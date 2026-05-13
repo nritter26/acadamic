@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { exec } = require('child_process');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,17 +37,14 @@ app.post('/api/progress', (req, res) => {
     }
 });
 
-// ── Execute Code API (with error analysis) ──
+// ── Execute Code API ──
 app.post('/api/execute', (req, res) => {
     const { lang, code } = req.body;
     if (!code) return res.status(400).json({ error: 'No code provided' });
 
     if (lang === 'js') {
-        try {
-            new vm.Script(code);
-        } catch (e) {
-            const errMsg = analyzeJSError(code, e);
-            return res.json({ output: errMsg, error: true });
+        try { new vm.Script(code); } catch (e) {
+            return res.json({ output: analyzeJSError(code, e), error: true });
         }
         try {
             let output = '';
@@ -57,16 +56,45 @@ app.post('/api/execute', (req, res) => {
                 output += 'WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
             } } };
             vm.runInNewContext(code, sandbox, { timeout: 5000 });
-            res.json({ output: output || '(no output)' });
+            return res.json({ output: output || '(no output)' });
         } catch (e) {
-            const errMsg = analyzeRuntimeError(code, e);
-            res.json({ output: errMsg, error: true });
+            return res.json({ output: analyzeRuntimeError(code, e), error: true });
         }
-    } else if (lang === 'py' || lang === 'python') {
-        res.json({ output: `# Python execution is not available in-browser.\n# Copy this code to a .py file and run with: python3 filename.py\n# Or use an online Python editor like replit.com or python.org/shell` });
-    } else {
-        res.json({ output: `// ${lang.toUpperCase()} execution is not available in-browser.\n// Copy this code to a ${lang} file and compile/run locally.\n// Example compilation:\n` + getCompileHint(lang) });
     }
+
+    const runners = {
+        py:  { cmd: 'python3 -u "%f"', ext: '.py' },
+        go:  { cmd: 'go run "%f"', ext: '.go' },
+        ts:  { cmd: 'tsx "%f"', ext: '.ts' },
+        rs:  { cmd: 'rustc -o _prog "%f" && ./_prog', ext: '.rs' },
+        c:   { cmd: 'gcc -Wall -o _prog "%f" && ./_prog', ext: '.c' },
+        cpp: { cmd: 'g++ -std=c++20 -Wall -o _prog "%f" && ./_prog', ext: '.cpp' },
+        cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
+        kt:  { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
+        swift: { cmd: 'swift "%f"', ext: '.swift' },
+        zig: { cmd: 'zig run "%f"', ext: '.zig' },
+    };
+
+    const runner = runners[lang];
+    if (!runner) {
+        return res.json({ output: `// ${lang.toUpperCase()} execution not available on this server\n` + getCompileHint(lang) });
+    }
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'exec-'));
+    const tmpFile = path.join(tmpDir, 'code' + runner.ext);
+    fs.writeFileSync(tmpFile, code);
+
+    const cmd = runner.cmd.replace('%f', tmpFile);
+
+    const env = { ...process.env, PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`, DOTNET_ROOT: path.join(os.homedir(), '.local/dotnet') };
+
+    exec(cmd, { timeout: 120000, cwd: tmpDir, env }, (err, stdout, stderr) => {
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+        if (err) console.error('exec err:', err.message);
+        const combined = (stdout || '') + (stderr || '');
+        const out = combined.trim() || (err ? 'Process failed' : '(no output)');
+        return res.json({ output: out.replace(/\n+$/, '') });
+    });
 });
 
 function getCompileHint(lang) {

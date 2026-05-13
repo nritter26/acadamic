@@ -1,33 +1,9 @@
 let currentLang = 'js';
 let currentPhase = '';
 let currentTopic = '';
+let currentLevel = 'all';
 
-function setMode(lang) {
-    currentLang = lang;
-    document.getElementById('app').className = lang + '-mode';
-    document.getElementById('header-title').innerText = lang.toUpperCase();
-    document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
-    document.getElementById('nav-' + lang).classList.add('active');
 
-    const langData = courseData[lang] || {};
-    let html = "";
-    let idx = 0;
-    for (let phase in langData) {
-        html += `<span class="phase-label">${phase}</span>`;
-        for (let topic in langData[phase]) {
-            const delay = idx * 20;
-            html += `<button class="item-btn topic-btn-enter" style="animation-delay:${delay}ms" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')">${topic}</button>`;
-            idx++;
-        }
-    }
-    document.getElementById('topic-list').innerHTML = html;
-    
-    if (Object.keys(langData).length > 0) {
-        const firstPhase = Object.keys(langData)[0];
-        const firstTopic = Object.keys(langData[firstPhase])[0];
-        loadTopic(firstPhase, firstTopic);
-    }
-}
 
 function loadTopic(phase, topic) {
     currentPhase = phase;
@@ -51,7 +27,57 @@ function loadTopic(phase, topic) {
     expEl.classList.add('fade-in');
     
     document.getElementById('editor').value = item.code;
-    document.getElementById('output').innerText = "// Ready to practice: " + topic;
+    updateHighlight();
+    document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
+}
+
+function filterTopics(query) {
+    const q = query ? query.toLowerCase().trim() : '';
+    document.querySelectorAll('.item-btn').forEach(btn => {
+        const matchesSearch = !q || btn.textContent.toLowerCase().includes(q);
+        const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
+        btn.style.display = matchesSearch && matchesLevel ? '' : 'none';
+    });
+    const container = document.getElementById('topic-list');
+    const children = container.children;
+    for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        if (!el.classList.contains('phase-label')) continue;
+        let hasVisible = false;
+        for (let j = i + 1; j < children.length; j++) {
+            if (children[j].classList.contains('phase-label')) break;
+            if (children[j].style.display !== 'none') { hasVisible = true; break; }
+        }
+        el.style.display = hasVisible ? '' : 'none';
+    }
+}
+
+function renderLevelBar() {
+    const levelBarEl = document.getElementById('level-bar');
+    const levels = [
+        { id: 'all', label: 'All' },
+        { id: 'beginner', label: 'Beginner' },
+        { id: 'intermediate', label: 'Intermediate' },
+        { id: 'expert', label: 'Expert' },
+    ];
+    let html = '';
+    for (const l of levels) {
+        const active = l.id === currentLevel ? ' active' : '';
+        html += `<button class="level-btn${active}" onclick="setLevel('${l.id}')">${l.label}</button>`;
+    }
+    levelBarEl.innerHTML = html;
+    levelBarEl.style.display = 'flex';
+}
+
+function setLevel(level) {
+    currentLevel = level;
+    renderLevelBar();
+    const searchInput = document.getElementById('topic-search');
+    filterTopics(searchInput ? searchInput.value : '');
+}
+
+function toggleCheatsheet() {
+    document.getElementById('cheatsheetOverlay').classList.toggle('open');
 }
 
 function loadCheatsheet() {
@@ -60,6 +86,7 @@ function loadCheatsheet() {
         const ch = challenges[challengeIdx];
         if (ch && ch.solution) {
             document.getElementById('editor').value = ch.solution;
+            updateHighlight();
             document.getElementById('output').innerText = '// Answer revealed for: ' + ch.title;
             return;
         }
@@ -67,31 +94,37 @@ function loadCheatsheet() {
 
     const langData = courseData[currentLang];
     if (!langData || Object.keys(langData).length === 0) {
-        document.getElementById('editor').value = "// No cheatsheet available for " + currentLang.toUpperCase();
-        document.getElementById('output').innerText = "// Cheatsheet unavailable";
+        document.getElementById('output').innerText = "// Cheatsheet unavailable for " + currentLang.toUpperCase();
         return;
     }
 
-    let phase = currentPhase;
-    if (!langData[phase]) {
-        phase = Object.keys(langData)[0];
+    let html = '';
+    let idx = 0;
+    for (const phase of Object.keys(langData)) {
+        const topics = langData[phase];
+        const isActivePhase = phase === currentPhase;
+        html += `<div class="cs-section">`;
+        html += `<div class="cs-section-title">${phase}</div>`;
+        for (const name of Object.keys(topics)) {
+            const t = topics[name];
+            const isActive = name === currentTopic && isActivePhase;
+            const codeHtml = t.code
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
+                .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
+            html += `<div class="cs-topic${isActive ? ' cs-active' : ''}">`;
+            html += `<div class="cs-topic-title">${name}</div>`;
+            html += `<div class="cs-desc">${t.exp}</div>`;
+            html += `<div class="cs-code">${codeHtml}</div>`;
+            html += `</div>`;
+            idx++;
+        }
+        html += `</div>`;
     }
-    const topics = langData[phase];
-    const topicNames = Object.keys(topics);
-    let output = `// ${currentLang.toUpperCase()} Cheatsheet — ${phase}\n`;
-    output += `// ${topicNames.length} topics in this section\n`;
-    output += `//\n`;
 
-    for (const name of topicNames) {
-        const t = topics[name];
-        const isActive = name === currentTopic;
-        output += `\n`;
-        output += `// ─── ${name} ${isActive ? '◀ ACTIVE' : ''} ───\n`;
-        output += t.code;
-    }
-
-    document.getElementById('editor').value = output;
-    document.getElementById('output').innerText = `// Cheatsheet: ${phase} (${topicNames.length} topics)`;
+    document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} topics)`;
+    document.getElementById('cheatsheetBody').innerHTML = html;
+    toggleCheatsheet();
 }
 
 const BACKEND_URL = window.location.origin;
@@ -122,7 +155,29 @@ function runCode() {
     })
     .then(r => r.json())
     .then(d => { out.innerText = d.output; })
-    .catch(e => { out.innerText = "// Backend unavailable, using preview\n// Logical Preview Mode for " + currentLang.toUpperCase(); });
+    .catch(e => {
+        const hints = {
+            py: 'python3 filename.py', go: 'go run program.go', rs: 'rustc program.rs && ./program',
+            ts: 'npx ts-node program.ts', c: 'gcc -Wall -o program program.c && ./program',
+            cpp: 'g++ -std=c++20 -Wall -o program program.cpp && ./program',
+            cs: 'dotnet run', kt: 'kotlinc program.kt -include-runtime -d program.jar && java -jar program.jar',
+            swift: 'swift program.swift', zig: 'zig build-exe program.zig && ./program',
+            pg: 'psql -f query.sql', dk: 'docker build -t myapp . && docker run myapp',
+            mongodb: 'mongosh < script.js', gamedev: 'Run in your game engine IDE',
+            git: 'Run git commands in terminal'
+        };
+        if (window.location.protocol === 'file:') {
+            out.innerText = "// Start the server first:\n//   node server.js\n// Then open http://localhost:3000";
+        } else {
+            const hint = hints[currentLang];
+            const lines = code.split('\n');
+            const codeBlock = lines.slice(0, 25).map(l => '// ' + l).join('\n');
+            const more = lines.length > 25 ? '\n// ... (' + (lines.length - 25) + ' more lines)' : '';
+            out.innerText = (hint
+                ? `// Backend unavailable — run locally:\n//   ${hint}\n//\n${codeBlock}${more}`
+                : `// Backend unavailable for ${currentLang.toUpperCase()}\n// Use the curriculum examples to learn the syntax`);
+        }
+    });
 }
 
 function toggleAI() {
@@ -293,7 +348,6 @@ function initOOPSession() {
     document.getElementById('app').className = 'oop-mode';
     document.getElementById('header-title').innerText = 'OOP LAB';
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
-    document.getElementById('nav-oop').classList.add('active');
 
     const langData = courseData[oopSelectedLang] || {};
     const phases = oopPhases[oopSelectedLang] || [];
@@ -327,18 +381,6 @@ function switchOOPLang(lang) {
     oopSelectedLang = lang;
     initOOPSession();
 }
-
-// Hook into setMode for AI suggestions
-const origSetMode = setMode;
-setMode = function(lang) {
-    if (lang === 'oop') {
-        initOOPSession();
-        updateAISuggestions();
-        return;
-    }
-    origSetMode(lang);
-    updateAISuggestions();
-};
 
 // Schema Designer
 let schemaTables = [];
@@ -394,7 +436,13 @@ function schemaRemoveCol(tableId, colIdx) {
     schemaRender();
 }
 
+let schemaAbortController = null;
+
 function schemaRender() {
+    if (schemaAbortController) schemaAbortController.abort();
+    schemaAbortController = new AbortController();
+    const signal = schemaAbortController.signal;
+
     const canvas = document.getElementById('schemaCanvas');
     canvas.innerHTML = '';
 
@@ -462,8 +510,8 @@ function schemaRender() {
             el.style.left = table.x + 'px';
             el.style.top = table.y + 'px';
             schemaDrawRelationLines();
-        });
-        document.addEventListener('mouseup', () => { isDragging = false; });
+        }, { signal });
+        document.addEventListener('mouseup', () => { isDragging = false; }, { signal });
 
         canvas.appendChild(el);
     }
@@ -723,6 +771,7 @@ function renderQuiz() {
     list.innerHTML = html;
     document.getElementById('explanation').innerHTML = '<div style="color:#64748b;font-size:11px;padding:10px;">Select answers to test your knowledge. Green = correct, Red = wrong.</div>';
     document.getElementById('editor').value = '';
+    updateHighlight();
     document.getElementById('output').innerText = '// Quiz Mode Active';
 }
 
@@ -755,12 +804,42 @@ let challengeIdx = 0;
 
 function initChallenge() {
     currentLang = 'challenge';
+    currentLevel = 'all';
     document.getElementById('app').className = 'challenge-mode';
     document.getElementById('header-title').innerText = 'CODE CHALLENGES';
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-challenge').classList.add('active');
+    
+    // Render level filter for challenges
+    const levelBarEl = document.getElementById('level-bar');
+    if (levelBarEl) {
+        let levelHtml = '<button class="level-btn active" onclick="setChallengeLevel(\'all\')">All</button>';
+        ['beginner', 'intermediate', 'expert'].forEach(level => {
+            levelHtml += `<button class="level-btn" onclick="setChallengeLevel('${level}')">${level}</button>`;
+        });
+        levelBarEl.innerHTML = levelHtml;
+        levelBarEl.style.display = 'flex';
+    }
+    
     renderChallengeList();
     loadChallenge(0);
+}
+
+function setChallengeLevel(level) {
+    currentLevel = level;
+    
+    // Update active button styling
+    const levelButtons = document.querySelectorAll('#level-bar .level-btn');
+    levelButtons.forEach(btn => {
+        const btnLevel = btn.textContent.toLowerCase();
+        if (btnLevel === level) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    renderChallengeList();
 }
 
 function renderChallengeList() {
@@ -773,9 +852,17 @@ function renderChallengeList() {
         html += `<button class="challenge-lang-btn ${active}" onclick="switchChallengeLang('${l}')">${names[l]}</button>`;
     }
     html += `</div>`;
+    
+    let filteredChallenges = [];
     challenges.forEach((ch, i) => {
-        const active = i === challengeIdx ? 'active' : '';
-        html += `<div class="challenge-card ${active}" onclick="loadChallenge(${i})">
+        if (currentLevel === 'all' || ch.level === currentLevel) {
+            filteredChallenges.push({...ch, idx: i});
+        }
+    });
+    
+    filteredChallenges.forEach((ch) => {
+        const active = ch.idx === challengeIdx ? 'active' : '';
+        html += `<div class="challenge-card ${active}" onclick="loadChallenge(${ch.idx})">
             <div><span class="ch-title">${ch.title}</span><span class="ch-level ${ch.level}">${ch.level}</span></div>
             <div class="ch-desc">${ch.desc}</div>
         </div>`;
@@ -789,6 +876,7 @@ function loadChallenge(idx) {
     challengeIdx = idx;
     const ch = challenges[idx];
     document.getElementById('editor').value = ch.bug;
+    updateHighlight();
     document.getElementById('output').innerText = '// Challenge: ' + ch.title + '\n// Edit the code and click "Run" to test your fix';
     document.getElementById('explanation').innerHTML = `<h3 style="margin:0;color:#fff">${ch.title}</h3>
         <p style="color:#f59e0b;font-size:10px;font-weight:800;text-transform:uppercase;">${ch.level}</p>
@@ -1100,16 +1188,150 @@ function hideCompletions() {
     }
 }
 
-// ── AUTO-CLOSE HOOK INTO setMode ──
-// Hook into setMode
+// ── PROGRESS TRACKING ──
+let completedTopics = new Set();
+
+function loadProgress() {
+    fetch(BACKEND_URL + '/api/progress')
+        .then(r => r.json())
+        .then(data => {
+            completedTopics = new Set();
+            for (const lang in data)
+                for (const topic in data[lang])
+                    if (data[lang][topic]) completedTopics.add(lang + ':' + topic);
+            updateTopicDisplay();
+        })
+        .catch(() => {});
+}
+
+function toggleProgress(topic) {
+    const key = currentLang + ':' + topic;
+    const completed = !completedTopics.has(key);
+    completed ? completedTopics.add(key) : completedTopics.delete(key);
+    fetch(BACKEND_URL + '/api/progress', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: currentLang, topic, completed })
+    }).catch(() => {});
+    updateTopicDisplay();
+}
+
+function updateTopicDisplay() {
+    document.querySelectorAll('.item-btn').forEach(btn => {
+        const raw = btn.getAttribute('data-topic') || btn.textContent.replace(/^[★☆]\s*/, '').trim();
+        btn.setAttribute('data-topic', raw);
+        const isDone = completedTopics.has(currentLang + ':' + raw);
+        btn.innerHTML = `<span class="topic-star" data-topic="${raw.replace(/"/g, '&quot;')}">${isDone ? '★' : '☆'}</span> ${raw}`;
+        btn.classList.toggle('topic-done', isDone);
+        const star = btn.querySelector('.topic-star');
+        if (star) star.onclick = function(e) { e.stopPropagation(); toggleProgress(raw); };
+    });
+}
+
+// ── SYNTAX HIGHLIGHTING ──
+let hlEditor = null;
+let hlOverlay = null;
+
+function initHighlighting() {
+    const textarea = document.getElementById('editor');
+    if (hlOverlay) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'editor-wrapper';
+    textarea.parentNode.insertBefore(wrapper, textarea);
+    wrapper.appendChild(textarea);
+    hlOverlay = document.createElement('pre');
+    hlOverlay.className = 'editor-highlight';
+    hlOverlay.innerHTML = '<code></code>';
+    wrapper.insertBefore(hlOverlay, textarea);
+    textarea.addEventListener('input', updateHighlight);
+    textarea.addEventListener('scroll', function() {
+        hlOverlay.scrollTop = this.scrollTop;
+        hlOverlay.scrollLeft = this.scrollLeft;
+    });
+    hlEditor = textarea;
+    updateHighlight();
+}
+
+function updateHighlight() {
+    if (!hlOverlay) return;
+    const code = hlEditor ? hlEditor.value : document.getElementById('editor').value;
+    hlOverlay.firstChild.innerHTML = highlightCode(code, currentLang);
+    if (hlEditor) {
+        hlOverlay.scrollTop = hlEditor.scrollTop;
+        hlOverlay.scrollLeft = hlEditor.scrollLeft;
+    }
+}
+
+function highlightCode(code, lang) {
+    let h = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    h = h.replace(/(\/\/.*)/g, '<span class="hl-comment">$1</span>');
+    h = h.replace(/(#.*)/g, '<span class="hl-comment">$1</span>');
+    h = h.replace(/(--.*)/g, '<span class="hl-comment">$1</span>');
+    h = h.replace(/\/\*[\s\S]*?\*\//g, '<span class="hl-comment">$&</span>');
+    h = h.replace(/(["'`])(?:(?!\1|\\).|\\.)*\1/g, '<span class="hl-string">$&</span>');
+    h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-number">$1</span>');
+    const kws = LANG_KEYWORDS[lang] || LANG_KEYWORDS.js;
+    const sorted = [...kws].sort((a, b) => b.length - a.length);
+    const escaped = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    if (escaped) h = h.replace(new RegExp('\\b(' + escaped + ')\\b', 'gi'), '<span class="hl-keyword">$1</span>');
+    return h;
+}
+
 setMode = function(lang) {
     document.getElementById('schemaDesigner').classList.remove('open');
     document.getElementById('editor').style.display = 'block';
     document.getElementById('cheatsheet-btn').textContent = lang === 'challenge' ? 'Reveal Answer' : 'Cheatsheet';
-    if (lang === 'quiz') { initQuiz(); updateAISuggestions(); return; }
+    if (lang === 'quiz') { document.getElementById('level-bar').style.display = 'none'; initQuiz(); updateAISuggestions(); return; }
     if (lang === 'challenge') { initChallenge(); updateAISuggestions(); return; }
-    origSetMode(lang);
+    if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
+
+    currentLevel = 'all';
+    currentLang = lang;
+    document.getElementById('app').className = lang + '-mode';
+    document.getElementById('header-title').innerText = lang.toUpperCase();
+    document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+    const navBtn = document.getElementById('nav-' + lang);
+    if (navBtn) navBtn.classList.add('active');
+
+    document.getElementById('level-bar').style.display = 'flex';
+    renderLevelBar();
+
+    const langData = courseData[lang] || {};
+    let html = '';
+    let idx = 0;
+    for (const phase in langData) {
+        html += `<span class="phase-label">${phase}</span>`;
+        for (const topic in langData[phase]) {
+            const delay = idx * 20;
+            const level = langData[phase][topic].level || 'beginner';
+            html += `<button class="item-btn topic-btn-enter" style="animation-delay:${delay}ms" data-level="${level}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')">${topic}</button>`;
+            idx++;
+        }
+    }
+    document.getElementById('topic-list').innerHTML = html;
+    const searchInput = document.getElementById('topic-search');
+    if (searchInput) searchInput.value = '';
+
+    updateTopicDisplay();
+
+    if (Object.keys(langData).length > 0) {
+        const firstPhase = Object.keys(langData)[0];
+        const firstTopic = Object.keys(langData[firstPhase])[0];
+        loadTopic(firstPhase, firstTopic);
+    }
     updateAISuggestions();
 };
+
+initHighlighting();
+loadProgress();
+
+fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"lang":"js","code":"1"}' })
+    .catch(() => {
+        const out = document.getElementById('output');
+        if (window.location.protocol === 'file:') {
+            out.innerText = "// Open this via localhost:3000\n//   cd " + window.location.pathname.split('/').slice(0,-1).join('/') + "\n//   node server.js\n// Then refresh this page";
+        } else {
+            out.innerText = "// Backend not running. Start with:\n//   node server.js";
+        }
+    });
 
 setMode('js');

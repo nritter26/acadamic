@@ -30,7 +30,7 @@
     </div>
 </header>
 <main>
-    <div class="col"><label>Curriculum</label><div id="topic-list" class="scroll"></div></div>
+    <div class="col"><label>Curriculum</label><input id="topic-search" type="text" placeholder="Search topics..." oninput="filterTopics(this.value)"><div id="level-bar"></div><div id="topic-list" class="scroll"></div></div>
     <div class="col"><label>Theory</label><div id="explanation" class="scroll"><h3 style="margin:0; color:#fff">break &amp; continue</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">Operators</p>'break' exits a loop immediately; 'continue' skips to the next iteration step.</div></div>
     <div class="col"><label>Workspace</label><div class="schema-designer" id="schemaDesigner">
     <div class="schema-toolbar">
@@ -70,6 +70,15 @@
 
 
 <button class="ai-toggle" id="aiToggle" onclick="toggleAI()">AI</button>
+<div class="cheatsheet-overlay" id="cheatsheetOverlay" onclick="if(event.target===this) toggleCheatsheet()">
+    <div class="cheatsheet-paper">
+        <div class="cheatsheet-header">
+            <span id="cheatsheetTitle">Cheatsheet</span>
+            <button onclick="toggleCheatsheet()">✕</button>
+        </div>
+        <div class="cheatsheet-body" id="cheatsheetBody"></div>
+    </div>
+</div>
 <div class="ai-panel" id="aiPanel">
     <div class="ai-header">
         <span>AI Assistant</span>
