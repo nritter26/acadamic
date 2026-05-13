@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doge's Lab: Full Mastery Edition</title>
+    <link rel="stylesheet" href="data/style.css">
+</head>
+<body id="app" class="py-mode">
+<header>
+    <div style="font-weight:900; font-size:22px;">DOGE'S <span style="color:var(--accent)" id="header-title">PY</span></div>
+    <div class="selector">
+        <button id="nav-js" onclick="setMode('js')" class="">JavaScript</button>
+        <button id="nav-ts" onclick="setMode('ts')" class="">TypeScript</button>
+        <button id="nav-py" onclick="setMode('py')" class="">Python</button>
+        <button id="nav-go" onclick="setMode('go')" class="">Go</button>
+        <button id="nav-zig" onclick="setMode('zig')" class="">Zig</button>
+        <button id="nav-pg" onclick="setMode('pg')" class="">PostgreSQL</button>
+        <button id="nav-dk" onclick="setMode('dk')" class="">Docker</button>
+        <button id="nav-cs" onclick="setMode('cs')" class="">C#</button>
+        <button id="nav-git" onclick="setMode('git')" class="">Git</button>
+        <button id="nav-kt" onclick="setMode('kt')" class="">Kotlin</button>
+        <button id="nav-rs" onclick="setMode('rs')" class="">Rust</button>
+        <button id="nav-swift" onclick="setMode('swift')" class="">Swift</button>
+        <button id="nav-c" onclick="setMode('c')" class="">C</button>
+        <button id="nav-cpp" onclick="setMode('cpp')" class="">C++</button>
+        <button id="nav-gamedev" onclick="setMode('gamedev')" class="">GameDev</button>
+        <button id="nav-quiz" onclick="setMode('quiz')" class="">Quiz</button>
+        <button id="nav-challenge" onclick="setMode('challenge')" class="">Code Lab</button>
+    </div>
+</header>
+<main>
+    <div class="col"><label>Curriculum</label><div id="topic-list" class="scroll"></div></div>
+    <div class="col"><label>Theory</label><div id="explanation" class="scroll"><h3 style="margin:0; color:#fff">break &amp; continue</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">Operators</p>'break' exits a loop immediately; 'continue' skips to the next iteration step.</div></div>
+    <div class="col"><label>Workspace</label><div class="schema-designer" id="schemaDesigner">
+    <div class="schema-toolbar">
+        <button class="primary" onclick="schemaAddTable()">+ Table</button>
+        <button onclick="schemaGenerateSQL()">Generate SQL</button>
+        <button class="danger" onclick="schemaClearAll()">Clear All</button>
+    </div>
+    <div class="schema-canvas" id="schemaCanvas"></div>
+    <div class="schema-sql-output" id="schemaSQLOutput">-- Click "Generate SQL" to create DDL from your schema</div>
+</div>
+<textarea id="editor" spellcheck="false">for n in range(5):
+    if n == 2: continue
+    if n == 4: break
+    print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()">Schema</button></div></div>
+    <div class="col"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll">// Logical Preview Mode for PY</div></div>
+</main>
+<script src="data/courseData.js"></script>
+<script src="data/js.js"></script>
+<script src="data/ts.js"></script>
+<script src="data/go.js"></script>
+<script src="data/zig.js"></script>
+<script src="data/py.js"></script>
+<script src="data/pg.js"></script>
+<script src="data/dk.js"></script>
+<script src="data/cs.js"></script>
+<script src="data/git.js"></script>
+<script src="data/kt.js"></script>
+<script src="data/rust.js"></script>
+<script src="data/swift.js"></script>
+<script src="data/c.js"></script>
+<script src="data/cpp.js"></script>
+<script src="data/gamedev.js"></script>
+<script src="data/mongodb.js"></script>
+<script src="data/quiz.js"></script>
+<script src="data/challenges.js"></script>
+<script src="data/app.js"></script>
+
+
+<button class="ai-toggle" id="aiToggle" onclick="toggleAI()">AI</button>
+<div class="ai-panel" id="aiPanel">
+    <div class="ai-header">
+        <span>AI Assistant</span>
+        <button onclick="toggleAI()">✕</button>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg bot">
+            <div class="label">AI</div>
+            Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.
+        </div>
+    </div>
+    <div class="ai-suggestions" id="aiSuggestions"></div>
+    <div class="ai-input-row">
+        <input id="aiInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendAI()">
+        <button onclick="sendAI()">Send</button>
+    </div>
+</div>
+</body></html>
