@@ -1287,13 +1287,11 @@ setMode = function(lang) {
     currentLevel = 'all';
     currentLang = lang;
     document.getElementById('app').className = lang + '-mode';
+    document.getElementById('level-bar').style.display = 'none';
     document.getElementById('header-title').innerText = lang.toUpperCase();
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     const navBtn = document.getElementById('nav-' + lang);
     if (navBtn) navBtn.classList.add('active');
-
-    document.getElementById('level-bar').style.display = 'flex';
-    renderLevelBar();
 
     const langData = courseData[lang] || {};
     let html = '';
