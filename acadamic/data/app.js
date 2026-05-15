@@ -31,25 +31,10 @@ function loadTopic(phase, topic) {
     document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
 }
 
-function filterTopics(query) {
-    const q = query ? query.toLowerCase().trim() : '';
-    document.querySelectorAll('.item-btn').forEach(btn => {
-        const matchesSearch = !q || btn.textContent.toLowerCase().includes(q);
-        const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
-        btn.style.display = matchesSearch && matchesLevel ? '' : 'none';
-    });
-    const container = document.getElementById('topic-list');
-    const children = container.children;
-    for (let i = 0; i < children.length; i++) {
-        const el = children[i];
-        if (!el.classList.contains('phase-label')) continue;
-        let hasVisible = false;
-        for (let j = i + 1; j < children.length; j++) {
-            if (children[j].classList.contains('phase-label')) break;
-            if (children[j].style.display !== 'none') { hasVisible = true; break; }
-        }
-        el.style.display = hasVisible ? '' : 'none';
-    }
+let filterDebounceTimer;
+function debounceFilterTopics(query) {
+    clearTimeout(filterDebounceTimer);
+    filterDebounceTimer = setTimeout(() => filterTopics(query), 200);
 }
 
 function renderLevelBar() {
@@ -129,9 +114,20 @@ function loadCheatsheet() {
 
 const BACKEND_URL = window.location.origin;
 
+const runBtn = document.querySelector('.run-btn');
+
+function setRunLoading(loading) {
+    if (!runBtn) return;
+    runBtn.disabled = loading;
+    runBtn.textContent = loading ? 'Running... ▶' : 'Run ▶';
+    runBtn.style.opacity = loading ? '0.6' : '1';
+}
+
 function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
+    if (!code.trim()) { out.innerText = "// No code to run"; return; }
+    setRunLoading(true);
     out.innerText = "// Running...";
 
     if (currentLang === 'js') {
@@ -145,6 +141,7 @@ function runCode() {
         } catch(e) {
             out.innerText = "Error: " + e.message;
         }
+        setRunLoading(false);
         return;
     }
 
@@ -154,8 +151,9 @@ function runCode() {
         body: JSON.stringify({ lang: currentLang, code })
     })
     .then(r => r.json())
-    .then(d => { out.innerText = d.output; })
+    .then(d => { out.innerText = d.output; setRunLoading(false); })
     .catch(e => {
+        setRunLoading(false);
         const hints = {
             py: 'python3 filename.py', go: 'go run program.go', rs: 'rustc program.rs && ./program',
             ts: 'npx ts-node program.ts', c: 'gcc -Wall -o program program.c && ./program',
@@ -180,37 +178,140 @@ function runCode() {
     });
 }
 
+let conversationHistory = [];
+const MAX_HISTORY = 10;
+
 function toggleAI() {
     document.getElementById('aiPanel').classList.toggle('open');
     document.getElementById('aiToggle').classList.toggle('open');
 }
 
-const aiResponses = {
-    "variable": "Variables store data values. Use `let` (mutable) or `const` (immutable) in JS, `var` in Go, or just `name = value` in Python. Each language has its own convention.",
-    "function": "Functions are reusable blocks of code. Define with `function name(){}` in JS, `def name():` in Python, `func name(){}` in Go, or `fn name(){}` in Zig.",
-    "loop": "Loops repeat code. `for` is universal. JS/Python/Go all have `for`; C# adds `foreach`; Python has `while`. Use `break` to exit, `continue` to skip iteration.",
-    "array": "Arrays hold ordered collections. JS: `[]`, Python: `list`, Go: `[]type`, Rust: `Vec`, Zig: `[]T`. Indexing starts at 0.",
-    "class": "Classes are blueprints for objects. JS/C#/Python/TS use `class`. Go uses structs+methods. Zig uses structs with no inheritance.",
-    "error": "Error handling differs: JS/Python use try/catch, Go returns errors as values, Rust uses Result/Option, Zig uses error unions.",
-    "git": "Git tracks changes. Basic flow: `git add` → `git commit` → `git push`. Use branches (`git branch`) to isolate work, `git merge` to combine.",
-    "async": "Async code runs without blocking. JS: async/await + Promises. Python: async/await + asyncio. C#: async/await + Task. Go: goroutines + channels.",
-    "type": "Types define data kinds. TS/C#/Go/Zig are statically typed. JS/Python are dynamically typed. Static types catch errors at compile time.",
-    "string": "Strings are text data. Use quotes: `'text'` or `\"text\"` in most langs. Template literals (`\\`text ${var}\\``) in JS. f-strings (`f\"{var}\"`) in Python.",
-    "default": "Here's a general tip: The best way to learn programming is to write code every day. Practice the topics in the curriculum, experiment in the editor, and don't be afraid to break things!"
-};
+function addAIMessage(text, role) {
+    const el = document.getElementById('aiMessages');
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + role;
+    if (role === 'bot') {
+        div.innerHTML = `<div class="label">AI</div>${text}`;
+    } else {
+        div.textContent = text;
+    }
+    if (role === 'typing') {
+        div.id = 'aiTyping';
+    }
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+    if (role !== 'typing') {
+        conversationHistory.push({ role, text });
+        if (conversationHistory.length > MAX_HISTORY) {
+            conversationHistory.shift();
+        }
+    }
+}
+
+function removeTypingIndicator() {
+    const typing = document.getElementById('aiTyping');
+    if (typing) typing.remove();
+}
+
+const aiTutorResponses = [
+    {
+        keywords: ['variable', 'declare', 'let', 'const', 'var'],
+        response: "Variables store data in memory so you can reuse and manipulate values.\n\n**Syntax by language:**\n- **JS:** `let name = value;` (mutable), `const name = value;` (immutable)\n- **Python:** `name = value` (no keyword needed)\n- **Go:** `var name type = value` or `name := value` (type inference)\n- **Kotlin:** `var name = value` (mutable), `val name = value` (read-only)\n\n**Try this to experiment:**\n1. Declare a variable with your name\n2. Declare another with your age\n3. Print both using console.log() or print()\n\n**Common pitfalls:**\n- Using `var` in JS (function-scoped, causes bugs) — prefer `let`/`const`\n- Forgetting keywords creates globals: `x = 5` without `let`/`const`/`var` creates a global\n- Using `const` for values that need to change later"
+    },
+    {
+        keywords: ['function', 'method', 'def', 'func'],
+        response: "Functions are reusable blocks of code that perform a specific task.\n\n**Syntax by language:**\n- **JS:** `function name(params) { ... }` or `const name = (params) => { ... }`\n- **Python:** `def name(params):`\n- **Go:** `func name(params) returnType { ... }`\n- **Rust:** `fn name(params) -> returnType { ... }`\n\n**Hands-on exercise:**\nWrite a function that takes two numbers and returns their sum. Then call it and log the result.\n\n**Design principle:** Each function should do ONE thing well.\n\n**Common pitfalls:**\n- Missing `return` -> function returns `undefined` (JS) / `None` (Python)\n- Calling without `()`: `myFunc` vs `myFunc()` — first is the function itself, not a call\n- Mutating input parameters directly creates side effects"
+    },
+    {
+        keywords: ['class', 'object', 'oop', 'inherit', 'extends', 'prototype', 'struct'],
+        response: "Object-Oriented Programming organizes code around objects with data (properties) and behavior (methods).\n\n**Key concepts:**\n- **Encapsulation:** bundle data + methods, hide internal details\n- **Inheritance:** a class can extend another, reusing behavior\n- **Polymorphism:** same method name, different implementations\n- **Composition:** building objects from other objects (prefer over inheritance)\n\n**Try this:**\n1. Create a simple class (e.g., `Car` with `brand` and `year`)\n2. Add a method (e.g., `honk()`)\n3. Create an instance and call the method\n\n**Golden rule:** Favor composition over inheritance. Instead of `Dog extends Animal`, give Dog an `energy` property and a `tired()` method."
+    },
+    {
+        keywords: ['array', 'list', 'collection', 'vector', 'slice', 'map', 'set', 'dictionary', 'hash'],
+        response: "Collections let you store and manipulate groups of values.\n\n**Common types:**\n- **Array/Slice/List:** ordered sequence of values\n- **Map/Dict/Hash:** key-value pairs for fast lookups\n- **Set:** unique values (no duplicates)\n\n**Exercise:**\n1. Create an array of 5 numbers\n2. Write a loop to double each number\n3. Store the results in a new array\n\n**Watch out for:**\n- Off-by-one: `arr[arr.length]` is always out of bounds\n- Using `delete arr[i]` in JS leaves a hole — use `.splice()` instead\n- Arrays are 0-indexed in virtually all languages"
+    },
+    {
+        keywords: ['loop', 'for', 'while', 'iterate', 'foreach'],
+        response: "Loops let you repeat code — essential for processing collections and automating repetitive tasks.\n\n**Types of loops:**\n- **`for` loop:** when you know how many iterations\n- **`while` loop:** when you don't know the count\n- **`for...of` / `foreach`:** iterating over collections (cleaner)\n- **`map` / `filter` / `reduce`:** functional iteration\n\n**Control:**\n- `break` — exit the loop immediately\n- `continue` — skip to the next iteration\n\n**Try this:**\nWrite a loop that prints numbers 1 to 10, but skips 5 and stops at 8.\n\n**Most common bugs:**\n- **Infinite loop:** forgetting to increment your counter\n- **Off-by-one:** using `<=` when you mean `<` (or vice versa)\n- **Modifying an array while iterating:** skips elements or causes unexpected behavior"
+    },
+    {
+        keywords: ['error', 'exception', 'try', 'catch', 'panic', 'throw', 'result'],
+        response: "Error handling is how programs deal with unexpected situations.\n\n**Approaches by language:**\n- **JS/Python/C#/Kotlin:** `try { risky() } catch (e) { handle(e) }`\n- **Go:** functions return errors: `result, err := doSomething()`\n- **Rust:** `Result<T, E>` and `Option<T>` — pattern match or use `?`\n\n**Best practices:**\n- Catch specific error types, not generic `Exception`\n- Always clean up resources (files, connections) in `finally`\n- Log errors WITH context\n- Don't silently swallow errors\n\n**Exercise:**\n1. Write a function that divides two numbers\n2. Add error handling for division by zero\n3. Test both valid and invalid inputs"
+    },
+    {
+        keywords: ['async', 'await', 'promise', 'future', 'coroutine', 'callback'],
+        response: "Async programming lets your code handle time-consuming operations without blocking.\n\n**Mental model:** Think of async code like ordering coffee: instead of waiting at the counter (blocking), you get a buzzer (promise) and do other things until it buzzes (resolved).\n\n**How each language does it:**\n- **JS:** `async function` + `await promise`\n- **Python:** `async def` + `await`\n- **Go:** `go func()` starts a goroutine, `chan` for communication\n- **C#:** `async Task` + `await`\n\n**Common mistakes:**\n- Forgetting `await` — you get a Promise object instead of the value\n- Not handling rejections — unhandled promise rejections crash Node.js\n- Callback hell — use Promises or async/await"
+    },
+    {
+        keywords: ['type', 'string', 'int', 'bool', 'float', 'null', 'undefined', 'void', 'any'],
+        response: "Types describe what kind of data a value is.\n\n**Static vs Dynamic typing:**\n- **Static (TS, Go, Rust, C#):** types checked at compile time, catch errors early\n- **Dynamic (JS, Python):** types checked at runtime, more flexible\n\n**Language oddities to know:**\n- **JS:** `typeof null === 'object'` — a longstanding bug!\n- **JS:** `'5' + 3 = '53'` (string concat wins), but `'5' - 3 = 2`\n- **Go:** zero values — `int` defaults to `0`, `string` to `\"\"`\n\n**Try this:**\n1. Declare a variable with a type annotation (if your language supports it)\n2. Try assigning a different type — see what error you get"
+    },
+    {
+        keywords: ['git', 'commit', 'push', 'pull', 'branch', 'merge', 'rebase'],
+        response: "Git tracks changes to your code over time.\n\n**Essential workflow:**\n1. `git add .` — stage your changes\n2. `git commit -m \"message\"` — save a snapshot\n3. `git push` — upload to remote\n\n**Branching strategy:**\n- `main` — production-ready code\n- `feature/xyz` — work on new features\n- Never commit directly to main! Use pull requests.\n\n**Pro tips to avoid disaster:**\n- Use `--force-with-lease` instead of `--force` on shared branches\n- Always pull before pushing: `git pull --rebase`\n- Commit early and often with clear messages\n- Use `.gitignore` to keep secrets out of the repo"
+    },
+    {
+        keywords: ['sql', 'select', 'join', 'table', 'database', 'query', 'where', 'insert'],
+        response: "SQL is the language of relational databases.\n\n**Core operations (CRUD):**\n- `SELECT columns FROM table WHERE condition` — retrieve data\n- `INSERT INTO table (cols) VALUES (vals)` — add data\n- `UPDATE table SET col=val WHERE condition` — modify data\n- `DELETE FROM table WHERE condition` — remove data\n\n**JOINs combine tables:**\n- `INNER JOIN` — only matching rows from both tables\n- `LEFT JOIN` — all rows from left table, NULLs where right doesn't match\n\n**Most common errors:**\n- **Missing WHERE in UPDATE/DELETE** — modifies ALL rows!\n- **Not using parameterized queries** — leads to SQL injection\n- **Missing indexes** on frequently queried columns = slow queries\n\n**Try the Schema Designer (click 'Schema' below the editor)** to build tables visually!"
+    },
+    {
+        keywords: ['debug', 'bug', 'fix', 'issue', 'wrong', 'not working', 'broken'],
+        response: "Debugging is a systematic process. Here's a methodical approach:\n\n**1. READ the error message** — it tells you WHAT and WHERE\n**2. REPRODUCE** — can you make it happen consistently?\n**3. ISOLATE** — comment out code until the bug disappears\n**4. INSPECT** — use console.log() or a debugger to check values\n**5. HYPOTHESIZE** — \"If X is wrong, then Y should happen.\" Test it.\n**6. FIX** — make the smallest possible change\n**7. VERIFY** — does the fix actually work? Does it break anything else?\n\n**Remember:** Every bug is a learning opportunity! The error message is trying to help you."
+    },
+    {
+        keywords: ['help', 'how', 'what is', 'explain', 'understand', 'confused', 'beginner', 'start', 'learn'],
+        response: "I'm here to help you learn! Here's my advice:\n\n**The 4-step practice method:**\n1. **Read** the topic explanation in the curriculum\n2. **Type** the code example yourself (don't copy-paste — muscle memory matters!)\n3. **Modify** it — change values, add features, break it intentionally\n4. **Build** something small with the concept\n\n**I can help with:**\n- Explaining a specific topic (ask \"Explain [topic]\")\n- Debugging your code (tell me what's not working)\n- Showing examples (\"Show me an example of X\")\n\n**What are you working on right now?** Tell me the topic and I'll give you a clear explanation."
+    },
+    {
+        keywords: ['pointer', 'reference', 'memory', 'malloc', 'free', 'heap', 'stack', 'alloc', 'borrow', 'ownership'],
+        response: "Memory management is essential in systems languages (C, C++, Rust, Zig).\n\n**Stack vs Heap:**\n- **Stack:** Fast, small, automatic. Local variables go here.\n- **Heap:** Slower, flexible, manual. Dynamic allocations go here.\n\n**Key concepts by language:**\n- **C:** `malloc()`/`free()` — completely manual, error-prone\n- **C++:** `new`/`delete`, smart pointers (`unique_ptr`, `shared_ptr`)\n- **Rust:** Ownership — compiler enforces memory safety at compile time!\n- **Zig:** Manual but safe — explicit allocators, no hidden allocations\n\n**Classic memory bugs:**\n- **Memory leak:** forgetting to free\n- **Dangling pointer:** using memory after freeing\n- **Buffer overflow:** writing past array bounds\n- **Double free:** freeing the same memory twice"
+    },
+    {
+        keywords: ['closure', 'scope', 'hoist', 'temporal dead zone', 'tdz', 'lexical'],
+        response: "Scope determines WHERE variables are accessible. Closures are a powerful consequence of scope.\n\n**Types of scope:**\n- **Global:** accessible everywhere (avoid polluting this)\n- **Block scope:** inside `{}` (`let`, `const` in JS)\n\n**What's a closure?**\nA function that \"remembers\" the variables from where it was defined, even after that outer function has finished running.\n\n```js\nfunction makeCounter() {\n  let count = 0;\n  return function() { return ++count; };\n}\nconst counter = makeCounter();\ncounter(); // 1\ncounter(); // 2  <-- count is still accessible!\n```\n\n**Common closure bug:**\n```js\nfor (var i = 0; i < 5; i++) {\n  setTimeout(() => console.log(i), 100); // prints 5,5,5,5,5\n}\n```\n**Fix:** use `let` instead of `var` (block scoping per iteration)."
+    },
+    {
+        keywords: ['string', 'concatenat', 'interpolat', 'template', 'char', 'substring', 'slice', 'split', 'trim'],
+        response: "Strings are sequences of characters — one of the most common data types.\n\n**Common operations:**\n- **Length:** `str.length` (JS), `len(str)` (Python)\n- **Substring:** `str.slice(0, 5)` — first 5 chars\n- **Split:** `str.split(',')` -> array of strings\n- **Join:** `arr.join(',')` -> string\n- **Case:** `str.toUpperCase()`, `str.toLowerCase()`\n- **Trim:** `str.trim()`\n\n**String interpolation:**\n- **JS:** `` `Hello, ${name}!` ``\n- **Python:** `f\"Hello, {name}!\"`\n- **C#:** `$\"Hello, {name}!\"`\n\n**Important:** Strings are IMMUTABLE in virtually all languages. Methods return NEW strings — the original stays the same.\n\n**Common gotchas:**\n- Off-by-one in substring: `\"hello\".slice(1, 3)` is `\"el\"` (end index is exclusive)\n- Forgetting to trim user input: `\"  input  \".trim()`"
+    },
+    {
+        keywords: ['recursion', 'recursive', 'base case', 'stack overflow'],
+        response: "Recursion is when a function calls itself. It's elegant for problems with repetitive structure (trees, fractals, divide-and-conquer).\n\n**Every recursive function needs two parts:**\n1. **Base case** — when to STOP (without this, infinite recursion!)\n2. **Recursive case** — call itself with a simpler version of the problem\n\n```js\nfunction factorial(n) {\n  if (n <= 1) return 1;       // base case\n  return n * factorial(n - 1); // recursive case\n}\n```\n\n**When to use recursion vs loops:**\n- **Recursion:** tree traversal, parsing, divide-and-conquer\n- **Loops:** simple iteration, performance-critical code\n\n**Watch out for:**\n- **Stack overflow:** too many recursive calls exhausts the call stack\n- **Missing base case:** infinite recursion = crash\n\n**Exercise:** Write a recursive function that computes the nth Fibonacci number."
+    },
+    {
+        keywords: ['syntax', 'semicolon', 'bracket', 'parenthesis', 'brace', 'colon'],
+        response: "Syntax errors mean the computer can't understand your code — you've broken the grammar rules. This is NORMAL and happens to every programmer, every day.\n\n**Quick debugging checklist:**\n1. Are all `(`, `{`, `[` properly closed with `)`, `}`, `]`?\n2. Are strings quoted correctly? Matching `\"...\"`, `'...'`, or backticks?\n3. Are statements terminated? (JS/C# need `;`, Python uses newlines)\n4. Are variable names spelled identically everywhere?\n5. Missing comma between array/object items?\n\n**The error message is your friend!** It tells you:\n- The line number where it got confused\n- What it expected vs what it found\n\n**Pro tip:** Look at the LINE BEFORE the error. The parser often doesn't realize something's wrong until the next line."
+    },
+    {
+        keywords: ['hello', 'hi', 'hey', 'greeting', 'sup'],
+        response: "Hey there! Welcome to Doge's Lab!\n\nI'm your AI programming tutor. Here's what I can do:\n- **Explain concepts** from the curriculum (just ask!)\n- **Debug your code** (tell me what's not working)\n- **Show examples** with runnable code\n- **Guide your learning** with exercises and challenges\n\n**To get started:**\n1. Pick a language from the top bar\n2. Click a topic on the left\n3. Read the explanation and try the code\n4. Modify the code and click \"Run\"\n5. Ask me anything if you get stuck!\n\n**What language are you learning today?**"
+    }
+];
 
 function getAIResponse(input) {
-    const q = input.toLowerCase();
-    for (const key of Object.keys(aiResponses)) {
-        if (q.includes(key)) return aiResponses[key];
+    const q = input.toLowerCase().trim();
+    if (!q) return "Ask me something about programming!";
+
+    for (const entry of aiTutorResponses) {
+        if (entry.keywords.some(k => q.includes(k))) {
+            let reply = entry.response;
+            if (currentLang && !q.includes('language') && !q.includes(currentLang)) {
+                reply += `\n\n**You're studying:** ${currentLang.toUpperCase()}`;
+                reply += `\nTry the code example in the editor, modify it, and click Run to see what happens!`;
+            }
+            return reply;
+        }
     }
-    if (q.includes("how") || q.includes("what") || q.includes("why")) {
-        return `Good question about **${currentLang.toUpperCase()}**! Try exploring the curriculum topics on the left for detailed explanations with code examples.`;
+
+    if (q.includes("how") || q.includes("what") || q.includes("why") || q.includes("?")) {
+        return `Great question about **${currentLang.toUpperCase()}**! Let me help you understand this topic.\n\nInstead of giving you the answer directly — what do YOU think the answer might be? Try looking at the curriculum topics on the left and experimenting in the editor. If you're still stuck, share your code and I'll help guide you!`;
     }
+
     if (q.includes("help") || q.includes("hello") || q.includes("hi")) {
-        return `Hello! I'm your AI assistant for **${currentLang.toUpperCase()}**. Ask me about variables, functions, loops, classes, or pick a suggestion below.`;
+        return `Hello! I'm your AI tutor for **${currentLang.toUpperCase()}**. I can help you understand any topic you're working on. Try asking me about variables, functions, loops, or classes — or pick a suggestion below!`;
     }
-    return aiResponses.default;
+
+    return "Here's a general tip: The best way to learn programming is to **write code every day**. Practice the topics in the curriculum, experiment in the editor, and don't be afraid to break things! That's how you learn.\n\n**What specific topic are you working on?** Tell me and I'll help explain it!";
 }
 
 function getLocalAIResponse(input) {
@@ -253,61 +354,70 @@ function getLocalAIResponse(input) {
     }
 
     if (best && bestScore >= 2) {
-        return `<b>${best.topic}</b> — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+        return `I found this in the curriculum that might help:<br><br><b>${best.topic}</b> — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br><b>Try this:</b> paste the code into the editor, modify it, and click Run to experiment!`;
     }
     return null;
 }
 
-const suggestionSets = {
-    js: ["What is a closure?", "Explain async/await", "Array methods", "Promise syntax", "this keyword"],
-    ts: ["Types vs interfaces", "What are generics?", "Utility types", "Enum usage", "Type guards"],
-    py: ["List comprehensions", "What are decorators?", "Why __init__?", "args and kwargs", "pip basics"],
-    go: ["Goroutines vs threads", "What are interfaces?", "Defer usage", "Error handling", "Slice vs array"],
-    zig: ["What is comptime?", "Memory allocators", "Error union types", "Zig vs C", "Build system"],
-    pg: ["JOIN types", "Window functions", "Index strategies", "CTE vs subquery", "ACID explained"],
-    dk: ["Docker vs VM", "Multi-stage builds", "Volume vs bind", "Compose networks", "Health checks"],
-    cs: ["LINQ queries", "Async/await in C#", "Record vs class", "What is .NET?", "Extension methods"],
-    git: ["Undo last commit", "Merge vs rebase", "Fix merge conflict", "What is HEAD?", "Git stash"],
-    kt: ["Null safety explained", "Data classes", "Extension functions", "Coroutines basics", "Scope functions"],
-    rs: ["Ownership explained", "Borrowing rules", "Traits vs generics", "Lifetimes", "Pattern matching"],
-    swift: ["Optionals explained", "Protocols vs classes", "ARC memory management", "Closures capture", "Property wrappers"],
-    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation", "Abstract vs interface", "Composition vs inheritance"]
-};
+function getErrorTutorTip(topic, output) {
+    const tips = {
+        "variables": "Getting an error with variables? Common issues:\n- Did you declare it with `let`/`const`/`var` (JS) or just `name = value` (Python)?\n- Check the spelling — `myVariable` vs `myvariable` are different!\n- Make sure you declared it before trying to use it (variables aren't hoisted with `let`/`const`)\n\n**Try:** Declare a simple variable and log it. Once that works, add complexity step by step.",
+        "functions": "Functions can be tricky! Check these:\n- Do you have the `function` keyword (JS) or `def` (Python)?\n- Did you use `return` to send back a value? Without it, the function returns `undefined`.\n- Did you call it with parentheses? `myFunc` is the function itself, `myFunc()` calls it.\n\n**Try:** Write the simplest possible function that returns a fixed value, then gradually add parameters.",
+        "loops": "Loop errors usually come from:\n- **Infinite loop:** is your counter actually changing? `for (let i=0; i<10; i++)` — don't forget the `i++`!\n- **Off-by-one:** using `<=` when you need `<` (or vice versa)\n- **Wrong array index:** arrays start at 0, so `arr[arr.length]` is out of bounds\n\n**Try:** Write a loop that just prints the numbers 0-4. Once that works, add your logic.",
+        "arrays": "Array issues are often:\n- **Out of bounds:** `arr[arr.length]` doesn't exist — last index is `arr.length - 1`\n- **Using `delete`:** `delete arr[i]` leaves a hole — use `.splice()` instead\n- **Confusing indexOf:** returns `-1` when not found, which is truthy!\n\n**Try:** Create an array of 3 items, log each item in a loop, then try adding/removing items.",
+        "strings": "String gotchas:\n- **Immutability:** `str.toUpperCase()` returns a NEW string — the original stays the same\n- **Concatenation vs addition:** `'5' + 3 = '53'`, not 8! Use `Number()` to convert\n- **Off-by-one:** `str.slice(1, 3)` gives characters at index 1 and 2 (end is exclusive)\n\n**Try:** Create a string variable and try different methods on it to see what each returns.",
+        "classes": "Class errors are usually:\n- **Missing `new`:** `const obj = MyClass()` vs `const obj = new MyClass()`\n- **`this` context:** inside callbacks, `this` might not be what you expect — use arrow functions\n- **Forgetting `constructor`:** the constructor runs when you create a new instance\n\n**Try:** Create the simplest possible class with one property and one method, then build up.",
+    };
 
-function updateAISuggestions() {
-    const el = document.getElementById('aiSuggestions');
-    const suggestions = suggestionSets[currentLang] || suggestionSets.js;
-    el.innerHTML = suggestions.map(s => `<button onclick="askAI('${s}')">${s}</button>`).join('');
-}
-
-function addAIMessage(text, role) {
-    const el = document.getElementById('aiMessages');
-    const div = document.createElement('div');
-    div.className = 'ai-msg ' + role;
-    if (role === 'bot') {
-        div.innerHTML = `<div class="label">AI</div>${text}`;
-    } else {
-        div.textContent = text;
+    for (const [key, tip] of Object.entries(tips)) {
+        if (topic.toLowerCase().includes(key)) {
+            return "I see you're getting an error. Don't worry, this is totally normal! Let's work through it together.\n\n" + tip + "\n\n**Still stuck?** Share what you expected to happen vs what actually happened and I'll help more!";
+        }
     }
-    el.appendChild(div);
-    el.scrollTop = el.scrollHeight;
+
+    return "I noticed your code has an error. That's okay — debugging is how we learn!\n\n**Quick check:**\n1. Look at the error message — what line does it point to?\n2. Compare your code with the example in the curriculum\n3. Simplify: comment things out until it works, then add back one piece at a time\n\n**Can you tell me:** what did you expect to happen, and what actually happened?";
 }
 
 function askAI(q) {
     addAIMessage(q, 'user');
+    addAIMessage('', 'typing');
+
+    const editor = document.getElementById('editor');
+    const currentCode = editor ? editor.value : '';
+    const output = document.getElementById('output');
+    const hasError = output && (output.innerText.includes('Error:') || output.innerText.includes('ERROR') || output.innerText.includes('SyntaxError') || output.innerText.includes('ReferenceError') || output.innerText.includes('FAIL'));
+    const lastOutput = output ? output.innerText : '';
+
+        if (hasError && currentTopic && (q.includes('why') || q.includes('error') || q.includes('fix') || q.includes('bug') || q.includes('wrong') || q.includes('not working') || q.length < 10)) {
+        const errorTip = getErrorTutorTip(currentTopic, lastOutput);
+        if (errorTip) {
+            setTimeout(() => { removeTypingIndicator(); addAIMessage(errorTip, 'bot'); }, 200);
+            return;
+        }
+    }
+
     const localReply = getLocalAIResponse(q);
     if (localReply) {
-        setTimeout(() => addAIMessage(localReply, 'bot'), 200);
+        setTimeout(() => { removeTypingIndicator(); addAIMessage(localReply, 'bot'); }, 200);
         return;
     }
     fetch(BACKEND_URL + '/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q, lang: currentLang })
+        body: JSON.stringify({
+            message: q,
+            lang: currentLang,
+            topic: currentTopic,
+            phase: currentPhase,
+            code: currentCode,
+            output: lastOutput,
+            hasError: hasError,
+            history: conversationHistory.slice(-6)
+        })
     })
     .then(r => r.json())
-    .then(d => addAIMessage(d.reply || getAIResponse(q), 'bot'))
-    .catch(() => setTimeout(() => addAIMessage(getAIResponse(q), 'bot'), 300));
+    .then(d => { removeTypingIndicator(); addAIMessage(d.reply || getAIResponse(q), 'bot'); })
+    .catch(() => { removeTypingIndicator(); setTimeout(() => addAIMessage(getAIResponse(q), 'bot'), 300); });
 }
 
 function sendAI() {
@@ -316,6 +426,65 @@ function sendAI() {
     if (!q) return;
     input.value = '';
     askAI(q);
+}
+
+const suggestionSets = {
+    js: ["Explain closures with an example", "How does async/await work?", "Common array methods guide", "What is 'this' keyword?", "Practice: write a function"],
+    ts: ["Types vs interfaces explained", "What are generics?", "Utility types guide", "Enum best practices", "Practice: type a function"],
+    py: ["List comprehensions explained", "How do decorators work?", "Why __init__?", "args and kwargs guide", "Practice: write a class"],
+    go: ["Goroutines vs threads", "What are interfaces?", "When to use defer", "Error handling in Go", "Practice: write a struct"],
+    zig: ["What is comptime?", "Memory allocators guide", "Error union types", "Zig vs C comparison", "Practice: zig basics"],
+    pg: ["JOIN types explained", "Window functions guide", "Index strategies", "CTE vs subquery", "Practice: write a query"],
+    dk: ["Docker vs VM explained", "Multi-stage builds", "Volume vs bind mount", "Docker Compose networks", "Practice: write a Dockerfile"],
+    cs: ["LINQ queries explained", "Async/await in C#", "Record vs class", "What is .NET?", "Practice: write a class"],
+    git: ["How to undo a commit", "Merge vs rebase", "How to fix a merge conflict", "What is HEAD?", "Practice: git workflow"],
+    kt: ["Null safety explained", "Data classes guide", "Extension functions", "Coroutines basics", "Practice: write a class"],
+    rs: ["Ownership explained simply", "Borrowing rules guide", "Traits vs generics", "Lifetimes explained", "Practice: write a struct"],
+    swift: ["Optionals explained", "Protocols vs classes", "ARC memory guide", "Closures capture rules", "Practice: write a struct"],
+    cloud: ["What is cloud computing?", "IaaS vs PaaS vs SaaS", "Serverless explained", "Containers vs VMs", "Practice: deploy something"],
+    mongodb: ["Documents vs tables", "CRUD in MongoDB", "Aggregation pipeline", "Indexes in MongoDB", "Practice: write a query"],
+    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation guide", "Abstract vs interface", "Composition vs inheritance"]
+};
+
+function getDynamicSuggestions() {
+    const output = document.getElementById('output');
+    const outputText = output ? output.innerText : '';
+    const hasError = outputText.includes('Error:') || outputText.includes('FAIL') || outputText.includes('SyntaxError') || outputText.includes('ReferenceError') || outputText.includes('TypeError');
+
+    if (hasError && currentTopic) {
+        return ["Why did I get this error?", "Help me debug my code", `Explain ${currentTopic}`, "How do I fix common mistakes?"];
+    }
+    if (currentTopic) {
+        const topHints = {
+            "Variables": ["How do I declare a variable?", "Variable naming rules", "What is scope?", "Practice: declare and print"],
+            "Functions": ["How do I write a function?", "What is a return statement?", "Function parameters", "Practice: write a function"],
+            "Loops": ["For vs while which to use?", "How to break a loop", "Nested loops explained", "Practice: loop exercise"],
+            "Arrays": ["Common array methods", "How to loop over an array", "Adding and removing items", "Practice: array exercise"],
+            "Objects": ["How to create an object", "Accessing properties", "Object methods", "Practice: build an object"],
+            "Strings": ["String methods guide", "String interpolation", "How to concatenate", "Practice: string exercise"],
+            "Classes": ["How to create a class?", "constructor method", "this keyword explained", "Practice: write a class"],
+            "Inheritance": ["extends keyword", "super() call", "Override methods", "When to use inheritance"],
+            "Error Handling": ["try/catch syntax", "Throwing errors", "Error types", "Practice: handle an error"],
+            "Async/Await": ["Promise syntax guide", "async function basics", "await keyword", "Practice: fetch data"],
+        };
+        for (const [key, hints] of Object.entries(topHints)) {
+            if (currentTopic.toLowerCase().includes(key.toLowerCase())) return hints;
+        }
+    }
+    if (outputText.includes('Error') || outputText.includes('wrong') || outputText.includes('FAIL')) {
+        return ["Why did I get this error?", "How do I fix my code?", "Explain what went wrong", "Debugging tips"];
+    }
+    if (outputText.includes('PASS') || outputText.includes('Challenge solved')) {
+        return ["What should I learn next?", "Explain the concept behind this", "Show me a harder challenge", "Practice more exercises"];
+    }
+    return null;
+}
+
+function updateAISuggestions() {
+    const el = document.getElementById('aiSuggestions');
+    const dynamic = getDynamicSuggestions();
+    const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
+    el.innerHTML = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('');
 }
 
 const oopPhases = {
@@ -394,8 +563,12 @@ function toggleSchemaDesigner() {
     const editor = document.getElementById('editor');
     editor.style.display = el.classList.contains('open') ? 'none' : 'block';
     if (el.classList.contains('open') && schemaTables.length === 0) {
-        schemaAddTable();
-        schemaAddTable();
+        if (!schemaLoad()) {
+            schemaAddTable();
+            schemaAddTable();
+        } else {
+            schemaRender();
+        }
     }
 }
 
@@ -416,7 +589,7 @@ function schemaRemoveTable(id) {
     schemaTables = schemaTables.filter(t => t.id !== id);
     schemaTables.forEach(t => {
         t.cols.forEach(c => {
-            if (c.fk && c.fk.table === id) c.fk = null;
+            if (c.fk && c.fk.tableId === id) c.fk = null;
         });
     });
     schemaRender();
@@ -438,9 +611,32 @@ function schemaRemoveCol(tableId, colIdx) {
 
 let schemaAbortController = null;
 
+const SCHEMA_STORAGE_KEY = 'dogeslab_schema';
+
+function schemaSave() {
+    try { localStorage.setItem(SCHEMA_STORAGE_KEY, JSON.stringify(schemaTables)); } catch {}
+}
+
+function schemaLoad() {
+    try {
+        const saved = localStorage.getItem(SCHEMA_STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                schemaTables = parsed;
+                const maxId = parsed.reduce((m, t) => Math.max(m, t.id || 0), 0);
+                schemaNextId = maxId + 1;
+                return true;
+            }
+        }
+    } catch {}
+    return false;
+}
+
 function schemaRender() {
     if (schemaAbortController) schemaAbortController.abort();
     schemaAbortController = new AbortController();
+    schemaSave();
     const signal = schemaAbortController.signal;
 
     const canvas = document.getElementById('schemaCanvas');
@@ -456,7 +652,7 @@ function schemaRender() {
     svg.style.overflow = 'visible';
     svg.id = 'schemaLineLayer';
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    defs.innerHTML = '<marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/></marker>';
+    defs.innerHTML = '<marker id="fkArrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#f59e0b"/></marker><marker id="fkCircle" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><circle cx="4" cy="4" r="3" fill="none" stroke="#f59e0b" stroke-width="1.5"/></marker>';
     svg.appendChild(defs);
     canvas.appendChild(svg);
 
@@ -475,9 +671,16 @@ function schemaRender() {
         table.cols.forEach((col, i) => {
             const pkBadge = col.pk ? 'PK' : '';
             const fkBadge = col.fk ? 'FK' : '';
-            const isFKTarget = schemaTables.some(t => t.cols.some(c => c.fk && c.fk.table === table.id && c.fk.col === col.name));
-            html += `<div class="st-row ${isFKTarget ? 'fk-highlight' : ''}" data-table-id="${table.id}" data-col-idx="${i}">
-                <span class="st-pk schema-fk-handle" title="${col.fk ? `FK→${col.fk.table}.${col.fk.col}` : 'Drag to link FK'}">${pkBadge || (fkBadge ? 'FK' : '')}</span>
+            const isFKTarget = schemaTables.some(t => t.cols.some(c => c.fk && c.fk.tableId === table.id && c.fk.colIdx === i));
+            const hasFK = !!col.fk;
+            const fkLabel = col.fk ? (() => { const t = schemaTables.find(x => x.id === col.fk.tableId); return t && t.cols[col.fk.colIdx] ? `FK→${t.name}.${t.cols[col.fk.colIdx].name}` : 'FK'; })() : '';
+            const rowClasses = ['st-row'];
+            if (isFKTarget) rowClasses.push('fk-highlight');
+            if (hasFK) rowClasses.push('has-fk');
+            const handleContent = col.pk ? 'PK' : (col.fk ? 'FK' : '~>');
+            const handleTitle = col.fk ? (fkLabel ? `FK → ${fkLabel} (click to remove)` : 'FK (click to remove)') : (col.pk ? 'Drag to link this PK as FK target' : 'Drag to another column to create FK');
+            html += `<div class="${rowClasses.join(' ')}" data-table-id="${table.id}" data-col-idx="${i}">
+                <span class="st-pk schema-fk-handle" title="${handleTitle}">${handleContent}</span>
                 <input value="${col.name}" onchange="schemaUpdateCol(${table.id}, ${i}, 'name', this.value)" spellcheck="false" placeholder="col">
                 <select onchange="schemaUpdateCol(${table.id}, ${i}, 'type', this.value)">
                     ${schemaTypes.map(t => `<option ${t === col.type ? 'selected' : ''}>${t}</option>`).join('')}
@@ -516,9 +719,58 @@ function schemaRender() {
         canvas.appendChild(el);
     }
     schemaDrawRelationLines();
+
+    if (linkingState) {
+        const srcRow = canvas.querySelector(`.st-row[data-table-id="${linkingState.tableId}"][data-col-idx="${linkingState.colIdx}"]`);
+        if (srcRow) {
+            srcRow.classList.add('linking-source');
+            const h = srcRow.querySelector('.schema-fk-handle');
+            if (h) h.classList.add('linking');
+        }
+        document.querySelectorAll('.st-row').forEach(r => {
+            const tid = parseInt(r.dataset.tableId);
+            if (!isNaN(tid) && tid !== linkingState.tableId) r.classList.add('linking-valid-target');
+        });
+    }
+
+    if (schemaActiveTab === 'erd') schemaRenderERD();
 }
 
 let schemaFKDragSource = null;
+let schemaActiveTab = 'design';
+let linkingState = null;
+
+function linkClear() {
+    if (linkingState) {
+        linkingState = null;
+        document.querySelectorAll('.st-row.linking-source, .st-row.linking-valid-target, .schema-fk-handle.linking, .erd-row.erd-linking-source, .erd-row.erd-linking-valid-target')
+            .forEach(r => r.classList.remove('linking-source', 'linking-valid-target', 'linking', 'erd-linking-source', 'erd-linking-valid-target'));
+        document.body.style.cursor = '';
+    }
+}
+
+function linkStart(tableId, colIdx) {
+    linkClear();
+    linkingState = { tableId, colIdx };
+    document.body.style.cursor = 'crosshair';
+    if (schemaActiveTab === 'erd') schemaRenderERD();
+    else schemaRender();
+}
+
+function linkEnd(targetTableId, targetColIdx) {
+    if (!linkingState) return;
+    if (targetTableId === linkingState.tableId) { linkClear(); return; }
+    const srcTable = schemaTables.find(t => t.id === linkingState.tableId);
+    const srcCol = srcTable?.cols[linkingState.colIdx];
+    const tgtTable = schemaTables.find(t => t.id === targetTableId);
+    const tgtCol = tgtTable?.cols[targetColIdx];
+    if (srcCol && tgtCol) {
+        srcCol.fk = { tableId: targetTableId, colIdx: targetColIdx };
+    }
+    linkClear();
+    schemaRender();
+    if (schemaActiveTab === 'erd') schemaRenderERD();
+}
 
 function schemaDrawRelationLines() {
     const svg = document.getElementById('schemaLineLayer');
@@ -526,6 +778,7 @@ function schemaDrawRelationLines() {
     const oldGroup = svg.querySelector('g');
     if (oldGroup) oldGroup.remove();
     const canvas = document.getElementById('schemaCanvas');
+    if (canvas.offsetParent === null) return;
     const canvasRect = canvas.getBoundingClientRect();
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     group.style.pointerEvents = 'none';
@@ -533,38 +786,76 @@ function schemaDrawRelationLines() {
     for (const table of schemaTables) {
         for (const col of table.cols) {
             if (!col.fk) continue;
-            const targetTable = schemaTables.find(t => t.id === col.fk.table);
+            const targetTable = schemaTables.find(t => t.id === col.fk.tableId);
             if (!targetTable) continue;
+            const targetCol = targetTable.cols[col.fk.colIdx];
+            if (!targetCol) continue;
             const srcEl = canvas.querySelector(`[data-table-id="${table.id}"]`);
             const tgtEl = canvas.querySelector(`[data-table-id="${targetTable.id}"]`);
             if (!srcEl || !tgtEl) continue;
             const sr = srcEl.getBoundingClientRect();
             const tr = tgtEl.getBoundingClientRect();
-            const x1 = sr.right - canvasRect.left;
-            const y1 = sr.top + sr.height / 2 - canvasRect.top;
-            const x2 = tr.left - canvasRect.left;
-            const y2 = tr.top + tr.height / 2 - canvasRect.top;
+            const srcRows = srcEl.querySelectorAll('.st-row');
+            const tgtRows = tgtEl.querySelectorAll('.st-row');
+            const srcRow = srcRows[table.cols.indexOf(col)];
+            const tgtRow = tgtRows[col.fk.colIdx];
+            let y1 = sr.top + sr.height / 2 - canvasRect.top;
+            let x1 = sr.right - canvasRect.left;
+            if (srcRow) {
+                const srRect = srcRow.getBoundingClientRect();
+                y1 = srRect.top + srRect.height / 2 - canvasRect.top;
+                x1 = srRect.right - canvasRect.left;
+            }
+            let y2 = tr.top + tr.height / 2 - canvasRect.top;
+            let x2 = tr.left - canvasRect.left;
+            if (tgtRow) {
+                const trRect = tgtRow.getBoundingClientRect();
+                y2 = trRect.top + trRect.height / 2 - canvasRect.top;
+                x2 = trRect.left - canvasRect.left;
+            }
+            const dx = Math.abs(x2 - x1);
             const midX = (x1 + x2) / 2;
+            const offset = Math.max(40, dx * 0.4);
+
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+            path.setAttribute('d', `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`);
             path.setAttribute('stroke', '#f59e0b');
             path.setAttribute('stroke-width', '2');
             path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-dasharray', '6,3');
-            path.setAttribute('marker-end', 'url(#arrowhead)');
+            path.setAttribute('marker-start', 'url(#fkCircle)');
+            path.setAttribute('marker-end', 'url(#fkArrow)');
             group.appendChild(path);
+
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', x1 + 6);
+            label.setAttribute('y', y1 + 3);
+            label.setAttribute('fill', '#f59e0b');
+            label.setAttribute('font-size', '8');
+            label.setAttribute('font-weight', 'bold');
+            label.textContent = '*';
+            group.appendChild(label);
+
+            const label2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label2.setAttribute('x', x2 - 6);
+            label2.setAttribute('y', y2 + 3);
+            label2.setAttribute('fill', '#10b981');
+            label2.setAttribute('font-size', '8');
+            label2.setAttribute('font-weight', 'bold');
+            label2.setAttribute('text-anchor', 'end');
+            label2.textContent = '1';
+            group.appendChild(label2);
         }
     }
     svg.appendChild(group);
 }
 
-document.addEventListener('mousedown', function(e) {
+function handleDesignHandleClick(e) {
     const handle = e.target.closest('.schema-fk-handle');
     if (!handle) return;
     if (!document.getElementById('schemaDesigner').classList.contains('open')) return;
     e.preventDefault();
     e.stopPropagation();
-    const row = handle.closest('[data-table-id]');
+    const row = handle.closest('[data-col-idx]');
     if (!row) return;
     const tableId = parseInt(row.dataset.tableId);
     const colIdx = parseInt(row.dataset.colIdx);
@@ -573,62 +864,286 @@ document.addEventListener('mousedown', function(e) {
     const col = table.cols[colIdx];
     if (!col) return;
 
-    if (col.fk) {
-        col.fk = null;
-        schemaRender();
+    if (linkingState) {
+        const tColIdx = parseInt(row.dataset.colIdx);
+        linkEnd(tableId, tColIdx);
         return;
     }
+
+    if (col.fk) { col.fk = null; schemaRender(); return; }
 
     const canvas = document.getElementById('schemaCanvas');
     const svg = document.getElementById('schemaLineLayer');
     const cr = canvas.getBoundingClientRect();
     const hr = handle.getBoundingClientRect();
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('stroke', '#f59e0b');
-    line.setAttribute('stroke-width', '2');
-    line.setAttribute('stroke-dasharray', '5,3');
-    svg.appendChild(line);
-
-    const startX = hr.left + hr.width / 2 - cr.left;
-    const startY = hr.top + hr.height / 2 - cr.top;
-    schemaFKDragSource = { tableId, colIdx, line, startX, startY };
+    const mx = e.clientX, my = e.clientY;
+    let isDragging = false;
+    let line = null;
 
     const onMove = function(ev) {
-        if (!schemaFKDragSource) return;
-        const r = canvas.getBoundingClientRect();
-        schemaFKDragSource.line.setAttribute('x1', schemaFKDragSource.startX);
-        schemaFKDragSource.line.setAttribute('y1', schemaFKDragSource.startY);
-        schemaFKDragSource.line.setAttribute('x2', ev.clientX - r.left);
-        schemaFKDragSource.line.setAttribute('y2', ev.clientY - r.top);
+        if (!isDragging && (Math.abs(ev.clientX - mx) > 4 || Math.abs(ev.clientY - my) > 4)) {
+            isDragging = true;
+            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('stroke', '#f59e0b');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', '5,3');
+            svg.appendChild(line);
+            schemaFKDragSource = {
+                tableId, colIdx, line,
+                startX: hr.left + hr.width / 2 - cr.left,
+                startY: hr.top + hr.height / 2 - cr.top
+            };
+        }
+        if (isDragging && schemaFKDragSource) {
+            const r = canvas.getBoundingClientRect();
+            schemaFKDragSource.line.setAttribute('x1', schemaFKDragSource.startX);
+            schemaFKDragSource.line.setAttribute('y1', schemaFKDragSource.startY);
+            schemaFKDragSource.line.setAttribute('x2', ev.clientX - r.left);
+            schemaFKDragSource.line.setAttribute('y2', ev.clientY - r.top);
+        }
+    };
+
+    const onMoveTarget = function(ev) {
+        document.querySelectorAll('.st-row.fk-drag-target').forEach(r => r.classList.remove('fk-drag-target'));
+        if (!isDragging || !schemaFKDragSource) return;
+        const el = document.elementFromPoint(ev.clientX, ev.clientY);
+        const tr = el ? el.closest('[data-col-idx]') : null;
+        if (tr) {
+            const tid = parseInt(tr.dataset.tableId);
+            if (tid !== schemaFKDragSource.tableId) tr.classList.add('fk-drag-target');
+        }
     };
 
     const onUp = function(ev) {
         document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mousemove', onMoveTarget);
         document.removeEventListener('mouseup', onUp);
-        if (!schemaFKDragSource) return;
-        if (schemaFKDragSource.line.parentNode) {
-            schemaFKDragSource.line.parentNode.removeChild(schemaFKDragSource.line);
-        }
-        const target = document.elementFromPoint(ev.clientX, ev.clientY);
-        const targetRow = target ? target.closest('[data-table-id]') : null;
-        if (targetRow) {
-            const tTableId = parseInt(targetRow.dataset.tableId);
-            const tColIdx = parseInt(targetRow.dataset.colIdx);
-            if (tTableId !== undefined && tColIdx !== undefined && tTableId !== schemaFKDragSource.tableId) {
-                const tTable = schemaTables.find(t => t.id === tTableId);
-                if (tTable && tTable.cols[tColIdx]) {
-                    const sourceCol = schemaTables.find(t => t.id === schemaFKDragSource.tableId).cols[schemaFKDragSource.colIdx];
-                    sourceCol.fk = { table: tTable.name, col: tTable.cols[tColIdx].name };
+        document.querySelectorAll('.st-row.fk-drag-target').forEach(r => r.classList.remove('fk-drag-target'));
+        if (isDragging && schemaFKDragSource) {
+            if (schemaFKDragSource.line.parentNode) schemaFKDragSource.line.parentNode.removeChild(schemaFKDragSource.line);
+            const target = document.elementFromPoint(ev.clientX, ev.clientY);
+            const targetRow = target ? target.closest('[data-col-idx]') : null;
+            if (targetRow) {
+                const tTableId = parseInt(targetRow.dataset.tableId);
+                const tColIdx = parseInt(targetRow.dataset.colIdx);
+                if (!isNaN(tTableId) && !isNaN(tColIdx) && tTableId !== schemaFKDragSource.tableId) {
+                    const tTable = schemaTables.find(t => t.id === tTableId);
+                    if (tTable && tTable.cols[tColIdx]) {
+                        const sourceCol = schemaTables.find(t => t.id === schemaFKDragSource.tableId).cols[schemaFKDragSource.colIdx];
+                        sourceCol.fk = { tableId: tTable.id, colIdx: tColIdx };
+                    }
                 }
             }
+            schemaFKDragSource = null;
+            schemaRender();
+            if (schemaActiveTab === 'erd') schemaRenderERD();
+        } else if (!isDragging) {
+            linkStart(tableId, colIdx);
         }
-        schemaFKDragSource = null;
-        schemaRender();
     };
 
     document.addEventListener('mousemove', onMove);
+    document.addEventListener('mousemove', onMoveTarget);
     document.addEventListener('mouseup', onUp);
+}
+
+document.addEventListener('mousedown', handleDesignHandleClick);
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && linkingState) { linkClear(); schemaRender(); if (schemaActiveTab === 'erd') schemaRenderERD(); }
 });
+
+function schemaSwitchTab(tab) {
+    schemaActiveTab = tab;
+    linkClear();
+    document.getElementById('schemaTabDesign').classList.toggle('active', tab === 'design');
+    document.getElementById('schemaTabErd').classList.toggle('active', tab === 'erd');
+    document.getElementById('schemaCanvas').style.display = tab === 'design' ? 'block' : 'none';
+    document.getElementById('erdCanvas').style.display = tab === 'erd' ? 'block' : 'none';
+    document.getElementById('schemaAddTableBtn').style.display = tab === 'design' ? '' : 'none';
+    if (tab === 'erd') schemaRenderERD();
+}
+
+function schemaAutoLayout() {
+    if (schemaTables.length === 0) return;
+    const padding = 30;
+    const tableW = 220;
+    const gapX = 60;
+    const gapY = 60;
+    const cols = Math.max(1, Math.ceil(Math.sqrt(schemaTables.length)));
+    schemaTables.forEach((table, idx) => {
+        const c = idx % cols;
+        const r = Math.floor(idx / cols);
+        table.x = padding + c * (tableW + gapX);
+        table.y = padding + r * (gapY + 120);
+    });
+    schemaRender();
+    if (schemaActiveTab === 'erd') schemaRenderERD();
+}
+
+function erdHandleRowClick(e) {
+    const row = e.target.closest('.erd-row');
+    if (!row) return;
+    const tableEl = row.closest('.erd-table');
+    if (!tableEl) return;
+    const tableId = parseInt(tableEl.dataset.tableId);
+    if (isNaN(tableId)) return;
+    const colIdx = parseInt(row.dataset.colIdx);
+    if (isNaN(colIdx)) return;
+    const table = schemaTables.find(t => t.id === tableId);
+    if (!table) return;
+    const col = table.cols[colIdx];
+    if (!col) return;
+
+    if (linkingState) {
+        linkEnd(tableId, colIdx);
+        return;
+    }
+
+    if (col.fk) { col.fk = null; schemaRenderERD(); schemaRender(); return; }
+
+    linkStart(tableId, colIdx);
+}
+
+function schemaRenderERD() {
+    const canvas = document.getElementById('erdCanvas');
+    canvas.innerHTML = '';
+    if (schemaTables.length === 0) {
+        canvas.innerHTML = '<div style="color:#64748b; padding:40px; text-align:center; font-size:13px;">No tables defined. Switch to Design tab to create a schema.</div>';
+        return;
+    }
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.pointerEvents = 'none';
+    svg.style.overflow = 'visible';
+    svg.id = 'erdLineLayer';
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = '<marker id="erdArrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#f59e0b"/></marker><marker id="erdCircle" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><circle cx="4" cy="4" r="3" fill="none" stroke="#f59e0b" stroke-width="1.5"/></marker>';
+    svg.appendChild(defs);
+    canvas.appendChild(svg);
+
+    schemaTables.forEach((table) => {
+        const el = document.createElement('div');
+        el.className = 'erd-table';
+        el.style.left = table.x + 'px';
+        el.style.top = table.y + 'px';
+        el.dataset.tableId = table.id;
+
+        const body = table.cols.map((c, i) => {
+            const isPK = c.pk;
+            const isFK = !!c.fk;
+            const tag = isPK ? '<span class="erd-pk">PK</span>' : (isFK ? '<span class="erd-fk">FK</span>' : '<span class="erd-pk"></span>');
+            const cls = ['erd-row'];
+            if (c.fk) cls.push('erd-has-fk');
+            return `<div class="${cls.join(' ')}" data-col-idx="${i}">${tag}<span class="erd-name">${c.name}</span><span class="erd-type">${c.type}</span></div>`;
+        }).join('');
+
+        el.innerHTML = `<div class="erd-header"><span class="erd-icon">▦</span>${table.name}</div><div class="erd-body">${body}</div>`;
+
+        let isDragging = false, startX, startY, origX, origY;
+        el.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.erd-row')) return;
+            isDragging = true;
+            startX = e.clientX; startY = e.clientY;
+            origX = table.x; origY = table.y;
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            table.x = origX + (e.clientX - startX);
+            table.y = origY + (e.clientY - startY);
+            el.style.left = table.x + 'px';
+            el.style.top = table.y + 'px';
+            schemaDrawERDLines();
+        }, { signal: schemaAbortController.signal });
+        document.addEventListener('mouseup', function() { isDragging = false; }, { signal: schemaAbortController.signal });
+
+        canvas.appendChild(el);
+    });
+
+    canvas.addEventListener('click', erdHandleRowClick);
+
+    if (linkingState) {
+        const srcRow = canvas.querySelector(`.erd-row[data-col-idx="${linkingState.colIdx}"]`);
+        if (srcRow) {
+            const parentTable = srcRow.closest('.erd-table');
+            if (parentTable && parseInt(parentTable.dataset.tableId) === linkingState.tableId) {
+                srcRow.classList.add('erd-linking-source');
+            }
+        }
+        canvas.querySelectorAll('.erd-row').forEach(r => {
+            const parent = r.closest('.erd-table');
+            if (parent && parseInt(parent.dataset.tableId) !== linkingState.tableId) {
+                r.classList.add('erd-linking-valid-target');
+            }
+        });
+    }
+
+    setTimeout(() => schemaDrawERDLines(), 50);
+}
+
+function schemaDrawERDLines() {
+    const erdSvg = document.getElementById('erdLineLayer');
+    if (!erdSvg) return;
+    const oldGroup = erdSvg.querySelector('g');
+    if (oldGroup) oldGroup.remove();
+    const canvas = document.getElementById('erdCanvas');
+    const cr = canvas.getBoundingClientRect();
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    group.style.pointerEvents = 'none';
+
+    for (const table of schemaTables) {
+        for (const col of table.cols) {
+            if (!col.fk) continue;
+            const targetTable = schemaTables.find(t => t.id === col.fk.tableId);
+            if (!targetTable) continue;
+            const srcEl = canvas.querySelector(`.erd-table[data-table-id="${table.id}"]`);
+            const tgtEl = canvas.querySelector(`.erd-table[data-table-id="${targetTable.id}"]`);
+            if (!srcEl || !tgtEl) continue;
+            const sr = srcEl.getBoundingClientRect();
+            const tr = tgtEl.getBoundingClientRect();
+            const srcRows = srcEl.querySelectorAll('.erd-row');
+            const tgtRows = tgtEl.querySelectorAll('.erd-row');
+            const srcRow = srcRows[table.cols.indexOf(col)];
+            const tgtRow = tgtRows[col.fk.colIdx];
+            let y1 = sr.top + sr.height / 2 - cr.top;
+            let x1 = sr.right - cr.left;
+            if (srcRow) { const r2 = srcRow.getBoundingClientRect(); y1 = r2.top + r2.height / 2 - cr.top; x1 = r2.right - cr.left; }
+            let y2 = tr.top + tr.height / 2 - cr.top;
+            let x2 = tr.left - cr.left;
+            if (tgtRow) { const r2 = tgtRow.getBoundingClientRect(); y2 = r2.top + r2.height / 2 - cr.top; x2 = r2.left - cr.left; }
+            const dx = Math.abs(x2 - x1);
+            const offset = Math.max(40, dx * 0.4);
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`);
+            path.setAttribute('stroke', '#f59e0b');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-dasharray', '6,3');
+            path.setAttribute('marker-start', 'url(#erdCircle)');
+            path.setAttribute('marker-end', 'url(#erdArrow)');
+            group.appendChild(path);
+
+            const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lbl.setAttribute('x', x1 + 6); lbl.setAttribute('y', y1 - 4);
+            lbl.setAttribute('fill', '#f59e0b'); lbl.setAttribute('font-size', '9');
+            lbl.setAttribute('font-weight', 'bold'); lbl.textContent = '*';
+            group.appendChild(lbl);
+
+            const lbl2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lbl2.setAttribute('x', x2 - 6); lbl2.setAttribute('y', y2 - 4);
+            lbl2.setAttribute('fill', '#10b981'); lbl2.setAttribute('font-size', '9');
+            lbl2.setAttribute('font-weight', 'bold'); lbl2.setAttribute('text-anchor', 'end');
+            lbl2.textContent = '1';
+            group.appendChild(lbl2);
+        }
+    }
+    erdSvg.appendChild(group);
+}
 
 function schemaRenameTable(id, name) {
     const table = schemaTables.find(t => t.id === id);
@@ -671,7 +1186,11 @@ function schemaGenerateSQL() {
             let line = `    ${c.name} ${c.type}`;
             if (c.pk && pkCols.length === 1) line += ' PRIMARY KEY';
             if (c.fk) {
-                constraints.push(`    FOREIGN KEY (${c.name}) REFERENCES ${c.fk.table}(${c.fk.col})`);
+                const t = schemaTables.find(x => x.id === c.fk.tableId);
+                const tc = t ? t.cols[c.fk.colIdx] : null;
+                if (t && tc) {
+                    constraints.push(`    FOREIGN KEY (${c.name}) REFERENCES ${t.name}(${tc.name})`);
+                }
             }
             return line;
         }).join(',\n');
@@ -847,7 +1366,7 @@ function renderChallengeList() {
     const list = document.getElementById('topic-list');
     let html = `<div class="challenge-lang-bar">`;
     for (const l of ['js','py','go','ts','rs','swift']) {
-        const names = { js:'JS', py:'Python', go:'Go', ts:'TS' };
+        const names = { js:'JS', py:'Python', go:'Go', ts:'TS', rs:'Rust', swift:'Swift' };
         const active = l === challengeLang ? 'active' : '';
         html += `<button class="challenge-lang-btn ${active}" onclick="switchChallengeLang('${l}')">${names[l]}</button>`;
     }
@@ -897,6 +1416,7 @@ function switchChallengeLang(lang) {
 const origRunCode = runCode;
 runCode = function() {
     if (currentLang === 'challenge') {
+        setRunLoading(true);
         testChallenge();
         return;
     }
@@ -906,7 +1426,7 @@ runCode = function() {
 function testChallenge() {
     const challenges = challengeData[challengeLang] || [];
     const ch = challenges[challengeIdx];
-    if (!ch) { document.getElementById('output').innerText = '// No challenge selected'; return; }
+    if (!ch) { setRunLoading(false); document.getElementById('output').innerText = '// No challenge selected'; return; }
     const code = document.getElementById('editor').value;
     const out = document.getElementById('output');
 
@@ -929,6 +1449,7 @@ function testChallenge() {
     } else {
         out.innerText = "// Challenge preview mode for " + challengeLang.toUpperCase() + "\n// Check the solution logic manually";
     }
+    setRunLoading(false);
 }
 
 // ── EDITOR AUTO-CLOSE & SMART INDENT ──
@@ -1225,6 +1746,7 @@ function updateTopicDisplay() {
         const star = btn.querySelector('.topic-star');
         if (star) star.onclick = function(e) { e.stopPropagation(); toggleProgress(raw); };
     });
+    updateProgressBar();
 }
 
 // ── SYNTAX HIGHLIGHTING ──
@@ -1287,8 +1809,13 @@ setMode = function(lang) {
     currentLevel = 'all';
     currentLang = lang;
     document.getElementById('app').className = lang + '-mode';
-    document.getElementById('level-bar').style.display = 'none';
+    const levelBar = document.getElementById('level-bar');
+    if (levelBar) levelBar.style.display = 'none';
     document.getElementById('header-title').innerText = lang.toUpperCase();
+    if (lang === 'pg') {
+        const sd = document.getElementById('schemaDesigner');
+        if (!sd.classList.contains('open')) toggleSchemaDesigner();
+    }
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     const navBtn = document.getElementById('nav-' + lang);
     if (navBtn) navBtn.classList.add('active');
@@ -1320,6 +1847,7 @@ setMode = function(lang) {
 };
 
 initHighlighting();
+initLineNumbers();
 loadProgress();
 
 fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"lang":"js","code":"1"}' })
@@ -1331,5 +1859,216 @@ fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'ap
             out.innerText = "// Backend not running. Start with:\n//   node server.js";
         }
     });
+
+const origRunCodeForSuggestions = runCode;
+runCode = function() {
+    origRunCodeForSuggestions();
+    setTimeout(updateAISuggestions, 500);
+};
+
+// ── KEYBOARD SHORTCUTS ──
+document.addEventListener('keydown', function(e) {
+    const tag = document.activeElement ? document.activeElement.tagName : '';
+    const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runCode();
+        return;
+    }
+
+    if (e.key === '/' && !inInput) {
+        e.preventDefault();
+        document.getElementById('topic-search').focus();
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        const aiPanel = document.getElementById('aiPanel');
+        if (aiPanel.classList.contains('open')) { toggleAI(); e.preventDefault(); return; }
+        const cheatsheet = document.getElementById('cheatsheetOverlay');
+        if (cheatsheet.classList.contains('open')) { toggleCheatsheet(); e.preventDefault(); return; }
+        return;
+    }
+
+    if (e.key === '?' && !inInput) {
+        e.preventDefault();
+        showShortcuts();
+        return;
+    }
+
+    if ((e.key === 'n' || e.key === 'N') && !inInput) {
+        e.preventDefault();
+        navTopic(1);
+        return;
+    }
+
+    if ((e.key === 'p' || e.key === 'P') && !inInput) {
+        e.preventDefault();
+        navTopic(-1);
+        return;
+    }
+});
+
+function showShortcuts() {
+    const existing = document.getElementById('shortcutsOverlay');
+    if (existing) { existing.remove(); return; }
+    const overlay = document.createElement('div');
+    overlay.id = 'shortcutsOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.85);backdrop-filter:blur(4px);z-index:300;display:flex;justify-content:center;align-items:center;';
+    overlay.onclick = function(e) { if (e.target === this) this.remove(); };
+    overlay.innerHTML =
+        '<div style="background:#0f172a;border:1px solid #334155;border-radius:12px;padding:25px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:fadeIn 0.2s ease;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">' +
+        '<span style="font-size:13px;font-weight:900;color:#f1f5f9;letter-spacing:1px;">⌨ SHORTCUTS</span>' +
+        '<button onclick="document.getElementById(\'shortcutsOverlay\').remove()" style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;">✕</button></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Ctrl+Enter</kbd></div><div style="color:#94a3b8;font-size:11px;">Run code</div>' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">/</kbd></div><div style="color:#94a3b8;font-size:11px;">Search topics</div>' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">n</kbd> / <kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">p</kbd></div><div style="color:#94a3b8;font-size:11px;">Next / Previous topic</div>' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Esc</kbd></div><div style="color:#94a3b8;font-size:11px;">Close panels</div>' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">?</kbd></div><div style="color:#94a3b8;font-size:11px;">Show this menu</div>' +
+        '</div></div>';
+    document.body.appendChild(overlay);
+}
+
+// ── TOPIC NAVIGATION ──
+function getTopicList() {
+    const langData = courseData[currentLang];
+    if (!langData) return [];
+    const topics = [];
+    for (const phase in langData) {
+        for (const topic in langData[phase]) {
+            topics.push({ phase, topic });
+        }
+    }
+    return topics;
+}
+
+function getCurrentTopicIndex() {
+    const list = getTopicList();
+    return list.findIndex(t => t.topic === currentTopic && t.phase === currentPhase);
+}
+
+function navTopic(dir) {
+    const list = getTopicList();
+    const idx = getCurrentTopicIndex();
+    if (idx === -1) return;
+    const next = idx + dir;
+    if (next < 0 || next >= list.length) return;
+    loadTopic(list[next].phase, list[next].topic);
+}
+
+// ── PROGRESS BAR ──
+function updateProgressBar() {
+    const langData = courseData[currentLang];
+    if (!langData) return;
+    const allTopics = getTopicList();
+    if (allTopics.length === 0) return;
+    let completed = 0;
+    for (const t of allTopics) {
+        if (completedTopics.has(currentLang + ':' + t.topic)) completed++;
+    }
+    const pct = Math.round((completed / allTopics.length) * 100);
+    let bar = document.getElementById('progressBar');
+    if (!bar) {
+        const label = document.querySelector('.col:first-child label');
+        if (!label) return;
+        const container = document.createElement('div');
+        container.id = 'progressBarContainer';
+        container.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+        container.innerHTML =
+            '<div id="progressBar" style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden;">' +
+            '<div style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div></div>' +
+            '<span id="progressText" style="font-size:9px;color:#64748b;font-weight:800;white-space:nowrap;">0%</span>';
+        label.after(container);
+        bar = document.getElementById('progressBar');
+    }
+    const fill = bar.querySelector('div');
+    fill.style.width = pct + '%';
+    document.getElementById('progressText').textContent = completed + '/' + allTopics.length + ' (' + pct + '%)';
+}
+
+// ── SEARCH RESULT COUNT ──
+function filterTopics(query) {
+    const q = query ? query.toLowerCase().trim() : '';
+    let visible = 0;
+    let total = 0;
+    document.querySelectorAll('.item-btn').forEach(btn => {
+        total++;
+        const matchesSearch = !q || btn.textContent.toLowerCase().includes(q);
+        const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
+        btn.style.display = matchesSearch && matchesLevel ? '' : 'none';
+        if (matchesSearch && matchesLevel) visible++;
+    });
+    const container = document.getElementById('topic-list');
+    const children = container.children;
+    for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        if (!el.classList.contains('phase-label')) continue;
+        let hasVisible = false;
+        for (let j = i + 1; j < children.length; j++) {
+            if (children[j].classList.contains('phase-label')) break;
+            if (children[j].style.display !== 'none') { hasVisible = true; break; }
+        }
+        el.style.display = hasVisible ? '' : 'none';
+    }
+
+    let countEl = document.getElementById('searchCount');
+    if (q && visible < total) {
+        if (!countEl) {
+            countEl = document.createElement('div');
+            countEl.id = 'searchCount';
+            countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;';
+            document.getElementById('topic-search').after(countEl);
+        }
+        countEl.textContent = visible + ' of ' + total + ' topics match';
+        countEl.style.display = '';
+    } else if (countEl) {
+        countEl.style.display = 'none';
+    }
+}
+
+// ── EDITOR LINE NUMBERS ──
+let lineNumbersEl = null;
+
+function initLineNumbers() {
+    const wrapper = document.querySelector('.editor-wrapper');
+    if (!wrapper) return;
+    if (wrapper.querySelector('.editor-lines')) return;
+
+    lineNumbersEl = document.createElement('div');
+    lineNumbersEl.className = 'editor-lines';
+    lineNumbersEl.style.cssText = 'position:absolute;top:0;left:0;width:36px;height:100%;padding:15px 4px;font-family:Consolas,monospace;font-size:13px;line-height:1.6;color:#475569;overflow:hidden;text-align:right;z-index:3;pointer-events:none;box-sizing:border-box;user-select:none;';
+    wrapper.insertBefore(lineNumbersEl, wrapper.firstChild);
+
+    const textarea = document.getElementById('editor');
+    textarea.addEventListener('input', updateLineNumbers);
+    textarea.addEventListener('scroll', syncLineNumbersScroll);
+    textarea.addEventListener('keydown', updateLineNumbers);
+    updateLineNumbers();
+
+    // Adjust editor padding for line numbers
+    textarea.style.paddingLeft = '50px';
+    const hl = wrapper.querySelector('.editor-highlight');
+    if (hl) hl.style.paddingLeft = '50px';
+}
+
+function updateLineNumbers() {
+    if (!lineNumbersEl) return;
+    const textarea = document.getElementById('editor');
+    const lines = textarea.value.split('\n').length;
+    const nums = [];
+    for (let i = 1; i <= lines; i++) {
+        nums.push('<span>' + i + '</span>');
+    }
+    lineNumbersEl.innerHTML = nums.join('\n');
+}
+
+function syncLineNumbersScroll() {
+    if (!lineNumbersEl) return;
+    const textarea = document.getElementById('editor');
+    lineNumbersEl.scrollTop = textarea.scrollTop;
+}
 
 setMode('js');
