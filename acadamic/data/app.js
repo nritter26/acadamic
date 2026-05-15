@@ -2,6 +2,8 @@ let currentLang = 'js';
 let currentPhase = '';
 let currentTopic = '';
 let currentLevel = 'all';
+let currentCompletionFilter = 'all';
+let collapsedPhases = new Set();
 
 
 
@@ -515,8 +517,23 @@ function getDynamicSuggestions() {
     const outputText = output ? output.innerText : '';
     const hasError = outputText.includes('Error:') || outputText.includes('FAIL') || outputText.includes('SyntaxError') || outputText.includes('ReferenceError') || outputText.includes('TypeError');
 
-    if (hasError && currentTopic) {
-        return ["Why did I get this error?", "Help me debug my code", `Explain ${currentTopic}`, "How do I fix common mistakes?"];
+    if (hasError) {
+        if (outputText.includes('SyntaxError') || outputText.includes('Unexpected token')) {
+            return ["What is a syntax error?", "How to fix missing brackets", "Check my punctuation", "Common syntax mistakes"];
+        }
+        if (outputText.includes('ReferenceError') || outputText.includes('is not defined')) {
+            return ["What is a ReferenceError?", "How to declare variables", "Variable scope explained", "Check variable spelling"];
+        }
+        if (outputText.includes('TypeError') || outputText.includes('is not a function') || outputText.includes('Cannot read property')) {
+            return ["What is a TypeError?", "Check variable types", "How to use console.log", "Debug undefined values"];
+        }
+        if (outputText.includes('FAIL') || outputText.includes('Challenge')) {
+            return ["Hint for this challenge", "Explain the concept", "Show me a similar example", "Debug my logic"];
+        }
+        if (currentTopic) {
+            return ["Why did I get this error?", "Help me debug my code", `Explain ${currentTopic}`, "How do I fix common mistakes?"];
+        }
+        return ["Why did I get this error?", "How do I fix my code?", "Explain what went wrong", "Debugging tips"];
     }
     if (currentTopic) {
         const topHints = {
@@ -530,13 +547,16 @@ function getDynamicSuggestions() {
             "Inheritance": ["extends keyword", "super() call", "Override methods", "When to use inheritance"],
             "Error Handling": ["try/catch syntax", "Throwing errors", "Error types", "Practice: handle an error"],
             "Async/Await": ["Promise syntax guide", "async function basics", "await keyword", "Practice: fetch data"],
+            "Pointers": ["What is a pointer?", "Stack vs heap", "Memory management", "Practice: pointer basics"],
+            "Recursion": ["Base case explained", "Recursion vs loops", "Stack overflow risk", "Practice: recursion"],
+            "Testing": ["How to write tests", "What is TDD?", "Jest for beginners", "Practice: test a function"],
+            "SQL": ["SELECT vs INSERT", "JOIN types explained", "WHERE clause filter", "Practice: write a query"],
+            "Git": ["How to commit", "Branching explained", "Merge vs rebase", "Practice: git workflow"],
         };
         for (const [key, hints] of Object.entries(topHints)) {
             if (currentTopic.toLowerCase().includes(key.toLowerCase())) return hints;
         }
-    }
-    if (outputText.includes('Error') || outputText.includes('wrong') || outputText.includes('FAIL')) {
-        return ["Why did I get this error?", "How do I fix my code?", "Explain what went wrong", "Debugging tips"];
+        return [`Explain ${currentTopic}`, `Practice: ${currentTopic.toLowerCase()} exercise`, "Show me an example", "Common mistakes"];
     }
     if (outputText.includes('PASS') || outputText.includes('Challenge solved')) {
         return ["What should I learn next?", "Explain the concept behind this", "Show me a harder challenge", "Practice more exercises"];
@@ -1871,10 +1891,10 @@ setMode = function(lang) {
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
 
     currentLevel = 'all';
+    currentCompletionFilter = 'all';
     currentLang = lang;
     document.getElementById('app').className = lang + '-mode';
     const levelBar = document.getElementById('level-bar');
-    if (levelBar) levelBar.style.display = 'none';
     document.getElementById('header-title').innerText = lang.toUpperCase();
     if (lang === 'pg') {
         const sd = document.getElementById('schemaDesigner');
@@ -1885,14 +1905,53 @@ setMode = function(lang) {
     if (navBtn) navBtn.classList.add('active');
 
     const langData = courseData[lang] || {};
+    const phases = Object.keys(langData);
+    const totalPhases = phases.length;
+
+    // Auto-assign difficulty based on phase position
+    const third = Math.max(1, Math.ceil(totalPhases / 3));
+    const phaseLevels = {};
+    phases.forEach((phase, i) => {
+        if (i < third) phaseLevels[phase] = 'beginner';
+        else if (i < third * 2) phaseLevels[phase] = 'intermediate';
+        else phaseLevels[phase] = 'expert';
+    });
+
+    // Build level bar with difficulty filter + completion filter
+    if (levelBar) {
+        let levelHtml = '<button class="level-btn active" onclick="setLevel(\'all\')">All</button>';
+        ['beginner', 'intermediate', 'expert'].forEach(lvl => {
+            levelHtml += `<button class="level-btn" onclick="setLevel('${lvl}')">${lvl}</button>`;
+        });
+        levelHtml += `<span style="flex:1"></span>`;
+        levelHtml += `<button class="level-btn${currentCompletionFilter === 'all' ? ' active' : ''}" onclick="setCompletionFilter('all')">All</button>`;
+        levelHtml += `<button class="level-btn${currentCompletionFilter === 'uncompleted' ? ' active' : ''}" onclick="setCompletionFilter('uncompleted')">Todo</button>`;
+        levelHtml += `<button class="level-btn${currentCompletionFilter === 'completed' ? ' active' : ''}" onclick="setCompletionFilter('completed')">Done</button>`;
+        levelBar.innerHTML = levelHtml;
+        levelBar.style.display = 'flex';
+    }
+
+    // Build topic list with collapsible phases, counts, badges
     let html = '';
     let idx = 0;
     for (const phase in langData) {
-        html += `<span class="phase-label">${phase}</span>`;
+        const topics = Object.keys(langData[phase]);
+        const count = topics.length;
+        const phaseKey = phase.replace(/\s/g, '');
+        const isCollapsed = collapsedPhases.has(phaseKey);
+
+        html += `<div class="phase-header ${isCollapsed ? 'collapsed' : ''}" data-phase="${phaseKey}" onclick="togglePhase('${phaseKey}','${phase.replace(/'/g, "\\'")}')">
+            <span class="phase-toggle">${isCollapsed ? '▶' : '▼'}</span>
+            <span class="phase-label-text">${phase}</span>
+            <span class="phase-count">${count}</span>
+        </div>`;
+
+        const displayStyle = isCollapsed ? 'display:none;' : '';
         for (const topic in langData[phase]) {
             const delay = idx * 20;
-            const level = langData[phase][topic].level || 'beginner';
-            html += `<button class="item-btn topic-btn-enter" style="animation-delay:${delay}ms" data-level="${level}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')">${topic}</button>`;
+            const level = phaseLevels[phase];
+            const badges = getAutoTags(phase, topic).slice(0, 2).join(' ');
+            html += `<button class="item-btn topic-btn-enter" style="animation-delay:${delay}ms;${displayStyle}" data-level="${level}" data-phase="${phaseKey}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')"><span class="diff-badge ${level}">${level[0].toUpperCase()}</span> ${topic}</button>`;
             idx++;
         }
     }
