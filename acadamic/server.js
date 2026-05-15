@@ -9,6 +9,10 @@ const os = require('os');
 
 const { askLLM } = require('./ai/provider');
 const { getCurriculumContext, getTopicContext } = require('./ai/curriculum');
+const { search: semanticSearch, getContext: getSemanticContext } = require('./ai/embeddings');
+const learner = require('./ai/learner');
+const { review: codeReview } = require('./ai/reviewer');
+const { generateExercise } = require('./ai/exercises');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -422,16 +426,158 @@ function buildLLMMessages(message, lang, topic, phase, code, output, hasError, h
     return messages;
 }
 
+// ── Explain Code API ──
+app.post('/api/explain', async (req, res) => {
+    const { code, lang, topic } = req.body;
+    if (!code) return res.json({ explanation: "No code provided to explain." });
+
+    if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+        const context = topic ? `The user is studying ${topic} in ${lang || 'programming'}.` : `The user is programming in ${lang || 'a language'}.`;
+        const messages = [
+            { role: 'user', content: `${context}\n\nPlease explain the following code step by step. Describe what each line does, identify the programming concepts used, and suggest any improvements:\n\n\`\`\`\n${code}\n\`\`\`` }
+        ];
+        const llmReply = await askLLM(messages);
+        if (llmReply) return res.json({ explanation: llmReply, source: 'llm' });
+    }
+
+    const reviewResult = await codeReview(code, lang || 'js', topic);
+
+    const lines = code.split('\n');
+    let explanation = '';
+
+    const hasLLM = reviewResult.source === 'llm';
+    if (hasLLM) {
+        explanation = reviewResult.review;
+    } else {
+        explanation = `**Code Overview:**\n`;
+        explanation += `- **${lines.length} lines** of ${(lang || 'code').toUpperCase()}\n`;
+        if (code.includes('function') || code.includes('=>')) explanation += "- Defines one or more **functions**\n";
+        if (code.includes('for(') || code.includes('for (')) explanation += "- Contains a **for loop**\n";
+        if (code.includes('while(') || code.includes('while (')) explanation += "- Contains a **while loop**\n";
+        if (code.includes('if(') || code.includes('if (')) explanation += "- Contains **conditional logic** (if statements)\n";
+        if (code.includes('class ')) explanation += "- Defines a **class**\n";
+        if (code.includes('return ')) explanation += "- Uses **return statements**\n";
+        if (code.includes('const ') || code.includes('let ') || code.includes('var ')) explanation += "- Declares **variables**\n";
+        if (code.includes('.')) explanation += "- Calls **methods** or accesses **properties**\n";
+
+        if (reviewResult.issues && reviewResult.issues.length > 0) {
+            explanation += "\n\n**Potential Issues:**\n";
+            explanation += reviewResult.issues.map((h, i) => `${i + 1}. ${h.message}`).join('\n');
+        }
+
+        if (reviewResult.score) {
+            explanation += `\n\n**Code Score:** ${reviewResult.score}/10`;
+        }
+
+        explanation += "\n\n**Suggestion:** Try modifying the code in the editor and running it to see how changes affect the output!";
+    }
+
+    res.json({ explanation, source: reviewResult.source || 'static', issues: reviewResult.issues, score: reviewResult.score });
+});
+
+// ── AI Code Review API ──
+app.post('/api/review', async (req, res) => {
+    const { code, lang, topic, learnerId } = req.body;
+    if (!code) return res.json({ review: 'No code provided.', issues: [], score: 0 });
+
+    const result = await codeReview(code, lang, topic);
+
+    if (learnerId && result.issues) {
+        const errorCount = result.issues.filter(i => i.severity === 'error' || i.severity === 'warning').length;
+        if (errorCount > 0) {
+            learner.trackError(learnerId, lang || 'js', topic || 'general');
+        }
+        learner.trackAttempt(learnerId, lang || 'js', topic || 'general');
+    }
+
+    res.json(result);
+});
+
+// ── AI Exercise Generator API ──
+app.post('/api/exercise', async (req, res) => {
+    const { topic, lang, level } = req.body;
+    if (!topic) return res.status(400).json({ error: 'No topic provided' });
+
+    const exercise = await generateExercise(topic, lang || 'js', level || 'beginner');
+    res.json(exercise);
+});
+
+// ── Learner State API ──
+function getLearnerId(req) {
+    return req.body?.learnerId || req.query?.learnerId || req.ip || 'default';
+}
+
+app.post('/api/learner/track', (req, res) => {
+    const learnerId = getLearnerId(req);
+    const { event, lang, topic, phase, data } = req.body;
+
+    switch (event) {
+        case 'complete-topic':
+            learner.trackTopicCompletion(learnerId, lang, topic, phase);
+            break;
+        case 'error':
+            learner.trackError(learnerId, lang, topic);
+            break;
+        case 'attempt':
+            learner.trackAttempt(learnerId, lang, topic);
+            break;
+        case 'quiz':
+            learner.trackQuiz(learnerId, data?.correct, data?.total);
+            break;
+        case 'challenge':
+            learner.trackChallenge(learnerId, data?.solved);
+            break;
+        case 'ai-interaction':
+            learner.trackAIInteraction(learnerId);
+            break;
+        default:
+            return res.status(400).json({ error: 'Unknown event type' });
+    }
+
+    res.json({ ok: true });
+});
+
+app.get('/api/learner/state', (req, res) => {
+    const learnerId = getLearnerId(req);
+    const lang = req.query.lang;
+    const learnerState = learner.getLearner(learnerId);
+    const mastery = lang ? learner.getConceptMastery(learnerId, lang) : null;
+    res.json({ learner: learnerState, mastery });
+});
+
+app.get('/api/learner/reviews', (req, res) => {
+    const learnerId = getLearnerId(req);
+    const due = learner.getDueReviews(learnerId);
+    res.json({ due });
+});
+
+app.get('/api/learner/recommend', (req, res) => {
+    const learnerId = getLearnerId(req);
+    const lang = req.query.lang;
+    try {
+        const availablePhases = req.query.topics ? JSON.parse(req.query.topics) : {};
+        const recommendation = learner.getNextRecommendedTopic(learnerId, lang, availablePhases);
+        res.json({ recommendation });
+    } catch {
+        res.json({ recommendation: null });
+    }
+});
+
+// ── Enhanced Chat with Semantic Search ──
 app.post('/api/chat', async (req, res) => {
-    const { message, lang, topic, phase, code, output, hasError, history } = req.body;
+    const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
     if (!message) return res.json({ reply: "Ask me something about programming!" });
     const q = message.toLowerCase().trim();
+
+    const lid = learnerId || req.ip || 'default';
+    learner.trackAIInteraction(lid);
 
     // ── Try LLM first if configured ──
     if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
         const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError, history);
         const llmReply = await askLLM(llmMessages);
         if (llmReply) {
+            if (topic && lang) learner.trackAttempt(lid, lang, topic);
             return res.json({ reply: llmReply });
         }
     }
@@ -454,10 +600,16 @@ app.post('/api/chat', async (req, res) => {
         }
 
         if (code && topic) {
+            const mastery = learner.getConceptMastery(lid, lang);
+            const weakTopic = mastery?.topics?.find(t => t.topic === topic);
+            const attemptInfo = weakTopic && weakTopic.attempts > 0
+                ? `\n- You've attempted this ${weakTopic.attempts} time(s) — don't give up!`
+                : '';
+
             errorReply += `Since you're working on **${topic}**, here's a hint:\n`;
             errorReply += `- Look at the example in the curriculum and compare it with your code line by line\n`;
             errorReply += `- Try simplifying: comment out parts until it works, then add them back one at a time\n`;
-            errorReply += `- Check the most common mistake for this topic and see if it applies to you\n\n`;
+            errorReply += `- Check the most common mistake for this topic and see if it applies to you${attemptInfo}\n\n`;
         }
 
         if (!errorReply) {
@@ -470,6 +622,7 @@ app.post('/api/chat', async (req, res) => {
             errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
         }
 
+        if (topic && lang) learner.trackError(lid, lang, topic);
         return res.json({ reply: errorReply });
     }
 
@@ -495,6 +648,19 @@ app.post('/api/chat', async (req, res) => {
         }
     }
 
+    // ── Try semantic curriculum search ──
+    const semanticResults = await semanticSearch(q, lang, 1);
+    if (semanticResults.length > 0 && semanticResults[0].score > 0.15) {
+        const best = semanticResults[0];
+        let reply = `I found relevant content in the curriculum related to your question.\n\n**${best.topic}** (${best.lang.toUpperCase()} - ${best.phase})\n\n`;
+        reply += best.exp.slice(0, 500) + '...\n\n';
+        if (best.code) {
+            reply += `**Example code:**\n\`\`\`\n${best.code}\n\`\`\`\n\n`;
+        }
+        reply += `Would you like me to explain more about **${best.topic}** or help you practice it?`;
+        return res.json({ reply });
+    }
+
     // ── Context-aware: if topic is provided, try to answer based on it ──
     if (topic && (q.includes('what') || q.includes('how') || q.includes('explain') || q.includes('tell me') || q.includes('?') || q.length < 15)) {
         for (const entry of aiResponses) {
@@ -509,7 +675,7 @@ app.post('/api/chat', async (req, res) => {
         }
     }
 
-    // ── Standard keyword matching (improved with substring matching) ──
+    // ── Standard keyword matching ──
     for (const entry of aiResponses) {
         if (entry.keywords.some(k => q.includes(k))) {
             return res.json({ reply: entry.response });
@@ -545,43 +711,6 @@ app.post('/api/chat', async (req, res) => {
         "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
     ];
     res.json({ reply: fallbacks[Math.floor(Math.random() * fallbacks.length)] });
-});
-
-// ── Explain Code API ──
-app.post('/api/explain', async (req, res) => {
-    const { code, lang, topic } = req.body;
-    if (!code) return res.json({ explanation: "No code provided to explain." });
-
-    if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
-        const context = topic ? `The user is studying ${topic} in ${lang || 'programming'}.` : `The user is programming in ${lang || 'a language'}.`;
-        const messages = [
-            { role: 'user', content: `${context}\n\nPlease explain the following code step by step. Describe what each line does, identify the programming concepts used, and suggest any improvements:\n\n\`\`\`\n${code}\n\`\`\`` }
-        ];
-        const llmReply = await askLLM(messages);
-        if (llmReply) return res.json({ explanation: llmReply });
-    }
-
-    const lines = code.split('\n');
-    const analysis = analyzeUserCode(code, lang || 'js');
-    let explanation = "**Code Overview:**\n";
-    explanation += `- **${lines.length} lines** of ${(lang || 'code').toUpperCase()}\n`;
-
-    if (code.includes('function') || code.includes('=>')) explanation += "- Defines one or more **functions**\n";
-    if (code.includes('for(') || code.includes('for (')) explanation += "- Contains a **for loop**\n";
-    if (code.includes('while(') || code.includes('while (')) explanation += "- Contains a **while loop**\n";
-    if (code.includes('if(') || code.includes('if (')) explanation += "- Contains **conditional logic** (if statements)\n";
-    if (code.includes('class ')) explanation += "- Defines a **class**\n";
-    if (code.includes('return ')) explanation += "- Uses **return statements**\n";
-    if (code.includes('const ') || code.includes('let ') || code.includes('var ')) explanation += "- Declares **variables**\n";
-    if (code.includes('.')) explanation += "- Calls **methods** or accesses **properties**\n";
-
-    if (analysis && analysis.length > 0) {
-        explanation += "\n**Potential Issues:**\n";
-        explanation += analysis.map((h, i) => `${i + 1}. ${h}`).join('\n');
-    }
-
-    explanation += "\n\n**Suggestion:** Try modifying the code in the editor and running it to see how changes affect the output!";
-    res.json({ explanation });
 });
 
 // ── Streaming Chat API (SSE) ──

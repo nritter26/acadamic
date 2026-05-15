@@ -20,10 +20,14 @@ function loadTopic(phase, topic) {
     document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active-topic'));
     const btnId = 'btn-' + topic.replace(/\s/g, '').replace(/[&,]/g, '');
     const btn = document.getElementById(btnId);
-    if (btn) btn.classList.add('active-topic');
+    if (btn) {
+        btn.classList.add('active-topic');
+        btn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
 
     const expEl = document.getElementById('explanation');
-    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${topic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${phase}</p>${item.exp}`;
+    const depth = getTopicDepth(item.exp);
+    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${topic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${phase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${item.exp}`;
     expEl.classList.remove('fade-in');
     void expEl.offsetWidth;
     expEl.classList.add('fade-in');
@@ -31,6 +35,7 @@ function loadTopic(phase, topic) {
     document.getElementById('editor').value = item.code;
     updateHighlight();
     document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
+    setTimeout(suggestNextTopic, 100);
 }
 
 let filterDebounceTimer;
@@ -52,6 +57,10 @@ function renderLevelBar() {
         const active = l.id === currentLevel ? ' active' : '';
         html += `<button class="level-btn${active}" onclick="setLevel('${l.id}')">${l.label}</button>`;
     }
+    html += `<span style="flex:1"></span>`;
+    html += `<button class="level-btn${currentCompletionFilter === 'all' ? ' active' : ''}" onclick="setCompletionFilter('all')">All</button>`;
+    html += `<button class="level-btn${currentCompletionFilter === 'uncompleted' ? ' active' : ''}" onclick="setCompletionFilter('uncompleted')">Todo</button>`;
+    html += `<button class="level-btn${currentCompletionFilter === 'completed' ? ' active' : ''}" onclick="setCompletionFilter('completed')">Done</button>`;
     levelBarEl.innerHTML = html;
     levelBarEl.style.display = 'flex';
 }
@@ -64,7 +73,10 @@ function setLevel(level) {
 }
 
 function toggleCheatsheet() {
-    document.getElementById('cheatsheetOverlay').classList.toggle('open');
+    const overlay = document.getElementById('cheatsheetOverlay');
+    const wasOpen = overlay.classList.contains('open');
+    overlay.classList.toggle('open');
+    if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
 }
 
 function loadCheatsheet() {
@@ -121,8 +133,106 @@ const runBtn = document.querySelector('.run-btn');
 function setRunLoading(loading) {
     if (!runBtn) return;
     runBtn.disabled = loading;
-    runBtn.textContent = loading ? 'Running... ▶' : 'Run ▶';
-    runBtn.style.opacity = loading ? '0.6' : '1';
+    if (loading) {
+        runBtn.textContent = 'Running';
+    } else {
+        runBtn.textContent = currentLang === 'challenge' ? 'Test ▶' : 'Run ▶';
+    }
+    runBtn.classList.toggle('loading', loading);
+}
+
+function getLogicalPreview(code, lang) {
+    function skipStr(s, i) {
+        const q = s[i]; i++;
+        while (i < s.length && !(s[i] === q && s[i-1] !== '\\')) i++;
+        return i;
+    }
+
+    function extractCallArgs(line, prefix) {
+        const idx = line.indexOf(prefix);
+        if (idx === -1) return null;
+        const parenPos = idx + prefix.length - 1;
+        if (line[parenPos] !== '(') return null;
+        let depth = 1, i = parenPos + 1;
+        while (i < line.length && depth > 0) {
+            if (line[i] === '(') depth++;
+            else if (line[i] === ')') depth--;
+            else if (line[i] === '"' || line[i] === "'" || line[i] === '`') i = skipStr(line, i);
+            i++;
+        }
+        return depth === 0 ? line.substring(parenPos + 1, i - 1) : null;
+    }
+
+    function pullStrings(text) {
+        const res = [];
+        const re = /"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|`((?:[^`\\]|\\.)*)`/g;
+        let m;
+        while ((m = re.exec(text)) !== null) {
+            let s = (m[1] || m[2] || m[3] || '');
+            s = s.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\(.)/g, '$1');
+            if (s) res.push(s);
+        }
+        if (res.length === 0) {
+            const numMatch = text.trim().match(/^(\d+\.?\d*)$/);
+            if (numMatch) res.push(numMatch[1]);
+        }
+        return res;
+    }
+
+    let clean = code.replace(/\/\*[\s\S]*?\*\//g, '');
+    if (lang === 'py' || lang === 'pg' || lang === 'dk' || lang === 'git') {
+        clean = clean.replace(/#[^\n]*/g, '');
+    } else {
+        clean = clean.replace(/\/\/[^\n]*/g, '');
+    }
+
+    const langPrefixes = {
+        py: ['print('],
+        js: ['console.log(', 'console.error(', 'console.warn('],
+        ts: ['console.log(', 'console.error(', 'console.warn('],
+        go: ['fmt.Print(', 'fmt.Println(', 'fmt.Printf('],
+        rs: ['println!(', 'print!('],
+        c: ['printf(', 'puts('],
+        cpp: ['printf(', 'puts('],
+        cs: ['Console.WriteLine(', 'Console.Write('],
+        kt: ['println(', 'print('],
+        swift: ['print('],
+        zig: ['print(', 'std.debug.print('],
+    };
+
+    const output = [];
+
+    for (const raw of clean.split('\n')) {
+        const line = raw.trim();
+        if (!line) continue;
+
+        if (lang === 'cpp') {
+            const ci = line.includes('cout') ? line.indexOf('cout') : line.indexOf('std::cout');
+            if (ci !== -1) {
+                const parts = line.slice(ci).split(/<<|;/);
+                const strs = [];
+                for (const p of parts) {
+                    strs.push(...pullStrings(p));
+                }
+                const joined = strs.join('');
+                if (joined) output.push(joined);
+                continue;
+            }
+        }
+
+        const prefixes = langPrefixes[lang] || [];
+        for (const prefix of prefixes) {
+            const args = extractCallArgs(line, prefix);
+            if (args === null) continue;
+            const strings = pullStrings(args);
+            if (strings.length > 0) {
+                output.push(lang === 'py' ? strings.join(' ') : strings.join(''));
+            }
+            break;
+        }
+    }
+
+    return output.length > 0 ? output.join('\n') : null;
 }
 
 function runCode() {
@@ -156,6 +266,11 @@ function runCode() {
     .then(d => { out.innerText = d.output; setRunLoading(false); })
     .catch(e => {
         setRunLoading(false);
+        const preview = getLogicalPreview(code, currentLang);
+        if (preview) {
+            out.innerText = preview;
+            return;
+        }
         const hints = {
             py: 'python3 filename.py', go: 'go run program.go', rs: 'rustc program.rs && ./program',
             ts: 'npx ts-node program.ts', c: 'gcc -Wall -o program program.c && ./program',
@@ -181,38 +296,124 @@ function runCode() {
 }
 
 let conversationHistory = [];
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 50;
 
-function toggleAI() {
-    document.getElementById('aiPanel').classList.toggle('open');
-    document.getElementById('aiToggle').classList.toggle('open');
+const CHAT_STORAGE_KEY = 'dogeslab_chat';
+
+function saveChatHistory() {
+    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
 }
 
-function addAIMessage(text, role) {
+function loadChatHistory() {
+    try {
+        const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+                conversationHistory = parsed.slice(-20);
+                const el = document.getElementById('aiMessages');
+                if (el) {
+                    el.innerHTML = '';
+                    for (const msg of conversationHistory) {
+                        addAIMessage(msg.text, msg.role, true);
+                    }
+                }
+            }
+        }
+    } catch {}
+}
+
+function clearChatHistory() {
+    conversationHistory = [];
+    try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
+    const el = document.getElementById('aiMessages');
+    if (el) {
+        el.innerHTML = `<div class="ai-msg bot"><div class="label">AI</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
+    }
+    updateAISuggestions();
+}
+
+function toggleAI() {
+    const panel = document.getElementById('aiPanel');
+    const wasOpen = panel.classList.contains('open');
+    panel.classList.toggle('open');
+    document.getElementById('aiToggle').classList.toggle('open');
+    if (!wasOpen) loadChatHistory();
+    if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
+}
+
+function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
-        div.innerHTML = `<div class="label">AI</div>${text}`;
-    } else {
+        let displayText = text;
+        if (text && text.includes('**')) {
+            displayText = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        }
+        displayText = displayText.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, '<pre class="ai-code-block"><code>$2</code></pre>');
+        displayText = displayText.replace(/\`([^`]+)\`/g, '<code>$1</code>');
+        displayText = displayText.replace(/\n/g, '<br>');
+        div.innerHTML = `<div class="label">AI</div>${displayText}`;
+    } else if (role === 'user') {
         div.textContent = text;
     }
     if (role === 'typing') {
         div.id = 'aiTyping';
+        div.innerHTML = '<div class="label">AI</div><span class="typing-dots">● ● ●</span>';
     }
     el.appendChild(div);
     el.scrollTop = el.scrollHeight;
-    if (role !== 'typing') {
+    if (role !== 'typing' && !skipSave) {
         conversationHistory.push({ role, text });
         if (conversationHistory.length > MAX_HISTORY) {
             conversationHistory.shift();
         }
+        saveChatHistory();
     }
 }
 
 function removeTypingIndicator() {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
+}
+
+// ── Code Review UI ──
+function reviewCode() {
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    if (!code.trim()) {
+        document.getElementById('output').innerText = "// No code to review — write some code in the editor first!";
+        return;
+    }
+
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage('Review my code', 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, lang: currentLang, topic: currentTopic })
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        let reply = '';
+        if (d.source === 'llm') {
+            reply = d.review;
+        } else {
+            if (d.review) reply = d.review;
+            if (d.score) reply += `\n\n**Score:** ${d.score}/10`;
+        }
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't reach the review server. Make sure the backend is running (node server.js).", 'bot');
+    });
 }
 
 const aiTutorResponses = [
@@ -564,11 +765,52 @@ function getDynamicSuggestions() {
     return null;
 }
 
+// ── AI Exercise Generation ──
+function generateExercise() {
+    const topic = currentTopic || 'programming basics';
+    const lang = currentLang || 'js';
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage(`Generate an exercise for ${topic}`, 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/exercise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, lang, level: 'beginner' })
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        let reply = `<div class="exercise-card"><div class="exercise-title">${d.title || 'Exercise'}</div>`;
+        reply += `<div class="exercise-desc">${d.description || 'No description'}</div>`;
+        if (d.starterCode) {
+            reply += `<pre class="ai-code-block"><code>${d.starterCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        }
+        if (d.hint) {
+            reply += `<div class="exercise-hint">💡 ${d.hint}</div>`;
+        }
+        reply += `<button class="exercise-btn" onclick="document.getElementById('editor').value = '${(d.starterCode || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'; updateHighlight();">Load into Editor</button>`;
+        reply += `</div>`;
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't generate an exercise. Make sure the backend is running.", 'bot');
+    });
+}
+
 function updateAISuggestions() {
     const el = document.getElementById('aiSuggestions');
     const dynamic = getDynamicSuggestions();
     const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
-    el.innerHTML = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`).join('');
+    const hasExercise = currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
+    const buttons = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`);
+    if (hasExercise && !suggestions.some(s => s.toLowerCase().includes('exercise'))) {
+        buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+    }
+    el.innerHTML = buttons.join('');
 }
 
 const oopPhases = {
@@ -610,6 +852,7 @@ function initOOPSession() {
         html += `<button class="oop-lang-btn ${active}" style="background:${l.id === oopSelectedLang ? 'var(--accent)' : '#1e293b'};color:${l.id === oopSelectedLang ? '#000' : '#94a3b8'};border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:800;" onclick="switchOOPLang('${l.id}')">${l.label}</button>`;
     }
     html += `</div>`;
+    html += `<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode('js');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>`;
     let idx = 0;
     for (const phase of phases) {
         if (langData[phase]) {
@@ -1352,6 +1595,7 @@ function renderQuiz() {
         html += `<button class="quiz-lang-btn ${active}" onclick="switchQuizLang('${l}')">${names[l]}</button>`;
     }
     html += `</div>`;
+    html += `<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode('js');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>`;
     const done = Object.keys(quizAnswers).length;
     html += `<div class="quiz-score"><span>Score: <strong>${quizScore.correct}/${quizScore.total}</strong></span><span>Progress: <strong>${done}/${questions.length}</strong></span><button class="quiz-reset" onclick="resetQuiz()">Reset</button></div>`;
     questions.forEach((q, i) => {
@@ -1455,6 +1699,7 @@ function renderChallengeList() {
         html += `<button class="challenge-lang-btn ${active}" onclick="switchChallengeLang('${l}')">${names[l]}</button>`;
     }
     html += `</div>`;
+    html += `<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode('js');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>`;
     
     let filteredChallenges = [];
     challenges.forEach((ch, i) => {
@@ -1817,18 +2062,31 @@ function toggleProgress(topic) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lang: currentLang, topic, completed })
     }).catch(() => {});
+
+    const toast = document.createElement('div');
+    toast.textContent = completed ? '★ Completed!' : '☆ Unmarked';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:800;z-index:999;animation:fadeIn 0.2s ease;box-shadow:0 4px 16px rgba(0,0,0,0.4);pointer-events:none;';
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 1200);
+
     updateTopicDisplay();
 }
 
 function updateTopicDisplay() {
     document.querySelectorAll('.item-btn').forEach(btn => {
-        const raw = btn.getAttribute('data-topic') || btn.textContent.replace(/^[★☆]\s*/, '').trim();
+        const raw = btn.getAttribute('data-topic') || btn.textContent.replace(/^[★☆]\s*/, '').replace(/^[BIE]\s+/, '').trim();
         btn.setAttribute('data-topic', raw);
         const isDone = completedTopics.has(currentLang + ':' + raw);
-        btn.innerHTML = `<span class="topic-star" data-topic="${raw.replace(/"/g, '&quot;')}">${isDone ? '★' : '☆'}</span> ${raw}`;
+        const level = btn.dataset.level || 'beginner';
+        const diffBadge = `<span class="diff-badge ${level}">${level[0].toUpperCase()}</span>`;
+        btn.innerHTML = `<span class="topic-star" data-topic="${raw.replace(/"/g, '&quot;')}">${isDone ? '★' : '☆'}</span> ${diffBadge}<span class="topic-name">${raw}</span>`;
         btn.classList.toggle('topic-done', isDone);
         const star = btn.querySelector('.topic-star');
-        if (star) star.onclick = function(e) { e.stopPropagation(); toggleProgress(raw); };
+        if (star) star.onclick = function(e) {
+            e.stopPropagation();
+            const parent = this.closest('.item-btn');
+            if (parent) toggleProgress(parent.dataset.topic);
+        };
     });
     updateProgressBar();
 }
@@ -1882,13 +2140,102 @@ function highlightCode(code, lang) {
     return h;
 }
 
+// ── Compiler Pipeline ──
+function compilerRunPipeline(stage) {
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    const lang = currentLang === 'compiler' ? 'js' : currentLang;
+    const result = COMPILER.runPipeline(code, lang);
+    const content = document.getElementById('cp-pipeline-content');
+
+    const tabs = document.querySelectorAll('.cp-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+
+    if (stage === -1) {
+        tabs.forEach(t => t.classList.add('active'));
+        let html = '<div class="cp-pipeline-stage"><div class="cp-stage-label">Source</div><div class="cp-source-code">';
+        html += COMPILER.highlightCode(code, lang) + '</div></div>';
+        html += '<div class="cp-pipeline-stage"><div class="cp-stage-label">Tokens</div>' + result.html.tokens + '</div>';
+        html += '<div class="cp-pipeline-stage"><div class="cp-stage-label">AST</div>' + result.html.ast + '</div>';
+        html += '<div class="cp-pipeline-stage"><div class="cp-stage-label">Statistics</div>' + result.html.stats + '</div>';
+        content.innerHTML = html;
+        return;
+    }
+
+    const tab = document.querySelector(`.cp-tab[data-stage="${stage}"]`);
+    if (tab) tab.classList.add('active');
+
+    switch (stage) {
+        case 0:
+            content.innerHTML = '<div class="cp-pipeline-stage"><div class="cp-stage-label">Source Code</div><div class="cp-source-code">' + COMPILER.highlightCode(code, lang) + '</div></div>';
+            break;
+        case 1:
+            content.innerHTML = '<div class="cp-pipeline-stage"><div class="cp-stage-label">Tokens</div>' + result.html.tokens + '</div>';
+            break;
+        case 2:
+            content.innerHTML = '<div class="cp-pipeline-stage"><div class="cp-stage-label">AST</div>' + result.html.ast + '</div>';
+            break;
+        case 3:
+            content.innerHTML = '<div class="cp-pipeline-stage"><div class="cp-stage-label">Statistics</div>' + result.html.stats + '</div>';
+            break;
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const tab = e.target.closest('.cp-tab');
+    if (tab) {
+        const stage = parseInt(tab.dataset.stage);
+        compilerRunPipeline(stage);
+    }
+});
+
 setMode = function(lang) {
     document.getElementById('schemaDesigner').classList.remove('open');
     document.getElementById('editor').style.display = 'block';
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('compiler-output').style.display = 'none';
+    document.getElementById('compiler-buttons').style.display = 'none';
+    const runBtn = document.querySelector('.run-btn');
     document.getElementById('cheatsheet-btn').textContent = lang === 'challenge' ? 'Reveal Answer' : 'Cheatsheet';
+    if (runBtn) runBtn.textContent = lang === 'challenge' ? 'Test ▶' : 'Run ▶';
     if (lang === 'quiz') { document.getElementById('level-bar').style.display = 'none'; initQuiz(); updateAISuggestions(); return; }
     if (lang === 'challenge') { initChallenge(); updateAISuggestions(); return; }
+    if (lang === 'game') { document.getElementById('level-bar').style.display = 'none'; initGame(); updateAISuggestions(); return; }
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
+    if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
+    if (lang === 'compiler') {
+        document.getElementById('level-bar').style.display = 'none';
+        document.getElementById('output').style.display = 'none';
+        document.getElementById('compiler-output').style.display = 'block';
+        document.getElementById('compiler-buttons').style.display = 'flex';
+        document.getElementById('schemaDesigner').classList.remove('open');
+        document.getElementById('editor').style.display = 'block';
+        currentLang = 'compiler';
+        document.getElementById('app').className = 'compiler-mode';
+        document.getElementById('header-title').innerText = 'COMPILER';
+        document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+        const navBtn = document.getElementById('nav-compiler');
+        if (navBtn) navBtn.classList.add('active');
+        const langData = courseData.compiler || {};
+        let html = '';
+        for (const phase in langData) {
+            const topics = Object.keys(langData[phase]);
+            html += `<div class="phase-header" data-phase="${phase}" onclick="togglePhase('${phase}','${phase}')"><span class="phase-toggle">▼</span><span class="phase-label-text">${phase}</span><span class="phase-count">${topics.length}</span></div>`;
+            for (const topic in langData[phase]) {
+                html += `<button class="item-btn" data-phase="${phase}" id="btn-${topic.replace(/\s/g, '')}" onclick="loadTopic('${phase}', '${topic}')"><span class="topic-name">${topic}</span></button>`;
+            }
+        }
+        document.getElementById('topic-list').innerHTML = html;
+        document.getElementById('cheatsheet-btn').textContent = 'Cheatsheet';
+        if (runBtn) runBtn.textContent = 'Run ▶';
+        updateAISuggestions();
+        if (Object.keys(langData).length > 0) {
+            const firstPhase = Object.keys(langData)[0];
+            const firstTopic = Object.keys(langData[firstPhase])[0];
+            loadTopic(firstPhase, firstTopic);
+        }
+        return;
+    }
 
     currentLevel = 'all';
     currentCompletionFilter = 'all';
@@ -1896,10 +2243,6 @@ setMode = function(lang) {
     document.getElementById('app').className = lang + '-mode';
     const levelBar = document.getElementById('level-bar');
     document.getElementById('header-title').innerText = lang.toUpperCase();
-    if (lang === 'pg') {
-        const sd = document.getElementById('schemaDesigner');
-        if (!sd.classList.contains('open')) toggleSchemaDesigner();
-    }
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     const navBtn = document.getElementById('nav-' + lang);
     if (navBtn) navBtn.classList.add('active');
@@ -1917,19 +2260,7 @@ setMode = function(lang) {
         else phaseLevels[phase] = 'expert';
     });
 
-    // Build level bar with difficulty filter + completion filter
-    if (levelBar) {
-        let levelHtml = '<button class="level-btn active" onclick="setLevel(\'all\')">All</button>';
-        ['beginner', 'intermediate', 'expert'].forEach(lvl => {
-            levelHtml += `<button class="level-btn" onclick="setLevel('${lvl}')">${lvl}</button>`;
-        });
-        levelHtml += `<span style="flex:1"></span>`;
-        levelHtml += `<button class="level-btn${currentCompletionFilter === 'all' ? ' active' : ''}" onclick="setCompletionFilter('all')">All</button>`;
-        levelHtml += `<button class="level-btn${currentCompletionFilter === 'uncompleted' ? ' active' : ''}" onclick="setCompletionFilter('uncompleted')">Todo</button>`;
-        levelHtml += `<button class="level-btn${currentCompletionFilter === 'completed' ? ' active' : ''}" onclick="setCompletionFilter('completed')">Done</button>`;
-        levelBar.innerHTML = levelHtml;
-        levelBar.style.display = 'flex';
-    }
+    if (levelBar) renderLevelBar();
 
     // Build topic list with collapsible phases, counts, badges
     let html = '';
@@ -1939,19 +2270,23 @@ setMode = function(lang) {
         const count = topics.length;
         const phaseKey = phase.replace(/\s/g, '');
         const isCollapsed = collapsedPhases.has(phaseKey);
+        let phaseDone = 0;
+        for (const t of topics) {
+            if (completedTopics.has(currentLang + ':' + t)) phaseDone++;
+        }
 
         html += `<div class="phase-header ${isCollapsed ? 'collapsed' : ''}" data-phase="${phaseKey}" onclick="togglePhase('${phaseKey}','${phase.replace(/'/g, "\\'")}')">
             <span class="phase-toggle">${isCollapsed ? '▶' : '▼'}</span>
             <span class="phase-label-text">${phase}</span>
-            <span class="phase-count">${count}</span>
+            <span class="phase-count">${phaseDone}/${count}</span>
         </div>`;
 
-        const displayStyle = isCollapsed ? 'display:none;' : '';
+        const collapsedClass = isCollapsed ? ' phase-collapsed' : '';
         for (const topic in langData[phase]) {
             const delay = idx * 20;
             const level = phaseLevels[phase];
             const badges = getAutoTags(phase, topic).slice(0, 2).join(' ');
-            html += `<button class="item-btn topic-btn-enter" style="animation-delay:${delay}ms;${displayStyle}" data-level="${level}" data-phase="${phaseKey}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')"><span class="diff-badge ${level}">${level[0].toUpperCase()}</span> ${topic}</button>`;
+            html += `<button class="item-btn topic-btn-enter${collapsedClass}" style="animation-delay:${delay}ms" data-level="${level}" data-phase="${phaseKey}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')"><span class="diff-badge ${level}">${level[0].toUpperCase()}</span><span class="topic-name">${topic}</span></button>`;
             idx++;
         }
     }
@@ -1976,7 +2311,11 @@ loadProgress();
 fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"lang":"js","code":"1"}' })
     .catch(() => {
         const out = document.getElementById('output');
-        if (window.location.protocol === 'file:') {
+        const editor = document.getElementById('editor');
+        const preview = editor ? getLogicalPreview(editor.value, currentLang) : null;
+        if (preview) {
+            out.innerText = preview;
+        } else if (window.location.protocol === 'file:') {
             out.innerText = "// Open this via localhost:3000\n//   cd " + window.location.pathname.split('/').slice(0,-1).join('/') + "\n//   node server.js\n// Then refresh this page";
         } else {
             out.innerText = "// Backend not running. Start with:\n//   node server.js";
@@ -2028,6 +2367,12 @@ document.addEventListener('keydown', function(e) {
         return;
     }
 
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('output').innerText = '// Output cleared';
+        return;
+    }
+
     if (e.key === '/' && !inInput) {
         e.preventDefault();
         document.getElementById('topic-search').focus();
@@ -2035,6 +2380,8 @@ document.addEventListener('keydown', function(e) {
     }
 
     if (e.key === 'Escape') {
+        const shortcuts = document.getElementById('shortcutsOverlay');
+        if (shortcuts) { shortcuts.remove(); e.preventDefault(); return; }
         const aiPanel = document.getElementById('aiPanel');
         if (aiPanel.classList.contains('open')) { toggleAI(); e.preventDefault(); return; }
         const cheatsheet = document.getElementById('cheatsheetOverlay');
@@ -2062,9 +2409,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 function showShortcuts() {
-    const existing = document.getElementById('shortcutsOverlay');
-    if (existing) { existing.remove(); return; }
-    const overlay = document.createElement('div');
+    let overlay = document.getElementById('shortcutsOverlay');
+    if (overlay) { overlay.remove(); return; }
+    overlay = document.createElement('div');
     overlay.id = 'shortcutsOverlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.85);backdrop-filter:blur(4px);z-index:300;display:flex;justify-content:center;align-items:center;';
     overlay.onclick = function(e) { if (e.target === this) this.remove(); };
@@ -2079,6 +2426,7 @@ function showShortcuts() {
         '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">n</kbd> / <kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">p</kbd></div><div style="color:#94a3b8;font-size:11px;">Next / Previous topic</div>' +
         '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Esc</kbd></div><div style="color:#94a3b8;font-size:11px;">Close panels</div>' +
         '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">?</kbd></div><div style="color:#94a3b8;font-size:11px;">Show this menu</div>' +
+        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Ctrl+K</kbd></div><div style="color:#94a3b8;font-size:11px;">Clear output</div>' +
         '</div></div>';
     document.body.appendChild(overlay);
 }
@@ -2140,43 +2488,241 @@ function updateProgressBar() {
     document.getElementById('progressText').textContent = completed + '/' + allTopics.length + ' (' + pct + '%)';
 }
 
-// ── SEARCH RESULT COUNT ──
+// ── DIFFICULTY / AUTO-TAGS / DEPTH ──
+function getAutoTags(phase, topic) {
+    const tags = new Set();
+    const phaseWords = phase.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
+    const topicWords = topic.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
+    phaseWords.forEach(w => tags.add(w));
+    topicWords.forEach(w => tags.add(w));
+    return [...tags];
+}
+
+function getTopicDepth(exp) {
+    const len = (exp || '').length;
+    if (len < 200) return { label: 'quick', icon: '⚡' };
+    if (len < 500) return { label: 'standard', icon: '●' };
+    return { label: 'in-depth', icon: '◉' };
+}
+
+// ── COLLAPSIBLE PHASES ──
+function togglePhase(phaseKey, phaseName) {
+    const header = document.querySelector(`.phase-header[data-phase="${phaseKey}"]`);
+    if (!header) return;
+    const isCollapsed = collapsedPhases.has(phaseKey);
+    if (isCollapsed) {
+        collapsedPhases.delete(phaseKey);
+        header.classList.remove('collapsed');
+        header.querySelector('.phase-toggle').textContent = '▼';
+    } else {
+        collapsedPhases.add(phaseKey);
+        header.classList.add('collapsed');
+        header.querySelector('.phase-toggle').textContent = '▶';
+    }
+    const items = document.querySelectorAll(`.item-btn[data-phase="${phaseKey}"]`);
+    items.forEach(btn => {
+        btn.classList.toggle('phase-collapsed', collapsedPhases.has(phaseKey));
+    });
+}
+
+// ── COLLAPSE / EXPAND ALL ──
+function collapseAllPhases() {
+    document.querySelectorAll('.phase-header').forEach(h => {
+        const key = h.dataset.phase;
+        if (!key) return;
+        collapsedPhases.add(key);
+        h.classList.add('collapsed');
+        const toggle = h.querySelector('.phase-toggle');
+        if (toggle) toggle.textContent = '▶';
+    });
+    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.add('phase-collapsed'); });
+}
+
+function expandAllPhases() {
+    document.querySelectorAll('.phase-header').forEach(h => {
+        const key = h.dataset.phase;
+        if (!key) return;
+        collapsedPhases.delete(key);
+        h.classList.remove('collapsed');
+        const toggle = h.querySelector('.phase-toggle');
+        if (toggle) toggle.textContent = '▼';
+    });
+    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.remove('phase-collapsed'); });
+}
+
+// ── COMPLETION FILTER ──
+function setCompletionFilter(filter) {
+    currentCompletionFilter = filter;
+    const levelBar = document.getElementById('level-bar');
+    if (levelBar) {
+        levelBar.querySelectorAll('.level-btn').forEach(btn => {
+            if (btn.textContent.toLowerCase() === filter || (filter === 'uncompleted' && btn.textContent === 'Todo') || (filter === 'completed' && btn.textContent === 'Done') || (filter === 'all' && btn.textContent === 'All')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    const searchInput = document.getElementById('topic-search');
+    filterTopics(searchInput ? searchInput.value : '');
+}
+
+// ── SEARCH EXPLANATIONS + EMPTY STATE + COMPLETION FILTER ──
 function filterTopics(query) {
     const q = query ? query.toLowerCase().trim() : '';
     let visible = 0;
     let total = 0;
+    const langData = courseData[currentLang];
+
     document.querySelectorAll('.item-btn').forEach(btn => {
         total++;
-        const matchesSearch = !q || btn.textContent.toLowerCase().includes(q);
+        const topicName = btn.textContent.replace(/^[★☆]\s*/, '').trim();
+
+        let matchesSearch = !q;
+        if (q) {
+            matchesSearch = topicName.toLowerCase().includes(q);
+            if (!matchesSearch && langData) {
+                for (const phase in langData) {
+                    for (const topic in langData[phase]) {
+                        if (topic === topicName) {
+                            const exp = (langData[phase][topic].exp || '').toLowerCase();
+                            if (exp.includes(q)) matchesSearch = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
-        btn.style.display = matchesSearch && matchesLevel ? '' : 'none';
-        if (matchesSearch && matchesLevel) visible++;
+
+        let matchesCompletion = true;
+        if (currentCompletionFilter !== 'all') {
+            const isDone = completedTopics.has(currentLang + ':' + topicName);
+            matchesCompletion = currentCompletionFilter === 'completed' ? isDone : !isDone;
+        }
+
+        const show = matchesSearch && matchesLevel && matchesCompletion;
+        btn.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
+
     const container = document.getElementById('topic-list');
     const children = container.children;
+
+    // Handle phase headers visibility (for non-collapsible phases that still have phase-label class)
     for (let i = 0; i < children.length; i++) {
         const el = children[i];
-        if (!el.classList.contains('phase-label')) continue;
+        if (!el.classList.contains('phase-header')) continue;
+        const phaseKey = el.dataset.phase;
         let hasVisible = false;
         for (let j = i + 1; j < children.length; j++) {
-            if (children[j].classList.contains('phase-label')) break;
+            if (children[j].classList.contains('phase-header')) break;
             if (children[j].style.display !== 'none') { hasVisible = true; break; }
         }
         el.style.display = hasVisible ? '' : 'none';
     }
 
+    // Search count
     let countEl = document.getElementById('searchCount');
-    if (q && visible < total) {
+    if (visible < total) {
         if (!countEl) {
             countEl = document.createElement('div');
             countEl.id = 'searchCount';
             countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;';
             document.getElementById('topic-search').after(countEl);
         }
-        countEl.textContent = visible + ' of ' + total + ' topics match';
-        countEl.style.display = '';
+        countEl.textContent = visible + ' of ' + total + ' topics';
+        if (currentLevel !== 'all') countEl.textContent += ' (' + currentLevel + ')';
+        if (currentCompletionFilter !== 'all') countEl.textContent += ' (' + currentCompletionFilter + ')';
+        countEl.style.display = visible === 0 ? '' : '';
     } else if (countEl) {
         countEl.style.display = 'none';
+    }
+
+    // Empty state
+    let emptyEl = document.getElementById('emptyState');
+    if (visible === 0) {
+        let reason = '';
+        if (q) reason = ' matching "' + query + '"';
+        else if (currentLevel !== 'all') reason = ' at ' + currentLevel + ' level';
+        else if (currentCompletionFilter !== 'all') reason = ' that are ' + currentCompletionFilter;
+        const msg = '✨ No topics' + reason;
+        if (!emptyEl) {
+            emptyEl = document.createElement('div');
+            emptyEl.id = 'emptyState';
+            emptyEl.style.cssText = 'color:#64748b;font-size:11px;padding:30px 10px;text-align:center;line-height:1.6;';
+            container.appendChild(emptyEl);
+        }
+        emptyEl.textContent = msg;
+        emptyEl.style.display = '';
+    } else if (emptyEl) {
+        emptyEl.style.display = 'none';
+    }
+
+    // Scroll topic list to top if filtering is active
+    if (q || currentLevel !== 'all' || currentCompletionFilter !== 'all') {
+        const listEl = document.getElementById('topic-list');
+        if (listEl) listEl.scrollTop = 0;
+    }
+
+    // Highlight matching text in topic names
+    document.querySelectorAll('.item-btn .topic-name').forEach(el => {
+        el.innerHTML = el.textContent;
+    });
+    if (q) {
+        const visSelector = '.item-btn:not([style*="display: none"]) .topic-name';
+        document.querySelectorAll(visSelector).forEach(el => {
+            const text = el.textContent;
+            const idx = text.toLowerCase().indexOf(q);
+            if (idx === -1) return;
+            const before = text.slice(0, idx);
+            const match = text.slice(idx, idx + q.length);
+            const after = text.slice(idx + q.length);
+            el.innerHTML = `${before}<mark style="background:rgba(247,223,30,0.25);color:#f7df1e;border-radius:2px;font-weight:700;">${match}</mark>${after}`;
+        });
+    }
+}
+
+// ── PROGRESS NUDGE ──
+function suggestNextTopic() {
+    if (currentCompletionFilter === 'completed') return;
+    const langData = courseData[currentLang];
+    if (!langData) return;
+    const topics = getTopicList();
+    const idx = getCurrentTopicIndex();
+    if (idx === -1) return;
+
+    // Find next uncompleted topic
+    for (let i = idx + 1; i < topics.length; i++) {
+        const key = currentLang + ':' + topics[i].topic;
+        if (!completedTopics.has(key)) {
+            const nudgeEl = document.getElementById('topicNudge');
+            if (nudgeEl) nudgeEl.remove();
+
+            const nudge = document.createElement('div');
+            nudge.id = 'topicNudge';
+            nudge.style.cssText = 'font-size:10px;color:#94a3b8;padding:6px 10px;margin-top:6px;background:#1e293b;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid #334155;';
+            nudge.innerHTML = '<span style="color:var(--accent);">→</span> Next: <strong>' + topics[i].topic + '</strong>';
+            nudge.onclick = function() { loadTopic(topics[i].phase, topics[i].topic); };
+            const output = document.getElementById('output');
+            if (output && output.parentNode) {
+                output.parentNode.appendChild(nudge);
+            }
+            return;
+        }
+    }
+
+    // All done
+    const existing = document.getElementById('topicNudge');
+    if (existing) existing.remove();
+    const nudge = document.createElement('div');
+    nudge.id = 'topicNudge';
+    nudge.style.cssText = 'font-size:10px;color:#10b981;padding:6px 10px;margin-top:6px;background:rgba(16,185,129,0.1);border-radius:6px;display:flex;align-items:center;gap:6px;border:1px solid rgba(16,185,129,0.3);';
+    nudge.innerHTML = '✓ All topics completed! Try the Code Lab or Quiz.';
+    const output = document.getElementById('output');
+    if (output && output.parentNode) {
+        output.parentNode.appendChild(nudge);
     }
 }
 
