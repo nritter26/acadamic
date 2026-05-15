@@ -230,57 +230,37 @@ textarea:focus { border-color: var(--accent); }
     .col:nth-child(3) { order:2; }
     .col:nth-child(4) { order:4; }
     .quiz-mode main { grid-template-columns:1fr; }
-    
-    /* Fix height collapse on tablet screen viewports */
     .editor-wrapper { min-height: 350px; height: 350px; }
 }
 
 @media (max-width: 768px) {
     body { padding:10px; height: auto !important; min-height: 100vh; overflow-y: auto; }
-    header { flex-direction:column; gap:10px; }
-    .selector { justify-content:center; }
-    .selector button { font-size:10px; padding:6px 10px; }
+    header { flex-direction:column; gap:8px; }
+    .selector { justify-content:flex-start; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+    .selector button { font-size:10px; padding:6px 10px; flex-shrink:0; }
     main { grid-template-columns: 1fr; gap:10px; height: auto !important; }
     .col:nth-child(1) { order:1; }
     .col:nth-child(2) { order:2; }
     .col:nth-child(3) { order:3; }
     .col:nth-child(4) { order:4; }
     .quiz-mode .col:nth-child(1) { grid-column:1 !important; }
-    .ai-toggle { display:none; }
-    .ai-panel { width:100vw; right:-100vw; }
-    .ai-panel.open { right:0; }
-    .ai-toggle.open { right:100vw; }
-    
-    /* FIX: Force container out of 0px collapse so absolute children can render */
-    .editor-wrapper { min-height: 300px; height: 300px; flex: none; width: 100%; }
-    #output { min-height: 220px; flex: none; width: 100%; box-sizing: border-box; }
-    
-    .workspace-actions { flex-direction: column; }
-    .workspace-actions .run-btn { width: 100%; }
-    .console-label { flex-direction: column; align-items: flex-start; }
-    .console-label .benchmark-btn { width: auto; }
-}
 
-@media (max-width: 768px) {
-    body { padding:10px; }
-    header { flex-direction:column; gap:10px; }
-    .selector { justify-content:center; }
-    .selector button { font-size:10px; padding:6px 10px; }
-    main { grid-template-columns: 1fr; gap:10px; }
-    .col:nth-child(1) { order:1; }
-    .col:nth-child(2) { order:2; }
-    .col:nth-child(3) { order:3; }
-    .col:nth-child(4) { order:4; }
-    .quiz-mode .col:nth-child(1) { grid-column:1; }
     .ai-toggle { display:none; }
     .ai-panel { width:100vw; right:-100vw; }
     .ai-panel.open { right:0; }
     .ai-toggle.open { right:100vw; }
-    textarea, #output { min-height: 220px; }
-    .workspace-actions { flex-direction: column; }
-    .workspace-actions .run-btn { width: 100%; }
-    .console-label { flex-direction: column; align-items: flex-start; }
-    .console-label .benchmark-btn { width: auto; }
+
+    .editor-wrapper { min-height: 250px; height: 250px; flex:none; width:100%; }
+    #output { min-height: 180px; flex:none; width:100%; box-sizing:border-box; }
+
+    .workspace-actions { flex-direction:column; }
+    .workspace-actions .run-btn { width:100%; }
+    .console-label { flex-direction:column; align-items:flex-start; }
+    .console-label .benchmark-btn { width:auto; }
+
+    .cheatsheet-paper { width:95vw; height:90vh; }
+    .challenge-card .ch-title { font-size:11px; }
+    .schema-canvas { min-height:200px; }
 }
 
 
