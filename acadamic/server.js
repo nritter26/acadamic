@@ -5,6 +5,9 @@ const vm = require('vm');
 const { exec } = require('child_process');
 const os = require('os');
 
+const { askLLM } = require('./ai/provider');
+const { getCurriculumContext, getTopicContext } = require('./ai/curriculum');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
@@ -376,10 +379,60 @@ const aiResponses = [
     }
 ];
 
-app.post('/api/chat', (req, res) => {
+function buildLLMMessages(message, lang, topic, phase, code, output, hasError, history) {
+    const messages = [];
+    const context = [];
+
+    if (topic) {
+        const topicCtx = getTopicContext(topic, lang);
+        if (topicCtx) context.push(topicCtx);
+    }
+
+    if (code) {
+        const analysis = analyzeUserCode(code, lang);
+        if (analysis && analysis.length > 0) {
+            context.push(`The user has written this code:\n\`\`\`\n${code}\n\`\`\`\n\nCode analysis findings:\n${analysis.map((h, i) => `${i + 1}. ${h}`).join('\n')}`);
+        } else {
+            context.push(`The user has written this code:\n\`\`\`\n${code}\n\`\`\``);
+        }
+    }
+
+    if (hasError && output) {
+        context.push(`The code produced this output/error:\n\`\`\`\n${output.replace(/<[^>]*>/g, '').trim()}\n\`\`\``);
+    }
+
+    if (!topic) {
+        const curriculumCtx = getCurriculumContext(message, lang);
+        if (curriculumCtx) context.push(curriculumCtx);
+    }
+
+    if (context.length > 0) {
+        messages.push({ role: 'user', content: `Context:\n${context.join('\n\n')}\n\nUser question: ${message}` });
+    } else if (history && history.length > 0) {
+        for (const msg of history.slice(-10)) {
+            messages.push({ role: msg.role === 'bot' ? 'assistant' : 'user', content: msg.text || msg.content || '' });
+        }
+        messages.push({ role: 'user', content: message });
+    } else {
+        messages.push({ role: 'user', content: message });
+    }
+
+    return messages;
+}
+
+app.post('/api/chat', async (req, res) => {
     const { message, lang, topic, phase, code, output, hasError, history } = req.body;
     if (!message) return res.json({ reply: "Ask me something about programming!" });
     const q = message.toLowerCase().trim();
+
+    // ── Try LLM first if configured ──
+    if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+        const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError, history);
+        const llmReply = await askLLM(llmMessages);
+        if (llmReply) {
+            return res.json({ reply: llmReply });
+        }
+    }
 
     // ── Code-aware, error-aware help ──
     if (hasError || q.includes('error') || q.includes('bug') || q.includes('fix') || q.includes('wrong') || q.includes('not working') || q.includes('issue')) {
@@ -490,6 +543,91 @@ app.post('/api/chat', (req, res) => {
         "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
     ];
     res.json({ reply: fallbacks[Math.floor(Math.random() * fallbacks.length)] });
+});
+
+// ── Explain Code API ──
+app.post('/api/explain', async (req, res) => {
+    const { code, lang, topic } = req.body;
+    if (!code) return res.json({ explanation: "No code provided to explain." });
+
+    if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+        const context = topic ? `The user is studying ${topic} in ${lang || 'programming'}.` : `The user is programming in ${lang || 'a language'}.`;
+        const messages = [
+            { role: 'user', content: `${context}\n\nPlease explain the following code step by step. Describe what each line does, identify the programming concepts used, and suggest any improvements:\n\n\`\`\`\n${code}\n\`\`\`` }
+        ];
+        const llmReply = await askLLM(messages);
+        if (llmReply) return res.json({ explanation: llmReply });
+    }
+
+    const lines = code.split('\n');
+    const analysis = analyzeUserCode(code, lang || 'js');
+    let explanation = "**Code Overview:**\n";
+    explanation += `- **${lines.length} lines** of ${(lang || 'code').toUpperCase()}\n`;
+
+    if (code.includes('function') || code.includes('=>')) explanation += "- Defines one or more **functions**\n";
+    if (code.includes('for(') || code.includes('for (')) explanation += "- Contains a **for loop**\n";
+    if (code.includes('while(') || code.includes('while (')) explanation += "- Contains a **while loop**\n";
+    if (code.includes('if(') || code.includes('if (')) explanation += "- Contains **conditional logic** (if statements)\n";
+    if (code.includes('class ')) explanation += "- Defines a **class**\n";
+    if (code.includes('return ')) explanation += "- Uses **return statements**\n";
+    if (code.includes('const ') || code.includes('let ') || code.includes('var ')) explanation += "- Declares **variables**\n";
+    if (code.includes('.')) explanation += "- Calls **methods** or accesses **properties**\n";
+
+    if (analysis && analysis.length > 0) {
+        explanation += "\n**Potential Issues:**\n";
+        explanation += analysis.map((h, i) => `${i + 1}. ${h}`).join('\n');
+    }
+
+    explanation += "\n\n**Suggestion:** Try modifying the code in the editor and running it to see how changes affect the output!";
+    res.json({ explanation });
+});
+
+// ── Streaming Chat API (SSE) ──
+app.get('/api/chat/stream', async (req, res) => {
+    const { message, lang, topic, phase, code, output, hasError } = req.query;
+    if (!message) return res.status(400).json({ error: 'No message provided' });
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    if (!process.env.AI_PROVIDER || process.env.AI_PROVIDER === 'keyword') {
+        let reply = '';
+        const q = message.toLowerCase().trim();
+        for (const entry of aiResponses) {
+            if (entry.keywords.some(k => q.includes(k))) {
+                reply = entry.response;
+                break;
+            }
+        }
+        if (!reply) {
+            reply = topic
+                ? `Great question about **${topic}**! What do you think the answer might be?`
+                : "That's interesting! Could you tell me more about what you're working on?";
+        }
+        for (const char of reply) {
+            res.write(`data: ${JSON.stringify({ content: char })}\n\n`);
+        }
+        res.write('data: [DONE]\n\n');
+        res.end();
+        return;
+    }
+
+    try {
+        const history = req.query.history ? JSON.parse(req.query.history) : [];
+        const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError === 'true', history);
+        let full = '';
+        await askLLM(llmMessages, (chunk) => {
+            full += chunk;
+            res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+        });
+        res.write('data: [DONE]\n\n');
+        res.end();
+    } catch (e) {
+        res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+    }
 });
 
 // ── Benchmark API ──

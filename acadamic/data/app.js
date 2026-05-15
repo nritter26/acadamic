@@ -1927,8 +1927,36 @@ fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'ap
 const origRunCodeForSuggestions = runCode;
 runCode = function() {
     origRunCodeForSuggestions();
-    setTimeout(updateAISuggestions, 500);
+    setTimeout(() => {
+        updateAISuggestions();
+        const out = document.getElementById('output');
+        if (out && (out.innerText.includes('Error:') || out.innerText.includes('ERROR') || out.innerText.includes('FAIL') || out.innerText.includes('SyntaxError') || out.innerText.includes('ReferenceError') || out.innerText.includes('TypeError'))) {
+            const aiPanel = document.getElementById('aiPanel');
+            if (aiPanel && !aiPanel.classList.contains('open')) {
+                toggleAI();
+            }
+            const aiInput = document.getElementById('aiInput');
+            if (aiInput && !aiInput.value.trim()) {
+                aiInput.placeholder = 'I see an error — want help debugging? Type your question...';
+            }
+        }
+    }, 800);
 };
+
+function explainCode() {
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    if (!code.trim()) {
+        document.getElementById('output').innerText = "// No code to explain — write some code in the editor first!";
+        return;
+    }
+
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    const q = `Explain this code step by step:\n\n\`\`\`\n${code}\n\`\`\``;
+    askAI(q);
+}
 
 // ── KEYBOARD SHORTCUTS ──
 document.addEventListener('keydown', function(e) {
