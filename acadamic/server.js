@@ -685,9 +685,9 @@ app.post('/api/review', async (req, res) => {
     if (learnerId && result.issues) {
         const errorCount = result.issues.filter(i => i.severity === 'error' || i.severity === 'warning').length;
         if (errorCount > 0) {
-            learner.trackError(learnerId, lang || 'js', topic || 'general');
+            await learner.trackError(learnerId, lang || 'js', topic || 'general');
         }
-        learner.trackAttempt(learnerId, lang || 'js', topic || 'general');
+        await learner.trackAttempt(learnerId, lang || 'js', topic || 'general');
     }
 
     res.json(result);
@@ -707,56 +707,70 @@ function getLearnerId(req) {
     return req.body?.learnerId || req.query?.learnerId || req.ip || 'default';
 }
 
-app.post('/api/learner/track', (req, res) => {
+app.post('/api/learner/track', async (req, res) => {
     const learnerId = getLearnerId(req);
     const { event, lang, topic, phase, data } = req.body;
 
-    switch (event) {
-        case 'complete-topic':
-            learner.trackTopicCompletion(learnerId, lang, topic, phase);
-            break;
-        case 'error':
-            learner.trackError(learnerId, lang, topic);
-            break;
-        case 'attempt':
-            learner.trackAttempt(learnerId, lang, topic);
-            break;
-        case 'quiz':
-            learner.trackQuiz(learnerId, data?.correct, data?.total);
-            break;
-        case 'challenge':
-            learner.trackChallenge(learnerId, data?.solved);
-            break;
-        case 'ai-interaction':
-            learner.trackAIInteraction(learnerId);
-            break;
-        default:
-            return res.status(400).json({ error: 'Unknown event type' });
+    try {
+        switch (event) {
+            case 'complete-topic':
+                await learner.trackTopicCompletion(learnerId, lang, topic, phase);
+                break;
+            case 'error':
+                await learner.trackError(learnerId, lang, topic);
+                break;
+            case 'attempt':
+                await learner.trackAttempt(learnerId, lang, topic);
+                break;
+            case 'quiz':
+                await learner.trackQuiz(learnerId, data?.correct, data?.total);
+                break;
+            case 'challenge':
+                await learner.trackChallenge(learnerId, data?.solved);
+                break;
+            case 'ai-interaction':
+                await learner.trackAIInteraction(learnerId);
+                break;
+            default:
+                return res.status(400).json({ error: 'Unknown event type' });
+        }
+        res.json({ ok: true });
+    } catch (e) {
+        console.error('learner track error:', e.message);
+        res.status(500).json({ error: 'Failed to track event' });
     }
-
-    res.json({ ok: true });
 });
 
-app.get('/api/learner/state', (req, res) => {
+app.get('/api/learner/state', async (req, res) => {
     const learnerId = getLearnerId(req);
     const lang = req.query.lang;
-    const learnerState = learner.getLearner(learnerId);
-    const mastery = lang ? learner.getConceptMastery(learnerId, lang) : null;
-    res.json({ learner: learnerState, mastery });
+    try {
+        const learnerState = await learner.getLearner(learnerId);
+        const mastery = lang ? await learner.getConceptMastery(learnerId, lang) : null;
+        res.json({ learner: learnerState, mastery });
+    } catch (e) {
+        console.error('learner state error:', e.message);
+        res.status(500).json({ error: 'Failed to get learner state' });
+    }
 });
 
-app.get('/api/learner/reviews', (req, res) => {
+app.get('/api/learner/reviews', async (req, res) => {
     const learnerId = getLearnerId(req);
-    const due = learner.getDueReviews(learnerId);
-    res.json({ due });
+    try {
+        const due = await learner.getDueReviews(learnerId);
+        res.json({ due });
+    } catch (e) {
+        console.error('learner reviews error:', e.message);
+        res.status(500).json({ error: 'Failed to get reviews' });
+    }
 });
 
-app.get('/api/learner/recommend', (req, res) => {
+app.get('/api/learner/recommend', async (req, res) => {
     const learnerId = getLearnerId(req);
     const lang = req.query.lang;
     try {
         const availablePhases = req.query.topics ? JSON.parse(req.query.topics) : {};
-        const recommendation = learner.getNextRecommendedTopic(learnerId, lang, availablePhases);
+        const recommendation = await learner.getNextRecommendedTopic(learnerId, lang, availablePhases);
         res.json({ recommendation });
     } catch {
         res.json({ recommendation: null });
@@ -770,7 +784,7 @@ app.post('/api/chat', async (req, res) => {
     const q = resolveFollowUp(message, history).toLowerCase().trim();
 
     const lid = learnerId || req.ip || 'default';
-    learner.trackAIInteraction(lid);
+    try { await learner.trackAIInteraction(lid); } catch {};
 
     const sseSend = (chunk) => {
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
@@ -792,7 +806,7 @@ app.post('/api/chat', async (req, res) => {
                 sseSend(chunk);
             });
             if (gotChunk) {
-                if (topic && lang) learner.trackAttempt(lid, lang, topic);
+                if (topic && lang) await learner.trackAttempt(lid, lang, topic);
                 return sseDone();
             }
         }
@@ -822,7 +836,7 @@ app.post('/api/chat', async (req, res) => {
             } else {
                 errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
             }
-            if (topic && lang) learner.trackError(lid, lang, topic);
+            if (topic && lang) await learner.trackError(lid, lang, topic);
             return streamReply(res, errorReply);
         }
 

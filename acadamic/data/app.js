@@ -389,7 +389,7 @@ function clearChatHistory() {
     try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
     const el = document.getElementById('aiMessages');
     if (el) {
-        el.innerHTML = `<div class="ai-msg bot"><div class="label">AI</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
+        el.innerHTML = `<div class="ai-msg bot"><div class="label">Devin</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
     }
     updateAISuggestions();
 }
@@ -435,13 +435,13 @@ function addAIMessage(text, role, skipSave) {
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
-        div.innerHTML = `<div class="label">AI</div>${formatAIText(text)}`;
+        div.innerHTML = `<div class="label">Devin</div>${formatAIText(text)}`;
     } else if (role === 'user') {
         div.textContent = text;
     }
     if (role === 'typing') {
         div.id = 'aiTyping';
-        div.innerHTML = '<div class="label">AI</div><span class="typing-dots">● ● ●</span>';
+        div.innerHTML = '<div class="label">Devin</div><span class="typing-dots">● ● ●</span>';
     }
     el.appendChild(div);
     el.scrollTop = el.scrollHeight;
@@ -468,7 +468,7 @@ function createStreamingBotMessage() {
     const el = document.getElementById('aiMessages');
     const div = document.createElement('div');
     div.className = 'ai-msg bot streaming';
-    div.innerHTML = '<div class="label">AI</div><span class="streaming-content"></span><span class="streaming-cursor">▊</span>';
+    div.innerHTML = '<div class="label">Devin</div><span class="streaming-content"></span><span class="streaming-cursor">▊</span>';
     el.appendChild(div);
     el.scrollTop = el.scrollHeight;
     streamingMsgEl = div;

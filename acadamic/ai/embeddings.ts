@@ -1,3 +1,4 @@
+import fsp from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import config from './config';
@@ -5,7 +6,7 @@ import config from './config';
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const CACHE_FILE = path.join(__dirname, '..', 'data', 'embeddings-cache.json');
 
-export interface CurriculumDoc {
+interface CurriculumDoc {
   lang: string;
   phase: string;
   topic: string;
@@ -25,11 +26,22 @@ interface TFIDFIndex {
   docVectors: DocVector[];
   idf: Record<string, number>;
   docCount: number;
+  invertedIndex: Record<string, number[]>;
+}
+
+interface ScoredCurriculumResult {
+  lang: string;
+  phase: string;
+  topic: string;
+  exp: string;
+  code: string;
+  score: number;
 }
 
 let curriculumDocs: CurriculumDoc[] = [];
 let tfidfIndex: TFIDFIndex | null = null;
 let embedCache: Record<string, number[]> | null = null;
+let initPromise: Promise<void> | null = null;
 
 function tokenize(text: string): string[] {
   return (text || '')
@@ -37,7 +49,7 @@ function tokenize(text: string): string[] {
     .replace(/<[^>]*>/g, ' ')
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length > 2);
+    .filter(w => w.length > 2 && w.length < 50);
 }
 
 function extractTopicObjs(content: string): { topic: string; exp: string; code: string }[] {
@@ -79,17 +91,25 @@ function extractTopicObjs(content: string): { topic: string; exp: string; code: 
   return results;
 }
 
-export function buildCurriculumDocs(): void {
+export async function buildCurriculumDocs(): Promise<void> {
   curriculumDocs = [];
   try {
-    const files = fs.readdirSync(DATA_DIR).filter(f =>
+    let dir: string[];
+    try {
+      dir = await fsp.readdir(DATA_DIR);
+    } catch {
+      console.error('buildCurriculumDocs: data directory not found');
+      return;
+    }
+
+    const files = dir.filter(f =>
       f.endsWith('.js') &&
       !['app.js', 'courseData.js', 'challenges.js', 'quiz.js', 'style.css', 'game.js', 'db.js'].includes(f),
     );
 
     for (const file of files) {
       const lang = file.replace('.js', '');
-      const content = fs.readFileSync(path.join(DATA_DIR, file), 'utf-8');
+      const content = await fsp.readFile(path.join(DATA_DIR, file), 'utf-8');
       const phaseRe = /"([^"]+)":\s*\{/g;
       let pm: RegExpExecArray | null;
 
@@ -103,20 +123,25 @@ export function buildCurriculumDocs(): void {
       }
     }
     console.log(`Curriculum index: ${curriculumDocs.length} topics indexed`);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error('buildCurriculumDocs error:', (e as Error).message);
   }
 }
 
 function buildTFIDF(): void {
-  if (curriculumDocs.length === 0) buildCurriculumDocs();
+  if (curriculumDocs.length === 0) return;
   const docCount = curriculumDocs.length;
   const df: Record<string, number> = {};
+  const invertedIndex: Record<string, number[]> = {};
 
   const tokenizedDocs = curriculumDocs.map((doc, di) => {
     const tokens = tokenize(doc.text);
     const unique = new Set(tokens);
     for (const t of unique) df[t] = (df[t] || 0) + 1;
+    for (const t of unique) {
+      if (!invertedIndex[t]) invertedIndex[t] = [];
+      invertedIndex[t].push(di);
+    }
     return { docIndex: di, tokens };
   });
 
@@ -140,7 +165,7 @@ function buildTFIDF(): void {
     };
   });
 
-  tfidfIndex = { docVectors, idf, docCount };
+  tfidfIndex = { docVectors, idf, docCount, invertedIndex };
 }
 
 function cosineSimilarity(vecA: Record<string, number>, vecB: Record<string, number>): number {
@@ -156,26 +181,42 @@ function cosineSimilarity(vecA: Record<string, number>, vecB: Record<string, num
 
 export function searchTFIDF(query: string, lang?: string, topN = 5): (CurriculumDoc & { score: number })[] {
   if (!tfidfIndex) buildTFIDF();
+  if (!tfidfIndex || curriculumDocs.length === 0) return [];
+
   const qTokens = tokenize(query);
   if (qTokens.length === 0) return [];
+
+  let candidateSet: Set<number> | null = null;
+  for (const t of qTokens) {
+    const docs = tfidfIndex.invertedIndex[t];
+    if (!docs) continue;
+    if (!candidateSet) {
+      candidateSet = new Set(docs);
+    } else {
+      candidateSet = new Set(docs.filter(d => candidateSet!.has(d)));
+    }
+  }
+  if (!candidateSet) return [];
 
   const qTf: Record<string, number> = {};
   for (const t of qTokens) qTf[t] = (qTf[t] || 0) + 1;
   const qMax = Math.max(...Object.values(qTf), 1);
   const qVec: Record<string, number> = {};
   for (const [t, freq] of Object.entries(qTf)) {
-    qVec[t] = (freq / qMax) * (tfidfIndex!.idf[t] || 0);
+    qVec[t] = (freq / qMax) * (tfidfIndex.idf[t] || 0);
   }
 
-  return tfidfIndex!.docVectors
-    .filter(dv => !lang || curriculumDocs[dv.docIndex].lang === lang)
-    .map(dv => ({
-      ...curriculumDocs[dv.docIndex],
-      score: cosineSimilarity(qVec, dv.vector),
-    }))
-    .filter(r => r.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topN);
+  const results: (CurriculumDoc & { score: number })[] = [];
+  for (const di of candidateSet) {
+    const dv = tfidfIndex.docVectors[di];
+    if (lang && curriculumDocs[di].lang !== lang) continue;
+    const score = cosineSimilarity(qVec, dv.vector);
+    if (score > 0) {
+      results.push({ ...curriculumDocs[di], score });
+    }
+  }
+
+  return results.sort((a, b) => b.score - a.score).slice(0, topN);
 }
 
 async function getEmbedding(text: string): Promise<number[] | null> {
@@ -192,12 +233,16 @@ async function getEmbedding(text: string): Promise<number[] | null> {
         body: JSON.stringify({ model: 'text-embedding-3-small', input: text.slice(0, 8191) }),
       });
       if (response.ok) {
-        const data = await response.json();
-        const emb: number[] = data.data[0].embedding;
-        if (embedCache) embedCache[key] = emb;
-        return emb;
+        const data = (await response.json()) as { data: { embedding: number[] }[] };
+        const emb: number[] | undefined = data.data?.[0]?.embedding;
+        if (emb && embedCache) {
+          embedCache[key] = emb;
+          return emb;
+        }
       }
-    } catch {}
+    } catch (e: unknown) {
+      console.error('getEmbedding error:', (e as Error).message);
+    }
   }
   return null;
 }
@@ -233,12 +278,38 @@ async function searchEmbedding(
   return withScores.length > 0 ? withScores : null;
 }
 
+async function fetchEmbeddings(inputs: string[]): Promise<{ key: string; embedding: number[] }[] | null> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.openai.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: inputs,
+      }),
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { data: { embedding: number[]; index: number }[] };
+    return inputs.map((input, i) => ({
+      key: input.toLowerCase().slice(0, 100),
+      embedding: data.data.find(d => d.index === i)?.embedding || [],
+    })).filter(r => r.embedding.length > 0);
+  } catch (e: unknown) {
+    console.error('fetchEmbeddings batch error:', (e as Error).message);
+    return null;
+  }
+}
+
 async function buildEmbeddingCache(): Promise<void> {
   if (!config.openai.apiKey || config.provider === 'keyword') return;
   try {
-    if (fs.existsSync(CACHE_FILE)) {
-      embedCache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
-    } else {
+    try {
+      const raw = await fsp.readFile(CACHE_FILE, 'utf-8');
+      embedCache = JSON.parse(raw) as Record<string, number[]>;
+    } catch {
       embedCache = {};
     }
     const batchSize = 20;
@@ -249,33 +320,19 @@ async function buildEmbeddingCache(): Promise<void> {
         return !embedCache![key];
       });
       if (toEmbed.length === 0) continue;
-      try {
-        const response = await fetch('https://api.openai.com/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${config.openai.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'text-embedding-3-small',
-            input: toEmbed.map(d => `${d.topic}: ${d.exp}`.slice(0, 8191)),
-          }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          for (let j = 0; j < data.data.length; j++) {
-            const key = toEmbed[j].topic.toLowerCase().slice(0, 100);
-            embedCache![key] = data.data[j].embedding;
-            const doc = curriculumDocs.find(
-              d => d.topic === toEmbed[j].topic && d.lang === toEmbed[j].lang,
-            );
-            if (doc) doc._embedding = data.data[j].embedding;
-          }
-        }
-      } catch {}
+
+      const inputs = toEmbed.map(d => `${d.topic}: ${d.exp}`.slice(0, 8191));
+      const results = await fetchEmbeddings(inputs);
+      if (!results) continue;
+
+      for (const { key, embedding } of results) {
+        embedCache![key] = embedding;
+        const doc = toEmbed.find(d => d.topic.toLowerCase().slice(0, 100) === key);
+        if (doc) doc._embedding = embedding;
+      }
     }
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(embedCache));
-  } catch (e) {
+    await fsp.writeFile(CACHE_FILE, JSON.stringify(embedCache));
+  } catch (e: unknown) {
     console.error('buildEmbeddingCache error:', (e as Error).message);
   }
 }
@@ -285,14 +342,19 @@ export async function search(
   lang?: string,
   topN = 5,
 ): Promise<(CurriculumDoc & { score: number })[]> {
-  if (curriculumDocs.length === 0) buildCurriculumDocs();
+  if (curriculumDocs.length === 0 && !initPromise) {
+    initPromise = init();
+    await initPromise;
+  } else if (initPromise) {
+    await initPromise;
+  }
   const embResults = await searchEmbedding(query, lang, topN);
   if (embResults) return embResults;
   return searchTFIDF(query, lang, topN);
 }
 
-export function getContext(query: string, lang?: string, topN = 3): string {
-  const results = searchTFIDF(query, lang, topN);
+export async function getContext(query: string, lang?: string, topN = 3): Promise<string> {
+  const results = await search(query, lang, topN);
   if (results.length === 0) return '';
   let context = '\n\n**Relevant curriculum content (semantic match):**\n';
   for (const r of results) {
@@ -313,17 +375,6 @@ export function getTopicContext(topic: string, lang?: string): string {
   return context;
 }
 
-// ── Re-export from former curriculum.js ──
-
-export interface ScoredCurriculumResult {
-  lang: string;
-  phase: string;
-  topic: string;
-  exp: string;
-  code: string;
-  score: number;
-}
-
 export function searchCurriculum(
   query: string,
   lang?: string,
@@ -332,10 +383,31 @@ export function searchCurriculum(
 }
 
 export function getCurriculumContext(query: string, lang?: string): string {
-  return getContext(query, lang, 3);
+  const results = searchTFIDF(query, lang, 3);
+  if (results.length === 0) return '';
+  let context = '\n\n**Relevant curriculum content (semantic match):**\n';
+  for (const r of results) {
+    context += `\n[${r.lang.toUpperCase()} - ${r.phase} - ${r.topic}] (relevance: ${(r.score * 100).toFixed(0)}%)\n`;
+    if (r.exp) context += `${r.exp.slice(0, 300)}...\n`;
+    if (r.code) context += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
+  }
+  return context;
 }
 
-// ── Init ──
-buildCurriculumDocs();
-buildTFIDF();
-if (config.openai.apiKey) buildEmbeddingCache();
+export async function init(): Promise<void> {
+  await buildCurriculumDocs();
+  buildTFIDF();
+  if (config.openai.apiKey) {
+    try {
+      await buildEmbeddingCache();
+    } catch (e: unknown) {
+      console.error('init: embedding cache build failed:', (e as Error).message);
+    }
+  }
+}
+
+initPromise = init().catch(e => {
+  console.error('init failed:', (e as Error).message);
+});
+
+export type { CurriculumDoc, ScoredCurriculumResult };

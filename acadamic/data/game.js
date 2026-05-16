@@ -1173,7 +1173,7 @@ const crosswordTerms = [
   { term: 'syntax', clue: 'The set of rules for writing code' },
   { term: 'compile', clue: 'Transform source code into machine code' },
   { term: 'server', clue: 'A computer that serves data to clients' },
-  { term: 'client', glue: 'A device or program that requests data' },
+  { term: 'client', clue: 'A device or program that requests data' },
 ];
 var cwIdx = 0, cwScore = 0;
 function initCrossword() { cwIdx = Math.floor(Math.random() * crosswordTerms.length); cwScore = 0; renderCrossword(); }

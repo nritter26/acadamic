@@ -1,26 +1,28 @@
 import fs from 'fs';
+import fsp from 'fs/promises';
 import path from 'path';
 
 const LEARNER_DIR = path.join(__dirname, '..', 'data', 'learners');
 
-if (!fs.existsSync(LEARNER_DIR)) fs.mkdirSync(LEARNER_DIR, { recursive: true });
+const REVIEW_INTERVALS = [1, 3, 7, 14, 30] as const;
 
-export interface LearnerTopic {
+interface LearnerTopic {
   completedAt: string | null;
   reviews: number;
   lastReviewed: string | null;
   nextReview: string | null;
   attempts: number;
   errors: number;
+  phase?: string;
 }
 
-export interface LearnerPhase {
+interface LearnerPhase {
   completed: number;
   total: number;
   mastery: number;
 }
 
-export interface Learner {
+interface Learner {
   id: string;
   topics: Record<string, LearnerTopic>;
   phases: Record<string, LearnerPhase>;
@@ -32,12 +34,45 @@ export interface Learner {
   masteryByConcept: Record<string, number>;
   reviewQueue: string[];
   aiInteractions: number;
+  schemaVersion?: number;
 }
 
 interface PhaseTopics {
   [phaseName: string]: {
     [topicName: string]: unknown;
   };
+}
+
+interface DueReview {
+  key: string;
+  completedAt: string | null;
+  reviews: number;
+  lastReviewed: string | null;
+  nextReview: string | null;
+  attempts: number;
+  errors: number;
+  phase?: string;
+}
+
+interface TopicMastery {
+  topic: string;
+  mastery: number;
+  completed: boolean;
+  errors: number;
+  attempts: number;
+  nextReview: string | null;
+}
+
+interface ConceptMastery {
+  topics: TopicMastery[];
+  overall: number;
+  lang: string;
+}
+
+interface RecommendedTopic {
+  topic: string;
+  phase?: string;
+  reason: 'review-due' | 'weak-concept' | 'next-in-sequence';
 }
 
 const DEFAULT_LEARNER: Learner = {
@@ -51,38 +86,98 @@ const DEFAULT_LEARNER: Learner = {
   masteryByConcept: {},
   reviewQueue: [],
   aiInteractions: 0,
+  schemaVersion: 2,
 };
 
-const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
+const SCHEMA_VERSION = 2;
 
 function getLearnerPath(learnerId: string): string {
-  const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128);
   return path.join(LEARNER_DIR, `${safe}.json`);
 }
 
-export function getLearner(learnerId: string): Learner {
-  try {
-    const fp = getLearnerPath(learnerId);
-    if (fs.existsSync(fp)) {
-      return JSON.parse(fs.readFileSync(fp, 'utf-8'));
-    }
-  } catch {}
-  return { ...DEFAULT_LEARNER, id: learnerId };
+function topicKey(lang: string, phase: string | undefined, topic: string): string {
+  return `${lang}:${phase || 'general'}:${topic}`;
 }
 
-export function saveLearner(learner: Learner): void {
+function parseTopicKey(key: string): { lang: string; phase: string; topic: string } {
+  const parts = key.split(':');
+  if (parts.length >= 3) {
+    return { lang: parts[0], phase: parts[1], topic: parts.slice(2).join(':') };
+  }
+  return { lang: parts[0], phase: 'general', topic: parts[1] || '' };
+}
+
+function validateLearner(data: unknown): data is Learner {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return typeof d.id === 'string' && typeof d.topics === 'object' && d.topics !== null;
+}
+
+function migrateLearner(data: Record<string, unknown>): Learner {
+  const topics = data.topics as Record<string, LearnerTopic> | undefined;
+  if (topics) {
+    const migrated: Record<string, LearnerTopic> = {};
+    for (const [key, val] of Object.entries(topics)) {
+      const parts = key.split(':');
+      if (parts.length === 2) {
+        const newKey = `${parts[0]}:${val.phase || 'general'}:${parts[1]}`;
+        migrated[newKey] = { ...val, phase: undefined };
+      } else {
+        migrated[key] = val;
+      }
+    }
+    data.topics = migrated;
+  }
+  return { ...DEFAULT_LEARNER, ...data, schemaVersion: SCHEMA_VERSION } as Learner;
+}
+
+async function ensureDir(): Promise<void> {
   try {
+    await fsp.mkdir(LEARNER_DIR, { recursive: true });
+  } catch {}
+}
+
+export async function getLearner(learnerId: string): Promise<Learner> {
+  try {
+    const fp = getLearnerPath(learnerId);
+    const raw = await fsp.readFile(fp, 'utf-8');
+    const data = JSON.parse(raw);
+    if (!validateLearner(data)) {
+      console.error(`getLearner: invalid schema for ${learnerId}, resetting`);
+      return { ...DEFAULT_LEARNER, id: learnerId };
+    }
+    if (data.schemaVersion !== SCHEMA_VERSION) {
+      return migrateLearner(data as unknown as Record<string, unknown>);
+    }
+    return data;
+  } catch (e: unknown) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+      return { ...DEFAULT_LEARNER, id: learnerId };
+    }
+    console.error(`getLearner error for ${learnerId}:`, (e as Error).message);
+    return { ...DEFAULT_LEARNER, id: learnerId };
+  }
+}
+
+export async function saveLearner(learner: Learner): Promise<void> {
+  try {
+    await ensureDir();
     learner.lastSeen = new Date().toISOString();
-    fs.writeFileSync(getLearnerPath(learner.id), JSON.stringify(learner, null, 2));
-  } catch (e) {
+    const fp = getLearnerPath(learner.id);
+    const tmp = fp + '.tmp';
+    await fsp.writeFile(tmp, JSON.stringify(learner, null, 2));
+    await fsp.rename(tmp, fp);
+  } catch (e: unknown) {
     console.error('saveLearner error:', (e as Error).message);
   }
 }
 
 function updatePhaseMastery(learner: Learner, lang: string, phase: string): void {
   const phaseKey = `${lang}:${phase}`;
+  const prefix = `${lang}:${phase}:`;
   const phaseTopics = Object.entries(learner.topics).filter(([k]) =>
-    k.startsWith(`${lang}:`),
+    k.startsWith(prefix),
   );
   const completed = phaseTopics.filter(([, v]) => v.completedAt).length;
   const total = phaseTopics.length;
@@ -93,14 +188,14 @@ function updatePhaseMastery(learner: Learner, lang: string, phase: string): void
   };
 }
 
-export function trackTopicCompletion(
+export async function trackTopicCompletion(
   learnerId: string,
   lang: string,
   topic: string,
   phase?: string,
-): Learner {
-  const learner = getLearner(learnerId);
-  const key = `${lang}:${topic}`;
+): Promise<Learner> {
+  const learner = await getLearner(learnerId);
+  const key = topicKey(lang, phase, topic);
 
   if (!learner.topics[key]) {
     learner.topics[key] = {
@@ -113,89 +208,81 @@ export function trackTopicCompletion(
     };
   } else {
     learner.topics[key].completedAt = new Date().toISOString();
-    learner.topics[key].reviews = (learner.topics[key].reviews || 0) + 1;
+    learner.topics[key].reviews += 1;
     learner.topics[key].nextReview = new Date(
       Date.now() + 86400000 * REVIEW_INTERVALS[0],
     ).toISOString();
   }
 
-  learner.sessions = (learner.sessions || 0) + 1;
+  learner.sessions += 1;
   updatePhaseMastery(learner, lang, phase || 'general');
-  saveLearner(learner);
+  await saveLearner(learner);
   return learner;
 }
 
-export function trackError(
+export async function trackError(
   learnerId: string,
   lang: string,
   topic: string,
-): void {
-  const learner = getLearner(learnerId);
-  const key = `${lang}:${topic}`;
+  phase?: string,
+): Promise<void> {
+  const learner = await getLearner(learnerId);
+  const key = topicKey(lang, phase, topic);
   if (!learner.topics[key]) {
     learner.topics[key] = {
       attempts: 0, errors: 0, completedAt: null, reviews: 0,
       lastReviewed: null, nextReview: null,
     };
   }
-  learner.topics[key].errors = (learner.topics[key].errors || 0) + 1;
-  learner.topics[key].attempts = (learner.topics[key].attempts || 0) + 1;
-  saveLearner(learner);
+  learner.topics[key].errors += 1;
+  learner.topics[key].attempts += 1;
+  await saveLearner(learner);
 }
 
-export function trackAttempt(
+export async function trackAttempt(
   learnerId: string,
   lang: string,
   topic: string,
-): void {
-  const learner = getLearner(learnerId);
-  const key = `${lang}:${topic}`;
+  phase?: string,
+): Promise<void> {
+  const learner = await getLearner(learnerId);
+  const key = topicKey(lang, phase, topic);
   if (!learner.topics[key]) {
     learner.topics[key] = {
       attempts: 0, errors: 0, completedAt: null, reviews: 0,
       lastReviewed: null, nextReview: null,
     };
   }
-  learner.topics[key].attempts = (learner.topics[key].attempts || 0) + 1;
-  saveLearner(learner);
+  learner.topics[key].attempts += 1;
+  await saveLearner(learner);
 }
 
-export function trackQuiz(
+export async function trackQuiz(
   learnerId: string,
   correct: number,
   total: number,
-): void {
-  const learner = getLearner(learnerId);
+): Promise<void> {
+  const learner = await getLearner(learnerId);
   learner.quizzes.total += total;
   learner.quizzes.correct += correct;
-  saveLearner(learner);
+  await saveLearner(learner);
 }
 
-export function trackChallenge(learnerId: string, solved: boolean): void {
-  const learner = getLearner(learnerId);
+export async function trackChallenge(learnerId: string, solved: boolean): Promise<void> {
+  const learner = await getLearner(learnerId);
   learner.challenges.total += 1;
   if (solved) learner.challenges.solved += 1;
-  saveLearner(learner);
+  await saveLearner(learner);
 }
 
-export function trackAIInteraction(learnerId: string): void {
-  const learner = getLearner(learnerId);
-  learner.aiInteractions = (learner.aiInteractions || 0) + 1;
-  saveLearner(learner);
+export async function trackAIInteraction(learnerId: string): Promise<void> {
+  const learner = await getLearner(learnerId);
+  learner.aiInteractions += 1;
+  await saveLearner(learner);
 }
 
-export interface DueReview {
-  key: string;
-  completedAt: string | null;
-  reviews: number;
-  lastReviewed: string | null;
-  nextReview: string | null;
-  attempts: number;
-  errors: number;
-}
-
-export function getDueReviews(learnerId: string): DueReview[] {
-  const learner = getLearner(learnerId);
+export async function getDueReviews(learnerId: string): Promise<DueReview[]> {
+  const learner = await getLearner(learnerId);
   const now = new Date();
   return Object.entries(learner.topics)
     .filter(([, v]) => v.completedAt && v.nextReview && new Date(v.nextReview) <= now)
@@ -203,50 +290,62 @@ export function getDueReviews(learnerId: string): DueReview[] {
     .sort((a, b) => new Date(a.nextReview!).getTime() - new Date(b.nextReview!).getTime());
 }
 
-export function scheduleReview(
+// SM-2 spaced repetition algorithm
+function sm2Interval(quality: number, repetitions: number, previousInterval: number): { interval: number; repetitions: number; easeFactor: number } {
+  let ef = 2.5;
+  let newReps = repetitions;
+  let interval: number;
+
+  if (quality < 3) {
+    newReps = 0;
+    interval = 1;
+  } else {
+    if (repetitions === 0) {
+      interval = 1;
+    } else if (repetitions === 1) {
+      interval = 6;
+    } else {
+      interval = Math.round(previousInterval * ef);
+    }
+    newReps += 1;
+  }
+
+  ef = Math.max(1.3, ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+  return { interval, repetitions: newReps, easeFactor: ef };
+}
+
+export async function scheduleReview(
   learnerId: string,
   lang: string,
   topic: string,
-): void {
-  const learner = getLearner(learnerId);
-  const key = `${lang}:${topic}`;
+  phase?: string,
+  quality?: number,
+): Promise<void> {
+  const learner = await getLearner(learnerId);
+  const key = topicKey(lang, phase, topic);
   if (learner.topics[key]) {
-    const current = learner.topics[key].reviews || 0;
-    const interval =
-      REVIEW_INTERVALS[Math.min(current, REVIEW_INTERVALS.length - 1)];
-    learner.topics[key].nextReview = new Date(
-      Date.now() + interval * 86400000,
-    ).toISOString();
-    learner.topics[key].lastReviewed = new Date().toISOString();
-    learner.topics[key].reviews = current + 1;
+    const current = learner.topics[key];
+    const prevInterval = current.nextReview
+      ? Math.round((new Date(current.nextReview).getTime() - (current.lastReviewed ? new Date(current.lastReviewed).getTime() : Date.now())) / 86400000)
+      : 1;
+    const q = quality !== undefined ? Math.max(0, Math.min(5, quality)) : 3;
+    const result = sm2Interval(q, current.reviews, Math.max(1, prevInterval));
+    current.nextReview = new Date(Date.now() + result.interval * 86400000).toISOString();
+    current.lastReviewed = new Date().toISOString();
+    current.reviews = result.repetitions;
   }
-  saveLearner(learner);
+  await saveLearner(learner);
 }
 
-export interface TopicMastery {
-  topic: string;
-  mastery: number;
-  completed: boolean;
-  errors: number;
-  attempts: number;
-  nextReview: string | null;
-}
-
-export interface ConceptMastery {
-  topics: TopicMastery[];
-  overall: number;
-  lang: string;
-}
-
-export function getConceptMastery(
+export async function getConceptMastery(
   learnerId: string,
   lang: string,
-): ConceptMastery {
-  const learner = getLearner(learnerId);
+): Promise<ConceptMastery> {
+  const learner = await getLearner(learnerId);
   const topics = Object.entries(learner.topics)
     .filter(([k]) => k.startsWith(`${lang}:`))
     .map(([k, v]): TopicMastery => {
-      const topicName = k.split(':')[1];
+      const { topic: topicName } = parseTopicKey(k);
       const errorRate = v.attempts > 0 ? v.errors / v.attempts : 0;
       const mastery = v.completedAt
         ? Math.max(5, Math.min(100, 100 - errorRate * 100 - (v.reviews === 0 ? 10 : 0)))
@@ -267,41 +366,35 @@ export function getConceptMastery(
   return { topics, overall, lang };
 }
 
-export function getWeakestTopics(
+export async function getWeakestTopics(
   learnerId: string,
   lang: string,
   n = 3,
-): TopicMastery[] {
-  const { topics } = getConceptMastery(learnerId, lang);
+): Promise<TopicMastery[]> {
+  const { topics } = await getConceptMastery(learnerId, lang);
   return topics
     .filter(t => t.completed)
     .sort((a, b) => a.mastery - b.mastery)
     .slice(0, n);
 }
 
-export interface RecommendedTopic {
-  topic: string;
-  phase?: string;
-  reason: 'review-due' | 'weak-concept' | 'next-in-sequence';
-}
-
-export function getNextRecommendedTopic(
+export async function getNextRecommendedTopic(
   learnerId: string,
   lang: string,
   availablePhases: PhaseTopics,
-): RecommendedTopic | null {
-  const learner = getLearner(learnerId);
+): Promise<RecommendedTopic | null> {
+  const learner = await getLearner(learnerId);
   const completedTopics = Object.entries(learner.topics)
     .filter(([k, v]) => k.startsWith(`${lang}:`) && v.completedAt)
-    .map(([k]) => k.split(':')[1]);
+    .map(([k]) => parseTopicKey(k).topic);
 
-  const due = getDueReviews(learnerId).filter(r => r.key.startsWith(`${lang}:`));
+  const due = (await getDueReviews(learnerId)).filter(r => r.key.startsWith(`${lang}:`));
   if (due.length > 0) {
-    const topicName = due[0].key.split(':')[1];
+    const { topic: topicName } = parseTopicKey(due[0].key);
     return { topic: topicName, reason: 'review-due' };
   }
 
-  const weakest = getWeakestTopics(learnerId, lang, 1);
+  const weakest = await getWeakestTopics(learnerId, lang, 1);
   if (weakest.length > 0 && weakest[0].mastery < 60) {
     return { topic: weakest[0].topic, reason: 'weak-concept' };
   }
@@ -326,3 +419,8 @@ export function getNextRecommendedTopic(
 
   return null;
 }
+
+export type {
+  LearnerTopic, LearnerPhase, Learner, PhaseTopics,
+  DueReview, TopicMastery, ConceptMastery, RecommendedTopic,
+};

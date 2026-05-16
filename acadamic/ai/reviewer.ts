@@ -20,9 +20,9 @@ interface ReviewResult {
   source?: 'llm' | 'static';
 }
 
-type LangKey = 'js' | 'py' | 'go' | 'rs';
+type LangKey = 'js' | 'ts' | 'py' | 'go' | 'rs' | 'sql';
 
-const KEYWORD_ISSUES: Record<LangKey, KeywordPattern[]> = {
+const KEYWORD_ISSUES: Record<LangKey, readonly KeywordPattern[]> = {
   js: [
     { pattern: /==(?!\s*=)/, message: 'Use `===` (strict equality) instead of `==` to avoid type coercion.', severity: 'style' },
     { pattern: /\bvar\s/, message: 'Use `let` or `const` instead of `var` for block scoping.', severity: 'style' },
@@ -36,6 +36,14 @@ const KEYWORD_ISSUES: Record<LangKey, KeywordPattern[]> = {
     { pattern: /new\s+(Array|Object|RegExp)\s*\(/, message: 'Use literal syntax: `[]`, `{}`, `/pattern/` instead of `new Array()`, etc.', severity: 'style' },
     { pattern: /\bString\s*\(/, message: 'Use `String(value)` or template literals `` `${value}` `` for conversion.', severity: 'style' },
     { pattern: /\bNumber\s*\(/, message: 'Use `Number(value)` or unary `+value` for numeric conversion.', severity: 'style' },
+  ],
+  ts: [
+    { pattern: /\bany\b(?!\s*[)};,\]])/, message: 'Avoid `any` — use proper types or `unknown` with type guards.', severity: 'warning' },
+    { pattern: /@ts-ignore/, message: '`@ts-ignore` suppresses all type errors — use `@ts-expect-error` to document expected violations.', severity: 'warning' },
+    { pattern: /@ts-nocheck/, message: '`@ts-nocheck` disables type checking entirely — fix the types instead.', severity: 'error' },
+    { pattern: /as\s+any\b/, message: '`as any` bypasses the type system — use a proper type or assertion function.', severity: 'warning' },
+    { pattern: /!\s*[.);\],}]/, message: 'Non-null assertion `!` hides undefined — use a type guard instead.', severity: 'style' },
+    { pattern: /interface\s+\w+\s*\{[^}]*\}[^;]/s, message: 'Prefer `type` over `interface` for union/intersection types; use `interface` for object shapes that may be extended.', severity: 'style' },
   ],
   py: [
     { pattern: /(?:except|catch)\s*:\s*$/, message: 'Bare `except:` catches ALL exceptions including Ctrl+C — specify the exception type.', severity: 'warning' },
@@ -71,9 +79,27 @@ const KEYWORD_ISSUES: Record<LangKey, KeywordPattern[]> = {
     { pattern: /Rc<RefCell</, message: '`Rc<RefCell<>>` is single-threaded and runtime-checked — consider `Arc<Mutex<>>` for threading or simpler ownership.', severity: 'info' },
     { pattern: /Box<dyn\s/, message: 'Trait object `Box<dyn T>` has runtime overhead — prefer generics with static dispatch where possible.', severity: 'style' },
   ],
+  sql: [
+    { pattern: /(['"])\s*\+\s*\w+\s*\+/, message: 'String concatenation in SQL is vulnerable to injection — use parameterized queries.', severity: 'error' },
+    { pattern: /INSERT\s+INTO.*VALUES\s*\([^)]*\)/i, message: 'Use parameterized INSERT with placeholders (`?` or `$1`) instead of string interpolation.', severity: 'warning' },
+    { pattern: /' OR '1'='1/, message: 'SQL injection pattern detected — always use parameterized queries.', severity: 'error' },
+    { pattern: /DROP\s+TABLE/i, message: '`DROP TABLE` is irreversible in production — use migrations with rollbacks.', severity: 'warning' },
+    { pattern: /SELECT\s+\*/i, message: '`SELECT *` can break on schema changes — list columns explicitly.', severity: 'style' },
+    { pattern: /DELETE\s+FROM\s+\w+\s*(?:;|$)/i, message: 'Unconditional DELETE without WHERE clause will remove all rows.', severity: 'error' },
+    { pattern: /UPDATE\s+\w+\s+SET(?!.*\bWHERE\b)/is, message: 'Unconditional UPDATE without WHERE clause will modify all rows.', severity: 'error' },
+  ],
 };
 
-function analyzeStructure(code: string, lang: string): ReviewIssue[] {
+function findLineIndex(lines: string[], matchIndex: number): number {
+  let charCount = 0;
+  for (let i = 0; i < lines.length; i++) {
+    charCount += lines[i].length + 1;
+    if (charCount > matchIndex) return i;
+  }
+  return 0;
+}
+
+function analyzeStructure(code: string, _lang: string): ReviewIssue[] {
   const issues: ReviewIssue[] = [];
   const lines = code.split('\n');
 
@@ -95,18 +121,26 @@ function analyzeStructure(code: string, lang: string): ReviewIssue[] {
     issues.push({ line: 0, message: `Unbalanced brackets: ${openBrackets} opening vs ${closeBrackets} closing.`, severity: 'error', category: 'syntax' });
   }
 
-  if ((code.includes('function') || code.includes('=>') || code.includes('def ') || code.includes('func ')) && !code.includes('return')) {
-    if (code.includes('function') || code.includes('=>') || code.includes('def ') || code.includes('func ')) {
-      const funcLines = lines.filter(l => l.includes('function') || l.includes('=>') || l.includes('def ') || l.includes('func '));
-      if (funcLines.length > 0 && !funcLines.some(l => l.trim().startsWith('//') || l.trim().startsWith('#'))) {
-        for (const fl of funcLines) {
-          const lineNum = lines.indexOf(fl) + 1;
-          const trimmed = fl.trim();
-          if (!trimmed.startsWith('//') && !trimmed.startsWith('#') && !trimmed.startsWith('console.log')) {
-            issues.push({ line: lineNum, message: 'Function defined but no `return` statement found — will return undefined/None.', severity: 'warning', category: 'logic' });
-            break;
-          }
-        }
+  const funcRe = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/g;
+  let funcMatch: RegExpExecArray | null;
+  const funcLinesFound = new Set<number>();
+  while ((funcMatch = funcRe.exec(code)) !== null) {
+    const lineIdx = findLineIndex(lines, funcMatch.index);
+    if (lineIdx !== undefined) funcLinesFound.add(lineIdx);
+  }
+
+  const hasReturn = /\breturn\b/.test(code);
+  if (!hasReturn && funcLinesFound.size > 0) {
+    for (const lIdx of funcLinesFound) {
+      const trimmed = lines[lIdx].trim();
+      if (!trimmed.startsWith('//') && !trimmed.startsWith('#') && !trimmed.startsWith('/*') && !trimmed.startsWith('console.log')) {
+        issues.push({
+          line: lIdx + 1,
+          message: 'Function defined but no `return` statement found — will return undefined/None.',
+          severity: 'warning',
+          category: 'logic',
+        });
+        break;
       }
     }
   }
@@ -116,13 +150,15 @@ function analyzeStructure(code: string, lang: string): ReviewIssue[] {
 
 function checkKeywordPatterns(code: string, lang: string): ReviewIssue[] {
   const issues: ReviewIssue[] = [];
-  const patterns = KEYWORD_ISSUES[lang as LangKey] || [];
+  const patterns = KEYWORD_ISSUES[lang as LangKey];
+  if (!patterns) return issues;
   const lines = code.split('\n');
+
   for (const { pattern, message, severity } of patterns) {
     const match = code.match(pattern);
-    if (match) {
-      const matchedLine = lines.findIndex(l => pattern.test(l));
-      issues.push({ line: matchedLine + 1, message, severity, category: 'style' });
+    if (match && match.index !== undefined) {
+      const lineIdx = findLineIndex(lines, match.index);
+      issues.push({ line: lineIdx + 1, message, severity, category: 'style' });
     }
   }
   return issues;
@@ -162,13 +198,13 @@ Overall score out of 10 based on: correctness, style, efficiency, edge cases.`;
 
 function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[] } {
   const lines = code.split('\n');
-  const hasMain = code.includes('main') || code.includes('Main');
-  const hasFunctions = code.includes('function') || code.includes('=>') || code.includes('def ') || code.includes('func ');
-  const hasClass = code.includes('class ');
+  const hasMain = /\bmain\b/i.test(code);
+  const hasFunctions = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code);
+  const hasClass = /\bclass\s+/.test(code);
   const hasLoop = /for\s*\(|while\s*\(|\.forEach|for\s+\w+\s+in|for\s+\w+\s+of/.test(code);
   const hasConditional = /if\s*\(|elif\s+|else\s+/.test(code);
-  const hasTryCatch = code.includes('try') && (code.includes('catch') || code.includes('except'));
-  const hasAsync = code.includes('async') || code.includes('await') || code.includes('then(');
+  const hasTryCatch = /\btry\b/.test(code) && (/\bcatch\b/.test(code) || /\bexcept\b/.test(code));
+  const hasAsync = /\basync\b|\bawait\b|\.then\(/.test(code);
 
   let review = `**Code Review — ${lang ? lang.toUpperCase() : 'Code'}**\n\n`;
   review += `**Overview:** ${lines.length} lines, ${hasFunctions ? 'contains functions, ' : ''}${hasClass ? 'contains classes, ' : ''}${hasLoop ? 'uses loops, ' : ''}${hasConditional ? 'uses conditionals, ' : ''}${hasTryCatch ? 'has error handling, ' : ''}${hasAsync ? 'uses async patterns.' : '.'}`;
@@ -178,7 +214,7 @@ function generateStructureReview(code: string, lang: string): { review: string; 
   const allIssues = [...structuralIssues, ...keywordIssues];
 
   if (allIssues.length > 0) {
-    review += `\n\n**Issues Found:**\n`;
+    review += '\n\n**Issues Found:**\n';
     const bySeverity: Record<string, ReviewIssue[]> = { error: [], warning: [], style: [], info: [] };
     for (const issue of allIssues) {
       (bySeverity[issue.severity] || bySeverity.info).push(issue);
@@ -192,18 +228,20 @@ function generateStructureReview(code: string, lang: string): { review: string; 
   }
 
   if (hasMain && !hasFunctions && lines.length < 10) {
-    review += `\n**Suggestion:** This code is very simple — try organizing it into functions to practice modular design.\n`;
+    review += '\n**Suggestion:** This code is very simple — try organizing it into functions to practice modular design.\n';
   }
 
   if (lines.length > 50) {
     review += `\n**Suggestion:** This function/file is getting long (${lines.length} lines). Consider breaking it into smaller functions for readability.\n`;
   }
 
-  if (!hasTryCatch && (code.includes('fetch(') || code.includes('readFile') || code.includes('writeFile'))) {
-    review += `\n**Suggestion:** I/O operations like fetch/file access can fail — add error handling with try/catch.\n`;
+  if (!hasTryCatch && (/\bfetch\s*\(/.test(code) || /\breadFile\b/.test(code) || /\bwriteFile\b/.test(code))) {
+    review += '\n**Suggestion:** I/O operations like fetch/file access can fail — add error handling with try/catch.\n';
   }
 
-  const commentedRatio = lines.filter(l => l.trim().startsWith('//') || l.trim().startsWith('#') || l.trim().startsWith('/*')).length / lines.length;
+  const commentRe = /^\s*(\/\/|#|\/\*)/;
+  const commentedLines = lines.filter(l => commentRe.test(l)).length;
+  const commentedRatio = commentedLines / lines.length;
   if (commentedRatio > 0.4) {
     review += `\n**Suggestion:** High comment-to-code ratio (${Math.round(commentedRatio * 100)}%). Comments explain WHY, not WHAT — let the code speak for itself.\n`;
   }

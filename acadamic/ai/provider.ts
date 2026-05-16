@@ -1,18 +1,37 @@
 import config from './config';
 
-export interface LLMMessage {
+interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
 type StreamCallback = (chunk: string) => void;
 
+interface ProviderConfig {
+  apiKey?: string;
+  model: string;
+  endpoint?: string;
+  maxTokens: number;
+}
+
+interface ProviderHandler {
+  buildBody(messages: LLMMessage[], stream: boolean): Record<string, unknown>;
+  buildHeaders(): Record<string, string>;
+  endpoint: string;
+  parser(line: string): string | null;
+  responseParser(data: Record<string, unknown>): string | null;
+  stripSystem?: boolean;
+}
+
 async function streamSSEResponse(
   response: Response,
   onStream: StreamCallback,
   parser: (line: string) => string | null,
 ): Promise<string> {
-  const reader = response.body!.getReader();
+  if (!response.body) {
+    throw new Error('Response body is null — streaming not supported');
+  }
+  const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let full = '';
   let buffer = '';
@@ -42,7 +61,7 @@ async function streamSSEResponse(
 function openAIParser(data: string): string | null {
   try {
     const parsed = JSON.parse(data);
-    return parsed.choices?.[0]?.delta?.content || null;
+    return (parsed.choices?.[0]?.delta?.content as string) || null;
   } catch {
     return null;
   }
@@ -50,7 +69,7 @@ function openAIParser(data: string): string | null {
 
 function anthropicParser(data: string): string | null {
   try {
-    const parsed = JSON.parse(data);
+    const parsed = JSON.parse(data) as { type?: string; delta?: { text?: string } };
     if (parsed.type === 'content_block_delta') {
       return parsed.delta?.text || null;
     }
@@ -60,6 +79,88 @@ function anthropicParser(data: string): string | null {
   }
 }
 
+const PROVIDERS: Record<string, ProviderHandler> = {
+  openai: {
+    endpoint: config.openai.endpoint || 'https://api.openai.com/v1',
+    buildBody(messages, stream) {
+      return {
+        model: this.model,
+        messages: [{ role: 'system', content: config.systemPrompt }, ...messages],
+        max_tokens: this.maxTokens,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+      };
+    },
+    parser: openAIParser,
+    responseParser(data) {
+      const d = data as { choices?: { message?: { content?: string } }[] };
+      return d.choices?.[0]?.message?.content || null;
+    },
+    get apiKey() { return config.openai.apiKey; },
+    get model() { return config.openai.model; },
+    get maxTokens() { return config.openai.maxTokens; },
+  },
+  anthropic: {
+    endpoint: 'https://api.anthropic.com/v1',
+    buildBody(messages, stream) {
+      const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({
+        role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
+        content: m.content,
+      }));
+      return {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        system: config.systemPrompt,
+        messages: chatMessages,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'x-api-key': this.apiKey,
+        'anthropic-version': '2023-06-01',
+      };
+    },
+    parser: anthropicParser,
+    responseParser(data) {
+      const d = data as { content?: { text?: string }[] };
+      return d.content?.[0]?.text || null;
+    },
+    stripSystem: true,
+    get apiKey() { return config.anthropic.apiKey; },
+    get model() { return config.anthropic.model; },
+    get maxTokens() { return config.anthropic.maxTokens; },
+  },
+  local: {
+    endpoint: config.local.endpoint || 'http://localhost:11434/v1',
+    buildBody(messages, stream) {
+      return {
+        model: this.model,
+        messages: [{ role: 'system' as const, content: config.systemPrompt }, ...messages],
+        max_tokens: this.maxTokens,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return { 'Content-Type': 'application/json' };
+    },
+    parser: openAIParser,
+    responseParser(data) {
+      const d = data as { choices?: { message?: { content?: string } }[] };
+      return d.choices?.[0]?.message?.content || null;
+    },
+    get apiKey() { return ''; },
+    get model() { return config.local.model; },
+    get maxTokens() { return config.local.maxTokens; },
+  },
+};
+
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
@@ -67,126 +168,53 @@ async function fetchWithRetry(
 ): Promise<Response | null> {
   for (let i = 0; i <= retries; i++) {
     try {
-      const response = await fetch(url, options);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeout);
       if (response.ok) return response;
-      if (response.status < 500 && response.status !== 429) return null;
+      if (response.status === 429 && i < retries) {
+        const retryAfter = parseInt(response.headers.get('Retry-After') || '', 10);
+        const delay = retryAfter ? retryAfter * 1000 : 1000 * Math.pow(2, i) + Math.random() * 500;
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      if (response.status < 500) return null;
     } catch {
       if (i === retries) return null;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i) + Math.random() * 500));
     }
-    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
   }
   return null;
 }
 
-async function askOpenAI(
+async function callProvider(
+  provider: ProviderHandler,
   messages: LLMMessage[],
   onStream?: StreamCallback,
 ): Promise<string | null> {
-  const { apiKey, model, endpoint, maxTokens } = config.openai;
-  const body = {
-    model,
-    messages: [{ role: 'system', content: config.systemPrompt }, ...messages],
-    max_tokens: maxTokens,
-    stream: !!onStream,
-  };
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${apiKey}`,
-  };
+  const url = `${provider.endpoint}/chat/completions`;
+  const body = provider.buildBody(messages, !!onStream);
+  const headers = provider.buildHeaders();
 
   if (onStream) {
-    const response = await fetchWithRetry(`${endpoint}/chat/completions`, {
+    const response = await fetchWithRetry(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
     });
     if (!response) return null;
-    return streamSSEResponse(response, onStream, openAIParser);
+    return streamSSEResponse(response, onStream, provider.parser);
   }
 
-  const response = await fetchWithRetry(`${endpoint}/chat/completions`, {
+  const response = await fetchWithRetry(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
   });
   if (!response) return null;
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || null;
-}
-
-async function askAnthropic(
-  messages: LLMMessage[],
-  onStream?: StreamCallback,
-): Promise<string | null> {
-  const { apiKey, model, maxTokens } = config.anthropic;
-  const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({
-    role: m.role === 'assistant' ? 'assistant' : 'user' as const,
-    content: m.content,
-  }));
-  const body = {
-    model,
-    max_tokens: maxTokens,
-    system: config.systemPrompt,
-    messages: chatMessages,
-    stream: !!onStream,
-  };
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'x-api-key': apiKey,
-    'anthropic-version': '2023-06-01',
-  };
-
-  if (onStream) {
-    const response = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-    if (!response) return null;
-    return streamSSEResponse(response, onStream, anthropicParser);
-  }
-
-  const response = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-  if (!response) return null;
-  const data = await response.json();
-  return data.content?.[0]?.text || null;
-}
-
-async function askLocal(
-  messages: LLMMessage[],
-  onStream?: StreamCallback,
-): Promise<string | null> {
-  const { endpoint, model, maxTokens } = config.local;
-  const body = {
-    model,
-    messages: [{ role: 'system' as const, content: config.systemPrompt }, ...messages],
-    max_tokens: maxTokens,
-    stream: !!onStream,
-  };
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-
-  if (onStream) {
-    const response = await fetchWithRetry(`${endpoint}/chat/completions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-    if (!response) return null;
-    return streamSSEResponse(response, onStream, openAIParser);
-  }
-
-  const response = await fetchWithRetry(`${endpoint}/chat/completions`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-  if (!response) return null;
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || null;
+  return provider.responseParser(data);
 }
 
 export async function askLLM(
@@ -196,13 +224,15 @@ export async function askLLM(
   const { provider } = config;
 
   if (provider === 'openai' && config.openai.apiKey) {
-    return askOpenAI(messages, onStream);
+    return callProvider(PROVIDERS.openai, messages, onStream);
   }
   if (provider === 'anthropic' && config.anthropic.apiKey) {
-    return askAnthropic(messages, onStream);
+    return callProvider(PROVIDERS.anthropic, messages, onStream);
   }
   if (provider === 'local') {
-    return askLocal(messages, onStream);
+    return callProvider(PROVIDERS.local, messages, onStream);
   }
   return null;
 }
+
+export type { LLMMessage, StreamCallback };
