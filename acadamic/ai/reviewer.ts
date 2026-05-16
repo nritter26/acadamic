@@ -1,6 +1,28 @@
-const { askLLM } = require('./provider');
+import { askLLM } from './provider';
 
-const KEYWORD_ISSUES = {
+interface KeywordPattern {
+  pattern: RegExp;
+  message: string;
+  severity: 'error' | 'warning' | 'style' | 'info';
+}
+
+interface ReviewIssue {
+  line: number;
+  message: string;
+  severity: 'error' | 'warning' | 'style' | 'info';
+  category?: 'syntax' | 'style' | 'logic';
+}
+
+interface ReviewResult {
+  review: string;
+  issues: ReviewIssue[];
+  score: number | null;
+  source?: 'llm' | 'static';
+}
+
+type LangKey = 'js' | 'py' | 'go' | 'rs';
+
+const KEYWORD_ISSUES: Record<LangKey, KeywordPattern[]> = {
   js: [
     { pattern: /==(?!\s*=)/, message: 'Use `===` (strict equality) instead of `==` to avoid type coercion.', severity: 'style' },
     { pattern: /\bvar\s/, message: 'Use `let` or `const` instead of `var` for block scoping.', severity: 'style' },
@@ -19,18 +41,40 @@ const KEYWORD_ISSUES = {
     { pattern: /(?:except|catch)\s*:\s*$/, message: 'Bare `except:` catches ALL exceptions including Ctrl+C — specify the exception type.', severity: 'warning' },
     { pattern: /==\s*(?:True|False|None)/, message: 'Use `is` instead of `==` for comparing to `True`/`False`/`None`.', severity: 'style' },
     { pattern: /\t/, message: 'Mixed tabs and spaces — use 4 spaces consistently.', severity: 'error' },
+    { pattern: /os\.system\s*\(/, message: 'Prefer `subprocess.run()` with argument list over `os.system()` — avoids shell injection.', severity: 'warning' },
+    { pattern: /shell\s*=\s*True/, message: '`shell=True` in subprocess is a security risk — use argument list instead.', severity: 'error' },
+    { pattern: /pickle\.(loads|load)\s*\(/, message: '`pickle` deserialization can execute arbitrary code — prefer JSON or safe serializers.', severity: 'error' },
+    { pattern: /exec\s*\(/, message: '`exec()` executes arbitrary code — avoid it unless absolutely necessary.', severity: 'error' },
+    { pattern: /def\s+\w+\s*\([^)]*=\s*\[/, message: 'Mutable default argument `[]` is shared across calls — use `None` and create inside the function.', severity: 'warning' },
+    { pattern: /def\s+\w+\s*\([^)]*=\s*\{/, message: 'Mutable default argument `{}` is shared across calls — use `None` and create inside the function.', severity: 'warning' },
+    { pattern: /from\s+\w+\s+import\s+\*/, message: 'Star imports pollute the namespace — import only what you need.', severity: 'style' },
   ],
   go: [
     { pattern: /if\s+err\s*!=\s*nil\s*\{\s*\n\s*return\s+\w+/, message: 'Good error check — but consider adding error context with `fmt.Errorf("context: %w", err)`.', severity: 'info' },
+    { pattern: /ioutil\./, message: '`ioutil` is deprecated since Go 1.16 — use `os` and `io` packages instead.', severity: 'warning' },
+    { pattern: /http\.DefaultServeMux/, message: '`http.DefaultServeMux` is a global — use a local `http.ServeMux` for security.', severity: 'warning' },
+    { pattern: /defer\s+\w+[.\w]*\(\)\s*\n[^}]*\bfor\b/, message: '`defer` inside a loop accumulates — consider moving the defer outside or using immediate execution.', severity: 'warning' },
+    { pattern: /go\s+\w+\(.*\)/, message: 'Goroutine launched without sync mechanism — ensure proper synchronization with WaitGroup or channels.', severity: 'info' },
+    { pattern: /time\.Sleep\s*\(/, message: 'Using `time.Sleep` for synchronization is fragile — use channels or sync primitives.', severity: 'warning' },
+    { pattern: /recover\(\)/, message: '`recover()` only works inside a deferred function — verify it is inside `defer`.', severity: 'info' },
+    { pattern: /:=.*err/, message: 'Short variable declaration `:=` can shadow existing `err` — check that `err` is intentionally declared.', severity: 'info' },
   ],
   rs: [
     { pattern: /\.unwrap\(\)/, message: '`.unwrap()` will panic on error — prefer pattern matching or `?` operator.', severity: 'warning' },
     { pattern: /\.expect\(/, message: '`.expect()` will panic on error — prefer proper error handling.', severity: 'warning' },
+    { pattern: /unsafe\s*\{/, message: '`unsafe` block bypasses Rust\'s safety guarantees — avoid unless absolutely necessary.', severity: 'error' },
+    { pattern: /transmute\s*\(/, message: '`transmute` is extremely dangerous — prefer safe conversions or `bytemuck` crate.', severity: 'error' },
+    { pattern: /\bas\s+(i\d+|u\d+|f\d+|isize|usize)/, message: 'Numeric cast `as` can silently truncate — use `TryFrom` for safe conversions.', severity: 'warning' },
+    { pattern: /panic!\s*\(/, message: '`panic!` should be reserved for unrecoverable states — use `Result` for fallible operations.', severity: 'warning' },
+    { pattern: /Box::new\s*\(/, message: 'Excessive heap allocation with `Box::new` — consider stack allocation or `Cow`.', severity: 'style' },
+    { pattern: /\.clone\(\)/, message: 'Unnecessary `.clone()` creates a full copy — consider borrowing instead.', severity: 'style' },
+    { pattern: /Rc<RefCell</, message: '`Rc<RefCell<>>` is single-threaded and runtime-checked — consider `Arc<Mutex<>>` for threading or simpler ownership.', severity: 'info' },
+    { pattern: /Box<dyn\s/, message: 'Trait object `Box<dyn T>` has runtime overhead — prefer generics with static dispatch where possible.', severity: 'style' },
   ],
 };
 
-function analyzeStructure(code, lang) {
-  const issues = [];
+function analyzeStructure(code: string, lang: string): ReviewIssue[] {
+  const issues: ReviewIssue[] = [];
   const lines = code.split('\n');
 
   const openBraces = (code.match(/\{/g) || []).length;
@@ -70,9 +114,9 @@ function analyzeStructure(code, lang) {
   return issues;
 }
 
-function checkKeywordPatterns(code, lang) {
-  const issues = [];
-  const patterns = KEYWORD_ISSUES[lang] || [];
+function checkKeywordPatterns(code: string, lang: string): ReviewIssue[] {
+  const issues: ReviewIssue[] = [];
+  const patterns = KEYWORD_ISSUES[lang as LangKey] || [];
   const lines = code.split('\n');
   for (const { pattern, message, severity } of patterns) {
     const match = code.match(pattern);
@@ -84,7 +128,7 @@ function checkKeywordPatterns(code, lang) {
   return issues;
 }
 
-async function reviewWithLLM(code, lang, topic) {
+async function reviewWithLLM(code: string, lang: string, topic?: string): Promise<string | null> {
   const prompt = `You are an expert code reviewer. Review the following ${lang || 'programming'} code${topic ? ` on the topic of "${topic}"` : ''}.
 
 Code to review:
@@ -116,7 +160,7 @@ Overall score out of 10 based on: correctness, style, efficiency, edge cases.`;
   }
 }
 
-function generateStructureReview(code, lang) {
+function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[] } {
   const lines = code.split('\n');
   const hasMain = code.includes('main') || code.includes('Main');
   const hasFunctions = code.includes('function') || code.includes('=>') || code.includes('def ') || code.includes('func ');
@@ -135,7 +179,7 @@ function generateStructureReview(code, lang) {
 
   if (allIssues.length > 0) {
     review += `\n\n**Issues Found:**\n`;
-    const bySeverity = { error: [], warning: [], style: [], info: [] };
+    const bySeverity: Record<string, ReviewIssue[]> = { error: [], warning: [], style: [], info: [] };
     for (const issue of allIssues) {
       (bySeverity[issue.severity] || bySeverity.info).push(issue);
     }
@@ -168,7 +212,7 @@ function generateStructureReview(code, lang) {
   return { review, issues: allIssues };
 }
 
-function calculateScore(issues, lineCount) {
+function calculateScore(issues: ReviewIssue[], lineCount: number): number {
   let score = 10;
   for (const issue of issues) {
     if (issue.severity === 'error') score -= 2;
@@ -179,7 +223,7 @@ function calculateScore(issues, lineCount) {
   return Math.max(1, Math.round(score * 10) / 10);
 }
 
-async function review(code, lang, topic) {
+export async function review(code: string, lang: string, topic?: string): Promise<ReviewResult> {
   if (!code || !code.trim()) {
     return { review: 'No code to review.', issues: [], score: 0 };
   }
@@ -195,4 +239,4 @@ async function review(code, lang, topic) {
   return { ...result, source: 'static' };
 }
 
-module.exports = { review, analyzeStructure, checkKeywordPatterns };
+export { analyzeStructure, checkKeywordPatterns };

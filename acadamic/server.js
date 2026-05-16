@@ -11,10 +11,9 @@ const { URL } = require('url');
 const os = require('os');
 
 const { askLLM } = require('./ai/provider');
-const { getCurriculumContext, getTopicContext } = require('./ai/curriculum');
-const { search: semanticSearch, getContext: getSemanticContext } = require('./ai/embeddings');
+const { getCurriculumContext, getTopicContext, search: semanticSearch, getContext: getSemanticContext } = require('./ai/embeddings');
 const learner = require('./ai/learner');
-const { review: codeReview     } = require('./ai/reviewer');
+const { review: codeReview } = require('./ai/reviewer');
 const { generateExercise } = require('./ai/exercises');
 const database = require('./sql/database');
 
