@@ -1,8 +1,12 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
+import os from 'os';
 
 const LEARNER_DIR = path.join(__dirname, '..', 'data', 'learners');
+const FALLBACK_DIR = path.join(os.tmpdir(), 'doges-lab-learners');
+
+let activeLearnerDir = LEARNER_DIR;
 
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30] as const;
 
@@ -92,8 +96,24 @@ const DEFAULT_LEARNER: Learner = {
 const SCHEMA_VERSION = 2;
 
 function getLearnerPath(learnerId: string): string {
-  const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128);
-  return path.join(LEARNER_DIR, `${safe}.json`);
+  const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  return path.join(activeLearnerDir, `${safe}.json`);
+}
+
+async function ensureDir(): Promise<void> {
+  try {
+    await fsp.mkdir(LEARNER_DIR, { recursive: true });
+    await fsp.access(LEARNER_DIR, fs.constants.W_OK);
+    activeLearnerDir = LEARNER_DIR;
+  } catch {
+    try {
+      await fsp.mkdir(FALLBACK_DIR, { recursive: true });
+      activeLearnerDir = FALLBACK_DIR;
+      console.log('[Learner] Using fallback directory:', FALLBACK_DIR);
+    } catch (e) {
+      console.error('[Learner] Could not create learner directory:', e);
+    }
+  }
 }
 
 function topicKey(lang: string, phase: string | undefined, topic: string): string {
@@ -130,12 +150,6 @@ function migrateLearner(data: Record<string, unknown>): Learner {
     data.topics = migrated;
   }
   return { ...DEFAULT_LEARNER, ...data, schemaVersion: SCHEMA_VERSION } as Learner;
-}
-
-async function ensureDir(): Promise<void> {
-  try {
-    await fsp.mkdir(LEARNER_DIR, { recursive: true });
-  } catch {}
 }
 
 export async function getLearner(learnerId: string): Promise<Learner> {

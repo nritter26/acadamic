@@ -1148,6 +1148,20 @@ body.api-mode #apiResponse { display: flex !important; }
     border-top: 5px solid #334155;
 }
 
+/* ── Loading Placeholder ── */
+.loading-placeholder { color: #64748b; padding: 40px 20px; text-align: center; font-style: italic; font-size: 13px; }
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .devin-mascot { transition: none; }
+  .devin-mascot.talking { animation: none; }
+}
+
 /* ── AI Toggle Button ── */
 .ai-toggle {
     position: fixed;
