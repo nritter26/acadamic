@@ -23,10 +23,6 @@ type ProgressStore struct {
 	db Progress
 }
 
-func escapeArg(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
-}
-
 type ExecuteReq struct {
 	Lang string `json:"lang"`
 	Code string `json:"code"`

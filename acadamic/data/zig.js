@@ -26,7 +26,7 @@ courseData.zig = {
             exp: "Zig provides signed (i) and unsigned (u) integers from 2 to 65535 bits: u8, i32, u64, i128, u256, etc. Arbitrary bit-widths like u7 or i13 are supported with optimal machine code generation.",
             code: "const a: u8 = 255;\nconst b: i32 = -1_000;\nconst c: u64 = 1 << 40;\nconst d: u7 = 127;\nconst e: i13 = 4096;\nstd.debug.print(\"{d} {d} {d} {d} {d}\\n\", .{ a, b, c, d, e });"
         },
-        "Floats & Floats": {
+        "Floats": {
             exp: "Floating point types: f16 (half), f32 (float), f64 (double), f80 (x86 extended), f128 (quad). Literals use decimal or scientific notation with optional type suffix.",
             code: "const a: f32 = 3.14;\nconst b: f64 = 2.71e10;\nconst c: f16 = 1.5;\nconst d = @as(f128, 0.1);\nstd.debug.print(\"{d} {d} {d} {d}\\n\", .{ a, b, c, d });"
         },
