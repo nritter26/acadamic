@@ -606,7 +606,7 @@ function copyCode() {
     });
 }
 
-const aiTutorResponses = typeof aiTutorResponses !== 'undefined' ? aiTutorResponses : [];
+const aiTutorResponses = typeof window !== 'undefined' && window.aiTutorResponses ? window.aiTutorResponses : [];
 
 function getAIResponse(input) {
     const q = input.toLowerCase().trim();
