@@ -224,5 +224,130 @@ FROM users
 LEFT JOIN orders ON users.id = orders.user_id
 GROUP BY users.name;`
     }
+  },
+  "Semantic Analysis": {
+    "Type Checking & Scope": {
+      exp: `<p><strong>Semantic analysis</strong> is the compiler stage that checks whether code makes logical sense — beyond just syntax.</p>
+<p>While parsing checks <em>structure</em> (grammar), semantic analysis checks <em>meaning</em>. This is where the compiler catches real bugs.</p>
+<p><strong>What semantic analysis checks:</strong></p>
+<ul>
+<li><strong>Type checking:</strong> Are operands the right types? <code>"hello" - 5</code> is syntactically valid but semantically wrong in most languages.</li>
+<li><strong>Scope resolution:</strong> Does each variable reference point to a valid declaration?</li>
+<li><strong>Name binding:</strong> Are functions, types, and variables used before declaration (where required)?</li>
+<li><strong>Type inference:</strong> Can the compiler deduce types without explicit annotations?</li>
+</ul>
+<p><strong>Type systems spectrum:</strong></p>
+<ul>
+<li><strong>Dynamic:</strong> Types checked at runtime (Python, JavaScript) — flexible but error-prone</li>
+<li><strong>Static:</strong> Types checked at compile time (C, Go, Rust) — catches errors early</li>
+<li><strong>Gradual:</strong> Mix of both (TypeScript, Python with type hints)</li>
+<li><strong>Strong:</strong> No implicit type coercion (Python, Rust)</li>
+<li><strong>Weak:</strong> Implicit coercion allowed (C, JavaScript)</li>
+</ul>
+<p><strong>Semantic errors vs syntax errors:</strong></p>
+<ul>
+<li><strong>Syntax error:</strong> <code>let 5x = 3;</code> — the grammar doesn't allow this</li>
+<li><strong>Semantic error:</strong> <code>let x: number = "hello";</code> — grammatically valid, but type mismatch</li>
+</ul>`,
+      code: `// Semantic analysis catches these:
+// Type mismatch (TypeScript):
+// let age: number = "twenty";  // Error: Type 'string' not assignable to 'number'
+
+// Undefined variable (all languages):
+// console.log(undeclaredVar);  // ReferenceError: undeclaredVar is not defined
+
+// Scope error:
+// {
+//   let x = 1;
+// }
+// console.log(x);  // ReferenceError: x is not defined (block scoped)
+
+// Type error caught by compiler:
+// In Go: var x int = "hello"  // cannot use "hello" (type string) as type int`
+    }
+  },
+  "Optimization": {
+    "Making Code Faster": {
+      exp: `<p><strong>Compiler optimization</strong> transforms code to run faster, use less memory, or consume less power — without changing its meaning.</p>
+<p>Most optimizations are <strong>conservative</strong>: the compiler only applies them when it's sure the program's behavior won't change.</p>
+<p><strong>Categories of optimization:</strong></p>
+<ul>
+<li><strong>Constant folding:</strong> <code>x = 5 + 3</code> → <code>x = 8</code> (evaluate at compile time)</li>
+<li><strong>Constant propagation:</strong> If <code>x = 5</code>, replace all uses of <code>x</code> with <code>5</code></li>
+<li><strong>Dead code elimination:</strong> Remove branches that never execute or variables never read</li>
+<li><strong>Loop unrolling:</strong> Duplicate loop body to reduce overhead of the loop control</li>
+<li><strong>Function inlining:</strong> Replace function call with the function body itself</li>
+<li><strong>Strength reduction:</strong> Replace expensive ops with cheaper ones (e.g., <code>x * 2</code> → <code>x &lt;&lt; 1</code>)</li>
+<li><strong>Common subexpression elimination:</strong> Compute a value once and reuse it</li>
+</ul>
+<p><strong>Optimization levels in GCC/Clang:</strong></p>
+<ul>
+<li><code>-O0</code>: No optimization (fastest compile, slowest code)</li>
+<li><code>-O1</code>: Basic optimizations (good balance)</li>
+<li><code>-O2</code>: More aggressive (recommended for release builds)</li>
+<li><code>-O3</code>: Very aggressive (may increase code size)</li>
+<li><code>-Os</code>: Optimize for size (embedded systems)</li>
+</ul>`,
+      code: `// Before optimization:
+function compute(arr) {
+  let total = 0;
+  for (let i = 0; i < arr.length; i++) {
+    const taxRate = 0.08;
+    total += arr[i] * taxRate;
+  }
+  return total;
+}
+
+// After constant propagation + inlining:
+// const taxRate = 0.08;  // hoisted outside loop
+// total += arr[i] * 0.08;  // constant propagated
+
+// After loop-invariant code motion:
+// const taxRate = 0.08;
+// const len = arr.length;  // computed once
+// for (let i = 0; i < len; i++) {
+//   total += arr[i] * taxRate;
+// }`
+    }
+  },
+  "Intermediate Representations": {
+    "From AST to Machine Code": {
+      exp: `<p>Between the high-level AST and the low-level machine code, most compilers use one or more <strong>intermediate representations (IRs)</strong>.</p>
+<p>IRs bridge the gap between the source language and the target hardware, making the compiler easier to port to new architectures.</p>
+<p><strong>Common IRs:</strong></p>
+<ul>
+<li><strong>Three-Address Code (TAC):</strong> Simple instruction format: <code>t1 = a + b</code></li>
+<li><strong>Static Single Assignment (SSA):</strong> Each variable assigned exactly once — enables powerful optimizations (used by LLVM, GCC)</li>
+<li><strong>LLVM IR:</strong> A low-level, typed IR used by Clang, rustc, and many others</li>
+<li><strong>Bytecode:</strong> Portable IR for virtual machines (JVM bytecode, Python bytecode, WASM)</li>
+<li><strong>C as IR:</strong> Some compilers output C code and let the C compiler handle machine code generation</li>
+</ul>
+<p><strong>Why multi-level IRs?</strong></p>
+<ul>
+<li>Frontend (language-specific) → high-level IR → mid-level IR → low-level IR → machine code</li>
+<li>Each level enables different optimizations</li>
+<li>New language backends only need to generate IR, not full machine code</li>
+</ul>
+<p><strong>LLVM's architecture:</strong> The most popular compiler infrastructure uses this exact pattern. Language frontends (Clang for C/C++, rustc for Rust) all emit LLVM IR, which LLVM optimizes and compiles to native code.</p>`,
+      code: `// High-level source:
+// result = (a + b) * (c - d)
+
+// Three-Address Code (TAC):
+// t1 = a + b
+// t2 = c - d
+// result = t1 * t2
+
+// SSA Form (Static Single Assignment):
+// t1 = a + b
+// t2 = c - d
+// t3 = t1 * t2
+// result = t3
+// (each variable assigned exactly once)
+
+// LLVM IR (conceptual):
+// %t1 = add i32 %a, %b
+// %t2 = sub i32 %c, %d
+// %result = mul i32 %t1, %t2`
+    }
   }
 };

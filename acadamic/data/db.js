@@ -1,13 +1,8 @@
 let dbProvider = 'pg';
-let cloudProvider = 'aws';
 
 const dbProviderNames = {
     pg: 'PostgreSQL', mysql: 'MySQL', sqlite: 'SQLite',
-    mongodb: 'MongoDB', firebase: 'Firebase', cloud: 'Cloud',
-};
-
-const cloudProviderNames = {
-    aws: 'AWS', azure: 'Azure', gcp: 'GCP', cloud: 'General',
+    mongodb: 'MongoDB', firebase: 'Firebase', cloud: 'General Cloud',
 };
 
 function initDatabase() {
@@ -22,17 +17,6 @@ function initDatabase() {
 
 function switchDBProvider(provider) {
     dbProvider = provider;
-    if (provider === 'cloud') {
-        switchCloudProvider(cloudProvider);
-        return;
-    }
-    currentLang = provider;
-    renderDBTopics();
-    loadFirstTopic(provider);
-}
-
-function switchCloudProvider(provider) {
-    cloudProvider = provider;
     currentLang = provider;
     renderDBTopics();
     loadFirstTopic(provider);
@@ -65,17 +49,7 @@ function renderDBTopics() {
         const active = key === dbProvider ? ' active' : '';
         html += `<button class="db-btn${active}" onclick="switchDBProvider('${key}')">${dbProviderNames[key]}</button>`;
     }
-    html += `</div>`;
-    if (dbProvider === 'cloud') {
-        html += `<div class="db-bar" style="margin-top:4px">`;
-        const cpKeys = Object.keys(cloudProviderNames);
-        for (const key of cpKeys) {
-            const active = key === cloudProvider ? ' active' : '';
-            html += `<button class="db-btn${active}" onclick="switchCloudProvider('${key}')">${cloudProviderNames[key]}</button>`;
-        }
-        html += `</div>`;
-    }
-    html += `<div style="height:6px"></div>`;
+    html += `</div><div style="height:6px"></div>`;
     const langData = courseData[currentLang];
     if (langData) {
         for (const phase in langData) {

@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -19,6 +21,10 @@ type Progress map[string]map[string]bool
 type ProgressStore struct {
 	mu sync.Mutex
 	db Progress
+}
+
+func escapeArg(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
 }
 
 type ExecuteReq struct {
@@ -99,13 +105,98 @@ func main() {
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		if req.Lang == "js" {
-			// JS execution via os/exec using node
-			// Simulated for safety in Go backend
-			json.NewEncoder(w).Encode(ExecRsp{Output: "// JS execution via Node.js backend\n// (Go backend: placeholder)"})
-		} else {
-			json.NewEncoder(w).Encode(ExecRsp{Output: fmt.Sprintf("// Logical Preview for %s\n// Run this code in your %s environment to execute it locally.", strings.ToUpper(req.Lang), strings.ToUpper(req.Lang))})
+		if req.Code == "" {
+			json.NewEncoder(w).Encode(ExecRsp{Output: "No code provided"})
+			return
 		}
+
+		// Build the exec command based on language
+		var cmdStr string
+		var ext string
+		var progBase string
+
+		switch req.Lang {
+		case "js":
+			ext = ".js"
+		case "py":
+			ext = ".py"
+			cmdStr = fmt.Sprintf("python3 -u \"%s\"", "%f")
+		case "go":
+			ext = ".go"
+			cmdStr = fmt.Sprintf("go run \"%s\"", "%f")
+		case "ts":
+			ext = ".ts"
+			cmdStr = fmt.Sprintf("tsx \"%s\"", "%f")
+		case "rs":
+			ext = ".rs"
+			progBase = fmt.Sprintf("_prog_%d", time.Now().UnixNano())
+			cmdStr = fmt.Sprintf("rustc -o %s \"%s\" && ./%s", progBase, "%f", progBase)
+		case "c":
+			ext = ".c"
+			progBase = fmt.Sprintf("_prog_%d", time.Now().UnixNano())
+			cmdStr = fmt.Sprintf("gcc -Wall -o %s \"%s\" && ./%s", progBase, "%f", progBase)
+		case "cpp":
+			ext = ".cpp"
+			progBase = fmt.Sprintf("_prog_%d", time.Now().UnixNano())
+			cmdStr = fmt.Sprintf("g++ -std=c++20 -Wall -o %s \"%s\" && ./%s", progBase, "%f", progBase)
+		case "zig":
+			ext = ".zig"
+			cmdStr = fmt.Sprintf("zig run \"%s\"", "%f")
+		case "swift":
+			ext = ".swift"
+			cmdStr = fmt.Sprintf("swift \"%s\"", "%f")
+		default:
+			json.NewEncoder(w).Encode(ExecRsp{Output: fmt.Sprintf("// %s execution not available in Go backend", strings.ToUpper(req.Lang))})
+			return
+		}
+
+		// For JS, execute inline
+		if req.Lang == "js" {
+			cmd := exec.Command("node", "-e", req.Code)
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				json.NewEncoder(w).Encode(ExecRsp{Output: fmt.Sprintf("Error: %s\n%s", err.Error(), string(output))})
+				return
+			}
+			out := strings.TrimSpace(string(output))
+			if out == "" {
+				out = "(no output)"
+			}
+			json.NewEncoder(w).Encode(ExecRsp{Output: out})
+			return
+		}
+
+		// For file-based execution
+		tmpDir, err := os.MkdirTemp("", "exec-")
+		if err != nil {
+			json.NewEncoder(w).Encode(ExecRsp{Output: "Failed to create temp directory"})
+			return
+		}
+		defer os.RemoveAll(tmpDir)
+
+		tmpFile := filepath.Join(tmpDir, "code"+ext)
+		if err := os.WriteFile(tmpFile, []byte(req.Code), 0644); err != nil {
+			json.NewEncoder(w).Encode(ExecRsp{Output: "Failed to write temp file"})
+			return
+		}
+
+		cmdLine := strings.ReplaceAll(cmdStr, "%f", tmpFile)
+		cmd := exec.Command("sh", "-c", cmdLine)
+		cmd.Dir = tmpDir
+		cmd.Env = append(os.Environ(),
+			fmt.Sprintf("PATH=%s:%s:%s", os.Getenv("PATH"),
+				filepath.Join(os.Getenv("HOME"), ".local/bin"),
+				filepath.Join(os.Getenv("HOME"), ".cargo/bin")))
+
+		output, err := cmd.CombinedOutput()
+		out := strings.TrimSpace(string(output))
+		if err != nil && out == "" {
+			out = fmt.Sprintf("Process failed: %s", err.Error())
+		}
+		if out == "" {
+			out = "(no output)"
+		}
+		json.NewEncoder(w).Encode(ExecRsp{Output: out})
 	})
 
 	mux.HandleFunc("POST /api/chat", func(w http.ResponseWriter, r *http.Request) {

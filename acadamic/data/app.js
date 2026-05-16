@@ -5,6 +5,51 @@ let currentLevel = 'all';
 let currentCompletionFilter = 'all';
 let collapsedPhases = new Set();
 
+const LANG_NAMES = {
+    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
+    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
+    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
+    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
+    cloud: 'cloud',
+};
+const NAME_TO_LANG = {};
+for (const [code, name] of Object.entries(LANG_NAMES)) {
+    NAME_TO_LANG[name] = code;
+}
+
+function detectLanguageInQuery(q) {
+    const words = q.toLowerCase().split(/\s+/);
+    for (const word of words) {
+        for (const [code, name] of Object.entries(LANG_NAMES)) {
+            if (word === name || word === code) return code;
+        }
+        if (word === 'sql') return 'pg';
+    }
+    return null;
+}
+
+function getLanguageIntro(langCode) {
+    const data = courseData[langCode];
+    if (!data) return null;
+    // Pick the first topic from the first phase
+    const phases = Object.keys(data);
+    if (!phases.length) return null;
+    const firstPhase = phases[0];
+    const topics = Object.keys(data[firstPhase]);
+    if (!topics.length) return null;
+    const topic = topics[0];
+    const item = data[firstPhase][topic];
+    const displayName = LANG_NAMES[langCode] || langCode.toUpperCase();
+    return {
+        topic,
+        phase: firstPhase,
+        exp: item.exp || '',
+        code: item.code || '',
+        displayName: displayName.charAt(0).toUpperCase() + displayName.slice(1),
+    };
+}
+
 
 
 function loadTopic(phase, topic) {
@@ -28,6 +73,16 @@ function loadTopic(phase, topic) {
     const expEl = document.getElementById('explanation');
     const depth = getTopicDepth(item.exp);
     expEl.innerHTML = `<h3 style="margin:0; color:#fff">${topic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${phase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${item.exp}`;
+    if (item.prereq) {
+        const parts = item.prereq.split('::');
+        if (parts.length === 2) {
+            const [prereqPhase, prereqTopic] = parts;
+            const prereqData = langData[prereqPhase] && langData[prereqPhase][prereqTopic];
+            if (prereqData) {
+                expEl.innerHTML = `<div class="prereq-banner">📚 Prerequisite: <a href="#" onclick="loadTopic('${prereqPhase.replace(/'/g, "\\'")}', '${prereqTopic.replace(/'/g, "\\'")}'); return false;">${prereqTopic}</a></div>` + expEl.innerHTML;
+            }
+        }
+    }
     expEl.classList.remove('fade-in');
     void expEl.offsetWidth;
     expEl.classList.add('fade-in');
@@ -277,7 +332,9 @@ function runCode() {
             cpp: 'g++ -std=c++20 -Wall -o program program.cpp && ./program',
             cs: 'dotnet run', kt: 'kotlinc program.kt -include-runtime -d program.jar && java -jar program.jar',
             swift: 'swift program.swift', zig: 'zig build-exe program.zig && ./program',
-            pg: 'psql -f query.sql', dk: 'docker build -t myapp . && docker run myapp',
+            sqlite: 'SQLite is built-in, just click Run!',
+            pg: 'psql -f query.sql', mysql: 'mysql < query.sql',
+            dk: 'docker build -t myapp . && docker run myapp',
             mongodb: 'mongosh < script.js', gamedev: 'Run in your game engine IDE',
             git: 'Run git commands in terminal'
         };
@@ -297,8 +354,12 @@ function runCode() {
 
 let conversationHistory = [];
 const MAX_HISTORY = 50;
-
 const CHAT_STORAGE_KEY = 'dogeslab_chat';
+
+let lastCodeRun = '';
+let lastCodeOutput = '';
+let convSubject = '';
+let convLang = '';
 
 function saveChatHistory() {
     try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
@@ -342,19 +403,39 @@ function toggleAI() {
     if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
 }
 
+let aiCodeId = 0;
+function formatAIText(text) {
+    let displayText = text;
+    if (text && text.includes('**')) {
+        displayText = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+    displayText = displayText.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
+        const id = 'ai-code-' + (++aiCodeId);
+        const safeCode = code.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        setTimeout(() => {
+            const btn = document.getElementById(id);
+            if (btn) btn.dataset.code = safeCode;
+        }, 0);
+        return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${code}</code></pre><button class="ai-run-code" id="${id}">Run</button></div>`;
+    });
+    displayText = displayText.replace(/\`([^`]+)\`/g, '<code>$1</code>');
+    displayText = displayText.replace(/\n/g, '<br>');
+    return displayText;
+}
+
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.ai-run-code');
+    if (btn && btn.dataset.code !== undefined) {
+        runCodeFromAI(btn.dataset.code);
+    }
+});
+
 function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
-        let displayText = text;
-        if (text && text.includes('**')) {
-            displayText = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        }
-        displayText = displayText.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, '<pre class="ai-code-block"><code>$2</code></pre>');
-        displayText = displayText.replace(/\`([^`]+)\`/g, '<code>$1</code>');
-        displayText = displayText.replace(/\n/g, '<br>');
-        div.innerHTML = `<div class="label">AI</div>${displayText}`;
+        div.innerHTML = `<div class="label">AI</div>${formatAIText(text)}`;
     } else if (role === 'user') {
         div.textContent = text;
     }
@@ -376,6 +457,100 @@ function addAIMessage(text, role, skipSave) {
 function removeTypingIndicator() {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
+}
+
+// ── Streaming Bot Message ──
+let streamingMsgEl = null;
+let streamingFullText = '';
+
+function createStreamingBotMessage() {
+    removeTypingIndicator();
+    const el = document.getElementById('aiMessages');
+    const div = document.createElement('div');
+    div.className = 'ai-msg bot streaming';
+    div.innerHTML = '<div class="label">AI</div><span class="streaming-content"></span><span class="streaming-cursor">▊</span>';
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+    streamingMsgEl = div;
+    streamingFullText = '';
+    return div;
+}
+
+function updateStreamingContent(text) {
+    streamingFullText = text;
+    if (!streamingMsgEl) return;
+    const content = streamingMsgEl.querySelector('.streaming-content');
+    if (content) {
+        content.innerHTML = formatAIText(text);
+    }
+    const el = document.getElementById('aiMessages');
+    el.scrollTop = el.scrollHeight;
+}
+
+function finalizeStreamingBotMessage(text) {
+    if (!streamingMsgEl) return;
+    streamingMsgEl.classList.remove('streaming');
+    const cursor = streamingMsgEl.querySelector('.streaming-cursor');
+    if (cursor) cursor.remove();
+    const content = streamingMsgEl.querySelector('.streaming-content');
+    if (content) {
+        content.innerHTML = formatAIText(text);
+    }
+    streamingFullText = text;
+    conversationHistory.push({ role: 'bot', text });
+    if (conversationHistory.length > MAX_HISTORY) conversationHistory.shift();
+    saveChatHistory();
+    streamingMsgEl = null;
+    updateAISuggestions();
+}
+
+function runCodeFromAI(code) {
+    const editor = document.getElementById('editor');
+    if (editor) {
+        editor.value = code;
+        updateHighlight();
+        runCode();
+    }
+}
+
+function isErrorQuery(q) {
+    return /why|error|fix|bug|wrong|not working|issue|debug/.test(q);
+}
+
+const PRONOUN_PATTERN = /^(what|how|why|where|when|who|which|can|could|would|will|do|does|did|is|are|was|were)\s+(is|are|was|were|does|do|did|can|could|would|will|about|the|a|an|it|this|that|they|these|those|its|their|them)\b/i;
+const PRONOUN_WORDS = /\b(it|this|that|they|them|these|those|its|their)\b/i;
+
+function extractSubject(text) {
+    if (!text) return '';
+    const langMatch = text.match(/\*\*([A-Z][a-z+#]+)\*\*/);
+    if (langMatch) {
+        const name = langMatch[1].toLowerCase();
+        for (const [, display] of Object.entries(LANG_NAMES)) {
+            if (name === display) return langMatch[1];
+        }
+    }
+    const topicMatch = text.match(/\*\*([^*]+)\*\*/);
+    if (topicMatch) return topicMatch[1];
+    return currentTopic || '';
+}
+
+function resolveFollowUp(q) {
+    if (!convSubject) return q;
+    const trimmed = q.trim();
+    if (PRONOUN_PATTERN.test(trimmed) || PRONOUN_WORDS.test(trimmed)) {
+        return `${convSubject} ${trimmed}`;
+    }
+    return q;
+}
+
+function extractConversationSubject(response) {
+    if (!response) return;
+    const subj = extractSubject(response);
+    if (subj) {
+        convSubject = subj;
+        const code = detectLanguageInQuery(subj.toLowerCase()) || '';
+        if (code) convLang = code;
+    }
 }
 
 // ── Code Review UI ──
@@ -492,6 +667,22 @@ const aiTutorResponses = [
     {
         keywords: ['recursion', 'recursive', 'base case', 'stack overflow', 'tail call'],
         response: "Recursion is when a function calls itself. It's an elegant way to solve problems that have a repetitive structure (trees, fractals, divide-and-conquer).\n\n**Every recursive function needs two parts:**\n1. **Base case** — when to STOP (without this, infinite recursion!)\n2. **Recursive case** — call itself with a simpler version of the problem\n\n```js\n// Factorial: n! = n * (n-1) * ... * 1\nfunction factorial(n) {\n  if (n <= 1) return 1;       // base case\n  return n * factorial(n - 1); // recursive case\n}\n```\n\n**When to use recursion vs loops:**\n- **Recursion:** tree traversal, parsing, divide-and-conquer algorithms\n- **Loops:** simple iteration, performance-critical code\n\n**Watch out for:**\n- **Stack overflow:** too many recursive calls exhausts the call stack\n- **Missing base case:** infinite recursion = crash\n- **Tail recursion optimization:** some languages optimize this (not JS/Python)\n\n**Exercise:** Write a recursive function that computes the nth Fibonacci number. Then compare it with a loop-based version."
+    },
+    {
+        keywords: ['rust', 'rustlang'],
+        response: "**Rust** is a systems programming language focused on three pillars: **safety**, **speed**, and **concurrency**.\n\n**Key features:**\n- **No garbage collector** — memory safety is enforced at compile time via an ownership system\n- **Zero-cost abstractions** — high-level constructs compile down to efficient machine code\n- **Fearless concurrency** — the type system prevents data races at compile time\n- **Excellent tooling** — `cargo` for package management, `rustfmt` for formatting, `clippy` for linting\n\n**Who uses it?**\n- Mozilla (Servo browser engine), Dropbox, Figma, Cloudflare\n- Systems programming, WebAssembly, CLI tools, game engines\n\n**Getting started:**\n```rust\nfn main() {\n    println!(\"Hello, Rust!\");\n    let x = 42;\n    println!(\"x = {}\", x);\n}\n```\n\n**Compared to C/C++:** Rust gives you the same low-level control but with a much safer type system. The compiler catches memory errors at compile time instead of crashing at runtime.\n\nWant to try Rust? Select it from the language bar at the top and start with the first topic!"
+    },
+    {
+        keywords: ['go language', 'golang'],
+        response: "**Go** (or Golang) is a statically typed, compiled programming language designed at Google for building scalable, concurrent systems.\n\n**Key features:**\n- **Simple syntax** — easy to read and learn, similar to C but cleaner\n- **Built-in concurrency** — goroutines and channels make concurrent programming straightforward\n- **Fast compilation** — compiles to a single binary in seconds\n- **Standard library** — includes HTTP server, JSON, testing, and more out of the box\n\n**Who uses it?**\n- Google, Uber, Dropbox, Docker, Kubernetes are written in Go\n- Perfect for REST APIs, microservices, CLI tools, network servers\n\n**Getting started:**\n```go\npackage main\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Go!\")\n}\n```\n\n**Compared to Python:** Go is much faster (compiled), catches errors at compile time, and has excellent built-in concurrency. Python is more flexible for quick scripting. Both are great for different use cases!\n\nWant to try Go? Select it from the language bar at the top and start with the first topic!"
+    },
+    {
+        keywords: ['python language'],
+        response: "**Python** is a high-level, interpreted programming language known for its readability and versatility. It's one of the best languages for beginners.\n\n**Key features:**\n- **Readable syntax** — uses indentation instead of braces, reads like plain English\n- **Dynamically typed** — no type declarations needed, great for rapid prototyping\n- **Massive ecosystem** — PyPI has over 400,000 packages for everything from web dev to AI\n- **Batteries included** — extensive standard library covers file I/O, networking, data processing\n\n**Who uses it?**\n- Data scientists, ML engineers, web developers (Django/Flask), DevOps\n- Google, Instagram, Spotify, Netflix — all use Python extensively\n\n**Getting started:**\n```python\nprint(\"Hello, Python!\")\nname = input(\"What's your name? \")\nprint(f\"Nice to meet you, {name}!\")\n```\n\n**Compared to JavaScript:** Python is more readable and has better data science libraries. JS is faster in the browser and has a larger web ecosystem. Both are excellent for beginners!\n\nWant to try Python? Select it from the language bar at the top!"
+    },
+    {
+        keywords: ['javascript language'],
+        response: "**JavaScript** is the language of the web — it runs in every browser and on servers via Node.js. It's one of the most widely-used programming languages.\n\n**Key features:**\n- **Universal** — runs in every web browser without any installation\n- **Event-driven** — naturally suited for interactive UIs and real-time apps\n- **Flexible** — supports procedural, object-oriented, and functional programming styles\n- **Huge ecosystem** — npm is the largest package registry in the world\n\n**Who uses it?**\n- Every web developer (frontend AND backend with Node.js)\n- React, Vue, Angular, Svelte — all major frontend frameworks use JS/TypeScript\n\n**Getting started:**\n```js\nconsole.log(\"Hello, JavaScript!\");\nconst name = \"World\";\nconsole.log(`Hello, ${name}!`);\n```\n\n**Why learn JavaScript?** It's the only language that runs natively in web browsers. Once you know JS, you can build websites, mobile apps (React Native), desktop apps (Electron), and server apps (Node.js) — all with one language!\n\nYou're already in JavaScript mode! Just pick a topic on the left to get started."
     }
 ];
 
@@ -538,15 +729,66 @@ function getAIResponse(input) {
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
 
+const SYNONYM_MAP = {
+    variable: ['variable', 'declare', 'let', 'const', 'var', 'declaration', 'assign'],
+    function: ['function', 'method', 'def', 'func', '=>', 'arrow', 'lambda', 'call'],
+    class: ['class', 'object', 'oop', 'inherit', 'extends', 'prototype', 'struct', 'constructor'],
+    array: ['array', 'list', 'collection', 'vector', 'slice', 'element', 'index'],
+    loop: ['loop', 'for', 'while', 'iterate', 'foreach', 'iteration', 'repeat'],
+    string: ['string', 'char', 'text', 'concatenat', 'interpolat', 'template'],
+    async: ['async', 'await', 'promise', 'callback', 'future', 'coroutine', 'goroutine'],
+    error: ['error', 'exception', 'try', 'catch', 'panic', 'throw', 'debug', 'bug'],
+    type: ['type', 'int', 'bool', 'float', 'string', 'null', 'undefined', 'void'],
+    pointer: ['pointer', 'reference', 'memory', 'malloc', 'free', 'heap', 'stack', 'borrow', 'ownership'],
+    closure: ['closure', 'scope', 'hoist', 'lexical', 'temporal dead zone', 'tdz'],
+    recursion: ['recursion', 'recursive', 'base case', 'stack overflow', 'tail call'],
+    testing: ['test', 'testing', 'assert', 'jest', 'mocha', 'pytest'],
+    sql: ['sql', 'select', 'join', 'table', 'database', 'query', 'where', 'insert', 'index'],
+    git: ['git', 'commit', 'push', 'pull', 'branch', 'merge', 'rebase', 'clone'],
+};
+
+function expandSynonyms(word) {
+    for (const [, syns] of Object.entries(SYNONYM_MAP)) {
+        if (syns.includes(word) || syns.some(s => s.includes(word))) {
+            return syns;
+        }
+    }
+    return [word];
+}
+
 function getLocalAIResponse(input) {
     const q = input.toLowerCase().trim();
     if (!q || q.length < 3) return null;
-    const langData = courseData[currentLang];
-    if (!langData) return null;
 
     const words = q.split(/\s+/).filter(w => w.length > 2);
     const meta = ['help', 'hello', 'hi', 'hey', 'thanks'];
     if (meta.includes(q) || words.length === 0) return null;
+
+    // ── Cross-language detection ──
+    const askedLang = detectLanguageInQuery(q);
+    const searchLang = askedLang || currentLang;
+    const langData = courseData[searchLang];
+    if (!langData) return null;
+
+    // If asking about a different language, give a language intro
+    if (askedLang && askedLang !== currentLang) {
+        const intro = getLanguageIntro(askedLang);
+        if (intro) {
+            return `**${intro.displayName}** is a programming language you can study here!<br><br>${intro.exp || ''}<br><br>` +
+                `**Example code:**<br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${(intro.code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br>` +
+                `Want to switch to **${intro.displayName}**? Click the language selector at the top!<br><br>` +
+                `I can also tell you about specific topics in ${intro.displayName} — just ask!`;
+        }
+    }
+
+    // ── Curriculum search (in the detected or current language) ──
+    const expandedWords = new Set();
+    for (const w of words) {
+        for (const syn of expandSynonyms(w)) {
+            expandedWords.add(syn);
+        }
+    }
+    const allWords = [...expandedWords];
 
     let best = null;
     let bestScore = 0;
@@ -560,25 +802,28 @@ function getLocalAIResponse(input) {
 
             let score = 0;
             let matchedWords = 0;
+            let topicMatches = 0;
 
-            for (const word of words) {
-                if (topicLow.includes(word)) { score += 3; matchedWords++; }
-                if (expLow.includes(word)) score += 1;
+            for (const word of allWords) {
+                if (topicLow.includes(word)) { score += 3; matchedWords++; topicMatches++; }
+                if (expLow.includes(word)) { score += 1; matchedWords++; }
             }
 
             if (searchText.includes(q)) score += 10;
-            if (matchedWords > 0) score = score * (1 + matchedWords / words.length);
-            if (phase === currentPhase) score *= 1.2;
+            if (matchedWords > 0) score = score * (1 + matchedWords / (allWords.length || 1));
+            if (topicMatches > 0) score *= 1.3;
+            if (phase === currentPhase && searchLang === currentLang) score *= 1.2;
 
             if (score > bestScore) {
                 bestScore = score;
-                best = { phase, topic, code: item.code, exp: item.exp };
+                best = { phase, topic, code: item.code, exp: item.exp, lang: searchLang };
             }
         }
     }
 
-    if (best && bestScore >= 2) {
-        return `I found this in the curriculum that might help:<br><br><b>${best.topic}</b> — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br><b>Try this:</b> paste the code into the editor, modify it, and click Run to experiment!`;
+    if (best && bestScore >= 1.5) {
+        const langLabel = best.lang !== currentLang ? ` (${LANG_NAMES[best.lang] || best.lang.toUpperCase()})` : '';
+        return `I found this in the curriculum that might help:<br><br><b>${best.topic}</b>${langLabel} — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br><b>Try this:</b> paste the code into the editor, modify it, and click Run to experiment!`;
     }
     return null;
 }
@@ -622,33 +867,44 @@ function analyzeUserCodeClient(code, lang) {
     return hints.length > 0 ? hints : null;
 }
 
-function askAI(q) {
+async function askAI(q) {
+    streamingFullText = '';
+    const enrichedQ = resolveFollowUp(q);
     addAIMessage(q, 'user');
-    addAIMessage('', 'typing');
 
     const editor = document.getElementById('editor');
     const currentCode = editor ? editor.value : '';
     const output = document.getElementById('output');
-    const hasError = output && (output.innerText.includes('Error:') || output.innerText.includes('ERROR') || output.innerText.includes('SyntaxError') || output.innerText.includes('ReferenceError') || output.innerText.includes('FAIL'));
-    const lastOutput = output ? output.innerText : '';
+    const outputText = output ? output.innerText : '';
+    const hasError = outputText.includes('Error:') || outputText.includes('ERROR') || outputText.includes('SyntaxError') || outputText.includes('ReferenceError') || outputText.includes('TypeError') || outputText.includes('FAIL');
 
-    if (hasError && currentTopic && (q.includes('why') || q.includes('error') || q.includes('fix') || q.includes('bug') || q.includes('wrong') || q.includes('not working') || q.length < 10)) {
-        const errorTip = getErrorTutorTip(currentTopic, lastOutput);
+    const setConvSubject = (reply) => {
+        if (reply) setTimeout(() => extractConversationSubject(reply), 0);
+    };
+
+    // ── 1. Error-aware early return ──
+    if (hasError && currentTopic && isErrorQuery(q)) {
+        const errorTip = getErrorTutorTip(currentTopic, outputText);
         if (errorTip) {
-            setTimeout(() => { removeTypingIndicator(); addAIMessage(errorTip, 'bot'); }, 200);
+            addAIMessage('', 'typing');
+            await sleep(300);
+            removeTypingIndicator();
+            addAIMessage(errorTip, 'bot');
+            setConvSubject(errorTip);
             return;
         }
     }
 
-    if (hasError || q.includes('error') || q.includes('bug') || q.includes('fix') || q.includes('wrong') || q.includes('not working') || q.includes('issue')) {
+    // ── 2. Code analysis for error-related questions ──
+    if (hasError || isErrorQuery(q)) {
         let errorReply = '';
         const analysis = analyzeUserCodeClient(currentCode, currentLang);
         if (analysis && analysis.length > 0) {
             errorReply = "I looked at your code and found some issues:\n\n" +
                 analysis.map((h, i) => `${i + 1}. ${h}`).join('\n') + '\n\n';
         }
-        if (lastOutput && (lastOutput.includes('Error:') || lastOutput.includes('ReferenceError') || lastOutput.includes('TypeError') || lastOutput.includes('SyntaxError'))) {
-            errorReply += `**Your code produced this output:**\n\`\`\`\n${lastOutput}\n\`\`\`\n\n`;
+        if (outputText && /Error|ReferenceError|TypeError|SyntaxError/.test(outputText)) {
+            errorReply += `**Your code produced this output:**\n\`\`\`\n${outputText}\n\`\`\`\n\n`;
         }
         if (currentCode && currentTopic) {
             errorReply += `Since you're working on **${currentTopic}**, here's a hint:\n`;
@@ -658,33 +914,95 @@ function askAI(q) {
         }
         if (errorReply) {
             errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
-            setTimeout(() => { removeTypingIndicator(); addAIMessage(errorReply, 'bot'); }, 200);
+            addAIMessage('', 'typing');
+            await sleep(200);
+            removeTypingIndicator();
+            addAIMessage(errorReply, 'bot');
+            setConvSubject(errorReply);
             return;
         }
     }
 
-    const localReply = getLocalAIResponse(q);
+    // ── 3. Local curriculum search (instant, no network) ──
+    const localReply = getLocalAIResponse(enrichedQ);
     if (localReply) {
-        setTimeout(() => { removeTypingIndicator(); addAIMessage(localReply, 'bot'); }, 200);
+        addAIMessage('', 'typing');
+        await sleep(200);
+        removeTypingIndicator();
+        addAIMessage(localReply, 'bot');
+        setConvSubject(localReply);
         return;
     }
-    fetch(BACKEND_URL + '/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            message: q,
-            lang: currentLang,
-            topic: currentTopic,
-            phase: currentPhase,
-            code: currentCode,
-            output: lastOutput,
-            hasError: hasError,
-            history: conversationHistory.slice(-6)
-        })
-    })
-    .then(r => r.json())
-    .then(d => { removeTypingIndicator(); addAIMessage(d.reply || getAIResponse(q), 'bot'); })
-    .catch(() => { removeTypingIndicator(); setTimeout(() => addAIMessage(getAIResponse(q), 'bot'), 300); });
+
+    // ── 4. Stream from backend ──
+    createStreamingBotMessage();
+    try {
+        const response = await fetch(BACKEND_URL + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: enrichedQ,
+                lang: convLang || currentLang,
+                topic: convSubject || currentTopic,
+                phase: currentPhase,
+                code: currentCode,
+                output: outputText,
+                hasError: hasError,
+                history: conversationHistory.slice(-8)
+            })
+        });
+
+        if (!response.ok || !response.body) {
+            throw new Error('Stream not available');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                    const data = trimmed.slice(6);
+                    if (data === '[DONE]') continue;
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.error) {
+                            finalizeStreamingBotMessage("Sorry, I encountered an error. Please try again.");
+                            return;
+                        }
+                        if (parsed.content !== undefined) {
+                            updateStreamingContent(streamingFullText + parsed.content);
+                        }
+                    } catch {}
+                }
+            }
+        }
+        extractConversationSubject(streamingFullText);
+        finalizeStreamingBotMessage(streamingFullText);
+    } catch (e) {
+        // ── 5. Fallback to local keyword responses ──
+        if (streamingMsgEl) {
+            streamingMsgEl.remove();
+            streamingMsgEl = null;
+        }
+        const fallbackReply = getAIResponse(enrichedQ);
+        addAIMessage('', 'typing');
+        await sleep(200);
+        removeTypingIndicator();
+        addAIMessage(fallbackReply, 'bot');
+        setConvSubject(fallbackReply);
+    }
+}
+
+function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
 }
 
 function sendAI() {
@@ -692,7 +1010,7 @@ function sendAI() {
     const q = input.value.trim();
     if (!q) return;
     input.value = '';
-    askAI(q);
+    askAI(q).catch(() => {});
 }
 
 const suggestionSets = {
@@ -717,6 +1035,7 @@ function getDynamicSuggestions() {
     const output = document.getElementById('output');
     const outputText = output ? output.innerText : '';
     const hasError = outputText.includes('Error:') || outputText.includes('FAIL') || outputText.includes('SyntaxError') || outputText.includes('ReferenceError') || outputText.includes('TypeError');
+    const convLen = conversationHistory.length;
 
     if (hasError) {
         if (outputText.includes('SyntaxError') || outputText.includes('Unexpected token')) {
@@ -726,16 +1045,31 @@ function getDynamicSuggestions() {
             return ["What is a ReferenceError?", "How to declare variables", "Variable scope explained", "Check variable spelling"];
         }
         if (outputText.includes('TypeError') || outputText.includes('is not a function') || outputText.includes('Cannot read property')) {
-            return ["What is a TypeError?", "Check variable types", "How to use console.log", "Debug undefined values"];
+            return ["What is a TypeError?", "Check variable types", "Debug undefined values", "How to use console.log"];
         }
         if (outputText.includes('FAIL') || outputText.includes('Challenge')) {
             return ["Hint for this challenge", "Explain the concept", "Show me a similar example", "Debug my logic"];
         }
         if (currentTopic) {
-            return ["Why did I get this error?", "Help me debug my code", `Explain ${currentTopic}`, "How do I fix common mistakes?"];
+            const topicLC = currentTopic.toLowerCase();
+            return [`Explain this ${topicLC} error`, `Help me fix ${topicLC}`, `How does ${topicLC} work?`, "Common debugging tips"];
         }
         return ["Why did I get this error?", "How do I fix my code?", "Explain what went wrong", "Debugging tips"];
     }
+
+    if (convLen >= 4) {
+        const lastBot = [...conversationHistory].reverse().find(m => m.role === 'bot');
+        if (lastBot && lastBot.text) {
+            const bt = lastBot.text.toLowerCase();
+            if (bt.includes('try this') || bt.includes('practice') || bt.includes('exercise')) {
+                return ["I tried it, now what?", "Explain the concept more", "Show me a variation", "What's next after this?"];
+            }
+            if (bt.includes('would you like') || bt.includes('tell me more')) {
+                return ["Yes, tell me more", "Give me an example", "Explain it simply", "Compare with other languages"];
+            }
+        }
+    }
+
     if (currentTopic) {
         const topHints = {
             "Variables": ["How do I declare a variable?", "Variable naming rules", "What is scope?", "Practice: declare and print"],
@@ -759,6 +1093,7 @@ function getDynamicSuggestions() {
         }
         return [`Explain ${currentTopic}`, `Practice: ${currentTopic.toLowerCase()} exercise`, "Show me an example", "Common mistakes"];
     }
+
     if (outputText.includes('PASS') || outputText.includes('Challenge solved')) {
         return ["What should I learn next?", "Explain the concept behind this", "Show me a harder challenge", "Practice more exercises"];
     }
@@ -804,6 +1139,29 @@ function generateExercise() {
 function updateAISuggestions() {
     const el = document.getElementById('aiSuggestions');
     const dynamic = getDynamicSuggestions();
+
+    if (streamingFullText) {
+        const text = streamingFullText.toLowerCase();
+        const followUps = [];
+        if (text.includes('variable') || text.includes('declare')) followUps.push('Show me a variable example');
+        if (text.includes('function') || text.includes('method')) followUps.push('Give me a function exercise');
+        if (text.includes('loop') || text.includes('for ') || text.includes('while')) followUps.push('Show me a loop example');
+        if (text.includes('class') || text.includes('object')) followUps.push('Practice: build a class');
+        if (text.includes('array') || text.includes('list')) followUps.push('Practice with arrays');
+        if (text.includes('error') || text.includes('debug')) followUps.push('How do I debug this?', 'Common mistakes');
+        if (followUps.length > 0) {
+            followUps.push('Tell me more', 'Give me an example');
+            const buttons = followUps.slice(0, 4).map(s =>
+                `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`
+            );
+            if (currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge') {
+                buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+            }
+            el.innerHTML = buttons.join('');
+            return;
+        }
+    }
+
     const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
     const hasExercise = currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
     const buttons = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`);
@@ -2072,6 +2430,61 @@ function toggleProgress(topic) {
     updateTopicDisplay();
 }
 
+function getTopicList() {
+    const langData = courseData[currentLang];
+    if (!langData) return [];
+    const topics = [];
+    for (const phase in langData) {
+        for (const topic in langData[phase]) {
+            topics.push({ phase, topic });
+        }
+    }
+    return topics;
+}
+
+function getCurrentTopicIndex() {
+    const list = getTopicList();
+    return list.findIndex(t => t.topic === currentTopic && t.phase === currentPhase);
+}
+
+function navTopic(dir) {
+    const list = getTopicList();
+    const idx = getCurrentTopicIndex();
+    if (idx === -1) return;
+    const next = idx + dir;
+    if (next < 0 || next >= list.length) return;
+    loadTopic(list[next].phase, list[next].topic);
+}
+
+function updateProgressBar() {
+    const langData = courseData[currentLang];
+    if (!langData) return;
+    const allTopics = getTopicList();
+    if (allTopics.length === 0) return;
+    let completed = 0;
+    for (const t of allTopics) {
+        if (completedTopics.has(currentLang + ':' + t.topic)) completed++;
+    }
+    const pct = Math.round((completed / allTopics.length) * 100);
+    let bar = document.getElementById('progressBar');
+    if (!bar) {
+        const label = document.querySelector('.col:first-child label');
+        if (!label) return;
+        const pctContainer = document.createElement('div');
+        pctContainer.id = 'progressBarContainer';
+        pctContainer.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+        pctContainer.innerHTML =
+            '<div id="progressBar" style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden;">' +
+            '<div style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div></div>' +
+            '<span id="progressText" style="font-size:9px;color:#64748b;font-weight:800;white-space:nowrap;">0%</span>';
+        label.after(pctContainer);
+        bar = document.getElementById('progressBar');
+    }
+    const fill = bar.querySelector('div');
+    fill.style.width = pct + '%';
+    document.getElementById('progressText').textContent = completed + '/' + allTopics.length + ' (' + pct + '%)';
+}
+
 function updateTopicDisplay() {
     document.querySelectorAll('.item-btn').forEach(btn => {
         const raw = btn.getAttribute('data-topic') || btn.textContent.replace(/^[★☆]\s*/, '').replace(/^[BIE]\s+/, '').trim();
@@ -2089,6 +2502,237 @@ function updateTopicDisplay() {
         };
     });
     updateProgressBar();
+}
+
+// ── DIFFICULTY / AUTO-TAGS / DEPTH ──
+function getAutoTags(phase, topic) {
+    const tags = new Set();
+    const phaseWords = phase.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
+    const topicWords = topic.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
+    phaseWords.forEach(w => tags.add(w));
+    topicWords.forEach(w => tags.add(w));
+    return [...tags];
+}
+
+function getTopicDepth(exp) {
+    const len = (exp || '').length;
+    if (len < 200) return { label: 'quick', icon: '⚡' };
+    if (len < 500) return { label: 'standard', icon: '●' };
+    return { label: 'in-depth', icon: '◉' };
+}
+
+// ── COLLAPSIBLE PHASES ──
+function togglePhase(phaseKey, phaseName) {
+    const header = document.querySelector(`.phase-header[data-phase="${phaseKey}"]`);
+    if (!header) return;
+    const isCollapsed = collapsedPhases.has(phaseKey);
+    if (isCollapsed) {
+        collapsedPhases.delete(phaseKey);
+        header.classList.remove('collapsed');
+        header.querySelector('.phase-toggle').textContent = '▼';
+    } else {
+        collapsedPhases.add(phaseKey);
+        header.classList.add('collapsed');
+        header.querySelector('.phase-toggle').textContent = '▶';
+    }
+    const items = document.querySelectorAll(`.item-btn[data-phase="${phaseKey}"]`);
+    items.forEach(btn => {
+        btn.classList.toggle('phase-collapsed', collapsedPhases.has(phaseKey));
+    });
+}
+
+// ── COLLAPSE / EXPAND ALL ──
+function collapseAllPhases() {
+    document.querySelectorAll('.phase-header').forEach(h => {
+        const key = h.dataset.phase;
+        if (!key) return;
+        collapsedPhases.add(key);
+        h.classList.add('collapsed');
+        const toggle = h.querySelector('.phase-toggle');
+        if (toggle) toggle.textContent = '▶';
+    });
+    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.add('phase-collapsed'); });
+}
+
+function expandAllPhases() {
+    document.querySelectorAll('.phase-header').forEach(h => {
+        const key = h.dataset.phase;
+        if (!key) return;
+        collapsedPhases.delete(key);
+        h.classList.remove('collapsed');
+        const toggle = h.querySelector('.phase-toggle');
+        if (toggle) toggle.textContent = '▼';
+    });
+    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.remove('phase-collapsed'); });
+}
+
+// ── COMPLETION FILTER ──
+function setCompletionFilter(filter) {
+    currentCompletionFilter = filter;
+    const levelBar = document.getElementById('level-bar');
+    if (levelBar) {
+        levelBar.querySelectorAll('.level-btn').forEach(btn => {
+            if (btn.textContent.toLowerCase() === filter || (filter === 'uncompleted' && btn.textContent === 'Todo') || (filter === 'completed' && btn.textContent === 'Done') || (filter === 'all' && btn.textContent === 'All')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    const searchInput = document.getElementById('topic-search');
+    filterTopics(searchInput ? searchInput.value : '');
+}
+
+// ── SEARCH EXPLANATIONS + EMPTY STATE + COMPLETION FILTER ──
+function filterTopics(query) {
+    const q = query ? query.toLowerCase().trim() : '';
+    let visible = 0;
+    let total = 0;
+    const langData = courseData[currentLang];
+
+    document.querySelectorAll('.item-btn').forEach(btn => {
+        total++;
+        const topicName = btn.textContent.replace(/^[★☆]\s*/, '').trim();
+
+        let matchesSearch = !q;
+        if (q) {
+            matchesSearch = topicName.toLowerCase().includes(q);
+            if (!matchesSearch && langData) {
+                for (const phase in langData) {
+                    for (const topic in langData[phase]) {
+                        if (topic === topicName) {
+                            const exp = (langData[phase][topic].exp || '').toLowerCase();
+                            if (exp.includes(q)) matchesSearch = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
+
+        let matchesCompletion = true;
+        if (currentCompletionFilter !== 'all') {
+            const isDone = completedTopics.has(currentLang + ':' + topicName);
+            matchesCompletion = currentCompletionFilter === 'completed' ? isDone : !isDone;
+        }
+
+        const show = matchesSearch && matchesLevel && matchesCompletion;
+        btn.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+
+    const container = document.getElementById('topic-list');
+    const children = container.children;
+
+    for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        if (!el.classList.contains('phase-header')) continue;
+        const phaseKey = el.dataset.phase;
+        let hasVisible = false;
+        for (let j = i + 1; j < children.length; j++) {
+            if (children[j].classList.contains('phase-header')) break;
+            if (children[j].style.display !== 'none') { hasVisible = true; break; }
+        }
+        el.style.display = hasVisible ? '' : 'none';
+    }
+
+    let countEl = document.getElementById('searchCount');
+    if (visible < total) {
+        if (!countEl) {
+            countEl = document.createElement('div');
+            countEl.id = 'searchCount';
+            countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;';
+            document.getElementById('topic-search').after(countEl);
+        }
+        countEl.textContent = visible + ' of ' + total + ' topics';
+        if (currentLevel !== 'all') countEl.textContent += ' (' + currentLevel + ')';
+        if (currentCompletionFilter !== 'all') countEl.textContent += ' (' + currentCompletionFilter + ')';
+        countEl.style.display = visible === 0 ? '' : '';
+    } else if (countEl) {
+        countEl.style.display = 'none';
+    }
+
+    let emptyEl = document.getElementById('emptyState');
+    if (visible === 0) {
+        let reason = '';
+        if (q) reason = ' matching "' + query + '"';
+        else if (currentLevel !== 'all') reason = ' at ' + currentLevel + ' level';
+        else if (currentCompletionFilter !== 'all') reason = ' that are ' + currentCompletionFilter;
+        const msg = '✨ No topics' + reason;
+        if (!emptyEl) {
+            emptyEl = document.createElement('div');
+            emptyEl.id = 'emptyState';
+            emptyEl.style.cssText = 'color:#64748b;font-size:11px;padding:30px 10px;text-align:center;line-height:1.6;';
+            container.appendChild(emptyEl);
+        }
+        emptyEl.textContent = msg;
+        emptyEl.style.display = '';
+    } else if (emptyEl) {
+        emptyEl.style.display = 'none';
+    }
+
+    if (q || currentLevel !== 'all' || currentCompletionFilter !== 'all') {
+        const listEl = document.getElementById('topic-list');
+        if (listEl) listEl.scrollTop = 0;
+    }
+
+    document.querySelectorAll('.item-btn .topic-name').forEach(el => {
+        el.innerHTML = el.textContent;
+    });
+    if (q) {
+        const visSelector = '.item-btn:not([style*="display: none"]) .topic-name';
+        document.querySelectorAll(visSelector).forEach(el => {
+            const text = el.textContent;
+            const idx = text.toLowerCase().indexOf(q);
+            if (idx === -1) return;
+            const before = text.slice(0, idx);
+            const match = text.slice(idx, idx + q.length);
+            const after = text.slice(idx + q.length);
+            el.innerHTML = `${before}<mark style="background:rgba(247,223,30,0.25);color:#f7df1e;border-radius:2px;font-weight:700;">${match}</mark>${after}`;
+        });
+    }
+}
+
+// ── PROGRESS NUDGE ──
+function suggestNextTopic() {
+    if (currentCompletionFilter === 'completed') return;
+    const langData = courseData[currentLang];
+    if (!langData) return;
+    const topics = getTopicList();
+    const idx = getCurrentTopicIndex();
+    if (idx === -1) return;
+
+    for (let i = idx + 1; i < topics.length; i++) {
+        const key = currentLang + ':' + topics[i].topic;
+        if (!completedTopics.has(key)) {
+            const nudgeEl = document.getElementById('topicNudge');
+            if (nudgeEl) nudgeEl.remove();
+
+            const nudge = document.createElement('div');
+            nudge.id = 'topicNudge';
+            nudge.style.cssText = 'font-size:10px;color:#94a3b8;padding:6px 10px;margin-top:6px;background:#1e293b;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid #334155;';
+            nudge.innerHTML = '<span style="color:var(--accent);">→</span> Next: <strong>' + topics[i].topic + '</strong>';
+            nudge.onclick = function() { loadTopic(topics[i].phase, topics[i].topic); };
+            const output = document.getElementById('output');
+            if (output && output.parentNode) {
+                output.parentNode.appendChild(nudge);
+            }
+            return;
+        }
+    }
+
+    const existing = document.getElementById('topicNudge');
+    if (existing) existing.remove();
+    const nudge = document.createElement('div');
+    nudge.id = 'topicNudge';
+    nudge.style.cssText = 'font-size:10px;color:#10b981;padding:6px 10px;margin-top:6px;background:rgba(16,185,129,0.1);border-radius:6px;display:flex;align-items:center;gap:6px;border:1px solid rgba(16,185,129,0.3);';
+    nudge.innerHTML = '✓ All topics completed! Try the Code Lab or Quiz.';
+    const output = document.getElementById('output');
+    if (output && output.parentNode) {
+        output.parentNode.appendChild(nudge);
+    }
 }
 
 // ── SYNTAX HIGHLIGHTING ──
@@ -2242,14 +2886,20 @@ setMode = function(lang) {
     currentLang = lang;
     document.getElementById('app').className = lang + '-mode';
     const levelBar = document.getElementById('level-bar');
-    document.getElementById('header-title').innerText = lang.toUpperCase();
-    document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
-    const navBtn = document.getElementById('nav-' + lang);
-    if (navBtn) navBtn.classList.add('active');
 
     const langData = courseData[lang] || {};
     const phases = Object.keys(langData);
     const totalPhases = phases.length;
+
+    const progressTotal = Object.values(langData).reduce((sum, topics) => sum + Object.keys(topics).length, 0);
+    const progressDone = Object.values(langData).reduce((sum, topics) => {
+        return sum + Object.keys(topics).filter(t => completedTopics.has(currentLang + ':' + t)).length;
+    }, 0);
+    const pct = progressTotal > 0 ? Math.round(progressDone / progressTotal * 100) : 0;
+    document.getElementById('header-title').innerHTML = lang.toUpperCase() + (pct > 0 ? ` <span style="font-size:10px;opacity:0.6;">${pct}%</span>` : '');
+    document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+    const navBtn = document.getElementById('nav-' + lang);
+    if (navBtn) navBtn.classList.add('active');
 
     // Auto-assign difficulty based on phase position
     const third = Math.max(1, Math.ceil(totalPhases / 3));
@@ -2286,7 +2936,7 @@ setMode = function(lang) {
             const delay = idx * 20;
             const level = phaseLevels[phase];
             const badges = getAutoTags(phase, topic).slice(0, 2).join(' ');
-            html += `<button class="item-btn topic-btn-enter${collapsedClass}" style="animation-delay:${delay}ms" data-level="${level}" data-phase="${phaseKey}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')"><span class="diff-badge ${level}">${level[0].toUpperCase()}</span><span class="topic-name">${topic}</span></button>`;
+            html += `<button class="item-btn topic-btn-enter${collapsedClass}" style="animation-delay:${delay}ms" data-level="${level}" data-phase="${phaseKey}" id="btn-${topic.replace(/\s/g, '').replace(/[&,]/g, '')}" onclick="loadTopic('${phase.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')"><span class="diff-badge ${level}"></span><span class="topic-name">${topic}</span></button>`;
             idx++;
         }
     }
@@ -2303,428 +2953,6 @@ setMode = function(lang) {
     }
     updateAISuggestions();
 };
-
-initHighlighting();
-initLineNumbers();
-loadProgress();
-
-fetch(BACKEND_URL + '/api/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{"lang":"js","code":"1"}' })
-    .catch(() => {
-        const out = document.getElementById('output');
-        const editor = document.getElementById('editor');
-        const preview = editor ? getLogicalPreview(editor.value, currentLang) : null;
-        if (preview) {
-            out.innerText = preview;
-        } else if (window.location.protocol === 'file:') {
-            out.innerText = "// Open this via localhost:3000\n//   cd " + window.location.pathname.split('/').slice(0,-1).join('/') + "\n//   node server.js\n// Then refresh this page";
-        } else {
-            out.innerText = "// Backend not running. Start with:\n//   node server.js";
-        }
-    });
-
-const origRunCodeForSuggestions = runCode;
-runCode = function() {
-    origRunCodeForSuggestions();
-    setTimeout(() => {
-        updateAISuggestions();
-        const out = document.getElementById('output');
-        if (out && (out.innerText.includes('Error:') || out.innerText.includes('ERROR') || out.innerText.includes('FAIL') || out.innerText.includes('SyntaxError') || out.innerText.includes('ReferenceError') || out.innerText.includes('TypeError'))) {
-            const aiPanel = document.getElementById('aiPanel');
-            if (aiPanel && !aiPanel.classList.contains('open')) {
-                toggleAI();
-            }
-            const aiInput = document.getElementById('aiInput');
-            if (aiInput && !aiInput.value.trim()) {
-                aiInput.placeholder = 'I see an error — want help debugging? Type your question...';
-            }
-        }
-    }, 800);
-};
-
-function explainCode() {
-    const editor = document.getElementById('editor');
-    const code = editor ? editor.value : '';
-    if (!code.trim()) {
-        document.getElementById('output').innerText = "// No code to explain — write some code in the editor first!";
-        return;
-    }
-
-    const aiPanel = document.getElementById('aiPanel');
-    if (!aiPanel.classList.contains('open')) toggleAI();
-
-    const q = `Explain this code step by step:\n\n\`\`\`\n${code}\n\`\`\``;
-    askAI(q);
-}
-
-// ── KEYBOARD SHORTCUTS ──
-document.addEventListener('keydown', function(e) {
-    const tag = document.activeElement ? document.activeElement.tagName : '';
-    const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
-
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        runCode();
-        return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        document.getElementById('output').innerText = '// Output cleared';
-        return;
-    }
-
-    if (e.key === '/' && !inInput) {
-        e.preventDefault();
-        document.getElementById('topic-search').focus();
-        return;
-    }
-
-    if (e.key === 'Escape') {
-        const shortcuts = document.getElementById('shortcutsOverlay');
-        if (shortcuts) { shortcuts.remove(); e.preventDefault(); return; }
-        const aiPanel = document.getElementById('aiPanel');
-        if (aiPanel.classList.contains('open')) { toggleAI(); e.preventDefault(); return; }
-        const cheatsheet = document.getElementById('cheatsheetOverlay');
-        if (cheatsheet.classList.contains('open')) { toggleCheatsheet(); e.preventDefault(); return; }
-        return;
-    }
-
-    if (e.key === '?' && !inInput) {
-        e.preventDefault();
-        showShortcuts();
-        return;
-    }
-
-    if ((e.key === 'n' || e.key === 'N') && !inInput) {
-        e.preventDefault();
-        navTopic(1);
-        return;
-    }
-
-    if ((e.key === 'p' || e.key === 'P') && !inInput) {
-        e.preventDefault();
-        navTopic(-1);
-        return;
-    }
-});
-
-function showShortcuts() {
-    let overlay = document.getElementById('shortcutsOverlay');
-    if (overlay) { overlay.remove(); return; }
-    overlay = document.createElement('div');
-    overlay.id = 'shortcutsOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.85);backdrop-filter:blur(4px);z-index:300;display:flex;justify-content:center;align-items:center;';
-    overlay.onclick = function(e) { if (e.target === this) this.remove(); };
-    overlay.innerHTML =
-        '<div style="background:#0f172a;border:1px solid #334155;border-radius:12px;padding:25px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:fadeIn 0.2s ease;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">' +
-        '<span style="font-size:13px;font-weight:900;color:#f1f5f9;letter-spacing:1px;">⌨ SHORTCUTS</span>' +
-        '<button onclick="document.getElementById(\'shortcutsOverlay\').remove()" style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;">✕</button></div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Ctrl+Enter</kbd></div><div style="color:#94a3b8;font-size:11px;">Run code</div>' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">/</kbd></div><div style="color:#94a3b8;font-size:11px;">Search topics</div>' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">n</kbd> / <kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">p</kbd></div><div style="color:#94a3b8;font-size:11px;">Next / Previous topic</div>' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Esc</kbd></div><div style="color:#94a3b8;font-size:11px;">Close panels</div>' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">?</kbd></div><div style="color:#94a3b8;font-size:11px;">Show this menu</div>' +
-        '<div style="color:#64748b;font-size:11px;"><kbd style="background:#1e293b;color:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:10px;">Ctrl+K</kbd></div><div style="color:#94a3b8;font-size:11px;">Clear output</div>' +
-        '</div></div>';
-    document.body.appendChild(overlay);
-}
-
-// ── TOPIC NAVIGATION ──
-function getTopicList() {
-    const langData = courseData[currentLang];
-    if (!langData) return [];
-    const topics = [];
-    for (const phase in langData) {
-        for (const topic in langData[phase]) {
-            topics.push({ phase, topic });
-        }
-    }
-    return topics;
-}
-
-function getCurrentTopicIndex() {
-    const list = getTopicList();
-    return list.findIndex(t => t.topic === currentTopic && t.phase === currentPhase);
-}
-
-function navTopic(dir) {
-    const list = getTopicList();
-    const idx = getCurrentTopicIndex();
-    if (idx === -1) return;
-    const next = idx + dir;
-    if (next < 0 || next >= list.length) return;
-    loadTopic(list[next].phase, list[next].topic);
-}
-
-// ── PROGRESS BAR ──
-function updateProgressBar() {
-    const langData = courseData[currentLang];
-    if (!langData) return;
-    const allTopics = getTopicList();
-    if (allTopics.length === 0) return;
-    let completed = 0;
-    for (const t of allTopics) {
-        if (completedTopics.has(currentLang + ':' + t.topic)) completed++;
-    }
-    const pct = Math.round((completed / allTopics.length) * 100);
-    let bar = document.getElementById('progressBar');
-    if (!bar) {
-        const label = document.querySelector('.col:first-child label');
-        if (!label) return;
-        const container = document.createElement('div');
-        container.id = 'progressBarContainer';
-        container.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
-        container.innerHTML =
-            '<div id="progressBar" style="flex:1;height:4px;background:#1e293b;border-radius:2px;overflow:hidden;">' +
-            '<div style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div></div>' +
-            '<span id="progressText" style="font-size:9px;color:#64748b;font-weight:800;white-space:nowrap;">0%</span>';
-        label.after(container);
-        bar = document.getElementById('progressBar');
-    }
-    const fill = bar.querySelector('div');
-    fill.style.width = pct + '%';
-    document.getElementById('progressText').textContent = completed + '/' + allTopics.length + ' (' + pct + '%)';
-}
-
-// ── DIFFICULTY / AUTO-TAGS / DEPTH ──
-function getAutoTags(phase, topic) {
-    const tags = new Set();
-    const phaseWords = phase.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
-    const topicWords = topic.toLowerCase().split(/[\s,&;:()]+/).filter(w => w.length > 2);
-    phaseWords.forEach(w => tags.add(w));
-    topicWords.forEach(w => tags.add(w));
-    return [...tags];
-}
-
-function getTopicDepth(exp) {
-    const len = (exp || '').length;
-    if (len < 200) return { label: 'quick', icon: '⚡' };
-    if (len < 500) return { label: 'standard', icon: '●' };
-    return { label: 'in-depth', icon: '◉' };
-}
-
-// ── COLLAPSIBLE PHASES ──
-function togglePhase(phaseKey, phaseName) {
-    const header = document.querySelector(`.phase-header[data-phase="${phaseKey}"]`);
-    if (!header) return;
-    const isCollapsed = collapsedPhases.has(phaseKey);
-    if (isCollapsed) {
-        collapsedPhases.delete(phaseKey);
-        header.classList.remove('collapsed');
-        header.querySelector('.phase-toggle').textContent = '▼';
-    } else {
-        collapsedPhases.add(phaseKey);
-        header.classList.add('collapsed');
-        header.querySelector('.phase-toggle').textContent = '▶';
-    }
-    const items = document.querySelectorAll(`.item-btn[data-phase="${phaseKey}"]`);
-    items.forEach(btn => {
-        btn.classList.toggle('phase-collapsed', collapsedPhases.has(phaseKey));
-    });
-}
-
-// ── COLLAPSE / EXPAND ALL ──
-function collapseAllPhases() {
-    document.querySelectorAll('.phase-header').forEach(h => {
-        const key = h.dataset.phase;
-        if (!key) return;
-        collapsedPhases.add(key);
-        h.classList.add('collapsed');
-        const toggle = h.querySelector('.phase-toggle');
-        if (toggle) toggle.textContent = '▶';
-    });
-    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.add('phase-collapsed'); });
-}
-
-function expandAllPhases() {
-    document.querySelectorAll('.phase-header').forEach(h => {
-        const key = h.dataset.phase;
-        if (!key) return;
-        collapsedPhases.delete(key);
-        h.classList.remove('collapsed');
-        const toggle = h.querySelector('.phase-toggle');
-        if (toggle) toggle.textContent = '▼';
-    });
-    document.querySelectorAll('.item-btn[data-phase]').forEach(b => { b.classList.remove('phase-collapsed'); });
-}
-
-// ── COMPLETION FILTER ──
-function setCompletionFilter(filter) {
-    currentCompletionFilter = filter;
-    const levelBar = document.getElementById('level-bar');
-    if (levelBar) {
-        levelBar.querySelectorAll('.level-btn').forEach(btn => {
-            if (btn.textContent.toLowerCase() === filter || (filter === 'uncompleted' && btn.textContent === 'Todo') || (filter === 'completed' && btn.textContent === 'Done') || (filter === 'all' && btn.textContent === 'All')) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    const searchInput = document.getElementById('topic-search');
-    filterTopics(searchInput ? searchInput.value : '');
-}
-
-// ── SEARCH EXPLANATIONS + EMPTY STATE + COMPLETION FILTER ──
-function filterTopics(query) {
-    const q = query ? query.toLowerCase().trim() : '';
-    let visible = 0;
-    let total = 0;
-    const langData = courseData[currentLang];
-
-    document.querySelectorAll('.item-btn').forEach(btn => {
-        total++;
-        const topicName = btn.textContent.replace(/^[★☆]\s*/, '').trim();
-
-        let matchesSearch = !q;
-        if (q) {
-            matchesSearch = topicName.toLowerCase().includes(q);
-            if (!matchesSearch && langData) {
-                for (const phase in langData) {
-                    for (const topic in langData[phase]) {
-                        if (topic === topicName) {
-                            const exp = (langData[phase][topic].exp || '').toLowerCase();
-                            if (exp.includes(q)) matchesSearch = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        const matchesLevel = currentLevel === 'all' || (btn.dataset.level || 'beginner') === currentLevel;
-
-        let matchesCompletion = true;
-        if (currentCompletionFilter !== 'all') {
-            const isDone = completedTopics.has(currentLang + ':' + topicName);
-            matchesCompletion = currentCompletionFilter === 'completed' ? isDone : !isDone;
-        }
-
-        const show = matchesSearch && matchesLevel && matchesCompletion;
-        btn.style.display = show ? '' : 'none';
-        if (show) visible++;
-    });
-
-    const container = document.getElementById('topic-list');
-    const children = container.children;
-
-    // Handle phase headers visibility (for non-collapsible phases that still have phase-label class)
-    for (let i = 0; i < children.length; i++) {
-        const el = children[i];
-        if (!el.classList.contains('phase-header')) continue;
-        const phaseKey = el.dataset.phase;
-        let hasVisible = false;
-        for (let j = i + 1; j < children.length; j++) {
-            if (children[j].classList.contains('phase-header')) break;
-            if (children[j].style.display !== 'none') { hasVisible = true; break; }
-        }
-        el.style.display = hasVisible ? '' : 'none';
-    }
-
-    // Search count
-    let countEl = document.getElementById('searchCount');
-    if (visible < total) {
-        if (!countEl) {
-            countEl = document.createElement('div');
-            countEl.id = 'searchCount';
-            countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;';
-            document.getElementById('topic-search').after(countEl);
-        }
-        countEl.textContent = visible + ' of ' + total + ' topics';
-        if (currentLevel !== 'all') countEl.textContent += ' (' + currentLevel + ')';
-        if (currentCompletionFilter !== 'all') countEl.textContent += ' (' + currentCompletionFilter + ')';
-        countEl.style.display = visible === 0 ? '' : '';
-    } else if (countEl) {
-        countEl.style.display = 'none';
-    }
-
-    // Empty state
-    let emptyEl = document.getElementById('emptyState');
-    if (visible === 0) {
-        let reason = '';
-        if (q) reason = ' matching "' + query + '"';
-        else if (currentLevel !== 'all') reason = ' at ' + currentLevel + ' level';
-        else if (currentCompletionFilter !== 'all') reason = ' that are ' + currentCompletionFilter;
-        const msg = '✨ No topics' + reason;
-        if (!emptyEl) {
-            emptyEl = document.createElement('div');
-            emptyEl.id = 'emptyState';
-            emptyEl.style.cssText = 'color:#64748b;font-size:11px;padding:30px 10px;text-align:center;line-height:1.6;';
-            container.appendChild(emptyEl);
-        }
-        emptyEl.textContent = msg;
-        emptyEl.style.display = '';
-    } else if (emptyEl) {
-        emptyEl.style.display = 'none';
-    }
-
-    // Scroll topic list to top if filtering is active
-    if (q || currentLevel !== 'all' || currentCompletionFilter !== 'all') {
-        const listEl = document.getElementById('topic-list');
-        if (listEl) listEl.scrollTop = 0;
-    }
-
-    // Highlight matching text in topic names
-    document.querySelectorAll('.item-btn .topic-name').forEach(el => {
-        el.innerHTML = el.textContent;
-    });
-    if (q) {
-        const visSelector = '.item-btn:not([style*="display: none"]) .topic-name';
-        document.querySelectorAll(visSelector).forEach(el => {
-            const text = el.textContent;
-            const idx = text.toLowerCase().indexOf(q);
-            if (idx === -1) return;
-            const before = text.slice(0, idx);
-            const match = text.slice(idx, idx + q.length);
-            const after = text.slice(idx + q.length);
-            el.innerHTML = `${before}<mark style="background:rgba(247,223,30,0.25);color:#f7df1e;border-radius:2px;font-weight:700;">${match}</mark>${after}`;
-        });
-    }
-}
-
-// ── PROGRESS NUDGE ──
-function suggestNextTopic() {
-    if (currentCompletionFilter === 'completed') return;
-    const langData = courseData[currentLang];
-    if (!langData) return;
-    const topics = getTopicList();
-    const idx = getCurrentTopicIndex();
-    if (idx === -1) return;
-
-    // Find next uncompleted topic
-    for (let i = idx + 1; i < topics.length; i++) {
-        const key = currentLang + ':' + topics[i].topic;
-        if (!completedTopics.has(key)) {
-            const nudgeEl = document.getElementById('topicNudge');
-            if (nudgeEl) nudgeEl.remove();
-
-            const nudge = document.createElement('div');
-            nudge.id = 'topicNudge';
-            nudge.style.cssText = 'font-size:10px;color:#94a3b8;padding:6px 10px;margin-top:6px;background:#1e293b;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid #334155;';
-            nudge.innerHTML = '<span style="color:var(--accent);">→</span> Next: <strong>' + topics[i].topic + '</strong>';
-            nudge.onclick = function() { loadTopic(topics[i].phase, topics[i].topic); };
-            const output = document.getElementById('output');
-            if (output && output.parentNode) {
-                output.parentNode.appendChild(nudge);
-            }
-            return;
-        }
-    }
-
-    // All done
-    const existing = document.getElementById('topicNudge');
-    if (existing) existing.remove();
-    const nudge = document.createElement('div');
-    nudge.id = 'topicNudge';
-    nudge.style.cssText = 'font-size:10px;color:#10b981;padding:6px 10px;margin-top:6px;background:rgba(16,185,129,0.1);border-radius:6px;display:flex;align-items:center;gap:6px;border:1px solid rgba(16,185,129,0.3);';
-    nudge.innerHTML = '✓ All topics completed! Try the Code Lab or Quiz.';
-    const output = document.getElementById('output');
-    if (output && output.parentNode) {
-        output.parentNode.appendChild(nudge);
-    }
-}
 
 // ── EDITOR LINE NUMBERS ──
 let lineNumbersEl = null;
@@ -2745,7 +2973,6 @@ function initLineNumbers() {
     textarea.addEventListener('keydown', updateLineNumbers);
     updateLineNumbers();
 
-    // Adjust editor padding for line numbers
     textarea.style.paddingLeft = '50px';
     const hl = wrapper.querySelector('.editor-highlight');
     if (hl) hl.style.paddingLeft = '50px';
@@ -2766,6 +2993,17 @@ function syncLineNumbersScroll() {
     if (!lineNumbersEl) return;
     const textarea = document.getElementById('editor');
     lineNumbersEl.scrollTop = textarea.scrollTop;
+}
+
+initHighlighting();
+initLineNumbers();
+loadProgress();
+
+function toggleNav() {
+    const menu = document.getElementById('nav-menu');
+    const hamburger = document.getElementById('hamburger-btn');
+    menu.classList.toggle('open');
+    hamburger.classList.toggle('open');
 }
 
 setMode('js');

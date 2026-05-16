@@ -4,15 +4,61 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const os = require('os');
 
 const { askLLM } = require('./ai/provider');
 const { getCurriculumContext, getTopicContext } = require('./ai/curriculum');
 const { search: semanticSearch, getContext: getSemanticContext } = require('./ai/embeddings');
 const learner = require('./ai/learner');
-const { review: codeReview } = require('./ai/reviewer');
+const { review: codeReview     } = require('./ai/reviewer');
 const { generateExercise } = require('./ai/exercises');
+const database = require('./sql/database');
+
+const LANG_NAMES = {
+    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
+    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
+    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
+    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
+    aws: 'aws', azure: 'azure', gcp: 'gcp', cloud: 'cloud',
+};
+
+function detectLanguage(query) {
+    const words = query.toLowerCase().split(/\s+/);
+    for (const word of words) {
+        for (const [code, name] of Object.entries(LANG_NAMES)) {
+            if (word === name || word === code) return code;
+        }
+        if (word === 'sql') return 'pg';
+    }
+    return null;
+}
+
+function extractSubject(text) {
+    if (!text) return '';
+    const m = text.match(/\*\*([A-Z][a-z+#]+)\*\*/);
+    if (m) return m[1];
+    return '';
+}
+
+function resolveFollowUp(q, history) {
+    if (!history || history.length < 2) return q;
+
+    const trimmed = q.trim().toLowerCase();
+    const pronounPattern = /^(what|how|why|where|when|which|can|could|would|will|do|does|did|is|are)\s+(is|are|was|were|does|do|did|can|could|about|the|a|an|it|this|that|they|these|those|its|their)\b/i;
+    const pronounWords = /\b(it|this|that|they|them|these|those|its|their)\b/i;
+
+    if (!pronounPattern.test(trimmed) && !pronounWords.test(trimmed)) return q;
+
+    const lastBot = [...history].reverse().find(m => m.role === 'bot');
+    if (!lastBot || !lastBot.text) return q;
+
+    const subject = extractSubject(lastBot.text);
+    if (!subject) return q;
+
+    return `${subject} ${q}`;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +70,11 @@ app.use(express.static(__dirname));
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(PROGRESS_FILE)) fs.writeFileSync(PROGRESS_FILE, '{}');
+
+const dbStatus = database.initAll();
+console.log('[DB] SQLite:', dbStatus.sqlite.available ? 'ready' : 'FAILED');
+console.log('[DB] PostgreSQL:', dbStatus.pg.available ? 'ready' : dbStatus.pg.reason || 'not configured');
+console.log('[DB] MySQL:', dbStatus.mysql.available ? 'ready' : dbStatus.mysql.reason || 'not configured');
 
 // Rate limiting
 const rateLimitStore = new Map();
@@ -44,6 +95,59 @@ function rateLimit(req, res, next) {
 }
 
 app.use('/api/', rateLimit);
+
+// ── Compiler Health Check ──
+const COMPILERS = {
+    py:  ['python3', '--version'],
+    go:  ['go', 'version'],
+    rs:  ['rustc', '--version'],
+    c:   ['gcc', '--version'],
+    cpp: ['g++', '--version'],
+    cs:  ['dotnet', '--version'],
+    kt:  ['kotlinc', '-version'],
+    swift: ['swift', '--version'],
+    zig: ['zig', 'version'],
+    ts:  ['tsx', '--version'],
+};
+
+const compilerCache = new Map();
+let lastCompilerCheck = 0;
+const COMPILER_CACHE_TTL = 30000;
+
+function checkCompilers() {
+    const now = Date.now();
+    if (now - lastCompilerCheck < COMPILER_CACHE_TTL && compilerCache.size > 0) {
+        return Promise.resolve(Object.fromEntries(compilerCache));
+    }
+    const extPath = `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`;
+    const checks = Object.entries(COMPILERS).map(([lang, [cmd, flag]]) => {
+        return new Promise(resolve => {
+            exec(`${cmd} ${flag}`, { timeout: 5000, env: { ...process.env, PATH: extPath } }, (err, stdout) => {
+                const ok = !err;
+                const version = ok ? (stdout || '').split('\n')[0].trim() : null;
+                compilerCache.set(lang, { available: ok, version });
+                resolve([lang, { available: ok, version }]);
+            });
+        });
+    });
+    return Promise.all(checks).then(results => {
+        lastCompilerCheck = Date.now();
+        return Object.fromEntries(results);
+    });
+}
+
+app.get('/api/health', async (req, res) => {
+    const compilers = await checkCompilers();
+    res.json({
+        status: 'ok',
+        uptime: process.uptime(),
+        node: process.version,
+        compilers,
+        database: database.getStatus(),
+        rateLimit: { window: '60s', max: RATE_MAX },
+        endpoints: ['/api/progress', '/api/execute', '/api/analyze', '/api/chat', '/api/health', '/api/benchmark', '/api/courses']
+    });
+});
 
 // ── Progress API ──
 app.get('/api/progress', (req, res) => {
@@ -66,9 +170,53 @@ app.post('/api/progress', (req, res) => {
     }
 });
 
+// ── Execution Queue (process pool) ──
+const EXEC_QUEUE = [];
+let EXEC_RUNNING = 0;
+const EXEC_MAX_CONCURRENT = 4;
+
+function execQueue(cmd, opts) {
+    return new Promise((resolve, reject) => {
+        EXEC_QUEUE.push({ cmd, opts, resolve, reject });
+        processNextExec();
+    });
+}
+
+function processNextExec() {
+    while (EXEC_RUNNING < EXEC_MAX_CONCURRENT && EXEC_QUEUE.length > 0) {
+        const job = EXEC_QUEUE.shift();
+        EXEC_RUNNING++;
+        exec(job.cmd, job.opts, (err, stdout, stderr) => {
+            EXEC_RUNNING--;
+            if (err) job.reject(err);
+            else job.resolve({ stdout, stderr });
+            processNextExec();
+        });
+    }
+}
+
+// ── Execute with stdin support ──
+function execWithStdin(cmd, opts, stdin) {
+    return new Promise((resolve, reject) => {
+        const child = spawn('sh', ['-c', cmd], opts);
+        let stdout = '';
+        let stderr = '';
+        child.stdout.on('data', d => stdout += d.toString());
+        child.stderr.on('data', d => stderr += d.toString());
+        child.on('close', code => {
+            resolve({ stdout, stderr, code });
+        });
+        child.on('error', reject);
+        if (stdin) {
+            child.stdin.write(stdin);
+            child.stdin.end();
+        }
+    });
+}
+
 // ── Execute Code API ──
-app.post('/api/execute', (req, res) => {
-    const { lang, code } = req.body;
+app.post('/api/execute', async (req, res) => {
+    const { lang, code, stdin } = req.body;
     if (!code) return res.status(400).json({ error: 'No code provided' });
 
     if (lang === 'js') {
@@ -91,15 +239,31 @@ app.post('/api/execute', (req, res) => {
         }
     }
 
+    // ── SQL Execution ──
+    if (lang === 'sqlite') {
+        return res.json(database.executeSQLite(code));
+    }
+    if (lang === 'pg') {
+        const result = await database.executePG(code);
+        return res.json(result);
+    }
+    if (lang === 'mysql') {
+        const result = await database.executeMySQL(code);
+        return res.json(result);
+    }
+
+    const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const prog = `_prog_${token}`;
+
     const runners = {
         py:  { cmd: 'python3 -u "%f"', ext: '.py' },
         go:  { cmd: 'go run "%f"', ext: '.go' },
         ts:  { cmd: 'tsx "%f"', ext: '.ts' },
-        rs:  { cmd: 'rustc -o _prog "%f" && ./_prog', ext: '.rs' },
-        c:   { cmd: 'gcc -Wall -o _prog "%f" && ./_prog', ext: '.c' },
-        cpp: { cmd: 'g++ -std=c++20 -Wall -o _prog "%f" && ./_prog', ext: '.cpp' },
+        rs:  { cmd: `rustc -o ${prog} "%f" && ./${prog}`, ext: '.rs' },
+        c:   { cmd: `gcc -Wall -o ${prog} "%f" && ./${prog}`, ext: '.c' },
+        cpp: { cmd: `g++ -std=c++20 -Wall -o ${prog} "%f" && ./${prog}`, ext: '.cpp' },
         cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
-        kt:  { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
+        kt:  { cmd: `kotlinc -include-runtime -d ${prog}.jar "%f" && java -jar ${prog}.jar`, ext: '.kt' },
         swift: { cmd: 'swift "%f"', ext: '.swift' },
         zig: { cmd: 'zig run "%f"', ext: '.zig' },
     };
@@ -117,13 +281,29 @@ app.post('/api/execute', (req, res) => {
 
     const env = { ...process.env, PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`, DOTNET_ROOT: path.join(os.homedir(), '.local/dotnet') };
 
-    exec(cmd, { timeout: 120000, cwd: tmpDir, env }, (err, stdout, stderr) => {
-        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
-        if (err) console.error('exec err:', err.message);
-        const combined = (stdout || '') + (stderr || '');
-        const out = combined.trim() || (err ? 'Process failed' : '(no output)');
-        return res.json({ output: out.replace(/\n+$/, '') });
-    });
+    const sandboxedCmd = `ulimit -v 262144 -t 30 2>/dev/null; ${cmd}`;
+
+    const execOpts = { timeout: 30000, cwd: tmpDir, env };
+
+    const execPromise = stdin
+        ? execWithStdin(sandboxedCmd, execOpts, stdin)
+        : execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true });
+
+    execPromise
+        .then(({ stdout, stderr }) => {
+            fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+            const stdoutClean = (stdout || '').trimEnd();
+            const stderrClean = (stderr || '').trimEnd();
+            let output = stdoutClean;
+            if (stderrClean) {
+                output += (output ? '\n' : '') + '// stderr:\n' + stderrClean;
+            }
+            return res.json({ output: output || '(no output)' });
+        })
+        .catch(err => {
+            fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+            return res.json({ output: 'Process failed: ' + err.message.slice(0, 200), error: true });
+        });
 });
 
 function getCompileHint(lang) {
@@ -140,7 +320,9 @@ function getCompileHint(lang) {
         rs: '// rustc program.rs && ./program',
         dk: '// docker build -t myapp . && docker run myapp',
         git: '// git commands run in your terminal directly',
-        pg: '// psql -f query.sql or run directly in psql shell',
+        sqlite: '// SQLite execution is built-in. Click Run!',
+        pg: '// PostgreSQL: set PG_CONNECTION_STRING in .env or use psql -f query.sql',
+        mysql: '// MySQL: set MYSQL_CONNECTION_STRING in .env or use mysql < query.sql',
         mongodb: '// mongosh < script.js or paste into mongosh',
         gamedev: '// Use your game engine IDE to run this code',
         quiz: '// Quiz questions are interactive in the UI',
@@ -382,6 +564,22 @@ const aiResponses = [
     {
         keywords: ['recursion', 'recursive', 'base case', 'stack overflow', 'tail call'],
         response: "Recursion is when a function calls itself. It's an elegant way to solve problems that have a repetitive structure (trees, fractals, divide-and-conquer).\n\n**Every recursive function needs two parts:**\n1. **Base case** — when to STOP (without this, infinite recursion!)\n2. **Recursive case** — call itself with a simpler version of the problem\n\n```js\n// Factorial: n! = n * (n-1) * ... * 1\nfunction factorial(n) {\n  if (n <= 1) return 1;       // base case\n  return n * factorial(n - 1); // recursive case\n}\n```\n\n**When to use recursion vs loops:**\n- **Recursion:** tree traversal, parsing, divide-and-conquer algorithms\n- **Loops:** simple iteration, performance-critical code\n\n**Watch out for:**\n- **Stack overflow:** too many recursive calls exhausts the call stack\n- **Missing base case:** infinite recursion = crash\n- **Tail recursion optimization:** some languages optimize this (not JS/Python)\n\n**Exercise:** Write a recursive function that computes the nth Fibonacci number. Then compare it with a loop-based version."
+    },
+    {
+        keywords: ['rust', 'rustlang'],
+        response: "**Rust** is a systems programming language focused on three pillars: **safety**, **speed**, and **concurrency**.\n\n**Key features:**\n- **No garbage collector** — memory safety is enforced at compile time via an ownership system\n- **Zero-cost abstractions** — high-level constructs compile down to efficient machine code\n- **Fearless concurrency** — the type system prevents data races at compile time\n- **Excellent tooling** — `cargo` for package management, `rustfmt` for formatting, `clippy` for linting\n\n**Who uses it?**\n- Mozilla (Servo browser engine), Dropbox, Figma, Cloudflare\n- Systems programming, WebAssembly, CLI tools, game engines\n\n**Getting started:**\n```rust\nfn main() {\n    println!(\"Hello, Rust!\");\n    let x = 42;\n    println!(\"x = {}\", x);\n}\n```\n\n**Compared to C/C++:** Rust gives you the same low-level control but with a much safer type system. The compiler catches memory errors at compile time instead of crashing at runtime.\n\nWant to try Rust? Select it from the language bar at the top and start with the first topic!"
+    },
+    {
+        keywords: ['go language', 'golang'],
+        response: "**Go** (or Golang) is a statically typed, compiled programming language designed at Google for building scalable, concurrent systems.\n\n**Key features:**\n- **Simple syntax** — easy to read and learn, similar to C but cleaner\n- **Built-in concurrency** — goroutines and channels make concurrent programming straightforward\n- **Fast compilation** — compiles to a single binary in seconds\n- **Standard library** — includes HTTP server, JSON, testing, and more out of the box\n\n**Who uses it?**\n- Google, Uber, Dropbox, Docker, Kubernetes are written in Go\n- Perfect for REST APIs, microservices, CLI tools, network servers\n\n**Getting started:**\n```go\npackage main\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Go!\")\n}\n```\n\n**Compared to Python:** Go is much faster (compiled), catches errors at compile time, and has excellent built-in concurrency. Python is more flexible for quick scripting. Both are great for different use cases!\n\nWant to try Go? Select it from the language bar at the top and start with the first topic!"
+    },
+    {
+        keywords: ['python language'],
+        response: "**Python** is a high-level, interpreted programming language known for its readability and versatility. It's one of the best languages for beginners.\n\n**Key features:**\n- **Readable syntax** — uses indentation instead of braces, reads like plain English\n- **Dynamically typed** — no type declarations needed, great for rapid prototyping\n- **Massive ecosystem** — PyPI has over 400,000 packages for everything from web dev to AI\n- **Batteries included** — extensive standard library covers file I/O, networking, data processing\n\n**Who uses it?**\n- Data scientists, ML engineers, web developers (Django/Flask), DevOps\n- Google, Instagram, Spotify, Netflix — all use Python extensively\n\n**Getting started:**\n```python\nprint(\"Hello, Python!\")\nname = input(\"What's your name? \")\nprint(f\"Nice to meet you, {name}!\")\n```\n\n**Compared to JavaScript:** Python is more readable and has better data science libraries. JS is faster in the browser and has a larger web ecosystem. Both are excellent for beginners!\n\nWant to try Python? Select it from the language bar at the top!"
+    },
+    {
+        keywords: ['javascript language'],
+        response: "**JavaScript** is the language of the web — it runs in every browser and on servers via Node.js. It's one of the most widely-used programming languages.\n\n**Key features:**\n- **Universal** — runs in every web browser without any installation\n- **Event-driven** — naturally suited for interactive UIs and real-time apps\n- **Flexible** — supports procedural, object-oriented, and functional programming styles\n- **Huge ecosystem** — npm is the largest package registry in the world\n\n**Who uses it?**\n- Every web developer (frontend AND backend with Node.js)\n- React, Vue, Angular, Svelte — all major frontend frameworks use JS/TypeScript\n\n**Getting started:**\n```js\nconsole.log(\"Hello, JavaScript!\");\nconst name = \"World\";\nconsole.log(`Hello, ${name}!`);\n```\n\n**Why learn JavaScript?** It's the only language that runs natively in web browsers. Once you know JS, you can build websites, mobile apps (React Native), desktop apps (Electron), and server apps (Node.js) — all with one language!\n\nYou're already in JavaScript mode! Just pick a topic on the left to get started."
     }
 ];
 
@@ -567,197 +765,153 @@ app.get('/api/learner/recommend', (req, res) => {
 app.post('/api/chat', async (req, res) => {
     const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
     if (!message) return res.json({ reply: "Ask me something about programming!" });
-    const q = message.toLowerCase().trim();
+    const q = resolveFollowUp(message, history).toLowerCase().trim();
 
     const lid = learnerId || req.ip || 'default';
     learner.trackAIInteraction(lid);
 
-    // ── Try LLM first if configured ──
-    if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
-        const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError, history);
-        const llmReply = await askLLM(llmMessages);
-        if (llmReply) {
-            if (topic && lang) learner.trackAttempt(lid, lang, topic);
-            return res.json({ reply: llmReply });
-        }
-    }
-
-    // ── Code-aware, error-aware help ──
-    if (hasError || q.includes('error') || q.includes('bug') || q.includes('fix') || q.includes('wrong') || q.includes('not working') || q.includes('issue')) {
-        let errorReply = '';
-
-        if (code) {
-            const analysis = analyzeUserCode(code, lang);
-            if (analysis && analysis.length > 0) {
-                errorReply = "I looked at your code and found some issues:\n\n" +
-                    analysis.map((h, i) => `${i + 1}. ${h}`).join('\n') + '\n\n';
-            }
-        }
-
-        if (output && (output.includes('Error:') || output.includes('ReferenceError') || output.includes('TypeError') || output.includes('SyntaxError') || output.includes('FAIL'))) {
-            const cleanOutput = output.replace(/<[^>]*>/g, '').trim();
-            errorReply += `**Your code produced this output:**\n\`\`\`\n${cleanOutput}\n\`\`\`\n\n`;
-        }
-
-        if (code && topic) {
-            const mastery = learner.getConceptMastery(lid, lang);
-            const weakTopic = mastery?.topics?.find(t => t.topic === topic);
-            const attemptInfo = weakTopic && weakTopic.attempts > 0
-                ? `\n- You've attempted this ${weakTopic.attempts} time(s) — don't give up!`
-                : '';
-
-            errorReply += `Since you're working on **${topic}**, here's a hint:\n`;
-            errorReply += `- Look at the example in the curriculum and compare it with your code line by line\n`;
-            errorReply += `- Try simplifying: comment out parts until it works, then add them back one at a time\n`;
-            errorReply += `- Check the most common mistake for this topic and see if it applies to you${attemptInfo}\n\n`;
-        }
-
-        if (!errorReply) {
-            errorReply = "Let's debug this systematically:\n\n";
-            errorReply += "**1. What did you expect to happen?**\n";
-            errorReply += "**2. What actually happened?**\n";
-            errorReply += "**3. What have you tried so far?**\n\n";
-            errorReply += "Share your code and the error message, and I'll help you find the issue!";
-        } else {
-            errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
-        }
-
-        if (topic && lang) learner.trackError(lid, lang, topic);
-        return res.json({ reply: errorReply });
-    }
-
-    // ── Topic-aware follow-up detection ──
-    if (history && history.length >= 2) {
-        const lastBotMsg = history.filter(h => h.role === 'bot').pop();
-        if (lastBotMsg && (q.includes('yes') || q.includes('ok') || q.includes('sure') || q.includes('tell me more') || q.includes('example') || q.includes('show me'))) {
-            const followUps = {
-                'variable': "Let's practice! Try this in the editor:\n```\n// Declare a variable 'name' with your name as a string\n// Declare a variable 'age' with your age as a number\n// Print both using console.log()\n```\nThen click Run and tell me what you see!",
-                'function': "Here's a simple exercise: Write a function called `add` that takes two parameters and returns their sum. Then call it and log the result.\n\n**Hint:** `function add(a, b) { ... }`",
-                'loop': "Practice: Write a loop that prints the numbers 1 through 10. Then modify it to only print even numbers.\n\n**Hint for evens:** Use `if (i % 2 === 0)` to check if a number is even.",
-                'array': "Try this: Create an array of your 3 favorite foods. Write a loop that prints \"I like [food]\" for each one.",
-                'class': "Exercise: Create a `Person` class with `name` and `age` properties. Add a `greet()` method that says \"Hi, I'm [name]!\". Create an instance and call greet()."
-            };
-            for (const [key, reply] of Object.entries(followUps)) {
-                if (lastBotMsg.text && lastBotMsg.text.toLowerCase().includes(key)) {
-                    return res.json({ reply });
-                }
-            }
-        }
-        if (q.includes('thank') || q.includes('thanks')) {
-            return res.json({ reply: "You're welcome! The best way to learn is by doing. Keep experimenting, keep breaking things, and keep asking questions. What would you like to explore next?" });
-        }
-    }
-
-    // ── Try semantic curriculum search ──
-    const semanticResults = await semanticSearch(q, lang, 1);
-    if (semanticResults.length > 0 && semanticResults[0].score > 0.15) {
-        const best = semanticResults[0];
-        let reply = `I found relevant content in the curriculum related to your question.\n\n**${best.topic}** (${best.lang.toUpperCase()} - ${best.phase})\n\n`;
-        reply += best.exp.slice(0, 500) + '...\n\n';
-        if (best.code) {
-            reply += `**Example code:**\n\`\`\`\n${best.code}\n\`\`\`\n\n`;
-        }
-        reply += `Would you like me to explain more about **${best.topic}** or help you practice it?`;
-        return res.json({ reply });
-    }
-
-    // ── Context-aware: if topic is provided, try to answer based on it ──
-    if (topic && (q.includes('what') || q.includes('how') || q.includes('explain') || q.includes('tell me') || q.includes('?') || q.length < 15)) {
-        for (const entry of aiResponses) {
-            if (topic && entry.keywords.some(k => topic.toLowerCase().includes(k))) {
-                let reply = entry.response;
-                if (topic) {
-                    reply += `\n\n**You're currently studying:** ${topic} (${phase || ''})`;
-                    reply += `\nTry the code example in the editor, modify it, and click Run to see what happens!`;
-                }
-                return res.json({ reply });
-            }
-        }
-    }
-
-    // ── Standard keyword matching ──
-    for (const entry of aiResponses) {
-        if (entry.keywords.some(k => q.includes(k))) {
-            return res.json({ reply: entry.response });
-        }
-    }
-
-    for (const entry of aiResponses) {
-        const combined = entry.keywords.join(' ');
-        if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
-            return res.json({ reply: entry.response });
-        }
-    }
-
-    // ── Greeting / thanks catch-all ──
-    if (q.includes('thank') || q.includes('thanks')) {
-        return res.json({ reply: "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step! What would you like to learn next?" });
-    }
-
-    if (q.includes('hello') || q.includes('hi ') || q === 'hey' || q.includes('good')) {
-        const langInfo = lang ? `I see you're studying **${lang.toUpperCase()}**. ` : '';
-        return res.json({ reply: `Hello! ${langInfo}Ask me anything about the topic you're working on, or pick a suggestion below to get started!` });
-    }
-
-    // ── Fallback: try to match topic from curriculum (Socratic style) ──
-    if (topic) {
-        return res.json({ reply: `Great question about **${topic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far in the editor? Tell me your thought process and I'll help guide you to the right solution!` });
-    }
-
-    // ── Generic fallback ──
-    const fallbacks = [
-        "That's an interesting question! To help you best, could you tell me:\n1. What language are you working with?\n2. What topic are you studying?\n3. What have you tried so far?",
-        "I want to make sure I help you effectively. Could you tell me more about what you're working on? For example: \"Explain ${currentLang} functions\" or \"Help me debug my loop\".",
-        "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
-    ];
-    res.json({ reply: fallbacks[Math.floor(Math.random() * fallbacks.length)] });
-});
-
-// ── Streaming Chat API (SSE) ──
-app.get('/api/chat/stream', async (req, res) => {
-    const { message, lang, topic, phase, code, output, hasError } = req.query;
-    if (!message) return res.status(400).json({ error: 'No message provided' });
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    if (!process.env.AI_PROVIDER || process.env.AI_PROVIDER === 'keyword') {
-        let reply = '';
-        const q = message.toLowerCase().trim();
-        for (const entry of aiResponses) {
-            if (entry.keywords.some(k => q.includes(k))) {
-                reply = entry.response;
-                break;
-            }
-        }
-        if (!reply) {
-            reply = topic
-                ? `Great question about **${topic}**! What do you think the answer might be?`
-                : "That's interesting! Could you tell me more about what you're working on?";
-        }
-        for (const char of reply) {
-            res.write(`data: ${JSON.stringify({ content: char })}\n\n`);
-        }
+    const sseSend = (chunk) => {
+        res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+    };
+    const sseDone = () => {
         res.write('data: [DONE]\n\n');
         res.end();
-        return;
-    }
+    };
 
     try {
-        const history = req.query.history ? JSON.parse(req.query.history) : [];
-        const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError === 'true', history);
-        let full = '';
-        await askLLM(llmMessages, (chunk) => {
-            full += chunk;
-            res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
-        });
-        res.write('data: [DONE]\n\n');
-        res.end();
+        // ── 1. Try LLM first if configured ──
+        if (process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+            const llmMessages = buildLLMMessages(message, lang, topic, phase, code, output, hasError, history);
+            let full = '';
+            let gotChunk = false;
+            await askLLM(llmMessages, (chunk) => {
+                gotChunk = true;
+                full += chunk;
+                sseSend(chunk);
+            });
+            if (gotChunk) {
+                if (topic && lang) learner.trackAttempt(lid, lang, topic);
+                return sseDone();
+            }
+        }
+
+        // ── 2. Code-aware, error-aware help ──
+        if (hasError || /error|bug|fix|wrong|not working|issue/.test(q)) {
+            let errorReply = '';
+            if (code) {
+                const analysis = analyzeUserCode(code, lang);
+                if (analysis && analysis.length > 0) {
+                    errorReply = "I looked at your code and found some issues:\n\n" +
+                        analysis.map((h, i) => `${i + 1}. ${h}`).join('\n') + '\n\n';
+                }
+            }
+            if (output && /Error|ReferenceError|TypeError|SyntaxError|FAIL/.test(output)) {
+                const cleanOutput = output.replace(/<[^>]*>/g, '').trim();
+                errorReply += `**Your code produced this output:**\n\`\`\`\n${cleanOutput}\n\`\`\`\n\n`;
+            }
+            if (code && topic) {
+                errorReply += `Since you're working on **${topic}**, here's a hint:\n`;
+                errorReply += `- Look at the example in the curriculum and compare it with your code line by line\n`;
+                errorReply += `- Try simplifying: comment out parts until it works, then add them back one at a time\n`;
+                errorReply += `- Check the most common mistake for this topic and see if it applies to you\n\n`;
+            }
+            if (!errorReply) {
+                errorReply = "Let's debug this systematically:\n\n**1. What did you expect?**\n**2. What actually happened?**\n**3. What have you tried?**\n\nShare your code and the error message, and I'll help!";
+            } else {
+                errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
+            }
+            if (topic && lang) learner.trackError(lid, lang, topic);
+            return streamReply(res, errorReply);
+        }
+
+        // ── 3. Follow-up detection ──
+        if (history && history.length >= 2) {
+            const lastBotMsg = history.filter(h => h.role === 'bot').pop();
+            if (lastBotMsg && /yes|ok|sure|tell me more|example|show me/.test(q)) {
+                const followUps = {
+                    'variable': "Let's practice! Try this in the editor:\n```\n// Declare a variable 'name' with your name as a string\n// Declare a variable 'age' with your age as a number\n// Print both using console.log()\n```\nThen click Run and tell me what you see!",
+                    'function': "Here's a simple exercise: Write a function called `add` that takes two parameters and returns their sum. Then call it and log the result.\n\n**Hint:** `function add(a, b) { ... }`",
+                    'loop': "Practice: Write a loop that prints the numbers 1 through 10. Then modify it to only print even numbers.\n\n**Hint for evens:** Use `if (i % 2 === 0)` to check if a number is even.",
+                    'array': "Try this: Create an array of your 3 favorite foods. Write a loop that prints \"I like [food]\" for each one.",
+                    'class': "Exercise: Create a `Person` class with `name` and `age` properties. Add a `greet()` method that says \"Hi, I'm [name]!\". Create an instance and call greet()."
+                };
+                for (const [key, reply] of Object.entries(followUps)) {
+                    if (lastBotMsg.text && lastBotMsg.text.toLowerCase().includes(key)) {
+                        return streamReply(res, reply);
+                    }
+                }
+            }
+            if (q.includes('thank')) {
+                return streamReply(res, "You're welcome! The best way to learn is by doing. Keep experimenting, keep breaking things, and keep asking questions. What would you like to explore next?");
+            }
+        }
+
+        // ── 4. Try semantic curriculum search ──
+        const searchLang = detectLanguage(message) || lang;
+        const semanticResults = await semanticSearch(q, searchLang, 1);
+        if (semanticResults.length > 0 && semanticResults[0].score > 0.15) {
+            const best = semanticResults[0];
+            let reply = `I found relevant content in the curriculum related to your question.\n\n**${best.topic}** (${best.lang.toUpperCase()} - ${best.phase})\n\n`;
+            reply += best.exp.slice(0, 500) + '...\n\n';
+            if (best.code) {
+                reply += `**Example code:**\n\`\`\`\n${best.code}\n\`\`\`\n\n`;
+            }
+            reply += `Would you like me to explain more about **${best.topic}** or help you practice it?`;
+            return streamReply(res, reply);
+        }
+
+        // ── 5. Context-aware topic matching ──
+        if (topic && /what|how|explain|tell me|\?/.test(q)) {
+            for (const entry of aiResponses) {
+                if (entry.keywords.some(k => topic.toLowerCase().includes(k))) {
+                    let reply = entry.response;
+                    reply += `\n\n**You're currently studying:** ${topic} (${phase || ''})`;
+                    reply += `\nTry the code example in the editor, modify it, and click Run to see what happens!`;
+                    return streamReply(res, reply);
+                }
+            }
+        }
+
+        // ── 6. Standard keyword matching ──
+        for (const entry of aiResponses) {
+            if (entry.keywords.some(k => q.includes(k))) {
+                return streamReply(res, entry.response);
+            }
+        }
+
+        // ── 7. Secondary keyword matching ──
+        for (const entry of aiResponses) {
+            const combined = entry.keywords.join(' ');
+            if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
+                return streamReply(res, entry.response);
+            }
+        }
+
+        // ── 8. Greeting / thanks ──
+        if (q.includes('thank')) {
+            return streamReply(res, "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step! What would you like to learn next?");
+        }
+
+        if (/hello|hi |^hey$|good/.test(q)) {
+            const langInfo = lang ? `I see you're studying **${lang.toUpperCase()}**. ` : '';
+            return streamReply(res, `Hello! ${langInfo}Ask me anything about the topic you're working on, or pick a suggestion below to get started!`);
+        }
+
+        // ── 9. Socratic / generic fallback ──
+        if (topic) {
+            return streamReply(res, `Great question about **${topic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far in the editor? Tell me your thought process and I'll help guide you to the right solution!`);
+        }
+
+        const fallbacks = [
+            "That's an interesting question! To help you best, could you tell me:\n1. What language are you working with?\n2. What topic are you studying?\n3. What have you tried so far?",
+            "I want to make sure I help you effectively. Could you tell me more about what you're working on? For example: \"Explain functions\" or \"Help me debug my loop\".",
+            "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
+        ];
+        return streamReply(res, fallbacks[Math.floor(Math.random() * fallbacks.length)]);
+
     } catch (e) {
-        res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
-        res.write('data: [DONE]\n\n');
-        res.end();
+        sseSend("Sorry, I encountered an error processing your request. Please try again.");
+        sseDone();
     }
 });
 
