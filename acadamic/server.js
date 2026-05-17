@@ -16,15 +16,7 @@ const learner = require('./ai/learner');
 const { review: codeReview } = require('./ai/reviewer');
 const { generateExercise } = require('./ai/exercises');
 const database = require('./sql/database');
-
-const LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
-    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
-    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
-    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    aws: 'aws', azure: 'azure', gcp: 'gcp', cloud: 'cloud',
-};
+const { LANG_NAMES } = require('./public/langConfig');
 
 function detectLanguage(query) {
     const words = query.toLowerCase().split(/\s+/);
@@ -77,6 +69,21 @@ const dbStatus = database.initAll();
 console.log('[DB] SQLite:', dbStatus.sqlite.available ? 'ready' : 'FAILED');
 console.log('[DB] PostgreSQL:', dbStatus.pg.available ? 'ready' : dbStatus.pg.reason || 'not configured');
 console.log('[DB] MySQL:', dbStatus.mysql.available ? 'ready' : dbStatus.mysql.reason || 'not configured');
+
+// ── Environment Validation ──
+const REQUIRED_FOR_AI = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'LOCAL_LLM_ENDPOINT'];
+const AI_PROVIDER = process.env.AI_PROVIDER || 'keyword';
+if (AI_PROVIDER !== 'keyword') {
+    const missingKeys = REQUIRED_FOR_AI.filter(key => !process.env[key]);
+    if (missingKeys.length > 0) {
+        console.warn(`[WARN] AI_PROVIDER="${AI_PROVIDER}" but missing: ${missingKeys.join(', ')}`);
+        console.warn(`[WARN] Falling back to keyword-based AI responses`);
+    }
+}
+if (!process.env.AI_SYSTEM_PROMPT) {
+    console.log('[INFO] Using default AI_SYSTEM_PROMPT. Set AI_SYSTEM_PROMPT to customize.');
+}
+console.log(`[AI] Provider: ${AI_PROVIDER}, Model: ${process.env[AI_PROVIDER.toUpperCase() + '_MODEL'] || 'default'}`);
 
 // Rate limiting
 const rateLimitStore = new Map();
@@ -188,7 +195,10 @@ app.post('/api/progress', (req, res) => {
     }
 });
 
-// ── Execution Queue (process pool) ──
+// ── Execution Queue (process pool for concurrent code execution) ──
+// Purpose: Manage concurrent code execution with a queue and max workers
+// Uses: Non-interactive code (no stdin needed, stdout/stderr capture)
+// Why separate function: Prevents spawning unlimited processes; ensures fair scheduling
 const EXEC_QUEUE = [];
 let EXEC_RUNNING = 0;
 const EXEC_MAX_CONCURRENT = 4;
@@ -213,7 +223,11 @@ function processNextExec() {
     }
 }
 
-// ── Execute with stdin support ──
+// ── Execute with stdin support (for interactive input) ──
+// Purpose: Run code that requires stdin (e.g., user input prompts)
+// Uses: Interactive code (takes stdin, pipes output to stdout/stderr)
+// Why separate: spawn() + stdin.write() provides true streaming input; exec() doesn't buffer stdin
+// Note: Uses spawn('sh', ['-c', cmd]) which is safe because cmd is pre-sandboxed with ulimit
 function execWithStdin(cmd, opts, stdin) {
     return new Promise((resolve, reject) => {
         const child = spawn('sh', ['-c', cmd], opts);

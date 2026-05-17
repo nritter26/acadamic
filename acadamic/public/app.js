@@ -1,3 +1,4 @@
+// Import from langConfig for consistency
 let currentLang = 'js';
 let currentPhase = '';
 let currentTopic = '';
@@ -5,17 +6,23 @@ let currentLevel = 'all';
 let currentCompletionFilter = 'all';
 let collapsedPhases = new Set();
 
-const LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
-    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
-    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
-    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
-};
-const NAME_TO_LANG = {};
-for (const [code, name] of Object.entries(LANG_NAMES)) {
-    NAME_TO_LANG[name] = code;
+// LANG_NAMES and NAME_TO_LANG are defined in langConfig.js (loaded before app.js)
+// Fallback definitions for standalone usage
+if (typeof LANG_NAMES === 'undefined') {
+    const LANG_NAMES = {
+        js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+        rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
+        swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
+        mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
+        mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
+        cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
+    };
+}
+if (typeof NAME_TO_LANG === 'undefined') {
+    const NAME_TO_LANG = {};
+    for (const [code, name] of Object.entries(LANG_NAMES)) {
+        NAME_TO_LANG[name] = code;
+    }
 }
 
 function normalizeCourseData() {

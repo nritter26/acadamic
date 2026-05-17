@@ -15,3 +15,8 @@ const LANG_TOPICS = {};
 for (const code of Object.keys(LANG_NAMES)) {
     LANG_TOPICS[code] = {};
 }
+
+// Export for server-side use and Node.js environments
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { LANG_NAMES, NAME_TO_LANG, LANG_TOPICS };
+}
