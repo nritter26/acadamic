@@ -3,6 +3,13 @@ let dbProvider = 'pg';
 const dbProviderNames = {
     pg: 'PostgreSQL', mysql: 'MySQL', sqlite: 'SQLite',
     mongodb: 'MongoDB', firebase: 'Firebase', cloud: 'General Cloud',
+    aws: 'AWS', azure: 'Azure', gcp: 'GCP',
+};
+
+const dbProviderColors = {
+    pg: '#336791', mysql: '#F29111', sqlite: '#003B57',
+    mongodb: '#47A248', firebase: '#FFCA28', cloud: '#4285F4',
+    aws: '#FF9900', azure: '#0078D4', gcp: '#4285F4',
 };
 
 function initDatabase() {
@@ -18,6 +25,17 @@ function initDatabase() {
 function switchDBProvider(provider) {
     dbProvider = provider;
     currentLang = provider;
+    if (!courseData[provider]) {
+        document.getElementById('topic-list').innerHTML = '<div style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
+        document.getElementById('explanation').innerHTML = '<div style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
+        document.getElementById('editor').value = '';
+        document.getElementById('output').innerText = '// Loading...';
+        loadLangData(provider, function () {
+            renderDBTopics();
+            loadFirstTopic(provider);
+        });
+        return;
+    }
     renderDBTopics();
     loadFirstTopic(provider);
 }
@@ -47,6 +65,7 @@ function renderDBTopics() {
     const dbKeys = Object.keys(dbProviderNames);
     for (const key of dbKeys) {
         const active = key === dbProvider ? ' active' : '';
+        const color = dbProviderColors[key] || '#94a3b8';
         html += `<button class="db-btn${active}" onclick="switchDBProvider('${key}')">${dbProviderNames[key]}</button>`;
     }
     html += `</div><div style="height:6px"></div>`;

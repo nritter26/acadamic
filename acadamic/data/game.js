@@ -94,32 +94,108 @@ const sprintChallenges = [
   { desc: 'Print "Hello" using fmt', code: 'package main\nimport "fmt"\nfunc main() {\n  fmt.Println("Hello")\n}', lang: 'go' },
 ];
 
-// ── MEMORY DATA ──
-const memoryPairs = [
-  { a: 'console.log()', b: 'Print in JS' },
-  { a: 'console.log()', b: 'Print in JS' },
-  { a: 'print()', b: 'Print in Python' },
-  { a: 'print()', b: 'Print in Python' },
-  { a: 'fmt.Println()', b: 'Print in Go' },
-  { a: 'fmt.Println()', b: 'Print in Go' },
-  { a: 'println!()', b: 'Print in Rust' },
-  { a: 'println!()', b: 'Print in Rust' },
-  { a: 'let x = 5', b: 'Mutable variable JS' },
-  { a: 'let x = 5', b: 'Mutable variable JS' },
-  { a: 'const x = 5', b: 'Immutable JS' },
-  { a: 'const x = 5', b: 'Immutable JS' },
-  { a: 'def foo():', b: 'Function in Python' },
-  { a: 'def foo():', b: 'Function in Python' },
-  { a: 'func foo()', b: 'Function in Go' },
-  { a: 'func foo()', b: 'Function in Go' },
-  { a: 'fn foo()', b: 'Function in Rust' },
-  { a: 'fn foo()', b: 'Function in Rust' },
-  { a: 'if x > 0:', b: 'If in Python' },
-  { a: 'if x > 0:', b: 'If in Python' },
-  { a: 'for i in range(10):', b: 'Loop in Python' },
-  { a: 'for i in range(10):', b: 'Loop in Python' },
-  { a: '// comment', b: 'Single line comment' },
-  { a: '// comment', b: 'Single line comment' },
+// ── SPOT THE BUG DATA ──
+const spotBugQuestions = [
+  {
+    code: 'function add(a, b) {\n  return a * b;\n}',
+    bugLine: 1, explain: 'The function <strong>multiplies</strong> (a * b) instead of <strong>adding</strong> (a + b). The return statement uses the wrong operator.',
+    lang: 'js'
+  },
+  {
+    code: 'const PI = 3.14;\nPI = 3.14159;',
+    bugLine: 1, explain: 'Cannot reassign a <strong>const</strong> variable. Use <strong>let</strong> instead of const if reassignment is needed.',
+    lang: 'js'
+  },
+  {
+    code: 'if (x = 5) {\n  console.log("x is 5");\n}',
+    bugLine: 0, explain: 'Using <strong>=</strong> (assignment) instead of <strong>===</strong> (comparison). This assigns 5 to x and the condition is always truthy.',
+    lang: 'js'
+  },
+  {
+    code: 'let i = 10;\nwhile (i >= 0) {\n  console.log(i);\n  i++;\n}',
+    bugLine: 3, explain: 'The loop <strong>increments</strong> i (i++) instead of <strong>decrementing</strong> (i--), causing an infinite loop.',
+    lang: 'js'
+  },
+  {
+    code: 'const nums = [1, 2, 3];\nconsole.log(nums[3]);',
+    bugLine: 1, explain: 'Index <strong>3</strong> is out of bounds for a 3-element array. Arrays are 0-indexed, so valid indices are 0-2.',
+    lang: 'js'
+  },
+  {
+    code: 'function greet(name) {\n  return "Hello, " + name;\n}\nconsole.log(greet());',
+    bugLine: 3, explain: '<strong>greet()</strong> is called without an argument, so <strong>name</strong> is undefined. The output will be "Hello, undefined".',
+    lang: 'js'
+  },
+  {
+    code: 'const obj = { name: "Alice" };\nconsole.log(obj.Name);',
+    bugLine: 1, explain: 'JavaScript is <strong>case-sensitive</strong>. obj.Name should be <strong>obj.name</strong> (lowercase n).',
+    lang: 'js'
+  },
+  {
+    code: 'const nums = [1, 2, 3];\nnums = [4, 5, 6];',
+    bugLine: 1, explain: 'Cannot reassign a <strong>const</strong> variable. Use <strong>let</strong> to declare nums if you need to reassign it.',
+    lang: 'js'
+  },
+  {
+    code: 'for i in range(5)\n  print(i)',
+    bugLine: 0, explain: 'Missing <strong>colon</strong> (:) after the for loop condition. Python requires a colon at the end of for/while/if/def lines.',
+    lang: 'py'
+  },
+  {
+    code: 'x = 10\nif x = 5:\n  print("five")',
+    bugLine: 1, explain: 'Using <strong>=</strong> (assignment) instead of <strong>==</strong> (comparison) in the condition. Python uses == for equality checks.',
+    lang: 'py'
+  },
+  {
+    code: 'def square(n):\n  retrun n * n',
+    bugLine: 1, explain: '<strong>Typo:</strong> "retrun" should be <strong>return</strong>. This will cause a SyntaxError.',
+    lang: 'py'
+  },
+  {
+    code: 'numbers = [1, 2, 3]\nprint(numbers[3])',
+    bugLine: 1, explain: 'Index <strong>3</strong> is out of range for a 3-element list. Python lists are 0-indexed (valid indices: 0-2).',
+    lang: 'py'
+  },
+  {
+    code: 'print("Hello',
+    bugLine: 0, explain: 'Missing <strong>closing quote</strong> and <strong>closing parenthesis</strong>. The string and function call are never terminated.',
+    lang: 'py'
+  },
+  {
+    code: 'func add(a int, b int) int {\n  return a - b\n}',
+    bugLine: 1, explain: 'The function <strong>subtracts</strong> (a - b) instead of <strong>adding</strong> (a + b). The return statement uses the wrong operator.',
+    lang: 'go'
+  },
+  {
+    code: 'package main\nfunc main() {\n  var x int\n  x = "hello"\n  fmt.Println(x)\n}',
+    bugLine: 3, explain: '<strong>Type mismatch:</strong> x is declared as int but assigned a string. Go is statically typed and does not allow implicit type conversions.',
+    lang: 'go'
+  },
+  {
+    code: 'package main\nimport "fmt"\nfunc main() {\n  var x int\n  fmt.Println(X)\n}',
+    bugLine: 4, explain: 'Go is <strong>case-sensitive</strong>. <strong>X</strong> is not defined; should be <strong>x</strong> (lowercase). This causes a compilation error.',
+    lang: 'go'
+  },
+  {
+    code: 'package main\nfunc main() {\n  const x = 5\n  x = 10\n}',
+    bugLine: 3, explain: 'Cannot reassign a <strong>const</strong> in Go. Constants are immutable and must be initialized with a compile-time known value.',
+    lang: 'go'
+  },
+  {
+    code: 'fn main() {\n  let x = 5;\n  x = 10;\n  println!("{}", x);\n}',
+    bugLine: 2, explain: 'Rust variables are <strong>immutable by default</strong>. Add <strong>mut</strong> (let mut x = 5) to make it mutable.',
+    lang: 'rs'
+  },
+  {
+    code: 'fn main() {\n  let v = vec![1, 2, 3];\n  println!("{}", v[3]);\n}',
+    bugLine: 2, explain: 'Index <strong>3</strong> is out of bounds for a vector with 3 elements. Valid indices are 0-2. Rust panics at runtime for out-of-bounds access.',
+    lang: 'rs'
+  },
+  {
+    code: 'fn main() {\n  let s = String::from("hello");\n  println!("{}", s[1]);\n}',
+    bugLine: 2, explain: 'Cannot index <strong>String</strong> directly in Rust. Strings are UTF-8 encoded, use <strong>.chars()</strong> or slicing for byte access.',
+    lang: 'rs'
+  },
 ];
 
 // ── FLASH DATA ──
@@ -227,7 +303,7 @@ const GAMES = [
   { id:'scramble',     name:'Code Scramble',    icon:'🔀', desc:'Reorder shuffled code lines', color:'#f59e0b' },
   { id:'debug',        name:'Debug the Bug',    icon:'🐛', desc:'Find and fix the bug', color:'#10b981' },
   { id:'sprint',       name:'Syntax Sprint',    icon:'🏃', desc:'Write code from a description', color:'#3b82f6' },
-  { id:'memory',       name:'Memory Match',     icon:'🧠', desc:'Match code concept pairs', color:'#8b5cf6' },
+  { id:'spotbug',      name:'Spot the Bug',     icon:'🔍', desc:'Find the buggy line in code', color:'#8b5cf6' },
   { id:'flash',        name:'Speed Read',       icon:'⚡', desc:'Read code then answer', color:'#ec4899' },
   { id:'race',         name:'Race Compiler',    icon:'🏎️', desc:'Solve under time pressure', color:'#14b8a6' },
   { id:'swipe',        name:'Syntax Swipe',     icon:'👆', desc:'Valid syntax or not?', color:'#f97316' },
@@ -310,7 +386,7 @@ function launchGame(id) {
   else if (id === 'scramble') initScramble();
   else if (id === 'debug') initDebug();
   else if (id === 'sprint') initSprint();
-  else if (id === 'memory') initMemory();
+  else if (id === 'spotbug') initSpotBug();
   else if (id === 'flash') initFlash();
   else if (id === 'race') initRace();
   else if (id === 'swipe') initSwipe();
@@ -598,59 +674,81 @@ function checkSprint() {
 }
 
 // ════════════════════════════════════════
-// 5. MEMORY MATCH
+// 5. SPOT THE BUG
 // ════════════════════════════════════════
-let memoryCards = [], memoryFlipped = [], memoryMatched = [], memoryLocked = false, memoryMoves = 0;
+let spotBugRound = 0, spotBugCorrect = 0, spotBugTotal = 0, spotBugAns = -1, spotBugLocked = false;
+const SPOT_BUG_ROUNDS = 10;
 
-function initMemory() {
-  const shuffled = shuffleArr(memoryPairs).slice(0, 12);
-  memoryCards = [];
-  for (const p of shuffled) { memoryCards.push({id:memoryCards.length, pair:memoryCards.length, text:p.a, val:'a'}); memoryCards.push({id:memoryCards.length, pair:memoryCards.length-1, text:p.b, val:'b'}); }
-  memoryCards = shuffleArr(memoryCards);
-  memoryFlipped = []; memoryMatched = []; memoryLocked = false; memoryMoves = 0;
-  renderMemory();
+function initSpotBug() {
+  spotBugQuestions.sort(() => Math.random() - 0.5);
+  spotBugRound = 0; spotBugCorrect = 0; spotBugTotal = 0; spotBugAns = -1; spotBugLocked = false;
+  renderSpotBug();
 }
-function renderMemory() {
+function renderSpotBug() {
   const body = document.getElementById('gamePaperBody');
-  let html = addBackBtn() + `<div style="display:flex;gap:12px;margin-bottom:8px;font-size:11px;color:#64748b;"><span>Moves: <strong id="memMoves">${memoryMoves}</strong></span><span>Matched: <strong>${memoryMatched.length/2}/${memoryCards.length/2}</strong></span></div>`;
-  html += '<div class="memory-grid">';
-  for (const card of memoryCards) {
-    const isFlipped = memoryFlipped.includes(card.id) || memoryMatched.includes(card.id);
-    const isMatched = memoryMatched.includes(card.id);
-    html += `<div class="memory-card${isFlipped?' flipped':''}${isMatched?' matched':''}" onclick="${!isFlipped&&!memoryLocked?`flipMemCard(${card.id})`:''}">
-      <div class="memory-inner"><div class="memory-front">?</div><div class="memory-back">${escapeHtml(card.text)}</div></div>
+  if (spotBugRound >= SPOT_BUG_ROUNDS || spotBugRound >= spotBugQuestions.length) {
+    const pct = spotBugTotal > 0 ? Math.round((spotBugCorrect/spotBugTotal)*100) : 0;
+    const xp = spotBugCorrect * 15;
+    earnXP(xp);
+    if (spotBugCorrect === spotBugTotal) createConfetti(50);
+    else if (spotBugCorrect > 0) createConfetti(20);
+    body.innerHTML = addBackBtn() + `<div style="text-align:center;padding:20px;">
+      <div style="font-size:40px;margin-bottom:8px;">${pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '💪'}</div>
+      <div style="font-size:24px;font-weight:900;color:var(--accent);">${spotBugCorrect}/${spotBugTotal}</div>
+      <div style="color:#64748b;margin:8px 0;">bugs found (${pct}%)</div>
+      <div style="color:#10b981;font-weight:800;">+${xp} XP</div>
+      <button class="game-new-btn" style="margin-top:12px;" onclick="initSpotBug()">Play Again</button>
     </div>`;
+    return;
+  }
+  const q = spotBugQuestions[spotBugRound];
+  const lines = q.code.split('\n');
+  const answered = spotBugAns >= 0;
+  let html = addBackBtn() + `<div style="display:flex;gap:12px;margin-bottom:8px;font-size:10px;color:#64748b;">
+    <span>Bug ${spotBugRound+1}/${Math.min(SPOT_BUG_ROUNDS, spotBugQuestions.length)}</span>
+    <span>Found: <strong style="color:var(--accent);">${spotBugCorrect}</strong></span>
+    <span style="margin-left:auto;">${q.lang.toUpperCase()}</span>
+  </div>`;
+  html += '<div class="spotbug-code">';
+  for (let i = 0; i < lines.length; i++) {
+    const ln = i;
+    let cls = 'spotbug-line';
+    if (answered && ln === q.bugLine) cls += ' correct';
+    else if (answered && ln === spotBugAns) cls += ' wrong';
+    html += `<div class="${cls}" onclick="${answered ? '' : `spotBugAnswer(${i})`}">`;
+    html += `<span class="spotbug-lineno">${i + 1}</span>`;
+    html += `<span class="spotbug-code-text">${escapeHtml(lines[i])}</span>`;
+    html += '</div>';
   }
   html += '</div>';
-  if (memoryMatched.length === memoryCards.length) {
-    const xp = Math.max(10, 30 - memoryMoves);
-    earnXP(xp);
-    createConfetti(40);
-    html += `<div class="game-new-record" style="font-size:14px;">All matched! +${xp} XP</div>`;
-    html += `<button class="game-new-btn" style="margin-top:8px;" onclick="initMemory()">Play Again</button>`;
+  if (answered) {
+    const isCorrect = spotBugAns === q.bugLine;
+    html += `<div class="spotbug-explain">${isCorrect ? '✅ ' : '❌ '} ${q.explain}</div>`;
+    html += `<button class="game-new-btn" style="margin-top:10px;" onclick="nextSpotBug()">Next →</button>`;
   }
   body.innerHTML = html;
 }
-function flipMemCard(id) {
-  if (memoryLocked || memoryFlipped.includes(id) || memoryMatched.includes(id)) return;
-  memoryFlipped.push(id); memoryMoves++;
-  if (memoryFlipped.length === 2) {
-    memoryLocked = true;
-    const [a, b] = memoryFlipped;
-    const cA = memoryCards.find(c => c.id === a), cB = memoryCards.find(c => c.id === b);
-    if (cA.pair === cB.pair && cA.id !== cB.id) {
-      memoryMatched.push(a, b); memoryFlipped = []; memoryLocked = false;
-      if (memoryMatched.length === memoryCards.length) {
-        renderMemory();
-      } else {
-        showToast('✓ Match!', 'success');
-        renderMemory();
-      }
-    } else {
-      setTimeout(() => { memoryFlipped = []; memoryLocked = false; renderMemory(); }, 800);
-    }
+function spotBugAnswer(line) {
+  if (spotBugLocked) return;
+  spotBugLocked = true;
+  spotBugAns = line;
+  spotBugTotal++;
+  const q = spotBugQuestions[spotBugRound];
+  if (line === q.bugLine) {
+    spotBugCorrect++;
+    playSound('correct');
+    recordAchievementStat('spotBugCorrect', 1);
+    showScorePopup('+15 XP', 'game-xp-popup');
+  } else {
+    playSound('wrong');
   }
-  renderMemory();
+  renderSpotBug();
+}
+function nextSpotBug() {
+  spotBugRound++;
+  spotBugAns = -1;
+  spotBugLocked = false;
+  renderSpotBug();
 }
 
 // ════════════════════════════════════════
@@ -935,7 +1033,7 @@ const ACHIEVEMENT_DEFS = [
   { id:'typing_80',     name:'Speed Demon',      desc:'Get 80 WPM in Typing',            icon:'⚡', check: s => s.typingBest >= 80 },
   { id:'scramble_5',    name:'Puzzle Solver',    desc:'Win 5 Scramble rounds',           icon:'🧩', check: s => s.scrambleWins >= 5 },
   { id:'debug_10',      name:'Bug Hunter',       desc:'Fix 10 bugs',                     icon:'🐛', check: s => s.debugFixed >= 10 },
-  { id:'memory_full',   name:'Memory Master',    desc:'Complete a full Memory game',     icon:'🧠', check: s => s.memoryComplete >= 1 },
+  { id:'spotbug_5',     name:'Bug Spotter',      desc:'Find 5 bugs correctly',           icon:'🔍', check: s => s.spotBugCorrect >= 5 },
   { id:'flash_perfect', name:'Speed Reader',     desc:'Get all Flash questions right',   icon:'📖', check: s => s.flashPerfect >= 1 },
   { id:'swipe_10',      name:'Syntax Expert',    desc:'Get 10 Swipe questions right',    icon:'👆', check: s => s.swipeCorrect >= 10 },
   { id:'daily_3',       name:'Daily Devotee',    desc:'Complete 3 Daily Challenges',     icon:'🗓️', check: s => s.dailyDone >= 3 },
@@ -981,7 +1079,7 @@ function gatherAchievementState() {
   return {
     totalXP: xpData.xp || 0, level: xpData.lvl || 1, totalPlays,
     typingBest, scrambleWins: extra.scrambleWins || 0, debugFixed: extra.debugFixed || 0,
-    memoryComplete: extra.memoryComplete || 0, flashPerfect: extra.flashPerfect || 0,
+    spotBugCorrect: extra.spotBugCorrect || 0, flashPerfect: extra.flashPerfect || 0,
     swipeCorrect: extra.swipeCorrect || 0, dailyDone: extra.dailyDone || 0,
     golfUnderPar: extra.golfUnderPar || 0, regexSolved: extra.regexSolved || 0,
     sqlCorrect: extra.sqlCorrect || 0, apiCorrect: extra.apiCorrect || 0,

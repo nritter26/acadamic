@@ -11,11 +11,64 @@ const LANG_NAMES = {
     swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
     mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    cloud: 'cloud',
+    cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
 };
 const NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {
     NAME_TO_LANG[name] = code;
+}
+
+function normalizeCourseData() {
+    for (const lang of Object.keys(courseData)) {
+        const langData = courseData[lang];
+        if (!langData || typeof langData !== 'object') continue;
+        for (const phase of Object.keys(langData)) {
+            const phaseData = langData[phase];
+            if (!phaseData || typeof phaseData !== 'object') continue;
+            for (const topic of Object.keys(phaseData)) {
+                const item = phaseData[topic];
+                if (Array.isArray(item)) {
+                    phaseData[topic] = {
+                        exp: item[0],
+                        code: item[1],
+                        ...(item.length > 2 && { prereq: item[2] }),
+                    };
+                }
+            }
+        }
+    }
+}
+normalizeCourseData();
+
+const LANG_TO_FILE = {
+    rs: 'rust',
+};
+const LOADING_LANGS = new Set();
+
+function loadLangData(lang, callback) {
+    if (courseData[lang]) {
+        if (callback) callback();
+        return true;
+    }
+    if (LOADING_LANGS.has(lang)) {
+        return false;
+    }
+    LOADING_LANGS.add(lang);
+    const filename = (LANG_TO_FILE[lang] || lang) + '.json';
+    fetch('data/' + filename)
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (data) {
+            courseData[lang] = data;
+            LOADING_LANGS.delete(lang);
+            normalizeCourseData();
+            if (callback) callback();
+        })
+        .catch(function (err) {
+            LOADING_LANGS.delete(lang);
+            console.error('Failed to load data for', lang + ':', err);
+            if (callback) callback();
+        });
+    return false;
 }
 
 function detectLanguageInQuery(q) {
@@ -1852,9 +1905,15 @@ function runBenchmark() {
 }
 
 // ── QUIZ MODE ──
+// ── QUIZ MODE ──
 let quizLang = 'js';
 let quizAnswers = {};
 let quizScore = { correct: 0, total: 0 };
+let quizLevel = 'all';
+let quizRoundQuestions = [];
+let quizRoundDone = false;
+let quizRoundNum = 1;
+let quizLevelCleared = {};
 
 function initQuiz() {
     currentLang = 'quiz';
@@ -1862,66 +1921,186 @@ function initQuiz() {
     document.getElementById('header-title').innerText = 'QUIZ';
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-quiz').classList.add('active');
+    quizLevel = 'all';
+    startQuizRound();
     renderQuiz();
+}
+
+function getQuizPool() {
+    const questions = quizData[quizLang] || [];
+    if (quizLevel === 'all') return questions;
+    return questions.filter(q => q.level === quizLevel);
+}
+
+function startQuizRound() {
+    const pool = getQuizPool();
+    const unanswered = pool.filter((q, i) => {
+        const globalIdx = quizData[quizLang].indexOf(q);
+        return quizAnswers[globalIdx] === undefined;
+    });
+    const shuffled = [...unanswered].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, 10);
+    quizRoundQuestions = selected.map(q => quizData[quizLang].indexOf(q));
+    quizRoundDone = false;
 }
 
 function renderQuiz() {
     const questions = quizData[quizLang] || [];
     const list = document.getElementById('topic-list');
-    let html = `<div class="quiz-lang-bar">`;
+    
+    let html = '<div class="quiz-lang-bar">';
     for (const l of ['js','ts','py','go','cs','kt','rs','swift','git','pg']) {
         const names = { js:'JS', ts:'TS', py:'Python', go:'Go', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', git:'Git', pg:'SQL' };
         const active = l === quizLang ? 'active' : '';
-        html += `<button class="quiz-lang-btn ${active}" onclick="switchQuizLang('${l}')">${names[l]}</button>`;
+        html += '<button class="quiz-lang-btn ' + active + '" onclick="switchQuizLang(\'' + l + '\')">' + names[l] + '</button>';
     }
-    html += `</div>`;
-    html += `<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode('js');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>`;
-    const done = Object.keys(quizAnswers).length;
-    html += `<div class="quiz-score"><span>Score: <strong>${quizScore.correct}/${quizScore.total}</strong></span><span>Progress: <strong>${done}/${questions.length}</strong></span><button class="quiz-reset" onclick="resetQuiz()">Reset</button></div>`;
-    questions.forEach((q, i) => {
-        const sel = quizAnswers[i];
+    html += '</div>';
+    
+    html += '<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode(\'js\');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>';
+    
+    // Level cleared banners
+    for (const level of ['beginner', 'intermediate', 'expert']) {
+        const key = quizLang + ':' + level;
+        if (quizLevelCleared[key]) {
+            html += '<div class="quiz-level-cleared">🏆 ' + level.charAt(0).toUpperCase() + level.slice(1) + ' Cleared! (' + quizLevelCleared[key].correct + '/' + quizLevelCleared[key].total + ')</div>';
+        }
+    }
+    
+    // Progress
+    const doneTotal = Object.keys(quizAnswers).length;
+    html += '<div class="quiz-round-progress">🔥 Round ' + quizRoundNum + ' · ' + quizRoundQuestions.filter(idx => quizAnswers[idx] !== undefined).length + '/' + quizRoundQuestions.length + ' answered</div>';
+    html += '<div class="quiz-score"><span>Score: <strong>' + quizScore.correct + '/' + quizScore.total + '</strong></span><span>Total: <strong>' + doneTotal + '/' + questions.length + '</strong></span><button class="quiz-reset" onclick="resetQuiz()">Reset</button></div>';
+    
+    // Round complete banner
+    if (quizRoundDone) {
+        const roundCorrect = quizRoundQuestions.filter(idx => quizAnswers[idx] === questions[idx].ans).length;
+        html += '<div class="quiz-round-banner"><span class="quiz-round-pass">🎯 Round ' + quizRoundNum + ' Complete! ' + roundCorrect + '/' + quizRoundQuestions.length + ' correct</span><button class="quiz-next-btn" onclick="nextQuizRound()">Next Round ▶</button></div>';
+    }
+    
+    // Questions
+    quizRoundQuestions.forEach((globalIdx, i) => {
+        const q = questions[globalIdx];
+        if (!q) return;
+        const sel = quizAnswers[globalIdx];
         let cls = '';
         if (sel !== undefined) {
             cls = sel === q.ans ? 'correct' : 'wrong';
         }
-        html += `<div class="quiz-card fade-in"><div class="q-num">Q${i+1}/${questions.length}</div><div class="q-text">${q.q}</div>`;
+        html += '<div class="quiz-card fade-in"><div class="q-num">Round ' + quizRoundNum + ' · Q' + (i+1) + '/' + quizRoundQuestions.length + '<span class="quiz-round-meta">' + q.level + '</span></div><div class="q-text">' + q.q + '</div>';
         q.opts.forEach((o, j) => {
             let oc = 'quiz-opt';
             if (sel !== undefined) {
                 if (j === q.ans) oc += ' correct';
                 if (j === sel && j !== q.ans) oc += ' wrong';
             } else if (j === sel) oc += ' selected';
-            html += `<button class="${oc}" onclick="answerQuiz(${i}, ${j})">${String.fromCharCode(65+j)}. ${o}</button>`;
+            html += '<button class="' + oc + '" onclick="answerQuiz(' + i + ', ' + j + ')">' + String.fromCharCode(65+j) + '. ' + o + '</button>';
         });
-        html += `</div>`;
+        if (sel !== undefined && sel !== q.ans && q.explain) {
+            html += '<div class="quiz-explain">' + q.explain + '</div>';
+        }
+        html += '</div>';
     });
+    
+    // Empty state
+    if (quizRoundQuestions.length === 0) {
+        html += '<div style="color:#64748b;font-size:11px;padding:30px 10px;text-align:center;">';
+        if (doneTotal >= questions.length) {
+            html += '🎉 All questions completed for ' + (quizLevel === 'all' ? 'this language' : quizLevel) + '! Try a different level or language.';
+        } else {
+            html += 'No questions match the selected level. Try a different difficulty.';
+        }
+        html += '</div>';
+    }
+    
     list.innerHTML = html;
-    document.getElementById('explanation').innerHTML = '<div style="color:#64748b;font-size:11px;padding:10px;">Select answers to test your knowledge. Green = correct, Red = wrong.</div>';
+    document.getElementById('explanation').innerHTML = '<div style="color:#64748b;font-size:11px;padding:10px;">Answer 10 questions per round. Pick a difficulty level to filter. Clear all questions at a level to earn the 🏆 badge!</div>';
     document.getElementById('editor').value = '';
     updateHighlight();
     document.getElementById('output').innerText = '// Quiz Mode Active';
+    
+    renderQuizLevelBar();
+}
+
+function renderQuizLevelBar() {
+    const levelBarEl = document.getElementById('level-bar');
+    if (!levelBarEl) return;
+    let html = '<button class="level-btn' + (quizLevel === 'all' ? ' active' : '') + '" onclick="setQuizLevel(\'all\')">All</button>';
+    for (const level of ['beginner', 'intermediate', 'expert']) {
+        const active = quizLevel === level ? ' active' : '';
+        const key = quizLang + ':' + level;
+        const cleared = quizLevelCleared[key] ? ' ✅' : '';
+        html += '<button class="level-btn' + active + '" onclick="setQuizLevel(\'' + level + '\')">' + level.charAt(0).toUpperCase() + level.slice(1) + cleared + '</button>';
+    }
+    levelBarEl.innerHTML = html;
+    levelBarEl.style.display = 'flex';
+}
+
+function answerQuiz(qIdx, optIdx) {
+    const questions = quizData[quizLang] || [];
+    if (quizRoundDone) return;
+    if (qIdx >= quizRoundQuestions.length) return;
+    const globalIdx = quizRoundQuestions[qIdx];
+    if (quizAnswers[globalIdx] !== undefined) return;
+    quizAnswers[globalIdx] = optIdx;
+    quizScore.total++;
+    if (optIdx === questions[globalIdx].ans) quizScore.correct++;
+    
+    const answeredInRound = quizRoundQuestions.filter(idx => quizAnswers[idx] !== undefined).length;
+    if (answeredInRound >= quizRoundQuestions.length) {
+        quizRoundDone = true;
+        checkQuizLevelCleared();
+    }
+    renderQuiz();
+}
+
+function checkQuizLevelCleared() {
+    const questions = quizData[quizLang] || [];
+    for (const level of ['beginner', 'intermediate', 'expert']) {
+        const key = quizLang + ':' + level;
+        if (quizLevelCleared[key]) continue;
+        const levelQIdxs = [];
+        questions.forEach((q, i) => {
+            if (q.level === level) levelQIdxs.push(i);
+        });
+        const allAnswered = levelQIdxs.length > 0 && levelQIdxs.every(idx => quizAnswers[idx] !== undefined);
+        if (allAnswered) {
+            const correct = levelQIdxs.filter(idx => quizAnswers[idx] === questions[idx].ans).length;
+            quizLevelCleared[key] = { total: levelQIdxs.length, correct };
+        }
+    }
+}
+
+function nextQuizRound() {
+    quizRoundNum++;
+    startQuizRound();
+    renderQuiz();
+}
+
+function setQuizLevel(level) {
+    quizLevel = level;
+    quizRoundNum = 1;
+    startQuizRound();
+    renderQuiz();
 }
 
 function switchQuizLang(lang) {
     quizLang = lang;
     quizAnswers = {};
     quizScore = { correct: 0, total: 0 };
-    renderQuiz();
-}
-
-function answerQuiz(qIdx, optIdx) {
-    const questions = quizData[quizLang] || [];
-    if (qIdx >= questions.length) return;
-    if (quizAnswers[qIdx] !== undefined) return;
-    quizAnswers[qIdx] = optIdx;
-    quizScore.total++;
-    if (optIdx === questions[qIdx].ans) quizScore.correct++;
+    quizLevel = 'all';
+    quizRoundNum = 1;
+    quizLevelCleared = {};
+    startQuizRound();
     renderQuiz();
 }
 
 function resetQuiz() {
     quizAnswers = {};
     quizScore = { correct: 0, total: 0 };
+    quizLevel = 'all';
+    quizRoundNum = 1;
+    quizLevelCleared = {};
+    startQuizRound();
     renderQuiz();
 }
 
@@ -3006,7 +3185,7 @@ setMode = function(lang) {
     const runBtn = document.querySelector('.run-btn');
     document.getElementById('cheatsheet-btn').textContent = lang === 'challenge' ? 'Reveal Answer' : 'Cheatsheet';
     if (runBtn) runBtn.textContent = lang === 'challenge' ? 'Test ▶' : 'Run ▶';
-    if (lang === 'quiz') { document.getElementById('level-bar').style.display = 'none'; initQuiz(); updateAISuggestions(); return; }
+    if (lang === 'quiz') { document.getElementById('level-bar').style.display = 'flex'; initQuiz(); updateAISuggestions(); return; }
     if (lang === 'challenge') { initChallenge(); updateAISuggestions(); return; }
     if (lang === 'game') { document.getElementById('level-bar').style.display = 'none'; initGame(); updateAISuggestions(); return; }
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
@@ -3043,6 +3222,20 @@ setMode = function(lang) {
             const firstTopic = Object.keys(langData[firstPhase])[0];
             loadTopic(firstPhase, firstTopic);
         }
+        return;
+    }
+
+    if (!courseData[lang]) {
+        document.getElementById('topic-list').innerHTML = '<div class="loading-placeholder" style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading curriculum...</div>';
+        document.getElementById('explanation').innerHTML = '<div class="loading-placeholder" style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
+        document.getElementById('editor').value = '// Loading...';
+        document.getElementById('output').innerText = '// Loading curriculum data...';
+        document.getElementById('app').className = lang + '-mode';
+        document.getElementById('header-title').innerText = lang.toUpperCase();
+        document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+        const navBtn = document.getElementById('nav-' + lang);
+        if (navBtn) navBtn.classList.add('active');
+        loadLangData(lang, function () { setMode(lang); });
         return;
     }
 
