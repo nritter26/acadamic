@@ -174,7 +174,7 @@ export async function getLearner(learnerId: string): Promise<Learner> {
   }
 }
 
-export async function saveLearner(learner: Learner): Promise<void> {
+async function saveLearner(learner: Learner): Promise<void> {
   try {
     await ensureDir();
     learner.lastSeen = new Date().toISOString();
@@ -304,53 +304,6 @@ export async function getDueReviews(learnerId: string): Promise<DueReview[]> {
     .sort((a, b) => new Date(a.nextReview!).getTime() - new Date(b.nextReview!).getTime());
 }
 
-// SM-2 spaced repetition algorithm
-function sm2Interval(quality: number, repetitions: number, previousInterval: number): { interval: number; repetitions: number; easeFactor: number } {
-  let ef = 2.5;
-  let newReps = repetitions;
-  let interval: number;
-
-  if (quality < 3) {
-    newReps = 0;
-    interval = 1;
-  } else {
-    if (repetitions === 0) {
-      interval = 1;
-    } else if (repetitions === 1) {
-      interval = 6;
-    } else {
-      interval = Math.round(previousInterval * ef);
-    }
-    newReps += 1;
-  }
-
-  ef = Math.max(1.3, ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
-  return { interval, repetitions: newReps, easeFactor: ef };
-}
-
-export async function scheduleReview(
-  learnerId: string,
-  lang: string,
-  topic: string,
-  phase?: string,
-  quality?: number,
-): Promise<void> {
-  const learner = await getLearner(learnerId);
-  const key = topicKey(lang, phase, topic);
-  if (learner.topics[key]) {
-    const current = learner.topics[key];
-    const prevInterval = current.nextReview
-      ? Math.round((new Date(current.nextReview).getTime() - (current.lastReviewed ? new Date(current.lastReviewed).getTime() : Date.now())) / 86400000)
-      : 1;
-    const q = quality !== undefined ? Math.max(0, Math.min(5, quality)) : 3;
-    const result = sm2Interval(q, current.reviews, Math.max(1, prevInterval));
-    current.nextReview = new Date(Date.now() + result.interval * 86400000).toISOString();
-    current.lastReviewed = new Date().toISOString();
-    current.reviews = result.repetitions;
-  }
-  await saveLearner(learner);
-}
-
 export async function getConceptMastery(
   learnerId: string,
   lang: string,
@@ -380,7 +333,7 @@ export async function getConceptMastery(
   return { topics, overall, lang };
 }
 
-export async function getWeakestTopics(
+async function getWeakestTopics(
   learnerId: string,
   lang: string,
   n = 3,
@@ -434,7 +387,4 @@ export async function getNextRecommendedTopic(
   return null;
 }
 
-export type {
-  LearnerTopic, LearnerPhase, Learner, PhaseTopics,
-  DueReview, TopicMastery, ConceptMastery, RecommendedTopic,
-};
+

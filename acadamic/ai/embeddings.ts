@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import config from './config';
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const CONTENT_DIR = path.join(__dirname, '..', 'content');
 const CACHE_FILE = path.join(__dirname, '..', 'data', 'embeddings-cache.json');
 
 interface CurriculumDoc {
@@ -52,73 +52,34 @@ function tokenize(text: string): string[] {
     .filter(w => w.length > 2 && w.length < 50);
 }
 
-function extractTopicObjs(content: string): { topic: string; exp: string; code: string }[] {
-  const results: { topic: string; exp: string; code: string }[] = [];
-  const topicRe = /"([^"]+)":\s*\{/g;
-  let m: RegExpExecArray | null;
-
-  while ((m = topicRe.exec(content)) !== null) {
-    const name = m[1];
-    const start = m.index + m[0].length - 1;
-    let depth = 1, i = start + 1;
-    let inStr: string | null = null;
-    let inTmpl = false;
-
-    while (i < content.length && depth > 0) {
-      const c = content[i];
-      if (inStr) {
-        if (c === '\\') i++;
-        else if (c === inStr) inStr = null;
-      } else if (c === '`') inTmpl = !inTmpl;
-      else if (!inTmpl && (c === '"' || c === "'")) inStr = c;
-      else if (!inTmpl) {
-        if (c === '{') depth++;
-        else if (c === '}') depth--;
-      }
-      i++;
-    }
-
-    const block = content.slice(start, i);
-    if (!name || (!block.includes('exp:') && !block.includes('code:'))) continue;
-
-    const expM = block.match(/exp:\s*`([^`]*)`/);
-    const codeM = block.match(/code:\s*`([^`]*)`/);
-    const exp = expM ? expM[1].replace(/<[^>]*>/g, '').trim() : '';
-    const code = codeM ? codeM[1].trim() : '';
-
-    if (exp || code) results.push({ topic: name, exp, code });
-  }
-  return results;
-}
-
-export async function buildCurriculumDocs(): Promise<void> {
+async function buildCurriculumDocs(): Promise<void> {
   curriculumDocs = [];
   try {
-    let dir: string[];
-    try {
-      dir = await fsp.readdir(DATA_DIR);
-    } catch {
-      console.error('buildCurriculumDocs: data directory not found');
+    if (!fs.existsSync(CONTENT_DIR)) {
+      console.error('buildCurriculumDocs: content directory not found');
       return;
     }
-
-    const files = dir.filter(f =>
-      f.endsWith('.js') &&
-      !['app.js', 'courseData.js', 'challenges.js', 'quiz.js', 'style.css', 'game.js', 'db.js'].includes(f),
-    );
+    const files = fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.json'));
 
     for (const file of files) {
-      const lang = file.replace('.js', '');
-      const content = await fsp.readFile(path.join(DATA_DIR, file), 'utf-8');
-      const phaseRe = /"([^"]+)":\s*\{/g;
-      let pm: RegExpExecArray | null;
+      const lang = file.replace('.json', '');
+      const raw = fs.readFileSync(path.join(CONTENT_DIR, file), 'utf-8');
+      const data = JSON.parse(raw);
 
-      while ((pm = phaseRe.exec(content)) !== null) {
-        const phase = pm[1];
-        const after = content.slice(pm.index + pm[0].length);
-        const inner = extractTopicObjs(after);
-        for (const t of inner) {
-          curriculumDocs.push({ lang, phase, ...t, text: `${t.topic} ${t.exp} ${t.code}` });
+      for (const [phase, topics] of Object.entries<Record<string, unknown>>(data)) {
+        for (const [topic, val] of Object.entries(topics)) {
+          if (Array.isArray(val)) {
+            const exp = typeof val[0] === 'string' ? val[0] : '';
+            const code = typeof val[1] === 'string' ? val[1] : '';
+            curriculumDocs.push({ lang, phase, topic, exp, code, text: `${topic} ${exp} ${code}` });
+          } else if (val && typeof val === 'object') {
+            const entry = val as Record<string, unknown>;
+            const exp = typeof entry.exp === 'string' ? entry.exp : '';
+            const code = typeof entry.code === 'string' ? entry.code : '';
+            if (exp || code) {
+              curriculumDocs.push({ lang, phase, topic, exp, code, text: `${topic} ${exp} ${code}` });
+            }
+          }
         }
       }
     }
@@ -131,8 +92,8 @@ export async function buildCurriculumDocs(): Promise<void> {
 function buildTFIDF(): void {
   if (curriculumDocs.length === 0) return;
   const docCount = curriculumDocs.length;
-  const df: Record<string, number> = {};
-  const invertedIndex: Record<string, number[]> = {};
+  const df: Record<string, number> = Object.create(null);
+  const invertedIndex: Record<string, number[]> = Object.create(null);
 
   const tokenizedDocs = curriculumDocs.map((doc, di) => {
     const tokens = tokenize(doc.text);
@@ -179,7 +140,7 @@ function cosineSimilarity(vecA: Record<string, number>, vecB: Record<string, num
   return denom === 0 ? 0 : dot / denom;
 }
 
-export function searchTFIDF(query: string, lang?: string, topN = 5): (CurriculumDoc & { score: number })[] {
+function searchTFIDF(query: string, lang?: string, topN = 5): (CurriculumDoc & { score: number })[] {
   if (!tfidfIndex) buildTFIDF();
   if (!tfidfIndex || curriculumDocs.length === 0) return [];
 
@@ -375,13 +336,6 @@ export function getTopicContext(topic: string, lang?: string): string {
   return context;
 }
 
-export function searchCurriculum(
-  query: string,
-  lang?: string,
-): ScoredCurriculumResult[] {
-  return searchTFIDF(query, lang, 5);
-}
-
 export function getCurriculumContext(query: string, lang?: string): string {
   const results = searchTFIDF(query, lang, 3);
   if (results.length === 0) return '';
@@ -394,7 +348,7 @@ export function getCurriculumContext(query: string, lang?: string): string {
   return context;
 }
 
-export async function init(): Promise<void> {
+async function init(): Promise<void> {
   await buildCurriculumDocs();
   buildTFIDF();
   if (config.openai.apiKey) {
@@ -410,4 +364,4 @@ initPromise = init().catch(e => {
   console.error('init failed:', (e as Error).message);
 });
 
-export type { CurriculumDoc, ScoredCurriculumResult };
+

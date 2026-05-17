@@ -103,8 +103,9 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .header-extra-tabs #nav-game:hover { background: #64748b; color: #000 !important; }
 .header-extra-tabs #nav-quiz:hover { background: #f59e0b; }
 .selector { display: flex; gap: 8px; flex-wrap: wrap; }
-.selector button { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; transition: all 0.25s ease; }
+.selector button { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; transition: all 0.25s ease; position: relative; overflow: hidden; }
 .selector button:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-1px); }
+.selector button:active { transform: translateY(0) scale(0.97); }
 .selector button.active { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 main { display: grid; grid-template-columns: 240px 380px 1fr 1fr; gap: 15px; flex: 1; padding-top: 15px; min-height: 0; grid-template-rows: minmax(0, 1fr); }
 .col { background: var(--card); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); transition: border-color 0.3s, box-shadow 0.3s; min-height: 0; }
@@ -114,6 +115,7 @@ label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: upper
 .item-btn { display: block; width: 100%; text-align: left; background: rgba(255,255,255,0.03); border: none; color: #94a3b8; padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; font-size: 11px; line-height: 1.4; transition: all 0.3s ease; overflow: hidden; max-height: 60px; }
 .item-btn.phase-collapsed { max-height: 0; opacity: 0; padding: 0 10px; margin-bottom: 0; border: 0; pointer-events: none; }
 .item-btn:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateX(3px); }
+.item-btn:active { transform: translateX(2px) scale(0.98); }
 .item-btn.active-topic { background: rgba(255,255,255,0.15); border-left: 3px solid var(--accent); color: #fff; transform: translateX(3px); }
 .item-btn.topic-done { opacity:0.85; }
 .topic-star { cursor:pointer; margin-right:4px; font-size:12px; user-select:none; padding:4px 2px; }
@@ -127,8 +129,9 @@ label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: upper
 .console-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .benchmark-btn { background: #1e293b; color: #94a3b8; border: none; padding: 8px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; transition: background 0.2s ease; }
 .benchmark-btn:hover { background: #334155; color: #fff; }
-.level-btn { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 700; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+.level-btn { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 700; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; position: relative; overflow: hidden; }
 .level-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+.level-btn:active { transform: translateY(0) scale(0.96); }
 .level-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: 800; }
 .phase-label { font-size: 9px; color: #475569; font-weight: 800; margin: 15px 0 8px 0; display: block; text-transform: uppercase; border-left: 2px solid #334155; padding-left: 5px; letter-spacing: 1px; }
 .phase-header { display: flex; align-items: center; gap: 8px; margin: 15px 0 8px 0; cursor: pointer; user-select: none; border-left: 2px solid #334155; padding-left: 5px; transition: border-color 0.2s; }
@@ -147,8 +150,9 @@ label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: upper
 textarea { background: #000; color: #a5f3fc; border: 1px solid #334155; border-radius: 8px; padding: 15px; font-family: 'Consolas', monospace; flex: 1; resize: none; outline: none; font-size: 13px; line-height: 1.6; transition: border-color 0.3s; }
 textarea:focus { border-color: var(--accent); }
 #output { background: #000; color: #10b981; padding: 15px; font-family: 'Consolas', monospace; border-radius: 8px; flex: 1; white-space: pre-wrap; font-size: 12px; overflow-y: auto; border: 1px solid #1e293b; }
-.run-btn { background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.25s ease; position: relative; }
+.run-btn { background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.25s ease; position: relative; overflow: hidden; }
 .run-btn:hover { transform: scale(1.03); box-shadow: 0 0 20px var(--accent); }
+.run-btn:active { transform: scale(0.97); }
 .run-btn.loading { pointer-events: none; opacity: 0.7; }
 @keyframes runSpinner { to { transform: rotate(360deg); } }
 .run-btn.loading::after { content: ''; display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: runSpinner 0.6s linear infinite; margin-left: 8px; vertical-align: middle; }
@@ -644,8 +648,9 @@ textarea:focus { border-color: var(--accent); }
 .quiz-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 15px; margin-bottom: 10px; animation: fadeIn 0.25s ease; }
 .quiz-card .q-num { font-size: 10px; color: #64748b; font-weight: 800; margin-bottom: 6px; }
 .quiz-card .q-text { color: #f1f5f9; font-size: 13px; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
-.quiz-opt { display: block; width: 100%; text-align: left; background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; cursor: pointer; font-size: 11px; transition: all 0.15s; }
+.quiz-opt { display: block; width: 100%; text-align: left; background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; cursor: pointer; font-size: 11px; transition: all 0.15s; position: relative; overflow: hidden; }
 .quiz-opt:hover { background: #334155; color: #fff; }
+.quiz-opt:active { transform: scale(0.98); }
 .quiz-opt.selected { border-color: var(--accent); color: var(--accent); background: rgba(16,185,129,0.1); }
 .quiz-opt.correct { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.15); }
 .quiz-opt.wrong { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.15); }
@@ -657,6 +662,7 @@ textarea:focus { border-color: var(--accent); }
 .quiz-explain { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 8px; line-height: 1.5; }
 .challenge-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
 .challenge-card:hover { border-color: var(--accent); transform: translateX(2px); }
+.challenge-card:active { transform: scale(0.98); }
 .challenge-card.active { border-color: var(--accent); border-left: 3px solid var(--accent); }
 .challenge-card .ch-title { font-size: 12px; font-weight: 800; color: #f1f5f9; }
 .challenge-card .ch-level { font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
@@ -909,6 +915,7 @@ body.compiler-mode .selector button#nav-compiler { background: var(--accent); co
 .game-hub-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:4px; }
 .game-hub-card { background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; cursor:pointer; transition:all 0.2s; text-align:center; }
 .game-hub-card:hover { border-color:var(--card-color); transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+.game-hub-card:active { transform:scale(0.96); }
 .game-hub-icon { font-size:24px; margin-bottom:4px; }
 .game-hub-name { font-size:10px; font-weight:800; color:#f1f5f9; margin-bottom:2px; }
 .game-hub-desc { font-size:8px; color:#64748b; line-height:1.3; }
@@ -1053,7 +1060,7 @@ body.api-mode #apiResponse { display: flex !important; }
 @media (max-width: 900px) {
     .hamburger-btn { display: block; }
     .selector {
-        display: none;
+        display: flex;
         position: fixed;
         top: 70px;
         left: 0;
@@ -1066,8 +1073,12 @@ body.api-mode #apiResponse { display: flex !important; }
         overflow-y: auto;
         flex-wrap: wrap;
         gap: 6px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-10px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
     }
-    .selector.open { display: flex; }
+    .selector.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .selector button { flex: 1 1 calc(50% - 6px); font-size: 10px; padding: 6px 10px; }
     main { grid-template-columns: 1fr; }
     .col:nth-child(3), .col:nth-child(4) { grid-column: 1; }
@@ -1136,6 +1147,139 @@ body.api-mode #apiResponse { display: flex !important; }
 
 /* ── Loading Placeholder ── */
 .loading-placeholder { color: #64748b; padding: 40px 20px; text-align: center; font-style: italic; font-size: 13px; }
+
+/* ── Column Staggered Entrance ── */
+.col-enter { animation: colFadeSlide 0.5s ease both; }
+.col-enter:nth-child(1) { animation-delay: 0.05s; }
+.col-enter:nth-child(2) { animation-delay: 0.12s; }
+.col-enter:nth-child(3) { animation-delay: 0.19s; }
+.col-enter:nth-child(4) { animation-delay: 0.26s; }
+@keyframes colFadeSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Skeleton Loading Shimmer ── */
+.skeleton-line {
+  height: 12px; border-radius: 4px; margin-bottom: 8px;
+  background: linear-gradient(90deg, #1e293b 25%, #2a3a4f 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
+}
+.skeleton-line:last-child { width: 65%; }
+.skeleton-line.short { width: 40%; }
+.skeleton-line.med { width: 75%; }
+.skeleton-title { height: 18px; width: 55%; margin-bottom: 14px; border-radius: 4px;
+  background: linear-gradient(90deg, #1e293b 25%, #2a3a4f 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Button Ripple ── */
+.ripple-btn { position: relative; overflow: hidden; }
+.ripple-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.25) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.ripple-btn:active::after { opacity: 1; transition: 0s; }
+
+/* ── Card Press Feedback ── */
+.press-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.press-card:active { transform: scale(0.97); }
+
+/* ── Search Highlight ── */
+@keyframes searchPulse {
+  0% { background: rgba(247,223,30,0); }
+  30% { background: rgba(247,223,30,0.25); }
+  100% { background: rgba(247,223,30,0); }
+}
+.search-match { animation: searchPulse 1.2s ease forwards; border-radius: 3px; }
+
+/* ── Quiz Card Slide ── */
+.quiz-card.slide-out { animation: quizSlideOut 0.25s ease forwards; }
+.quiz-card.slide-in { animation: quizSlideIn 0.3s ease forwards; }
+@keyframes quizSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-30px); }
+}
+@keyframes quizSlideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Output Appearance ── */
+.output-fade { animation: outputAppear 0.35s ease; }
+@keyframes outputAppear {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Quiz Answer Pulse ── */
+.quiz-opt.just-answered { animation: answerPulse 0.4s ease; }
+@keyframes answerPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* ── Copy Button Checkmark ── */
+.run-btn.copied { background: #10b981; transition: background 0.2s ease; }
+
+/* ── Mobile Nav Slide ── */
+.selector.slide-down { animation: navSlideDown 0.25s ease forwards; }
+@keyframes navSlideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile Panel Transitions ── */
+@media (max-width: 768px) {
+  .ai-panel.open { animation: panelSlideIn 0.3s ease; }
+  @keyframes panelSlideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+}
+
+/* ── Smooth Accent Transitions ── */
+.selector button.active,
+.selector button,
+.item-btn,
+.run-btn,
+.game-nav-btn,
+.level-btn,
+.phase-header,
+.doge-nav-btn { transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease; }
+
+/* ── Touch Feedback ── */
+@media (hover: none) and (pointer: coarse) {
+  .selector button:active,
+  .item-btn:active,
+  .game-nav-btn:active,
+  .level-btn:active,
+  .run-btn:active { transform: scale(0.95); }
+  .item-btn, .selector button,
+  .game-nav-btn, .level-btn { min-height: 44px; }
+  .ai-input-row input { min-height: 44px; font-size: 14px; }
+}
+
+/* ── Phase Complete Celebration ── */
+@keyframes phaseCompletePop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.phase-complete-banner {
+  animation: phaseCompletePop 0.4s ease forwards;
+  background: rgba(16,185,129,0.12); border: 1px solid #10b981;
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 12px;
+  font-size: 11px; font-weight: 700; color: #10b981; text-align: center;
+}
 
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {

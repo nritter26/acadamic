@@ -55,7 +55,7 @@ function loadLangData(lang, callback) {
     }
     LOADING_LANGS.add(lang);
     const filename = (LANG_TO_FILE[lang] || lang) + '.json';
-    fetch('data/' + filename)
+    fetch('content/' + filename)
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (data) {
             courseData[lang] = data;
@@ -650,9 +650,9 @@ function copyCode() {
     navigator.clipboard.writeText(editor.value).then(() => {
         const btn = document.getElementById('copy-btn');
         const orig = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.style.color = '#34d399';
-        setTimeout(() => { btn.textContent = orig; btn.style.color = '#94a3b8'; }, 1500);
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
     }).catch(() => {
         editor.select();
         document.execCommand('copy');
@@ -2744,13 +2744,15 @@ function filterTopics(query) {
         if (!countEl) {
             countEl = document.createElement('div');
             countEl.id = 'searchCount';
-            countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;';
+            countEl.style.cssText = 'font-size:9px;color:#64748b;margin-bottom:6px;font-weight:700;transition:opacity 0.2s ease;';
             document.getElementById('topic-search').after(countEl);
         }
         countEl.textContent = visible + ' of ' + total + ' topics';
         if (currentLevel !== 'all') countEl.textContent += ' (' + currentLevel + ')';
         if (currentCompletionFilter !== 'all') countEl.textContent += ' (' + currentCompletionFilter + ')';
         countEl.style.display = visible === 0 ? '' : '';
+        countEl.style.opacity = '0';
+        requestAnimationFrame(function () { countEl.style.opacity = '1'; });
     } else if (countEl) {
         countEl.style.display = 'none';
     }
@@ -3226,8 +3228,10 @@ setMode = function(lang) {
     }
 
     if (!courseData[lang]) {
-        document.getElementById('topic-list').innerHTML = '<div class="loading-placeholder" style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading curriculum...</div>';
-        document.getElementById('explanation').innerHTML = '<div class="loading-placeholder" style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
+        document.getElementById('topic-list').innerHTML =
+            '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>';
+        document.getElementById('explanation').innerHTML =
+            '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div>';
         document.getElementById('editor').value = '// Loading...';
         document.getElementById('output').innerText = '// Loading curriculum data...';
         document.getElementById('app').className = lang + '-mode';

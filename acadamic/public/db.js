@@ -26,8 +26,8 @@ function switchDBProvider(provider) {
     dbProvider = provider;
     currentLang = provider;
     if (!courseData[provider]) {
-        document.getElementById('topic-list').innerHTML = '<div style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
-        document.getElementById('explanation').innerHTML = '<div style="color:#64748b;padding:20px;text-align:center;font-size:11px;">Loading...</div>';
+        document.getElementById('topic-list').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>';
+        document.getElementById('explanation').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line"></div>';
         document.getElementById('editor').value = '';
         document.getElementById('output').innerText = '// Loading...';
         loadLangData(provider, function () {

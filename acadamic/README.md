@@ -58,26 +58,32 @@ JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Swift, Postgr
 
 ```
 acadamic/
-├── server.js                    # Express backend (967 lines)
+├── server.js                    # Express backend entry point
 ├── index.html                   # Single-page frontend app
 ├── package.json                 # Dependencies & scripts
 ├── .env.example                 # Env var template
 ├── netlify.toml                 # Netlify deployment config
 ├── tsconfig.json                # TypeScript configuration
 │
-├── data/                        # Frontend app & course content
+├── public/                      # Client-side source files
 │   ├── app.js                   # Main frontend logic (~3,193 lines)
+│   ├── style.css                # Application stylesheet (~1,166 lines)
 │   ├── courseData.js            # Course metadata container
 │   ├── langConfig.js            # Language code ↔ name mappings
-│   ├── style.css                # Application stylesheet (~1,166 lines)
 │   ├── compiler-core.js         # Multi-language lexer/parser/AST (~428 lines)
 │   ├── compiler-curriculum.js   # Compiler design curriculum (~352 lines)
 │   ├── challenges.js            # 1,890 code challenges across 6 langs
 │   ├── quiz.js                  # Quiz questions per language
 │   ├── game.js                  # Gaming mode logic (16 mini-games)
 │   ├── db.js                    # Database tab frontend
-│   ├── ai-responses.js          # AI tutor keyword responses
-│   ├── js.js, py.js, ...        # Language-specific course data
+│   └── ai-responses.js          # AI tutor keyword responses
+│
+├── content/                     # Course curriculum data (JSON)
+│   ├── js.json, py.json, ...    # 23 language course files
+│   └── ...                      # 4,360+ indexed topics
+│
+├── data/                        # Runtime data (learner profiles, progress)
+│   ├── progress.json            # Topic completion progress
 │   └── learners/                # Per-user learner profiles (JSON)
 │
 ├── ai/                          # AI tutoring & analysis engine
@@ -93,7 +99,7 @@ acadamic/
 │   └── seed.sql                 # Sample data (20 tables, 6 schemas, 502 lines)
 │
 ├── backend-go/                  # Alternative Go backend
-│   ├── main.go                  # Go HTTP server (332 lines)
+│   ├── main.go                  # Go HTTP server
 │   └── go.mod                   # Go module definition
 │
 └── netlify/                     # Netlify serverless functions
@@ -235,154 +241,25 @@ The Compiler tab provides a client-side multi-language tokenizer and parser:
 
 ## Course Data Format
 
-Course files in `data/` export language topics organized by phase:
+Course files in `content/` are lazy-loaded JSON files with language topics organized by phase:
 
-```js
-courseData.py = {
+```json
+{
   "Basics": {
     "Variables": {
-      exp: "<p>Explanation HTML</p>",
-      code: "// Example code",
-      level: "beginner"
+      "exp": "<p>Explanation HTML</p>",
+      "code": "// Example code"
     }
   }
-};
+}
 ```
 
 ## Deployment
 
 The project is configured for Netlify deployment:
 
-- `netlify.toml` maps `/api/*` to serverless functions
-- Functions in `netlify/functions/` handle execute, chat, progress, and benchmark
+- `netlify.toml` maps `/api/*` to the unified serverless function
+- `netlify/functions/api.js` handles all API routes (health, execute, chat, progress, analyze, review, explain, exercise, learner, courses, proxy, benchmark)
 - Static files are served from the root directory
 
-## Quick Start
 
-### Node.js Backend
-
-```bash
-cd acadamic
-npm install
-npm start
-```
-
-Open http://localhost:3000
-
-### Go Backend (alternative)
-
-```bash
-cd acadamic/backend-go
-go run main.go
-```
-
-The Go backend runs on port 8080 and serves the same API plus static files.
-
-## API Endpoints
-
-### Progress
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/progress` | Get all progress data |
-| POST | `/api/progress` | Save topic completion |
-
-### Code Execution
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/execute` | Execute code in specified language (supports js, ts, py, go, rs, zig, c, cpp, cs, kt, swift, sqlite, pg, mysql) |
-| POST | `/api/proxy` | Proxy HTTP requests (client-side execution helper) |
-
-### Analysis
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/analyze` | Static code analysis with keyword patterns |
-| POST | `/api/review` | Full code review (static + optional LLM) |
-| POST | `/api/explain` | Code explanation with curriculum context |
-
-### AI & Tutor
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/chat` | AI assistant chat with curriculum-aware responses |
-| POST | `/api/exercise` | Generate on-demand practice exercise |
-| GET | `/api/health` | Health check with DB status |
-
-### Learner Profile
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/learner/track` | Track topic completion, errors, attempts, quizzes, challenges |
-| GET | `/api/learner/state` | Get learner profile & concept mastery |
-| GET | `/api/learner/reviews` | Get due reviews (spaced repetition) |
-| GET | `/api/learner/recommend` | Get next recommended topic |
-
-### Other
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/benchmark` | Performance benchmark (Node.js vs Go) |
-| GET | `/api/courses` | List available course files |
-
-## AI Module
-
-The AI system supports multiple providers configured via `.env`:
-
-- **`keyword`** (default, no API key needed) — Pattern-matches user questions against the curriculum index, returns relevant topic explanations.
-- **`openai`** — Set `AI_PROVIDER=openai` + `OPENAI_API_KEY`. Uses GPT models with streaming support.
-- **`anthropic`** — Set `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`. Uses Claude models with streaming support.
-- **`local`** — Set `AI_PROVIDER=local`. Connects to any OpenAI-compatible local endpoint (Ollama, LM Studio, etc.).
-
-The curriculum search uses:
-1. **OpenAI embeddings** (if API key is configured) — semantic vector search via `text-embedding-3-small`
-2. **TF-IDF** (always available) — keyword-based relevance scoring
-3. **Curriculum index** — regex-based topic extraction from course data files
-
-Learner profiles track per-user progress using spaced repetition with review intervals at 1, 3, 7, 14, 30 days.
-
-## SQL Execution (Database Tab)
-
-The Database tab includes a built-in SQLite engine seeded with 20 tables across 6 schemas:
-
-| Schema | Tables |
-|--------|--------|
-| HR | employees, departments, salaries |
-| Commerce | customers, orders, order_items, products, categories |
-| Education | students, courses, enrollments |
-| Content | authors, articles, comments |
-| Supply Chain | suppliers, shipments, inventory |
-| Banking | accounts, transactions |
-
-- **SQLite** — Always available, no setup needed. In-memory, resets on server restart.
-- **PostgreSQL** — Optional. Set `PG_CONNECTION_STRING` in `.env`.
-- **MySQL** — Optional. Set `MYSQL_CONNECTION_STRING` in `.env`.
-
-Results are formatted as ASCII box-drawing tables. Multiple semicolon-separated statements are supported.
-
-## Compiler Pipeline Explorer
-
-The Compiler tab provides a client-side multi-language tokenizer and parser:
-
-1. **Tokens** — Lexical analysis: splits source into token stream (keywords, identifiers, literals, operators, etc.)
-2. **AST** — Abstract Syntax Tree: recursive descent parser builds a structured tree
-3. **Stats** — Code metrics: LOC, comment ratio, cyclomatic complexity, nesting depth, token counts
-
-## Course Data Format
-
-Course files in `data/` export language topics organized by phase:
-
-```js
-courseData.py = {
-  "Basics": {
-    "Variables": {
-      exp: "<p>Explanation HTML</p>",
-      code: "// Example code",
-      level: "beginner"
-    }
-  }
-};
-```
-
-## Deployment
-
-The project is configured for Netlify deployment:
-
-- `netlify.toml` maps `/api/*` to serverless functions
-- Functions in `netlify/functions/` handle execute, chat, progress, and benchmark
-- Static files are served from the root directory

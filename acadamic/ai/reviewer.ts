@@ -277,4 +277,4 @@ export async function review(code: string, lang: string, topic?: string): Promis
   return { ...result, source: 'static' };
 }
 
-export { analyzeStructure, checkKeywordPatterns };
+

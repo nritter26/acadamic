@@ -11,7 +11,7 @@ const { URL } = require('url');
 const os = require('os');
 
 const { askLLM } = require('./ai/provider');
-const { getCurriculumContext, getTopicContext, search: semanticSearch, getContext: getSemanticContext } = require('./ai/embeddings');
+const { getCurriculumContext, getTopicContext, search: semanticSearch } = require('./ai/embeddings');
 const learner = require('./ai/learner');
 const { review: codeReview } = require('./ai/reviewer');
 const { generateExercise } = require('./ai/exercises');
@@ -490,7 +490,7 @@ function analyzeUserCode(code, lang) {
     return hints.length > 0 ? hints : null;
 }
 
-const aiResponses = require('./data/ai-responses');
+const aiResponses = require('./public/ai-responses');
 
 
 function buildLLMMessages(message, lang, topic, phase, code, output, hasError, history) {
@@ -953,8 +953,9 @@ app.get('/api/benchmark', (req, res) => {
 // ── Get available courses ──
 app.get('/api/courses', (req, res) => {
     try {
-        const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.js') && f !== 'courseData.js' && f !== 'app.js' && f !== 'challenges.js' && f !== 'style.css' && f !== 'quiz.js');
-        const courses = files.map(f => f.replace('.js', ''));
+        const CONTENT_DIR = path.join(__dirname, 'content');
+        const files = fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.json'));
+        const courses = files.map(f => f.replace('.json', ''));
         res.json(courses);
     } catch (e) {
         res.json({ error: e.message });

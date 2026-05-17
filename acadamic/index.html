@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doge's Lab: Full Mastery Edition</title>
-    <link rel="stylesheet" href="data/style.css">
+    <link rel="stylesheet" href="public/style.css">
 </head>
 <body id="app" class="js-mode">
 <header>
@@ -40,9 +40,9 @@
     </div>
 </header>
 <main>
-    <div class="col"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)"><div id="level-bar"></div><div id="topic-list" class="scroll"></div></div>
-    <div class="col"><label>Theory</label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
-    <div class="col"><label>Workspace</label><div class="api-client" id="apiClient">
+    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)"><div id="level-bar"></div><div id="topic-list" class="scroll"></div></div>
+    <div class="col col-enter"><label>Theory</label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
+    <div class="col col-enter"><label>Workspace</label><div class="api-client" id="apiClient">
     <div class="api-toolbar">
         <select id="apiMethod" class="api-method-select">
             <option value="GET">GET</option>
@@ -106,7 +106,7 @@
     if n == 2: continue
     if n == 4: break
     print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()">Schema</button><button id="explain-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#a5f3fc;" onclick="explainCode()">Explain</button><button id="review-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#34d399;" onclick="reviewCode()">Review</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
-    <div class="col"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
+    <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
     <div class="api-res-topbar">
         <span class="api-res-status" id="apiResStatus">—</span>
         <span class="api-res-meta" id="apiResMeta"></span>
@@ -119,15 +119,15 @@
     <pre id="apiResBody" class="api-res-body">Send a request to see the response</pre>
 </div><div id="compiler-output" class="scroll" style="display:none;"><div class="cp-pipeline-tabs"><button class="cp-tab active" data-stage="0">Source</button><button class="cp-tab" data-stage="1">Tokens</button><button class="cp-tab" data-stage="2">AST</button><button class="cp-tab" data-stage="3">Stats</button></div><div id="cp-pipeline-content" class="cp-pipeline-content"><div class="cp-placeholder">Click "Tokens ▶", "AST ▶", or "Full Pipeline ▶" to analyze your code.</div></div></div></div>
 </main>
-<script src="data/courseData.js"></script>
-<script src="data/quiz.js"></script>
-<script src="data/challenges.js"></script>
-<script src="data/game.js"></script>
-<script src="data/db.js"></script>
-<script src="data/compiler-core.js"></script>
-<script src="data/compiler-curriculum.js"></script>
-<script src="data/ai-responses.js"></script>
-<script src="data/app.js"></script>
+<script src="public/courseData.js"></script>
+<script src="public/quiz.js"></script>
+<script src="public/challenges.js"></script>
+<script src="public/game.js"></script>
+<script src="public/db.js"></script>
+<script src="public/compiler-core.js"></script>
+<script src="public/compiler-curriculum.js"></script>
+<script src="public/ai-responses.js"></script>
+<script src="public/app.js"></script>
 <script>
 function toggleDogeModal() {
     document.getElementById('dogeOverlay').classList.toggle('open');
