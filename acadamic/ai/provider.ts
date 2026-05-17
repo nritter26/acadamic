@@ -18,6 +18,7 @@ interface ProviderHandler {
   buildBody(messages: LLMMessage[], stream: boolean): Record<string, unknown>;
   buildHeaders(): Record<string, string>;
   endpoint: string;
+  path: string;
   parser(line: string): string | null;
   responseParser(data: Record<string, unknown>): string | null;
   stripSystem?: boolean;
@@ -82,6 +83,7 @@ function anthropicParser(data: string): string | null {
 const PROVIDERS: Record<string, ProviderHandler> = {
   openai: {
     endpoint: config.openai.endpoint || 'https://api.openai.com/v1',
+    path: '/chat/completions',
     buildBody(messages, stream) {
       return {
         model: this.model,
@@ -107,6 +109,7 @@ const PROVIDERS: Record<string, ProviderHandler> = {
   },
   anthropic: {
     endpoint: 'https://api.anthropic.com/v1',
+    path: '/messages',
     buildBody(messages, stream) {
       const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({
         role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
@@ -139,6 +142,7 @@ const PROVIDERS: Record<string, ProviderHandler> = {
   },
   local: {
     endpoint: config.local.endpoint || 'http://localhost:11434/v1',
+    path: '/chat/completions',
     buildBody(messages, stream) {
       return {
         model: this.model,
@@ -193,7 +197,7 @@ async function callProvider(
   messages: LLMMessage[],
   onStream?: StreamCallback,
 ): Promise<string | null> {
-  const url = `${provider.endpoint}/chat/completions`;
+  const url = `${provider.endpoint}${provider.path}`;
   const body = provider.buildBody(messages, !!onStream);
   const headers = provider.buildHeaders();
 

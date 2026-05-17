@@ -239,7 +239,7 @@ async function searchEmbedding(
   return withScores.length > 0 ? withScores : null;
 }
 
-async function fetchEmbeddings(inputs: string[]): Promise<{ key: string; embedding: number[] }[] | null> {
+async function fetchEmbeddings(inputs: string[]): Promise<{ key: string; embedding: number[] | null }[] | null> {
   try {
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
@@ -256,8 +256,8 @@ async function fetchEmbeddings(inputs: string[]): Promise<{ key: string; embeddi
     const data = (await response.json()) as { data: { embedding: number[]; index: number }[] };
     return inputs.map((input, i) => ({
       key: input.toLowerCase().slice(0, 100),
-      embedding: data.data.find(d => d.index === i)?.embedding || [],
-    })).filter(r => r.embedding.length > 0);
+      embedding: data.data.find(d => d.index === i)?.embedding || null,
+    }));
   } catch (e: unknown) {
     console.error('fetchEmbeddings batch error:', (e as Error).message);
     return null;
@@ -286,10 +286,11 @@ async function buildEmbeddingCache(): Promise<void> {
       const results = await fetchEmbeddings(inputs);
       if (!results) continue;
 
-      for (const { key, embedding } of results) {
+      for (let j = 0; j < results.length; j++) {
+        const { key, embedding } = results[j];
+        if (!embedding) continue;
         embedCache![key] = embedding;
-        const doc = toEmbed.find(d => d.topic.toLowerCase().slice(0, 100) === key);
-        if (doc) doc._embedding = embedding;
+        toEmbed[j]._embedding = embedding;
       }
     }
     await fsp.writeFile(CACHE_FILE, JSON.stringify(embedCache));

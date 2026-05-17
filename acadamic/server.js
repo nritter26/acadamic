@@ -83,6 +83,15 @@ const rateLimitStore = new Map();
 const RATE_WINDOW = 60000;
 const RATE_MAX = 30;
 
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of rateLimitStore) {
+        const valid = timestamps.filter(t => now - t < RATE_WINDOW);
+        if (valid.length === 0) rateLimitStore.delete(ip);
+        else rateLimitStore.set(ip, valid);
+    }
+}, 300000);
+
 function rateLimit(req, res, next) {
     const ip = req.ip || req.connection.remoteAddress;
     const now = Date.now();
@@ -162,6 +171,13 @@ app.get('/api/progress', (req, res) => {
 app.post('/api/progress', (req, res) => {
     try {
         const { lang, topic, completed } = req.body;
+        if (!lang || !topic || typeof lang !== 'string' || typeof topic !== 'string') {
+            return res.status(400).json({ error: 'lang and topic must be non-empty strings' });
+        }
+        if (lang === '__proto__' || lang === 'constructor' || lang === 'prototype' ||
+            topic === '__proto__' || topic === 'constructor' || topic === 'prototype') {
+            return res.status(400).json({ error: 'Invalid key' });
+        }
         const data = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8'));
         if (!data[lang]) data[lang] = {};
         data[lang][topic] = completed;
@@ -492,6 +508,11 @@ function analyzeUserCode(code, lang) {
 
 const aiResponses = require('./public/ai-responses');
 
+function streamReply(res, text) {
+    res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
+    res.write('data: [DONE]\n\n');
+    res.end();
+}
 
 function buildLLMMessages(message, lang, topic, phase, code, output, hasError, history) {
     const messages = [];
@@ -687,6 +708,9 @@ app.get('/api/learner/recommend', async (req, res) => {
 
 // ── Enhanced Chat with Semantic Search ──
 app.post('/api/chat', async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
     const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
     if (!message) return res.json({ reply: "Ask me something about programming!" });
     const q = resolveFollowUp(message, history).toLowerCase().trim();
