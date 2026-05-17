@@ -607,6 +607,36 @@ function extractConversationSubject(response) {
 }
 
 // ── Code Review UI ──
+function explainCode() {
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    if (!code.trim()) {
+        document.getElementById('output').innerText = "// No code to explain — write some code in the editor first!";
+        return;
+    }
+
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage('Explain this code', 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, lang: currentLang, topic: currentTopic })
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        addAIMessage(d.explanation || "Couldn't generate an explanation.", 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't reach the explain server. Make sure the backend is running (node server.js).", 'bot');
+    });
+}
+
 function reviewCode() {
     const editor = document.getElementById('editor');
     const code = editor ? editor.value : '';
