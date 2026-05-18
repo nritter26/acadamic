@@ -114,5 +114,41 @@
       "Playwright is the recommended E2E testing framework for SvelteKit, providing cross-browser automation, network interception, and component testing across Chromium, Firefox, and WebKit.",
       "test('home page loads', async ({ page }) => {\n  await page.goto('/');\n  await expect(page.locator('h1')).toContainText('Welcome');\n});"
     ]
+  },
+  "Svelte 5 Runes": {
+    "$state": [
+      "Svelte 5 introduces runes, explicit reactivity markers prefixed with $. $state replaces let-based reactivity and works outside .svelte files, making .svelte.ts files possible for shared state.",
+      "<script>\n  let count = $state(0);\n  function increment() { count++; }\n</script>\n<button onclick={increment}>{count}</button>"
+    ],
+    "$derived": [
+      "$derived computes values from $state dependencies and updates automatically. Unlike the store-based derived, it works in any .svelte or .svelte.ts file with no setup wrapper.",
+      "let name = $state('Alice');\nlet age = $state(30);\nlet greeting = $derived(`Hello, ${name}! You are ${age}.`);"
+    ],
+    "$effect": [
+      "$effect runs a callback whenever its reactive dependencies change, consolidating lifecycle and reactivity into one primitive. The returned teardown function handles cleanup on re-run or destroy.",
+      "$effect(() => {\n  localStorage.setItem('count', String(count));\n  return () => console.log('Cleanup');\n});"
+    ],
+    "$props": [
+      "$props replaces the export let pattern for component props in Svelte 5. It accepts a default object and returns reactive bindings that update when the parent re-renders.",
+      "let { title, count = 0, onAction }: {\n  title: string;\n  count?: number;\n  onAction?: () => void;\n} = $props();"
+    ],
+    "$bindable": [
+      "$bindable marks a prop as eligible for two-way binding using bind: in the parent. It provides a default value and enables the parent-child sync pattern without manual event dispatching.",
+      "let { value = $bindable('') } = $props();\n// Usage: <MyInput bind:value={name} />"
+    ]
+  },
+  "Snippets": {
+    "Snippet Blocks": [
+      "Snippets are reusable template fragments defined with {#snippet name} and rendered with {@render name}. They accept parameters and can be passed between components as first-class template values.",
+      "{#snippet header(title)}\n  <h1>{title}</h1>\n{/snippet}\n\n{@render header('Welcome')}"
+    ],
+    "Snippet Props": [
+      "Snippets passed as props allow parent components to inject template content into children, replacing slot-based composition with a more explicit and type-safe pattern.",
+      "// Parent\n<MyTable {data}>\n  {#snippet cell(item)}\n    <strong>{item.name}</strong>\n  {/snippet}\n</MyTable>\n\n// MyTable\nlet { data, cell } = $props();\n{#each data as item}\n  {@render cell(item)}\n{/each}"
+    ],
+    "Children Snippet": [
+      "The implicit children snippet captures default content between component tags. It provides a cleaner alternative to the default slot for wrapping content in layout components.",
+      "// Parent\n<Card>\n  <p>Card content here</p>\n</Card>\n\n// Card.svelte\nlet { children } = $props();\n<div class=\"card\">\n  {@render children()}\n</div>"
+    ]
   }
 }

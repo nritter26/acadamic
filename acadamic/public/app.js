@@ -227,17 +227,13 @@ function loadCheatsheet() {
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
                 .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
-            html += `<div class="cs-topic${isActive ? ' cs-active' : ''}">`;
-            html += `<div class="cs-topic-title">${name}</div>`;
-            html += `<div class="cs-desc">${t.exp}</div>`;
             html += `<div class="cs-code">${codeHtml}</div>`;
-            html += `</div>`;
             idx++;
         }
         html += `</div>`;
     }
 
-    document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} topics)`;
+    document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} snippets)`;
     document.getElementById('cheatsheetBody').innerHTML = html;
     toggleCheatsheet();
 }
@@ -355,6 +351,10 @@ function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
     if (!code.trim()) { out.innerText = "// No code to run"; return; }
+    if (currentLang === 'git') {
+        out.innerText = processGitCommand(code);
+        return;
+    }
     setRunLoading(true);
     out.innerText = "// Running...";
 
@@ -3483,6 +3483,7 @@ setMode = function(lang) {
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
 
+    roadmapRendered = false;
     const roadmapBtn = document.getElementById('roadmap-btn');
     if (roadmapBtn) {
         roadmapBtn.style.display = '';
@@ -3505,6 +3506,7 @@ setMode = function(lang) {
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
+    if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); return; }
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';

@@ -110,5 +110,47 @@
       "Remix leverages HTTP caching extensively. The headers export allows setting Cache-Control headers per route, and loaders can implement conditional requests with ETags for efficient revalidation.",
       "export async function loader({ request }) {\n  const data = await getData();\n  const etag = hash(data);\n  if (request.headers.get('If-None-Match') === etag) {\n    return new Response(null, { status: 304 });\n  }\n  return json(data, { headers: { ETag: etag } });\n}"
     ]
+  },
+  "Vite Plugin": {
+    "Remix Vite Plugin": [
+      "Remix now ships as a Vite plugin for faster builds, HMR, and streamlined configuration. The vite.config replaces remix.config with a familiar Vite API and automatic React Fast Refresh.",
+      "import { vitePlugin as remix } from '@remix-run/dev';\nimport { defineConfig } from 'vite';\n\nexport default defineConfig({\n  plugins: [remix()]\n});"
+    ],
+    "Plugin Configuration": [
+      "The Remix Vite plugin accepts options for server entry, routes directory, future flags, and build output. It integrates with other Vite plugins like Tailwind and MDX for a unified build pipeline.",
+      "export default defineConfig({\n  plugins: [remix({\n    appDirectory: 'my-app',\n    future: { v3_fetcherPersist: true }\n  })]\n});"
+    ],
+    "HMR & Fast Refresh": [
+      "Vite-powered HMR updates Remix route components in milliseconds without losing page state. React Fast Refresh preserves component state across edits, dramatically improving the dev feedback loop.",
+      "// No config needed - Vite HMR works out of the box\n// Edits to route components reflect instantly\n// Edits to loaders/actions trigger a full reload"
+    ]
+  },
+  "Session Management": {
+    "createCookieSessionStorage": [
+      "Cookie session storage encodes session data directly in encrypted cookies, suitable for small payloads. It requires no database and is the simplest session strategy for Remix apps.",
+      "import { createCookieSessionStorage } from '@remix-run/node';\n\nconst { getSession, commitSession, destroySession } = createCookieSessionStorage({\n  cookie: { name: '__session', secrets: ['s3cret'], sameSite: 'lax' }\n});"
+    ],
+    "createSessionStorage": [
+      "createSessionStorage allows custom backing stores (database, Redis) for larger session data while using a cookie only for the session ID. This scales beyond cookie size limits.",
+      "const { getSession, commitSession, destroySession } = createSessionStorage({\n  cookie: { name: 'sid', secrets: ['s3cret'] },\n  createData: (data) => db.sessions.create(data),\n  readData: (id) => db.sessions.find(id),\n  updateData: (id, data) => db.sessions.update(id, data),\n  deleteData: (id) => db.sessions.delete(id)\n});"
+    ],
+    "Flash Messages": [
+      "Flash messages are one-time session values that are cleared after being read, ideal for success or error notifications after form submissions. They use the session's flash method.",
+      "// In action\nexport async function action({ request }) {\n  const session = await getSession(request.headers.get('Cookie'));\n  session.flash('success', 'Post created!');\n  return redirect('/posts', { headers: { 'Set-Cookie': await commitSession(session) } });\n}"
+    ]
+  },
+  "Type Inference": {
+    "Typed Loader Data": [
+      "useLoaderData infers the return type of the route's loader using typeof loader. This provides end-to-end type safety from the server to the client without manual type definitions.",
+      "import { useLoaderData } from '@remix-run/react';\nimport type { loader } from './route';\n\nexport default function Posts() {\n  const posts = useLoaderData<typeof loader>();\n  // posts is fully typed based on loader return\n  return <div>{posts.map(p => p.title)}</div>;\n}"
+    ],
+    "Typed Actions": [
+      "useActionData provides type-safe access to action return values. Combine with typeof action for compile-time checking of error messages, form data, and mutation results.",
+      "import { useActionData } from '@remix-run/react';\nimport type { action } from './route';\n\nconst actionData = useActionData<typeof action>();\n{actionData?.error && <p>{actionData.error}</p>}"
+    ],
+    "serialize Type": [
+      "Remix's SerializeFrom type unwraps Promise and Response types from loaders, providing a cleaner type for client-side hooks when the loader uses async patterns.",
+      "import type { SerializeFrom } from '@remix-run/node';\nimport type { loader } from './route';\n\ntype LoaderData = SerializeFrom<typeof loader>;\n// Removes Promise/Response wrappers for client consumption"
+    ]
   }
 }

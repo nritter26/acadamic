@@ -110,5 +110,47 @@
       "Creating custom Nuxt modules allows packaging reusable functionality. Modules can modify the Nuxt configuration, add hooks, register components, and integrate with the build pipeline.",
       "// modules/my-module.ts\nexport default defineNuxtModule({\n  meta: { name: 'my-module', version: '1.0.0' },\n  setup(options, nuxt) {\n    nuxt.hook('pages:extend', (pages) => {\n      pages.push({ path: '/custom', file: './custom.vue' });\n    });\n  }\n});"
     ]
+  },
+  "Nuxt DevTools": {
+    "Overview": [
+      "Nuxt DevTools provides an in-app panel with page inspection, component tree, state editor, timeline, and module management. It is available in development with zero configuration.",
+      "// Installed by default in Nuxt 3.4+\n// Press Shift+Alt+D or click the DevTools icon in the bottom right corner"
+    ],
+    "Pages & Components": [
+      "The DevTools Pages tab displays all auto-detected routes with their middleware, layout, and data dependencies. The Components tab shows the live component tree with state inspection.",
+      "// Components tab shows:\n// - Component hierarchy with props and state\n// - Edit state values in real time\n// - Navigate to source on click"
+    ],
+    "Timeline & Analysis": [
+      "The Timeline tab records async operations, navigation events, and rendering performance. It helps identify slow API calls, excessive reactivity, and rendering bottlenecks.",
+      "// Timeline records:\n// - Navigation transitions\n// - useFetch/useAsyncData requests\n// - Composables lifecycle events"
+    ]
+  },
+  "Assets & Media": {
+    "Nuxt Image": [
+      "Nuxt Image (@nuxt/image) provides automatic image optimization with responsive sizes, format conversion to WebP/AVIF, lazy loading, and CDN provider integrations (Cloudinary, Imgix, etc).",
+      "<NuxtImg src=\"/hero.jpg\" width=\"1200\" height=\"600\" loading=\"lazy\" />\n<NuxtPicture src=\"/photo.jpg\" sizes=\"sm:100vw md:50vw lg:400px\" />"
+    ],
+    "Public Assets": [
+      "Assets in the public/ directory are served at the root URL without processing. Assets in assets/ are processed by Vite (version-hashed, minified) and imported via ~/assets path.",
+      "// public/favicon.ico -> /favicon.ico\nimport logo from '~/assets/logo.svg';\n<img :src=\"logo\" alt=\"Logo\" />"
+    ],
+    "Fonts": [
+      "Nuxt Fonts (@nuxt/fonts) automatically optimizes Google Fonts and custom fonts with self-hosting, subsetting, and fallback generation to eliminate CLS from font swaps.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ modules: ['@nuxt/fonts'] });\n// Use in CSS: font-family: 'Inter', sans-serif;"
+    ]
+  },
+  "Server & Nitro": {
+    "Nitro Engine": [
+      "Nitro is Nuxt's server engine powering API routes, middleware, and SSR. It supports multiple deployment presets (Node, Vercel, Netlify, Cloudflare) and auto-detects the target environment.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({\n  nitro: {\n    preset: 'node-server',\n    experimental: { wasm: true }\n  }\n});"
+    ],
+    "Hybrid Rendering": [
+      "Hybrid rendering lets you define different rendering strategies per route: SSR, SSG, SPA, or ISR. Route rules control caching, prerendering, and rendering modes granularly.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({\n  routeRules: {\n    '/': { prerender: true },\n    '/dashboard': { ssr: false },\n    '/blog/**': { swr: 3600 }\n  }\n});"
+    ],
+    "Server Storage": [
+      "Nitro's server storage provides a unified key-value API across filesystem, Redis, Cloudflare KV, and other drivers. It handles session storage, cache, and file uploads without extra dependencies.",
+      "// server/api/counter.ts\nexport default defineEventHandler(async () => {\n  const count = await useStorage().getItem('data:count');\n  await useStorage().setItem('data:count', (count || 0) + 1);\n  return { count };\n});"
+    ]
   }
 }

@@ -111,8 +111,40 @@
    "const v1 = express.Router(); const v2 = express.Router(); v1.get('/users', (req, res) => res.json({ version: 'v1' })); v2.get('/users', (req, res) => res.json({ version: 'v2' })); app.use('/api/v1', v1); app.use('/api/v2', v2);"
   ],
   "Documentation": [
-   "API documentation with Swagger/OpenAPI defines endpoints, schemas, and auth. Swagger UI provides interactive documentation. JSDoc comments auto-generate OpenAPI specs.",
-   "const swaggerJsdoc = require('swagger-jsdoc'); const swaggerUi = require('swagger-ui-express'); const specs = swaggerJsdoc({ definition: { openapi: '3.0.0', info: { title: 'My API', version: '1.0.0' } }, apis: ['./routes/*.js'] }); app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));"
-  ]
- }
+      "API documentation with Swagger/OpenAPI defines endpoints, schemas, and auth. Swagger UI provides interactive documentation. JSDoc comments auto-generate OpenAPI specs.",
+      "const swaggerJsdoc = require('swagger-jsdoc'); const swaggerUi = require('swagger-ui-express'); const specs = swaggerJsdoc({ definition: { openapi: '3.0.0', info: { title: 'My API', version: '1.0.0' } }, apis: ['./routes/*.js'] }); app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));"
+    ]
+  },
+  "WebSockets": {
+    "Socket.io Integration": [
+      "Socket.io enables real-time bidirectional communication between the server and clients. Express apps integrate Socket.io by wrapping the HTTP server and attaching socket handlers with namespace support.",
+      "const http = require('http'); const { Server } = require('socket.io'); const server = http.createServer(app); const io = new Server(server, { cors: { origin: '*' } }); io.on('connection', (socket) => { console.log('User connected'); socket.on('message', (data) => io.emit('message', data)); socket.on('disconnect', () => console.log('Disconnected')); }); server.listen(3000);"
+    ],
+    "ws Library": [
+      "The ws library is a lightweight WebSocket implementation for Express. It attaches to the HTTP server and provides a simple event-based API with support for rooms and binary data.",
+      "const { WebSocketServer } = require('ws'); const server = app.listen(3000); const wss = new WebSocketServer({ server }); wss.on('connection', (ws) => { ws.on('message', (data) => wss.clients.forEach(client => client.send(data))); ws.send('Connected'); });"
+    ],
+    "Broadcasting": [
+      "Socket.io rooms and namespaces organize connections into logical groups for targeted broadcasting. The broadcast flag sends to all clients except the sender, and rooms isolate groups.",
+      "io.on('connection', (socket) => { socket.join('room-' + userId); socket.broadcast.to('room-' + userId).emit('user-online', userId); io.to('room-' + userId).emit('notification', { text: 'New message' }); });"
+    ]
+  },
+  "Security": {
+    "Helmet": [
+      "Helmet secures Express apps by setting various HTTP headers including Content-Security-Policy, X-Frame-Options, X-XSS-Protection, Strict-Transport-Security, and X-Content-Type-Options.",
+      "const helmet = require('helmet'); app.use(helmet()); app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: [\"'self'\"], scriptSrc: [\"'self'\", \"'unsafe-inline'\"] } }));"
+    ],
+    "Rate Limiting": [
+      "express-rate-limit protects against brute-force attacks by limiting repeated requests from the same IP. Rate limits are configurable per window with custom messages and headers.",
+      "const rateLimit = require('express-rate-limit'); const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many requests' } }); app.use('/api/', limiter);"
+    ],
+    "Compression": [
+      "compression middleware reduces response size using gzip/deflate. It automatically compresses JSON, text, and other compressible responses, improving bandwidth usage and load times.",
+      "const compression = require('compression'); app.use(compression({ threshold: 0, level: 6 })); // Skip compression for small SSE or already-compressed responses"
+    ],
+    "Input Validation": [
+      "Input validation libraries like Joi, express-validator, or Zod prevent injection attacks and malformed data. Validation middleware sanitizes and validates request bodies, params, and queries.",
+      "const { body, validationResult } = require('express-validator'); app.post('/user', [ body('email').isEmail().normalizeEmail(), body('age').isInt({ min: 0 }) ], (req, res) => { const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() }); });"
+    ]
+  }
 }

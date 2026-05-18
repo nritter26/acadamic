@@ -33,6 +33,9 @@ function initTechStack() {
 function switchTechStackProvider(provider) {
     techStackProvider = provider;
     currentLang = provider;
+    roadmapRendered = false;
+    const rBtn = document.getElementById('roadmap-btn');
+    if (rBtn) rBtn.title = 'View ' + (techStackProviderNames[provider] || provider) + ' Roadmap';
     if (!courseData[provider]) {
         document.getElementById('topic-list').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>';
         document.getElementById('explanation').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line"></div>';

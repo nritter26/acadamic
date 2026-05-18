@@ -110,5 +110,47 @@
       "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
       "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
     ]
+  },
+  "Composables": {
+    "useMouse": [
+      "Composables are functions that leverage the Composition API to encapsulate reusable stateful logic. A useMouse composable tracks mouse position with reactive coordinates that any component can consume.",
+      "export function useMouse() {\n  const x = ref(0);\n  const y = ref(0);\n  function update(e) { x.value = e.pageX; y.value = e.pageY; }\n  onMounted(() => window.addEventListener('mousemove', update));\n  onUnmounted(() => window.removeEventListener('mousemove', update));\n  return { x, y };\n}"
+    ],
+    "useLocalStorage": [
+      "Composables can wrap browser APIs like localStorage with reactive deserialization. The composable pattern allows sharing state across components without Pinia when the scope is small.",
+      "export function useLocalStorage(key, initial) {\n  const value = ref(JSON.parse(localStorage.getItem(key)) ?? initial);\n  watch(value, v => localStorage.setItem(key, JSON.stringify(v)));\n  return value;\n}"
+    ],
+    "Composable Contracts": [
+      "Well-designed composables follow predictable naming (useXxx), return a plain object or single ref, accept options via a single reactive object, and provide cleanup via onUnmounted.",
+      "export function useCounter(initial = 0) {\n  const count = ref(initial);\n  const increment = () => count.value++;\n  const decrement = () => count.value--;\n  const reset = () => count.value = initial;\n  return { count: readonly(count), increment, decrement, reset };\n}"
+    ]
+  },
+  "TypeScript": {
+    "Typed Props": [
+      "defineProps with TypeScript generics provides full type safety for component props. The generic syntax is the recommended approach over the runtime declaration for strict typing.",
+      "const props = defineProps<{\n  title: string\n  items?: { id: number; name: string }[]\n  onSelect?: (id: number) => void\n}>()"
+    ],
+    "Typed Emits": [
+      "defineEmits with TypeScript validates event payloads at compile time. The call signature syntax maps event names to their payload types for complete type coverage.",
+      "const emit = defineEmits<{\n  (e: 'update', id: number): void\n  (e: 'delete', payload: { id: number; reason: string }): void\n}>()"
+    ],
+    "Typed Refs": [
+      "Type parameters for ref, reactive, and computed enable strict type checking. Template refs use InstanceType to access the component type for direct method calls.",
+      "const count = ref<number>(0);\nconst user = reactive<{ name: string; age: number }>({ name: '', age: 0 });\nconst myForm = ref<InstanceType<typeof MyForm> | null>(null)"
+    ]
+  },
+  "Ecosystem": {
+    "VueUse": [
+      "VueUse is a collection of over 200 composable utilities for common patterns like geolocation, clipboard, dark mode, media queries, and fetch with reactive state management.",
+      "import { useDark, useToggle, useGeolocation } from '@vueuse/core';\nconst isDark = useDark();\nconst toggleDark = useToggle(isDark);\nconst { coords } = useGeolocation();"
+    ],
+    "Vue DevTools": [
+      "Vue DevTools is a browser extension providing component inspection, state editing, timeline profiling, route visualization, and Pinia store debugging with time-travel capabilities.",
+      "// Vue DevTools auto-detects Vue 3 apps in development\n// Timeline tab: track events, mutations, and performance\n// Components tab: browse hierarchy, inspect props/state, edit values live"
+    ],
+    "VitePress": [
+      "VitePress is a Vue-powered static site generator for documentation. It uses markdown content with Vue components, automatic search, and a default theme optimized for technical docs.",
+      "npm create vitepress@latest && npm run docs:dev\n# docs/.vitepress/config.ts\nexport default { title: 'My Docs', themeConfig: { nav: [{ text: 'Guide', link: '/guide' }] } }"
+    ]
   }
 }

@@ -110,5 +110,75 @@
       "Angular supports code splitting through lazy-loaded modules and ES dynamic imports. The CLI generates separate chunks per lazy route, and the router loads them on demand when the user navigates.",
       "{ path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }"
     ]
+  },
+  "Standalone Components": {
+    "Standalone API": [
+      "Standalone components, directives, and pipes are self-contained without needing NgModules. Created with the standalone: true flag, they import dependencies directly and can be lazy-loaded via the router.",
+      "@Component({\n  standalone: true,\n  imports: [CommonModule, RouterModule],\n  template: '<h1>{{ title }}</h1>'\n})\nexport class HomeComponent { title = 'Standalone'; }"
+    ],
+    "Bootstrap Standalone": [
+      "Applications can bootstrap directly from a standalone component instead of NgModule. The main.ts calls bootstrapApplication with the root component and optional provider configuration.",
+      "import { bootstrapApplication } from '@angular/platform-browser';\nimport { AppComponent } from './app/app.component';\n\nbootstrapApplication(AppComponent, {\n  providers: [importProvidersFrom(HttpClientModule)]\n});"
+    ],
+    "Routing Standalone": [
+      "Standalone components load lazily with loadComponent in the route config, eliminating the need for feature modules. Each route points directly to a component with its own imports.",
+      "const routes: Routes = [{\n  path: 'admin',\n  loadComponent: () => import('./admin/admin.component').then(c => c.AdminComponent)\n}];"
+    ]
+  },
+  "Signals": {
+    "Writable Signals": [
+      "Signals are reactive primitives that notify consumers when their value changes. Writable signals created with signal() expose get/set/update methods for synchronous state management.",
+      "const count = signal(0);\ncount.set(5);\ncount.update(v => v + 1);\nconsole.log(count());"
+    ],
+    "Computed Signals": [
+      "Computed signals derive values from other signals with lazy evaluation and caching. They only recompute when dependent signals change, replacing manual ChangeDetectorRef calls.",
+      "const count = signal(0);\nconst doubled = computed(() => count() * 2);\nconst label = computed(() => `Count is ${count()}`);"
+    ],
+    "Effects": [
+      "Effects run side effects automatically when their signal dependencies change. They are used for syncing state to localStorage, logging, or triggering imperative DOM operations.",
+      "effect(() => {\n  console.log(`Count changed to ${count()}`);\n  localStorage.setItem('count', String(count()));\n});"
+    ],
+    "Signal Inputs": [
+      "Signal-based inputs replace @Input with input() and input.required(), providing reactive input values without lifecycle hooks. They integrate natively with the change detection system.",
+      "export class MyComponent {\n  name = input.required<string>();\n  role = input('user');\n  items = input<Item[]>([]);\n}"
+    ]
+  },
+  "CLI & Schematics": {
+    "ng generate": [
+      "The Angular CLI generates components, directives, pipes, services, modules, and more using ng generate. Schematics customize generation with options for style, inline template, and routing.",
+      "ng generate component dashboard --standalone --inline-style --skip-tests\nng generate service api/data\nng generate module admin --route admin --module app"
+    ],
+    "Custom Schematics": [
+      "Custom schematics automate project scaffolding by generating files, modifying existing code, and installing dependencies. They are published as npm packages and run with ng generate.",
+      "// collection.json\n{\n  \"schematics\": {\n    \"my-component\": {\n      \"factory\": \"./my-component\",\n      \"schema\": \"./schema.json\"\n    }\n  }\n}"
+    ],
+    "Angular Builders": [
+      "Builders extend the Angular CLI build pipeline with custom build, test, or deploy logic. They replace Angular's default builder to support custom tooling like custom webpack configs.",
+      "// Custom builder\nimport { BuilderOutput, createBuilder } from '@angular-devkit/architect';\nexport default createBuilder((options, context) => {\n  return { success: true } as BuilderOutput;\n});"
+    ]
+  },
+  "Deferrable Views": {
+    "@defer": [
+      "Deferrable views (introduced in Angular 17) lazy-load component dependencies with @defer blocks. They improve initial bundle size by deferring heavy components until a specified trigger.",
+      "@defer (on viewport) {\n  <heavy-chart />\n} @placeholder {\n  <div>Chart loading...</div>\n} @loading {\n  <spinner />\n} @error {\n  <p>Failed to load chart</p>\n}"
+    ],
+    "Defer Triggers": [
+      "Defer triggers control when lazy content loads: on viewport (enters viewport), on interaction (user clicks), on immediate, on idle (browser idle), or on a custom timer.",
+      "@defer (on interaction; on timer(5000)) {\n  <expensive-component />\n} @placeholder {\n  <button>Click to load</button>\n}"
+    ],
+    "Defer Dependencies": [
+      "Deferred components and their transitive dependencies are split into separate JavaScript chunks. Angular loads these chunks asynchronously when the trigger condition is met, reducing initial payload.",
+      "// All imports inside @defer are automatically code-split\n@defer (on viewport) {\n  <admin-widget />\n}"
+    ]
+  },
+  "inject Function": {
+    "inject()": [
+      "The inject() function provides a programmatic alternative to constructor-based dependency injection. It can be called in the class body, making DI more flexible and reducing boilerplate.",
+      "export class DataService {\n  private http = inject(HttpClient);\n  private config = inject(APP_CONFIG);\n  private router = inject(Router);\n}"
+    ],
+    "Injection Context": [
+      "inject() must be called within an injection context such as a constructor, class field initializer, or factory function. Outside these contexts it throws, ensuring predictable DI resolution.",
+      "// Allowed: class field initializer\nprivate logger = inject(LoggerService);\n\n// Allowed: factory function\nexport const token = new InjectionToken<string>('config', {\n  factory: () => inject(HttpClient).getBaseUrl()\n});"
+    ]
   }
 }

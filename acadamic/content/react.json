@@ -106,5 +106,45 @@
       "Context API provides a built-in way to share values across the component tree without prop drilling. It's best suited for low-frequency updates like theme, locale, or auth state.",
       "const ThemeContext = createContext('light');\n<ThemeContext.Provider value=\"dark\">...</ThemeContext.Provider>"
     ]
+  },
+  "Concurrent React": {
+    "useTransition": [
+      "useTransition marks state updates as non-urgent transitions, keeping the UI responsive during expensive re-renders. The isPending flag shows a loading state without blocking user input.",
+      "const [isPending, startTransition] = useTransition();\n\nfunction handleSearch(e) {\n  startTransition(() => {\n    setSearchQuery(e.target.value);\n  });\n}\n\n{isPending && <Spinner />}"
+    ],
+    "useDeferredValue": [
+      "useDeferredValue lets you defer re-rendering a non-urgent part of the tree. The deferred value lags behind the real value, allowing urgent updates (like input typing) to stay responsive.",
+      "const [query, setQuery] = useState('');\nconst deferredQuery = useDeferredValue(query);\n\nconst suggestions = useMemo(() => search(deferredQuery), [deferredQuery]);\n\nconst isStale = query !== deferredQuery;"
+    ]
+  },
+  "Server Components": {
+    "RSC Basics": [
+      "React Server Components run exclusively on the server, never sent to the client. They reduce bundle size by keeping heavy dependencies server-side and can directly access databases and file systems.",
+      "// ServerComponent.server.js — runs on server, no JS sent to client\nimport db from 'db';\n\nexport default async function PostList() {\n  const posts = await db.post.findMany();\n  return (\n    <ul>\n      {posts.map(post => (\n        <li key={post.id}>{post.title}</li>\n      ))}\n    </ul>\n  );\n}"
+    ],
+    "Server Actions": [
+      "Server Actions are async functions that run on the server, invoked from client components. Use 'use server' to mark them, enabling direct mutations without building API routes.",
+      "// actions.js\n'use server';\nexport async function createPost(formData) {\n  const title = formData.get('title');\n  await db.post.create({ data: { title } });\n  revalidatePath('/posts');\n}\n\n// Client component\n<form action={createPost}>\n  <input name=\"title\" />\n  <button type=\"submit\">Create</button>\n</form>"
+    ]
+  },
+  "Error Handling": {
+    "Error Boundaries": [
+      "Error Boundaries catch JavaScript errors in their child component tree, displaying a fallback UI instead of crashing the whole app. Class components with componentDidCatch are required.",
+      "class ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false };\n  }\n  static getDerivedStateFromError(error) {\n    return { hasError: true };\n  }\n  componentDidCatch(error, errorInfo) {\n    logErrorToService(error, errorInfo);\n  }\n  render() {\n    if (this.state.hasError) {\n      return <h1>Something went wrong.</h1>;\n    }\n    return this.props.children;\n  }\n}\n\n<ErrorBoundary>\n  <MyComponent />\n</ErrorBoundary>"
+    ],
+    "Error Recovery": [
+      "Use key props to reset error boundaries. Changing the key unmounts and remounts the component tree, clearing the error state without a full page refresh.",
+      "function App() {\n  const [resetKey, setResetKey] = useState(0);\n  \n  return (\n    <ErrorBoundary key={resetKey}>\n      <MyComponent />\n      <button onClick={() => setResetKey(k => k + 1)}>Reset</button>\n    </ErrorBoundary>\n  );\n}"
+    ]
+  },
+  "Advanced Patterns": {
+    "Portals": [
+      "Portals render children into a DOM node outside the parent component's hierarchy, useful for modals, tooltips, and dropdowns that need to escape overflow or z-index clipping.",
+      "import { createPortal } from 'react-dom';\n\nfunction Modal({ children }) {\n  return createPortal(\n    <div className=\"modal-overlay\">\n      {children}\n    </div>,\n    document.getElementById('modal-root')\n  );\n}"
+    ],
+    "TypeScript with React": [
+      "TypeScript with React provides type safety for props, state, hooks, and event handlers. Use generic types for useState, useRef, and forwardRef for stricter typing.",
+      "interface ButtonProps {\n  label: string;\n  variant?: 'primary' | 'secondary';\n  onClick: () => void;\n}\n\nconst Button: React.FC<ButtonProps> = ({ label, variant = 'primary', onClick }) => {\n  return <button className={variant} onClick={onClick}>{label}</button>;\n};\n\nconst [count, setCount] = useState<number>(0);\nconst ref = useRef<HTMLInputElement>(null);"
+    ]
   }
 }

@@ -104,5 +104,47 @@
       "SvelteKit provides structured error handling with error/is-error utility, custom error pages (+error.svelte), and the handleError hook for logging and monitoring integration.",
       "import { error } from '@sveltejs/kit';\n\nif (!post) throw error(404, 'Post not found');"
     ]
+  },
+  "View Transitions": {
+    "Client Navigation": [
+      "SvelteKit integrates with the View Transition API for smooth page transitions on client-side navigation. The onNavigate lifecycle runs before navigation, enabling transition setup.",
+      "export function onNavigate() {\n  document.startViewTransition ?\n    document.startViewTransition(() => {}) :\n    null;\n}"
+    ],
+    "Cross-document Transitions": [
+      "Cross-document view transitions work across full page loads by defining @view-transition CSS rules. SvelteKit handles the JavaScript enhancement for seamless cross-page animations.",
+      "/* global.css */\n@view-transition {\n  navigation: auto;\n}\n\n@keyframes fade-in {\n  from { opacity: 0; }\n}\n::view-transition-old(root) { animation: fade-in 0.3s reverse; }\n::view-transition-new(root) { animation: fade-in 0.3s; }"
+    ],
+    "Element-level Transitions": [
+      "Individual elements can have their own view-transition-name for independent animation. Paired with the View Transition API, elements morph smoothly between pages without layout shifts.",
+      ".avatar {\n  view-transition-name: avatar;\n  contain: layout;\n}"
+    ]
+  },
+  "Environment & Config": {
+    "$env/static/private": [
+      "$env/static/private provides build-time environment variables accessible only on the server. These are inlined at build time and reserved for secrets like API keys and database URLs.",
+      "import { API_KEY, DATABASE_URL } from '$env/static/private';\n// Only importable in server files (+page.server.js, +server.js, hooks.server.js)"
+    ],
+    "$env/static/public": [
+      "$env/static/public exposes build-time environment variables prefixed with PUBLIC_ to both client and server code. These are safe for the browser and inlined during build.",
+      "import { PUBLIC_API_URL } from '$env/static/public';\n// Accessible in any file (client or server)"
+    ],
+    "$env/dynamic": [
+      "$env/dynamic/private and $env/dynamic/public load environment variables at runtime instead of build time. Dynamic env vars are useful when the same build deploys to multiple environments.",
+      "import { env } from '$env/dynamic/public';\n// Runtime resolution: env.PUBLIC_API_URL"
+    ]
+  },
+  "Link Options": {
+    "data-sveltekit-preload-data": [
+      "Link options control prefetching behavior. data-sveltekit-preload-data=\"hover\" starts loading data when the user hovers over a link, reducing perceived navigation time.",
+      "<a href=\"/blog\" data-sveltekit-preload-data=\"hover\">Blog</a>\n<a href=\"/dashboard\" data-sveltekit-preload-data=\"tap\">Dashboard</a>"
+    ],
+    "data-sveltekit-reload": [
+      "data-sveltekit-reload forces a full page navigation instead of client-side routing, useful when the target page uses different global CSS or needs a clean JavaScript context.",
+      "<a href=\"/legacy\" data-sveltekit-reload>Legacy Page</a>"
+    ],
+    "data-sveltekit-keepfocus": [
+      "data-sveltekit-keepfocus preserves the currently focused element across navigation, improving accessibility for keyboard users on single-page applications.",
+      "<a href=\"/next\" data-sveltekit-keepfocus>Next Step</a>"
+    ]
   }
 }

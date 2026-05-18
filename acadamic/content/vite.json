@@ -102,5 +102,27 @@
       "Migrating from Create React App to Vite requires installing Vite, moving index.html to the root, replacing react-scripts with Vite scripts, and updating env variables from REACT_APP_ to VITE_.",
       "npm uninstall react-scripts\nnpm install -D vite @vitejs/plugin-react\n// package.json scripts\n\"dev\": \"vite\",\n\"build\": \"vite build\",\n\"preview\": \"vite preview\"\n// Rename REACT_APP_* to VITE_* in .env"
     ]
+  },
+  "Advanced Features": {
+    "Environment API": [
+      "Vite 6's Environment API provides a programmatic interface for configuring multiple environments (client, server, edge) within the same config, each with its own plugins and resolve options.",
+      "export default defineConfig({\n  environments: {\n    client: { resolve: { conditions: ['browser'] } },\n    ssr: { resolve: { conditions: ['node'] } }\n  }\n});"
+    ],
+    "Library Mode": [
+      "Library mode builds your code as a reusable library instead of an app. Vite outputs ESM, CJS, and UMD formats with externalized dependencies and TypeScript declaration generation.",
+      "export default defineConfig({\n  build: {\n    lib: {\n      entry: 'src/index.ts',\n      name: 'MyLib',\n      formats: ['es', 'cjs', 'umd'],\n      fileName: (format) => `my-lib.${format}.js`\n    },\n    rollupOptions: { external: ['react', 'react-dom'] }\n  }\n});"
+    ],
+    "Web Workers": [
+      "Vite supports web workers with a simple ?worker import suffix, automatically bundling worker scripts into separate chunks. Inline workers are bundled into the main file.",
+      "const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });\nworker.postMessage('hello');\n\n// SharedWorker\nconst sw = new SharedWorker(new URL('./shared.ts', import.meta.url), { type: 'module' });"
+    ],
+    "WebAssembly": [
+      "Vite supports importing .wasm files directly as ES modules, initializing WebAssembly modules with automatic compilation and providing exported functions for use in application code.",
+      "import wasmModule from './add.wasm';\nconst instance = await wasmModule({ env: { memory: new WebAssembly.Memory({ initial: 1 }) } });\nconsole.log(instance.exports.add(2, 3));"
+    ],
+    "Glob Imports": [
+      "Glob imports with import.meta.glob load multiple modules from the filesystem dynamically, supporting eager loading, pattern matching, and import assertions for Markdown or JSON files.",
+      "const pages = import.meta.glob('./pages/*.md', { eager: true, as: 'raw' });\nconst modules = import.meta.glob('./locales/*.json', { query: '?raw', import: 'default' });\n// Returns { './pages/about.md': '<markdown content>' }"
+    ]
   }
 }
