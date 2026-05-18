@@ -617,11 +617,6 @@ function explainCode() {
         return;
     }
 
-    const btn = document.getElementById('explain-btn');
-    const origText = btn.textContent;
-    btn.textContent = 'Explaining...';
-    btn.disabled = true;
-
     const aiPanel = document.getElementById('aiPanel');
     if (!aiPanel.classList.contains('open')) toggleAI();
 
@@ -642,10 +637,7 @@ function explainCode() {
         removeTypingIndicator();
         addAIMessage("Couldn't reach the explain server. Make sure the backend is running (node server.js).", 'bot');
     })
-    .finally(() => {
-        btn.textContent = origText;
-        btn.disabled = false;
-    });
+    .catch(() => {});
 }
 
 function reviewCode() {
@@ -655,11 +647,6 @@ function reviewCode() {
         document.getElementById('output').innerText = "// No code to review — write some code in the editor first!";
         return;
     }
-
-    const btn = document.getElementById('review-btn');
-    const origText = btn.textContent;
-    btn.textContent = 'Reviewing...';
-    btn.disabled = true;
 
     const aiPanel = document.getElementById('aiPanel');
     if (!aiPanel.classList.contains('open')) toggleAI();
@@ -687,10 +674,6 @@ function reviewCode() {
     .catch(() => {
         removeTypingIndicator();
         addAIMessage("Couldn't reach the review server. Make sure the backend is running (node server.js).", 'bot');
-    })
-    .finally(() => {
-        btn.textContent = origText;
-        btn.disabled = false;
     });
 }
 
@@ -3493,6 +3476,10 @@ setMode = function(lang) {
     document.getElementById('output').style.display = 'block';
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
+
+    const roadmapBtn = document.getElementById('roadmap-btn');
+    if (roadmapBtn) roadmapBtn.style.display = lang === 'js' ? '' : 'none';
+
     if (lang !== 'challenge') {
         const schemaBtn = document.getElementById('schema-btn');
         if (schemaBtn) schemaBtn.style.display = '';
@@ -3562,7 +3549,15 @@ setMode = function(lang) {
     currentLevel = 'all';
     currentCompletionFilter = 'all';
     currentLang = lang;
-    document.getElementById('app').className = lang + '-mode';
+    const appEl = document.getElementById('app');
+    appEl.className = lang + '-mode';
+    // Hide workspace by default for JS mode, remove for others
+    if (lang === 'js') {
+        appEl.classList.add('hide-workspace');
+        appEl.classList.remove('workspace-open');
+    } else {
+        appEl.classList.remove('hide-workspace', 'workspace-open');
+    }
     const levelBar = document.getElementById('level-bar');
 
     const langData = courseData[lang] || {};
@@ -3715,5 +3710,117 @@ document.addEventListener('click', function(e) {
         hamburger.classList.remove('open');
     }
 });
+
+// ── WORKSPACE TOGGLE ──
+function toggleWorkspace() {
+    const appEl = document.getElementById('app');
+    const btn = document.getElementById('ws-toggle-btn');
+    if (appEl.classList.contains('workspace-open')) {
+        appEl.classList.remove('workspace-open');
+        appEl.classList.add('hide-workspace');
+        if (btn) btn.textContent = 'Editor ▸';
+        const rv = document.getElementById('roadmap-view');
+        if (rv) rv.style.display = 'none';
+        document.getElementById('topic-list').style.display = 'block';
+    } else {
+        appEl.classList.remove('hide-workspace');
+        appEl.classList.add('workspace-open');
+        if (btn) btn.textContent = 'Editor ▾';
+    }
+}
+
+// ── ROADMAP VIEW ──
+let roadmapRendered = false;
+
+function toggleRoadmapView() {
+    const overlay = document.getElementById('roadmapOverlay');
+    const btn = document.getElementById('roadmap-btn');
+    const wasOpen = overlay.classList.contains('open');
+
+    overlay.classList.toggle('open');
+    if (btn) btn.classList.toggle('active', !wasOpen);
+
+    if (!wasOpen && !roadmapRendered) {
+        const body = document.getElementById('roadmapBody');
+        renderRoadmap(body);
+        roadmapRendered = true;
+    }
+}
+
+function renderRoadmap(container) {
+    const langData = courseData.js;
+    if (!langData) return;
+
+    const phases = Object.keys(langData);
+    const nodeW = 180, nodeH = 36, gap = 30;
+
+    // First pass: compute overall bounding box
+    let maxRowWidth = 0;
+    let totalH = 50;
+    for (const phase of phases) {
+        const topics = Object.keys(langData[phase]);
+        if (topics.length === 0) continue;
+        const rowW = topics.length * (nodeW + gap) - gap;
+        if (rowW > maxRowWidth) maxRowWidth = rowW;
+        totalH += 60;
+    }
+    totalH += 20;
+
+    const padding = 20;
+    const svgW = maxRowWidth + padding * 2 + 15;
+    const svgH = totalH;
+
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgH}">`;
+    svg += `<style>.rn { cursor:pointer; } .rn:hover { opacity:0.8; } .rn rect { rx:6; ry:6; } .rn text { font-size:11px; font-weight:600; fill:#fff; text-anchor:middle; dominant-baseline:central; pointer-events:none; }</style>`;
+
+    svg += `<text x="${svgW/2}" y="20" text-anchor="middle" fill="#f1f5f9" font-size="16" font-weight="800">JavaScript Roadmap</text>`;
+
+    let y = 50;
+    for (let pi = 0; pi < phases.length; pi++) {
+        const phase = phases[pi];
+        const topics = Object.keys(langData[phase]);
+        if (topics.length === 0) continue;
+
+        const third = Math.ceil(phases.length / 3);
+        let color;
+        if (pi < third) color = '#38761d';
+        else if (pi < third * 2) color = '#9900ff';
+        else color = '#000000';
+
+        svg += `<text x="15" y="${y + nodeH/2 + 4}" fill="#64748b" font-size="9" font-weight="800" text-anchor="start" dominant-baseline:central">${phase.toUpperCase()}</text>`;
+
+        const rowW = topics.length * (nodeW + gap) - gap;
+        const startX = Math.max(15 + 10, (svgW - rowW) / 2);
+
+        let x = startX;
+        for (let ti = 0; ti < topics.length; ti++) {
+            const topic = topics[ti];
+            const displayName = topic.length > 18 ? topic.slice(0, 16) + '..' : topic;
+            const escapedPhase = phase.replace(/'/g, "\\'");
+            const escapedTopic = topic.replace(/'/g, "\\'");
+
+            svg += `<g class="rn" onclick="loadTopic('${escapedPhase}','${escapedTopic}'); document.getElementById('roadmapOverlay').classList.remove('open'); document.getElementById('roadmap-btn').classList.remove('active');">
+                <rect x="${x}" y="${y}" width="180" height="${nodeH}" fill="${color}" opacity="0.9"/>
+                <text x="${x + 90}" y="${y + nodeH/2}">${displayName}</text>
+            </g>`;
+
+            if (ti < topics.length - 1) {
+                svg += `<line x1="${x + 180}" y1="${y + nodeH/2}" x2="${x + 180 + 30}" y2="${y + nodeH/2}" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>`;
+            }
+            x += 210;
+        }
+
+        if (pi < phases.length - 1) {
+            const midX = svgW / 2;
+            svg += `<line x1="${midX}" y1="${y + nodeH + 5}" x2="${midX}" y2="${y + nodeH + 25}" stroke="#334155" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+        }
+
+        y += 60;
+    }
+
+    svg += `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker></defs>`;
+    svg += '</svg>';
+    container.innerHTML = svg;
+}
 
 setMode('js');
