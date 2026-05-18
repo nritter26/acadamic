@@ -14,6 +14,12 @@ var LANG_NAMES = {
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
     mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
     cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
+    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
+    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
+    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
+    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
+    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
+    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
 };
 var NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {
@@ -3478,7 +3484,10 @@ setMode = function(lang) {
     document.getElementById('compiler-buttons').style.display = 'none';
 
     const roadmapBtn = document.getElementById('roadmap-btn');
-    if (roadmapBtn) roadmapBtn.style.display = lang === 'js' ? '' : 'none';
+    if (roadmapBtn) {
+        roadmapBtn.style.display = '';
+        roadmapBtn.title = 'View ' + (LANG_NAMES[lang] || lang) + ' Roadmap';
+    }
 
     if (lang !== 'challenge') {
         const schemaBtn = document.getElementById('schema-btn');
@@ -3495,6 +3504,7 @@ setMode = function(lang) {
     if (lang === 'game') { document.getElementById('level-bar').style.display = 'none'; initGame(); updateAISuggestions(); return; }
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
+    if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); return; }
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';
@@ -3743,14 +3753,14 @@ function toggleRoadmapView() {
     if (!wasOpen && !roadmapRendered) {
         const body = document.getElementById('roadmapBody');
         renderRoadmap(body);
-        roadmapRendered = true;
     }
 }
 
 function renderRoadmap(container) {
-    const langData = courseData.js;
-    if (!langData) return;
+    const langData = courseData[currentLang];
+    if (!langData) { roadmapRendered = false; return; }
 
+    const langName = LANG_NAMES[currentLang] || currentLang;
     const phases = Object.keys(langData);
     const nodeW = 180, nodeH = 36, gap = 30;
 
@@ -3773,7 +3783,7 @@ function renderRoadmap(container) {
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgH}">`;
     svg += `<style>.rn { cursor:pointer; } .rn:hover { opacity:0.8; } .rn rect { rx:6; ry:6; } .rn text { font-size:11px; font-weight:600; fill:#fff; text-anchor:middle; dominant-baseline:central; pointer-events:none; }</style>`;
 
-    svg += `<text x="${svgW/2}" y="20" text-anchor="middle" fill="#f1f5f9" font-size="16" font-weight="800">JavaScript Roadmap</text>`;
+    svg += `<text x="${svgW/2}" y="20" text-anchor="middle" fill="#f1f5f9" font-size="16" font-weight="800">${langName} Roadmap</text>`;
 
     let y = 50;
     for (let pi = 0; pi < phases.length; pi++) {
@@ -3821,6 +3831,7 @@ function renderRoadmap(container) {
     svg += `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker></defs>`;
     svg += '</svg>';
     container.innerHTML = svg;
+    roadmapRendered = true;
 }
 
 setMode('js');

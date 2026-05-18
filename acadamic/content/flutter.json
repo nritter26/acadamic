@@ -1,0 +1,45 @@
+{
+ "Getting Started": {
+   "Dart Basics": ["Dart is a client-optimized language with sound null safety, type inference, and async/await. It compiles either ahead-of-time or just-in-time.", "void main() { var name = 'Flutter'; print('Hello $name'); }"],
+   "Widgets": ["Everything in Flutter is a widget. StatelessWidget builds immutable UI, while StatefulWidget manages mutable state that can trigger rebuilds.", "class MyWidget extends StatelessWidget { @override Widget build(BuildContext context) { return Text('Hello'); } }"],
+   "MaterialApp": ["MaterialApp wraps your app with Material Design conventions, including theming, navigation, and localization. It provides Scaffold and other Material widgets.", "MaterialApp(home: Scaffold(appBar: AppBar(title: Text('Home')), body: Center(child: Text('Hello'))))"]
+ },
+ "Layout": {
+   "Row": ["Row arranges child widgets horizontally. It uses MainAxisAlignment for horizontal alignment and CrossAxisAlignment for vertical alignment.", "Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Icon(Icons.star), Icon(Icons.favorite)])"],
+   "Column": ["Column arranges child widgets vertically with support for scrolling via Expanded and Flexible widgets for proportional sizing.", "Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('Top'), Text('Bottom')])"],
+   "Stack": ["Stack overlays children on top of each other, positioning them with Positioned widget relative to the stack edges.", "Stack(children: [Container(color: Colors.blue), Positioned(top: 10, left: 10, child: Text('Overlay'))])"],
+   "Container": ["Container combines painting, positioning, and sizing widgets. It supports padding, margins, borders, background color, and constraints.", "Container(padding: EdgeInsets.all(16), color: Colors.white, child: Text('Content'))"]
+ },
+ "State Management": {
+   "setState": ["setState is the simplest state management approach, notifying the framework to rebuild the widget tree when state changes inside StatefulWidget.", "setState(() { _counter++; });"],
+   "Provider": ["Provider exposes values down the widget tree via InheritedWidget. It is the recommended simple state management solution for Flutter apps.", "Provider<Counter>(create: (_) => Counter(), child: Consumer<Counter>(builder: (ctx, counter, _) => Text('${counter.value}')))"],
+   "Riverpod": ["Riverpod improves on Provider with compile-time safety, no BuildContext dependency, and support for async providers and code generation.", "final counterProvider = StateNotifierProvider<CounterNotifier, int>((ref) => CounterNotifier());"],
+   "Bloc": ["Bloc separates business logic from UI using streams of events and states. It enforces unidirectional data flow and testability.", "class CounterCubit extends Cubit<int> { void increment() => emit(state + 1); }"]
+ },
+ "Navigation": {
+   "Routes": ["Named routes map string identifiers to widget builders. Navigator.push and Navigator.pop handle stack-based navigation.", "Navigator.push(context, MaterialPageRoute(builder: (_) => SecondPage()));"],
+   "Navigator": ["Navigator 2.0 provides declarative routing with pages list, allowing deep linking and full control over the navigation stack.", "Navigator(pages: [MaterialPage(child: HomePage())], onPopPage: (route, result) => route.didPop(result));"],
+   "GoRouter": ["GoRouter provides declarative, URL-based routing with support for deep linking, redirects, and nested navigation using ShellRoute.", "GoRouter(routes: [GoRoute(path: '/', builder: (ctx, state) => HomePage())]);"]
+ },
+ "Forms": {
+   "Form": ["Form widget groups form fields for validation and saving. It uses a GlobalKey to access form state and validate all fields at once.", "final formKey = GlobalKey<FormState>();\nForm(key: formKey, child: Column(children: [TextFormField()]))"],
+   "TextFormField": ["TextFormField is a Material Design text input with built-in validation, error display, and controller access for programmatic manipulation.", "TextFormField(controller: _controller, validator: (v) => v.isEmpty ? 'Required' : null)"],
+   "Validation": ["Form validation uses validator callbacks that return error strings or null. AutovalidateMode controls when validation triggers.", "TextFormField(autovalidateMode: AutovalidateMode.onUserInteraction, validator: (v) => v.length < 3 ? 'Too short' : null)"]
+ },
+ "Networking": {
+   "http": ["The http package provides a simple, stream-based HTTP client for making REST API calls. It returns Response objects with status codes and bodies.", "var response = await http.get(Uri.parse('https://api.example.com/data'));\nprint(response.body);"],
+   "dio": ["Dio is a powerful HTTP client with interceptors, request cancellation, timeout handling, and file download/upload progress tracking.", "final response = await Dio().get('https://api.example.com/users');\nprint(response.data);"],
+   "REST API": ["REST APIs are consumed by mapping JSON responses to Dart models using fromJson/toJson methods. jsonDecode parses raw JSON strings.", "final json = jsonDecode(response.body);\nfinal user = User.fromJson(json);"],
+   "GraphQL": ["GraphQL queries request specific fields from the server, reducing over-fetching. The graphql_flutter package integrates with the widget tree.", "final result = await client.query(QueryOptions(document: gql('{ users { name email } }')));"]
+ },
+ "Storage": {
+   "SharedPreferences": ["SharedPreferences stores simple key-value pairs persistently. It is platform-native, backed by NSUserDefaults on iOS and SharedPreferences on Android.", "await prefs.setString('key', 'value');\nfinal val = prefs.getString('key');"],
+   "SQLite": ["SQLite provides relational local storage via the sqflite package. Tables are created with SQL and queried using raw or helper methods.", "final db = await openDatabase('mydb.db', version: 1, onCreate: (db, v) => db.execute('CREATE TABLE items(id INTEGER PRIMARY KEY, name TEXT)'));"],
+   "Hive": ["Hive is a lightweight, NoSQL key-value database written in Dart. It is fast and supports type adapters for complex objects.", "final box = await Hive.openBox('myBox');\nawait box.put('key', value);\nfinal val = box.get('key');"]
+ },
+ "Platform": {
+   "Platform Channels": ["Platform channels enable bidirectional communication between Dart and native Kotlin/Swift code via MethodChannel for platform-specific features.", "MethodChannel('com.example/channel').invokeMethod('getBatteryLevel');"],
+   "iOS/Android Specific": ["Platform-specific code uses dart:io Platform checks or conditional imports to handle OS differences in UI, permissions, and behavior.", "if (Platform.isIOS) { /* iOS code */ } else if (Platform.isAndroid) { /* Android code */ }"],
+   "Web": ["Flutter Web compiles Dart to JavaScript and renders via CanvasKit or HTML renderers. Responsive layouts use LayoutBuilder and MediaQuery for breakpoints.", "LayoutBuilder(builder: (ctx, constraints) { if (constraints.maxWidth > 600) return WideLayout(); else return NarrowLayout(); })"]
+ }
+}

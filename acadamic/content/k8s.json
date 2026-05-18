@@ -1,0 +1,44 @@
+{
+ "Getting Started": {
+   "Architecture": ["Kubernetes clusters consist of a control plane managing worker nodes. The control plane runs the API server, scheduler, controller manager, and etcd.", "kubectl get nodes\nkubectl cluster-info"],
+   "Pods": ["Pods are the smallest deployable units, containing one or more containers with shared storage and network. Each pod gets a unique cluster IP.", "apiVersion: v1\nkind: Pod\nmetadata:\n  name: nginx\nspec:\n  containers:\n  - name: nginx\n    image: nginx:latest"],
+   "kubectl Basics": ["kubectl is the CLI for controlling Kubernetes clusters. Common commands manage resources, view logs, exec into containers, and port-forward.", "kubectl create deployment myapp --image=nginx\nkubectl get pods -o wide\nkubectl logs pod-name\nkubectl exec -it pod-name -- /bin/sh"]
+ },
+ "Workloads": {
+   "Deployments": ["Deployments manage ReplicaSets and provide declarative updates with rolling updates, rollbacks, and scaling capabilities.", "apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: nginx\n  template:\n    metadata:\n      labels:\n        app: nginx\n    spec:\n      containers:\n      - name: nginx\n        image: nginx:1.21"],
+   "StatefulSets": ["StatefulSets manage stateful applications with stable network identities, ordered deployment, and persistent storage per pod.", "apiVersion: apps/v1\nkind: StatefulSet\nspec:\n  serviceName: \"db\"\n  replicas: 3\n  template:\n    spec:\n      containers:\n      - name: postgres\n        image: postgres:13\n        volumeMounts:\n        - name: data\n          mountPath: /var/lib/postgresql/data"],
+   "DaemonSets": ["DaemonSets ensure all or selected nodes run a copy of a pod, ideal for logging, monitoring, and networking agents.", "apiVersion: apps/v1\nkind: DaemonSet\nspec:\n  selector:\n    matchLabels:\n      app: fluentd\n  template:\n    spec:\n      containers:\n      - name: fluentd\n        image: fluent/fluentd:v1.16"]
+ },
+ "Services & Networking": {
+   "ClusterIP": ["ClusterIP exposes a service on an internal cluster IP accessible only within the cluster. It is the default Service type.", "apiVersion: v1\nkind: Service\nspec:\n  type: ClusterIP\n  selector:\n    app: nginx\n  ports:\n  - port: 80\n    targetPort: 80"],
+   "NodePort": ["NodePort exposes a service on each node's IP at a static port, making it accessible externally via nodeIP:nodePort.", "apiVersion: v1\nkind: Service\nspec:\n  type: NodePort\n  ports:\n  - port: 80\n    nodePort: 30080"],
+   "LoadBalancer": ["LoadBalancer provisions an external load balancer from cloud providers and assigns a public IP for internet-facing services.", "apiVersion: v1\nkind: Service\nspec:\n  type: LoadBalancer\n  ports:\n  - port: 80\n    targetPort: 8080"],
+   "Ingress": ["Ingress exposes HTTP/S routes to services with host/path-based routing, TLS termination, and virtual hosting.", "apiVersion: networking.k8s.io/v1\nkind: Ingress\nspec:\n  rules:\n  - host: myapp.com\n    http:\n      paths:\n      - path: /\n        pathType: Prefix\n        backend:\n          service:\n            name: myapp\n            port:\n              number: 80"]
+ },
+ "Configuration": {
+   "ConfigMaps": ["ConfigMaps store non-sensitive configuration data as key-value pairs or files that pods consume as environment variables or volumes.", "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: app-config\ndata:\n  APP_ENV: production\n  APP_DEBUG: \"false\""],
+   "Secrets": ["Secrets store sensitive data like passwords and API keys base64-encoded. They are injected into pods as environment variables or mounted volumes.", "apiVersion: v1\nkind: Secret\ntype: Opaque\ndata:\n  DB_PASSWORD: cGFzc3dvcmQxMjM=\n\n# kubectl create secret generic db-pass --from-literal=password=password123"],
+   "Environment Variables": ["Environment variables in pods reference ConfigMaps and Secrets directly or via configMapKeyRef and secretKeyRef selectors.", "containers:\n- name: app\n  env:\n  - name: APP_ENV\n    valueFrom:\n      configMapKeyRef:\n        name: app-config\n        key: APP_ENV\n  - name: DB_PASSWORD\n    valueFrom:\n      secretKeyRef:\n        name: db-secret\n        key: password"]
+ },
+ "Storage": {
+   "Volumes": ["Container volumes provide temporary or persistent storage attached to pods. Volume types include emptyDir, hostPath, and cloud disks.", "volumes:\n- name: data\n  emptyDir: {}\ncontainers:\n- name: app\n  volumeMounts:\n  - mountPath: /data\n    name: data"],
+   "PersistentVolumes": ["PersistentVolumes are cluster-wide storage resources provisioned by administrators or dynamically via StorageClass.", "apiVersion: v1\nkind: PersistentVolume\nspec:\n  capacity:\n    storage: 10Gi\n  accessModes:\n  - ReadWriteOnce\n  hostPath:\n    path: /mnt/data"],
+   "PVCs": ["PersistentVolumeClaims request storage resources from a PersistentVolume, binding to matching volumes based on capacity and access modes.", "apiVersion: v1\nkind: PersistentVolumeClaim\nspec:\n  accessModes:\n  - ReadWriteOnce\n  resources:\n    requests:\n      storage: 5Gi"],
+   "StorageClass": ["StorageClass provisions PersistentVolumes dynamically based on cloud provider storage types like SSD, HDD, or custom parameters.", "apiVersion: storage.k8s.io/v1\nkind: StorageClass\nprovisioner: kubernetes.io/gce-pd\nparameters:\n  type: pd-ssd\n  replication-type: none"]
+ },
+ "Scheduling": {
+   "NodeSelector": ["nodeSelector schedules pods onto nodes with matching labels, providing simple constraint-based pod placement.", "spec:\n  nodeSelector:\n    disktype: ssd"],
+   "Affinity": ["Node and pod affinity/anti-affinity rules express complex scheduling constraints with required or preferred matching conditions.", "spec:\n  affinity:\n    nodeAffinity:\n      requiredDuringSchedulingIgnoredDuringExecution:\n        nodeSelectorTerms:\n        - matchExpressions:\n          - key: topology.kubernetes.io/zone\n            operator: In\n            values:\n            - us-east-1a"],
+   "Taints/Tolerations": ["Taints repel pods from nodes unless the pod tolerates the taint. They prevent unwanted pods from scheduling on dedicated nodes.", "# Taint a node\nkubectl taint nodes node1 key=value:NoSchedule\n\n# Pod toleration\nspec:\n  tolerations:\n  - key: \"key\"\n    operator: \"Equal\"\n    value: \"value\"\n    effect: \"NoSchedule\""]
+ },
+ "Security": {
+   "RBAC": ["Role-Based Access Control restricts API access via Roles (namespace-scoped) and ClusterRoles (cluster-scoped) bound to users or ServiceAccounts.", "apiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nrules:\n- apiGroups: [\"\"]\n  resources: [\"pods\"]\n  verbs: [\"get\", \"list\", \"watch\"]"],
+   "ServiceAccounts": ["ServiceAccounts provide identities for pods to authenticate with the Kubernetes API, used with RBAC for fine-grained permissions.", "apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: my-app-sa\n---\n# Pod using the SA\nspec:\n  serviceAccountName: my-app-sa"],
+   "PodSecurityPolicies": ["Pod Security Standards (restricted, baseline, privileged) enforce security contexts, preventing privileged containers and host namespace access.", "apiVersion: policy/v1beta1\nkind: PodSecurityPolicy\nspec:\n  privileged: false\n  seLinux:\n    rule: RunAsAny\n  runAsUser:\n    rule: MustRunAsNonRoot"]
+ },
+ "Monitoring": {
+   "Metrics Server": ["Metrics Server collects resource utilization data from kubelet and exposes it via the Metrics API, enabling kubectl top and HPA.", "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml\nkubectl top pods"],
+   "Prometheus": ["Prometheus monitors Kubernetes with time-series metrics collection, alerting, and Grafana dashboards for visualization.", "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts\nhelm install prometheus prometheus-community/kube-prometheus-stack"],
+   "Logging": ["Logging in Kubernetes uses fluentd or filebeat to collect container logs, forward them to Elasticsearch, Loki, or cloud logging services.", "# DaemonSet collecting logs to stdout/stderr\nkubectl logs -l app=myapp --tail=100\nkubectl logs pod-name --previous"]
+ }
+}

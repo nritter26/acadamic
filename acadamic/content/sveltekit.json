@@ -1,0 +1,108 @@
+{
+  "Getting Started": {
+    "Project Setup": [
+      "Create a new SvelteKit project with the CLI, choosing from demo app, skeleton project, or minimal setup. The project includes Vite, TypeScript, ESLint, and Prettier out of the box.",
+      "npx sv create my-app && cd my-app && npm install"
+    ],
+    "Routing": [
+      "SvelteKit uses filesystem-based routing where files in src/routes map to URL paths. +page.svelte files define pages, +layout.svelte wraps nested routes, and dynamic params use [bracket] directories.",
+      "src/routes/blog/[slug]/+page.svelte"
+    ],
+    "Layouts": [
+      "Layout components wrap child routes with shared UI like headers and footers. Nested layouts inherit from parent layouts, and +layout.js can run data loading for an entire route segment.",
+      "<nav><a href=\"/\">Home</a></nav>\n<slot />"
+    ]
+  },
+  "Data Loading": {
+    "load": [
+      "The load function runs before a page or layout renders, fetching data on the server during SSR and on the client during client-side navigation. It returns data passed to the page as $page.data.",
+      "export async function load({ fetch, params }) {\n  const res = await fetch(`/api/posts/${params.slug}`);\n  return { post: await res.json() };\n}"
+    ],
+    "Page Data": [
+      "Page data from load is available in +page.svelte via $page.data. Data is typed automatically when using TypeScript, and re-fetched reactively when load dependencies change via depends().",
+      "<script lang=\"ts\">\n  let { data } = $props();\n</script>\n<h1>{data.post.title}</h1>"
+    ],
+    "Layout Data": [
+      "Layout load functions in +layout.js combine data for all child routes using merge strategies, accessible from any child page or layout. This is ideal for fetching shared resources like user profiles.",
+      "export async function load({ fetch }) {\n  const user = await fetch('/api/user').then(r => r.json());\n  return { user };\n}"
+    ]
+  },
+  "Endpoints": {
+    "GET": [
+      "GET handlers in +server.js return data from the server, typically JSON. They receive request event with params, url, fetch, and locals, making them ideal for API routes.",
+      "export async function GET({ params }) {\n  const post = await db.getPost(params.slug);\n  return json(post);\n}"
+    ],
+    "POST": [
+      "POST handlers accept request bodies for creating resources, validating input, and returning appropriate status codes. They're used for REST APIs and can handle multipart uploads.",
+      "export async function POST({ request }) {\n  const body = await request.json();\n  const created = await db.createPost(body);\n  return json(created, { status: 201 });\n}"
+    ],
+    "API Routes": [
+      "API routes in SvelteKit are server-only endpoints defined alongside pages, sharing the same filesystem routing. They can use server-side secrets and databases without exposing them to the client.",
+      "export async function PUT({ params, request }) {\n  const body = await request.json();\n  await db.updatePost(params.slug, body);\n  return new Response(null, { status: 204 });\n}"
+    ],
+    "Form Actions": [
+      "Form actions handle POST form submissions with progressive enhancement, running on the server to mutate data and return validation errors or success responses without JavaScript required.",
+      "export const actions = {\n  default: async ({ request }) => {\n    const data = await request.formData();\n    const name = data.get('name');\n    if (!name) return { error: 'Name required' };\n    await db.createUser(name);\n    return { success: true };\n  }\n};"
+    ]
+  },
+  "SSR & SSG": {
+    "Rendering Modes": [
+      "SvelteKit supports SSR (default), prerendering (SSG), and CSR modes configurable per route or globally. SSR renders on the server on each request, SSG pre-builds static HTML at build time.",
+      "export const ssr = true;\nexport const prerender = 'auto';"
+    ],
+    "Prerendering": [
+      "Prerendering generates static HTML files at build time for routes that don't need server data, suitable for marketing pages and blogs. Prerendered routes can be served from CDN with zero server cost.",
+      "export const prerender = true;"
+    ],
+    "CSR": [
+      "Client-side rendering skips server rendering entirely, loading the page as a shell and fetching data on the client. Useful for authenticated dashboard pages or apps that need minimal server load.",
+      "export const ssr = false;\nexport const csr = true;"
+    ]
+  },
+  "Auth": {
+    "Session Management": [
+      "SvelteKit sessions can be managed with cookies, JWTs, or server-side stores accessible via the event.locals object in hooks. Authentication libraries like Lucia or Auth.js integrate seamlessly with the hooks pattern.",
+      "export async function handle({ event, resolve }) {\n  const session = await getSession(event.cookies.get('sid'));\n  event.locals.user = session?.user ?? null;\n  return resolve(event);\n}"
+    ],
+    "Cookies": [
+      "SvelteKit provides a cookies API in server contexts for reading, setting, and deleting cookies with configurable options for path, maxAge, secure, httpOnly, and sameSite.",
+      "event.cookies.set('session', token, {\n  httpOnly: true, secure: true, maxAge: 60 * 60 * 24, path: '/'\n});"
+    ],
+    "OAuth": [
+      "OAuth authentication flows are handled server-side using endpoints or form actions, redirecting users to providers and exchanging authorization codes for tokens. Libraries like Lucia provide OAuth adapters.",
+      "export async function GET({ cookies, url, locals }) {\n  const code = url.searchParams.get('code');\n  const { tokens } = await githubAuth.validateAuthorizationCode(code);\n  locals.user = await createUserFromGithub(tokens);\n  return new Response(null, { status: 302, headers: { location: '/' } });\n}"
+    ]
+  },
+  "Deployment": {
+    "Adapters": [
+      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
+      "npm install --save-dev @sveltejs/adapter-node"
+    ],
+    "Vercel": [
+      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
+      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Netlify": [
+      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
+      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Node": [
+      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
+      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
+    ]
+  },
+  "Advanced": {
+    "Hooks": [
+      "Hooks are server-side middleware that intercept every request in handle, or module-level functions like handleError and handleFetch. They enable session management, redirects, and error tracking.",
+      "export async function handle({ event, resolve }) {\n  if (event.url.pathname.startsWith('/api')) {\n    event.request.headers.set('X-API-Key', process.env.API_KEY);\n  }\n  return resolve(event);\n}"
+    ],
+    "Params": [
+      "Params matchers validate and transform dynamic route parameters before load runs, preventing invalid requests from reaching data loading logic. Built-in matchers include int, uuid, and custom matchers.",
+      "export function match(param) {\n  return /^\\d+$/.test(param);\n}"
+    ],
+    "Error Handling": [
+      "SvelteKit provides structured error handling with error/is-error utility, custom error pages (+error.svelte), and the handleError hook for logging and monitoring integration.",
+      "import { error } from '@sveltejs/kit';\n\nif (!post) throw error(404, 'Post not found');"
+    ]
+  }
+}

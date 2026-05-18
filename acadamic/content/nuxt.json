@@ -1,0 +1,114 @@
+{
+  "Getting Started": {
+    "Project Setup": [
+      "Nuxt 3 projects are created using the nuxi CLI. The scaffolding tool asks about desired features like package manager, UI framework, and modules, generating a ready-to-develop project structure.",
+      "npx nuxi init my-app\ncd my-app\nnpm install\nnpm run dev"
+    ],
+    "Pages": [
+      "The pages directory in Nuxt automatically generates routes based on file structure. Each .vue file becomes a route, with index.vue as the root and dynamic routes using brackets like [id].vue.",
+      "<template>\n  <div>\n    <NuxtLink to=\"/posts/1\">Post 1</NuxtLink>\n    <NuxtPage />\n  </div>\n</template>"
+    ],
+    "Routing": [
+      "Nuxt provides <NuxtLink> for client-side navigation and <NuxtPage> for rendering matched routes. Route middleware can be defined to protect pages or redirect users based on conditions.",
+      "// middleware/auth.ts\nexport default defineNuxtRouteMiddleware((to, from) => {\n  const user = useUser();\n  if (!user.value) return navigateTo('/login');\n});"
+    ]
+  },
+  "Data Fetching": {
+    "useFetch": [
+      "useFetch is the simplest way to fetch data in Nuxt 3. It automatically deduplicates requests, handles caching, and provides reactive refs for data, pending state, and error handling.",
+      "const { data, pending, error } = await useFetch('/api/posts', {\n  params: { page: 1 }\n});"
+    ],
+    "useAsyncData": [
+      "useAsyncData provides more control over data fetching than useFetch. It accepts a custom fetcher function and supports keys for caching, refresh intervals, and lazy loading options.",
+      "const { data, refresh } = await useAsyncData('posts', () => $fetch('/api/posts'));"
+    ],
+    "Server Routes": [
+      "Server routes in the server/api directory handle backend logic with h3 event handlers. They support all HTTP methods and can access request body, query parameters, and cookies directly.",
+      "// server/api/posts.post.ts\nexport default defineEventHandler(async (event) => {\n  const body = await readBody(event);\n  return await createPost(body);\n});"
+    ]
+  },
+  "Rendering": {
+    "Universal": [
+      "Universal rendering is Nuxt's default mode, combining server-side rendering with client-side hydration. The server renders HTML on first request, then Vue takes over for SPA-like navigation.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ ssr: true })"
+    ],
+    "SPA": [
+      "Single Page Application mode disables server-side rendering entirely. All rendering happens client-side, with the server only serving a minimal HTML shell. Useful for fully client-driven apps.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ ssr: false })"
+    ],
+    "Static Generation": [
+      "Static generation pre-renders all pages at build time using nuxt generate. The output is a fully static site deployable on any static hosting provider like Netlify or Vercel.",
+      "npx nuxi generate\n# Output in .output/public/"
+    ]
+  },
+  "Modules": {
+    "Auth": [
+      "The @sidebase/nuxt-auth module provides a complete authentication system for Nuxt 3. It supports multiple auth providers, session management, and middleware protection out of the box.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({\n  modules: ['@sidebase/nuxt-auth'],\n  auth: { provider: { type: 'authjs' } }\n});"
+    ],
+    "Content": [
+      "Nuxt Content is a file-based CMS that reads Markdown, JSON, and YAML files from the content directory. It provides a queryable MongoDB-like API and automatic rendering of content files.",
+      "// content/index.md\n---\ntitle: Hello Nuxt\n---\n# Welcome\n<script setup>\nconst { data } = await useAsyncData('content', () => queryContent('/').find());\n</script>"
+    ],
+    "Tailwind": [
+      "The Nuxt Tailwind module integrates Tailwind CSS with zero configuration. It auto-imports the config, enables HMR for styles, and purges unused classes in production builds.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ modules: ['@nuxtjs/tailwindcss'] });"
+    ],
+    "SEO": [
+      "Nuxt provides built-in SEO tools through useHead composable and the @nuxtjs/seo module. It manages meta tags, Open Graph, structured data, and sitemaps for better search visibility.",
+      "useHead({\n  title: 'My Page',\n  meta: [{ name: 'description', content: 'Page description' }]\n});"
+    ]
+  },
+  "State Management": {
+    "useState": [
+      "useState is Nuxt's built-in reactive state composable that works across server and client. It creates a singleton ref that persists across component re-renders and is serialized during SSR.",
+      "const counter = useState('counter', () => 0);\nconst increment = () => counter.value++;"
+    ],
+    "Pinia": [
+      "Pinia is the recommended state management library for Nuxt 3. It provides a intuitive API with full TypeScript support, devtools integration, and automatic SSR hydration.",
+      "// stores/counter.ts\nexport const useCounterStore = defineStore('counter', () => {\n  const count = ref(0);\n  const double = computed(() => count.value * 2);\n  return { count, double };\n});"
+    ],
+    "Store Patterns": [
+      "Nuxt stores follow the composition API pattern with defineStore. Stores can be organized by domain feature and accessed anywhere in the app via the generated composable function.",
+      "const store = useCounterStore();\nstore.count++;\nconsole.log(store.double);"
+    ]
+  },
+  "Auth & Middleware": {
+    "Route Middleware": [
+      "Route middleware in Nuxt runs before entering a route and can redirect or cancel navigation. Middleware files are placed in the middleware directory and can be applied globally or per-route.",
+      "// middleware/redirect.global.ts\nexport default defineNuxtRouteMiddleware((to) => {\n  if (to.path === '/old') return navigateTo('/new');\n});"
+    ],
+    "Auth Module": [
+      "The nuxt-auth module provides session-based authentication with built-in login pages, OAuth support, and credential-based auth. It automatically handles token refresh and session persistence.",
+      "const { status, signIn, signOut, data } = useAuth();\nif (status.value === 'unauthenticated') signIn('github');"
+    ]
+  },
+  "Deployment": {
+    "Vercel": [
+      "Deploying Nuxt to Vercel requires the Vercel preset. Vercel automatically detects the framework, optimizes serverless functions, and provides edge network distribution.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ nitro: { preset: 'vercel' } });"
+    ],
+    "Netlify": [
+      "Nuxt deploys to Netlify using the Netlify preset, generating edge functions for server routes. Netlify provides automatic HTTPS, deploy previews, and form handling.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ nitro: { preset: 'netlify' } });\n[build]\n  command = \"npm run build\"\n  publish = \"dist\""
+    ],
+    "Node Server": [
+      "The Node server preset runs Nuxt as a standalone Node.js application. This is ideal for self-hosting on VPS, Docker containers, or traditional server environments.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({ nitro: { preset: 'node-server' } });\nnode .output/server/index.mjs"
+    ]
+  },
+  "Advanced": {
+    "Auto-imports": [
+      "Nuxt automatically imports composables, components, and utilities from predefined directories. Components in components/, composables in composables/, and utils in utils/ are auto-imported without explicit imports.",
+      "// components/MyButton.vue (auto-imported)\n<template><button>{{ text }}</button></template>"
+    ],
+    "Layers": [
+      "Nuxt layers allow extending a base Nuxt project from external sources or local directories. Layers can override components, pages, composables, and configuration, enabling modular architectures.",
+      "// nuxt.config.ts\nexport default defineNuxtConfig({\n  extends: ['github:org/my-layer']\n});"
+    ],
+    "Modules Dev": [
+      "Creating custom Nuxt modules allows packaging reusable functionality. Modules can modify the Nuxt configuration, add hooks, register components, and integrate with the build pipeline.",
+      "// modules/my-module.ts\nexport default defineNuxtModule({\n  meta: { name: 'my-module', version: '1.0.0' },\n  setup(options, nuxt) {\n    nuxt.hook('pages:extend', (pages) => {\n      pages.push({ path: '/custom', file: './custom.vue' });\n    });\n  }\n});"
+    ]
+  }
+}

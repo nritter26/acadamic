@@ -2,7 +2,14 @@
     --bg: #020617; --card: #1e293b; --js: #f7df1e;
     --ts: #3178c6; --go: #00add8;     --py: #ffd43b;  
     --pg: #336791; --dk: #2496ed; --zig: #f7a41d;
-    --git: #f1502f; --kt: #7F52FF; --rs: #d84f04; --swift: #F05138; --text: #f1f5f9; --accent: var(--js);
+    --git: #f1502f; --kt: #7F52FF; --rs: #d84f04; --swift: #F05138;
+    --react: #61DAFB; --vue: #4FC08D; --angular: #DD0031; --node: #339933;
+    --express: #000000; --next: #000000; --svelte: #FF3E00; --tailwind: #06B6D4;
+    --redis: #DC382D; --nuxt: #00DC82; --sveltekit: #FF3E00; --remix: #121212;
+    --vite: #646CFF; --webpack: #8DD6F9; --graphql: #E10098; --prisma: #2D3748;
+    --rnative: #61DAFB; --flutter: #02569B; --cypress: #17202C; --playwright: #2EAD33;
+    --k8s: #326CE5; --terraform: #7B42BC;
+    --text: #f1f5f9; --accent: var(--js);
 }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -201,7 +208,8 @@ textarea:focus { border-color: var(--accent); }
 .run-btn.loading { pointer-events: none; opacity: 0.7; }
 @keyframes runSpinner { to { transform: rotate(360deg); } }
 .run-btn.loading::after { content: ''; display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: runSpinner 0.6s linear infinite; margin-left: 8px; vertical-align: middle; }
-.ts-mode { --accent: var(--ts); } .py-mode { --accent: var(--py); } .go-mode { --accent: var(--go); } .pg-mode { --accent: var(--pg); } .dk-mode { --accent: var(--dk); } .zig-mode { --accent: var(--zig); } .cs-mode { --accent: #512BD4; } .git-mode { --accent: var(--git); } .kt-mode { --accent: var(--kt); } .rs-mode { --accent: var(--rs); } .swift-mode { --accent: var(--swift); } .oop-mode { --accent: #e91e63; }
+.ts-mode { --accent: var(--ts); } .py-mode { --accent: var(--py); } .go-mode { --accent: var(--go); } .pg-mode { --accent: var(--pg); } .zig-mode { --accent: var(--zig); } .cs-mode { --accent: #512BD4; } .git-mode { --accent: var(--git); } .kt-mode { --accent: var(--kt); } .rs-mode { --accent: var(--rs); } .swift-mode { --accent: var(--swift); } .oop-mode { --accent: #e91e63; }
+.techstack-mode { --accent: #2DD4BF; }
 @keyframes fadeSlide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.35s ease forwards; }
@@ -888,6 +896,11 @@ textarea:focus { border-color: var(--accent); }
 .db-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 .db-mode { --accent: var(--pg); }
 body.db-mode .selector button#nav-db { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+body.techstack-mode .selector button#nav-techstack { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.techstack-bar { display: flex; gap: 5px; margin-bottom: 4px; flex-wrap: wrap; }
+.techstack-btn { background: none; color: #64748b; border: 1px solid #334155; padding: 3px 10px; border-radius: 6px; cursor: pointer; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.2s; }
+.techstack-bar .techstack-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); }
+.techstack-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
 /* ── Compiler Mode ── */
 .compiler-mode { --accent: #a5f3fc; }

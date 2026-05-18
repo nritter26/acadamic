@@ -1,0 +1,106 @@
+{
+  "Getting Started": {
+    "Project Setup": [
+      "Vite scaffolds projects using create-vite with templates for vanilla JS/TS, React, Vue, Svelte, Lit, and more. The setup process installs dependencies and configures the build tool in seconds.",
+      "npm create vite@latest my-app -- --template react\ncd my-app\nnpm install\nnpm run dev"
+    ],
+    "CLI Commands": [
+      "Vite provides three primary CLI commands: vite (dev server), vite build (production build), and vite preview (preview production build). Flags like --port, --host, and --mode customize behavior.",
+      "vite --port 3000 --host 0.0.0.0  # Dev server on all interfaces\nvite build --mode staging         # Build with staging env"
+    ],
+    "Dev Server": [
+      "Vite's dev server uses native ES modules and esbuild pre-bundling for instant startup. Hot Module Replacement updates modules without full page reloads, preserving application state during development.",
+      "// vite.config.js\nexport default defineConfig({\n  server: { port: 3000, open: true, proxy: { '/api': 'http://localhost:8080' } }\n});"
+    ]
+  },
+  "Configuration": {
+    "vite.config.js": [
+      "Vite is configured via vite.config.js using the defineConfig helper for type hints. The config file supports conditional configurations based on mode, environment, and build targets.",
+      "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({\n  plugins: [react()],\n  build: { outDir: 'dist' }\n});"
+    ],
+    "Plugins": [
+      "Plugins extend Vite's functionality using a Rollup-compatible plugin API. They can transform code, inject styles, optimize assets, and hook into the build lifecycle at various stages.",
+      "import vitePlugin from 'vite-plugin-example';\nexport default defineConfig({\n  plugins: [vitePlugin({ option: true })]\n});"
+    ],
+    "Resolve": [
+      "The resolve config controls module resolution, including aliases, extensions, and main fields. Path aliases simplify imports by mapping @/ to the src directory.",
+      "export default defineConfig({\n  resolve: {\n    alias: { '@': '/src' },\n    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']\n  }\n});"
+    ]
+  },
+  "CSS & Assets": {
+    "PostCSS": [
+      "Vite includes PostCSS support out of the box. A postcss.config.js file is automatically detected, enabling features like Tailwind CSS, Autoprefixer, and custom CSS transformations.",
+      "// postcss.config.js\nmodule.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n};"
+    ],
+    "CSS Modules": [
+      "CSS Modules are supported natively for files ending in .module.css. Class names are locally scoped by default, and the generated module object maps original class names to hashed versions.",
+      "/* Button.module.css */\n.primary { background: blue; }\n// Component\nimport styles from './Button.module.css';\n<button className={styles.primary}>Click</button>"
+    ],
+    "Static Assets": [
+      "Vite handles static assets (images, fonts, SVGs) as ES module imports. Assets smaller than a configurable threshold are inlined as base64 data URLs, while larger files are emitted as separate files.",
+      "import logo from './assets/logo.png';\nimport icon from './assets/icon.svg?inline';\n<img src={logo} alt='Logo' />"
+    ]
+  },
+  "Build": {
+    "Production Build": [
+      "The vite build command produces optimized assets for production. It bundles with Rollup, minifies with esbuild or terser, applies code splitting, and generates hashed filenames for caching.",
+      "vite build\n# Output: dist/assets/index.[hash].js, dist/assets/index.[hash].css"
+    ],
+    "Code Splitting": [
+      "Vite automatically splits code into separate chunks for dynamic imports. Manual chunking can be configured in the build.rollupOptions to separate vendor libraries from application code.",
+      "export default defineConfig({\n  build: {\n    rollupOptions: {\n      output: {\n        manualChunks: { vendor: ['react', 'react-dom'] }\n      }\n    }\n  }\n});"
+    ],
+    "Chunking": [
+      "Advanced chunking strategies control how modules are grouped into output files. Vite supports async chunk loading, CSS code splitting, and granular control over chunk file names.",
+      "export default defineConfig({\n  build: {\n    chunkSizeWarningLimit: 500,\n    rollupOptions: {\n      output: {\n        chunkFileNames: 'assets/js/[name]-[hash].js'\n      }\n    }\n  }\n});"
+    ]
+  },
+  "Environment Variables": {
+    "Mode": [
+      "Vite modes (development, production, custom) determine which .env files are loaded. Custom modes like staging or test use .env.staging or .env.test files for environment-specific configuration.",
+      "vite build --mode staging\n# Loads .env.staging"
+    ],
+    ".env Files": [
+      "Vite loads environment variables from .env files with specific priority: .env.[mode].local > .env.[mode] > .env.local > .env. Only variables prefixed with VITE_ are exposed to client code.",
+      "# .env.local\nVITE_API_URL=https://api.example.com\nVITE_APP_TITLE=My App\n# Not exposed: SECRET_KEY=abc123"
+    ],
+    "Import.meta.env": [
+      "Environment variables are accessed via import.meta.env in client code. Vite also provides built-in variables like import.meta.env.MODE, import.meta.env.PROD, and import.meta.env.DEV.",
+      "const apiUrl = import.meta.env.VITE_API_URL;\nif (import.meta.env.DEV) {\n  console.log('Running in development mode');\n}"
+    ]
+  },
+  "Plugins": {
+    "Official": [
+      "Vite's official plugins include @vitejs/plugin-react (with Fast Refresh), @vitejs/plugin-vue, @vitejs/plugin-svelte, and @vitejs/plugin-legacy for legacy browser support.",
+      "npm install @vitejs/plugin-react\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({ plugins: [react()] });"
+    ],
+    "Community": [
+      "The community ecosystem includes plugins for PWA (vite-plugin-pwa), SVG (vite-plugin-svg), compression (vite-plugin-compression), and more. Most popular frameworks have dedicated Vite plugins.",
+      "npm install vite-plugin-pwa\nimport { VitePWA } from 'vite-plugin-pwa';\nexport default defineConfig({ plugins: [VitePWA({ registerType: 'autoUpdate' })] });"
+    ],
+    "Custom Plugins": [
+      "Custom Vite plugins follow the Rollup plugin convention with additional Vite-specific hooks. Plugins use the name, apply, enforce, and various transform/build hooks to modify behavior.",
+      "export default function myPlugin() {\n  return {\n    name: 'transform-file',\n    transform(src, id) {\n      if (id.endsWith('.custom')) return transformContent(src);\n    }\n  };\n}"
+    ]
+  },
+  "SSR": {
+    "Server-Side Rendering": [
+      "Vite provides SSR support with built-in APIs for development and production. The SSR build produces a server entry point that can render Vue/React components on the server.",
+      "// server.js\nimport { createServer } from 'vite';\nconst vite = await createServer({ server: { middlewareMode: true } });\napp.use(vite.middlewares);"
+    ],
+    "SSR Build": [
+      "The SSR build generates a separate bundle optimized for Node.js execution. It disables CSS extraction and produces ESM or CJS output depending on the configured format.",
+      "export default defineConfig({\n  build: {\n    ssr: 'src/entry-server.js',\n    outDir: 'dist/server',\n    rollupOptions: { output: { format: 'esm' } }\n  }\n});"
+    ]
+  },
+  "Migration": {
+    "Webpack to Vite": [
+      "Migrating from Webpack involves replacing loaders with Vite plugins, converting CommonJS to ESM, and adapting custom Webpack configurations to Vite's simpler config format. Most Webpack loaders have Vite equivalents.",
+      "# Install Vite and counterparts\nnpm uninstall webpack webpack-cli\nnpm install -D vite @vitejs/plugin-react\n# Convert webpack.config.js to vite.config.js"
+    ],
+    "CRA to Vite": [
+      "Migrating from Create React App to Vite requires installing Vite, moving index.html to the root, replacing react-scripts with Vite scripts, and updating env variables from REACT_APP_ to VITE_.",
+      "npm uninstall react-scripts\nnpm install -D vite @vitejs/plugin-react\n// package.json scripts\n\"dev\": \"vite\",\n\"build\": \"vite build\",\n\"preview\": \"vite preview\"\n// Rename REACT_APP_* to VITE_* in .env"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "Getting Started": {
+    "JSX": [
+      "JSX is a syntax extension for JavaScript that looks like HTML and allows you to write markup inside your components. It gets transpiled to React.createElement calls under the hood by tools like Babel.",
+      "const element = <h1>Hello, World!</h1>;"
+    ],
+    "Components": [
+      "Components are reusable, self-contained pieces of UI that can be either function-based or class-based. Modern React favors functional components with hooks.",
+      "function Welcome({ name }) {\n  return <h1>Hello, {name}</h1>;\n}"
+    ],
+    "Props": [
+      "Props (short for properties) are read-only inputs passed to components from their parent. They enable parent-to-child communication and make components configurable.",
+      "<Welcome name=\"Alice\" color=\"blue\" />"
+    ]
+  },
+  "State & Lifecycle": {
+    "useState": [
+      "useState is a hook that adds local state to function components. It returns a stateful value and a function to update it, triggering a re-render when called.",
+      "const [count, setCount] = useState(0);"
+    ],
+    "useEffect": [
+      "useEffect lets you perform side effects in function components such as data fetching, subscriptions, or DOM manipulation. The dependency array controls when the effect re-runs.",
+      "useEffect(() => {\n  document.title = `Count: ${count}`;\n}, [count]);"
+    ],
+    "useRef": [
+      "useRef returns a mutable ref object whose .current property persists across renders without causing re-renders. It's commonly used to access DOM elements directly.",
+      "const inputRef = useRef(null);\ninputRef.current.focus();"
+    ]
+  },
+  "Advanced Hooks": {
+    "useContext": [
+      "useContext consumes a context value created by React.createContext, allowing deep prop drilling to be avoided. It re-renders the component when the context value changes.",
+      "const theme = useContext(ThemeContext);"
+    ],
+    "useReducer": [
+      "useReducer is an alternative to useState for complex state logic involving multiple sub-values or when the next state depends on the previous one. It follows the reducer pattern from Redux.",
+      "const [state, dispatch] = useReducer(reducer, initialState);"
+    ],
+    "useMemo": [
+      "useMemo memoizes the result of an expensive computation, recomputing only when its dependencies change. Use it to optimize performance by avoiding unnecessary recalculations.",
+      "const sorted = useMemo(() => data.sort(), [data]);"
+    ]
+  },
+  "Styling": {
+    "CSS Modules": [
+      "CSS Modules scope CSS class names locally by default, preventing naming collisions across components. Files are imported like JavaScript objects and class names are accessed as properties.",
+      "import styles from './Button.module.css';\n<button className={styles.primary}>Click</button>"
+    ],
+    "Styled Components": [
+      "Styled Components is a CSS-in-JS library that lets you write actual CSS inside your JavaScript using tagged template literals. It automatically handles vendor prefixing and scoping.",
+      "const Button = styled.button`\n  background: palevioletred;\n  color: white;\n`;"
+    ],
+    "Tailwind": [
+      "Tailwind CSS is a utility-first framework providing low-level classes for rapid UI building. It pairs well with React through class composition and tools like clsx for conditional classes.",
+      "<div className=\"flex items-center p-4 bg-blue-500 text-white rounded-lg\">"
+    ]
+  },
+  "Forms & Routing": {
+    "Controlled Forms": [
+      "In controlled forms, form elements derive their value from React state and update via onChange handlers. This gives React single source of truth for form data and enables validation.",
+      "<input value={value} onChange={e => setValue(e.target.value)} />"
+    ],
+    "React Router": [
+      "React Router is the standard routing library for React apps, enabling navigation between views while keeping the UI in sync with the URL. It supports nested routes, params, and lazy loading.",
+      "<Route path=\"/users/:id\" element={<UserPage />} />"
+    ]
+  },
+  "Testing": {
+    "Jest": [
+      "Jest is a delightful JavaScript testing framework with zero configuration, built-in assertions, mocking, and code coverage. It's the default test runner in Create React App.",
+      "test('adds 1 + 2 to equal 3', () => {\n  expect(sum(1, 2)).toBe(3);\n});"
+    ],
+    "React Testing Library": [
+      "React Testing Library builds on top of DOM Testing Library and encourages testing components from the user's perspective. It queries rendered output rather than testing implementation details.",
+      "render(<Button label=\"Submit\" />);\nfireEvent.click(screen.getByText('Submit'));"
+    ],
+    "Cypress": [
+      "Cypress is an end-to-end testing framework that runs in the browser, providing real-time reloads, time travel debugging, and automatic waiting. It's ideal for integration and E2E tests.",
+      "cy.visit('/login');\ncy.get('[data-cy=submit]').click();"
+    ]
+  },
+  "Performance": {
+    "Code Splitting": [
+      "Code splitting breaks your bundle into smaller chunks loaded on demand, reducing initial load time. React.lazy and Suspense make code splitting declarative and easy to implement.",
+      "const LazyComponent = React.lazy(() => import('./HeavyComponent'));"
+    ],
+    "Lazy Loading": [
+      "Lazy loading defers loading of non-critical resources until they are needed. Combined with Suspense, it shows a fallback UI while the lazy component loads asynchronously.",
+      "<Suspense fallback={<Spinner />}>\n  <LazyComponent />\n</Suspense>"
+    ],
+    "Memoization": [
+      "React.memo is a higher-order component that prevents re-rendering when props haven't changed. useCallback memorizes callback functions to maintain referential equality across renders.",
+      "const Memoized = React.memo(MyComponent);"
+    ]
+  },
+  "State Management": {
+    "Redux": [
+      "Redux is a predictable state container with a single store, immutable updates via pure reducers, and actions dispatched to trigger state changes. The Redux Toolkit simplifies boilerplate significantly.",
+      "const reducer = (state, action) => {\n  switch (action.type) {\n    case 'INCREMENT': return { count: state.count + 1 };\n    default: return state;\n  }\n};"
+    ],
+    "Zustand": [
+      "Zustand is a minimal state management library with a hook-based API, no boilerplate, and support for middleware. It's ideal for projects that need simple global state without Redux overhead.",
+      "const useStore = create((set) => ({\n  count: 0,\n  increment: () => set((state) => ({ count: state.count + 1 }))\n}));"
+    ],
+    "Context API": [
+      "Context API provides a built-in way to share values across the component tree without prop drilling. It's best suited for low-frequency updates like theme, locale, or auth state.",
+      "const ThemeContext = createContext('light');\n<ThemeContext.Provider value=\"dark\">...</ThemeContext.Provider>"
+    ]
+  }
+}

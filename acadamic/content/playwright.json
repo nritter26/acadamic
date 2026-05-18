@@ -1,0 +1,45 @@
+{
+ "Getting Started": {
+   "Install": ["Playwright is a browser automation library supporting Chromium, Firefox, and WebKit. Install via npm with one command for all browsers.", "npm init playwright@latest"],
+   "Browser Context": ["Browser contexts are isolated browser sessions with their own cookies, storage, and permissions. They enable parallel, independent test execution.", "const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });\nconst page = await context.newPage();"],
+   "Selectors": ["Playwright selectors include CSS, XPath, text, and role-based locators. The engine auto-waits for elements to be actionable before interacting.", "await page.locator('button:has-text(\"Submit\")').click();"]
+ },
+ "Locators": {
+   "getByRole": ["Role locators select elements by their ARIA role and accessible name, following best practices for accessibility and resilience.", "await page.getByRole('button', { name: 'Submit' }).click();"],
+   "getByText": ["Text locators find elements by their visible text content, supporting exact matching and substring matching.", "await page.getByText('Welcome back!').click();"],
+   "CSS": ["CSS selectors are fast and familiar for locating elements by class, id, attribute, or structure. They support pseudo-selectors like :has.", "await page.locator('.nav-item.active').click();"],
+   "XPath": ["XPath selectors traverse the DOM tree with powerful path expressions, useful for complex parent-child-sibling relationships.", "await page.locator('//div[@class=\"menu\"]//button[2]').click();"]
+ },
+ "Actions": {
+   "Click": ["Playwright clicks scroll elements into view, wait for actionability, and dispatch real browser events. Options include force, position, and modifier keys.", "await page.locator('#submit-btn').click({ modifiers: ['Shift'] });"],
+   "Fill": ["fill clears existing input and types new text. It dispatches input events for React and Vue change detection.", "await page.locator('#email').fill('user@example.com');"],
+   "Navigate": ["Navigation methods load URLs and wait for the page to reach a loaded state. Playwright supports back, forward, go, and reload.", "await page.goto('https://example.com', { waitUntil: 'networkidle' });"],
+   "Keyboard": ["Keyboard actions simulate key presses, combinations, and typing. Special keys are accessed via page.keyboard.", "await page.keyboard.press('Control+A');\nawait page.keyboard.type('replacement text');"]
+ },
+ "Assertions": {
+   "toHaveText": ["toHaveText asserts that an element's text content matches expected values, with options for exact or partial matching.", "await expect(page.locator('h1')).toHaveText('Dashboard');"],
+   "toBeVisible": ["toBeVisible checks that an element is present in the DOM, not hidden, and within the viewport. It auto-retries until timeout.", "await expect(page.getByText('Success')).toBeVisible();"],
+   "Soft Assertions": ["Soft assertions continue test execution after failure, collecting all failures for reporting. The test fails at the end.", "await expect.soft(page.locator('.status')).toHaveText('Active');\nawait expect.soft(page.locator('.count')).toHaveText('5');"]
+ },
+ "Network": {
+   "Route": ["page.route intercepts and modifies network requests, enabling request blocking, response modification, and API mocking.", "await page.route('**/*.png', route => route.abort());\nawait page.route('**/api/users', route => route.fulfill({ body: JSON.stringify([]) }));"],
+   "Intercept": ["Request interception captures network traffic for inspection. Playwright waits for specific requests using request/response events.", "page.on('request', req => console.log(req.url()));\npage.on('response', res => console.log(res.status()));"],
+   "Mock APIs": ["API mocking returns fake responses without hitting the server, making tests fast and deterministic. Route patterns support wildcards.", "await page.route('**/api/*', async route => { await route.fulfill({ contentType: 'application/json', body: '{\"data\":[]}' }); });"]
+ },
+ "Multi-browser": {
+   "Chromium": ["Chromium is Playwright's primary browser, offering the fastest and most feature-complete support for modern web platform APIs.", "const browser = await chromium.launch({ headless: true });"],
+   "Firefox": ["Firefox support in Playwright enables testing in Gecko-based browsers with near-complete API parity to Chromium.", "const browser = await firefox.launch();"],
+   "WebKit": ["WebKit targets Safari's rendering engine, crucial for testing iOS Safari behavior and macOS-specific features.", "const browser = await webkit.launch();"],
+   "Mobile": ["Playwright emulates mobile devices with device descriptors for iPhone, iPad, and Android, including viewport, user agent, and touch events.", "const iPhone = devices['iPhone 12'];\nconst context = await browser.newContext({ ...iPhone });"]
+ },
+ "Fixtures": {
+   "Test Fixtures": ["Fixtures in Playwright Test inject reusable resources like page, context, and custom objects into tests with automatic setup and teardown.", "const test = base.extend({ loggedInPage: async ({ page }, use) => { await page.goto('/login'); await page.fill('#user', 'admin'); await use(page); } });"],
+   "Project Config": ["Projects define browser configurations, device emulation, and retry policies. Multiple projects run in parallel for cross-browser coverage.", "projects: [{ name: 'chromium', use: { browserName: 'chromium' } }, { name: 'firefox', use: { browserName: 'firefox' } }]"],
+   "Global Setup": ["Global setup runs once before all test files for expensive operations like authentication, database seeding, or server startup.", "export default { globalSetup: './global-setup', globalTeardown: './global-teardown' };"]
+ },
+ "CI/CD": {
+   "Docker": ["Playwright's official Docker image includes all browsers and system dependencies for reliable CI execution.", "FROM mcr.microsoft.com/playwright:v1.40\nRUN npx playwright test"],
+   "GitHub Actions": ["GitHub Actions runs Playwright tests with matrix strategy for parallel cross-browser execution across operating systems.", "jobs: { test: { strategy: { matrix: { browser: [chromium, firefox, webkit] } } } }"],
+   "Parallel Execution": ["Playwright Test runs test files in parallel by default. Sharding splits tests across multiple CI machines for faster pipelines.", "npx playwright test --shard=1/3"]
+ }
+}

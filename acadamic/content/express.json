@@ -1,0 +1,118 @@
+{
+ "Getting Started": {
+  "Routing": [
+   "Routing defines how an application responds to client requests at specific endpoints (URIs) and HTTP methods. Express provides intuitive methods like app.get(), app.post(), and app.all() for route definition.",
+   "const express = require('express'); const app = express(); app.get('/', (req, res) => res.send('Home')); app.post('/api/users', (req, res) => res.status(201).json({ id: 1 }));"
+  ],
+  "Middleware": [
+   "Middleware functions execute in sequence during the request-response cycle, with access to the request and response objects. They can modify objects, end the cycle, or call the next middleware via next().",
+   "const logger = (req, res, next) => { console.log(req.method, req.url); next(); }; app.use(logger); app.use(express.json());"
+  ],
+  "App Setup": [
+   "Setting up an Express app involves creating the app instance, configuring middleware, defining routes, and starting the server with app.listen(). Includes error handling middleware defined last.",
+   "const express = require('express'); const app = express(); const PORT = process.env.PORT || 3000; app.use(express.json()); app.get('/', (req, res) => res.json({ status: 'OK' })); app.listen(PORT);"
+  ]
+ },
+ "Middleware": {
+  "Built-in": [
+   "Express includes built-in middleware: express.json() for JSON body parsing, express.urlencoded() for form data, express.static() for static files, and express.Router() for modular routing.",
+   "app.use(express.json({ limit: '10mb' })); app.use(express.urlencoded({ extended: false })); app.use(express.static('public', { maxAge: '1d' }));"
+  ],
+  "Third-party": [
+   "Third-party middleware adds cookie-parsing (cookie-parser), logging (morgan), compression (compression), CORS (cors), and session management (express-session).",
+   "const cors = require('cors'); const morgan = require('morgan'); app.use(cors({ origin: 'https://example.com' })); app.use(morgan('combined'));"
+  ],
+  "Custom": [
+   "Custom middleware encapsulates reusable logic for auth, validation, logging, or request transformation. A middleware function takes req, res, and next parameters.",
+   "const validateUser = (req, res, next) => { const { email, password } = req.body; if (!email || !password) return res.status(400).json({ error: 'Required' }); req.validated = { email, password }; next(); }; app.post('/login', validateUser, loginHandler);"
+  ],
+  "Error Handling": [
+   "Error-handling middleware has four parameters (err, req, res, next) and catches errors from preceding middleware and routes. Define it last in the middleware stack.",
+   "app.use((err, req, res, next) => { const status = err.status || 500; const message = err.message || 'Error'; console.error(err.stack); res.status(status).json({ error: message }); });"
+  ]
+ },
+ "Routing": {
+  "Router": [
+   "Express Router enables modular, mountable route handlers. Routers act as mini-applications with their own middleware and routes, keeping code organized by feature.",
+   "const router = express.Router(); router.use(authMiddleware); router.get('/', (req, res) => res.json([{ id: 1 }])); router.post('/', (req, res) => res.status(201).json(req.body)); module.exports = router; app.use('/api/users', userRouter);"
+  ],
+  "Route Params": [
+   "Route parameters capture values from the URL path. They are defined with a colon prefix and accessed via req.params. Params can be optional or use regex patterns.",
+   "app.get('/users/:userId', (req, res) => { const id = req.params.userId; res.json({ userId: id }); }); app.get('/files/:filename(\\\\.png)', handler);"
+  ],
+  "Query Strings": [
+   "Query strings pass key-value pairs after the ? in the URL. Express parses them and makes them available via req.query. Useful for filtering, pagination, and search parameters.",
+   "app.get('/api/users', (req, res) => { const { page = 1, limit = 10, sort } = req.query; const skip = (page - 1) * limit; res.json({ page, limit, sort }); });"
+  ]
+ },
+ "Request & Response": {
+  "Headers": [
+   "Request headers are accessed via req.headers. Response headers are set with res.set() or res.header(). CORS headers, content negotiation, and caching are common use cases.",
+   "app.use((req, res, next) => { res.header('X-Powered-By', 'Express'); res.header('Access-Control-Allow-Origin', '*'); next(); }); const userAgent = req.headers['user-agent'];"
+  ],
+  "Body Parsing": [
+   "Express can parse various request body formats: JSON (express.json()), URL-encoded form data (express.urlencoded()), raw text, and multipart file uploads (multer).",
+   "app.use(express.json()); app.use(express.urlencoded({ extended: true })); const multer = require('multer'); const upload = multer({ dest: 'uploads/' }); app.post('/upload', upload.single('file'), (req, res) => res.json(req.file));"
+  ],
+  "File Upload": [
+   "File uploads in Express use the multer middleware. Multer handles multipart/form-data and provides file metadata including original name, size, mimetype, and temp file path.",
+   "const storage = multer.diskStorage({ destination: './uploads', filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname) }); const upload = multer({ storage, limits: { fileSize: 5e6 } }); app.post('/profile', upload.single('avatar'), handler);"
+  ]
+ },
+ "Templates": {
+  "Pug": [
+   "Pug (formerly Jade) is a template engine for Express with terse syntax using indentation instead of tags. It supports variables, conditionals, iteration, mixins, and layout inheritance.",
+   "app.set('view engine', 'pug'); app.set('views', './views'); // views/index.pug: doctype html html head title= title body h1 Welcome #{name}"
+  ],
+  "EJS": [
+   "EJS (Embedded JavaScript) uses plain HTML with <% %> tags for logic and <%= %> for output. It includes partials, layouts via express-ejs-layouts, and supports async rendering.",
+   "app.set('view engine', 'ejs'); app.set('views', './views'); // views/index.ejs: <h1>Welcome <%= name %></h1> <% if (user) { %> <p>Logged in</p> <% } %>"
+  ],
+  "Handlebars": [
+   "Handlebars is a logic-less template engine with {{mustache}} syntax. It enforces strict separation of logic from presentation using helpers and partials instead of inline code.",
+   "const exphbs = require('express-handlebars'); app.engine('handlebars', exphbs()); app.set('view engine', 'handlebars'); // views/index.handlebars: <h1>Welcome {{name}}</h1>"
+  ]
+ },
+ "Database Integration": {
+  "MongoDB": [
+   "Integrating MongoDB with Express uses Mongoose ODM for schemas, models, and validation. Mongoose provides a schema-based solution for modeling application data.",
+   "const mongoose = require('mongoose'); mongoose.connect(process.env.MONGO_URI); const User = mongoose.model('User', { name: String, email: String }); app.get('/users', async (req, res) => res.json(await User.find()));"
+  ],
+  "SQL/Prisma": [
+   "Prisma ORM integrates with Express for type-safe database access. It supports PostgreSQL, MySQL, SQLite, and SQL Server with auto-generated query client.",
+   "const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); app.get('/users/:id', async (req, res) => { const user = await prisma.user.findUnique({ where: { id: Number(req.params.id) }, include: { posts: true } }); res.json(user); });"
+  ],
+  "Redis": [
+   "Redis with Express is used for caching, session storage, and rate limiting. Connect-redis stores Express sessions in Redis for fast, persistent session management.",
+   "const session = require('express-session'); const RedisStore = require('connect-redis')(session); const redis = require('redis'); const client = redis.createClient(); app.use(session({ store: new RedisStore({ client }), secret: 'secret', resave: false, saveUninitialized: false }));"
+  ]
+ },
+ "Authentication": {
+  "JWT": [
+   "JSON Web Tokens (JWT) provide stateless authentication. After login, a signed token containing user claims is sent to the client, which includes it in the Authorization header for protected routes.",
+   "const jwt = require('jsonwebtoken'); const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' }); const verifyToken = (req, res, next) => { const token = req.headers.authorization?.split(' ')[1]; try { req.user = jwt.verify(token, process.env.JWT_SECRET); next(); } catch (e) { res.status(401).json({ error: 'Invalid token' }); } };"
+  ],
+  "Sessions": [
+   "Express-session creates server-side sessions stored in memory or external stores like Redis. A signed cookie identifies the session, keeping user data on the server for security.",
+   "const session = require('express-session'); app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true, cookie: { secure: true, httpOnly: true, maxAge: 86400000 } })); app.get('/login', (req, res) => { req.session.userId = user.id; res.redirect('/'); });"
+  ],
+  "Passport": [
+   "Passport.js provides strategy-based authentication supporting local, OAuth (Google, GitHub, Facebook), JWT, and many other providers. serializeUser/deserializeUser manage session persistence.",
+   "const passport = require('passport'); const LocalStrategy = require('passport-local'); passport.use(new LocalStrategy(async (username, password, done) => { const user = await User.findOne({ username }); if (!user || !user.verifyPassword(password)) return done(null, false); return done(null, user); })); app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));"
+  ]
+ },
+ "REST APIs": {
+  "Best Practices": [
+   "REST API best practices include proper HTTP methods and status codes, consistent naming (plural nouns), versioning, pagination, filtering, sorting, and comprehensive error responses.",
+   "const sendSuccess = (res, data, status = 200) => res.status(status).json({ success: true, data }); const sendError = (res, message, status = 400) => res.status(status).json({ success: false, error: message });"
+  ],
+  "Versioning": [
+   "API versioning prevents breaking changes from affecting existing clients. Common strategies include URL-based (/api/v1/), header-based (Accept-Version), and query-parameter versioning.",
+   "const v1 = express.Router(); const v2 = express.Router(); v1.get('/users', (req, res) => res.json({ version: 'v1' })); v2.get('/users', (req, res) => res.json({ version: 'v2' })); app.use('/api/v1', v1); app.use('/api/v2', v2);"
+  ],
+  "Documentation": [
+   "API documentation with Swagger/OpenAPI defines endpoints, schemas, and auth. Swagger UI provides interactive documentation. JSDoc comments auto-generate OpenAPI specs.",
+   "const swaggerJsdoc = require('swagger-jsdoc'); const swaggerUi = require('swagger-ui-express'); const specs = swaggerJsdoc({ definition: { openapi: '3.0.0', info: { title: 'My API', version: '1.0.0' } }, apis: ['./routes/*.js'] }); app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));"
+  ]
+ }
+}

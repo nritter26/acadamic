@@ -1,0 +1,45 @@
+{
+ "Getting Started": {
+   "JSX": ["JSX is a syntax extension for JavaScript that looks like HTML and is compiled to React.createElement calls. It allows writing UI components declaratively.", "const element = <Text style={{color: 'blue'}}>Hello World</Text>;"],
+   "Components": ["Components are reusable building blocks in React Native, defined as functions returning JSX. They accept props and manage their own state.", "const Greeting = ({ name }) => <Text>Hello {name}!</Text>;"],
+   "StyleSheet": ["StyleSheet provides a way to define styles with performance benefits through abstraction. It validates and optimizes style objects.", "const styles = StyleSheet.create({ container: { flex: 1, justifyContent: 'center', alignItems: 'center' } });"]
+ },
+ "Core Components": {
+   "View": ["View is the fundamental container component supporting flexbox layout, styling, touch handling, and accessibility. It maps to UIView on iOS and View on Android.", "<View style={styles.container}>{children}</View>"],
+   "Text": ["Text is the only component that renders text in React Native. It supports nesting, styling, and event handling like onPress.", "<Text style={{fontSize: 18, fontWeight: 'bold'}}>Hello World</Text>"],
+   "Image": ["Image displays images from local assets, network URLs, or data URIs. It requires explicit dimensions when loading from network sources.", "<Image source={{uri: 'https://example.com/image.png'}} style={{width: 200, height: 200}} />"],
+   "ScrollView": ["ScrollView is a scrolling container for multiple components and views. It loads all content upfront and is best for smaller amounts of content.", "<ScrollView contentContainerStyle={styles.scroll}><Text>Item 1</Text><Text>Item 2</Text></ScrollView>"]
+ },
+ "Navigation": {
+   "React Navigation": ["React Navigation is the standard navigation library for React Native apps, providing stack, tab, and drawer navigators with native transitions.", "npm install @react-navigation/native @react-navigation/stack"],
+   "Stack": ["Stack navigator manages a navigation stack where screens are pushed and popped. It provides native-like transitions and header customization.", "const Stack = createStackNavigator();\n<Stack.Navigator><Stack.Screen name=\"Home\" component={HomeScreen} /></Stack.Navigator>"],
+   "Tab": ["Tab navigator provides bottom or top tab navigation with icons and labels. Each tab maintains its own navigation state.", "const Tab = createBottomTabNavigator();\n<Tab.Navigator><Tab.Screen name=\"Home\" component={HomeScreen} /></Tab.Navigator>"],
+   "Drawer": ["Drawer navigator creates a side menu that slides in from the left, supporting nested navigators and custom drawer content.", "const Drawer = createDrawerNavigator();\n<Drawer.Navigator><Drawer.Screen name=\"Home\" component={HomeScreen} /></Drawer.Navigator>"]
+ },
+ "State & Data": {
+   "useState": ["useState is a React hook that adds local state to functional components, returning a state variable and a setter function.", "const [count, setCount] = useState(0);\n<Button title=\"Press\" onPress={() => setCount(count + 1)} />"],
+   "AsyncStorage": ["AsyncStorage is an unencrypted, asynchronous key-value storage system for persisting data across app restarts on both iOS and Android.", "import AsyncStorage from '@react-native-async-storage/async-storage';\nawait AsyncStorage.setItem('key', 'value');\nconst value = await AsyncStorage.getItem('key');"],
+   "Redux": ["Redux is a predictable state container with a single store, actions, and reducers. React-Redux connects components to the store.", "const reducer = (state = { count: 0 }, action) => action.type === 'INCREMENT' ? { count: state.count + 1 } : state;"]
+ },
+ "Networking": {
+   "fetch": ["The Fetch API provides a native way to make HTTP requests in React Native. It returns promises and supports JSON, text, and binary responses.", "fetch('https://api.example.com/data')\n  .then(res => res.json())\n  .then(data => console.log(data));"],
+   "Axios": ["Axios is a promise-based HTTP client with interceptors, automatic JSON parsing, and request cancellation. It provides a cleaner API than fetch.", "const response = await axios.get('https://api.example.com/users');\nconsole.log(response.data);"],
+   "WebSocket": ["WebSocket enables full-duplex real-time communication over a persistent TCP connection, ideal for chat apps, live updates, and gaming.", "const ws = new WebSocket('ws://example.com/socket');\nws.onmessage = (e) => console.log(e.data);"]
+ },
+ "Device APIs": {
+   "Camera": ["React Native Camera provides device camera access with support for photos, videos, barcode scanning, and custom camera UI.", "import { Camera } from 'react-native-camera';\n<Camera ref={ref => setCamera(ref)} type={Camera.Constants.Type.back} />"],
+   "Location": ["Geolocation APIs provide device location through GPS or network positioning, supporting high-accuracy and background location tracking.", "import Geolocation from '@react-native-community/geolocation';\nGeolocation.getCurrentPosition(pos => console.log(pos.coords.latitude));"],
+   "Push Notifications": ["Push notifications allow sending alerts to user devices even when the app is closed. Firebase Cloud Messaging is the standard solution.", "import messaging from '@react-native-firebase/messaging';\nconst token = await messaging().getToken();"]
+ },
+ "Performance": {
+   "FlatList": ["FlatList efficiently renders large lists by virtualizing rows, recycling components, and rendering only visible items. It supports headers, footers, and pull-to-refresh.", "<FlatList data={data} renderItem={({item}) => <Text>{item.name}</Text>} keyExtractor={item => item.id} />"],
+   "Optimization": ["React Native optimization includes using PureComponent, useMemo, avoiding inline functions in render, and minimizing re-renders with React.memo.", "const ListItem = React.memo(({ title }) => <Text>{title}</Text>);"],
+   "Hermes": ["Hermes is an open-source JavaScript engine optimized for React Native, reducing app startup time, memory usage, and APK/IPA size.", "// Enable in android/app/build.gradle\nproject.ext.react = [enableHermes: true]"]
+ },
+ "Deployment": {
+   "iOS": ["iOS deployment requires an Apple Developer account, Xcode configuration, and provisioning profiles. The app is archived and uploaded via Xcode or Transporter.", "xcodebuild -workspace App.xcworkspace -scheme App -archivePath build/App.xcarchive archive"],
+   "Android": ["Android deployment generates a signed APK or AAB using keystore credentials. The build is created with Gradle and uploaded to the Play Console.", "cd android && ./gradlew bundleRelease\n# AAB file generated at android/app/build/outputs/bundle/release/"],
+   "App Store": ["App Store Connect manages app metadata, screenshots, pricing, and release. Apps undergo Apple review before publication.", "// Use Transporter or Xcode to upload, then manage via App Store Connect"],
+   "Play Store": ["Google Play Console handles Android publishing, beta testing, staged rollouts, and in-app products. AAB format is now required for new apps.", "// Upload AAB to Play Console > Production > Create new release"]
+ }
+}
