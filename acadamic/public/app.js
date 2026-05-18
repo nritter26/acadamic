@@ -3479,8 +3479,8 @@ setMode = function(lang) {
 
     const roadmapBtn = document.getElementById('roadmap-btn');
     if (roadmapBtn) {
-        roadmapBtn.style.display = (lang === 'js' || lang === 'ts' || lang === 'go' || lang === 'cpp') ? '' : 'none';
-        roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : lang === 'go' ? 'View Go Roadmap' : lang === 'cpp' ? 'View C++ Roadmap' : 'View JavaScript Roadmap';
+        roadmapBtn.style.display = (lang === 'js' || lang === 'ts' || lang === 'go' || lang === 'cpp' || lang === 'swift') ? '' : 'none';
+        roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : lang === 'go' ? 'View Go Roadmap' : lang === 'cpp' ? 'View C++ Roadmap' : lang === 'swift' ? 'View Swift Roadmap' : 'View JavaScript Roadmap';
     }
 
     if (lang !== 'challenge') {
@@ -3764,7 +3764,7 @@ function renderRoadmap(container, lang) {
     const langData = courseData[lang];
     if (!langData) return;
 
-    const langName = lang === 'ts' ? 'TypeScript' : lang === 'go' ? 'Go' : lang === 'cpp' ? 'C++' : 'JavaScript';
+    const langName = lang === 'ts' ? 'TypeScript' : lang === 'go' ? 'Go' : lang === 'cpp' ? 'C++' : lang === 'swift' ? 'Swift' : 'JavaScript';
     const titleEl = document.getElementById('roadmapTitle');
     if (titleEl) titleEl.textContent = langName + ' Roadmap';
 
