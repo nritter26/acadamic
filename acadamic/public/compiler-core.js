@@ -27,7 +27,10 @@ const COMPILER = (() => {
     gamedev:{ lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
   };
 
-  const KEYWORD_SETS = LANG_KEYWORDS || {};
+  function _getKeywords(lang) {
+    const kw = (typeof LANG_KEYWORDS !== 'undefined' ? LANG_KEYWORDS : {});
+    return kw[lang] || [];
+  }
 
   const TOKEN_TYPES = {
     KEYWORD: 'keyword', IDENTIFIER: 'identifier', NUMBER: 'number',
@@ -44,7 +47,7 @@ const COMPILER = (() => {
   // ── Tokenizer ──
   function tokenize(code, lang) {
     const cfg = LANG_CONFIG[lang] || LANG_CONFIG.js;
-    const keywords = KEYWORD_SETS[lang] || [];
+    const keywords = _getKeywords(lang);
     const kwLower = keywords.map(k => k.toLowerCase());
     const tokens = [];
     let i = 0;

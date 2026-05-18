@@ -3183,7 +3183,7 @@ function highlightCode(code, lang) {
 function compilerRunPipeline(stage) {
     const editor = document.getElementById('editor');
     const code = editor ? editor.value : '';
-    const lang = currentLang === 'compiler' ? 'js' : currentLang;
+    const lang = currentLang === 'compiler' ? (window._pipelineLang || 'js') : currentLang;
     const result = COMPILER.runPipeline(code, lang);
     const content = document.getElementById('cp-pipeline-content');
 
@@ -3504,11 +3504,23 @@ setMode = function(lang) {
         document.getElementById('schemaDesigner').classList.remove('open');
         document.getElementById('editor').style.display = 'block';
         currentLang = 'compiler';
+        window._pipelineLang = 'js';
         document.getElementById('app').className = 'compiler-mode';
         document.getElementById('header-title').innerText = 'COMPILER';
         document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
         const navBtn = document.getElementById('nav-compiler');
         if (navBtn) navBtn.classList.add('active');
+        const cb = document.getElementById('compiler-buttons');
+        if (cb && !cb.querySelector('.pipeline-lang-picker')) {
+            const langs = [
+                ['js','JS'],['py','Python'],['go','Go'],['rs','Rust'],['ts','TypeScript'],
+                ['c','C'],['cpp','C++'],['cs','C#'],['kt','Kotlin'],['swift','Swift'],
+                ['zig','Zig'],['pg','SQL'],['dk','Docker'],['git','Git'],
+                ['mongodb','MongoDB'],['gamedev','GameDev']
+            ];
+            const opts = langs.map(([v,l]) => `<option value="${v}"${v==='js'?' selected':''}>${l}</option>`).join('');
+            cb.insertAdjacentHTML('afterbegin', `<select class="pipeline-lang-picker" onchange="window._pipelineLang=this.value">${opts}</select>`);
+        }
         const langData = courseData.compiler || {};
         let html = '';
         for (const phase in langData) {
