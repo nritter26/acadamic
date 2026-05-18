@@ -2918,6 +2918,8 @@ setMode = function(lang) {
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
 
+    document.querySelectorAll('.header-extra-tabs .game-nav-btn').forEach(b => b.classList.remove('active'));
+
     roadmapRendered = false;
     const roadmapBtn = document.getElementById('roadmap-btn');
     if (roadmapBtn) {

@@ -314,7 +314,7 @@ function loadFirstTechStackTopic(provider) {
 function renderTechStackTopics() {
     const list = document.getElementById('topic-list');
     let html = `<div class="techstack-bar">`;
-    const tsKeys = Object.keys(techStackProviderNames);
+    const tsKeys = Object.keys(techStackProviderNames).sort((a, b) => techStackProviderNames[a].localeCompare(techStackProviderNames[b]));
     for (const key of tsKeys) {
         const active = key === techStackProvider ? ' active' : '';
         const color = techStackProviderColors[key] || '#94a3b8';
