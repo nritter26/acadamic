@@ -1002,5 +1002,5 @@ app.get('/api/courses', (req, res) => {
 
 // ── Start ──
 app.listen(PORT, () => {
-    console.log(`Doge's Lab running at http://localhost:${PORT}`);
+    console.log(`Kodex's Lab running at http://localhost:${PORT}`);
 });

@@ -1,5 +1,5 @@
 const LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
     rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
     swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',

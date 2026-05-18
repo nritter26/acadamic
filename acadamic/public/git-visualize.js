@@ -286,6 +286,8 @@ function processGitCommand(input) {
             case 'commit': result = gitCommit(args); break;
             case 'branch': result = gitBranch(args); break;
             case 'checkout': result = gitCheckout(args); break;
+            case 'switch': result = gitSwitch(args); break;
+            case 'restore': result = gitRestore(args); break;
             case 'merge': result = gitMerge(args); break;
             case 'rebase': result = gitRebase(args); break;
             case 'cherry-pick': result = gitCherryPick(args); break;
@@ -297,7 +299,7 @@ function processGitCommand(input) {
             case 'tag': result = gitTag(args); break;
             case 'stash': result = gitStash(args); break;
             case 'help': result = helpText(); break;
-            default: result = '// Unknown git command: ' + cmd + '\n// Try: init, commit, branch, checkout, merge, rebase, cherry-pick, log, status, diff, reset, revert, tag, stash';
+            default: result = '// Unknown git command: ' + cmd + '\n// Try: init, commit, branch, checkout, switch, restore, merge, rebase, cherry-pick, log, status, diff, reset, revert, tag, stash';
         }
         updateGraph();
         return result;
@@ -393,6 +395,16 @@ function gitCheckout(args) {
         return '// HEAD is now at ' + shortHash(commit.id) + ' ' + commit.msg;
     }
     return '// error: pathspec "' + target + '" did not match any file(s) known to git';
+}
+
+function gitSwitch(args) {
+    if (args.length === 0) return '// error: git switch <branch> or git switch -c <branch>';
+    if (args[0] === '-c') return gitCheckout(['-b', args[1]]);
+    return gitCheckout([args[0]]);
+}
+
+function gitRestore(args) {
+    return '// Working directory changes are not tracked in this simulator.\n// Use checkout or switch to move between commits.';
 }
 
 function gitMerge(args) {
@@ -602,7 +614,7 @@ function gitStash(args) {
 }
 
 function helpText() {
-    return '// Git commands:\n//   init, commit -m "msg", branch, branch <name>,\n//   branch -d <name>, checkout <branch>, checkout -b <name>,\n//   merge <branch>, rebase <branch>, cherry-pick <id>,\n//   log --oneline, status, diff, reset --hard <id>,\n//   revert <id>, tag <name>, stash, stash pop';
+    return '// Git commands:\n//   init, commit -m "msg", branch, branch <name>,\n//   branch -d <name>, checkout <branch>, checkout -b <name>,\n//   switch <branch>, switch -c <branch>, restore,\n//   merge <branch>, rebase <branch>, cherry-pick <id>,\n//   log --oneline, status, diff, reset --hard <id>,\n//   revert <id>, tag <name>, stash, stash pop';
 }
 
 function computeLayout(state) {
@@ -701,7 +713,7 @@ function generateSVG(state, layout, existingIds) {
         svg += '<g class="' + cls + '" data-id="' + commit.id + '" data-depth="' + depth + '" style="animation-delay:' + delay + '" onclick="handleCommitClick(\'' + commit.id + '\')" onmouseenter="handleCommitHover(\'' + commit.id + '\')" onmouseleave="handleCommitUnhover()" style="cursor:pointer;">';
         svg += '<circle cx="' + pos.x + '" cy="' + pos.y + '" r="' + (parentCount > 1 ? 18 : 16) + '" fill="#0f172a" stroke="' + color + '" stroke-width="2.5" class="git-commit-circle"/>';
         svg += '<text x="' + pos.x + '" y="' + (pos.y + 1) + '" fill="#f1f5f9" font-size="7" text-anchor="middle" dominant-baseline="central" font-weight="700" font-family="monospace">' + shortHash(commit.id) + '</text>';
-        svg += '<text x="' + (pos.x + 30) + '" y="' + (pos.y + 2) + '" fill="#cbd5e1" font-size="8" dominant-baseline="central">' + commit.msg.substring(0, 35) + '</text>';
+        svg += '<text x="' + (pos.x + 30) + '" y="' + (pos.y + 14) + '" fill="#cbd5e1" font-size="8" dominant-baseline="central">' + commit.msg.substring(0, 35) + '</text>';
         svg += '</g>';
         if (state.tags) {
             for (const [tagName, tagId] of Object.entries(state.tags)) {

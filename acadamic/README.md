@@ -1,4 +1,4 @@
-# Doge's Lab: Full Mastery Edition
+# Kodex's Lab: Full Mastery Edition
 
 An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 45+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, and 16 mini-games.
 
@@ -259,7 +259,7 @@ Per-user profiles track progress using SM-2 spaced repetition:
 - Concept mastery: per-language proficiency scoring
 - Recommendations: due reviews → weakest concepts → next topic in sequence
 
-Profiles are stored as JSON in `data/learners/` with fallback to `/tmp/doges-lab-learners/`.
+Profiles are stored as JSON in `data/learners/` with fallback to `/tmp/kodex-lab-learners/`.
 
 ## SQL Execution (Database Tab)
 

@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 
 const LEARNER_DIR = path.join(__dirname, '..', 'data', 'learners');
-const FALLBACK_DIR = path.join(os.tmpdir(), 'doges-lab-learners');
+const FALLBACK_DIR = path.join(os.tmpdir(), 'koded-learners');
 
 let activeLearnerDir = LEARNER_DIR;
 
