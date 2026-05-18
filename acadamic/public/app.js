@@ -3478,7 +3478,10 @@ setMode = function(lang) {
     document.getElementById('compiler-buttons').style.display = 'none';
 
     const roadmapBtn = document.getElementById('roadmap-btn');
-    if (roadmapBtn) roadmapBtn.style.display = lang === 'js' ? '' : 'none';
+    if (roadmapBtn) {
+        roadmapBtn.style.display = (lang === 'js' || lang === 'ts') ? '' : 'none';
+        roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : 'View JavaScript Roadmap';
+    }
 
     if (lang !== 'challenge') {
         const schemaBtn = document.getElementById('schema-btn');
@@ -3742,7 +3745,6 @@ function toggleWorkspace() {
 }
 
 // ── ROADMAP VIEW ──
-let roadmapRendered = false;
 
 function toggleRoadmapView() {
     const overlay = document.getElementById('roadmapOverlay');
@@ -3752,16 +3754,19 @@ function toggleRoadmapView() {
     overlay.classList.toggle('open');
     if (btn) btn.classList.toggle('active', !wasOpen);
 
-    if (!wasOpen && !roadmapRendered) {
+    if (!wasOpen) {
         const body = document.getElementById('roadmapBody');
-        renderRoadmap(body);
-        roadmapRendered = true;
+        renderRoadmap(body, currentLang);
     }
 }
 
-function renderRoadmap(container) {
-    const langData = courseData.js;
+function renderRoadmap(container, lang) {
+    const langData = courseData[lang];
     if (!langData) return;
+
+    const langName = lang === 'ts' ? 'TypeScript' : 'JavaScript';
+    const titleEl = document.getElementById('roadmapTitle');
+    if (titleEl) titleEl.textContent = langName + ' Roadmap';
 
     const phases = Object.keys(langData);
     const nodeW = 180, nodeH = 36, gap = 30;
@@ -3785,7 +3790,7 @@ function renderRoadmap(container) {
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgH}">`;
     svg += `<style>.rn { cursor:pointer; } .rn:hover { opacity:0.8; } .rn rect { rx:6; ry:6; } .rn text { font-size:11px; font-weight:600; fill:#fff; text-anchor:middle; dominant-baseline:central; pointer-events:none; }</style>`;
 
-    svg += `<text x="${svgW/2}" y="20" text-anchor="middle" fill="#f1f5f9" font-size="16" font-weight="800">JavaScript Roadmap</text>`;
+    svg += `<text x="${svgW/2}" y="20" text-anchor="middle" fill="#f1f5f9" font-size="16" font-weight="800">${langName} Roadmap</text>`;
 
     let y = 50;
     for (let pi = 0; pi < phases.length; pi++) {
