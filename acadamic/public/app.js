@@ -2911,6 +2911,8 @@ function formatSize(bytes) {
     return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
 }
 
+let _prevModeForApi = null;
+
 setMode = function(lang) {
     document.getElementById('schemaDesigner').classList.remove('open');
     document.getElementById('editor').style.display = 'block';
@@ -2944,7 +2946,11 @@ setMode = function(lang) {
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
-    if (lang === 'api') { initAPI(); updateAISuggestions(); return; }
+    if (lang === 'api') { initAPI(); updateAISuggestions(); 
+        const apiBtn = document.getElementById('api-toggle-btn');
+        if (apiBtn) { apiBtn.style.display = ''; apiBtn.textContent = 'API ▾'; }
+        return; 
+    }
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';
         document.getElementById('output').style.display = 'none';
@@ -3097,6 +3103,13 @@ setMode = function(lang) {
 
     updateTopicDisplay();
 
+    // Show API toggle button only in backend mode
+    const apiBtn = document.getElementById('api-toggle-btn');
+    if (apiBtn) {
+        apiBtn.style.display = lang === 'backend' ? '' : 'none';
+        if (lang === 'backend') apiBtn.textContent = 'API ▸';
+    }
+
     updateAISuggestions();
     loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
 };
@@ -3200,6 +3213,20 @@ function toggleWorkspace() {
         appEl.classList.remove('hide-workspace');
         appEl.classList.add('workspace-open');
         if (btn) btn.textContent = 'Editor ▾';
+    }
+}
+
+// ── API CLIENT TOGGLE ──
+function toggleAPIClient() {
+    const btn = document.getElementById('api-toggle-btn');
+    if (currentLang === 'api') {
+        const prev = _prevModeForApi || 'backend';
+        _prevModeForApi = null;
+        setMode(prev);
+        if (btn) btn.textContent = 'API ▸';
+    } else {
+        _prevModeForApi = currentLang;
+        setMode('api');
     }
 }
 
