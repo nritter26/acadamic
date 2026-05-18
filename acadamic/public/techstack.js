@@ -8,6 +8,8 @@ const techStackProviderNames = {
     prisma: 'Prisma', rnative: 'React Native', flutter: 'Flutter',
     cypress: 'Cypress', playwright: 'Playwright', k8s: 'Kubernetes',
     terraform: 'Terraform',
+    bootstrap: 'Bootstrap', django: 'Django', flask: 'Flask',
+    fastapi: 'FastAPI', spring: 'Spring',
 };
 
 const techStackProviderColors = {
@@ -18,6 +20,8 @@ const techStackProviderColors = {
     prisma: '#2D3748', rnative: '#61DAFB', flutter: '#02569B',
     cypress: '#17202C', playwright: '#2EAD33', k8s: '#326CE5',
     terraform: '#7B42BC',
+    bootstrap: '#7952B3', django: '#092E20', flask: '#000000',
+    fastapi: '#009688', spring: '#6DB33F',
 };
 
 const techStackIntro = {
@@ -181,6 +185,41 @@ const techStackIntro = {
         usedFor: 'Provisioning and managing cloud infrastructure (AWS, Azure, GCP), version-controlling infrastructure state, automating multi-cloud deployments, and managing infrastructure lifecycles.',
         creator: 'Mitchell Hashimoto at HashiCorp, first released in July 2014. Terraform pioneered the "infrastructure as code" approach and is now an industry standard for cloud provisioning.',
         code: '# main.tf\nprovider "aws" {\n  region = "us-west-2"\n}\n\nresource "aws_s3_bucket" "my_bucket" {\n  bucket = "my-tf-bucket"\n  tags = {\n    Name = "My bucket"\n  }\n}\n\n# Run: terraform init && terraform apply'
+    },
+    bootstrap: {
+        name: 'Bootstrap',
+        what: 'Bootstrap is the world\'s most popular front-end component library, providing a responsive grid system, pre-built UI components, and utility classes. It uses a mobile-first approach with a 12-column grid, five responsive breakpoints, and Sass variables for customization. Bootstrap 5 dropped jQuery dependency and uses vanilla JavaScript for interactive components.',
+        usedFor: 'Building responsive websites quickly, prototyping interfaces, creating consistent UI across browsers, and developing admin dashboards. Bootstrap is ideal for projects that need a solid, battle-tested design system out of the box.',
+        creator: 'Mark Otto and Jacob Thornton at Twitter. Originally released in August 2011 as an internal tool, it was open-sourced and became the most starred project on GitHub.',
+        code: '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css" rel="stylesheet">\n<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"></script>\n\n<div class="container mt-5">\n  <div class="row">\n    <div class="col-12 col-md-6">\n      <div class="card">\n        <div class="card-body">\n          <h5 class="card-title">Bootstrap Card</h5>\n          <p class="card-text">Built with utility classes and components.</p>\n          <a href="#" class="btn btn-primary">Learn More</a>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>'
+    },
+    django: {
+        name: 'Django',
+        what: 'Django is a high-level Python web framework that encourages rapid development with a clean, pragmatic design. It follows the "batteries-included" philosophy, providing an ORM, admin panel, authentication system, forms, templates, and security features out of the box. Django follows the MTV (Model-Template-View) architectural pattern and emphasizes DRY principles.',
+        usedFor: 'Building database-driven web applications, content management systems, REST APIs (with DRF), e-commerce platforms, and data-driven websites. Django is popular for its security features and rapid development capabilities.',
+        creator: 'Adrian Holovaty and Simon Willison at the Lawrence Journal-World newspaper. First released in 2005 and named after the jazz guitarist Django Reinhardt. Now maintained by the Django Software Foundation.',
+        code: '# Install: pip install django\n# Create: django-admin startproject mysite\n\n# views.py\nfrom django.http import HttpResponse\n\ndef home(request):\n    return HttpResponse("<h1>Hello, Django!</h1>")\n\n# urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path("", views.home, name="home"),\n]\n\n# Run: python manage.py runserver'
+    },
+    flask: {
+        name: 'Flask',
+        what: 'Flask is a lightweight Python web microframework that provides the essentials for building web applications. It is minimal, flexible, and unopinionated — you choose your tools (ORM, template engine, etc.). Flask is built on Werkzeug (WSGI toolkit) and Jinja2 (template engine), making it ideal for small to medium projects, APIs, and microservices.',
+        usedFor: 'Building REST APIs, microservices, web application prototypes, and small to medium web applications. Flask is popular for its simplicity, flexibility, and extensive ecosystem of extensions.',
+        creator: 'Armin Ronacher, first released on April 1, 2010 as an April Fools joke that became a serious project. Part of the Pocoo team, now maintained by the Pallets project.',
+        code: '# Install: pip install flask\n\nfrom flask import Flask\n\napp = Flask(__name__)\n\n@app.route("/")\ndef hello():\n    return "<h1>Hello, Flask!</h1>"\n\nif __name__ == "__main__":\n    app.run(debug=True)\n\n# Run: python app.py'
+    },
+    fastapi: {
+        name: 'FastAPI',
+        what: 'FastAPI is a modern, high-performance Python web framework for building APIs with Python 3.8+ based on standard Python type hints. It automatically generates OpenAPI (Swagger) documentation, provides async/await support, and includes a powerful dependency injection system. FastAPI is one of the fastest Python frameworks, rivaling Node.js and Go in performance.',
+        usedFor: 'Building REST APIs, microservices, real-time applications with WebSocket support, and high-performance web services. FastAPI excels in projects requiring automatic API documentation, request validation, and async performance.',
+        creator: 'Sebastián Ramírez (tiangolo), first released in 2018. Built on Starlette (web toolkit) and Pydantic (data validation). FastAPI has rapidly grown to become one of the most popular Python web frameworks.',
+        code: '# Install: pip install fastapi[all]\n\nfrom fastapi import FastAPI\n\napp = FastAPI(title="My API")\n\n@app.get("/")\ndef read_root():\n    return {"message": "Hello, FastAPI!"}\n\n@app.get("/items/{item_id}")\ndef read_item(item_id: int, q: str = None):\n    return {"item_id": item_id, "q": q}\n\n# Run: uvicorn main:app --reload\n# Docs: http://127.0.0.1:8000/docs'
+    },
+    spring: {
+        name: 'Spring',
+        what: 'Spring is a comprehensive Java framework for building enterprise applications. Spring Boot simplifies development with auto-configuration, embedded servers, and starter dependencies. Key modules include Spring Core (DI/IoC), Spring MVC (web), Spring Data (databases), Spring Security (auth), and Spring Cloud (microservices).',
+        usedFor: 'Building enterprise Java applications, REST APIs, microservices, batch processing, and cloud-native applications. Spring Boot is the de facto standard for Java web development in enterprise environments.',
+        creator: 'Rod Johnson, first released in 2003 as a lighter alternative to Enterprise JavaBeans. Spring Boot was later created by Phil Webb and the Pivotal team in 2014 to simplify Spring configuration. Now maintained by VMware.',
+        code: '// Main application\nimport org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\nimport org.springframework.web.bind.annotation.*;\n\n@SpringBootApplication\n@RestController\npublic class DemoApplication {\n    public static void main(String[] args) {\n        SpringApplication.run(DemoApplication.class, args);\n    }\n\n    @GetMapping("/")\n    public String hello() {\n        return "Hello, Spring!";\n    }\n}\n\n// Run: mvn spring-boot:run'
     }
 };
 
