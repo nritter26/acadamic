@@ -20,7 +20,7 @@ interface ReviewResult {
   source?: 'llm' | 'static';
 }
 
-type LangKey = 'js' | 'ts' | 'py' | 'go' | 'rs' | 'sql';
+type LangKey = 'js' | 'ts' | 'py' | 'go' | 'rs' | 'sql' | 'c' | 'cpp' | 'cs' | 'kt' | 'swift';
 
 const KEYWORD_ISSUES: Record<LangKey, readonly KeywordPattern[]> = {
   js: [
@@ -36,6 +36,9 @@ const KEYWORD_ISSUES: Record<LangKey, readonly KeywordPattern[]> = {
     { pattern: /new\s+(Array|Object|RegExp)\s*\(/, message: 'Use literal syntax: `[]`, `{}`, `/pattern/` instead of `new Array()`, etc.', severity: 'style' },
     { pattern: /\bString\s*\(/, message: 'Use `String(value)` or template literals `` `${value}` `` for conversion.', severity: 'style' },
     { pattern: /\bNumber\s*\(/, message: 'Use `Number(value)` or unary `+value` for numeric conversion.', severity: 'style' },
+    { pattern: /\basync\s+function\b(?![\s\S]*\bawait\b)/, message: 'Async function without `await` inside — either use `await` or remove `async`.', severity: 'warning' as const },
+    { pattern: /\.then\([^)]*\)\s*\.catch\(/, message: 'Mix of `await` and `.then()/.catch()` — choose one style (prefer `async/await` with try/catch).', severity: 'style' as const },
+    { pattern: /new\s+Promise\b(?![\s\S]*\.catch\b)/, message: 'Promise without `.catch()` — unhandled rejections crash the process.', severity: 'warning' as const },
   ],
   ts: [
     { pattern: /\bany\b(?!\s*[)};,\]])/, message: 'Avoid `any` — use proper types or `unknown` with type guards.', severity: 'warning' },
@@ -87,6 +90,49 @@ const KEYWORD_ISSUES: Record<LangKey, readonly KeywordPattern[]> = {
     { pattern: /SELECT\s+\*/i, message: '`SELECT *` can break on schema changes — list columns explicitly.', severity: 'style' },
     { pattern: /DELETE\s+FROM\s+\w+\s*(?:;|$)/i, message: 'Unconditional DELETE without WHERE clause will remove all rows.', severity: 'error' },
     { pattern: /UPDATE\s+\w+\s+SET(?!.*\bWHERE\b)/is, message: 'Unconditional UPDATE without WHERE clause will modify all rows.', severity: 'error' },
+  ],
+  cpp: [
+    { pattern: /malloc\s*\(/, message: 'In C++, prefer `new`/`make_unique`/`make_shared` over `malloc`.', severity: 'warning' as const },
+    { pattern: /free\s*\(/, message: 'In C++, use `delete`/`delete[]` or smart pointers instead of `free`.', severity: 'warning' as const },
+    { pattern: /printf\s*\(/, message: 'In C++, prefer `std::cout` or `fmt::print` over `printf`.', severity: 'style' as const },
+    { pattern: /\bgoto\s+/, message: '`goto` makes code harder to follow — use structured control flow.', severity: 'style' as const },
+    { pattern: /\bnew\b(?!.*\bdelete\b)/, message: '`new` without matching `delete` causes memory leaks — use smart pointers (unique_ptr/shared_ptr).', severity: 'warning' as const },
+    { pattern: /using\s+namespace\s+std\b/, message: '`using namespace std` pollutes the namespace — prefer `std::` prefix or selective `using` declarations.', severity: 'style' as const },
+  ],
+  c: [
+    { pattern: /malloc\s*\([^)]*\)(?!.*free)/, message: '`malloc` without a matching `free` causes memory leaks.', severity: 'error' as const },
+    { pattern: /gets\s*\(/, message: '`gets()` is unsafe and removed in C11 — use `fgets()` with buffer size.', severity: 'error' as const },
+    { pattern: /strcpy\s*\(/, message: '`strcpy()` does not check buffer bounds — use `strncpy()` or `snprintf()`.', severity: 'warning' as const },
+    { pattern: /strcat\s*\(/, message: '`strcat()` does not check buffer bounds — use `strncat()` with size limit.', severity: 'warning' as const },
+    { pattern: /sprintf\s*\(/, message: '`sprintf()` can overflow — use `snprintf()` with buffer size.', severity: 'warning' as const },
+    { pattern: /\bgoto\s+/, message: '`goto` makes code harder to follow — use structured control flow (if/else, loops).', severity: 'style' as const },
+    { pattern: /scanf\s*\([^)]*%[^n]/, message: '`scanf()` without field width specifiers can overflow buffers.', severity: 'warning' as const },
+    { pattern: /printf\s*\([^)]*%n/, message: '`%n` in printf writes to memory — security risk and undefined behavior.', severity: 'error' as const },
+  ],
+  cs: [
+    { pattern: /async\s+void\b/, message: '`async void` can\'t be awaited and crashes on exception — use `async Task` instead.', severity: 'error' as const },
+    { pattern: /\bvar\s+\w+\s*=\s*null\b/, message: '`var` with `null` resolves to `object` — specify the type explicitly.', severity: 'warning' as const },
+    { pattern: /\.Result\b/, message: '`.Result` blocks the thread and can cause deadlocks — use `await` instead.', severity: 'warning' as const },
+    { pattern: /\.Wait\(\)/, message: '`.Wait()` blocks the thread and can cause deadlocks — use `await` instead.', severity: 'warning' as const },
+    { pattern: /\bthrow\s+new\s+Exception\b/, message: 'Throwing the base `Exception` type is too broad — use a more specific exception type.', severity: 'style' as const },
+    { pattern: /foreach\s*\([^)]+\.Select\b/, message: 'LINQ `.Select()` inside `foreach` adds overhead — query once and materialize with `.ToList()`.', severity: 'style' as const },
+    { pattern: /\"\s*\+\s*[^\"]/, message: 'String concatenation in loops is inefficient — use `StringBuilder`.', severity: 'style' as const },
+  ],
+  kt: [
+    { pattern: /\w+\s*!!\b/, message: '`!!` (double-bang) throws NullPointerException — use safe calls `?.` or Elvis `?:` instead.', severity: 'error' as const },
+    { pattern: /\blateinit\s+var\b/, message: '`lateinit var` crashes if accessed before init — consider `by lazy` or nullable with default.', severity: 'warning' as const },
+    { pattern: /\bas\b(?!\?)/, message: 'Unsafe cast `as` throws ClassCastException — use `as?` for safe casting.', severity: 'warning' as const },
+    { pattern: /\bnull\s*!=\s*\w+/, message: 'Use `?.let { }` or Elvis `?:` instead of manual null checks for idiomatic Kotlin.', severity: 'style' as const },
+    { pattern: /\bcompanion\s+object\b/, message: '`companion object` members are effectively static — consider top-level declarations.', severity: 'style' as const },
+  ],
+  swift: [
+    { pattern: /\w+\s*!\s*\./, message: 'Force unwrap `!` crashes on nil — use `if let` or `guard let` for safe unwrapping.', severity: 'error' as const },
+    { pattern: /\w+\s*!\s*\)/, message: 'Force unwrap `!` crashes on nil — use optional binding instead.', severity: 'error' as const },
+    { pattern: /\bImplicitlyUnwrappedOptional\b/, message: 'Implicitly unwrapped optionals are unsafe — use regular optionals with `?`.', severity: 'warning' as const },
+    { pattern: /\btry!\s*/, message: '`try!` crashes on error — use `try?` or `do/catch` for proper error handling.', severity: 'error' as const },
+    { pattern: /\bself\s*!\s*/, message: 'Force unwrapping `self` is dangerous — use `guard let self = self else { return }`.', severity: 'warning' as const },
+    { pattern: /\bclass\s+\w+\s*:\s*NSObject\b/, message: 'Inheriting from `NSObject` is unnecessary for pure Swift classes.', severity: 'style' as const },
+    { pattern: /\bdispatch_async\b/, message: '`dispatch_async` is outdated — use Swift Concurrency (`async/await`) or `Task`.', severity: 'warning' as const },
   ],
 };
 

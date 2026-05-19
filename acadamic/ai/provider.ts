@@ -1,4 +1,6 @@
 import config from './config';
+import { runKeywordTutor } from './tutor-keywords';
+import { getTinyLLMResponse } from './tiny-llm';
 
 interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -224,11 +226,65 @@ async function callProvider(
   return provider.responseParser(data);
 }
 
+export async function runKeywordTutorFn(
+  message: string,
+  lang?: string,
+  topic?: string,
+  code?: string,
+  hasError?: boolean,
+): Promise<string | null> {
+  const result = runKeywordTutor(message, lang, topic, code, hasError);
+  return result ? result.response : null;
+}
+
+export async function runHybridLLM(
+  messages: LLMMessage[],
+  onStream?: StreamCallback,
+  lang?: string,
+  topic?: string,
+  code?: string,
+  hasError?: boolean,
+): Promise<string | null> {
+  const lastMsg = messages[messages.length - 1]?.content || '';
+
+  const keywordResult = runKeywordTutor(lastMsg, lang, topic, code, hasError);
+  if (keywordResult) {
+    if (onStream) {
+      const words = keywordResult.response.split(/(\s+)/);
+      for (const word of words) {
+        onStream(word);
+        await new Promise(r => setTimeout(r, 10));
+      }
+    }
+    return keywordResult.response;
+  }
+
+  try {
+    const llmResponse = await getTinyLLMResponse(messages, onStream);
+    return llmResponse;
+  } catch (e) {
+    console.error('[hybrid] Tiny LLM fallback failed:', e);
+    return null;
+  }
+}
+
 export async function askLLM(
   messages: LLMMessage[],
   onStream?: StreamCallback,
+  options?: { lang?: string; topic?: string; code?: string; hasError?: boolean },
 ): Promise<string | null> {
   const { provider } = config;
+
+  if (provider === 'hybrid') {
+    return runHybridLLM(
+      messages,
+      onStream,
+      options?.lang,
+      options?.topic,
+      options?.code,
+      options?.hasError,
+    );
+  }
 
   if (provider === 'openai' && config.openai.apiKey) {
     return callProvider(PROVIDERS.openai, messages, onStream);

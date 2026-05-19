@@ -6,7 +6,7 @@ export interface ProviderConfig {
 }
 
 export interface AppConfig {
-  provider: 'keyword' | 'openai' | 'anthropic' | 'local';
+  provider: 'keyword' | 'openai' | 'anthropic' | 'local' | 'hybrid';
   openai: ProviderConfig;
   anthropic: ProviderConfig;
   local: ProviderConfig;
@@ -43,5 +43,13 @@ const config: AppConfig = {
 Keep explanations concise but thorough. Include code examples when relevant.
 The user is working through an interactive programming curriculum.`,
 };
+
+export function isHybrid(): boolean {
+  return config.provider === 'hybrid';
+}
+
+export function isKeyword(): boolean {
+  return config.provider === 'keyword';
+}
 
 export default config;

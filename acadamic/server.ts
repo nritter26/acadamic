@@ -11,13 +11,15 @@ import https from 'https';
 import { URL } from 'url';
 import os from 'os';
 
-import { askLLM } from './ai/provider';
+import { askLLM, runKeywordTutorFn } from './ai/provider';
+import { isModelLoaded } from './ai/tiny-llm';
 import { getCurriculumContext, getTopicContext, search as semanticSearch } from './ai/embeddings';
 import * as learner from './ai/learner';
 import { review as codeReview } from './ai/reviewer';
 import { generateExercise } from './ai/exercises';
 import * as database from './sql/database';
 import { LANG_NAMES } from './public/langConfig';
+import aiConfig from './ai/config';
 
 import type {
   ChatRequest, StreamChunk, ExplainRequest, ReviewRequest,
@@ -87,8 +89,8 @@ console.log('[DB] MySQL:', dbStatus.mysql?.available ? 'ready' : (dbStatus.mysql
 
 // ── Environment Validation ──
 const REQUIRED_FOR_AI = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'LOCAL_LLM_ENDPOINT'];
-const AI_PROVIDER = process.env.AI_PROVIDER || 'keyword';
-if (AI_PROVIDER !== 'keyword') {
+const AI_PROVIDER = process.env.AI_PROVIDER || 'hybrid';
+if (AI_PROVIDER !== 'keyword' && AI_PROVIDER !== 'hybrid') {
   const missingKeys = REQUIRED_FOR_AI.filter(key => !process.env[key]);
   if (missingKeys.length > 0) {
     console.warn(`[WARN] AI_PROVIDER="${AI_PROVIDER}" but missing: ${missingKeys.join(', ')}`);
@@ -99,6 +101,42 @@ if (!process.env.AI_SYSTEM_PROMPT) {
   console.log('[INFO] Using default AI_SYSTEM_PROMPT. Set AI_SYSTEM_PROMPT to customize.');
 }
 console.log(`[AI] Provider: ${AI_PROVIDER}, Model: ${process.env[AI_PROVIDER.toUpperCase() + '_MODEL'] || 'default'}`);
+
+// ── Ollama Auto-Detection ──
+let ollamaAvailable = false;
+let ollamaModels: { name: string; modified_at: string; size: number }[] = [];
+
+async function detectOllama(): Promise<void> {
+  try {
+    const response = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) });
+    if (response.ok) {
+      const data = await response.json() as { models?: { name: string; modified_at: string; size: number }[] };
+      ollamaModels = data.models || [];
+      ollamaAvailable = ollamaModels.length > 0;
+      if (ollamaAvailable) {
+        console.log(`[Ollama] Detected at http://localhost:11434`);
+        console.log(`[Ollama] Available models: ${ollamaModels.map(m => m.name).join(', ')}`);
+        if (AI_PROVIDER === 'keyword' || AI_PROVIDER === 'hybrid') {
+          process.env.AI_PROVIDER = 'local';
+          (aiConfig as { provider: string }).provider = 'local';
+          if (AI_PROVIDER === 'hybrid') {
+            console.log('[Ollama] Detected — overriding hybrid with local AI provider (set AI_PROVIDER in .env to override)');
+          } else {
+            console.log('[Ollama] Auto-enabled local AI provider (set AI_PROVIDER in .env to override)');
+          }
+        }
+      }
+    } else {
+      console.log('[Ollama] API responded but with error — not available');
+    }
+  } catch {
+    ollamaAvailable = false;
+    console.log('[Ollama] Not found at http://localhost:11434 — continuing with current AI provider');
+  }
+}
+
+// Run detection asynchronously (doesn't block server startup)
+detectOllama();
 
 // ── Rate limiting ──
 const rateLimitStore = new Map<string, number[]>();
@@ -178,8 +216,24 @@ app.get('/api/health', async (req: Request, res: Response) => {
     node: process.version,
     compilers,
     database: database.getStatus(),
+    ollama: { available: ollamaAvailable, models: ollamaModels.map(m => m.name) },
     rateLimit: { window: '60s', max: RATE_MAX },
-    endpoints: ['/api/progress', '/api/execute', '/api/analyze', '/api/chat', '/api/health', '/api/benchmark', '/api/courses', '/api/proxy']
+    endpoints: ['/api/progress', '/api/execute', '/api/analyze', '/api/chat', '/api/health', '/api/benchmark', '/api/courses', '/api/proxy', '/api/ollama/status']
+  });
+});
+
+app.get('/api/ollama/status', (req: Request, res: Response) => {
+  res.json({ available: ollamaAvailable, models: ollamaModels.map(m => m.name) });
+});
+
+// ── Tutor Status API ──
+app.get('/api/tutor/status', async (_req: Request, res: Response) => {
+  const modelLoaded = await isModelLoaded();
+  res.json({
+    mode: AI_PROVIDER,
+    model: process.env.TINY_LLM_MODEL || 'gte-small',
+    modelLoaded,
+    keywordReady: true,
   });
 });
 
@@ -549,7 +603,7 @@ interface LLMMsg {
   content: string;
 }
 
-function buildLLMMessages(
+async function buildLLMMessages(
   message: string,
   lang?: string,
   topic?: string,
@@ -558,9 +612,25 @@ function buildLLMMessages(
   output?: string,
   hasError?: boolean,
   history?: HistoryEntry[],
-): LLMMsg[] {
+  learnerId?: string,
+): Promise<LLMMsg[]> {
   const messages: LLMMsg[] = [];
   const context: string[] = [];
+
+  // Adaptive response depth: include learner mastery if available
+  if (learnerId && lang) {
+    try {
+      const mastery = await learner.getConceptMastery(learnerId, lang);
+      if (mastery && mastery.topics && mastery.topics.length > 0) {
+        const avgMastery = mastery.overall;
+        const weakTopics = mastery.topics.filter(t => t.completed && t.mastery < 60).map(t => t.topic);
+        let level = 'beginner';
+        if (avgMastery > 70) level = 'intermediate';
+        if (avgMastery > 85) level = 'expert';
+        context.push(`[Learner Profile] Current level: ${level}. Overall mastery: ${avgMastery}%. Weak areas: ${weakTopics.join(', ') || 'none'}. Adapt your response depth accordingly.`);
+      }
+    } catch {}
+  }
 
   if (topic) {
     const topicCtx = getTopicContext(topic, lang);
@@ -881,7 +951,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
         gotChunk = true;
         full += chunk;
         sseSend(chunk);
-      });
+      }, { lang, topic, code, hasError });
       if (gotChunk) {
         if (topic && lang) await learner.trackAttempt(lid, lang, topic);
         sseDone();
