@@ -22,7 +22,9 @@ import { LANG_NAMES } from './public/langConfig';
 import type {
   ChatRequest, StreamChunk, ExplainRequest, ReviewRequest,
   ExecuteRequest, AnalyzeRequest, LearnerTrackEvent, ProgressData,
-  ProxyRequest, ExerciseRequest, RunnerConfig, CompilerEntry,
+  ProxyRequest, ExerciseRequest, QuizGenerateRequest, QuizQuestion,
+  LearningPathRequest, LearningPathResponse, LearningPathStep,
+  RunnerConfig, CompilerEntry,
 } from './types';
 
 function detectLanguage(query: string): string | null {
@@ -671,6 +673,106 @@ app.post('/api/exercise', async (req: Request, res: Response) => {
 
   const exercise = await generateExercise(topic, lang || 'js', level || 'beginner');
   res.json(exercise);
+});
+
+// ── AI Quiz Generation ──
+app.post('/api/quiz/generate', async (req: Request, res: Response) => {
+  const { topic, lang, count, level } = req.body as QuizGenerateRequest;
+  if (!topic) { res.status(400).json({ error: 'No topic provided' }); return; }
+
+  const quizLang = lang || 'js';
+  const quizCount = Math.min(count || 3, 10);
+
+  try {
+    const context = await getCurriculumContext(topic, quizLang);
+    const prompt = `You are a programming quiz generator. Create ${quizCount} multiple-choice questions about "${topic}" in ${quizLang}.
+
+${context ? `Context from curriculum:\n${context}\n\n` : ''}
+Format your response as a JSON array of objects, each with:
+- "question": the question text
+- "options": array of 4 answer choices (strings)
+- "correctIndex": the 0-based index of the correct answer in options
+- "explanation": brief explanation of why the correct answer is right
+
+Make questions educational and appropriate for ${level || 'beginner'} level. Return ONLY valid JSON.`;
+
+    const reply = await askLLM([{ role: 'user', content: prompt }]);
+    if (reply) {
+      const jsonMatch = reply.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const questions = JSON.parse(jsonMatch[0]) as QuizQuestion[];
+        res.json({ questions: questions.slice(0, quizCount) });
+        return;
+      }
+    }
+    // Fallback: static quiz
+    const staticQuiz: QuizQuestion[] = [
+      { question: `What is the best way to declare a variable in ${quizLang}?`, options: ['Using the correct keyword', 'Without any keyword', 'With a type annotation', 'In a separate file'], correctIndex: 0, explanation: 'Always use the appropriate declaration keyword for the language.' },
+      { question: `How do you write a function in ${quizLang}?`, options: ['Using the function keyword or syntax', 'With a class', 'In a separate module', 'Using a macro'], correctIndex: 0, explanation: 'Functions are defined using the language-specific function syntax.' },
+    ];
+    res.json({ questions: staticQuiz, source: 'static' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to generate quiz' });
+  }
+});
+
+// ── Personalized Learning Path ──
+app.get('/api/learner/path', async (req: Request, res: Response) => {
+  const learnerId = getLearnerId(req);
+  const lang = (req.query.lang as string) || 'js';
+
+  try {
+    const learnerState = await learner.getLearner(learnerId);
+    const mastery = await learner.getConceptMastery(learnerId, lang);
+    const dueReviews = await learner.getDueReviews(learnerId);
+    const availablePhases: Record<string, Record<string, boolean>> = {};
+
+    // Try to get available phases from curriculum
+    try {
+      const langData = JSON.parse(fs.readFileSync(path.join(__dirname, 'content', `${lang}.json`), 'utf-8'));
+      for (const phase of Object.keys(langData)) {
+        availablePhases[phase] = Object.keys(langData[phase]).reduce((acc: Record<string, boolean>, t) => ({ ...acc, [t]: true }), {});
+      }
+    } catch {}
+
+    const recommendation = await learner.getNextRecommendedTopic(learnerId, lang, availablePhases);
+
+    const completedTopics = Object.entries(learnerState.topics)
+      .filter(([, v]) => v.completedAt && (v as any).key?.startsWith(`${lang}:`))
+      .map(([k]) => k);
+
+    const allTopics: LearningPathStep[] = [];
+    for (const [phase, topics] of Object.entries(availablePhases)) {
+      for (const topic of Object.keys(topics as Record<string, unknown>)) {
+        const key = `${lang}:${phase}:${topic}`;
+        const isCompleted = !!learnerState.topics[key]?.completedAt;
+        const isDue = dueReviews.some(r => r.key === key && r.key.startsWith(`${lang}:`));
+        let status: 'completed' | 'ready' | 'locked';
+        if (isCompleted) status = 'completed';
+        else if (recommendation && (recommendation.topic === topic || allTopics.length === 0)) status = 'ready';
+        else status = 'locked';
+        allTopics.push({ phase, topic, reason: isDue ? 'review-due' : 'next-in-sequence', status });
+      }
+    }
+
+    const weakAreas = mastery.topics
+      .filter(t => t.completed && t.mastery < 60)
+      .map(t => ({ topic: t.topic, mastery: t.mastery }));
+
+    const total = allTopics.length;
+    const completed = allTopics.filter(t => t.status === 'completed').length;
+
+    const result: LearningPathResponse = {
+      lang,
+      progress: { completed, total, percent: total > 0 ? Math.round(completed / total * 100) : 0 },
+      nextSteps: allTopics.filter(t => t.status !== 'locked').slice(0, 10),
+      weakAreas: weakAreas.slice(0, 5),
+    };
+    res.json(result);
+  } catch (e) {
+    console.error('learning path error:', (e as Error).message);
+    res.status(500).json({ error: 'Failed to generate learning path' });
+  }
 });
 
 // ── Learner State API ──

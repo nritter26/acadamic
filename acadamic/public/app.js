@@ -157,6 +157,7 @@ function loadTopic(phase, topic) {
     updateHighlight();
     document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
     setTimeout(suggestNextTopic, 100);
+    updateAIContext();
 }
 
 let filterDebounceTimer;
@@ -196,7 +197,7 @@ function setLevel(level) {
 function renderEngineBar() {
     const engineBarEl = document.getElementById('engine-bar');
     const engines = [
-        { id: 'all', label: 'All Engines' },
+        { id: 'all', label: 'Game Development' },
         { id: 'godot', label: 'Godot' },
         { id: 'unity', label: 'Unity' },
         { id: 'unreal', label: 'Unreal' },
@@ -217,15 +218,19 @@ function setEngineFilter(engine) {
     if (searchInput) searchInput.value = '';
     
     const appEl = document.getElementById('app');
+    const platformBar = document.getElementById('platform-bar');
+
     if (engine === 'all') {
         currentLang = 'gamedev';
         appEl.className = 'gamedev-mode';
+        if (platformBar) platformBar.style.display = 'none';
         renderTopicList('gamedev');
         updateAISuggestions();
         loadLangIntro('gamedev');
     } else {
         currentLang = engine;
         appEl.className = engine + '-mode';
+        if (platformBar) platformBar.style.display = 'none';
         if (!courseData[engine]) {
             loadLangData(engine, function () {
                 renderTopicList(engine);
@@ -258,9 +263,24 @@ function renderPlatformBar() {
 function setPlatform(platform) {
     currentMobilePlatform = platform;
     renderPlatformBar();
-    loadLangIntro(platform);
-    const searchInput = document.getElementById('topic-search');
-    filterTopics(searchInput ? searchInput.value : '');
+    if (currentLang === 'mobile') {
+        renderTopicList('mobile');
+        var data = courseData['mobile'];
+        if (data) {
+            var phases = Object.keys(data);
+            if (phases.length > 0) {
+                var phase = phases[0];
+                var topics = Object.keys(data[phase]);
+                if (topics.length > 0) loadTopic(phase, topics[0]);
+            }
+        }
+        var searchInput = document.getElementById('topic-search');
+        filterTopics(searchInput ? searchInput.value : '');
+    } else {
+        loadLangIntro(platform);
+        var searchInput = document.getElementById('topic-search');
+        filterTopics(searchInput ? searchInput.value : '');
+    }
 }
 
 function toggleCheatsheet() {
@@ -469,6 +489,7 @@ function runCode() {
             out.innerText = "Error: " + e.message;
         }
         setRunLoading(false);
+        if (typeof tutorialRunHook === 'function') tutorialRunHook();
         return;
     }
 
@@ -478,7 +499,7 @@ function runCode() {
         body: JSON.stringify({ lang: currentLang, code })
     })
     .then(r => r.json())
-    .then(d => { out.innerText = d.output; setRunLoading(false); })
+    .then(d => { out.innerText = d.output; setRunLoading(false); if (typeof tutorialRunHook === 'function') tutorialRunHook(); })
     .catch(e => {
         setRunLoading(false);
         const preview = getLogicalPreview(code, currentLang);
@@ -590,12 +611,15 @@ document.addEventListener('click', function(e) {
     }
 });
 
+let aiFeedbackId = 0;
+
 function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
-        div.innerHTML = `<div class="label">Devin</div>${formatAIText(text)}`;
+        const fid = 'fb-' + (++aiFeedbackId);
+        div.innerHTML = `<div class="label">Devin</div>${formatAIText(text)}<div class="ai-feedback" id="${fid}"><button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button></div>`;
     } else if (role === 'user') {
         div.textContent = text;
     }
@@ -614,6 +638,23 @@ function addAIMessage(text, role, skipSave) {
     }
 }
 
+function rateAIResponse(btn, dir, fid) {
+    const container = document.getElementById(fid);
+    if (!container) return;
+    const buttons = container.querySelectorAll('button');
+    const prevDir = container.dataset.rating ? parseInt(container.dataset.rating) : 0;
+    if (prevDir === dir) {
+        container.dataset.rating = '0';
+        buttons.forEach(b => b.classList.remove('voted', 'voted-down'));
+    } else {
+        container.dataset.rating = String(dir);
+        buttons[0].classList.toggle('voted', dir === 1);
+        buttons[1].classList.toggle('voted-down', dir === -1);
+        buttons[0].classList.toggle('voted-down', false);
+        buttons[1].classList.toggle('voted', false);
+    }
+}
+
 function removeTypingIndicator() {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
@@ -622,6 +663,51 @@ function removeTypingIndicator() {
 // ── Streaming Bot Message ──
 let streamingMsgEl = null;
 let streamingFullText = '';
+let streamAbortController = null;
+let isBackendReachable = true;
+
+function stopAIStream() {
+    if (streamAbortController) {
+        streamAbortController.abort();
+        streamAbortController = null;
+    }
+    document.getElementById('aiStopBtn').style.display = 'none';
+}
+
+function updateAIContext() {
+    const el = document.getElementById('aiContext');
+    if (!el) return;
+    const parts = [];
+    if (currentLang && currentLang !== 'challenge' && currentLang !== 'compiler' && currentLang !== 'quiz') {
+        parts.push(currentLang.toUpperCase());
+    }
+    if (currentTopic && currentTopic.length < 20) {
+        parts.push(currentTopic);
+    }
+    el.textContent = parts.length > 0 ? parts.join(' · ') : '';
+}
+
+function setOfflineBadge(online) {
+    isBackendReachable = online;
+    const badge = document.getElementById('aiOfflineBadge');
+    if (badge) badge.style.display = online ? 'none' : '';
+}
+
+function exportChatHistory() {
+    if (!conversationHistory.length) return;
+    let md = `# Devin Chat Export\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
+    for (const msg of conversationHistory) {
+        const role = msg.role === 'user' ? '**You**' : '**Devin**';
+        md += `${role}:\n${msg.text}\n\n---\n\n`;
+    }
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `devin-chat-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 function createStreamingBotMessage() {
     removeTypingIndicator();
@@ -656,6 +742,12 @@ function finalizeStreamingBotMessage(text) {
     if (content) {
         content.innerHTML = formatAIText(text);
     }
+    const fid = 'fb-' + (++aiFeedbackId);
+    const fb = document.createElement('div');
+    fb.className = 'ai-feedback';
+    fb.id = fid;
+    fb.innerHTML = `<button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button>`;
+    streamingMsgEl.appendChild(fb);
     streamingFullText = text;
     conversationHistory.push({ role: 'bot', text });
     if (conversationHistory.length > MAX_HISTORY) conversationHistory.shift();
@@ -799,9 +891,25 @@ function copyCode() {
 
 const aiTutorResponses = typeof window !== 'undefined' && window.aiTutorResponses ? window.aiTutorResponses : [];
 
-function getAIResponse(input) {
+function getAIResponse(input, history) {
     const q = input.toLowerCase().trim();
     if (!q) return "Ask me something about programming!";
+
+    // Conversation-aware: check if this is a follow-up
+    if (history && history.length >= 2) {
+        const lastBot = [...history].reverse().find(m => m.role === 'bot');
+        if (lastBot && /^(yes|ok|sure|tell me more|example|show me|how|what|why)\b/i.test(q)) {
+            const bt = lastBot.text.toLowerCase();
+            for (const entry of aiTutorResponses) {
+                if (entry.keywords.some(k => bt.includes(k))) {
+                    return `${entry.response}\n\n---\n*Following up on our previous conversation...*`;
+                }
+            }
+            if (currentTopic) {
+                return `Let's keep exploring **${currentTopic}**! Try this:\n1. Modify the code example in the editor\n2. Click Run to see what happens\n3. Ask me about anything you notice!\n\nWhat specific part would you like to dive deeper into?`;
+            }
+        }
+    }
 
     for (const entry of aiTutorResponses) {
         if (entry.keywords.some(k => q.includes(k))) {
@@ -941,7 +1049,23 @@ function getLocalAIResponse(input) {
     return null;
 }
 
+const ERROR_PATTERNS = [
+    { re: /SyntaxError|Unexpected token/i, title: 'Syntax Error', tip: 'A syntax error means the parser couldn\'t understand your code. Common causes:\n- Missing bracket, parenthesis, or curly brace\n- Missing comma between elements\n- Using a keyword as a variable name\n\n**Quick fix:** Look at the line number in the error and check for unbalanced `{`, `(`, `[`, or missing `,`.' },
+    { re: /ReferenceError|is not defined/i, title: 'Reference Error', tip: 'This means you\'re trying to use a variable or function that doesn\'t exist yet.\n\nCommon causes:\n- **Typo:** Did you spell it the same everywhere? JavaScript is case-sensitive!\n- **Not declared:** Did you use `let`, `const`, or `var` to declare it?\n- **Out of scope:** Is the variable accessible from where you\'re trying to use it?' },
+    { re: /TypeError|is not a function|Cannot read property/i, title: 'Type Error', tip: 'TypeError means a value is not the type you expected.\n\nCommon causes:\n- **undefined value:** `arr[0]` might be `undefined`, then calling `.name` on it fails\n- **Wrong type:** `"hello" - 5` doesn\'t work (but `"hello" + 5` does — string concatenation!)\n- **Not a function:** `arr.length()` is wrong — `length` is a property, not a method' },
+    { re: /RangeError/i, title: 'Range Error', tip: 'RangeError means a value is outside the allowed range.\n\nCommon causes:\n- **Infinite recursion:** Your function calls itself without reaching a base case\n- **Array size:** Trying to create an array with a negative length\n- **Stack overflow:** Too many nested function calls' },
+    { re: /FAIL|Error:/i, title: 'Execution Error', tip: 'Your code ran into an error during execution. Let\'s debug it step by step:\n1. Read the error message carefully — it tells you the line number\n2. Check the line it points to and the lines just before it\n3. Add `console.log()` to print values and see where things go wrong' },
+];
+
 function getErrorTutorTip(topic, output) {
+    const normalizedTopic = topic ? topic.toLowerCase() : '';
+
+    for (const pattern of ERROR_PATTERNS) {
+        if (pattern.re.test(output || '')) {
+            return `I see you got a **${pattern.title}**! Don't worry, this is totally normal. Let's fix it together.\n\n${pattern.tip}\n\n**Still stuck?** Share what you expected to happen vs what actually happened and I'll help more!`;
+        }
+    }
+
     const tips = {
         "variables": "Getting an error with variables? Common issues:\n- Did you declare it with `let`/`const`/`var` (JS) or just `name = value` (Python)?\n- Check the spelling — `myVariable` vs `myvariable` are different!\n- Make sure you declared it before trying to use it (variables aren't hoisted with `let`/`const`)\n\n**Try:** Declare a simple variable and log it. Once that works, add complexity step by step.",
         "functions": "Functions can be tricky! Check these:\n- Do you have the `function` keyword (JS) or `def` (Python)?\n- Did you use `return` to send back a value? Without it, the function returns `undefined`.\n- Did you call it with parentheses? `myFunc` is the function itself, `myFunc()` calls it.\n\n**Try:** Write the simplest possible function that returns a fixed value, then gradually add parameters.",
@@ -952,7 +1076,7 @@ function getErrorTutorTip(topic, output) {
     };
 
     for (const [key, tip] of Object.entries(tips)) {
-        if (topic.toLowerCase().includes(key)) {
+        if (normalizedTopic.includes(key)) {
             return "I see you're getting an error. Don't worry, this is totally normal! Let's work through it together.\n\n" + tip + "\n\n**Still stuck?** Share what you expected to happen vs what actually happened and I'll help more!";
         }
     }
@@ -994,6 +1118,10 @@ async function askAI(q) {
     const setConvSubject = (reply) => {
         if (reply) setTimeout(() => extractConversationSubject(reply), 0);
     };
+
+    // ── Exercise tutoring: detect if user loaded an exercise and ran it ──
+    const isExerciseMode = currentTopic && lastCodeRun && lastCodeOutput &&
+        (q.includes('my code') || q.includes('i tried') || q.includes('not working') || q.includes('help me'));
 
     // ── 1. Error-aware early return ──
     if (hasError && currentTopic && isErrorQuery(q)) {
@@ -1049,10 +1177,14 @@ async function askAI(q) {
 
     // ── 4. Stream from backend ──
     createStreamingBotMessage();
+    streamAbortController = new AbortController();
+    document.getElementById('aiStopBtn').style.display = '';
+    setOfflineBadge(true);
     try {
         const response = await fetch(BACKEND_URL + '/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: streamAbortController.signal,
             body: JSON.stringify({
                 message: enrichedQ,
                 lang: convLang || currentLang,
@@ -1097,15 +1229,27 @@ async function askAI(q) {
                 }
             }
         }
+        document.getElementById('aiStopBtn').style.display = 'none';
+        streamAbortController = null;
         extractConversationSubject(streamingFullText);
         finalizeStreamingBotMessage(streamingFullText);
     } catch (e) {
+        document.getElementById('aiStopBtn').style.display = 'none';
+        streamAbortController = null;
+        if (e.name === 'AbortError') {
+            if (streamingMsgEl) {
+                streamingMsgEl.remove();
+                streamingMsgEl = null;
+            }
+            return;
+        }
+        setOfflineBadge(false);
         // ── 5. Fallback to local keyword responses ──
         if (streamingMsgEl) {
             streamingMsgEl.remove();
             streamingMsgEl = null;
         }
-        const fallbackReply = getAIResponse(enrichedQ);
+        const fallbackReply = getAIResponse(enrichedQ, conversationHistory);
         addAIMessage('', 'typing');
         await sleep(200);
         removeTypingIndicator();
@@ -1213,6 +1357,127 @@ function getDynamicSuggestions() {
     return null;
 }
 
+// ── Learning Path ──
+function showLearningPath() {
+    const lang = currentLang || 'js';
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage('Show me my learning path', 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/learner/path?lang=' + lang, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        if (d.error) {
+            addAIMessage("Couldn't generate your learning path. Make sure the backend is running.", 'bot');
+            return;
+        }
+        let reply = `<div class="path-card" style="background:#1e293b;border-radius:10px;padding:12px;margin:8px 0;">`;
+        reply += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:800;color:var(--accent);">📚 Your Learning Path</span>
+            <span style="font-size:10px;color:#94a3b8;">${d.progress.completed}/${d.progress.total} (${d.progress.percent}%)</span>
+        </div>`;
+        const pct = d.progress.percent;
+        reply += `<div style="height:4px;background:#0f172a;border-radius:2px;margin-bottom:10px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;transition:width 0.5s;"></div>
+        </div>`;
+        if (d.nextSteps && d.nextSteps.length > 0) {
+            reply += `<div style="font-size:9px;color:#64748b;text-transform:uppercase;margin-bottom:6px;">Next Steps</div>`;
+            for (const step of d.nextSteps) {
+                const icon = step.status === 'completed' ? '✅' : step.status === 'ready' ? '→' : '🔒';
+                const color = step.status === 'completed' ? '#10b981' : step.status === 'ready' ? 'var(--accent)' : '#64748b';
+                const reason = step.reason === 'review-due' ? ' (review due)' : step.reason === 'weak-concept' ? ' (needs practice)' : '';
+                reply += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:10px;color:${color};">
+                    <span>${icon}</span>
+                    <span>${step.topic}${reason}</span>
+                </div>`;
+            }
+        }
+        if (d.weakAreas && d.weakAreas.length > 0) {
+            reply += `<div style="font-size:9px;color:#ef4444;text-transform:uppercase;margin:8px 0 4px;">Weak Areas</div>`;
+            for (const w of d.weakAreas) {
+                reply += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;font-size:10px;color:#fbbf24;">
+                    <span>⚠</span>
+                    <span>${w.topic} (${w.mastery}%)</span>
+                </div>`;
+            }
+        }
+        reply += `</div>`;
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't fetch your learning path. Make sure the backend is running.", 'bot');
+    });
+}
+
+// ── AI Quiz Generation ──
+function generateQuiz() {
+    const topic = currentTopic || 'programming basics';
+    const lang = currentLang || 'js';
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage(`Generate a quiz for ${topic}`, 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/quiz/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, lang, count: 3, level: 'beginner' })
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        if (!d.questions || d.questions.length === 0) {
+            addAIMessage("Couldn't generate a quiz right now. Try asking about a specific topic!", 'bot');
+            return;
+        }
+        let reply = '<div class="quiz-card" style="background:#1e293b;border-radius:10px;padding:12px;margin:8px 0;">';
+        reply += `<div style="font-size:9px;color:#64748b;text-transform:uppercase;margin-bottom:8px;">📝 Quiz: ${topic}</div>`;
+        for (let qi = 0; qi < d.questions.length; qi++) {
+            const q = d.questions[qi];
+            const qid = 'ai-quiz-' + qi;
+            reply += `<div style="margin-bottom:12px;font-size:11px;"><strong>${qi + 1}. ${q.question}</strong><br>`;
+            for (let oi = 0; oi < q.options.length; oi++) {
+                const optId = `${qid}-opt-${oi}`;
+                reply += `<label style="display:block;padding:4px 8px;margin:2px 0;border-radius:4px;cursor:pointer;background:#0f172a;font-size:10px;" onclick="document.querySelectorAll('#${qid} label').forEach(l=>l.style.background='#0f172a'); this.style.background='#334155'; window['${qid}_selected']=${oi};" id="${optId}">
+                    <input type="radio" name="${qid}" style="display:none;"> ${q.options[oi]}
+                </label>`;
+            }
+            reply += `<button style="margin-top:4px;background:#0ea5e9;color:#000;border:none;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;cursor:pointer;" onclick="checkQuizAnswer(${qi}, ${q.correctIndex}, '${qid}', '${q.explanation.replace(/'/g, "\\'")}')">Check</button>`;
+            reply += `<span id="${qid}-result" style="margin-left:6px;font-size:10px;"></span>`;
+            reply += `</div>`;
+        }
+        reply += `</div>`;
+        reply += `<div style="font-size:9px;color:#64748b;margin-top:4px;">${d.source === 'static' ? '⚡ Static quiz' : '✨ AI-generated'}</div>`;
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't generate a quiz. Make sure the backend is running.", 'bot');
+    });
+}
+
+function checkQuizAnswer(qi, correctIdx, qid, explanation) {
+    const selected = window[qid + '_selected'];
+    const result = document.getElementById(qid + '-result');
+    if (result === null || result === void 0 ? void 0 : result) {
+        if (selected === correctIdx) {
+            result.innerHTML = '✅ Correct!';
+            result.style.color = '#10b981';
+        } else {
+            result.innerHTML = '❌ Try again. ' + (explanation || '');
+            result.style.color = '#ef4444';
+        }
+    }
+}
+
 // ── AI Exercise Generation ──
 function generateExercise() {
     const topic = currentTopic || 'programming basics';
@@ -1276,10 +1541,13 @@ function updateAISuggestions() {
     }
 
     const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
-    const hasExercise = currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
+    const hasAI = currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
     const buttons = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`);
-    if (hasExercise && !suggestions.some(s => s.toLowerCase().includes('exercise'))) {
-        buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+    if (hasAI) {
+        const hasExercise = currentTopic && !suggestions.some(s => s.toLowerCase().includes('exercise'));
+        if (hasExercise) buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+        if (currentTopic) buttons.push(`<button onclick="generateQuiz()" style="background:#f59e0b;color:#000;">📝 Quiz</button>`);
+        buttons.push(`<button onclick="showLearningPath()" style="background:#8b5cf6;color:#000;">📚 Path</button>`);
     }
     el.innerHTML = buttons.join('');
 }
@@ -2467,7 +2735,8 @@ function filterTopics(query) {
         let matchesPlatform = true;
         if (currentMobilePlatform !== 'all') {
             const prefix = currentMobilePlatform === 'android' ? 'Android:' : 'iOS:';
-            matchesPlatform = (btn.dataset.phase || '').startsWith(prefix);
+            const phase = btn.dataset.phase || '';
+            matchesPlatform = phase === '' || phase.startsWith(prefix) || (!phase.startsWith('Android:') && !phase.startsWith('iOS:'));
         }
 
         const show = matchesSearch && matchesLevel && matchesCompletion && matchesPlatform;
@@ -2935,6 +3204,15 @@ setMode = function(lang) {
     document.getElementById('output').style.display = 'block';
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
+    document.getElementById('tutorial-nav').style.display = 'none';
+    document.getElementById('tutorial-progress').style.display = 'none';
+    document.getElementById('tutorial-quiz-overlay')?.classList.remove('open');
+    document.getElementById('tutorial-resume-overlay')?.classList.remove('open');
+    document.getElementById('cheatsheet-btn').style.display = '';
+    document.getElementById('schema-btn').style.display = '';
+    const stuckPanel = document.getElementById('tutorial-stuck-panel');
+    if (stuckPanel) stuckPanel.remove();
+    if (typeof tutorialManager !== 'undefined' && tutorialManager) tutorialManager.clearStuckTimer();
 
     document.querySelectorAll('.header-extra-tabs .game-nav-btn').forEach(b => b.classList.remove('active'));
 
@@ -2943,6 +3221,17 @@ setMode = function(lang) {
     if (roadmapBtn) {
         roadmapBtn.style.display = '';
         roadmapBtn.title = 'View ' + (LANG_NAMES[lang] || lang) + ' Roadmap';
+    }
+    const searchInput = document.getElementById('topic-search');
+    if (searchInput) searchInput.style.display = '';
+
+    if (lang === 'tutorial') {
+        document.getElementById('level-bar').style.display = 'none';
+        document.getElementById('tutorial-nav').style.display = 'flex';
+        document.getElementById('tutorial-progress').style.display = 'flex';
+        initTutorial();
+        updateAISuggestions();
+        return;
     }
 
     if (lang !== 'challenge') {
@@ -2964,6 +3253,7 @@ setMode = function(lang) {
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
+    if (lang === 'schema') { document.getElementById('level-bar').style.display = 'none'; initSchemaTutorial(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); 
         const apiBtn = document.getElementById('api-toggle-btn');
         if (apiBtn) { apiBtn.style.display = ''; apiBtn.textContent = 'API ▾'; }
@@ -3096,6 +3386,7 @@ setMode = function(lang) {
     if (backBtn) backBtn.style.display = 'none';
 
     updateAISuggestions();
+    updateAIContext();
     loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
 };
 
@@ -3206,9 +3497,22 @@ document.addEventListener('keydown', function(e) {
             runCode();
         }
     }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const panel = document.getElementById('aiPanel');
+        if (panel) {
+            const wasOpen = panel.classList.contains('open');
+            toggleAI();
+            if (!wasOpen) updateAIContext();
+        }
+    }
     if (e.key === 'Escape') {
         const aiPanel = document.getElementById('aiPanel');
-        if (aiPanel && aiPanel.classList.contains('open')) {
+        if (aiPanel && aiPanel.classList.contains('open') && !document.activeElement?.id?.startsWith('ai')) {
+            if (streamAbortController) {
+                stopAIStream();
+                return;
+            }
             toggleAI();
             return;
         }
@@ -3273,8 +3577,12 @@ function toggleRoadmapView() {
     overlay.classList.toggle('open');
     if (btn) btn.classList.toggle('active', !wasOpen);
 
-    if (!wasOpen && !roadmapRendered) {
+    if (!wasOpen) {
         const body = document.getElementById('roadmapBody');
+        const title = document.getElementById('roadmap-title');
+        const langName = LANG_NAMES[currentLang] || currentLang;
+        if (title) title.textContent = langName.charAt(0).toUpperCase() + langName.slice(1) + ' Roadmap';
+        roadmapRendered = false;
         renderRoadmap(body);
     }
 }

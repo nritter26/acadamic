@@ -77,6 +77,39 @@ export interface ExerciseRequest {
   level?: 'beginner' | 'intermediate' | 'expert';
 }
 
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface QuizGenerateRequest {
+  topic: string;
+  lang?: string;
+  count?: number;
+  level?: 'beginner' | 'intermediate' | 'expert';
+}
+
+export interface LearningPathRequest {
+  lang?: string;
+  learnerId?: string;
+}
+
+export interface LearningPathStep {
+  phase: string;
+  topic: string;
+  reason: string;
+  status: 'completed' | 'ready' | 'locked';
+}
+
+export interface LearningPathResponse {
+  lang: string;
+  progress: { completed: number; total: number; percent: number };
+  nextSteps: LearningPathStep[];
+  weakAreas: { topic: string; mastery: number }[];
+}
+
 export interface RunnerConfig {
   cmd: string;
   ext: string;

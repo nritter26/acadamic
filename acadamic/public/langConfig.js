@@ -11,6 +11,8 @@ const LANG_NAMES = {
     vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
     rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
     playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
+    godot: 'godot', unity: 'unity', unreal: 'unreal',
+    mobile: 'mobile game development',
 };
 const NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {
