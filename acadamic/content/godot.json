@@ -1,0 +1,14 @@
+{
+  "Getting Started": {
+    "Hello Godot": [
+      "Godot uses a scene-based architecture. Every game is built with nodes arranged in a tree. The main script extends Node or one of its subclasses like Node2D, Sprite2D, or CharacterBody2D. GDScript is Godot's primary scripting language — it's Python-like and deeply integrated with the engine.\n\nTo start, create a scene with a Node2D root, attach a GDScript, and use the _ready() function for initialization. Run your scene to see the output.",
+      "extends Node\n\n# Called when the node enters the scene tree for the first time.\nfunc _ready():\n    print(\"Hello, Godot!\")\n    print(\"Welcome to game development!\")\n\n# Called every frame. 'delta' is the elapsed time since the previous frame.\nfunc _process(delta):\n    # Game logic runs here each frame\n    pass"
+    ]
+  },
+  "Nodes & Scenes": {
+    "Scene Tree": [
+      "Every Godot game is a tree of nodes. A scene is a collection of nodes organized hierarchically. Nodes can be added, removed, and rearranged at runtime. The SceneTree manages all active nodes and handles processing, rendering, and input.",
+      "extends Node2D\n\nfunc _ready():\n    # Add a child node at runtime\n    var sprite = Sprite2D.new()\n    sprite.texture = preload(\"res://icon.svg\")\n    add_child(sprite)\n    \n    # Find nodes by path\n    var player = get_node(\"Player\")\n    \n    # Connect signals\n    sprite.connect(\"mouse_entered\", Callable(self, \"_on_sprite_hover\"))\n\nfunc _on_sprite_hover():\n    print(\"Mouse entered sprite!\")"
+    ]
+  }
+}

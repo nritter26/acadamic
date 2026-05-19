@@ -1,0 +1,14 @@
+{
+  "Getting Started": {
+    "Hello Unity": [
+      "Unity uses a component-based architecture. Game objects are empty containers that get behavior from attached components. Scripts are written in C# and inherit from MonoBehaviour. The Start() method runs once at initialization, and Update() runs every frame.\n\nCreate a C# script, attach it to a GameObject, and use Start() to print to the console. Press Play to see your output in the Console window.",
+      "using UnityEngine;\n\npublic class HelloUnity : MonoBehaviour\n{\n    // Start is called before the first frame update\n    void Start()\n    {\n        Debug.Log(\"Hello, Unity!\");\n        Debug.Log(\"Welcome to game development!\");\n    }\n\n    // Update is called once per frame\n    void Update()\n    {\n        // Game logic runs here each frame\n    }\n}"
+    ]
+  },
+  "GameObjects & Components": {
+    "Working with Components": [
+      "Everything in Unity is a GameObject with components. Transform is the only required component (position, rotation, scale). You can add components like Rigidbody (physics), Collider (collision detection), Renderer (visuals), and custom scripts. Use GetComponent<T>() to access components at runtime.",
+      "using UnityEngine;\n\npublic class PlayerController : MonoBehaviour\n{\n    public float speed = 5f;\n    private Rigidbody rb;\n\n    void Start()\n    {\n        // Get the Rigidbody component attached to this GameObject\n        rb = GetComponent<Rigidbody>();\n    }\n\n    void FixedUpdate()\n    {\n        float moveX = Input.GetAxis(\"Horizontal\");\n        float moveZ = Input.GetAxis(\"Vertical\");\n        Vector3 move = transform.right * moveX + transform.forward * moveZ;\n        rb.AddForce(move * speed);\n    }\n}"
+    ]
+  }
+}

@@ -153,6 +153,13 @@ label { font-size: 10px; font-weight: 900; color: #64748b; text-transform: upper
 .ws-toggle-btn { animation: editorPulse 2s ease-in-out infinite; }
 .ws-toggle-btn:hover { animation: none; }
 
+@keyframes apiPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+.api-toggle-btn { animation: apiPulse 2s ease-in-out infinite; }
+.api-toggle-btn:hover { animation: none; }
+
 .roadmap-overlay {
     display: none; position: fixed; inset: 0; z-index: 200;
     background: rgba(2,6,23,0.85); backdrop-filter: blur(4px);
@@ -232,6 +239,9 @@ textarea:focus { border-color: var(--accent); }
 .techstack-mode { --accent: #2DD4BF; }
 .mobile-mode { --accent: #47A248; }
 .backend-mode { --accent: #6366F1; }
+.godot-mode { --accent: #478CBF; }
+.unity-mode { --accent: #CCCCCC; }
+.unreal-mode { --accent: #FF9800; }
 @keyframes fadeSlide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.35s ease forwards; }
@@ -1311,7 +1321,7 @@ body.compiler-mode .run-btn { display: none; }
 body.api-mode main { grid-template-columns: 1fr 1fr; }
 body.api-mode .col:nth-child(1) { display: none; }
 body.api-mode .col:nth-child(2) { display: none; }
-body.api-mode #editor, body.api-mode #compiler-output, body.api-mode #compiler-buttons, body.api-mode .schema-designer { display: none !important; }
+body.api-mode #editor, body.api-mode #compiler-output, body.api-mode #compiler-buttons, body.api-mode .schema-designer, body.api-mode .run-btn { display: none !important; }
 body.api-mode .api-client { display: flex; }
 body.api-mode #output { display: none !important; }
 body.api-mode #apiResponse { display: flex !important; }

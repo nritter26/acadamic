@@ -14,6 +14,7 @@ var LANG_NAMES = {
     rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
     swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql', mobile: 'mobile', backend: 'backend',
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
+    godot: 'godot', unity: 'unity', unreal: 'unreal',
     mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
     cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
     react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
@@ -213,7 +214,30 @@ function setEngineFilter(engine) {
     currentEngineFilter = engine;
     renderEngineBar();
     const searchInput = document.getElementById('topic-search');
-    filterTopics(searchInput ? searchInput.value : '');
+    if (searchInput) searchInput.value = '';
+    
+    const appEl = document.getElementById('app');
+    if (engine === 'all') {
+        currentLang = 'gamedev';
+        appEl.className = 'gamedev-mode';
+        renderTopicList('gamedev');
+        updateAISuggestions();
+        loadLangIntro('gamedev');
+    } else {
+        currentLang = engine;
+        appEl.className = engine + '-mode';
+        if (!courseData[engine]) {
+            loadLangData(engine, function () {
+                renderTopicList(engine);
+                updateAISuggestions();
+                loadLangIntro(engine);
+            });
+        } else {
+            renderTopicList(engine);
+            updateAISuggestions();
+            loadLangIntro(engine);
+        }
+    }
 }
 
 function renderPlatformBar() {
@@ -2440,19 +2464,13 @@ function filterTopics(query) {
             matchesCompletion = currentCompletionFilter === 'completed' ? isDone : !isDone;
         }
 
-        let matchesEngine = true;
-        if (currentEngineFilter !== 'all') {
-            const enginePhaseMap = { godot: 'GodotEngine', unity: 'UnityEngine', unreal: 'UnrealEngine' };
-            matchesEngine = (btn.dataset.phase || '') === enginePhaseMap[currentEngineFilter];
-        }
-
         let matchesPlatform = true;
         if (currentMobilePlatform !== 'all') {
             const prefix = currentMobilePlatform === 'android' ? 'Android:' : 'iOS:';
             matchesPlatform = (btn.dataset.phase || '').startsWith(prefix);
         }
 
-        const show = matchesSearch && matchesLevel && matchesCompletion && matchesEngine && matchesPlatform;
+        const show = matchesSearch && matchesLevel && matchesCompletion && matchesPlatform;
         btn.style.display = show ? '' : 'none';
         if (show) visible++;
     });
@@ -2677,8 +2695,6 @@ function initAPI() {
     document.getElementById('app').className = 'api-mode';
     document.getElementById('header-title').innerHTML = 'API';
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
-    const navBtn = document.getElementById('nav-api');
-    if (navBtn) navBtn.classList.add('active');
 
     // Hide irrelevant UI elements
     document.getElementById('schemaDesigner').classList.remove('open');
@@ -2911,6 +2927,8 @@ function formatSize(bytes) {
     return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
 }
 
+let _prevModeForApi = null;
+
 setMode = function(lang) {
     document.getElementById('schemaDesigner').classList.remove('open');
     document.getElementById('editor').style.display = 'block';
@@ -2939,6 +2957,8 @@ setMode = function(lang) {
     const runBtn = document.querySelector('.run-btn');
     document.getElementById('cheatsheet-btn').textContent = lang === 'challenge' ? 'Reveal Answer' : 'Cheatsheet';
     if (runBtn) runBtn.textContent = lang === 'challenge' ? 'Test ▶' : 'Run ▶';
+    const apiBtn = document.getElementById('api-toggle-btn');
+    if (apiBtn) apiBtn.style.display = 'none';
     if (lang === 'quiz') { document.getElementById('level-bar').style.display = 'flex'; initQuiz(); updateAISuggestions(); return; }
     if (lang === 'challenge') { initChallenge(); updateAISuggestions(); return; }
     if (lang === 'game') { document.getElementById('level-bar').style.display = 'none'; initGame(); updateAISuggestions(); return; }
@@ -2946,7 +2966,13 @@ setMode = function(lang) {
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
-    if (lang === 'api') { initAPI(); updateAISuggestions(); return; }
+    if (lang === 'api') { initAPI(); updateAISuggestions(); 
+        const apiBtn = document.getElementById('api-toggle-btn');
+        if (apiBtn) { apiBtn.style.display = ''; apiBtn.textContent = 'API ▾'; }
+        const backBtn = document.getElementById('api-back-btn');
+        if (backBtn) backBtn.style.display = '';
+        return; 
+    }
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';
         document.getElementById('output').style.display = 'none';
@@ -2981,7 +3007,7 @@ setMode = function(lang) {
                 html += `<button class="item-btn" data-phase="${phase}" id="btn-${topic.replace(/\s/g, '')}" onclick="loadTopic('${phase}', '${topic}')"><span class="topic-name">${topic}</span></button>`;
             }
         }
-        document.getElementById('topic-list').innerHTML = html;
+    document.getElementById('topic-list').innerHTML = (prefixHtml || '') + html;
         document.getElementById('cheatsheet-btn').textContent = 'Cheatsheet';
         if (runBtn) runBtn.textContent = 'Run ▶';
         updateAISuggestions();
@@ -3066,16 +3092,41 @@ setMode = function(lang) {
     }
 
     // Build topic list with collapsible phases, counts, badges
-    let html = '';
-    const langDisplay = LANG_NAMES[lang] || lang;
-    const aboutTarget = lang === 'mobile' ? 'currentMobilePlatform' : `'${lang}'`;
+    let prefixHtml = '';
     if (lang === 'backend') {
-        html += `<div class="phase-header" onclick="setMode('api')" style="cursor:pointer;color:#f97316;border-color:#f97316;">
+        prefixHtml = `<div class="phase-header" onclick="setMode('api')" style="cursor:pointer;color:#f97316;border-color:#f97316;">
             <span class="phase-toggle">▶</span>
             <span class="phase-label-text" style="font-style:italic;color:#f97316;">API Client</span>
         </div>`;
     }
-    html += `<div class="phase-header" onclick="loadLangIntro(${aboutTarget})" style="cursor:pointer;">
+    renderTopicList(lang, prefixHtml);
+
+    // Show API toggle button only in backend mode
+    if (apiBtn) {
+        apiBtn.style.display = lang === 'backend' ? '' : 'none';
+        if (lang === 'backend') apiBtn.textContent = 'API ▸';
+    }
+    const backBtn = document.getElementById('api-back-btn');
+    if (backBtn) backBtn.style.display = 'none';
+
+    updateAISuggestions();
+    loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
+};
+
+function renderTopicList(lang, prefixHtml) {
+    const langData = courseData[lang] || {};
+    const phases = Object.keys(langData);
+    const totalPhases = phases.length;
+    const third = Math.max(1, Math.ceil(totalPhases / 3));
+    const phaseLevels = {};
+    phases.forEach((phase, i) => {
+        if (i < third) phaseLevels[phase] = 'beginner';
+        else if (i < third * 2) phaseLevels[phase] = 'intermediate';
+        else phaseLevels[phase] = 'expert';
+    });
+    let html = '';
+    const langDisplay = LANG_NAMES[lang] || lang;
+    html += `<div class="phase-header" onclick="loadLangIntro('${lang}')" style="cursor:pointer;">
         <span class="phase-toggle">▼</span>
         <span class="phase-label-text" style="font-style:italic;">About ${langDisplay}</span>
     </div>`;
@@ -3089,13 +3140,11 @@ setMode = function(lang) {
         for (const t of topics) {
             if (completedTopics.has(currentLang + ':' + t)) phaseDone++;
         }
-
         html += `<div class="phase-header ${isCollapsed ? 'collapsed' : ''}" data-phase="${phaseKey}" onclick="togglePhase('${phaseKey}','${phase.replace(/'/g, "\\'")}')">
             <span class="phase-toggle">${isCollapsed ? '▶' : '▼'}</span>
             <span class="phase-label-text">${phase}</span>
             <span class="phase-count">${phaseDone}/${count}</span>
         </div>`;
-
         const collapsedClass = isCollapsed ? ' phase-collapsed' : '';
         for (const topic in langData[phase]) {
             const delay = idx * 20;
@@ -3108,12 +3157,8 @@ setMode = function(lang) {
     document.getElementById('topic-list').innerHTML = html;
     const searchInput = document.getElementById('topic-search');
     if (searchInput) searchInput.value = '';
-
     updateTopicDisplay();
-
-    updateAISuggestions();
-    loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
-};
+}
 
 // ── EDITOR LINE NUMBERS ──
 let lineNumbersEl = null;
@@ -3214,6 +3259,20 @@ function toggleWorkspace() {
         appEl.classList.remove('hide-workspace');
         appEl.classList.add('workspace-open');
         if (btn) btn.textContent = 'Editor ▾';
+    }
+}
+
+// ── API CLIENT TOGGLE ──
+function toggleAPIClient() {
+    const btn = document.getElementById('api-toggle-btn');
+    if (currentLang === 'api') {
+        const prev = _prevModeForApi || 'backend';
+        _prevModeForApi = null;
+        setMode(prev);
+        if (btn) btn.textContent = 'API ▸';
+    } else {
+        _prevModeForApi = currentLang;
+        setMode('api');
     }
 }
 
@@ -3500,6 +3559,27 @@ const langIntro = {
         usedFor: 'Cloud computing, data analytics (BigQuery), machine learning (AI Platform), container orchestration (GKE), serverless computing (Cloud Functions), and scalable application hosting.',
         creator: 'Google. Launched in 2008 with App Engine. GCP leverages Google\'s massive infrastructure and expertise in data processing, machine learning, and containerized applications.',
         code: '# GCP — data and AI at scale\n# List Compute Engine instances\ngcloud compute instances list\n\n# Deploy a Cloud Function\ngcloud functions deploy my-function \\\n    --runtime nodejs18 \\\n    --trigger-http\n\n# Query BigQuery\ngcloud bigquery query \\\n    --sql "SELECT name FROM mydataset.users LIMIT 10"'
+    },
+    godot: {
+        name: 'Godot Engine',
+        what: 'Godot is a free, open-source game engine that provides a comprehensive set of common tools for game development. It features a unique scene-node architecture, a dedicated scripting language (GDScript) that is easy to learn, full C# support, and a visual editor that runs on any platform.',
+        usedFor: 'Creating 2D and 3D games, game prototypes, interactive applications, educational software, and simulations. Godot excels at 2D with its dedicated 2D engine, pixel-perfect rendering, and powerful animation tools.',
+        creator: 'Juan Linietsky and Ariel Manzur (Reduz and PunkPanda). First released as open-source in 2014 after being developed privately for several years. Now maintained by the Godot Foundation and a large community of contributors.',
+        code: 'extends Node\n\n# Called when the node enters the scene tree for the first time.\nfunc _ready():\n    print("Hello, Godot!")\n    print("Welcome to open-source game development!")\n\n# Called every frame.\nfunc _process(delta):\n    # Put your game logic here\n    pass'
+    },
+    unity: {
+        name: 'Unity Engine',
+        what: 'Unity is one of the world\'s most popular real-time 3D development platforms. It provides a complete ecosystem for creating games, simulations, and interactive experiences with a component-based architecture, a robust editor, and extensive asset store integration.',
+        usedFor: 'Game development (2D, 3D, VR, AR), architectural visualization, film and animation, automotive design, training simulations, and interactive installations across 25+ platforms.',
+        creator: 'Unity Technologies, founded by David Helgason, Nicholas Francis, and Joachim Ante in Copenhagen. First released in 2005 for Mac OS X, it has grown into a multi-billion dollar platform used by millions of developers worldwide.',
+        code: 'using UnityEngine;\n\npublic class HelloUnity : MonoBehaviour\n{\n    void Start()\n    {\n        Debug.Log("Hello, Unity!");\n        Debug.Log("Welcome to real-time 3D development!");\n    }\n\n    void Update()\n    {\n        // Game logic runs here each frame\n    }\n}'
+    },
+    unreal: {
+        name: 'Unreal Engine',
+        what: 'Unreal Engine is a cutting-edge game engine developed by Epic Games, known for its high-fidelity graphics, robust toolset, and industry-leading rendering capabilities. It features Blueprint visual scripting alongside full C++ support, making it accessible to both artists and engineers.',
+        usedFor: 'AAA game development, architectural visualization, film and broadcast production, virtual production (used in The Mandalorian), automotive design, simulation, and digital twin applications.',
+        creator: 'Epic Games, founded by Tim Sweeney. Originally developed as a first-person shooter engine for the 1998 game Unreal. The first publicly available version (UE2) released in 2002, with UE5 launching in 2022 featuring Nanite and Lumen.',
+        code: '#include "CoreMinimal.h"\n#include "GameFramework/Actor.h"\n#include "HelloUnreal.generated.h"\n\nUCLASS()\nclass AHelloUnreal : public AActor\n{\n    GENERATED_BODY()\n\nprotected:\n    virtual void BeginPlay() override\n    {\n        Super::BeginPlay();\n        UE_LOG(LogTemp, Warning, TEXT("Hello, Unreal!"));\n        UE_LOG(LogTemp, Warning, TEXT("Welcome to cutting-edge game development!"));\n    }\n};'
     }
 };
 

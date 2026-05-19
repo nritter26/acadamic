@@ -1,0 +1,14 @@
+{
+  "Getting Started": {
+    "Hello Unreal": [
+      "Unreal Engine uses C++ and Blueprints for game logic. The primary gameplay class is AActor, which represents any object that can be placed in the world. The BeginPlay() method runs when the actor enters play, and Tick() runs every frame.\n\nCreate a C++ class inheriting from AActor, override BeginPlay(), and use UE_LOG to print to the Output Log. Compile and place your actor in the level to see the output.",
+      "#include \"CoreMinimal.h\"\n#include \"GameFramework/Actor.h\"\n#include \"HelloUnreal.generated.h\"\n\nUCLASS()\nclass AHelloUnreal : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    // Sets default values for this actor's properties\n    AHelloUnreal()\n    {\n        PrimaryActorTick.bCanEverTick = true;\n    }\n\nprotected:\n    // Called when the game starts or when spawned\n    virtual void BeginPlay() override\n    {\n        Super::BeginPlay();\n        UE_LOG(LogTemp, Warning, TEXT(\"Hello, Unreal!\"));\n        UE_LOG(LogTemp, Warning, TEXT(\"Welcome to game development!\"));\n    }\n\npublic:\n    // Called every frame\n    virtual void Tick(float DeltaTime) override\n    {\n        Super::Tick(DeltaTime);\n        // Game logic runs here each frame\n    }\n};"
+    ]
+  },
+  "Actors & Components": {
+    "Actor Lifecycle": [
+      "AActor is the base class for all gameplay objects in Unreal. Actors have a lifecycle: construction, BeginPlay, Tick, and EndPlay. Actors can contain components (USceneComponent, UStaticMeshComponent, etc.) for modular behavior. UPROPERTY() and UFUNCTION() macros expose members to Blueprints and the engine's reflection system.",
+      "#include \"CoreMinimal.h\"\n#include \"GameFramework/Actor.h\"\n#include \"Components/StaticMeshComponent.h\"\n#include \"MyActor.generated.h\"\n\nUCLASS()\nclass AMyActor : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UPROPERTY(VisibleAnywhere)\n    UStaticMeshComponent* Mesh;\n\n    AMyActor()\n    {\n        Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT(\"Mesh\"));\n        RootComponent = Mesh;\n    }\n\n    virtual void Tick(float DeltaTime) override\n    {\n        Super::Tick(DeltaTime);\n        AddActorLocalRotation(FRotator(0, 100 * DeltaTime, 0));\n    }\n};"
+    ]
+  }
+}

@@ -43,8 +43,8 @@
 </header>
 <main>
     <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="topic-list" class="scroll"></div></div>
-    <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
-    <div class="col col-enter"><label>Workspace</label><div class="api-client" id="apiClient">
+    <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button><button id="api-toggle-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Toggle API client" style="display:none">API ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
+    <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client" id="apiClient">
     <div class="api-toolbar">
         <select id="apiMethod" class="api-method-select">
             <option value="GET">GET</option>

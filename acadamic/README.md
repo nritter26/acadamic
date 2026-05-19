@@ -1,27 +1,30 @@
 # Kodex's Lab: Full Mastery Edition
 
-An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 45+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, and 16 mini-games.
+An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 50+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, game development curriculum, mobile development curriculum, and 16 mini-games.
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-topic curriculum** | 45+ content files covering 12 programming languages, 4 databases, 7 cloud/DevOps tools, 8 frontend frameworks, 10 backend/tech tools, 4 testing/infra tools, gamedev, and compiler design — 4,360+ indexed topics |
+| **Multi-topic curriculum** | 56 content files covering 12 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,100+ indexed topics across 636 phases |
 | **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Swift, Zig via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. |
-| **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 6 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
-| **Schema designer** | Visual PostgreSQL table designer with drag-and-drop FK connector lines, generates DDL SQL. |
+| **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
+| **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Keyword-based Q&A (default, no API key) with 26 curated responses + TF-IDF curriculum search across all 4,360+ topics. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
+| **AI tutor** | Keyword-based Q&A (default, no API key) with 26 curated responses + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (6+ languages, 3 difficulty levels each). |
-| **Code challenges** | 1,890 bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
+| **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
 | **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
 | **AI exercises** | On-demand generated practice exercises per topic/level — fix-bug, fill-blank, write-function, predict-output, refactor, implement, optimize, debug, design, analyze, extend. LLM-generated with static fallback. |
 | **Learner profile** | Per-user progress tracking with SM-2 spaced-repetition review scheduling (1/3/7/14/30 day intervals), concept mastery metrics, error/attempt tracking, and personalized next-topic recommendations. |
-| **Benchmarking** | Compare Node.js vs Go backend performance with configurable iterations via `/api/benchmark`. |
 | **Auto-complete & smart indent** | Editor helper with keyword completion, bracket pairing, and auto-indentation across all languages. |
 | **Cheatsheet** | Per-language quick-reference cheatsheet with syntax, idioms, and common patterns. |
 | **Gaming mode** | 16 mini-games: Typing Speed, Code Scramble, Debug the Bug, Syntax Sprint, Memory Match, Speed Read, Race Compiler, Syntax Swipe, Code Golf, Binary/Hex Blitz, Crossword, Regex Rally, SQL JOIN Match, Errorpedia, API Arcade, Daily Challenge. |
+| **GameDev mode** | Full game development curriculum covering Godot, Unity, and Unreal Engine with engine-specific topic filters. Each engine has 14 topics across dedicated phases. Also includes 5 general gamedev phases (Game Loop, Physics, Audio, Input, Rendering, ECS, Networking, Optimization, Save Systems, Build/Deploy, Accessibility). |
+| **Mobile mode** | Android and iOS development curriculum with platform toggle filter. 98 topics across 16 phases (8 Android, 8 iOS) covering Kotlin, Jetpack Compose, Swift, SwiftUI, UIKit, architecture patterns, testing, distribution, and more. |
 | **REST API client** | Built-in Thunderclient-style workspace with HTTP method selection, URL input, headers/body/auth tabs (Bearer/Basic), and response display with status, headers, and formatted JSON. |
+| **Git visualizer** | Interactive Git learning mode with visualized branching, commits, merges, and common workflows. |
+| **Tech Stack mode** | Explore full technology stacks (backend, frontend, database, DevOps) for different application types. |
 | **Roadmap view** | SVG-based visual learning roadmap for topic progression. |
 | **Code editor file integration** | Load `.js`/`.py`/etc. files from disk via `<input type="file">` and FileReader. |
 | **Dynamic theming** | Language-specific accent colors applied via CSS custom properties (`--js`, `--py`, `--go`, etc.) across all UI elements. |
@@ -32,23 +35,29 @@ An interactive multi-language programming textbook, code playground, and compile
 JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Swift — each with full topic trees and live server-side execution.
 
 ### Databases
-PostgreSQL, MySQL, SQLite — with curriculum, live SQL execution, and schema designer.
-MongoDB — curriculum only (no execution).
+PostgreSQL, MySQL, SQLite, MongoDB, Firebase — with curriculum; SQLite/PG/MySQL with live SQL execution.
 
 ### DevOps & Cloud
-Docker, Git, Firebase, AWS, Azure, GCP, Cloud — curriculum with compile hints.
+Docker, Git, Firebase, AWS, Azure, GCP, Cloud, Kubernetes, Terraform — curriculum with compile hints.
 
 ### Frontend Frameworks
-React, Vue, Angular, Svelte, Next.js, Nuxt, SvelteKit, Remix — curriculum.
+React, Vue, Angular, Svelte, Next.js, Nuxt, SvelteKit, Remix, Vite, Webpack, Tailwind, Bootstrap — curriculum.
 
 ### Backend & Tech Tools
-Node.js, Express, Tailwind, Vite, Webpack, GraphQL, Prisma, Redis, React Native, Flutter — curriculum.
+Node.js, Express, FastAPI, Flask, Django, Spring, GraphQL, Prisma, Redis, React Native, Flutter — curriculum.
 
 ### Testing & Infrastructure
-Cypress, Playwright, Kubernetes, Terraform — curriculum.
+Cypress, Playwright — curriculum.
 
-### Game Development
-GameDev — curriculum with 16 mini-games.
+### Game Development (3 engines)
+- **General**: Game Loop, Physics, Audio, Input, Rendering, ECS, Networking, Optimization, Save Systems, Build/Deploy, Accessibility (11 phases, 76 topics)
+- **Godot Engine**: Nodes & Scenes, GDScript, Physics, Signals, Shaders, Tilemaps, Input, Resources, Editor Plugins, GDExtension, XR Tools, Render Modes (14 topics)
+- **Unity Engine**: GameObjects, Components, Physics, Prefabs, Shaders, UI Toolkit, Animation, Scriptable Objects, Gaming Services, Multi-Scene, Editor Tools, NavMesh, VFX Graph (14 topics)
+- **Unreal Engine**: Actors, Components, Blueprints, Physics, UMG, Materials, World Partition, MetaSounds, Animation Blueprints, Smart Objects, PCG, Mass Entity System (14 topics)
+
+### Mobile Development (2 platforms)
+- **Android**: Kotlin & Java, App Components, UI Toolkit (Jetpack Compose + Views), Architecture (MVVM, Hilt, Clean Architecture), Data & Networking (Retrofit, Room, Firebase), Async & Concurrency (Coroutines, Flow), Testing & Debug, Distribution (50 topics across 8 phases)
+- **iOS**: Swift & Objective-C, Xcode & Architecture, UIKit & SwiftUI, App Components & Navigation, Data & Networking (URLSession, CoreData, SwiftData), Concurrency & Memory (GCD, async/await, Actors), Testing & Debug, Distribution (48 topics across 8 phases)
 
 ### Compiler Design
 Complete compiler curriculum: tokenization, AST, parsing, code generation, optimization — with hands-on pipeline explorer.
@@ -88,34 +97,42 @@ All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of
 ```
 acadamic/
 ├── server.js                    # Express backend entry point (~1,006 lines)
-├── index.html                   # Single-page frontend app
+├── index.html                   # Single-page frontend app (379 lines)
 ├── package.json                 # Dependencies & scripts
 ├── tsconfig.json                # TypeScript configuration (ai/ → dist/)
 ├── .env.example                 # Env var template (58 entries)
 ├── netlify.toml                 # Netlify deployment config
 │
 ├── public/                      # Client-side source files
-│   ├── app.js                   # Main frontend logic (~3,833 lines)
-│   ├── style.css                # Application stylesheet (~1,395 lines)
+│   ├── app.js                   # Main frontend logic (~3,624 lines)
+│   ├── style.css                # Application stylesheet (~1,660 lines)
 │   ├── courseData.js            # Course metadata container
 │   ├── langConfig.js            # Language code ↔ name mappings (47 entries)
-│   ├── techstack.js             # Tech stack tab frontend (23 topics)
+│   ├── schema.js                # Schema designer (full visual DB designer, ~1,052 lines)
+│   ├── git-visualize.js         # Git visualizer learning mode (~993 lines)
+│   ├── techstack.js             # Tech stack explorer (~341 lines)
 │   ├── compiler-core.js         # Multi-language lexer/parser/AST (~428 lines)
-│   ├── compiler-curriculum.js   # Compiler design curriculum (~353 lines)
-│   ├── challenges.js            # 1,890 code challenges across 6 langs
-│   ├── quiz.js                  # Quiz questions per language
-│   ├── game.js                  # Gaming mode logic (16 mini-games)
-│   ├── db.js                    # Database tab frontend
-│   └── ai-responses.js          # 26 AI tutor keyword responses
+│   ├── compiler-curriculum.js   # Compiler design curriculum (~352 lines)
+│   ├── challenges.js            # 2,100+ code challenges across 6 langs
+│   ├── quiz.js                  # Quiz questions per language (~2,780 lines)
+│   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
+│   ├── db.js                    # Database tab frontend (~126 lines)
+│   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
+│   ├── ai-responses.js          # 26 AI tutor keyword responses
+│   └── logos/                   # 57 SVG logos for supported technologies
 │
-├── content/                     # Course curriculum data (45 JSON files)
+├── content/                     # Course curriculum data (56 JSON files, 636 phases, 3,100+ topics)
 │   ├── js.json, py.json, ...    # 12 programming languages
-│   ├── pg.json, mysql.json, ... # 4 databases
-│   ├── dk.json, git.json, ...   # 7 cloud/DevOps tools
-│   ├── react.json, vue.json,... # 8 frontend frameworks
-│   ├── node.json, express.json  # 10 backend/tech tools
+│   ├── pg.json, mysql.json, ... # 10 databases (PG, MySQL, SQLite, MongoDB, Firebase, + frameworks)
+│   ├── dk.json, git.json, ...   # 11 cloud/DevOps tools
+│   ├── react.json, vue.json,... # 14 frontend frameworks
+│   ├── node.json, express.json  # 17 backend/tech tools (incl. FastAPI, Flask, Django, Spring)
 │   ├── cypress.json, k8s.json   # 4 testing/infra tools
-│   └── gamedev.json             # Game development
+│   ├── gamedev.json             # Game development (17 phases, 143 topics)
+│   ├── godot.json               # Godot Engine (phases reference)
+│   ├── unity.json               # Unity Engine (phases reference)
+│   ├── unreal.json              # Unreal Engine (phases reference)
+│   └── mobile.json              # Android + iOS development (16 phases, 98 topics)
 │
 ├── data/                        # Runtime data (learner profiles, progress)
 │   ├── progress.json            # Topic completion progress
@@ -130,16 +147,10 @@ acadamic/
 │   └── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
 │
 ├── dist/                        # Compiled JS + declarations from tsconfig
-│   ├── config.js (+ .d.ts)
-│   ├── provider.js (+ .d.ts)
-│   ├── embeddings.js (+ .d.ts)
-│   ├── learner.js (+ .d.ts)
-│   ├── reviewer.js (+ .d.ts)
-│   └── exercises.js (+ .d.ts)
 │
 ├── sql/                         # SQL database engine
 │   ├── database.js              # SQLite in-memory DB + PG/MySQL pools
-│   └── seed.sql                 # Sample data (20+ tables, 6 schemas)
+│   └── seed.sql                 # Sample data (20+ tables, 7 schemas)
 │
 ├── backend-go/                  # Alternative Go backend
 │   ├── main.go                  # Go HTTP server (~329 lines)
@@ -238,13 +249,13 @@ Rate limiting: 30 requests per 60 seconds per IP across all `/api/*` routes.
 
 The AI system (`ai/`) is a full-stack TypeScript module supporting multiple providers configured via `.env`:
 
-- **`keyword`** (default, no API key needed) — Two-tier matching: 26 curated responses in `ai-responses.js` + TF-IDF curriculum search across all 45 content files via `embeddings.ts`. Returns relevant topic explanations with cosine similarity scoring.
+- **`keyword`** (default, no API key needed) — Two-tier matching: 26 curated responses in `ai-responses.js` + TF-IDF curriculum search across all 56 content files via `embeddings.ts`. Returns relevant topic explanations with cosine similarity scoring.
 - **`openai`** — Set `AI_PROVIDER=openai` + `OPENAI_API_KEY`. Uses GPT models with SSE streaming support.
 - **`anthropic`** — Set `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`. Uses Claude models with SSE streaming support.
 - **`local`** — Set `AI_PROVIDER=local`. Connects to any OpenAI-compatible local endpoint (Ollama, LM Studio, etc.).
 
 The curriculum search pipeline:
-1. **Curriculum index** — regex-based topic extraction from 45 JSON course files (4,360+ topics)
+1. **Curriculum index** — regex-based topic extraction from 56 JSON course files (3,100+ topics)
 2. **TF-IDF** (always available) — keyword-based relevance scoring with cosine similarity
 3. **OpenAI embeddings** (if API key configured) — semantic vector search via `text-embedding-3-small` with batch caching to disk
 
@@ -263,7 +274,7 @@ Profiles are stored as JSON in `data/learners/` with fallback to `/tmp/kodex-lab
 
 ## SQL Execution (Database Tab)
 
-The Database tab includes a built-in SQLite engine seeded with 20+ tables across 6 schemas:
+The Database tab includes a built-in SQLite engine seeded with 20+ tables across 7 schemas:
 
 | Schema | Tables |
 |--------|--------|
@@ -283,12 +294,32 @@ Results are formatted as ASCII box-drawing tables. Multiple semicolon-separated 
 
 ## Schema Designer
 
-The workspace includes a visual PostgreSQL schema designer:
+The workspace includes a full visual database schema designer with two views:
 
-- Add tables with custom names
-- Define columns with types, nullability, defaults, and primary keys
-- Create foreign key relationships with visual connector lines
-- Generate DDL SQL from the designed schema
+### Design View
+- **Tables**: Create, rename, delete, and drag-to-position tables on a dot-grid canvas
+- **Columns**: Define column name, type (INT, SERIAL, BIGINT, VARCHAR, TEXT, BOOLEAN, DATE, TIMESTAMP, DECIMAL, UUID, JSONB, FLOAT), constraint toggles (PK, NOT NULL, UNIQUE), and default values
+- **Foreign Keys**: Click-to-link FK relationships (click `~>` on source column, then click target column handle). Colored bezier curves show relationships with cardinality labels. Click an existing FK badge to remove it.
+- **Indexes**: Add, name, and toggle unique indexes per table. Select which columns are included.
+- **Table comments**: Add descriptive comments to tables.
+
+### ERD View
+- Read-only entity-relationship diagram with simplified table cards
+- PK/FK badges, constraint flags (NN, UQ, DF), and dashed relationship lines
+- Click rows to create or remove FK links (same click-to-link flow)
+- Drag tables to reposition
+
+### Toolbar Features
+- **Undo/Redo**: 50-deep stack with Ctrl+Z / Ctrl+Y keyboard shortcuts
+- **Auto Layout**: Auto-arranges tables in a grid
+- **Import SQL**: Paste CREATE TABLE statements (PostgreSQL, MySQL, SQLite dialects) and parse into visual design
+- **Export SQL**: Copy to clipboard or download as `.sql` file
+- **Export JSON**: Download schema as `.json` file
+- **Import JSON**: Load a previously exported `.json` schema file
+- **Multi-dialect**: Switch between PostgreSQL, MySQL, and SQLite for generated DDL
+- **Auto-generate SQL**: SQL preview auto-updates (500ms debounce) as you edit
+- **Version history**: Save named snapshots to localStorage, restore or delete them
+- **Clear All**: Wipe the current schema with confirmation
 
 ## Compiler Pipeline Explorer
 
@@ -336,7 +367,7 @@ The workspace includes a full Thunderclient-style HTTP client:
 
 ## Course Data Format
 
-Course files in `content/` are 45 lazy-loaded JSON files with topics organized by phase:
+Course files in `content/` are 56 lazy-loaded JSON files with topics organized by phase:
 
 ```json
 {
@@ -353,19 +384,23 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 
 ## UI Features
 
+- **Header extra tabs** — API, Code Lab, Compiler, GameDev, Mobile, Quiz, Gaming — each with distinct accent colors and hover effects
+- **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
+- **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
 - **Cyberpunk-themed header** — Animated "Just code — don't overthink" motto with glow/flicker CSS effects
 - **Devin mascot** — Animated SVG backpack robot with talking animation (triggered by Tab in AI input)
 - **Roadmap view** — SVG-based visual learning roadmap for topic progression
 - **Language-specific theming** — Dynamic accent colors per language via CSS custom properties
 - **Skeleton loading** — Placeholder UI while curriculum content lazy-loads
 - **File integration** — Load local source files into the editor via file picker
+- **Collapsible phases** — Expand/collapse all phases, with per-phase completion counters
 
 ## Deployment
 
 The project is configured for Netlify deployment:
 
 - `netlify.toml` maps `/api/*` to the unified serverless function
-- `netlify/functions/api.js` handles all 17 API routes through a single function handler
+- `netlify/functions/api.js` handles all API routes through a single function handler
 - Static files are served from the root directory
 - No build step required for the frontend (vanilla HTML/CSS/JS)
 - TypeScript compilation (`npm run build`) only needed if modifying the AI module
