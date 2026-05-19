@@ -841,6 +841,5 @@ function tutorialRunHook() {
     if (!hasError && tutorialManager.runCount > 0 && !tutorialManager.isStepCompleted(currentIdx)) {
         updateContinueButton(true);
     }
-    if (hasError) {
-    }
+}
 

@@ -11,7 +11,7 @@ An interactive multi-language programming textbook, code playground, and compile
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Keyword-based Q&A (default, no API key) with 26 curated responses + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
+| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 26 curated responses + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (6+ languages, 3 difficulty levels each). |
 | **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
 | **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
@@ -89,23 +89,23 @@ All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of
 | Backend | Node.js (Express) or Go (alternative) |
 | Runtime | Node.js 18+, Go 1.22+ |
 | Database (SQL) | better-sqlite3 (built-in), optional pg + mysql2 |
-| AI | Keyword matching + TF-IDF (default), OpenAI, Anthropic, local Ollama/LM Studio |
+| AI | Hybrid keyword + tiny-LLM tutor (default), OpenAI, Anthropic, local Ollama/LM Studio |
 | Deploy | Netlify (static + serverless functions) |
 
 ## Project Structure
 
 ```
 acadamic/
-├── server.js                    # Express backend entry point (~1,006 lines)
-├── index.html                   # Single-page frontend app (379 lines)
+├── server.ts                    # Express backend entry point (~1,217 lines)
+├── index.html                   # Single-page frontend app (327 lines)
 ├── package.json                 # Dependencies & scripts
-├── tsconfig.json                # TypeScript configuration (ai/ → dist/)
-├── .env.example                 # Env var template (58 entries)
+├── tsconfig.json                # TypeScript configuration (ai/, server.ts, sql/ → dist/)
+├── .env.example                 # Env var template
 ├── netlify.toml                 # Netlify deployment config
 │
 ├── public/                      # Client-side source files
-│   ├── app.js                   # Main frontend logic (~3,624 lines)
-│   ├── style.css                # Application stylesheet (~1,660 lines)
+│   ├── app.js                   # Main frontend logic (~4,802 lines)
+│   ├── style.css                # Application stylesheet (~2,344 lines)
 │   ├── courseData.js            # Course metadata container
 │   ├── langConfig.js            # Language code ↔ name mappings (47 entries)
 │   ├── schema.js                # Schema designer (full visual DB designer, ~1,052 lines)
@@ -119,6 +119,8 @@ acadamic/
 │   ├── db.js                    # Database tab frontend (~126 lines)
 │   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
 │   ├── ai-responses.js          # 26 AI tutor keyword responses
+│   ├── schema-tutorial.js       # Schema designer guided tutorial
+│   ├── tutorial.js              # App tutorial/onboarding helpers
 │   └── logos/                   # 57 SVG logos for supported technologies
 │
 ├── content/                     # Course curriculum data (56 JSON files, 636 phases, 3,100+ topics)
@@ -139,17 +141,20 @@ acadamic/
 │   └── learners/                # Per-user learner profiles (JSON, SM-2)
 │
 ├── ai/                          # AI tutoring & analysis engine (TypeScript)
-│   ├── config.ts                # Provider config (keyword/openai/anthropic/local)
+│   ├── config.ts                # Provider config (hybrid/keyword/openai/anthropic/local)
 │   ├── provider.ts              # LLM request handler with SSE streaming, retry
 │   ├── embeddings.ts            # TF-IDF + OpenAI embedding semantic search
 │   ├── learner.ts               # SM-2 spaced-repetition learner profiles
 │   ├── reviewer.ts              # Static + LLM code review (JS/TS/PY/GO/RS/SQL)
-│   └── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
+│   ├── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
+│   ├── tiny-llm.js              # Transformers.js tiny model helper for hybrid tutor
+│   └── tutor-keywords.js        # Keyword cascade for fast tutor responses
 │
 ├── dist/                        # Compiled JS + declarations from tsconfig
 │
 ├── sql/                         # SQL database engine
 │   ├── database.js              # SQLite in-memory DB + PG/MySQL pools
+│   ├── database.ts              # TypeScript source for database engine
 │   └── seed.sql                 # Sample data (20+ tables, 7 schemas)
 │
 ├── backend-go/                  # Alternative Go backend
@@ -186,16 +191,17 @@ cd acadamic/backend-go
 go run main.go
 ```
 
-The Go backend runs on port 8080 and serves the same API plus static files.
+The Go backend runs on port 8080 and serves the core API subset plus static files.
 
 ### Scripts
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `npm start` | `tsx server.js` | Run server with TypeScript execution |
-| `npm run dev` | `tsx watch server.js` | Run server in watch mode with hot reload |
-| `npm run build` | `tsc` | Compile TypeScript (`ai/` → `dist/`) |
+| `npm start` | `tsx server.ts` | Run server with TypeScript execution |
+| `npm run dev` | `tsx watch server.ts` | Run server in watch mode with hot reload |
+| `npm run build` | `tsc` | Compile TypeScript (`ai/`, `server.ts`, `sql/` → `dist/`) |
 | `npm run build:watch` | `tsc --watch` | Watch mode for TS compilation |
+| `npm run typecheck` | `tsc --noEmit` | Type-check without writing build output |
 
 ## API Endpoints
 
@@ -228,12 +234,14 @@ The Go backend runs on port 8080 and serves the same API plus static files.
 |--------|------|-------------|
 | POST | `/api/chat` | AI assistant chat with curriculum-aware responses, SSE streaming `{message, lang?, topic?, phase?, code?, output?, hasError?, history?, learnerId?}` |
 | POST | `/api/exercise` | Generate on-demand practice exercise `{topic, lang?, level?}` |
+| POST | `/api/quiz/generate` | Generate a short quiz for `{topic?, lang?, level?}` |
 | GET | `/api/courses` | List available course files from `content/` directory |
 
 ### Learner Profile
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/api/learner/track` | Track learner events: complete-topic, error, attempt, quiz, challenge, ai-interaction |
+| GET | `/api/learner/path` | Get recommended learner path data |
 | GET | `/api/learner/state` | Get learner profile & concept mastery (optional `?lang=`) |
 | GET | `/api/learner/reviews` | Get due spaced-repetition reviews |
 | GET | `/api/learner/recommend` | Get next recommended topic `(?lang=&topics=)` |
@@ -249,7 +257,8 @@ Rate limiting: 30 requests per 60 seconds per IP across all `/api/*` routes.
 
 The AI system (`ai/`) is a full-stack TypeScript module supporting multiple providers configured via `.env`:
 
-- **`keyword`** (default, no API key needed) — Two-tier matching: 26 curated responses in `ai-responses.js` + TF-IDF curriculum search across all 56 content files via `embeddings.ts`. Returns relevant topic explanations with cosine similarity scoring.
+- **`hybrid`** (default in `.env.example`, no API key needed) — Keyword cascade plus a Transformers.js tiny model fallback.
+- **`keyword`** — Fast no-download fallback using curated responses and curriculum context.
 - **`openai`** — Set `AI_PROVIDER=openai` + `OPENAI_API_KEY`. Uses GPT models with SSE streaming support.
 - **`anthropic`** — Set `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`. Uses Claude models with SSE streaming support.
 - **`local`** — Set `AI_PROVIDER=local`. Connects to any OpenAI-compatible local endpoint (Ollama, LM Studio, etc.).
@@ -403,4 +412,4 @@ The project is configured for Netlify deployment:
 - `netlify/functions/api.js` handles all API routes through a single function handler
 - Static files are served from the root directory
 - No build step required for the frontend (vanilla HTML/CSS/JS)
-- TypeScript compilation (`npm run build`) only needed if modifying the AI module
+- TypeScript compilation (`npm run build`) is needed after changing TypeScript sources
