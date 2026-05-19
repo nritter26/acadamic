@@ -2624,7 +2624,7 @@ function highlightCode(code, lang) {
 function compilerRunPipeline(stage) {
     const editor = document.getElementById('editor');
     const code = editor ? editor.value : '';
-    const lang = currentLang === 'compiler' ? 'js' : currentLang;
+    const lang = currentLang === 'compiler' ? (window._pipelineLang || 'js') : currentLang;
     const result = COMPILER.runPipeline(code, lang);
     const content = document.getElementById('cp-pipeline-content');
 
@@ -2925,6 +2925,8 @@ setMode = function(lang) {
     if (roadmapBtn) {
         roadmapBtn.style.display = '';
         roadmapBtn.title = 'View ' + (LANG_NAMES[lang] || lang) + ' Roadmap';
+        roadmapBtn.style.display = (lang === 'js' || lang === 'ts' || lang === 'go' || lang === 'cpp' || lang === 'swift') ? '' : 'none';
+        roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : lang === 'go' ? 'View Go Roadmap' : lang === 'cpp' ? 'View C++ Roadmap' : lang === 'swift' ? 'View Swift Roadmap' : 'View JavaScript Roadmap';
     }
 
     if (lang !== 'challenge') {
@@ -2953,11 +2955,23 @@ setMode = function(lang) {
         document.getElementById('schemaDesigner').classList.remove('open');
         document.getElementById('editor').style.display = 'block';
         currentLang = 'compiler';
+        window._pipelineLang = 'js';
         document.getElementById('app').className = 'compiler-mode';
         document.getElementById('header-title').innerText = 'COMPILER';
         document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
         const navBtn = document.getElementById('nav-compiler');
         if (navBtn) navBtn.classList.add('active');
+        const cb = document.getElementById('compiler-buttons');
+        if (cb && !cb.querySelector('.pipeline-lang-picker')) {
+            const langs = [
+                ['js','JS'],['py','Python'],['go','Go'],['rs','Rust'],['ts','TypeScript'],
+                ['c','C'],['cpp','C++'],['cs','C#'],['kt','Kotlin'],['swift','Swift'],
+                ['zig','Zig'],['pg','SQL'],['dk','Docker'],['git','Git'],
+                ['mongodb','MongoDB'],['gamedev','GameDev']
+            ];
+            const opts = langs.map(([v,l]) => `<option value="${v}"${v==='js'?' selected':''}>${l}</option>`).join('');
+            cb.insertAdjacentHTML('afterbegin', `<select class="pipeline-lang-picker" onchange="window._pipelineLang=this.value">${opts}</select>`);
+        }
         const langData = courseData.compiler || {};
         let html = '';
         for (const phase in langData) {
@@ -3204,7 +3218,6 @@ function toggleWorkspace() {
 }
 
 // ── ROADMAP VIEW ──
-let roadmapRendered = false;
 
 function toggleRoadmapView() {
     const overlay = document.getElementById('roadmapOverlay');
@@ -3214,7 +3227,7 @@ function toggleRoadmapView() {
     overlay.classList.toggle('open');
     if (btn) btn.classList.toggle('active', !wasOpen);
 
-    if (!wasOpen && !roadmapRendered) {
+    if (!wasOpen) {
         const body = document.getElementById('roadmapBody');
         renderRoadmap(body);
     }
@@ -3225,6 +3238,18 @@ function renderRoadmap(container) {
     if (!langData) { roadmapRendered = false; return; }
 
     const langName = LANG_NAMES[currentLang] || currentLang;
+        renderRoadmap(body, currentLang);
+    }
+}
+
+function renderRoadmap(container, lang) {
+    const langData = courseData[lang];
+    if (!langData) return;
+
+    const langName = lang === 'ts' ? 'TypeScript' : lang === 'go' ? 'Go' : lang === 'cpp' ? 'C++' : lang === 'swift' ? 'Swift' : 'JavaScript';
+    const titleEl = document.getElementById('roadmapTitle');
+    if (titleEl) titleEl.textContent = langName + ' Roadmap';
+
     const phases = Object.keys(langData);
     const nodeW = 180, nodeH = 36, gap = 30;
 
