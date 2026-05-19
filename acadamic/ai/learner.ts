@@ -80,6 +80,7 @@ interface RecommendedTopic {
 }
 
 const DEFAULT_LEARNER: Learner = {
+  id: '',
   topics: {},
   phases: {},
   quizzes: { total: 0, correct: 0 },

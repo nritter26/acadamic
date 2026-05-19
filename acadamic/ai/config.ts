@@ -24,6 +24,7 @@ const config: AppConfig = {
   anthropic: {
     apiKey: process.env.ANTHROPIC_API_KEY || '',
     model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
+    endpoint: process.env.ANTHROPIC_ENDPOINT || 'https://api.anthropic.com/v1',
     maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1024'),
   },
   local: {
