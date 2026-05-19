@@ -222,7 +222,6 @@ class TutorialManager {
 
         var step = this.getCurrentStep();
         if (!step) return;
-        try { tutorialDevinReaction('nudge', 'Stuck? I\'m here to help!'); } catch (e) {}
 
         var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[this.lang]) || this.lang;
         var panel = document.createElement('div');
@@ -390,7 +389,6 @@ function startTutorial() {
 
     renderTutorial();
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
-    setTimeout(function () { tutorialDevinReaction('peek', 'Hey! I\'m Devin, your tutor. Let\'s learn <strong>' + langName + '</strong> together!'); }, 800);
 }
 
 function renderTutorial() {
@@ -490,7 +488,6 @@ function finishSwitchTutorialLang(lang) {
     renderTutorialSidebar();
     loadTutorialStep(tutorialManager.getCurrentStepIndex());
     var lName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[lang]) || lang;
-    setTimeout(function () { tutorialDevinReaction('wave', 'Switched to <strong>' + lName + '</strong>! Let\'s learn.'); }, 600);
 }
 
 function renderTutorialSidebar() {
@@ -575,7 +572,6 @@ function loadTutorialStep(idx) {
     renderTutorialNav(idx);
     renderTutorialProgress();
     updateContinueButton(false);
-    tutorialDevinReaction('wave', 'Let\'s learn about <strong>' + step.topic + '</strong>!');
 }
 
 function renderTutorialNav(idx) {
@@ -642,7 +638,6 @@ function tutorialContinue() {
 
     tutorialManager.markStepComplete(currentIdx);
     renderTutorialSidebar();
-    tutorialDevinReaction('celebrate', 'Nice work! Ready for the next one?');
 
     if (tutorialManager.isComplete()) {
         showTutorialComplete();
@@ -655,7 +650,6 @@ function tutorialContinue() {
 function showQuizCheckpoint() {
     var overlay = document.getElementById('tutorial-quiz-overlay');
     if (!overlay) return;
-    tutorialDevinReaction('point', 'Quick check! Show what you\'ve learned.');
 
     var questions = tutorialManager.getQuizQuestions(5);
     if (questions.length === 0) {
@@ -732,9 +726,6 @@ function answerTutorialQuiz(optIdx) {
     explanation.innerHTML = isCorrect
         ? '\u2705 Correct!'
         : '\u274C Not quite. The answer was: <strong>' + questions[idx].opts[questions[idx].ans] + '</strong>';
-    setTimeout(function () {
-        tutorialDevinReaction(isCorrect ? 'celebrate' : 'sad', isCorrect ? 'You got it!' : 'Close! Review and try again.');
-    }, 50);
 
     var questionDiv = overlay.querySelector('.tutorial-quiz-question');
     questionDiv.appendChild(explanation);
@@ -759,9 +750,6 @@ function finalizeQuiz(overlay, questions, answers) {
         dotsHtml += '<span class="' + cls + '">' + label + '</span>';
     }
 
-    setTimeout(function () {
-        tutorialDevinReaction(passed ? 'celebrate' : 'sad', passed ? 'You passed! Great work!' : 'Don\'t give up! Review and retry.');
-    }, 50);
     var body = getQuizBody();
     if (!body) return;
     body.innerHTML = ''
@@ -808,7 +796,6 @@ function showTutorialComplete() {
     var completed = tutorialManager.getCompletedCount();
     var total = tutorialManager.getTotalSteps();
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
-    tutorialDevinReaction('star', 'Amazing! You finished the <strong>' + langName + '</strong> tutorial!');
 
     var quizKeys = Object.keys(tutorialManager.state.quizScores);
     var totalQuizCorrect = 0;
@@ -855,20 +842,5 @@ function tutorialRunHook() {
         updateContinueButton(true);
     }
     if (hasError) {
-        tutorialDevinReaction('sad', 'Looks like a bug. Want me to help?');
     }
-}
 
-// ── Tutorial Devin Mascot Reactions ──
-var _devinReactionTimer = null;
-
-function tutorialDevinReaction(mood, msg) {
-    if (typeof setDevinMood !== 'function') return;
-    if (_devinReactionTimer) {
-        clearTimeout(_devinReactionTimer);
-        _devinReactionTimer = null;
-    }
-    _devinReactionTimer = setTimeout(function () {
-        setDevinMood(mood, msg);
-    }, 400);
-}

@@ -286,68 +286,12 @@ function toggleKodexModal() {
     </div>
     <div class="ai-suggestions" id="aiSuggestions"></div>
     <div class="ai-input-row">
-        <textarea id="aiInput" placeholder="Ask a question... (Ctrl+K)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}if(event.key==='Tab'){event.preventDefault();showMascot();}" oninput="autoGrowAIInput(this)"></textarea>
+        <textarea id="aiInput" placeholder="Ask a question... (Ctrl+K)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}" oninput="autoGrowAIInput(this)"></textarea>
         <button id="aiStopBtn" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:900;cursor:pointer;font-size:12px;" onclick="stopAIStream()" title="Stop generating">■</button>
         <button onclick="sendAI()">Send</button>
     </div>
     <div id="aiOfflineBadge" style="padding:4px 10px;font-size:9px;color:#94a3b8;background:#1e293b;border-top:1px solid #334155;text-align:center;">⟳ Checking server...</div>
     <div id="aiStatusLine" style="display:none;"></div>
-</div>
-<div id="devinMascot" class="devin-mascot" onclick="hideMascot()">
-    <svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" class="devin-svg">
-        <defs>
-            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#FFD6A8"/>
-                <stop offset="100%" stop-color="#F5B880"/>
-            </linearGradient>
-        </defs>
-
-        <!-- Left arm stub -->
-        <g id="devinArmL">
-            <rect x="12" y="64" width="14" height="8" rx="4" fill="#FF8A5C" stroke="#D94A20" stroke-width="2"/>
-        </g>
-
-        <!-- Right arm stub -->
-        <g id="devinArmR">
-            <rect x="94" y="64" width="14" height="8" rx="4" fill="#FF8A5C" stroke="#D94A20" stroke-width="2"/>
-        </g>
-
-        <!-- Main rectangular body -->
-        <rect x="30" y="28" width="60" height="72" rx="10" fill="url(#bodyGrad)" stroke="#D98A4A" stroke-width="2.5"/>
-
-        <!-- Inner border accent -->
-        <rect x="34" y="32" width="52" height="64" rx="7" fill="none" stroke="#FFE8CC" stroke-width="1" opacity="0.4"/>
-
-        <!-- Coding badge -->
-        <rect x="44" y="76" width="32" height="16" rx="4" fill="#2D2D44" stroke="#1a1a2e" stroke-width="1.5"/>
-        <text x="49" y="88" font-family="monospace" font-size="11" font-weight="bold" fill="#FFD6A8">&lt;/&gt;</text>
-
-        <!-- Eyes -->
-        <ellipse cx="46" cy="50" rx="7" ry="8" fill="white" stroke="#D98A4A" stroke-width="1.5"/>
-        <ellipse cx="74" cy="50" rx="7" ry="8" fill="white" stroke="#D98A4A" stroke-width="1.5"/>
-        <!-- Pupils -->
-        <circle cx="47" cy="49" r="4.5" fill="#2D2D44"/>
-        <circle cx="75" cy="49" r="4.5" fill="#2D2D44"/>
-        <!-- Eye shine -->
-        <circle cx="49" cy="47" r="2" fill="white" opacity="0.9"/>
-        <circle cx="77" cy="47" r="2" fill="white" opacity="0.9"/>
-        <!-- Blush -->
-        <ellipse cx="36" cy="58" rx="5" ry="3" fill="#FF8A5C" opacity="0.35"/>
-        <ellipse cx="84" cy="58" rx="5" ry="3" fill="#FF8A5C" opacity="0.35"/>
-        <!-- Mouth (animated for talking) -->
-        <path id="devinMouth" d="M56 60 Q60 63 64 60" fill="none" stroke="#D98A4A" stroke-width="2.5" stroke-linecap="round"/>
-
-        <!-- Left leg stub -->
-        <g id="devinLegL">
-            <rect x="38" y="100" width="12" height="10" rx="5" fill="#FF8A5C" stroke="#D94A20" stroke-width="2"/>
-        </g>
-
-        <!-- Right leg stub -->
-        <g id="devinLegR">
-            <rect x="70" y="100" width="12" height="10" rx="5" fill="#FF8A5C" stroke="#D94A20" stroke-width="2"/>
-        </g>
-    </svg>
-    <div class="devin-speech" id="devinSpeech">Hey! I'm Devin, your tutor.</div>
 </div>
 <div class="tutorial-overlay" id="tutorial-quiz-overlay" onclick="if(event.target===this)return">
   <div class="tutorial-quiz-paper" onclick="event.stopPropagation()">
@@ -380,79 +324,5 @@ function closeResumePrompt() {
 
 <script src="public/tutorial.js"></script>
 <script>
-    let mascotTimer = null;
-    let mouthAnimId = null;
-    let moodTimer = null;
-
-    function showMascot(msg, mood) {
-        const el = document.getElementById('devinMascot');
-        const speech = document.getElementById('devinSpeech');
-        if (speech && msg) speech.textContent = msg;
-        el.classList.add('visible');
-        if (mood) el.classList.add(mood);
-        if (mood === 'talking' || (!mood && msg)) {
-            el.classList.add('talking');
-            startMouthAnim();
-        }
-        clearTimeout(mascotTimer);
-        mascotTimer = setTimeout(() => {
-            el.classList.remove('talking');
-            stopMouthAnim();
-            if (speech) speech.textContent = '';
-        }, 4000);
-        if (moodTimer) { clearTimeout(moodTimer); moodTimer = null; }
-        if (mood) {
-            moodTimer = setTimeout(() => {
-                el.classList.remove(mood);
-            }, 1500);
-        }
-    }
-
-    function setDevinMood(mood, msg) {
-        const el = document.getElementById('devinMascot');
-        const speech = document.getElementById('devinSpeech');
-        const moods = ['talking','wave','celebrate','sad','nudge','point','peek','star'];
-        moods.forEach(function(m) { el.classList.remove(m); });
-        if (moodTimer) { clearTimeout(moodTimer); moodTimer = null; }
-        if (mood) {
-            if (msg && speech) speech.textContent = msg;
-            el.classList.add('visible', mood);
-            if (mood === 'talking') {
-                stopMouthAnim(); startMouthAnim();
-            }
-            moodTimer = setTimeout(function() {
-                el.classList.remove(mood);
-                if (mood === 'talking') stopMouthAnim();
-            }, 2500);
-        }
-    }
-
-    function hideMascot() {
-        const el = document.getElementById('devinMascot');
-        const moods = ['talking','wave','celebrate','sad','nudge','point','peek','star'];
-        moods.forEach(function(m) { el.classList.remove(m); });
-        el.classList.remove('visible');
-        stopMouthAnim();
-        if (moodTimer) { clearTimeout(moodTimer); moodTimer = null; }
-    }
-
-    function startMouthAnim() {
-        stopMouthAnim();
-        const mouth = document.getElementById('devinMouth');
-        let open = false;
-        mouthAnimId = setInterval(() => {
-            open = !open;
-            mouth.setAttribute('d', open ? 'M54 61 Q60 69 66 61' : 'M56 60 Q60 63 64 60');
-        }, 250);
-    }
-
-    function stopMouthAnim() {
-        if (mouthAnimId) {
-            clearInterval(mouthAnimId);
-            mouthAnimId = null;
-        }
-        const mouth = document.getElementById('devinMouth');
-        if (mouth) mouth.setAttribute('d', 'M56 60 Q60 63 64 60');
-    }
 </script>
 </body></html>
