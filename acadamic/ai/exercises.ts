@@ -75,6 +75,7 @@ Make the exercise educational and focused on one concept at a time.`;
       starterCode: '// Write your code here',
       solution: '',
       hint: 'Review the curriculum topic and try step by step.',
+      test: 'true',
     };
   } catch {
     return generateStaticExercise(topic, lang, level);

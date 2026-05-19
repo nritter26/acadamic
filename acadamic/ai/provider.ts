@@ -22,6 +22,9 @@ interface ProviderHandler {
   parser(line: string): string | null;
   responseParser(data: Record<string, unknown>): string | null;
   stripSystem?: boolean;
+  apiKey: string;
+  model: string;
+  maxTokens: number;
 }
 
 async function streamSSEResponse(

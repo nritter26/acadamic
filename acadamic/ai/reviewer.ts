@@ -196,7 +196,7 @@ Overall score out of 10 based on: correctness, style, efficiency, edge cases.`;
   }
 }
 
-function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[] } {
+function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[]; score: number } {
   const lines = code.split('\n');
   const hasMain = /\bmain\b/i.test(code);
   const hasFunctions = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code);
@@ -246,8 +246,9 @@ function generateStructureReview(code: string, lang: string): { review: string; 
     review += `\n**Suggestion:** High comment-to-code ratio (${Math.round(commentedRatio * 100)}%). Comments explain WHY, not WHAT — let the code speak for itself.\n`;
   }
 
-  review += `\n**Score:** ${calculateScore(allIssues, lines.length)}/10`;
-  return { review, issues: allIssues };
+  const score = calculateScore(allIssues, lines.length);
+  review += `\n**Score:** ${score}/10`;
+  return { review, issues: allIssues, score };
 }
 
 function calculateScore(issues: ReviewIssue[], lineCount: number): number {

@@ -499,7 +499,7 @@ function runCode() {
             git: 'Run git commands in terminal'
         };
         if (window.location.protocol === 'file:') {
-            out.innerText = "// Start the server first:\n//   node server.js\n// Then open http://localhost:3000";
+            out.innerText = "// Start the server first:\n//   npx tsx server.ts\n// Then open http://localhost:3000";
         } else {
             const hint = hints[currentLang];
             const lines = code.split('\n');
@@ -740,7 +740,7 @@ function explainCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the explain server. Make sure the backend is running (node server.js).", 'bot');
+        addAIMessage("Couldn't reach the explain server. Make sure the backend is running (npx tsx server.ts).", 'bot');
     })
     .catch(() => {});
 }
@@ -778,7 +778,7 @@ function reviewCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the review server. Make sure the backend is running (node server.js).", 'bot');
+        addAIMessage("Couldn't reach the review server. Make sure the backend is running (npx tsx server.ts).", 'bot');
     });
 }
 

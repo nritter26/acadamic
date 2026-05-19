@@ -2,16 +2,20 @@
   "name": "koded",
   "version": "1.0.0",
   "description": "Koded: Interactive Programming Textbook",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
-    "start": "tsx server.js",
-    "dev": "tsx watch server.js",
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts",
     "build": "tsc",
-    "build:watch": "tsc --watch"
+    "build:watch": "tsc --watch",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.0",
+    "@types/better-sqlite3": "^7.6.0"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0",
