@@ -343,12 +343,13 @@ textarea:focus { border-color: var(--accent); }
     display: flex; gap: 8px; padding: 10px;
     border-top: 1px solid #334155;
 }
-.ai-input-row input {
+.ai-input-row textarea {
     flex: 1; background: #020617; border: 1px solid #334155;
     border-radius: 6px; padding: 10px; color: #f1f5f9;
-    font-size: 12px; outline: none;
+    font-size: 12px; outline: none; resize: none; font-family: inherit;
+    line-height: 1.4; min-height: 36px; max-height: 120px;
 }
-.ai-input-row input:focus { border-color: var(--accent); }
+.ai-input-row textarea:focus { border-color: var(--accent); }
 .ai-input-row button {
     background: var(--accent); color: #000; border: none;
     border-radius: 6px; padding: 8px 14px; font-weight: 900;
@@ -365,6 +366,8 @@ textarea:focus { border-color: var(--accent); }
     cursor: pointer; white-space: nowrap;
 }
 .ai-suggestions button:hover { background: #334155; color: #fff; }
+.ai-suggestions .ai-dismiss-btn { background:transparent;color:#334155;font-size:10px;padding:2px 6px;margin-left:auto; }
+.ai-suggestions .ai-dismiss-btn:hover { background:#1e293b;color:#64748b; }
 
 .schema-btn { display: none; }
 .db-mode .schema-btn { display: inline-block; }
@@ -1212,9 +1215,42 @@ body.compiler-mode .selector button#nav-compiler { background: var(--accent); co
 .ai-code-block { background:#0f172a; border:1px solid #1e293b; border-radius:6px; padding:10px 14px; margin:8px 0; overflow-x:auto; font-size:10px; line-height:1.5; }
 .ai-code-block code { color:#a5f3fc; }
 .ai-msg code { background:#1e293b; color:#a5f3fc; padding:1px 4px; border-radius:3px; font-size:10px; }
-.ai-msg.bot br { display:block; content:''; margin:4px 0; }
+.ai-msg.bot p { margin:4px 0; }
+.ai-msg.bot hr { border:none;border-top:1px solid #334155;margin:10px 0; }
+.ai-msg.bot blockquote { border-left:3px solid var(--accent);margin:6px 0;padding:4px 10px;color:#94a3b8;font-size:11px; }
+.ai-msg.bot table { width:100%;border-collapse:collapse;margin:6px 0;font-size:10px; }
+.ai-msg.bot th { padding:4px 8px;text-align:left;color:#f1f5f9;font-size:10px;font-weight:800;border-bottom:2px solid #334155; }
+.ai-msg.bot td { padding:4px 8px;color:#94a3b8;font-size:10px;border-bottom:1px solid #1e293b; }
+.ai-msg.bot ul, .ai-msg.bot ol { margin:4px 0;padding-left:20px; }
+.ai-msg.bot li { font-size:11px;color:#cbd5e1;margin:2px 0; }
+.ai-msg.bot a { color:var(--accent);text-decoration:underline; }
+.streaming-cancelled { color:#64748b; font-style:italic; font-size:10px; }
+.ai-msg.bot a:hover { opacity:0.8; }
+.ai-msg br { display:block; content:''; margin:4px 0; }
 .typing-dots { animation: typingPulse 1.2s infinite; color:#94a3b8; }
 @keyframes typingPulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
+
+/* ── Syntax Highlighting for AI code ── */
+.syn-keyword { color:#c084fc; font-weight:700; }
+.syn-string { color:#34d399; }
+.syn-number { color:#fbbf24; }
+.syn-comment { color:#64748b; font-style:italic; }
+.ai-code-block .syn-keyword { color:#c084fc; font-weight:700; }
+.ai-code-block .syn-string { color:#34d399; }
+.ai-code-block .syn-number { color:#fbbf24; }
+.ai-code-block .syn-comment { color:#64748b; font-style:italic; }
+
+/* ── AI copy button ── */
+.ai-copy-btn { position:absolute;top:6px;right:6px;background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;cursor:pointer;opacity:0;transition:opacity 0.2s;z-index:2; }
+.ai-msg-wrapper { position:relative; display:flex; flex-direction:column; }
+.ai-msg-wrapper:hover .ai-copy-btn { opacity:1; }
+.ai-copy-btn:hover { background:#334155;color:#fff; }
+.ai-copy-btn.copied { background:#059669;color:#fff;border-color:#059669; }
+
+/* ── AI edit button ── */
+.ai-edit-btn { position:absolute;top:6px;right:6px;background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;opacity:0;transition:opacity 0.2s;line-height:1; }
+.ai-msg-wrapper:hover .ai-edit-btn { opacity:1; }
+.ai-edit-btn:hover { background:#334155;color:#fff; }
 
 /* ── Streaming cursor ── */
 .ai-msg.streaming .streaming-cursor {

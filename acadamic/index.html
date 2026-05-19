@@ -285,7 +285,7 @@ function toggleKodexModal() {
     </div>
     <div class="ai-suggestions" id="aiSuggestions"></div>
     <div class="ai-input-row">
-        <input id="aiInput" placeholder="Ask a question... (Ctrl+K)" onkeydown="if(event.key==='Enter') sendAI(); if(event.key==='Tab') { event.preventDefault(); showMascot(); }">
+        <textarea id="aiInput" placeholder="Ask a question... (Ctrl+K)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}if(event.key==='Tab'){event.preventDefault();showMascot();}" oninput="autoGrowAIInput(this)"></textarea>
         <button id="aiStopBtn" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:900;cursor:pointer;font-size:12px;" onclick="stopAIStream()" title="Stop generating">■</button>
         <button onclick="sendAI()">Send</button>
     </div>

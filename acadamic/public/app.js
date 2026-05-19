@@ -585,23 +585,177 @@ function toggleAI() {
 }
 
 let aiCodeId = 0;
+function highlightCode(code, lang) {
+    const kw = {
+        js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
+        ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
+        py: ['def','return','if','elif','else','for','while','in','not','and','or','is','None','True','False','class','import','from','as','try','except','finally','raise','with','async','await','yield','lambda','pass','break','continue','global','nonlocal','self','super'],
+        go: ['func','return','if','else','for','range','switch','case','break','continue','go','defer','select','chan','map','struct','interface','type','package','import','var','const','nil','true','false','make','new','append','len','cap'],
+        rs: ['fn','let','mut','if','else','for','while','loop','match','return','pub','struct','enum','impl','trait','use','mod','as','in','ref','self','super','Some','None','Ok','Err','true','false','let','const','static','unsafe','async','await','move','where'],
+        cs: ['public','private','protected','internal','static','void','int','string','bool','float','double','var','class','struct','enum','interface','namespace','using','return','if','else','for','foreach','while','do','switch','case','break','continue','new','this','base','virtual','override','abstract','sealed','readonly','const','async','await','try','catch','finally','throw','get','set','value'],
+        swift: ['func','var','let','if','else','for','in','while','switch','case','break','continue','return','class','struct','enum','protocol','extension','import','guard','defer','throw','throws','rethrows','catch','async','await','actor','nonisolated','mutating','self','super','nil','true','false'],
+    }[lang] || ['const','let','var','function','return','if','else','for','while','class','import','export','true','false','null','undefined','new','this','try','catch'];
+    const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const lines = escaped.split('\n');
+    return lines.map(line => {
+        const tokens = [];
+        let i = 0;
+        while (i < line.length) {
+            // single-line comment
+            const rest = line.slice(i);
+            const sCm = rest.match(/^\/\/.*/);
+            if (sCm) { tokens.push('<span class="syn-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
+            const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
+            if (bCm) { tokens.push('<span class="syn-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
+            // string
+            const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
+            if (str) { tokens.push('<span class="syn-string">' + str[1] + '</span>'); i += str[1].length; continue; }
+            // number
+            const num = rest.match(/^\b(\d+\.?\d*|0x[0-9a-fA-F]+)\b/);
+            if (num) { tokens.push('<span class="syn-number">' + num[1] + '</span>'); i += num[1].length; continue; }
+            // word (keyword or identifier)
+            const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
+            if (word) {
+                if (kw.includes(word[1])) tokens.push('<span class="syn-keyword">' + word[1] + '</span>');
+                else tokens.push(word[1]);
+                i += word[1].length;
+                continue;
+            }
+            tokens.push(line[i]);
+            i++;
+        }
+        return tokens.join('');
+    }).join('\n');
+}
+
 function formatAIText(text) {
-    let displayText = text;
-    if (text && text.includes('**')) {
-        displayText = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    }
-    displayText = displayText.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
-        const id = 'ai-code-' + (++aiCodeId);
+    if (!text) return '';
+    // 1. Extract and protect code blocks
+    const codeBlocks = [];
+    const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
+        const idx = codeBlocks.length;
         const safeCode = code.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        setTimeout(() => {
-            const btn = document.getElementById(id);
-            if (btn) btn.dataset.code = safeCode;
-        }, 0);
-        return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${code}</code></pre><button class="ai-run-code" id="${id}">Run</button></div>`;
+        const highlighted = highlightCode(code, lang);
+        codeBlocks.push({ lang, code, safeCode, highlighted });
+        return `\x00CODEBLOCK${idx}\x00`;
     });
-    displayText = displayText.replace(/\`([^`]+)\`/g, '<code>$1</code>');
-    displayText = displayText.replace(/\n/g, '<br>');
-    return displayText;
+    // 2. Process block-level markdown (headings, horizontal rules, blockquotes, lists)
+    const lines = noCode.split('\n');
+    let result = '';
+    let inList = false;
+    let listStack = []; // tracks list types at each nesting level
+    let listLevel = 0;
+    for (let li = 0; li < lines.length; li++) {
+        let line = lines[li];
+        const trimmed = line.trim();
+        const indent = line.length - line.trimStart().length;
+        const listMatch = trimmed.match(/^(\s*[-*+]\s)(.*)$/);
+        const orderedMatch = trimmed.match(/^(\s*\d+\.\s)(.*)$/);
+        // check if line is a code block placeholder
+        const cbPlaceholder = line.match(/^\x00CODEBLOCK(\d+)\x00$/);
+        if (cbPlaceholder) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const cb = codeBlocks[parseInt(cbPlaceholder[1])];
+            result += `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+            continue;
+        }
+        // heading
+        const hMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+        if (hMatch) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const level = hMatch[1].length;
+            result += `<h${level} style="font-size:${14 - level}px;color:#f1f5f9;margin:8px 0 4px;font-weight:800;">${hMatch[2]}</h${level}>`;
+            continue;
+        }
+        // horizontal rule
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            result += '<hr style="border:none;border-top:1px solid #334155;margin:10px 0;">';
+            continue;
+        }
+        // blockquote
+        if (trimmed.startsWith('> ')) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const content = inlineFormat(trimmed.replace(/^>\s?/, ''), codeBlocks, false);
+            result += `<blockquote style="border-left:3px solid var(--accent);margin:6px 0;padding:4px 10px;color:#94a3b8;font-size:11px;">${content}</blockquote>`;
+            continue;
+        }
+        // list item
+        const isListItem = listMatch || orderedMatch;
+        if (isListItem) {
+            const prefix = listMatch ? listMatch[1] : orderedMatch[1];
+            const content = listMatch ? listMatch[2] : orderedMatch[2];
+            const tag = listMatch ? 'ul' : 'ol';
+            if (!inList) { result += `<${tag} style="margin:4px 0;padding-left:20px;">`; inList = true; listStack = [tag]; }
+            const formatted = inlineFormat(content, codeBlocks, true);
+            result += `<li style="font-size:11px;color:#cbd5e1;margin:2px 0;">${formatted}</li>`;
+            // peek ahead for nested content
+            continue;
+        }
+        // empty line in list resets
+        if (inList && trimmed === '') {
+            result += '</li></ul>'.repeat(listStack.length);
+            inList = false;
+            listStack = [];
+            continue;
+        }
+        // table
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            // check if next line is a separator row
+            const nextLine = lines[li + 1];
+            const isSep = nextLine && /^\|[\s:-]+\|/.test(nextLine.trim());
+            if (isSep) {
+                // find all headers
+                const headers = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
+                const hHtml = headers.map(h => `<th style="padding:4px 8px;text-align:left;color:#f1f5f9;font-size:10px;font-weight:800;border-bottom:2px solid #334155;">${inlineFormat(h, codeBlocks, false)}</th>`).join('');
+                result += `<table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:10px;"><thead><tr>${hHtml}</tr></thead><tbody>`;
+                li++; // skip separator
+                // read body rows
+                while (li + 1 < lines.length) {
+                    const rowLine = lines[li + 1].trim();
+                    if (!rowLine.startsWith('|') || !rowLine.endsWith('|')) break;
+                    li++;
+                    const cells = rowLine.split('|').filter(c => c.trim()).map(c => c.trim());
+                    const rHtml = cells.map(c => `<td style="padding:4px 8px;color:#94a3b8;font-size:10px;border-bottom:1px solid #1e293b;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
+                    result += `<tr>${rHtml}</tr>`;
+                }
+                result += '</tbody></table>';
+                continue;
+            }
+            // single row table (not preceded by separator)
+            const cells = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
+            const rHtml = cells.map(c => `<td style="padding:3px 6px;font-size:10px;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
+            result += `<table style="width:100%;border-collapse:collapse;margin:4px 0;"><tr>${rHtml}</tr></table>`;
+            continue;
+        }
+        // default paragraph
+        if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+        if (trimmed !== '') {
+            result += `<p style="margin:4px 0;">${inlineFormat(trimmed, codeBlocks, false)}</p>`;
+        }
+    }
+    if (inList) { result += '</li></ul>'.repeat(listStack.length); }
+    return result;
+}
+
+function inlineFormat(text, codeBlocks) {
+    let t = text;
+    // inline code
+    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;">$1</code>');
+    // bold
+    t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
+    // italic
+    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
+    // links
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">$1</a>');
+    // inline code block placeholders (shouldn't be here but just in case)
+    t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
+        const cb = codeBlocks[parseInt(idx)];
+        if (cb) return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+        return '';
+    });
+    return t;
 }
 
 document.addEventListener('click', function(e) {
@@ -615,19 +769,51 @@ let aiFeedbackId = 0;
 
 function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-msg-wrapper';
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
         const fid = 'fb-' + (++aiFeedbackId);
-        div.innerHTML = `<div class="label">Devin</div>${formatAIText(text)}<div class="ai-feedback" id="${fid}"><button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button></div>`;
+        const formatted = formatAIText(text);
+        const escaped = text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+        div.innerHTML = `<div class="label">Devin</div>${formatted}<div class="ai-feedback" id="${fid}"><button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button></div>`;
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-copy-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1500);
+            }).catch(() => {});
+        };
+        wrapper.appendChild(copyBtn);
     } else if (role === 'user') {
         div.textContent = text;
+        const editBtn = document.createElement('button');
+        editBtn.className = 'ai-edit-btn';
+        editBtn.textContent = '✎';
+        editBtn.title = 'Edit and resend';
+        editBtn.onclick = function() {
+            const input = document.getElementById('aiInput');
+            input.value = text;
+            autoGrowAIInput(input);
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        };
+        wrapper.appendChild(editBtn);
     }
+    wrapper.appendChild(div);
     if (role === 'typing') {
         div.id = 'aiTyping';
         div.innerHTML = '<div class="label">Devin</div><span class="typing-dots">● ● ●</span>';
     }
-    el.appendChild(div);
+    if (role === 'typing') {
+        el.appendChild(div);
+    } else {
+        el.appendChild(wrapper);
+    }
     el.scrollTop = el.scrollHeight;
     if (role !== 'typing' && !skipSave) {
         conversationHistory.push({ role, text });
@@ -672,6 +858,17 @@ function stopAIStream() {
         streamAbortController = null;
     }
     document.getElementById('aiStopBtn').style.display = 'none';
+    if (streamingMsgEl) {
+        const content = streamingMsgEl.querySelector('.streaming-content');
+        if (content) {
+            const existing = content.innerHTML;
+            content.innerHTML = existing + '<span class="streaming-cancelled"> [cancelled]</span>';
+        }
+        const cursor = streamingMsgEl.querySelector('.streaming-cursor');
+        if (cursor) cursor.remove();
+        streamingMsgEl.classList.remove('streaming');
+        streamingMsgEl = null;
+    }
 }
 
 function updateAIContext() {
@@ -712,12 +909,16 @@ function exportChatHistory() {
 function createStreamingBotMessage() {
     removeTypingIndicator();
     const el = document.getElementById('aiMessages');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-msg-wrapper';
     const div = document.createElement('div');
     div.className = 'ai-msg bot streaming';
     div.innerHTML = '<div class="label">Devin</div><span class="streaming-content"></span><span class="streaming-cursor">▊</span>';
-    el.appendChild(div);
+    wrapper.appendChild(div);
+    el.appendChild(wrapper);
     el.scrollTop = el.scrollHeight;
     streamingMsgEl = div;
+    streamingMsgEl._wrapper = wrapper;
     streamingFullText = '';
     return div;
 }
@@ -748,6 +949,21 @@ function finalizeStreamingBotMessage(text) {
     fb.id = fid;
     fb.innerHTML = `<button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button>`;
     streamingMsgEl.appendChild(fb);
+    const escaped = text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+    const wrapper = streamingMsgEl._wrapper;
+    if (wrapper) {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-copy-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1500);
+            }).catch(() => {});
+        };
+        wrapper.appendChild(copyBtn);
+    }
     streamingFullText = text;
     conversationHistory.push({ role: 'bot', text });
     if (conversationHistory.length > MAX_HISTORY) conversationHistory.shift();
@@ -1262,11 +1478,17 @@ function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
 }
 
+function autoGrowAIInput(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
 function sendAI() {
     const input = document.getElementById('aiInput');
     const q = input.value.trim();
     if (!q) return;
     input.value = '';
+    autoGrowAIInput(input);
     askAI(q).catch(() => {});
 }
 
@@ -1285,7 +1507,15 @@ const suggestionSets = {
     swift: ["Optionals explained", "Protocols vs classes", "ARC memory guide", "Closures capture rules", "Practice: write a struct"],
     cloud: ["What is cloud computing?", "IaaS vs PaaS vs SaaS", "Serverless explained", "Containers vs VMs", "Practice: deploy something"],
     mongodb: ["Documents vs tables", "CRUD in MongoDB", "Aggregation pipeline", "Indexes in MongoDB", "Practice: write a query"],
-    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation guide", "Abstract vs interface", "Composition vs inheritance"]
+    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation guide", "Abstract vs interface", "Composition vs inheritance"],
+    gamedev: ["ECS explained simply", "Game loop patterns", "Physics for beginners", "Optimization tips"],
+    godot: ["GDscript basics", "Scene system explained", "Signals vs groups", "Practice: build a scene"],
+    unity: ["MonoBehaviour lifecycle", "Prefab system guide", "Unity Physics tips", "Practice: build a prefab"],
+    unreal: ["Blueprint vs C++", "Chaos physics guide", "UMG UI basics", "Practice: build a widget"],
+    mobile: ["Touch input handling", "Mobile optimization", "Battery life tips", "Store submission guide"],
+    react: ["What is JSX?", "useState vs useReducer", "Props vs state", "Practice: build a component"],
+    vue: ["Reactivity explained", "Composition API guide", "Vue Router basics", "Practice: build a component"],
+    node: ["What is Node.js?", "Express basics", "File system guide", "Practice: build a server"],
 };
 
 function getDynamicSuggestions() {
@@ -1344,9 +1574,35 @@ function getDynamicSuggestions() {
             "Testing": ["How to write tests", "What is TDD?", "Jest for beginners", "Practice: test a function"],
             "SQL": ["SELECT vs INSERT", "JOIN types explained", "WHERE clause filter", "Practice: write a query"],
             "Git": ["How to commit", "Branching explained", "Merge vs rebase", "Practice: git workflow"],
+            "DOM": ["What is the DOM?", "Query selectors guide", "Event listeners explained", "Practice: manipulate the DOM"],
+            "Events": ["Event types explained", "Event delegation", "Event propagation (bubbling)", "Practice: handle a click"],
+            "Promises": ["What is a Promise?", "Promise chaining", "Promise.all explained", "Practice: use a Promise"],
+            "Modules": ["Import vs require", "Named vs default exports", "Module bundlers explained", "Practice: create a module"],
+            "JSON": ["JSON.parse vs stringify", "Working with JSON data", "Fetching JSON from APIs", "Practice: parse JSON"],
+            "Fetch": ["How to use fetch()", "GET vs POST requests", "Handling responses", "Practice: call an API"],
+            "Closures": ["What is a closure?", "Lexical scope explained", "Practical closure examples", "Practice: write a closure"],
+            "Prototypes": ["Prototype chain explained", "Proto vs prototype", "ES6 classes are syntactic sugar", "Practice: prototype method"],
+            "this": ["How 'this' works", "Arrow functions vs this", "Call, apply, bind", "Practice: control 'this'"],
+            "Map": ["Map vs Object", "Map methods guide", "Set data structure", "Practice: use Map and Set"],
+            "Generators": ["What is a generator?", "Yield keyword explained", "Generator use cases", "Practice: write a generator"],
+            "Regex": ["Common regex patterns", "Test vs exec", "Groups and capture", "Practice: regex exercise"],
+            "Web APIs": ["LocalStorage guide", "Geolocation API", "Canvas basics", "Practice: use a Web API"],
+            "Strict Mode": ["What is strict mode?", "Benefits of strict mode", "Common strict mode errors", "Practice: use strict"],
+            "Template Literals": ["String interpolation", "Multi-line strings", "Tagged templates", "Practice: template literals"],
+            "Destructuring": ["Array destructuring", "Object destructuring", "Nested destructuring", "Practice: destructure data"],
+            "Spread": ["Spread operator guide", "Rest parameters", "Spread vs concat", "Practice: use spread"],
+            "Ternary": ["Ternary operator syntax", "When to use ternary", "Nested ternaries", "Practice: use ternary"],
+            "Nullish": ["Nullish coalescing ??", "Optional chaining ?.", "Logical OR vs ??", "Practice: use ?. and ??"],
+            "Truthy": ["Truthy and falsy values", "Equality comparisons", "Type coercion explained", "Practice: check truthiness"],
+            "Scope": ["Global vs local scope", "Block scope with let/const", "Hoisting explained", "Practice: scope exercise"],
+            "Hoisting": ["What is hoisting?", "Var vs let hoisting", "Function declarations hoisted", "Practice: hoisting quiz"],
+            "IIFE": ["What is an IIFE?", "Module pattern with IIFE", "Private variables", "Practice: write an IIFE"],
+            "Memoization": ["What is memoization?", "Caching function results", "Performance optimization", "Practice: memoize a function"],
+            "Debounce": ["What is debouncing?", "Debounce vs throttle", "Real-world use cases", "Practice: debounce input"],
         };
+        const topicLC = currentTopic.toLowerCase();
         for (const [key, hints] of Object.entries(topHints)) {
-            if (currentTopic.toLowerCase().includes(key.toLowerCase())) return hints;
+            if (topicLC.includes(key.toLowerCase())) return hints;
         }
         return [`Explain ${currentTopic}`, `Practice: ${currentTopic.toLowerCase()} exercise`, "Show me an example", "Common mistakes"];
     }
@@ -1549,6 +1805,7 @@ function updateAISuggestions() {
         if (currentTopic) buttons.push(`<button onclick="generateQuiz()" style="background:#f59e0b;color:#000;">📝 Quiz</button>`);
         buttons.push(`<button onclick="showLearningPath()" style="background:#8b5cf6;color:#000;">📚 Path</button>`);
     }
+    buttons.push(`<button class="ai-dismiss-btn" onclick="document.getElementById('aiSuggestions').innerHTML=''" title="Dismiss suggestions">✕</button>`);
     el.innerHTML = buttons.join('');
 }
 

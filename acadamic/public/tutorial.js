@@ -236,7 +236,7 @@ class TutorialManager {
             + '<div class="tutorial-stuck-tip"><strong>Your task:</strong> ' + step.task + '</div>'
             + '<div class="tutorial-stuck-actions">'
             + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); openCheatsheet()">\uD83D\uDCD6 Open Cheatsheet</button>'
-            + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); toggleAI(); setTimeout(function() { askAI(\'Help me with ' + step.topic + ' in ' + langName + '\'); }, 300)">\uD83E\uDD16 Ask Devin</button>'
+            + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); toggleAI(); setTimeout(function() { askAI(\'I\\\'m doing a tutorial step on ' + step.topic + ' in ' + langName + '. My task is: ' + step.task.replace(/<[^>]*>/g, '') + '. Can you help me?\'); }, 300)">\uD83E\uDD16 Ask Devin</button>'
             + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); tutorialManager.resetCurrentCode()">\uD83D\uDD04 Reset code to original</button>'
             + '</div>'
             + '</div>';
