@@ -1,10 +1,16 @@
 const LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
     rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
     swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
     mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
     aws: 'aws', azure: 'azure', gcp: 'gcp', cloud: 'cloud',
+    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
+    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
+    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
+    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
+    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
+    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
 };
 const NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {

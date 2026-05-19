@@ -177,7 +177,7 @@ let total = 30;  // 10+20 computed at compile time!
   },
   "All Languages Supported": {
     "All Languages Supported": {
-      exp: `<p>This Compiler Explorer analyzes code from <strong>all 15+ languages</strong> in Doge's Lab! The tokenizer and AST builder adapt to each language's syntax.</p>
+      exp: `<p>This Compiler Explorer analyzes code from <strong>all 15+ languages</strong> in Kodex's Lab! The tokenizer and AST builder adapt to each language's syntax.</p>
 <p><strong>How it works across languages:</strong></p>
 <ul>
 <li><strong>Comment styles:</strong> <code>//</code> (JS/TS/C/C++/etc.), <code>#</code> (Python/Docker), <code>--</code> (SQL)</li>

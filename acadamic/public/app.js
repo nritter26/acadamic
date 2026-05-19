@@ -4,16 +4,26 @@ let currentPhase = '';
 let currentTopic = '';
 let currentLevel = 'all';
 let currentCompletionFilter = 'all';
+let currentEngineFilter = 'all';
+let currentMobilePlatform = 'all';
 let collapsedPhases = new Set();
 
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
 var LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go',
+    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
     rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql',
+    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql', mobile: 'mobile', backend: 'backend',
     mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
     mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
     cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
+    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
+    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
+    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
+    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
+    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
+    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
+    bootstrap: 'bootstrap', django: 'django', flask: 'flask',
+    fastapi: 'fastapi', spring: 'spring',
 };
 var NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {
@@ -182,6 +192,53 @@ function setLevel(level) {
     filterTopics(searchInput ? searchInput.value : '');
 }
 
+function renderEngineBar() {
+    const engineBarEl = document.getElementById('engine-bar');
+    const engines = [
+        { id: 'all', label: 'All Engines' },
+        { id: 'godot', label: 'Godot' },
+        { id: 'unity', label: 'Unity' },
+        { id: 'unreal', label: 'Unreal' },
+    ];
+    let html = '';
+    for (const e of engines) {
+        const active = e.id === currentEngineFilter ? ' active' : '';
+        html += `<button class="engine-btn${active}" onclick="setEngineFilter('${e.id}')">${e.label}</button>`;
+    }
+    engineBarEl.innerHTML = html;
+    engineBarEl.style.display = 'flex';
+}
+
+function setEngineFilter(engine) {
+    currentEngineFilter = engine;
+    renderEngineBar();
+    const searchInput = document.getElementById('topic-search');
+    filterTopics(searchInput ? searchInput.value : '');
+}
+
+function renderPlatformBar() {
+    const bar = document.getElementById('platform-bar');
+    const platforms = [
+        { id: 'android', label: 'Android' },
+        { id: 'ios', label: 'iOS' },
+    ];
+    let html = '';
+    for (const p of platforms) {
+        const active = p.id === currentMobilePlatform ? ' active' : '';
+        html += `<button class="platform-btn${active}" data-platform="${p.id}" onclick="setPlatform('${p.id}')">${p.label}</button>`;
+    }
+    bar.innerHTML = html;
+    bar.style.display = 'flex';
+}
+
+function setPlatform(platform) {
+    currentMobilePlatform = platform;
+    renderPlatformBar();
+    loadLangIntro(platform);
+    const searchInput = document.getElementById('topic-search');
+    filterTopics(searchInput ? searchInput.value : '');
+}
+
 function toggleCheatsheet() {
     const overlay = document.getElementById('cheatsheetOverlay');
     const wasOpen = overlay.classList.contains('open');
@@ -199,6 +256,30 @@ function loadCheatsheet() {
             document.getElementById('output').innerText = '// Answer revealed for: ' + ch.title;
             return;
         }
+    }
+
+    const csData = cheatsheets && cheatsheets[currentLang];
+    if (csData && Object.keys(csData).length > 0) {
+        let html = '';
+        let idx = 0;
+        for (const section of Object.keys(csData)) {
+            const snippets = csData[section];
+            html += `<div class="cs-section">`;
+            html += `<div class="cs-section-title">${section}</div>`;
+            for (const code of snippets) {
+                const codeHtml = code
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
+                    .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
+                html += `<div class="cs-code">${codeHtml}</div>`;
+                idx++;
+            }
+            html += `</div>`;
+        }
+        document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} snippets)`;
+        document.getElementById('cheatsheetBody').innerHTML = html;
+        toggleCheatsheet();
+        return;
     }
 
     const langData = courseData[currentLang];
@@ -221,17 +302,13 @@ function loadCheatsheet() {
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
                 .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
-            html += `<div class="cs-topic${isActive ? ' cs-active' : ''}">`;
-            html += `<div class="cs-topic-title">${name}</div>`;
-            html += `<div class="cs-desc">${t.exp}</div>`;
             html += `<div class="cs-code">${codeHtml}</div>`;
-            html += `</div>`;
             idx++;
         }
         html += `</div>`;
     }
 
-    document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} topics)`;
+    document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} snippets)`;
     document.getElementById('cheatsheetBody').innerHTML = html;
     toggleCheatsheet();
 }
@@ -349,6 +426,10 @@ function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
     if (!code.trim()) { out.innerText = "// No code to run"; return; }
+    if (currentLang === 'git') {
+        out.innerText = processGitCommand(code);
+        return;
+    }
     setRunLoading(true);
     out.innerText = "// Running...";
 
@@ -1244,660 +1325,8 @@ function switchOOPLang(lang) {
     initOOPSession();
 }
 
-// Schema Designer
-let schemaTables = [];
-let schemaNextId = 1;
+// Schema Designer lives in public/schema.js
 
-const schemaTypes = ['INT', 'SERIAL', 'BIGINT', 'VARCHAR(255)', 'TEXT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'DECIMAL', 'UUID', 'JSONB', 'FLOAT'];
-
-function toggleSchemaDesigner() {
-    const el = document.getElementById('schemaDesigner');
-    el.classList.toggle('open');
-    const editor = document.getElementById('editor');
-    editor.style.display = el.classList.contains('open') ? 'none' : 'block';
-    if (el.classList.contains('open') && schemaTables.length === 0) {
-        if (!schemaLoad()) {
-            schemaAddTable();
-            schemaAddTable();
-        } else {
-            schemaRender();
-        }
-    }
-}
-
-function schemaAddTable() {
-    const id = schemaNextId++;
-    schemaTables.push({
-        id, name: `table_${id}`, x: 10 + (schemaTables.length * 20) % 200,
-        y: 10 + Math.floor(schemaTables.length / 3) * 40,
-        cols: [
-            { name: 'id', type: 'SERIAL', pk: true, fk: null },
-            { name: 'name', type: 'VARCHAR(255)', pk: false, fk: null }
-        ]
-    });
-    schemaRender();
-}
-
-function schemaRemoveTable(id) {
-    schemaTables = schemaTables.filter(t => t.id !== id);
-    schemaTables.forEach(t => {
-        t.cols.forEach(c => {
-            if (c.fk && c.fk.tableId === id) c.fk = null;
-        });
-    });
-    schemaRender();
-}
-
-function schemaAddCol(tableId) {
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table) return;
-    table.cols.push({ name: 'col', type: 'TEXT', pk: false, fk: null });
-    schemaRender();
-}
-
-function schemaRemoveCol(tableId, colIdx) {
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table || table.cols.length <= 1) return;
-    table.cols.splice(colIdx, 1);
-    schemaRender();
-}
-
-let schemaAbortController = null;
-
-const SCHEMA_STORAGE_KEY = 'dogeslab_schema';
-
-function schemaSave() {
-    try { localStorage.setItem(SCHEMA_STORAGE_KEY, JSON.stringify(schemaTables)); } catch {}
-}
-
-function schemaLoad() {
-    try {
-        const saved = localStorage.getItem(SCHEMA_STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                schemaTables = parsed;
-                const maxId = parsed.reduce((m, t) => Math.max(m, t.id || 0), 0);
-                schemaNextId = maxId + 1;
-                return true;
-            }
-        }
-    } catch {}
-    return false;
-}
-
-function schemaRender() {
-    if (schemaAbortController) schemaAbortController.abort();
-    schemaAbortController = new AbortController();
-    schemaSave();
-    const signal = schemaAbortController.signal;
-
-    const canvas = document.getElementById('schemaCanvas');
-    canvas.innerHTML = '';
-
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    svg.style.overflow = 'visible';
-    svg.id = 'schemaLineLayer';
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    defs.innerHTML = '<marker id="fkArrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#f59e0b"/></marker><marker id="fkCircle" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><circle cx="4" cy="4" r="3" fill="none" stroke="#f59e0b" stroke-width="1.5"/></marker>';
-    svg.appendChild(defs);
-    canvas.appendChild(svg);
-
-    for (const table of schemaTables) {
-        const el = document.createElement('div');
-        el.className = 'schema-table';
-        el.style.left = table.x + 'px';
-        el.style.top = table.y + 'px';
-        el.dataset.tableId = table.id;
-
-        let html = `<div class="st-header">
-            <input value="${table.name}" onchange="schemaRenameTable(${table.id}, this.value)" spellcheck="false">
-            <button class="st-del" onclick="schemaRemoveTable(${table.id})">✕</button>
-        </div><div class="st-body">`;
-
-        table.cols.forEach((col, i) => {
-            const pkBadge = col.pk ? 'PK' : '';
-            const fkBadge = col.fk ? 'FK' : '';
-            const isFKTarget = schemaTables.some(t => t.cols.some(c => c.fk && c.fk.tableId === table.id && c.fk.colIdx === i));
-            const hasFK = !!col.fk;
-            const fkLabel = col.fk ? (() => { const t = schemaTables.find(x => x.id === col.fk.tableId); return t && t.cols[col.fk.colIdx] ? `FK→${t.name}.${t.cols[col.fk.colIdx].name}` : 'FK'; })() : '';
-            const rowClasses = ['st-row'];
-            if (isFKTarget) rowClasses.push('fk-highlight');
-            if (hasFK) rowClasses.push('has-fk');
-            const handleContent = col.pk ? 'PK' : (col.fk ? 'FK' : '~>');
-            const handleTitle = col.fk ? (fkLabel ? `FK → ${fkLabel} (click to remove)` : 'FK (click to remove)') : (col.pk ? 'Drag to link this PK as FK target' : 'Drag to another column to create FK');
-            html += `<div class="${rowClasses.join(' ')}" data-table-id="${table.id}" data-col-idx="${i}">
-                <span class="st-pk schema-fk-handle" title="${handleTitle}">${handleContent}</span>
-                <input value="${col.name}" onchange="schemaUpdateCol(${table.id}, ${i}, 'name', this.value)" spellcheck="false" placeholder="col">
-                <select onchange="schemaUpdateCol(${table.id}, ${i}, 'type', this.value)">
-                    ${schemaTypes.map(t => `<option ${t === col.type ? 'selected' : ''}>${t}</option>`).join('')}
-                </select>
-                <input type="checkbox" ${col.pk ? 'checked' : ''} onchange="schemaTogglePK(${table.id}, ${i})" title="Primary Key">
-                <button class="st-del-col" onclick="schemaRemoveCol(${table.id}, ${i})">✕</button>
-            </div>`;
-        });
-
-        html += `</div><div class="st-add-row">
-            <input placeholder="col name" id="newCol-${table.id}" onkeydown="if(event.key==='Enter')schemaAddCol(${table.id})">
-            <button onclick="schemaAddCol(${table.id})">+</button>
-        </div>`;
-
-        el.innerHTML = html;
-
-        let isDragging = false, startX, startY, origX, origY;
-        el.addEventListener('mousedown', e => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
-            isDragging = true;
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.getBoundingClientRect();
-            startX = e.clientX; startY = e.clientY;
-            origX = table.x; origY = table.y;
-        });
-        document.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            table.x = origX + (e.clientX - startX);
-            table.y = origY + (e.clientY - startY);
-            el.style.left = table.x + 'px';
-            el.style.top = table.y + 'px';
-            schemaDrawRelationLines();
-        }, { signal });
-        document.addEventListener('mouseup', () => { isDragging = false; }, { signal });
-
-        canvas.appendChild(el);
-    }
-    schemaDrawRelationLines();
-
-    if (linkingState) {
-        const srcRow = canvas.querySelector(`.st-row[data-table-id="${linkingState.tableId}"][data-col-idx="${linkingState.colIdx}"]`);
-        if (srcRow) {
-            srcRow.classList.add('linking-source');
-            const h = srcRow.querySelector('.schema-fk-handle');
-            if (h) h.classList.add('linking');
-        }
-        document.querySelectorAll('.st-row').forEach(r => {
-            const tid = parseInt(r.dataset.tableId);
-            if (!isNaN(tid) && tid !== linkingState.tableId) r.classList.add('linking-valid-target');
-        });
-    }
-
-    if (schemaActiveTab === 'erd') schemaRenderERD();
-}
-
-let schemaFKDragSource = null;
-let schemaActiveTab = 'design';
-let linkingState = null;
-
-function linkClear() {
-    if (linkingState) {
-        linkingState = null;
-        document.querySelectorAll('.st-row.linking-source, .st-row.linking-valid-target, .schema-fk-handle.linking, .erd-row.erd-linking-source, .erd-row.erd-linking-valid-target')
-            .forEach(r => r.classList.remove('linking-source', 'linking-valid-target', 'linking', 'erd-linking-source', 'erd-linking-valid-target'));
-        document.body.style.cursor = '';
-    }
-}
-
-function linkStart(tableId, colIdx) {
-    linkClear();
-    linkingState = { tableId, colIdx };
-    document.body.style.cursor = 'crosshair';
-    if (schemaActiveTab === 'erd') schemaRenderERD();
-    else schemaRender();
-}
-
-function linkEnd(targetTableId, targetColIdx) {
-    if (!linkingState) return;
-    if (targetTableId === linkingState.tableId) { linkClear(); return; }
-    const srcTable = schemaTables.find(t => t.id === linkingState.tableId);
-    const srcCol = srcTable?.cols[linkingState.colIdx];
-    const tgtTable = schemaTables.find(t => t.id === targetTableId);
-    const tgtCol = tgtTable?.cols[targetColIdx];
-    if (srcCol && tgtCol) {
-        srcCol.fk = { tableId: targetTableId, colIdx: targetColIdx };
-    }
-    linkClear();
-    schemaRender();
-    if (schemaActiveTab === 'erd') schemaRenderERD();
-}
-
-function schemaDrawRelationLines() {
-    const svg = document.getElementById('schemaLineLayer');
-    if (!svg) return;
-    const oldGroup = svg.querySelector('g');
-    if (oldGroup) oldGroup.remove();
-    const canvas = document.getElementById('schemaCanvas');
-    if (canvas.offsetParent === null) return;
-    const canvasRect = canvas.getBoundingClientRect();
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    group.style.pointerEvents = 'none';
-
-    for (const table of schemaTables) {
-        for (const col of table.cols) {
-            if (!col.fk) continue;
-            const targetTable = schemaTables.find(t => t.id === col.fk.tableId);
-            if (!targetTable) continue;
-            const targetCol = targetTable.cols[col.fk.colIdx];
-            if (!targetCol) continue;
-            const srcEl = canvas.querySelector(`[data-table-id="${table.id}"]`);
-            const tgtEl = canvas.querySelector(`[data-table-id="${targetTable.id}"]`);
-            if (!srcEl || !tgtEl) continue;
-            const sr = srcEl.getBoundingClientRect();
-            const tr = tgtEl.getBoundingClientRect();
-            const srcRows = srcEl.querySelectorAll('.st-row');
-            const tgtRows = tgtEl.querySelectorAll('.st-row');
-            const srcRow = srcRows[table.cols.indexOf(col)];
-            const tgtRow = tgtRows[col.fk.colIdx];
-            let y1 = sr.top + sr.height / 2 - canvasRect.top;
-            let x1 = sr.right - canvasRect.left;
-            if (srcRow) {
-                const srRect = srcRow.getBoundingClientRect();
-                y1 = srRect.top + srRect.height / 2 - canvasRect.top;
-                x1 = srRect.right - canvasRect.left;
-            }
-            let y2 = tr.top + tr.height / 2 - canvasRect.top;
-            let x2 = tr.left - canvasRect.left;
-            if (tgtRow) {
-                const trRect = tgtRow.getBoundingClientRect();
-                y2 = trRect.top + trRect.height / 2 - canvasRect.top;
-                x2 = trRect.left - canvasRect.left;
-            }
-            const dx = Math.abs(x2 - x1);
-            const midX = (x1 + x2) / 2;
-            const offset = Math.max(40, dx * 0.4);
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`);
-            path.setAttribute('stroke', '#f59e0b');
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('fill', 'none');
-            path.setAttribute('marker-start', 'url(#fkCircle)');
-            path.setAttribute('marker-end', 'url(#fkArrow)');
-            group.appendChild(path);
-
-            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            label.setAttribute('x', x1 + 6);
-            label.setAttribute('y', y1 + 3);
-            label.setAttribute('fill', '#f59e0b');
-            label.setAttribute('font-size', '8');
-            label.setAttribute('font-weight', 'bold');
-            label.textContent = '*';
-            group.appendChild(label);
-
-            const label2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            label2.setAttribute('x', x2 - 6);
-            label2.setAttribute('y', y2 + 3);
-            label2.setAttribute('fill', '#10b981');
-            label2.setAttribute('font-size', '8');
-            label2.setAttribute('font-weight', 'bold');
-            label2.setAttribute('text-anchor', 'end');
-            label2.textContent = '1';
-            group.appendChild(label2);
-        }
-    }
-    svg.appendChild(group);
-}
-
-function handleDesignHandleClick(e) {
-    const handle = e.target.closest('.schema-fk-handle');
-    if (!handle) return;
-    if (!document.getElementById('schemaDesigner').classList.contains('open')) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const row = handle.closest('[data-col-idx]');
-    if (!row) return;
-    const tableId = parseInt(row.dataset.tableId);
-    const colIdx = parseInt(row.dataset.colIdx);
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table) return;
-    const col = table.cols[colIdx];
-    if (!col) return;
-
-    if (linkingState) {
-        const tColIdx = parseInt(row.dataset.colIdx);
-        linkEnd(tableId, tColIdx);
-        return;
-    }
-
-    if (col.fk) { col.fk = null; schemaRender(); return; }
-
-    const canvas = document.getElementById('schemaCanvas');
-    const svg = document.getElementById('schemaLineLayer');
-    const cr = canvas.getBoundingClientRect();
-    const hr = handle.getBoundingClientRect();
-    const mx = e.clientX, my = e.clientY;
-    let isDragging = false;
-    let line = null;
-
-    const onMove = function(ev) {
-        if (!isDragging && (Math.abs(ev.clientX - mx) > 4 || Math.abs(ev.clientY - my) > 4)) {
-            isDragging = true;
-            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('stroke', '#f59e0b');
-            line.setAttribute('stroke-width', '2');
-            line.setAttribute('stroke-dasharray', '5,3');
-            svg.appendChild(line);
-            schemaFKDragSource = {
-                tableId, colIdx, line,
-                startX: hr.left + hr.width / 2 - cr.left,
-                startY: hr.top + hr.height / 2 - cr.top
-            };
-        }
-        if (isDragging && schemaFKDragSource) {
-            const r = canvas.getBoundingClientRect();
-            schemaFKDragSource.line.setAttribute('x1', schemaFKDragSource.startX);
-            schemaFKDragSource.line.setAttribute('y1', schemaFKDragSource.startY);
-            schemaFKDragSource.line.setAttribute('x2', ev.clientX - r.left);
-            schemaFKDragSource.line.setAttribute('y2', ev.clientY - r.top);
-        }
-    };
-
-    const onMoveTarget = function(ev) {
-        document.querySelectorAll('.st-row.fk-drag-target').forEach(r => r.classList.remove('fk-drag-target'));
-        if (!isDragging || !schemaFKDragSource) return;
-        const el = document.elementFromPoint(ev.clientX, ev.clientY);
-        const tr = el ? el.closest('[data-col-idx]') : null;
-        if (tr) {
-            const tid = parseInt(tr.dataset.tableId);
-            if (tid !== schemaFKDragSource.tableId) tr.classList.add('fk-drag-target');
-        }
-    };
-
-    const onUp = function(ev) {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mousemove', onMoveTarget);
-        document.removeEventListener('mouseup', onUp);
-        document.querySelectorAll('.st-row.fk-drag-target').forEach(r => r.classList.remove('fk-drag-target'));
-        if (isDragging && schemaFKDragSource) {
-            if (schemaFKDragSource.line.parentNode) schemaFKDragSource.line.parentNode.removeChild(schemaFKDragSource.line);
-            const target = document.elementFromPoint(ev.clientX, ev.clientY);
-            const targetRow = target ? target.closest('[data-col-idx]') : null;
-            if (targetRow) {
-                const tTableId = parseInt(targetRow.dataset.tableId);
-                const tColIdx = parseInt(targetRow.dataset.colIdx);
-                if (!isNaN(tTableId) && !isNaN(tColIdx) && tTableId !== schemaFKDragSource.tableId) {
-                    const tTable = schemaTables.find(t => t.id === tTableId);
-                    if (tTable && tTable.cols[tColIdx]) {
-                        const sourceCol = schemaTables.find(t => t.id === schemaFKDragSource.tableId).cols[schemaFKDragSource.colIdx];
-                        sourceCol.fk = { tableId: tTable.id, colIdx: tColIdx };
-                    }
-                }
-            }
-            schemaFKDragSource = null;
-            schemaRender();
-            if (schemaActiveTab === 'erd') schemaRenderERD();
-        } else if (!isDragging) {
-            linkStart(tableId, colIdx);
-        }
-    };
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mousemove', onMoveTarget);
-    document.addEventListener('mouseup', onUp);
-}
-
-document.addEventListener('mousedown', handleDesignHandleClick);
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && linkingState) { linkClear(); schemaRender(); if (schemaActiveTab === 'erd') schemaRenderERD(); }
-});
-
-function schemaSwitchTab(tab) {
-    schemaActiveTab = tab;
-    linkClear();
-    document.getElementById('schemaTabDesign').classList.toggle('active', tab === 'design');
-    document.getElementById('schemaTabErd').classList.toggle('active', tab === 'erd');
-    document.getElementById('schemaCanvas').style.display = tab === 'design' ? 'block' : 'none';
-    document.getElementById('erdCanvas').style.display = tab === 'erd' ? 'block' : 'none';
-    document.getElementById('schemaAddTableBtn').style.display = tab === 'design' ? '' : 'none';
-    if (tab === 'erd') schemaRenderERD();
-}
-
-function schemaAutoLayout() {
-    if (schemaTables.length === 0) return;
-    const padding = 30;
-    const tableW = 220;
-    const gapX = 60;
-    const gapY = 60;
-    const cols = Math.max(1, Math.ceil(Math.sqrt(schemaTables.length)));
-    schemaTables.forEach((table, idx) => {
-        const c = idx % cols;
-        const r = Math.floor(idx / cols);
-        table.x = padding + c * (tableW + gapX);
-        table.y = padding + r * (gapY + 120);
-    });
-    schemaRender();
-    if (schemaActiveTab === 'erd') schemaRenderERD();
-}
-
-function erdHandleRowClick(e) {
-    const row = e.target.closest('.erd-row');
-    if (!row) return;
-    const tableEl = row.closest('.erd-table');
-    if (!tableEl) return;
-    const tableId = parseInt(tableEl.dataset.tableId);
-    if (isNaN(tableId)) return;
-    const colIdx = parseInt(row.dataset.colIdx);
-    if (isNaN(colIdx)) return;
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table) return;
-    const col = table.cols[colIdx];
-    if (!col) return;
-
-    if (linkingState) {
-        linkEnd(tableId, colIdx);
-        return;
-    }
-
-    if (col.fk) { col.fk = null; schemaRenderERD(); schemaRender(); return; }
-
-    linkStart(tableId, colIdx);
-}
-
-function schemaRenderERD() {
-    const canvas = document.getElementById('erdCanvas');
-    canvas.innerHTML = '';
-    if (schemaTables.length === 0) {
-        canvas.innerHTML = '<div style="color:#64748b; padding:40px; text-align:center; font-size:13px;">No tables defined. Switch to Design tab to create a schema.</div>';
-        return;
-    }
-
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    svg.style.overflow = 'visible';
-    svg.id = 'erdLineLayer';
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    defs.innerHTML = '<marker id="erdArrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#f59e0b"/></marker><marker id="erdCircle" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><circle cx="4" cy="4" r="3" fill="none" stroke="#f59e0b" stroke-width="1.5"/></marker>';
-    svg.appendChild(defs);
-    canvas.appendChild(svg);
-
-    schemaTables.forEach((table) => {
-        const el = document.createElement('div');
-        el.className = 'erd-table';
-        el.style.left = table.x + 'px';
-        el.style.top = table.y + 'px';
-        el.dataset.tableId = table.id;
-
-        const body = table.cols.map((c, i) => {
-            const isPK = c.pk;
-            const isFK = !!c.fk;
-            const tag = isPK ? '<span class="erd-pk">PK</span>' : (isFK ? '<span class="erd-fk">FK</span>' : '<span class="erd-pk"></span>');
-            const cls = ['erd-row'];
-            if (c.fk) cls.push('erd-has-fk');
-            return `<div class="${cls.join(' ')}" data-col-idx="${i}">${tag}<span class="erd-name">${c.name}</span><span class="erd-type">${c.type}</span></div>`;
-        }).join('');
-
-        el.innerHTML = `<div class="erd-header"><span class="erd-icon">▦</span>${table.name}</div><div class="erd-body">${body}</div>`;
-
-        let isDragging = false, startX, startY, origX, origY;
-        el.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.erd-row')) return;
-            isDragging = true;
-            startX = e.clientX; startY = e.clientY;
-            origX = table.x; origY = table.y;
-        });
-        document.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
-            table.x = origX + (e.clientX - startX);
-            table.y = origY + (e.clientY - startY);
-            el.style.left = table.x + 'px';
-            el.style.top = table.y + 'px';
-            schemaDrawERDLines();
-        }, { signal: schemaAbortController.signal });
-        document.addEventListener('mouseup', function() { isDragging = false; }, { signal: schemaAbortController.signal });
-
-        canvas.appendChild(el);
-    });
-
-    canvas.addEventListener('click', erdHandleRowClick);
-
-    if (linkingState) {
-        const srcRow = canvas.querySelector(`.erd-row[data-col-idx="${linkingState.colIdx}"]`);
-        if (srcRow) {
-            const parentTable = srcRow.closest('.erd-table');
-            if (parentTable && parseInt(parentTable.dataset.tableId) === linkingState.tableId) {
-                srcRow.classList.add('erd-linking-source');
-            }
-        }
-        canvas.querySelectorAll('.erd-row').forEach(r => {
-            const parent = r.closest('.erd-table');
-            if (parent && parseInt(parent.dataset.tableId) !== linkingState.tableId) {
-                r.classList.add('erd-linking-valid-target');
-            }
-        });
-    }
-
-    setTimeout(() => schemaDrawERDLines(), 50);
-}
-
-function schemaDrawERDLines() {
-    const erdSvg = document.getElementById('erdLineLayer');
-    if (!erdSvg) return;
-    const oldGroup = erdSvg.querySelector('g');
-    if (oldGroup) oldGroup.remove();
-    const canvas = document.getElementById('erdCanvas');
-    const cr = canvas.getBoundingClientRect();
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    group.style.pointerEvents = 'none';
-
-    for (const table of schemaTables) {
-        for (const col of table.cols) {
-            if (!col.fk) continue;
-            const targetTable = schemaTables.find(t => t.id === col.fk.tableId);
-            if (!targetTable) continue;
-            const srcEl = canvas.querySelector(`.erd-table[data-table-id="${table.id}"]`);
-            const tgtEl = canvas.querySelector(`.erd-table[data-table-id="${targetTable.id}"]`);
-            if (!srcEl || !tgtEl) continue;
-            const sr = srcEl.getBoundingClientRect();
-            const tr = tgtEl.getBoundingClientRect();
-            const srcRows = srcEl.querySelectorAll('.erd-row');
-            const tgtRows = tgtEl.querySelectorAll('.erd-row');
-            const srcRow = srcRows[table.cols.indexOf(col)];
-            const tgtRow = tgtRows[col.fk.colIdx];
-            let y1 = sr.top + sr.height / 2 - cr.top;
-            let x1 = sr.right - cr.left;
-            if (srcRow) { const r2 = srcRow.getBoundingClientRect(); y1 = r2.top + r2.height / 2 - cr.top; x1 = r2.right - cr.left; }
-            let y2 = tr.top + tr.height / 2 - cr.top;
-            let x2 = tr.left - cr.left;
-            if (tgtRow) { const r2 = tgtRow.getBoundingClientRect(); y2 = r2.top + r2.height / 2 - cr.top; x2 = r2.left - cr.left; }
-            const dx = Math.abs(x2 - x1);
-            const offset = Math.max(40, dx * 0.4);
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`);
-            path.setAttribute('stroke', '#f59e0b');
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-dasharray', '6,3');
-            path.setAttribute('marker-start', 'url(#erdCircle)');
-            path.setAttribute('marker-end', 'url(#erdArrow)');
-            group.appendChild(path);
-
-            const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            lbl.setAttribute('x', x1 + 6); lbl.setAttribute('y', y1 - 4);
-            lbl.setAttribute('fill', '#f59e0b'); lbl.setAttribute('font-size', '9');
-            lbl.setAttribute('font-weight', 'bold'); lbl.textContent = '*';
-            group.appendChild(lbl);
-
-            const lbl2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            lbl2.setAttribute('x', x2 - 6); lbl2.setAttribute('y', y2 - 4);
-            lbl2.setAttribute('fill', '#10b981'); lbl2.setAttribute('font-size', '9');
-            lbl2.setAttribute('font-weight', 'bold'); lbl2.setAttribute('text-anchor', 'end');
-            lbl2.textContent = '1';
-            group.appendChild(lbl2);
-        }
-    }
-    erdSvg.appendChild(group);
-}
-
-function schemaRenameTable(id, name) {
-    const table = schemaTables.find(t => t.id === id);
-    if (table) table.name = name.replace(/[^a-zA-Z0-9_]/g, '_');
-}
-
-function schemaUpdateCol(tableId, colIdx, field, value) {
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table) return;
-    if (field === 'name') value = value.replace(/[^a-zA-Z0-9_]/g, '_');
-    table.cols[colIdx][field] = value;
-}
-
-function schemaTogglePK(tableId, colIdx) {
-    const table = schemaTables.find(t => t.id === tableId);
-    if (!table) return;
-    table.cols[colIdx].pk = !table.cols[colIdx].pk;
-}
-
-function schemaClearAll() {
-    if (schemaTables.length === 0) return;
-    if (!confirm('Clear all tables?')) return;
-    schemaTables = [];
-    schemaRender();
-    document.getElementById('schemaSQLOutput').textContent = '-- Schema cleared';
-}
-
-function schemaGenerateSQL() {
-    if (schemaTables.length === 0) {
-        document.getElementById('schemaSQLOutput').textContent = '-- No tables defined';
-        return;
-    }
-    let sql = "-- Schema generated by Doge's Lab Schema Designer\n";
-    let constraints = [];
-
-    for (const table of schemaTables) {
-        const pkCols = table.cols.filter(c => c.pk).map(c => c.name);
-        sql += `\nCREATE TABLE ${table.name} (\n`;
-        sql += table.cols.map(c => {
-            let line = `    ${c.name} ${c.type}`;
-            if (c.pk && pkCols.length === 1) line += ' PRIMARY KEY';
-            if (c.fk) {
-                const t = schemaTables.find(x => x.id === c.fk.tableId);
-                const tc = t ? t.cols[c.fk.colIdx] : null;
-                if (t && tc) {
-                    constraints.push(`    FOREIGN KEY (${c.name}) REFERENCES ${t.name}(${tc.name})`);
-                }
-            }
-            return line;
-        }).join(',\n');
-        if (pkCols.length > 1) {
-            constraints.push(`    PRIMARY KEY (${pkCols.join(', ')})`);
-        }
-        if (constraints.length) {
-            sql += ',\n' + constraints.join(',\n');
-        }
-        sql += '\n);\n';
-        constraints = [];
-    }
-    document.getElementById('schemaSQLOutput').textContent = sql;
-}
 
 function runBenchmark() {
     const out = document.getElementById('output');
@@ -1982,8 +1411,8 @@ function renderQuiz() {
     const list = document.getElementById('topic-list');
     
     let html = '<div class="quiz-lang-bar">';
-    for (const l of ['js','ts','py','go','cs','kt','rs','swift','git','pg']) {
-        const names = { js:'JS', ts:'TS', py:'Python', go:'Go', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', git:'Git', pg:'SQL' };
+    for (const l of ['js','ts','py','go','java','cs','kt','rs','swift','git','pg','backend','c','cpp','zig']) {
+        const names = { js:'JS', ts:'TS', py:'Python', go:'Go', java:'Java', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', git:'Git', pg:'SQL', backend:'Backend', c:'C', cpp:'C++', zig:'Zig' };
         const active = l === quizLang ? 'active' : '';
         html += '<button class="quiz-lang-btn ' + active + '" onclick="switchQuizLang(\'' + l + '\')">' + names[l] + '</button>';
     }
@@ -2281,8 +1710,8 @@ function renderChallengeList() {
     const totalAll = challenges.length;
 
     let html = `<div class="challenge-lang-bar">`;
-    for (const l of ['js','py','go','ts','rs','swift']) {
-        const names = { js:'JS', py:'Python', go:'Go', ts:'TS', rs:'Rust', swift:'Swift' };
+    for (const l of ['js','py','go','java','ts','rs','swift','backend']) {
+        const names = { js:'JS', py:'Python', go:'Go', java:'Java', ts:'TS', rs:'Rust', swift:'Swift', backend:'Backend' };
         const active = l === challengeLang ? 'active' : '';
         const solved = Object.keys(progress).filter(k => k.startsWith(l + '_')).length;
         const total = (challengeData[l] || []).length;
@@ -2446,8 +1875,8 @@ function refreshChallengeProgress() {
     if (langBar) {
         const btns = langBar.querySelectorAll('.challenge-lang-btn');
         for (const btn of btns) {
-            for (const l of ['js','py','go','ts','rs','swift']) {
-                const names = { js:'JS', py:'Python', go:'Go', ts:'TS', rs:'Rust', swift:'Swift' };
+            for (const l of ['js','py','go','java','ts','rs','swift']) {
+                const names = { js:'JS', py:'Python', go:'Go', java:'Java', ts:'TS', rs:'Rust', swift:'Swift' };
                 if (btn.textContent.includes(names[l]) || btn.textContent.includes(l.toUpperCase())) {
                     const solved = Object.keys(progress).filter(k => k.startsWith(l + '_')).length;
                     const total = (challengeData[l] || []).length;
@@ -3011,7 +2440,19 @@ function filterTopics(query) {
             matchesCompletion = currentCompletionFilter === 'completed' ? isDone : !isDone;
         }
 
-        const show = matchesSearch && matchesLevel && matchesCompletion;
+        let matchesEngine = true;
+        if (currentEngineFilter !== 'all') {
+            const enginePhaseMap = { godot: 'GodotEngine', unity: 'UnityEngine', unreal: 'UnrealEngine' };
+            matchesEngine = (btn.dataset.phase || '') === enginePhaseMap[currentEngineFilter];
+        }
+
+        let matchesPlatform = true;
+        if (currentMobilePlatform !== 'all') {
+            const prefix = currentMobilePlatform === 'android' ? 'Android:' : 'iOS:';
+            matchesPlatform = (btn.dataset.phase || '').startsWith(prefix);
+        }
+
+        const show = matchesSearch && matchesLevel && matchesCompletion && matchesEngine && matchesPlatform;
         btn.style.display = show ? '' : 'none';
         if (show) visible++;
     });
@@ -3477,8 +2918,13 @@ setMode = function(lang) {
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
 
+    document.querySelectorAll('.header-extra-tabs .game-nav-btn').forEach(b => b.classList.remove('active'));
+
+    roadmapRendered = false;
     const roadmapBtn = document.getElementById('roadmap-btn');
     if (roadmapBtn) {
+        roadmapBtn.style.display = '';
+        roadmapBtn.title = 'View ' + (LANG_NAMES[lang] || lang) + ' Roadmap';
         roadmapBtn.style.display = (lang === 'js' || lang === 'ts' || lang === 'go' || lang === 'cpp' || lang === 'swift') ? '' : 'none';
         roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : lang === 'go' ? 'View Go Roadmap' : lang === 'cpp' ? 'View C++ Roadmap' : lang === 'swift' ? 'View Swift Roadmap' : 'View JavaScript Roadmap';
     }
@@ -3498,6 +2944,8 @@ setMode = function(lang) {
     if (lang === 'game') { document.getElementById('level-bar').style.display = 'none'; initGame(); updateAISuggestions(); return; }
     if (lang === 'oop') { document.getElementById('level-bar').style.display = 'none'; initOOPSession(); updateAISuggestions(); return; }
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
+    if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
+    if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); return; }
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';
@@ -3563,11 +3011,12 @@ setMode = function(lang) {
 
     currentLevel = 'all';
     currentCompletionFilter = 'all';
+    currentEngineFilter = 'all';
     currentLang = lang;
     const appEl = document.getElementById('app');
     appEl.className = lang + '-mode';
     // Hide workspace by default for JS mode, remove for others
-    if (lang === 'js') {
+    if (lang === 'js' || lang === 'java') {
         appEl.classList.add('hide-workspace');
         appEl.classList.remove('workspace-open');
     } else {
@@ -3600,8 +3049,36 @@ setMode = function(lang) {
 
     if (levelBar) renderLevelBar();
 
+    const engineBar = document.getElementById('engine-bar');
+    if (lang === 'gamedev') {
+        if (engineBar) renderEngineBar();
+    } else if (engineBar) {
+        engineBar.style.display = 'none';
+    }
+
+    if (lang === 'mobile') {
+        currentMobilePlatform = 'android';
+        const platformBar = document.getElementById('platform-bar');
+        if (platformBar) renderPlatformBar();
+    } else {
+        const platformBar = document.getElementById('platform-bar');
+        if (platformBar) platformBar.style.display = 'none';
+    }
+
     // Build topic list with collapsible phases, counts, badges
     let html = '';
+    const langDisplay = LANG_NAMES[lang] || lang;
+    const aboutTarget = lang === 'mobile' ? 'currentMobilePlatform' : `'${lang}'`;
+    if (lang === 'backend') {
+        html += `<div class="phase-header" onclick="setMode('api')" style="cursor:pointer;color:#f97316;border-color:#f97316;">
+            <span class="phase-toggle">▶</span>
+            <span class="phase-label-text" style="font-style:italic;color:#f97316;">API Client</span>
+        </div>`;
+    }
+    html += `<div class="phase-header" onclick="loadLangIntro(${aboutTarget})" style="cursor:pointer;">
+        <span class="phase-toggle">▼</span>
+        <span class="phase-label-text" style="font-style:italic;">About ${langDisplay}</span>
+    </div>`;
     let idx = 0;
     for (const phase in langData) {
         const topics = Object.keys(langData[phase]);
@@ -3634,12 +3111,8 @@ setMode = function(lang) {
 
     updateTopicDisplay();
 
-    if (Object.keys(langData).length > 0) {
-        const firstPhase = Object.keys(langData)[0];
-        const firstTopic = Object.keys(langData[firstPhase])[0];
-        loadTopic(firstPhase, firstTopic);
-    }
     updateAISuggestions();
+    loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
 };
 
 // ── EDITOR LINE NUMBERS ──
@@ -3756,6 +3229,15 @@ function toggleRoadmapView() {
 
     if (!wasOpen) {
         const body = document.getElementById('roadmapBody');
+        renderRoadmap(body);
+    }
+}
+
+function renderRoadmap(container) {
+    const langData = courseData[currentLang];
+    if (!langData) { roadmapRendered = false; return; }
+
+    const langName = LANG_NAMES[currentLang] || currentLang;
         renderRoadmap(body, currentLang);
     }
 }
@@ -3838,6 +3320,250 @@ function renderRoadmap(container, lang) {
     svg += `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker></defs>`;
     svg += '</svg>';
     container.innerHTML = svg;
+    roadmapRendered = true;
+}
+
+// ── LANGUAGE INTRO ──
+
+const langIntro = {
+    js: {
+        name: 'JavaScript',
+        what: 'JavaScript is a high-level, interpreted programming language that is one of the core technologies of the World Wide Web. It enables interactive web pages and is an essential part of web applications.',
+        usedFor: 'Building interactive web pages, web and mobile applications, server-side applications (Node.js), browser extensions, game development, and automation scripts.',
+        creator: 'Brendan Eich at Netscape Communications Corporation. Created in just 10 days in May 1995, it was originally called Mocha, then LiveScript, and finally JavaScript.',
+        code: '// JavaScript — the language of the web\nconsole.log("Hello, World!");\n\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet("JavaScript"));'
+    },
+    ts: {
+        name: 'TypeScript',
+        what: 'TypeScript is a strongly typed programming language that builds on JavaScript by adding static type definitions. It compiles to plain JavaScript and provides better tooling, error checking, and code maintainability at scale.',
+        usedFor: 'Large-scale web applications, enterprise software, Angular applications, and any project where type safety and better developer tooling are valuable.',
+        creator: 'Anders Hejlsberg at Microsoft. First released in October 2012, after two years of internal development at Microsoft.',
+        code: '// TypeScript — JavaScript with types\nfunction greet(name: string): string {\n  return `Hello, ${name}!`;\n}\n\nconst message: string = greet("TypeScript");\nconsole.log(message);'
+    },
+    py: {
+        name: 'Python',
+        what: 'Python is a high-level, interpreted programming language known for its readable syntax and comprehensive standard library. It emphasizes code readability and simplicity, making it one of the most beginner-friendly languages.',
+        usedFor: 'Web development, data science, machine learning, artificial intelligence, scientific computing, automation, scripting, backend services, and education.',
+        creator: 'Guido van Rossum. First released in 1991 as a successor to the ABC language. The name Python comes from Monty Python\'s Flying Circus.',
+        code: '# Python — readable and powerful\nprint("Hello, World!")\n\ndef greet(name):\n    return f"Hello, {name}!"\n\nprint(greet("Python"))'
+    },
+    go: {
+        name: 'Go',
+        what: 'Go (also called Golang) is a statically typed, compiled programming language designed for simplicity, efficiency, and concurrent programming. It features built-in concurrency primitives and fast compilation.',
+        usedFor: 'Cloud services, microservices, CLI tools, DevOps tooling, web servers, networking applications, and concurrent systems requiring high performance.',
+        creator: 'Robert Griesemer, Rob Pike, and Ken Thompson at Google. First announced in November 2009. Inspired by C, but with memory safety, garbage collection, and structural typing.',
+        code: '// Go — simple and fast\npackage main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, Go!")\n}\n\nfunc greet(name string) string {\n    return fmt.Sprintf("Hello, %s!", name)\n}'
+    },
+    rs: {
+        name: 'Rust',
+        what: 'Rust is a systems programming language focused on safety, speed, and concurrency. It guarantees memory safety without a garbage collector through its ownership system and borrow checker.',
+        usedFor: 'Systems programming, embedded devices, WebAssembly, CLI tools, game engines, operating systems, networking, and performance-critical applications.',
+        creator: 'Graydon Hoare at Mozilla Research. First released in 2010 as a personal project, then sponsored by Mozilla. Now governed by the Rust Foundation.',
+        code: '// Rust — safe and fast\nfn main() {\n    println!("Hello, Rust!");\n}\n\nfn greet(name: &str) -> String {\n    format!("Hello, {}!", name)\n}'
+    },
+    c: {
+        name: 'C',
+        what: 'C is a general-purpose, procedural programming language that gives developers low-level access to memory and system resources. It is one of the most influential languages in computing history.',
+        usedFor: 'Operating systems, embedded systems, firmware, hardware drivers, compilers, game engines, and performance-critical applications where direct hardware control is needed.',
+        creator: 'Dennis Ritchie at Bell Labs. Created between 1969 and 1973 for use with the Unix operating system. C remains one of the most widely used languages.',
+        code: '// C — the foundation of modern computing\n#include <stdio.h>\n\nint main() {\n    printf("Hello, C!\\n");\n    return 0;\n}\n\nvoid greet(char* name) {\n    printf("Hello, %s!\\n", name);\n}'
+    },
+    cpp: {
+        name: 'C++',
+        what: 'C++ is a cross-platform language that extends C with object-oriented, generic, and functional features. It provides high-level abstractions with low-level control over system resources.',
+        usedFor: 'Game development, GUI applications, real-time systems, high-frequency trading, embedded systems, browser engines, and performance-critical software.',
+        creator: 'Bjarne Stroustrup at Bell Labs. First developed in 1979 as "C with Classes". The name C++ was coined in 1983, with the ++ operator implying an increment to C.',
+        code: '// C++ — object-oriented and powerful\n#include <iostream>\n#include <string>\n\nint main() {\n    std::cout << "Hello, C++!" << std::endl;\n    return 0;\n}\n\nstd::string greet(std::string name) {\n    return "Hello, " + name + "!";\n}'
+    },
+    cs: {
+        name: 'C#',
+        what: 'C# (pronounced "C sharp") is a modern, object-oriented programming language designed for the .NET platform. It combines the power of C++ with the simplicity of Visual Basic.',
+        usedFor: 'Windows applications, web applications (ASP.NET), game development (Unity), mobile apps (Xamarin), cloud services, and enterprise software.',
+        creator: 'Anders Hejlsberg at Microsoft. First released in 2000 as part of the .NET initiative. C# has evolved significantly with features like async/await, LINQ, and pattern matching.',
+        code: '// C# — elegant and modern\nusing System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, C#!");\n    }\n    \n    static string Greet(string name) {\n        return $"Hello, {name}!";\n    }\n}'
+    },
+    kt: {
+        name: 'Kotlin',
+        what: 'Kotlin is a modern, statically typed programming language that runs on the Java Virtual Machine. It is fully interoperable with Java while offering more concise syntax and null safety.',
+        usedFor: 'Android app development, server-side applications, web development (Kotlin/JS), multiplatform mobile apps, and replacing Java in existing projects.',
+        creator: 'JetBrains (the company behind IntelliJ IDEA). First released in 2011, with the first stable version in 2016. Google announced first-class support for Kotlin on Android in 2017.',
+        code: '// Kotlin — concise and safe\nfun main() {\n    println("Hello, Kotlin!")\n}\n\nfun greet(name: String): String {\n    return "Hello, $name!"\n}'
+    },
+    swift: {
+        name: 'Swift',
+        what: 'Swift is a powerful and intuitive programming language for Apple platforms. It is designed to be safe, fast, and expressive, with modern language features and a clean syntax.',
+        usedFor: 'iOS, macOS, watchOS, and tvOS app development. Swift is also used for server-side development and system programming on Apple platforms.',
+        creator: 'Chris Lattner at Apple. First announced in 2014 at WWDC, with the goal of replacing Objective-C as the primary language for Apple development.',
+        code: '// Swift — powerful and intuitive\nimport Foundation\n\nprint("Hello, Swift!")\n\nfunc greet(name: String) -> String {\n    return "Hello, \\(name)!"\n}'
+    },
+    zig: {
+        name: 'Zig',
+        what: 'Zig is a general-purpose programming language designed for robustness, optimality, and clarity. It provides low-level control like C but with modern features like comptime (compile-time execution).',
+        usedFor: 'Systems programming, embedded development, building cross-platform libraries, and as a C compiler replacement. Zig is often used for performance-critical and low-level software.',
+        creator: 'Andrew Kelley. First released in 2016 as a response to the complexity and shortcomings of existing systems programming languages.',
+        code: '// Zig — robust and optimal\nconst std = @import("std");\n\npub fn main() void {\n    std.debug.print("Hello, Zig!\\n", .{});\n}\n\nfn greet(name: []const u8) []const u8 {\n    return std.fmt.comptimePrint("Hello, {s}!", .{name});\n}'
+    },
+    pg: {
+        name: 'PostgreSQL',
+        what: 'PostgreSQL is a powerful, open-source object-relational database system known for reliability, feature robustness, and performance. It supports advanced data types and concurrent access.',
+        usedFor: 'Primary database for web applications, data warehousing, geospatial applications (PostGIS), financial systems, and any application requiring ACID compliance and complex queries.',
+        creator: 'Michael Stonebraker at the University of California, Berkeley. Started as the POSTGRES project in 1986. PostgreSQL (Post-Ingres SQL) has been actively developed for over 35 years.',
+        code: '-- PostgreSQL — the most advanced open-source database\nCREATE TABLE users (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    email VARCHAR(255) UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
+    },
+    mongodb: {
+        name: 'MongoDB',
+        what: 'MongoDB is a source-available, NoSQL document database that stores data in flexible, JSON-like documents. It is designed for scalability, high performance, and ease of development.',
+        usedFor: 'Applications requiring flexible schema, rapid prototyping, real-time analytics, content management, IoT data storage, and large-scale data processing.',
+        creator: 'Dwight Merriman, Eliot Horowitz, and Kevin Ryan at MongoDB Inc. (originally 10gen). First released in 2009 as a solution for scalability challenges with traditional databases.',
+        code: '// MongoDB — flexible document database\n// Insert a document\ndb.users.insertOne({\n    name: "Alice",\n    email: "alice@example.com",\n    roles: ["admin", "editor"]\n})\n\n// Query documents\ndb.users.find({ name: "Alice" })'
+    },
+    git: {
+        name: 'Git',
+        what: 'Git is a distributed version control system that tracks changes in source code during software development. It enables multiple developers to work on the same project simultaneously.',
+        usedFor: 'Source code management, collaboration, version control, continuous integration, code review workflows, and maintaining project history across distributed teams.',
+        creator: 'Linus Torvalds in 2005, originally created to manage Linux kernel development. Git was designed for speed, data integrity, and support for distributed, non-linear workflows.',
+        code: '# Git — version control for everything\n# Initialize a repository\ngit init\n\n# Add and commit changes\ngit add .\ngit commit -m "Initial commit"\n\n# Create and switch branches\ngit checkout -b feature-branch\n\n# Push to remote\ngit push origin main'
+    },
+    mysql: {
+        name: 'MySQL',
+        what: 'MySQL is an open-source relational database management system known for its reliability, performance, and ease of use. It uses SQL for querying and managing data.',
+        usedFor: 'Web applications (especially with LAMP stack), e-commerce platforms, content management systems, data warehousing, and as a general-purpose database for small to large applications.',
+        creator: 'Michael Widenius and David Axmark at MySQL AB. First released in 1995. Now owned by Oracle Corporation, but remains open-source under the GPL license.',
+        code: '-- MySQL — reliable and fast\nCREATE TABLE users (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    email VARCHAR(255) UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
+    },
+    sqlite: {
+        name: 'SQLite',
+        what: 'SQLite is a self-contained, serverless, zero-configuration SQL database engine. It is the most widely deployed database engine in the world, embedded in countless applications.',
+        usedFor: 'Mobile apps, embedded systems, IoT devices, desktop applications, browser storage, prototyping, and testing. SQLite is built into Android, iOS, and most major browsers.',
+        creator: 'D. Richard Hipp. First released in August 2000. The design philosophy was simplicity: a database that requires no setup, no server, and stores data in a single file.',
+        code: '-- SQLite — serverless and self-contained\nCREATE TABLE users (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT NOT NULL,\n    email TEXT UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
+    },
+    firebase: {
+        name: 'Firebase',
+        what: 'Firebase is a platform developed by Google for creating mobile and web applications. It provides a suite of cloud-based tools including real-time database, authentication, hosting, and analytics.',
+        usedFor: 'Building full-stack apps without managing servers, real-time features (chat, notifications), user authentication, cloud storage, push notifications, and app analytics.',
+        creator: 'Andrew Lee and James Tamplin at Firebase Inc. (originally Envolve). Founded in 2011, acquired by Google in 2014. Firebase has grown into Google\'s primary app development platform.',
+        code: '// Firebase — backend made simple\nimport { initializeApp } from \'firebase/app\';\nimport { getFirestore } from \'firebase/firestore\';\n\nconst app = initializeApp({\n    apiKey: "YOUR_API_KEY",\n    projectId: "YOUR_PROJECT"\n});\n\nconst db = getFirestore(app);\n\n// Real-time data sync\n// No server code needed'
+    },
+    cloud: {
+        name: 'Cloud Computing',
+        what: 'Cloud computing is the on-demand delivery of computing services over the internet, including servers, storage, databases, networking, software, and analytics. It enables flexible resources and economies of scale.',
+        usedFor: 'Hosting applications, storing and analyzing data, running virtual machines, deploying machine learning models, content delivery, and building scalable infrastructure without physical hardware.',
+        creator: 'The concept evolved from early time-sharing systems (1960s), with modern cloud pioneered by Amazon Web Services (2006), followed by Google Cloud and Microsoft Azure.',
+        code: '# Cloud Computing — infrastructure on demand\n# Deploy a server with AWS CLI\naws ec2 run-instances \\\n    --image-id ami-0abcdef1234567890 \\\n    --instance-type t2.micro \\\n    --key-name MyKeyPair \\\n    --security-groups my-sg\n\n# Scale with load balancer\necho "Your infrastructure is ready"'
+    },
+    aws: {
+        name: 'AWS',
+        what: 'Amazon Web Services (AWS) is the world\'s most comprehensive and broadly adopted cloud platform, offering over 200 fully featured services from data centers globally.',
+        usedFor: 'Cloud computing, storage (S3), compute (EC2), databases (RDS, DynamoDB), AI/ML services, serverless computing (Lambda), content delivery (CloudFront), and enterprise infrastructure.',
+        creator: 'Amazon.com. AWS launched in 2006, initially offering S3 (storage) and SQS (queuing). It pioneered the modern cloud computing market and remains the market leader.',
+        code: '# AWS — cloud leader\n# List S3 buckets\naws s3 ls\n\n# Deploy a Lambda function\naws lambda create-function \\\n    --function-name my-function \\\n    --runtime nodejs18.x \\\n    --handler index.handler \\\n    --role arn:aws:iam::account-id:role/lambda-role\n\n# Launch an EC2 instance\naws ec2 run-instances --image-id ami-xxx'
+    },
+    azure: {
+        name: 'Azure',
+        what: 'Microsoft Azure is a cloud computing platform offering infrastructure, platform, and software as a service. It integrates deeply with Microsoft\'s enterprise ecosystem including Active Directory and Visual Studio.',
+        usedFor: 'Cloud hosting, Windows-based applications, enterprise identity management, hybrid cloud solutions, AI and machine learning services, and IoT applications.',
+        creator: 'Microsoft. Announced in October 2008 as "Windows Azure", later renamed to Microsoft Azure in 2014. Azure has grown to be the second-largest cloud platform after AWS.',
+        code: '# Azure — Microsoft\'s cloud platform\n# Create a resource group\naz group create \\\n    --name myResourceGroup \\\n    --location eastus\n\n# Deploy a VM\naz vm create \\\n    --resource-group myResourceGroup \\\n    --name myVM \\\n    --image UbuntuLTS\n\n# List resources\naz resource list'
+    },
+    java: {
+        name: 'Java',
+        what: 'Java is a versatile, object-oriented programming language designed for platform independence through the "write once, run anywhere" principle. It runs on the Java Virtual Machine (JVM), making it compatible across all platforms that support the JVM, from mainframes to smartphones.',
+        usedFor: 'Enterprise applications, Android app development, web applications (Spring Boot), big data processing (Apache Hadoop, Spark), cloud microservices, embedded systems, and scientific computing.',
+        creator: 'James Gosling at Sun Microsystems. First released in 1995 as part of the Sun\'s Java platform. Originally called Oak, it was renamed to Java after Java coffee. Oracle Corporation acquired Sun Microsystems in 2010 and now maintains Java.',
+        code: '// Java — write once, run anywhere\npublic class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n    }\n\n    public static String greet(String name) {\n        return "Hello, " + name + "!";\n    }\n}'
+    },
+    backend: {
+        name: 'Backend',
+        what: 'Backend development refers to the server-side aspect of web development, focusing on creating and managing server logic, databases, and APIs. It involves handling user authentication, authorization, processing requests, and ensuring system performance and scalability.',
+        usedFor: 'Building and maintaining server-side components of web and mobile applications, RESTful APIs, microservices, database management, authentication systems, cloud infrastructure, and real-time services.',
+        creator: 'Backend development has evolved alongside the World Wide Web since Tim Berners-Lee invented the first web server in 1990. The field grew from simple CGI scripts to modern architectures including microservices, serverless computing, and event-driven systems.',
+        code: '// Backend — the engine behind the web\n// Example: Node.js Express API\nconst express = require(\'express\');\nconst app = express();\n\napp.get(\'/api/hello\', (req, res) => {\n    res.json({ message: "Hello from the backend!" });\n});\n\napp.listen(3000, () => {\n    console.log(\'Server running on port 3000\');\n});'
+    },
+    android: {
+        name: 'Android',
+        what: 'Android is a mobile operating system based on a modified version of the Linux kernel and other open-source software, designed primarily for touchscreen mobile devices. Developed by Google, it powers billions of devices worldwide and offers deep customization, a vast app ecosystem, and strong integration with Google services.',
+        usedFor: 'Building native Android apps using Kotlin or Java, developing for phones, tablets, Wear OS, Android TV, and Android Auto. Android apps are distributed via Google Play and other app stores.',
+        creator: 'Android was founded by Andy Rubin, Rich Miner, Nick Sears, and Chris White in 2003. It was acquired by Google in 2005 and the first commercial device (HTC Dream) launched in 2008. Google has led its development ever since.',
+        code: '// Android — built with Kotlin\nfun main() {\n    println("Hello, Android!")\n}\n\n// Android apps use:\n// - Kotlin/Java for logic\n// - Jetpack Compose or XML for UI\n// - Android Studio as IDE'
+    },
+    ios: {
+        name: 'iOS',
+        what: 'iOS is a mobile operating system created by Apple Inc. exclusively for its hardware, powering iPhone, iPad, and iPod Touch. Known for its smooth performance, strong security, privacy focus, and seamless ecosystem integration, iOS is the second most popular mobile OS worldwide.',
+        usedFor: 'Building native iOS apps using Swift or Objective-C, developing for iPhone, iPad, Apple Watch, and Apple TV. iOS apps are distributed exclusively through the Apple App Store with strict review guidelines.',
+        creator: 'iOS was created by Apple Inc. under the leadership of Steve Jobs. First released in 2007 alongside the original iPhone. It was derived from macOS and has undergone major redesigns with iOS 7 (flat design) and subsequent versions.',
+        code: '// iOS — built with Swift\nimport Foundation\nprint("Hello, iOS!")\n\n// iOS apps use:\n// - Swift/Objective-C for logic\n// - SwiftUI or UIKit for UI\n// - Xcode as IDE'
+    },
+    gcp: {
+        name: 'Google Cloud',
+        what: 'Google Cloud Platform (GCP) is a suite of cloud computing services that runs on the same infrastructure Google uses internally for its own products like Search, Gmail, and YouTube.',
+        usedFor: 'Cloud computing, data analytics (BigQuery), machine learning (AI Platform), container orchestration (GKE), serverless computing (Cloud Functions), and scalable application hosting.',
+        creator: 'Google. Launched in 2008 with App Engine. GCP leverages Google\'s massive infrastructure and expertise in data processing, machine learning, and containerized applications.',
+        code: '# GCP — data and AI at scale\n# List Compute Engine instances\ngcloud compute instances list\n\n# Deploy a Cloud Function\ngcloud functions deploy my-function \\\n    --runtime nodejs18 \\\n    --trigger-http\n\n# Query BigQuery\ngcloud bigquery query \\\n    --sql "SELECT name FROM mydataset.users LIMIT 10"'
+    }
+};
+
+function loadLangIntro(lang) {
+    const intro = langIntro[lang];
+    if (!intro) {
+        const langData = courseData[lang];
+        if (langData) {
+            const phases = Object.keys(langData);
+            if (phases.length > 0) {
+                const firstPhase = phases[0];
+                const topics = Object.keys(langData[firstPhase]);
+                if (topics.length > 0) {
+                    loadTopic(firstPhase, topics[0]);
+                    return;
+                }
+            }
+        }
+        return;
+    }
+
+    const color = 'var(--accent)';
+
+    document.getElementById('explanation').innerHTML = `
+        <div class="techstack-intro" onclick="loadFirstPlatformTopic('${lang}')" style="cursor:pointer;">
+            <div class="techstack-intro-header">
+                <img class="techstack-intro-logo" src="public/logos/${lang}.svg"
+                     alt="${intro.name}"
+                     onerror="this.style.display='none'">
+                <h2>${intro.name}</h2>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it?</h3>
+                <p>${intro.what}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it used for?</h3>
+                <p>${intro.usedFor}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>Who created it?</h3>
+                <p>${intro.creator}</p>
+            </div>
+            <p style="color:var(--accent);font-size:10px;margin-top:12px;opacity:0.7;">Click to start learning →</p>
+        </div>
+    `;
+
+    document.getElementById('editor').value = intro.code;
+    updateHighlight();
+    document.getElementById('output').innerText = '// ' + intro.name + ' — explore the topics below to start learning';
+}
+
+function loadFirstPlatformTopic(lang) {
+    const data = courseData['mobile'];
+    if (!data) return;
+    const prefix = lang === 'android' ? 'Android:' : 'iOS:';
+    for (const phase of Object.keys(data)) {
+        if (!phase.startsWith(prefix)) continue;
+        const topics = Object.keys(data[phase]);
+        if (topics.length > 0) {
+            loadTopic(phase, topics[0]);
+            return;
+        }
+    }
 }
 
 setMode('js');

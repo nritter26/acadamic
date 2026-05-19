@@ -25,6 +25,8 @@ function initDatabase() {
 function switchDBProvider(provider) {
     dbProvider = provider;
     currentLang = provider;
+    const rBtn = document.getElementById('roadmap-btn');
+    if (rBtn) rBtn.title = 'View ' + (dbProviderNames[provider] || provider) + ' Roadmap';
     if (!courseData[provider]) {
         document.getElementById('topic-list').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>';
         document.getElementById('explanation').innerHTML = '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line"></div>';
@@ -32,12 +34,47 @@ function switchDBProvider(provider) {
         document.getElementById('output').innerText = '// Loading...';
         loadLangData(provider, function () {
             renderDBTopics();
-            loadFirstTopic(provider);
+            loadDBIntro(provider);
         });
         return;
     }
     renderDBTopics();
-    loadFirstTopic(provider);
+    loadDBIntro(provider);
+}
+
+function loadDBIntro(provider) {
+    const intro = langIntro[provider];
+    if (!intro) {
+        loadFirstTopic(provider);
+        return;
+    }
+    const displayName = dbProviderNames[provider] || provider;
+    const color = dbProviderColors[provider] || 'var(--accent)';
+    document.getElementById('explanation').innerHTML = `
+        <div class="techstack-intro">
+            <div class="techstack-intro-header">
+                <img class="techstack-intro-logo" src="public/logos/${provider}.svg"
+                     alt="${displayName}" style="border-color:${color};"
+                     onerror="this.style.display='none'">
+                <h2>${displayName}</h2>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it?</h3>
+                <p>${intro.what}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it used for?</h3>
+                <p>${intro.usedFor}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>Who created it?</h3>
+                <p>${intro.creator}</p>
+            </div>
+        </div>
+    `;
+    document.getElementById('editor').value = intro.code;
+    updateHighlight();
+    document.getElementById('output').innerText = '// ' + displayName + ' — explore the topics below to start learning';
 }
 
 function loadFirstTopic(provider) {
@@ -69,6 +106,10 @@ function renderDBTopics() {
         html += `<button class="db-btn${active}" onclick="switchDBProvider('${key}')">${dbProviderNames[key]}</button>`;
     }
     html += `</div><div style="height:6px"></div>`;
+    html += `<div class="phase-header" onclick="loadDBIntro('${dbProvider}')" style="cursor:pointer;">
+        <span class="phase-toggle">▼</span>
+        <span class="phase-label-text" style="font-style:italic;">About ${dbProviderNames[dbProvider] || dbProvider}</span>
+    </div>`;
     const langData = courseData[currentLang];
     if (langData) {
         for (const phase in langData) {

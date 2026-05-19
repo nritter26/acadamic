@@ -3,19 +3,21 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doge's Lab: Full Mastery Edition</title>
+    <title>Kodex's Lab: Full Mastery Edition</title>
     <link rel="stylesheet" href="public/style.css">
 </head>
 <body id="app" class="js-mode">
 <header>
     <div class="header-left">
-        <div style="font-weight:900; font-size:22px; display:flex; align-items:center; gap:8px;">DOGE'S <span style="color:var(--accent)" id="header-title">PY</span><button id="doge-btn" onclick="toggleDogeModal()" class="doge-nav-btn" title="About Doge's Lab"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" width="22" height="22"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+        <div style="font-weight:900; font-size:22px; display:flex; align-items:center; gap:8px;">KODEX'S <span style="color:var(--accent)" id="header-title">PY</span><button id="kodex-btn" onclick="toggleKodexModal()" class="kodex-nav-btn" title="About Kodex's Lab"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" width="22" height="22"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
         <div class="header-extra-tabs">
-            <button id="nav-api" onclick="setMode('api')" class="game-nav-btn" style="color:#f97316;border-color:#f97316;">API</button>
+            <button id="nav-backend" onclick="setMode('backend')" class="game-nav-btn" style="color:#6366F1;border-color:#6366F1;">Backend</button>
             <button id="nav-challenge" onclick="setMode('challenge')" class="game-nav-btn" style="color:#a855f7;border-color:#a855f7;">Code Lab</button>
             <button id="nav-compiler" onclick="setMode('compiler')" class="game-nav-btn" style="color:#a5f3fc;border-color:#a5f3fc;">Compiler</button>
             <button id="nav-gamedev" onclick="setMode('gamedev')" class="game-nav-btn" style="color:#10b981;border-color:#10b981;">GameDev</button>
+            <button id="nav-mobile" onclick="setMode('mobile')" class="game-nav-btn" style="color:#ec4899;border-color:#ec4899;">Mobile</button>
             <button id="nav-game" onclick="toggleGameModal()" class="game-nav-btn">Gaming</button>
+            <button id="nav-techstack" onclick="setMode('techstack')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">Tech Stack</button>
             <button id="nav-quiz" onclick="setMode('quiz')" class="game-nav-btn" style="color:#f59e0b;border-color:#f59e0b;">Quiz</button>
         </div>
     </div>
@@ -26,9 +28,9 @@
         <button id="nav-cs" onclick="setMode('cs')" role="tab" aria-label="C sharp">C#</button>
         <button id="nav-cpp" onclick="setMode('cpp')" role="tab" aria-label="C plus plus">C++</button>
         <button id="nav-db" onclick="setMode('db')" role="tab" aria-label="Database">Database</button>
-        <button id="nav-dk" onclick="setMode('dk')" role="tab" aria-label="Docker">Docker</button>
         <button id="nav-git" onclick="setMode('git')" role="tab" aria-label="Git">Git</button>
         <button id="nav-go" onclick="setMode('go')" role="tab" aria-label="Go">Go</button>
+        <button id="nav-java" onclick="setMode('java')" role="tab" aria-label="Java">Java</button>
         <button id="nav-js" onclick="setMode('js')" role="tab" aria-label="JavaScript">JavaScript</button>
         <button id="nav-kt" onclick="setMode('kt')" role="tab" aria-label="Kotlin">Kotlin</button>
         <button id="nav-py" onclick="setMode('py')" role="tab" aria-label="Python">Python</button>
@@ -40,7 +42,7 @@
     </div>
 </header>
 <main>
-    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="topic-list" class="scroll"></div></div>
+    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="topic-list" class="scroll"></div></div>
     <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
     <div class="col col-enter"><label>Workspace</label><div class="api-client" id="apiClient">
     <div class="api-toolbar">
@@ -94,17 +96,65 @@
     </div>
 </div>
 <div class="schema-designer" id="schemaDesigner">
-    <div class="schema-toolbar">
+    <div class="schema-tabs">
+        <button id="schemaTabDesign" class="schema-tab active" onclick="schemaSwitchTab('design')">Design</button>
+        <button id="schemaTabErd" class="schema-tab" onclick="schemaSwitchTab('erd')">ERD</button>
+    </div>
+    <div class="schema-toolbar" id="schemaDesignTabBtn">
         <button class="primary" onclick="schemaAddTable()">+ Table</button>
-        <button onclick="schemaGenerateSQL()">Generate SQL</button>
+        <button onclick="schemaAutoLayout()" title="Auto-arrange tables">Auto Layout</button>
+        <button onclick="schemaUndo()" title="Undo (Ctrl+Z)">↩</button>
+        <button onclick="schemaRedo()" title="Redo (Ctrl+Y)">↪</button>
+        <span class="schema-separator"></span>
+        <button onclick="schemaOpenImport()">Import SQL</button>
+        <button onclick="schemaExportJSON()">Export JSON</button>
+        <label class="schema-file-btn">Import JSON<input type="file" id="schemaJSONInput" accept=".json" onchange="schemaImportJSON()" style="display:none"></label>
+        <span class="schema-separator"></span>
+        <span class="schema-dialect-group">
+            Dialect:
+            <select id="schemaDialectBtn" onchange="schemaSetDialect(this.value)" class="schema-dialect-select">
+                <option value="postgresql">PostgreSQL</option>
+                <option value="mysql">MySQL</option>
+                <option value="sqlite">SQLite</option>
+            </select>
+        </span>
+        <span class="schema-separator"></span>
+        <button onclick="schemaSaveVersion()">Save Version</button>
         <button class="danger" onclick="schemaClearAll()">Clear All</button>
     </div>
     <div class="schema-canvas" id="schemaCanvas"></div>
-    <div class="schema-sql-output" id="schemaSQLOutput">-- Click "Generate SQL" to create DDL from your schema</div>
+    <div class="erd-canvas" id="erdCanvas"></div>
+    <div class="schema-sql-footer">
+        <div class="schema-sql-header">
+            <span class="schema-sql-title">SQL Preview (auto-generated)</span>
+            <div class="schema-sql-actions">
+                <button class="schema-copy-btn" onclick="schemaCopySQL()" title="Copy SQL">Copy</button>
+                <button onclick="schemaDownloadSQL()" title="Download SQL file">Download</button>
+                <button onclick="schemaGenerateSQL()" title="Regenerate SQL">Regenerate</button>
+            </div>
+        </div>
+        <div class="schema-sql-output" id="schemaSQLOutput">-- Schema will auto-generate as you design</div>
+    </div>
+    <div class="schema-version-bar" id="schemaVersionBar">
+        <span class="schema-version-label">Versions:</span>
+        <div class="schema-version-list" id="schemaVersionList"></div>
+    </div>
+</div>
+<div class="schema-import-overlay" id="schemaImportOverlay">
+    <div class="schema-import-modal">
+        <h3>Import SQL</h3>
+        <textarea id="schemaImportText" class="schema-import-textarea" placeholder="Paste CREATE TABLE statements here...&#10;&#10;CREATE TABLE users (&#10;    id SERIAL PRIMARY KEY,&#10;    name VARCHAR(255) NOT NULL,&#10;    email VARCHAR(255) UNIQUE&#10);"></textarea>
+        <div class="schema-import-actions">
+            <button class="primary" onclick="schemaImportSQL()">Import</button>
+            <button onclick="schemaCloseImport()">Cancel</button>
+        </div>
+    </div>
 </div>
 <textarea id="editor" spellcheck="false" aria-label="Code editor">for n in range(5):
     if n == 2: continue
     if n == 4: break
+    print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
+    <div class="col col-enter"><label>Console</label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
     print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="explain-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#a5f3fc;" onclick="explainCode()" title="Get an AI explanation of your code">Explain</button><button id="review-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#34d399;" onclick="reviewCode()" title="Get an AI review of your code">Review</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Source ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(3)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
     <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
     <div class="api-res-topbar">
@@ -123,14 +173,18 @@
 <script src="public/quiz.js"></script>
 <script src="public/challenges.js"></script>
 <script src="public/game.js"></script>
-<script src="public/db.js"></script>
+    <script src="public/db.js"></script>
+    <script src="public/schema.js"></script>
+<script src="public/git-visualize.js"></script>
+<script src="public/techstack.js"></script>
 <script src="public/compiler-core.js"></script>
 <script src="public/compiler-curriculum.js"></script>
 <script src="public/ai-responses.js"></script>
+<script src="public/cheatsheets.js"></script>
 <script src="public/app.js"></script>
 <script>
-function toggleDogeModal() {
-    document.getElementById('dogeOverlay').classList.toggle('open');
+function toggleKodexModal() {
+    document.getElementById('kodexOverlay').classList.toggle('open');
 }
 </script>
 
@@ -144,14 +198,14 @@ function toggleDogeModal() {
         <div class="cheatsheet-body" id="cheatsheetBody"></div>
     </div>
 </div>
-<div class="doge-overlay" id="dogeOverlay" onclick="if(event.target===this) toggleDogeModal()">
-    <div class="doge-paper">
-        <div class="doge-paper-header">
-            <span><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--accent)" width="16" height="16" style="vertical-align:middle;margin-right:4px;"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg> Doge's Lab</span>
-            <button onclick="toggleDogeModal()">✕</button>
+<div class="kodex-overlay" id="kodexOverlay" onclick="if(event.target===this) toggleKodexModal()">
+    <div class="kodex-paper">
+        <div class="kodex-paper-header">
+            <span><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--accent)" width="16" height="16" style="vertical-align:middle;margin-right:4px;"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg> Kodex's Lab</span>
+            <button onclick="toggleKodexModal()">✕</button>
         </div>
-        <div class="doge-paper-body">
-            <pre class="doge-ascii" aria-label="Doge ASCII art">              ▄              ▄
+        <div class="kodex-paper-body">
+            <pre class="kodex-ascii" aria-label="Kodex ASCII art">              ▄              ▄
              ▐█▌            ▐█▌
              ▐█▌            ▐█▌
               █▌    ▄▄▄▄    ▐█
@@ -182,10 +236,10 @@ function toggleDogeModal() {
           ▐█████▌        ▐██████▌
           ██████          ███████
           ██████          ███████</pre>
-            <div class="doge-desc">
-                <h2>Welcome to Doge's Lab!</h2>
+            <div class="kodex-desc">
+                <h2>Welcome to Kodex's Lab!</h2>
                 <p>An interactive multi-language programming textbook and code playground. Learn 15+ programming languages with built-in code execution, quizzes, challenges, an AI assistant, and a PostgreSQL schema designer.</p>
-                <div class="doge-features">
+                <div class="kodex-features">
                     <span>📚 15+ Languages</span>
                     <span>⚡ Live Code Execution</span>
                     <span>🤖 Devin</span>

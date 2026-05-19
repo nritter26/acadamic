@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────
-// Doge's Lab — Multi-Language Compilation Pipeline Explorer
+// Kodex's Lab — Multi-Language Compilation Pipeline Explorer
 // Works for all languages in the app: JS, TS, PY, GO, RS, ZIG,
 // C, CPP, CS, KT, SWIFT, PG, DK, GIT, MONGODB, GAMEDEV
 // ──────────────────────────────────────────────────────────────

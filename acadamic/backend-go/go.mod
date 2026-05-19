@@ -1,3 +1,3 @@
-module doges-lab/backend-go
+module koded/backend-go
 
 go 1.22
