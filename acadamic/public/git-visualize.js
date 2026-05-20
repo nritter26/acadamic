@@ -467,12 +467,15 @@ function gitRebase(args) {
         else break;
     }
     if (branchCommits.length === 0) return '// Nothing to rebase.';
+    const oldHead = gitState.branches[gitState.HEAD];
     for (const c of branchCommits) {
         const newId = genId();
         const newParent = gitState.branches[gitState.HEAD];
-        c.id = newId;
-        c.parents = [newParent];
-        c.diff = { files: [{ file: 'rebased.txt', added: ['// ' + c.msg + ' (rebased)'], removed: [] }] };
+        const clone = JSON.parse(JSON.stringify(c));
+        clone.id = newId;
+        clone.parents = [newParent];
+        clone.diff = { files: [{ file: 'rebased.txt', added: ['// ' + c.msg + ' (rebased)'], removed: [] }] };
+        gitState.commits.splice(gitState.commits.indexOf(c), 1, clone);
         gitState.branches[gitState.HEAD] = newId;
     }
     return '// Successfully rebased ' + branchCommits.length + ' commit(s) onto ' + onto;
@@ -710,7 +713,7 @@ function generateSVG(state, layout, existingIds) {
         const depth = pos.depth || 0;
         const delay = (depth * 0.08) + 's';
         const cls = 'git-commit-node' + (isNew ? ' animate-in' : ' visible') + (parentCount > 1 ? ' merge-commit' : '');
-        svg += '<g class="' + cls + '" data-id="' + commit.id + '" data-depth="' + depth + '" style="animation-delay:' + delay + '" onclick="handleCommitClick(\'' + commit.id + '\')" onmouseenter="handleCommitHover(\'' + commit.id + '\')" onmouseleave="handleCommitUnhover()" style="cursor:pointer;">';
+        svg += '<g class="' + cls + '" data-id="' + commit.id + '" data-depth="' + depth + '" style="animation-delay:' + delay + '; cursor:pointer;" onclick="handleCommitClick(\'' + commit.id + '\')" onmouseenter="handleCommitHover(\'' + commit.id + '\')" onmouseleave="handleCommitUnhover()">';
         svg += '<circle cx="' + pos.x + '" cy="' + pos.y + '" r="' + (parentCount > 1 ? 18 : 16) + '" fill="#0f172a" stroke="' + color + '" stroke-width="2.5" class="git-commit-circle"/>';
         svg += '<text x="' + pos.x + '" y="' + (pos.y + 1) + '" fill="#f1f5f9" font-size="7" text-anchor="middle" dominant-baseline="central" font-weight="700" font-family="monospace">' + shortHash(commit.id) + '</text>';
         svg += '<text x="' + (pos.x + 30) + '" y="' + (pos.y + 14) + '" fill="#cbd5e1" font-size="8" dominant-baseline="central">' + commit.msg.substring(0, 35) + '</text>';
@@ -810,7 +813,11 @@ function handleCommitHover(commitId) {
 }
 
 function handleCommitUnhover() {
-    document.querySelectorAll('.git-commit-circle').forEach(c => c.setAttribute('r', '18'));
+    document.querySelectorAll('.git-commit-circle').forEach(c => {
+        const node = c.closest('.git-commit-node');
+        const isMerge = node?.classList.contains('merge-commit');
+        c.setAttribute('r', isMerge ? '18' : '16');
+    });
 }
 
 /* ── Terminal ── */

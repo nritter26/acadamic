@@ -1,3 +1,4 @@
+export { addMessage, getHistory, clearConversation, pruneOldConversations } from './conversation';
 export { checkCompilers, getCompileHint, getCompilerList } from './compiler';
 export { executeCode } from './executor';
 export { analyzeCode, analyzeUserCode } from './analyzer';

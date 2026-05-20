@@ -1,17 +1,27 @@
 import http from 'http';
 import https from 'https';
 import { URL } from 'url';
+import dns from 'dns';
 
 const FORBIDDEN_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]', '169.254.169.254', 'metadata.google.internal', '100.100.100.200'];
 const FORBIDDEN_PATTERNS = [/^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^127\./, /^0\./];
 
-export function isValidProxyUrl(urlStr: string): boolean {
+function isPrivateIP(ip: string): boolean {
+  if (FORBIDDEN_HOSTS.includes(ip)) return true;
+  if (FORBIDDEN_PATTERNS.some(p => p.test(ip))) return true;
+  return false;
+}
+
+export async function isValidProxyUrl(urlStr: string): Promise<boolean> {
   try {
     const parsed = new URL(urlStr);
     if (!['http:', 'https:'].includes(parsed.protocol)) return false;
     const host = parsed.hostname.toLowerCase();
     if (FORBIDDEN_HOSTS.some(fh => host === fh || host.endsWith('.' + fh))) return false;
-    if (FORBIDDEN_PATTERNS.some(p => p.test(host))) return false;
+    const addresses = await dns.promises.resolve4(host).catch(() => []);
+    for (const addr of addresses) {
+      if (isPrivateIP(addr)) return false;
+    }
     return true;
   } catch { return false; }
 }

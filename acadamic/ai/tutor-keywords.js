@@ -111,8 +111,9 @@ function detectLangFromMsg(msg) {
 
 function getCurrContext(message, topic) {
   const lower = message.toLowerCase();
-  if (topic) return { type: 'followup', topic };
-  if (FOLLOW_UP.some(r => r.test(message))) return { type: 'followup', topic: null };
+  const isFollowUp = FOLLOW_UP.some(r => r.test(message));
+  if (topic && isFollowUp) return { type: 'followup', topic };
+  if (isFollowUp) return { type: 'followup', topic: null };
   if (topic) return { type: 'topic', topic };
   return { type: 'general' };
 }
@@ -141,9 +142,10 @@ function curriculumSearch(message, lang) {
       for (const [phase, phaseData] of Object.entries(data)) {
         for (const [topicName, topicContent] of Object.entries(phaseData)) {
           const lowerTopic = topicName.toLowerCase();
+          const contentStr = Array.isArray(topicContent) ? topicContent[0] : (topicContent.exp || topicContent.code || '');
           if (topics.some(t => lowerTopic.includes(t)) ||
-              topics.some(t => topicContent[0].toLowerCase().includes(t))) {
-            results.push({ phase, topic: topicName, content: topicContent[0].slice(0, 200) });
+              topics.some(t => contentStr.toLowerCase().includes(t))) {
+            results.push({ phase, topic: topicName, content: contentStr.slice(0, 200) });
           }
         }
       }
@@ -155,10 +157,12 @@ function curriculumSearch(message, lang) {
   return [];
 }
 
-function handleErrorHelp(message, code, lang) {
+function handleErrorHelp(message, code, lang, hasError) {
   const lower = message.toLowerCase();
   let response = '';
-  const hasError = /error|bug|fix|wrong|not\s*working|issue|broken|crash|fail|exception/i.test(lower);
+  if (hasError === undefined || hasError === null) {
+    hasError = /error|bug|fix|wrong|not\s*working|issue|broken|crash|fail|exception/i.test(lower);
+  }
 
   if (hasError || code) {
     const langName = LANG_NAMES_AI[lang] || lang || 'your code';

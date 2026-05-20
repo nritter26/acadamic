@@ -11,7 +11,7 @@ const COMPILER = (() => {
   const LANG_CONFIG = {
     js:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
     ts:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    py:   { lineComment: '#',  blockComment: null,           strings: ['"', "'", '"""'], blockOpen: ':', blockClose: null, stmtTerm: '\n', indentBased: true, caseSensitive: true },
+    py:   { lineComment: '#',  blockComment: null,           strings: ['"', "'", '"""', "'''"], blockOpen: ':', blockClose: null, stmtTerm: '\n', indentBased: true, caseSensitive: true },
     go:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
     rs:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
     zig:  { lineComment: '//', blockComment: null,           strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
@@ -81,6 +81,7 @@ const COMPILER = (() => {
 
       // Multi-char string delimiters (like """)
       if (cfg.strings) {
+        let matchedMulti = false;
         for (const delim of cfg.strings) {
           if (delim.length > 1 && code.slice(i, i + delim.length) === delim) {
             let start = i;
@@ -91,10 +92,11 @@ const COMPILER = (() => {
             }
             if (i < code.length) i += delim.length;
             tokens.push({ type: TOKEN_TYPES.STRING, value: code.slice(start, i), pos: start });
+            matchedMulti = true;
             break;
           }
         }
-        if (tokens.length > 0 && tokens[tokens.length - 1].pos >= i) continue;
+        if (matchedMulti) continue;
       }
 
       // String

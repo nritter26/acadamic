@@ -15,6 +15,7 @@ interface ExecJob {
   opts: ExecOptions & { shell?: boolean };
   resolve: (value: { stdout: string; stderr: string }) => void;
   reject: (reason: Error) => void;
+  stdin?: string;
 }
 
 const EXEC_QUEUE: ExecJob[] = [];
@@ -25,18 +26,40 @@ function processNextExec(): void {
   while (EXEC_RUNNING < EXEC_MAX_CONCURRENT && EXEC_QUEUE.length > 0) {
     const job = EXEC_QUEUE.shift()!;
     EXEC_RUNNING++;
-    exec(job.cmd, job.opts, (err, stdout, stderr) => {
-      EXEC_RUNNING--;
-      if (err) job.reject(err);
-      else job.resolve({ stdout: String(stdout), stderr: String(stderr) });
-      processNextExec();
-    });
+    if (job.stdin !== undefined) {
+      const child = spawn('sh', ['-c', job.cmd], job.opts);
+      let stdout = '';
+      let stderr = '';
+      child.stdout.on('data', (d: string | Buffer) => stdout += d.toString());
+      child.stderr.on('data', (d: string | Buffer) => stderr += d.toString());
+      child.on('close', (code: number | null) => {
+        EXEC_RUNNING--;
+        job.resolve({ stdout, stderr });
+        processNextExec();
+      });
+      child.on('error', (e: Error) => {
+        EXEC_RUNNING--;
+        job.reject(e);
+        processNextExec();
+      });
+      if (job.stdin) {
+        child.stdin.write(job.stdin);
+        child.stdin.end();
+      }
+    } else {
+      exec(job.cmd, job.opts, (err, stdout, stderr) => {
+        EXEC_RUNNING--;
+        if (err) job.reject(err);
+        else job.resolve({ stdout: String(stdout), stderr: String(stderr) });
+        processNextExec();
+      });
+    }
   }
 }
 
-function execQueue(cmd: string, opts: ExecOptions & { shell?: boolean }): Promise<{ stdout: string; stderr: string }> {
+function execQueue(cmd: string, opts: ExecOptions & { shell?: boolean }, stdin?: string): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    EXEC_QUEUE.push({ cmd, opts, resolve, reject });
+    EXEC_QUEUE.push({ cmd, opts, resolve, reject, stdin });
     processNextExec();
   });
 }
@@ -217,9 +240,7 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
   const execOpts = { timeout: 30000, cwd: tmpDir, env };
 
   try {
-    const result = stdin
-      ? await execWithStdin(sandboxedCmd, execOpts, stdin)
-      : await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true } as unknown as ExecOptions & { shell?: boolean });
+    const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true } as unknown as ExecOptions & { shell?: boolean }, stdin);
 
     fs.rm(tmpDir, { recursive: true, force: true }, () => {});
     const stdoutClean = (result.stdout || '').trimEnd();

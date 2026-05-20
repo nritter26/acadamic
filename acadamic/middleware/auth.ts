@@ -22,7 +22,7 @@ export function generateToken(payload: AuthPayload): string {
 }
 
 export function verifyToken(token: string): AuthPayload {
-  return jwt.verify(token, JWT_SECRET) as AuthPayload;
+  return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as AuthPayload;
 }
 
 export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {

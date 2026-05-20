@@ -12,7 +12,7 @@ router.post('/', validate(ProxySchema), async (req: Request, res: Response) => {
     res.status(400).json({ error: 'No URL provided' });
     return;
   }
-  if (!isValidProxyUrl(url)) {
+  if (!(await isValidProxyUrl(url))) {
     res.status(400).json({ error: 'Invalid or forbidden URL' });
     return;
   }

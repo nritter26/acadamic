@@ -88,14 +88,18 @@ function loadTopic(phase, topic) {
 
     const expEl = document.getElementById('explanation');
     const depth = getTopicDepth(item.exp);
-    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${topic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${phase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${item.exp}`;
+    const safeTopic = escapeHtml(topic);
+    const safePhase = escapeHtml(phase);
+    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${safeTopic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${safePhase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${item.exp}`;
     if (item.prereq) {
         const parts = item.prereq.split('::');
         if (parts.length === 2) {
             const [prereqPhase, prereqTopic] = parts;
             const prereqData = langData[prereqPhase] && langData[prereqPhase][prereqTopic];
             if (prereqData) {
-                expEl.innerHTML = `<div class="prereq-banner">📚 Prerequisite: <a href="#" onclick="loadTopic('${prereqPhase.replace(/'/g, "\\'")}', '${prereqTopic.replace(/'/g, "\\'")}'); return false;">${prereqTopic}</a></div>` + expEl.innerHTML;
+                const safePP = escapeHtml(prereqPhase).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safePT = escapeHtml(prereqTopic).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                expEl.innerHTML = `<div class="prereq-banner">📚 Prerequisite: <a href="#" onclick="loadTopic('${safePP}', '${safePT}'); return false;">${escapeHtml(prereqTopic)}</a></div>` + expEl.innerHTML;
             }
         }
     }
@@ -640,6 +644,7 @@ function runCode() {
         } catch(e) {
             const errMsg = "Error: " + e.message;
             out.innerText = errMsg;
+            console.log = log;
             addErrorExplainButton(out, errMsg);
             triggerAutoDebug(errMsg, code);
             appendAutoReview(out, code, currentLang);
@@ -2632,6 +2637,7 @@ function testChallenge() {
             }
             out.innerHTML = html;
         } catch(e) {
+            console.log = log;
             out.innerHTML = `<div class="challenge-result fail">Error: ${escapeHtml(e.message)}</div>`;
         }
     } else {
@@ -3283,6 +3289,7 @@ function initHighlighting() {
     textarea.addEventListener('scroll', function() {
         hlOverlay.scrollTop = this.scrollTop;
         hlOverlay.scrollLeft = this.scrollLeft;
+        hideCompletions();
     });
     hlEditor = textarea;
     textarea.addEventListener('input', function() {
@@ -3685,6 +3692,7 @@ setMode = function(lang) {
         if (backBtn) backBtn.style.display = '';
         return; 
     }
+    let prefixHtml = '';
     if (lang === 'compiler') {
         document.getElementById('level-bar').style.display = 'none';
         document.getElementById('output').style.display = 'none';
@@ -3811,7 +3819,7 @@ setMode = function(lang) {
     }
 
     // Build topic list with collapsible phases, counts, badges
-    let prefixHtml = '';
+    prefixHtml = '';
     if (lang === 'backend') {
         prefixHtml = `<div class="phase-header" onclick="setMode('api')" style="cursor:pointer;color:#f97316;border-color:#f97316;">
             <span class="phase-toggle">▶</span>
@@ -3928,8 +3936,9 @@ loadProgress();
 function toggleNav() {
     const menu = document.getElementById('nav-menu');
     const hamburger = document.getElementById('hamburger-btn');
-    menu.classList.toggle('open');
+    const isOpen = menu.classList.toggle('open');
     hamburger.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', isOpen);
 }
 
 document.addEventListener('keydown', function(e) {
@@ -4025,15 +4034,6 @@ function toggleRoadmapView() {
         const langName = LANG_NAMES[currentLang] || currentLang;
         if (title) title.textContent = langName.charAt(0).toUpperCase() + langName.slice(1) + ' Roadmap';
         roadmapRendered = false;
-        renderRoadmap(body);
-    }
-}
-
-function renderRoadmap(container) {
-    const langData = courseData[currentLang];
-    if (!langData) { roadmapRendered = false; return; }
-
-    const langName = LANG_NAMES[currentLang] || currentLang;
         renderRoadmap(body, currentLang);
     }
 }

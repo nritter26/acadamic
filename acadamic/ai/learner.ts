@@ -224,8 +224,9 @@ export async function trackTopicCompletion(
   } else {
     learner.topics[key].completedAt = new Date().toISOString();
     learner.topics[key].reviews += 1;
+    const intervalIdx = Math.min(learner.topics[key].reviews, REVIEW_INTERVALS.length - 1);
     learner.topics[key].nextReview = new Date(
-      Date.now() + 86400000 * REVIEW_INTERVALS[0],
+      Date.now() + 86400000 * REVIEW_INTERVALS[intervalIdx],
     ).toISOString();
   }
 

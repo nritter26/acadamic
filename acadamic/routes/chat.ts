@@ -12,6 +12,9 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
 
   const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
 
+  let aborted = false;
+  req.on('close', () => { aborted = true; });
+
   if (!message) {
     res.write(`data: ${JSON.stringify({ content: "Ask me something about programming!" })}\n\n`);
     res.write('data: [DONE]\n\n');
@@ -20,14 +23,24 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
   }
 
   const sseSend = (chunk: string) => {
+    if (aborted) return;
     res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
   };
   const sseDone = () => {
+    if (aborted) return;
     res.write('data: [DONE]\n\n');
     res.end();
   };
 
-  await handleTutorMessage(message, { lang, topic, phase, code, output, hasError, history, learnerId }, sseSend, sseDone);
+  try {
+    await handleTutorMessage(message, { lang, topic, phase, code, output, hasError, history, learnerId }, sseSend, sseDone);
+  } catch (e) {
+    if (!aborted) {
+      res.write(`data: ${JSON.stringify({ content: 'Error: ' + (e as Error).message })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }
 });
 
 export default router;

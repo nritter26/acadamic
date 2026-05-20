@@ -384,7 +384,7 @@ INSERT INTO suppliers (id, name, contact_email, city, rating) VALUES
     (2, 'GlobalTextiles Inc', 'orders@globaltextiles.com', 'Mumbai', 4),
     (3, 'PrintWise Ltd', 'info@printwise.com', 'Hong Kong', 4),
     (4, 'GreenGrow Supplies', 'contact@greengrow.com', 'Amsterdam', 5),
-    (5, 'SportEquip Direct', 'sales@ sportequip.com', 'Portland', 3),
+    (5, 'SportEquip Direct', 'sales@sportequip.com', 'Portland', 3),
     (6, 'FreshSource Foods', 'orders@freshsource.com', 'Chicago', 4);
 
 -- ==============================================================
