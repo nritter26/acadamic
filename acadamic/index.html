@@ -19,6 +19,7 @@
             <button id="nav-game" onclick="toggleGameModal()" class="game-nav-btn">Gaming</button>
             <button id="nav-techstack" onclick="setMode('techstack')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">Tech Stack</button>
             <button id="nav-quiz" onclick="setMode('quiz')" class="game-nav-btn" style="color:#f59e0b;border-color:#f59e0b;">Quiz</button>
+            <button id="nav-tutorial" onclick="setMode('tutorial')" class="game-nav-btn" style="color:#f97316;border-color:#f97316;">Learn Code with Devin</button>
         </div>
     </div>
     <div class="cyber-motto" id="cyberMotto"><span class="cyber-line"></span><span class="cyber-text">Just code <span class="cyber-dash">&mdash;</span> don't overthink</span><span class="cyber-line"></span></div>
@@ -42,7 +43,7 @@
     </div>
 </header>
 <main>
-    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="topic-list" class="scroll"></div></div>
+    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="tutorial-progress"></div><div id="topic-list" class="scroll"></div></div>
     <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button><button id="api-toggle-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Toggle API client" style="display:none">API ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
     <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client" id="apiClient">
     <div class="api-toolbar">
@@ -103,6 +104,7 @@
     <div class="schema-toolbar" id="schemaDesignTabBtn">
         <button class="primary" onclick="schemaAddTable()">+ Table</button>
         <button onclick="schemaAutoLayout()" title="Auto-arrange tables">Auto Layout</button>
+        <button onclick="setMode('schema')" title="Open the schema designer tutorial" style="background:#8b5cf6;color:#fff;">Tutorial</button>
         <button onclick="schemaUndo()" title="Undo (Ctrl+Z)">↩</button>
         <button onclick="schemaRedo()" title="Redo (Ctrl+Y)">↪</button>
         <span class="schema-separator"></span>
@@ -150,10 +152,11 @@
         </div>
     </div>
 </div>
+<div id="schemaTutorialPage" style="display:none;"></div>
 <textarea id="editor" spellcheck="false" aria-label="Code editor">for n in range(5):
     if n == 2: continue
     if n == 4: break
-    print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
+    print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="check-code-btn" class="run-btn ai-toolbar-btn" style="flex:1; font-size:0.65rem; padding:10px; background:#22c55e; color:#000;" onclick="checkCode()" title="Run static code analysis on current code">Check Code</button><button id="explain-ai-btn" class="run-btn ai-toolbar-btn" style="flex:1; font-size:0.65rem; padding:10px; background:#0ea5e9; color:#000;" onclick="explainCode()" title="Get AI explanation of current code">Explain</button><button id="review-ai-btn" class="run-btn ai-toolbar-btn" style="flex:1; font-size:0.65rem; padding:10px; background:#8b5cf6; color:#000;" onclick="reviewCode()" title="Get AI review of current code">Review</button><button id="exercise-ai-btn" class="run-btn ai-toolbar-btn" style="flex:1; font-size:0.65rem; padding:10px; background:#10b981; color:#000;" onclick="generateExercise()" title="Generate an AI exercise">Exercise</button><button id="quiz-ai-btn" class="run-btn ai-toolbar-btn" style="flex:1; font-size:0.65rem; padding:10px; background:#f59e0b; color:#000;" onclick="generateQuiz()" title="Generate a quiz">Quiz</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="tutorial-nav"></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
     <div class="col col-enter"><label>Console</label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
     print(n)</textarea><div style="display:flex; gap:8px; margin-top:10px;"><button class="run-btn" style="flex:1;" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" style="flex:1; font-size:0.7rem; padding:10px;" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="explain-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#a5f3fc;" onclick="explainCode()" title="Get an AI explanation of your code">Explain</button><button id="review-btn" class="run-btn" style="flex:0.5; font-size:0.65rem; padding:10px; background:#1e293b; color:#34d399;" onclick="reviewCode()" title="Get an AI review of your code">Review</button><button id="copy-btn" class="run-btn" style="flex:0.3; font-size:0.65rem; padding:10px; background:#1e293b; color:#94a3b8;" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Source ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(3)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
     <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
@@ -175,11 +178,13 @@
 <script src="public/game.js"></script>
     <script src="public/db.js"></script>
     <script src="public/schema.js"></script>
+    <script src="public/schema-tutorial.js"></script>
 <script src="public/git-visualize.js"></script>
 <script src="public/techstack.js"></script>
 <script src="public/compiler-core.js"></script>
 <script src="public/compiler-curriculum.js"></script>
-<script src="public/ai-responses.js"></script>
+<script src="public/ai/responses.js"></script>
+<script src="public/ai/core.js"></script>
 <script src="public/cheatsheets.js"></script>
 <script src="public/app.js"></script>
 <script>
@@ -272,7 +277,9 @@ function toggleKodexModal() {
 <div class="ai-panel" id="aiPanel" role="complementary" aria-label="Devin">
     <div class="ai-header">
         <span>Devin</span>
-        <div><button onclick="clearChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Clear chat history">Clear</button><button onclick="toggleAI()">✕</button></div>
+        <span id="aiContext" class="ai-context" style="font-size:9px;font-weight:600;color:#64748b;text-transform:none;letter-spacing:0;flex:0;margin:0 4px;"></span>
+<span id="tutorStatus" style="font-size:8px;color:#64748b;margin-left:auto;padding:0 6px;white-space:nowrap;"></span>
+        <div><button onclick="clearChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Clear chat history">Clear</button><button onclick="exportChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Export chat as markdown">Export</button><button onclick="toggleAI()">✕</button></div>
     </div>
     <div class="ai-messages" id="aiMessages">
         <div class="ai-msg bot">
@@ -282,100 +289,43 @@ function toggleKodexModal() {
     </div>
     <div class="ai-suggestions" id="aiSuggestions"></div>
     <div class="ai-input-row">
-        <input id="aiInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendAI(); if(event.key==='Tab') { event.preventDefault(); showMascot(); }">
+        <textarea id="aiInput" placeholder="Ask a question... (Ctrl+K)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}" oninput="autoGrowAIInput(this)"></textarea>
+        <button id="aiStopBtn" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:900;cursor:pointer;font-size:12px;" onclick="stopAIStream()" title="Stop generating">■</button>
         <button onclick="sendAI()">Send</button>
     </div>
+    <div id="aiOfflineBadge" style="padding:4px 10px;font-size:9px;color:#94a3b8;background:#1e293b;border-top:1px solid #334155;text-align:center;">⟳ Checking server...</div>
+    <div id="aiStatusLine" style="display:none;"></div>
 </div>
-<div id="devinMascot" class="devin-mascot" onclick="hideMascot()">
-    <svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" class="devin-svg">
-        <!-- Backpack body -->
-        <rect x="20" y="20" width="80" height="90" rx="12" fill="#2d5a87" stroke="#1a3a5c" stroke-width="3"/>
-        <rect x="20" y="20" width="80" height="90" rx="12" fill="url(#packGrad)"/>
-        <!-- Top flap -->
-        <path d="M20 45 L60 30 L100 45 L100 30 Q100 20 90 20 L30 20 Q20 20 20 30 Z" fill="#3b7bb5" stroke="#1a3a5c" stroke-width="2.5"/>
-        <!-- Zipper -->
-        <line x1="60" y1="55" x2="60" y2="90" stroke="#f7df1e" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="60" cy="55" r="3" fill="#f7df1e"/>
-        <!-- Pockets -->
-        <rect x="15" y="60" width="12" height="25" rx="4" fill="#3b7bb5" stroke="#1a3a5c" stroke-width="2"/>
-        <rect x="93" y="60" width="12" height="25" rx="4" fill="#3b7bb5" stroke="#1a3a5c" stroke-width="2"/>
-        <!-- Straps -->
-        <path d="M35 20 Q30 5 40 0 Q50 -2 55 10" fill="none" stroke="#f7df1e" stroke-width="5" stroke-linecap="round"/>
-        <path d="M85 20 Q90 5 80 0 Q70 -2 65 10" fill="none" stroke="#f7df1e" stroke-width="5" stroke-linecap="round"/>
-        <!-- Eyes -->
-        <circle cx="45" cy="75" r="6" fill="white"/>
-        <circle cx="75" cy="75" r="6" fill="white"/>
-        <circle cx="46" cy="74" r="3" fill="#1a3a5c"/>
-        <circle cx="76" cy="74" r="3" fill="#1a3a5c"/>
-        <!-- Eye shine -->
-        <circle cx="47" cy="72" r="1.5" fill="white" opacity="0.8"/>
-        <circle cx="77" cy="72" r="1.5" fill="white" opacity="0.8"/>
-        <!-- Blush -->
-        <ellipse cx="37" cy="85" rx="5" ry="3" fill="#ff6b9d" opacity="0.4"/>
-        <ellipse cx="83" cy="85" rx="5" ry="3" fill="#ff6b9d" opacity="0.4"/>
-        <!-- Mouth (talks) -->
-        <path id="devinMouth" d="M50 92 Q60 100 70 92" fill="none" stroke="#1a3a5c" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- Arms -->
-        <path d="M15 50 Q0 60 5 80" fill="none" stroke="#2d5a87" stroke-width="6" stroke-linecap="round"/>
-        <path d="M105 50 Q120 60 115 80" fill="none" stroke="#2d5a87" stroke-width="6" stroke-linecap="round"/>
-        <!-- Legs -->
-        <rect x="30" y="108" width="18" height="25" rx="6" fill="#2d5a87" stroke="#1a3a5c" stroke-width="2"/>
-        <rect x="72" y="108" width="18" height="25" rx="6" fill="#2d5a87" stroke="#1a3a5c" stroke-width="2"/>
-        <!-- Feet -->
-        <ellipse cx="39" cy="133" rx="12" ry="6" fill="#3b7bb5" stroke="#1a3a5c" stroke-width="2"/>
-        <ellipse cx="81" cy="133" rx="12" ry="6" fill="#3b7bb5" stroke="#1a3a5c" stroke-width="2"/>
-        <!-- Gradient -->
-        <defs>
-            <linearGradient id="packGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#4a90d9"/>
-                <stop offset="100%" stop-color="#2d5a87"/>
-            </linearGradient>
-        </defs>
-    </svg>
-    <div class="devin-speech" id="devinSpeech">Need help? Ask me anything!</div>
+<div class="tutorial-overlay" id="tutorial-quiz-overlay" onclick="if(event.target===this)return">
+  <div class="tutorial-quiz-paper" onclick="event.stopPropagation()">
+    <div class="tutorial-quiz-body" id="tutorial-quiz-body"></div>
+  </div>
 </div>
+
+<div class="tutorial-overlay" id="tutorial-resume-overlay" onclick="if(event.target===this)closeResumePrompt()">
+  <div class="tutorial-resume-paper" onclick="event.stopPropagation()">
+    <div class="tutorial-resume-body">
+      <div class="tutorial-resume-icon">👋</div>
+      <h2>Welcome Back!</h2>
+      <p>You're partway through the JavaScript Tutorial.</p>
+      <div class="tutorial-resume-stats" id="tutorial-resume-stats"></div>
+      <div class="tutorial-resume-name" id="tutorial-resume-name"></div>
+      <div class="tutorial-resume-actions">
+        <button class="tutorial-resume-btn primary" onclick="startTutorial()">Continue Lesson</button>
+        <button class="tutorial-resume-btn" onclick="tutorialManager.reset(); startTutorial();">Start Over</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-    let mascotTimer = null;
-    let mouthAnimId = null;
+function closeResumePrompt() {
+  document.getElementById('tutorial-resume-overlay')?.classList.remove('open');
+  startTutorial();
+}
+</script>
 
-    function showMascot() {
-        const el = document.getElementById('devinMascot');
-        el.classList.add('visible');
-        el.classList.add('talking');
-        startMouthAnim();
-        clearTimeout(mascotTimer);
-        mascotTimer = setTimeout(() => {
-            el.classList.remove('talking');
-            stopMouthAnim();
-        }, 3000);
-        document.getElementById('aiInput').focus();
-    }
-
-    function hideMascot() {
-        const el = document.getElementById('devinMascot');
-        el.classList.remove('visible');
-        el.classList.remove('talking');
-        stopMouthAnim();
-        document.getElementById('aiInput').focus();
-    }
-
-    function startMouthAnim() {
-        stopMouthAnim();
-        const mouth = document.getElementById('devinMouth');
-        let open = false;
-        mouthAnimId = setInterval(() => {
-            open = !open;
-            mouth.setAttribute('d', open ? 'M48 94 Q60 104 72 94' : 'M50 92 Q60 100 70 92');
-        }, 250);
-    }
-
-    function stopMouthAnim() {
-        if (mouthAnimId) {
-            clearInterval(mouthAnimId);
-            mouthAnimId = null;
-        }
-        const mouth = document.getElementById('devinMouth');
-        if (mouth) mouth.setAttribute('d', 'M50 92 Q60 100 70 92');
-    }
+<script src="public/tutorial.js"></script>
+<script>
 </script>
 </body></html>

@@ -11,6 +11,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const DATA_DIR = path.join(ROOT, 'data');
 const PROGRESS_FILE = path.join(DATA_DIR, 'progress.json');
 const CONTENT_DIR = path.join(ROOT, 'content');
+const ACTIVE_AI_PROVIDER = process.env.AI_PROVIDER || 'hybrid';
 
 // ── Optional TS module imports (require build step to work on Netlify) ──
 let askLLM, learner, codeReview, generateExercise, semanticSearch, getTopicContext, getCurriculumContext;
@@ -257,7 +258,7 @@ async function handleChat(body) {
   }
 
   // LLM path if available
-  if (askLLM && process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+  if (askLLM && ACTIVE_AI_PROVIDER !== 'keyword') {
     try {
       const llmMessages = [{ role: 'user', content: `Context: The user is studying ${lang || 'programming'}${topic ? `, topic: ${topic}` : ''}.\n\nUser question: ${message}` }];
       const reply = await askLLM(llmMessages);
@@ -310,7 +311,7 @@ async function handleExplain(body) {
   const { code, lang, topic } = body;
   if (!code) return { statusCode: 200, body: JSON.stringify({ explanation: "No code provided." }) };
 
-  if (askLLM && process.env.AI_PROVIDER && process.env.AI_PROVIDER !== 'keyword') {
+  if (askLLM && ACTIVE_AI_PROVIDER !== 'keyword') {
     const context = topic ? `The user is studying ${topic} in ${lang || 'programming'}.` : `The user is programming in ${lang || 'a language'}.`;
     const messages = [{ role: 'user', content: `${context}\n\nExplain this code step by step:\n\n\`\`\`\n${code}\n\`\`\`` }];
     const llmReply = await askLLM(messages);

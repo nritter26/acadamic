@@ -9,27 +9,7 @@ let currentMobilePlatform = 'all';
 let collapsedPhases = new Set();
 
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
-var LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
-    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql', mobile: 'mobile', backend: 'backend',
-    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
-    godot: 'godot', unity: 'unity', unreal: 'unreal',
-    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
-    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
-    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
-    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
-    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
-    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
-    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
-    bootstrap: 'bootstrap', django: 'django', flask: 'flask',
-    fastapi: 'fastapi', spring: 'spring',
-};
-var NAME_TO_LANG = {};
-for (const [code, name] of Object.entries(LANG_NAMES)) {
-    NAME_TO_LANG[name] = code;
-}
+
 
 function normalizeCourseData() {
     for (const lang of Object.keys(courseData)) {
@@ -84,37 +64,7 @@ function loadLangData(lang, callback) {
     return false;
 }
 
-function detectLanguageInQuery(q) {
-    const words = q.toLowerCase().split(/\s+/);
-    for (const word of words) {
-        for (const [code, name] of Object.entries(LANG_NAMES)) {
-            if (word === name || word === code) return code;
-        }
-        if (word === 'sql') return 'pg';
-    }
-    return null;
-}
 
-function getLanguageIntro(langCode) {
-    const data = courseData[langCode];
-    if (!data) return null;
-    // Pick the first topic from the first phase
-    const phases = Object.keys(data);
-    if (!phases.length) return null;
-    const firstPhase = phases[0];
-    const topics = Object.keys(data[firstPhase]);
-    if (!topics.length) return null;
-    const topic = topics[0];
-    const item = data[firstPhase][topic];
-    const displayName = LANG_NAMES[langCode] || langCode.toUpperCase();
-    return {
-        topic,
-        phase: firstPhase,
-        exp: item.exp || '',
-        code: item.code || '',
-        displayName: displayName.charAt(0).toUpperCase() + displayName.slice(1),
-    };
-}
 
 
 
@@ -157,6 +107,7 @@ function loadTopic(phase, topic) {
     updateHighlight();
     document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
     setTimeout(suggestNextTopic, 100);
+    updateAIContext();
 }
 
 let filterDebounceTimer;
@@ -196,7 +147,7 @@ function setLevel(level) {
 function renderEngineBar() {
     const engineBarEl = document.getElementById('engine-bar');
     const engines = [
-        { id: 'all', label: 'All Engines' },
+        { id: 'all', label: 'Game Development' },
         { id: 'godot', label: 'Godot' },
         { id: 'unity', label: 'Unity' },
         { id: 'unreal', label: 'Unreal' },
@@ -217,15 +168,19 @@ function setEngineFilter(engine) {
     if (searchInput) searchInput.value = '';
     
     const appEl = document.getElementById('app');
+    const platformBar = document.getElementById('platform-bar');
+
     if (engine === 'all') {
         currentLang = 'gamedev';
         appEl.className = 'gamedev-mode';
+        if (platformBar) platformBar.style.display = 'none';
         renderTopicList('gamedev');
         updateAISuggestions();
         loadLangIntro('gamedev');
     } else {
         currentLang = engine;
         appEl.className = engine + '-mode';
+        if (platformBar) platformBar.style.display = 'none';
         if (!courseData[engine]) {
             loadLangData(engine, function () {
                 renderTopicList(engine);
@@ -258,9 +213,24 @@ function renderPlatformBar() {
 function setPlatform(platform) {
     currentMobilePlatform = platform;
     renderPlatformBar();
-    loadLangIntro(platform);
-    const searchInput = document.getElementById('topic-search');
-    filterTopics(searchInput ? searchInput.value : '');
+    if (currentLang === 'mobile') {
+        renderTopicList('mobile');
+        var data = courseData['mobile'];
+        if (data) {
+            var phases = Object.keys(data);
+            if (phases.length > 0) {
+                var phase = phases[0];
+                var topics = Object.keys(data[phase]);
+                if (topics.length > 0) loadTopic(phase, topics[0]);
+            }
+        }
+        var searchInput = document.getElementById('topic-search');
+        filterTopics(searchInput ? searchInput.value : '');
+    } else {
+        loadLangIntro(platform);
+        var searchInput = document.getElementById('topic-search');
+        filterTopics(searchInput ? searchInput.value : '');
+    }
 }
 
 function toggleCheatsheet() {
@@ -337,9 +307,165 @@ function loadCheatsheet() {
     toggleCheatsheet();
 }
 
-const BACKEND_URL = window.location.origin;
+function resolveBackendUrl() {
+    const override = localStorage.getItem('kodex_backend_url');
+    if (override) return override.replace(/\/$/, '');
+
+    const { protocol, hostname, port, origin } = window.location;
+    const staticDevPorts = new Set(['5500', '5501', '5502', '5173', '5174']);
+    const isLocalStaticServer = (hostname === 'localhost' || hostname === '127.0.0.1') && staticDevPorts.has(port);
+    if (isLocalStaticServer) {
+        return `${protocol}//${hostname}:3000`;
+    }
+
+    return origin;
+}
+
+const BACKEND_URL = resolveBackendUrl();
+
+// Generate persistent learner ID
+const LEARNER_ID = (function() {
+    let id = localStorage.getItem('kodex_learner_id');
+    if (!id) {
+        id = 'learner_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        localStorage.setItem('kodex_learner_id', id);
+    }
+    return id;
+})();
 
 const runBtn = document.querySelector('.run-btn');
+
+let dueReviewCount = 0;
+
+function checkDueReviews() {
+    fetch(BACKEND_URL + '/api/learner/reviews')
+        .then(r => r.json())
+        .then(d => {
+            if (d.due && d.due.length > 0) {
+                dueReviewCount = d.due.length;
+                updateReviewBadge();
+            } else {
+                dueReviewCount = 0;
+                updateReviewBadge();
+            }
+        })
+        .catch(() => { dueReviewCount = 0; updateReviewBadge(); });
+}
+
+function updateReviewBadge() {
+    const toggle = document.getElementById('aiToggle');
+    if (!toggle) return;
+    const existing = document.getElementById('review-badge');
+    if (existing) existing.remove();
+    if (dueReviewCount > 0) {
+        const badge = document.createElement('span');
+        badge.id = 'review-badge';
+        badge.textContent = ' ' + dueReviewCount;
+        badge.style.cssText = 'background:#ef4444;color:#fff;border-radius:8px;padding:0 5px;font-size:8px;font-weight:800;margin-left:2px;';
+        toggle.appendChild(badge);
+    }
+}
+
+async function readChatStream(response) {
+    if (!response.ok || !response.body) {
+        throw new Error('Stream not available');
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.content !== undefined) {
+                    fullText += parsed.content;
+                }
+            } catch {}
+        }
+    }
+
+    return fullText;
+}
+
+function triggerAutoDebug(errorText, code) {
+    if (!errorText || !code) return;
+    const out = document.getElementById('output');
+    const existingDebug = document.getElementById('ai-auto-debug-btn');
+    if (existingDebug) existingDebug.remove();
+    const btn = document.createElement('button');
+    btn.id = 'ai-auto-debug-btn';
+    btn.textContent = '🔧 Auto-Debug';
+    btn.style.cssText = 'display:block;margin-top:4px;margin-bottom:4px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:9px;font-weight:800;cursor:pointer;';
+    btn.onclick = async function() {
+        btn.textContent = '🔍 Analyzing...';
+        btn.disabled = true;
+        const aiPanel = document.getElementById('aiPanel');
+        if (!aiPanel.classList.contains('open')) toggleAI();
+        addAIMessage('', 'typing');
+        try {
+            const response = await fetch(BACKEND_URL + '/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Debug this error and suggest a fix. Error: ${errorText.slice(0, 300)}`,
+                    lang: currentLang,
+                    topic: currentTopic,
+                    code: code.slice(0, 2000),
+                    hasError: true,
+                    output: errorText.slice(0, 500),
+                    history: []
+                })
+            });
+            const reply = await readChatStream(response);
+            removeTypingIndicator();
+            if (reply) {
+                addAIMessage(reply, 'bot');
+            } else {
+                const errorQ = `I got this error and need help fixing it:\n\`\`\`\n${errorText.slice(0, 300)}\n\`\`\`\n\nMy code:\n\`\`\`\n${code.slice(0, 800)}\n\`\`\`\n\nWhat went wrong and how do I fix it?`;
+                askAI(errorQ);
+            }
+        } catch {
+            removeTypingIndicator();
+            const errorQ = `I got this error and need help fixing it. Error: ${errorText.split('\n')[0]}`;
+            askAI(errorQ);
+        } finally {
+            btn.textContent = '🔧 Auto-Debug';
+            btn.disabled = false;
+        }
+    };
+    if (out && out.parentNode) {
+        out.parentNode.appendChild(btn);
+    }
+}
+
+function applyAIFix() {
+    const editor = document.getElementById('editor');
+    if (!editor) return;
+    const lastBot = [...conversationHistory].reverse().find(m => m.role === 'bot');
+    if (!lastBot || !lastBot.text) return;
+    const codeMatch = lastBot.text.match(/```(?:\w+)?\n([\s\S]*?)```/);
+    if (codeMatch) {
+        editor.value = codeMatch[1];
+        updateHighlight();
+        runCode();
+    }
+}
+
+// Periodically check for due reviews
+setInterval(checkDueReviews, 60000);
+setTimeout(checkDueReviews, 3000);
 
 function setRunLoading(loading) {
     if (!runBtn) return;
@@ -446,9 +572,54 @@ function getLogicalPreview(code, lang) {
     return output.length > 0 ? output.join('\n') : null;
 }
 
+let lastErrorOutput = '';
+
+function addErrorExplainButton(out, errorText) {
+    lastErrorOutput = errorText;
+    const btnId = 'ai-explain-error-btn';
+    if (document.getElementById(btnId)) return;
+    const btn = document.createElement('button');
+    btn.id = btnId;
+    btn.textContent = '💡 Explain Error';
+    btn.style.cssText = 'display:block;margin-top:6px;background:#0ea5e9;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:10px;font-weight:800;cursor:pointer;';
+    btn.onclick = function() {
+        const editor = document.getElementById('editor');
+        const code = editor ? editor.value : '';
+        const aiPanel = document.getElementById('aiPanel');
+        if (!aiPanel.classList.contains('open')) toggleAI();
+        addAIMessage('', 'typing');
+        setTimeout(() => {
+            removeTypingIndicator();
+            const errorQ = `I got this error: ${errorText.split('\n')[0]}\n\nMy code:\n\`\`\`\n${code.slice(0, 500)}\n\`\`\`\n\nWhat went wrong and how do I fix it?`;
+            askAI(errorQ);
+        }, 200);
+    };
+    out.parentNode.appendChild(btn);
+}
+
+function appendAutoReview(outEl, code, lang) {
+    const result = localCodeReview(code, lang);
+    if (result.issues.length === 0) {
+        clearAnnotations();
+        return;
+    }
+    updateAnnotations(result.issues);
+    let summary = '\n\n// ── Auto Review ──\n';
+    const errors = result.issues.filter(i => i.severity === 'error').length;
+    const warnings = result.issues.filter(i => i.severity === 'warning').length;
+    const styles = result.issues.filter(i => i.severity === 'style').length;
+    if (errors) summary += `// ⛔ ${errors} error(s)`;
+    if (warnings) summary += `${errors ? ',' : '// ⚠'} ${warnings} warning(s)`;
+    if (styles) summary += `${errors || warnings ? ',' : '// ℹ'} ${styles} style issue(s)`;
+    summary += ` | Score: ${result.score}/10`;
+    outEl.innerText += summary;
+}
+
 function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
+    const existingBtn = document.getElementById('ai-explain-error-btn');
+    if (existingBtn) existingBtn.remove();
     if (!code.trim()) { out.innerText = "// No code to run"; return; }
     if (currentLang === 'git') {
         out.innerText = processGitCommand(code);
@@ -465,10 +636,16 @@ function runCode() {
             eval(code);
             console.log = log;
             out.innerText = localOut || "(no output)";
+            appendAutoReview(out, code, currentLang);
         } catch(e) {
-            out.innerText = "Error: " + e.message;
+            const errMsg = "Error: " + e.message;
+            out.innerText = errMsg;
+            addErrorExplainButton(out, errMsg);
+            triggerAutoDebug(errMsg, code);
+            appendAutoReview(out, code, currentLang);
         }
         setRunLoading(false);
+        if (typeof tutorialRunHook === 'function') tutorialRunHook();
         return;
     }
 
@@ -478,7 +655,16 @@ function runCode() {
         body: JSON.stringify({ lang: currentLang, code })
     })
     .then(r => r.json())
-    .then(d => { out.innerText = d.output; setRunLoading(false); })
+    .then(d => {
+        out.innerText = d.output;
+        setRunLoading(false);
+        if (typeof tutorialRunHook === 'function') tutorialRunHook();
+        if (d.error || d.output.includes('Error:') || d.output.includes('FAIL')) {
+            addErrorExplainButton(out, d.output);
+            triggerAutoDebug(d.output, code);
+        }
+        appendAutoReview(out, code, currentLang);
+    })
     .catch(e => {
         setRunLoading(false);
         const preview = getLogicalPreview(code, currentLang);
@@ -559,28 +745,257 @@ function toggleAI() {
     const wasOpen = panel.classList.contains('open');
     panel.classList.toggle('open');
     document.getElementById('aiToggle').classList.toggle('open');
-    if (!wasOpen) { loadChatHistory(); setTimeout(() => document.getElementById('aiInput').focus(), 100); }
+    if (!wasOpen) {
+        loadChatHistory();
+        setTimeout(() => document.getElementById('aiInput').focus(), 100);
+        updateAIContext();
+        // Proactive due review reminder
+        if (dueReviewCount > 0 && conversationHistory.length === 0) {
+            setTimeout(() => {
+                const msg = `📅 **You have ${dueReviewCount} topic${dueReviewCount > 1 ? 's' : ''} due for review!**\n\nSpaced repetition helps you retain what you've learned. Would you like to:\n\n1️⃣ **Review now** — I'll quiz you on each topic\n2️⃣ **Later** — dismiss this reminder\n\nWhat would you like to do?`;
+                addAIMessage(msg, 'bot');
+                const el = document.getElementById('aiSuggestions');
+                if (el) {
+                    el.innerHTML = `<button onclick="startReviewSession()">✅ Review Now</button><button onclick="dismissReviewReminder()">⏰ Later</button>`;
+                }
+            }, 500);
+        }
+    }
     if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
 }
 
+function startReviewSession() {
+    addAIMessage('Let me review the topics I need to revisit.', 'user');
+    addAIMessage('', 'typing');
+    fetch(BACKEND_URL + '/api/learner/reviews')
+        .then(r => r.json())
+        .then(d => {
+            removeTypingIndicator();
+            if (!d.due || d.due.length === 0) {
+                addAIMessage('No topics due for review right now. Great job staying on top of things! 🎉', 'bot');
+                return;
+            }
+            let reply = 'Great, let\'s review! I\'ll quiz you on each topic. Answer and I\'ll tell you if you\'re right.\n\n';
+            for (const item of d.due.slice(0, 5)) {
+                const parts = item.key.split(':');
+                const topicName = parts.slice(2).join(':') || parts[1] || 'unknown';
+                reply += `📖 **${topicName}** — last reviewed ${item.lastReviewed ? new Date(item.lastReviewed).toLocaleDateString() : 'never'}\n`;
+            }
+            reply += '\nSay **"start"** when you\'re ready to begin!';
+            addAIMessage(reply, 'bot');
+            const el = document.getElementById('aiSuggestions');
+            if (el) {
+                el.innerHTML = `<button onclick="askAI('Start the review')">🚀 Start Review</button><button onclick="dismissReviewReminder()">⏰ Dismiss</button>`;
+            }
+        })
+        .catch(() => {
+            removeTypingIndicator();
+            addAIMessage("Couldn't fetch reviews. Make sure the backend is running.", 'bot');
+        });
+}
+
+function dismissReviewReminder() {
+    dueReviewCount = 0;
+    updateReviewBadge();
+    const el = document.getElementById('aiSuggestions');
+    if (el) el.innerHTML = '';
+}
+
 let aiCodeId = 0;
+function highlightCode(code, lang) {
+    const kw = {
+        js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
+        ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
+        py: ['def','return','if','elif','else','for','while','in','not','and','or','is','None','True','False','class','import','from','as','try','except','finally','raise','with','async','await','yield','lambda','pass','break','continue','global','nonlocal','self','super'],
+        go: ['func','return','if','else','for','range','switch','case','break','continue','go','defer','select','chan','map','struct','interface','type','package','import','var','const','nil','true','false','make','new','append','len','cap'],
+        rs: ['fn','let','mut','if','else','for','while','loop','match','return','pub','struct','enum','impl','trait','use','mod','as','in','ref','self','super','Some','None','Ok','Err','true','false','let','const','static','unsafe','async','await','move','where'],
+        cs: ['public','private','protected','internal','static','void','int','string','bool','float','double','var','class','struct','enum','interface','namespace','using','return','if','else','for','foreach','while','do','switch','case','break','continue','new','this','base','virtual','override','abstract','sealed','readonly','const','async','await','try','catch','finally','throw','get','set','value'],
+        swift: ['func','var','let','if','else','for','in','while','switch','case','break','continue','return','class','struct','enum','protocol','extension','import','guard','defer','throw','throws','rethrows','catch','async','await','actor','nonisolated','mutating','self','super','nil','true','false'],
+    }[lang] || ['const','let','var','function','return','if','else','for','while','class','import','export','true','false','null','undefined','new','this','try','catch'];
+    const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const lines = escaped.split('\n');
+    return lines.map(line => {
+        const tokens = [];
+        let i = 0;
+        while (i < line.length) {
+            // single-line comment
+            const rest = line.slice(i);
+            const sCm = rest.match(/^\/\/.*/);
+            if (sCm) { tokens.push('<span class="syn-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
+            const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
+            if (bCm) { tokens.push('<span class="syn-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
+            // string
+            const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
+            if (str) { tokens.push('<span class="syn-string">' + str[1] + '</span>'); i += str[1].length; continue; }
+            // number
+            const num = rest.match(/^\b(\d+\.?\d*|0x[0-9a-fA-F]+)\b/);
+            if (num) { tokens.push('<span class="syn-number">' + num[1] + '</span>'); i += num[1].length; continue; }
+            // word (keyword or identifier)
+            const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
+            if (word) {
+                if (kw.includes(word[1])) tokens.push('<span class="syn-keyword">' + word[1] + '</span>');
+                else tokens.push(word[1]);
+                i += word[1].length;
+                continue;
+            }
+            tokens.push(line[i]);
+            i++;
+        }
+        return tokens.join('');
+    }).join('\n');
+}
+
+function escapeAIHtml(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function escapeAIAttr(text) {
+    return escapeAIHtml(text)
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function safeAIHref(url) {
+    const decoded = String(url).replace(/&amp;/g, '&').trim();
+    if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
+    return '';
+}
+
 function formatAIText(text) {
-    let displayText = text;
-    if (text && text.includes('**')) {
-        displayText = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    }
-    displayText = displayText.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
-        const id = 'ai-code-' + (++aiCodeId);
-        const safeCode = code.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        setTimeout(() => {
-            const btn = document.getElementById(id);
-            if (btn) btn.dataset.code = safeCode;
-        }, 0);
-        return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${code}</code></pre><button class="ai-run-code" id="${id}">Run</button></div>`;
+    if (!text) return '';
+    // 1. Extract and protect code blocks
+    const codeBlocks = [];
+    const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
+        const idx = codeBlocks.length;
+        const safeCode = escapeAIAttr(code);
+        const highlighted = highlightCode(code, lang);
+        codeBlocks.push({ lang, code, safeCode, highlighted });
+        return `\x00CODEBLOCK${idx}\x00`;
     });
-    displayText = displayText.replace(/\`([^`]+)\`/g, '<code>$1</code>');
-    displayText = displayText.replace(/\n/g, '<br>');
-    return displayText;
+    // 2. Process block-level markdown (headings, horizontal rules, blockquotes, lists)
+    const lines = noCode.split('\n');
+    let result = '';
+    let inList = false;
+    let listStack = []; // tracks list types at each nesting level
+    let listLevel = 0;
+    for (let li = 0; li < lines.length; li++) {
+        let line = lines[li];
+        const trimmed = line.trim();
+        const indent = line.length - line.trimStart().length;
+        const listMatch = trimmed.match(/^(\s*[-*+]\s)(.*)$/);
+        const orderedMatch = trimmed.match(/^(\s*\d+\.\s)(.*)$/);
+        // check if line is a code block placeholder
+        const cbPlaceholder = line.match(/^\x00CODEBLOCK(\d+)\x00$/);
+        if (cbPlaceholder) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const cb = codeBlocks[parseInt(cbPlaceholder[1])];
+            result += `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+            continue;
+        }
+        // heading
+        const hMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+        if (hMatch) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const level = hMatch[1].length;
+            result += `<h${level} style="font-size:${14 - level}px;color:#f1f5f9;margin:8px 0 4px;font-weight:800;">${inlineFormat(hMatch[2], codeBlocks, false)}</h${level}>`;
+            continue;
+        }
+        // horizontal rule
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            result += '<hr style="border:none;border-top:1px solid #334155;margin:10px 0;">';
+            continue;
+        }
+        // blockquote
+        if (trimmed.startsWith('> ')) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            const content = inlineFormat(trimmed.replace(/^>\s?/, ''), codeBlocks, false);
+            result += `<blockquote style="border-left:3px solid var(--accent);margin:6px 0;padding:4px 10px;color:#94a3b8;font-size:11px;">${content}</blockquote>`;
+            continue;
+        }
+        // list item
+        const isListItem = listMatch || orderedMatch;
+        if (isListItem) {
+            const prefix = listMatch ? listMatch[1] : orderedMatch[1];
+            const content = listMatch ? listMatch[2] : orderedMatch[2];
+            const tag = listMatch ? 'ul' : 'ol';
+            if (!inList) { result += `<${tag} style="margin:4px 0;padding-left:20px;">`; inList = true; listStack = [tag]; }
+            const formatted = inlineFormat(content, codeBlocks, true);
+            result += `<li style="font-size:11px;color:#cbd5e1;margin:2px 0;">${formatted}</li>`;
+            // peek ahead for nested content
+            continue;
+        }
+        // empty line in list resets
+        if (inList && trimmed === '') {
+            result += '</li></ul>'.repeat(listStack.length);
+            inList = false;
+            listStack = [];
+            continue;
+        }
+        // table
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+            // check if next line is a separator row
+            const nextLine = lines[li + 1];
+            const isSep = nextLine && /^\|[\s:-]+\|/.test(nextLine.trim());
+            if (isSep) {
+                // find all headers
+                const headers = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
+                const hHtml = headers.map(h => `<th style="padding:4px 8px;text-align:left;color:#f1f5f9;font-size:10px;font-weight:800;border-bottom:2px solid #334155;">${inlineFormat(h, codeBlocks, false)}</th>`).join('');
+                result += `<table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:10px;"><thead><tr>${hHtml}</tr></thead><tbody>`;
+                li++; // skip separator
+                // read body rows
+                while (li + 1 < lines.length) {
+                    const rowLine = lines[li + 1].trim();
+                    if (!rowLine.startsWith('|') || !rowLine.endsWith('|')) break;
+                    li++;
+                    const cells = rowLine.split('|').filter(c => c.trim()).map(c => c.trim());
+                    const rHtml = cells.map(c => `<td style="padding:4px 8px;color:#94a3b8;font-size:10px;border-bottom:1px solid #1e293b;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
+                    result += `<tr>${rHtml}</tr>`;
+                }
+                result += '</tbody></table>';
+                continue;
+            }
+            // single row table (not preceded by separator)
+            const cells = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
+            const rHtml = cells.map(c => `<td style="padding:3px 6px;font-size:10px;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
+            result += `<table style="width:100%;border-collapse:collapse;margin:4px 0;"><tr>${rHtml}</tr></table>`;
+            continue;
+        }
+        // default paragraph
+        if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
+        if (trimmed !== '') {
+            result += `<p style="margin:4px 0;">${inlineFormat(trimmed, codeBlocks, false)}</p>`;
+        }
+    }
+    if (inList) { result += '</li></ul>'.repeat(listStack.length); }
+    return result;
+}
+
+function inlineFormat(text, codeBlocks) {
+    let t = escapeAIHtml(text);
+    // inline code
+    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;">$1</code>');
+    // bold
+    t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
+    // italic
+    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
+    // links
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+        const href = safeAIHref(url);
+        if (!href) return label;
+        return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">${label}</a>`;
+    });
+    // inline code block placeholders (shouldn't be here but just in case)
+    t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
+        const cb = codeBlocks[parseInt(idx)];
+        if (cb) return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+        return '';
+    });
+    return t;
 }
 
 document.addEventListener('click', function(e) {
@@ -590,20 +1005,55 @@ document.addEventListener('click', function(e) {
     }
 });
 
+let aiFeedbackId = 0;
+
 function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-msg-wrapper';
     const div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     if (role === 'bot') {
-        div.innerHTML = `<div class="label">Devin</div>${formatAIText(text)}`;
+        const fid = 'fb-' + (++aiFeedbackId);
+        const formatted = formatAIText(text);
+        const escaped = text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+        div.innerHTML = `<div class="label">Devin</div>${formatted}<div class="ai-feedback" id="${fid}"><button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button></div>`;
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-copy-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1500);
+            }).catch(() => {});
+        };
+        wrapper.appendChild(copyBtn);
     } else if (role === 'user') {
         div.textContent = text;
+        const editBtn = document.createElement('button');
+        editBtn.className = 'ai-edit-btn';
+        editBtn.textContent = '✎';
+        editBtn.title = 'Edit and resend';
+        editBtn.onclick = function() {
+            const input = document.getElementById('aiInput');
+            input.value = text;
+            autoGrowAIInput(input);
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        };
+        wrapper.appendChild(editBtn);
     }
+    wrapper.appendChild(div);
     if (role === 'typing') {
         div.id = 'aiTyping';
         div.innerHTML = '<div class="label">Devin</div><span class="typing-dots">● ● ●</span>';
     }
-    el.appendChild(div);
+    if (role === 'typing') {
+        el.appendChild(div);
+    } else {
+        el.appendChild(wrapper);
+    }
     el.scrollTop = el.scrollHeight;
     if (role !== 'typing' && !skipSave) {
         conversationHistory.push({ role, text });
@@ -611,6 +1061,23 @@ function addAIMessage(text, role, skipSave) {
             conversationHistory.shift();
         }
         saveChatHistory();
+    }
+}
+
+function rateAIResponse(btn, dir, fid) {
+    const container = document.getElementById(fid);
+    if (!container) return;
+    const buttons = container.querySelectorAll('button');
+    const prevDir = container.dataset.rating ? parseInt(container.dataset.rating) : 0;
+    if (prevDir === dir) {
+        container.dataset.rating = '0';
+        buttons.forEach(b => b.classList.remove('voted', 'voted-down'));
+    } else {
+        container.dataset.rating = String(dir);
+        buttons[0].classList.toggle('voted', dir === 1);
+        buttons[1].classList.toggle('voted-down', dir === -1);
+        buttons[0].classList.toggle('voted-down', false);
+        buttons[1].classList.toggle('voted', false);
     }
 }
 
@@ -622,16 +1089,86 @@ function removeTypingIndicator() {
 // ── Streaming Bot Message ──
 let streamingMsgEl = null;
 let streamingFullText = '';
+let streamAbortController = null;
+let isBackendReachable = true;
+
+function stopAIStream() {
+    if (streamAbortController) {
+        streamAbortController.abort();
+        streamAbortController = null;
+    }
+    document.getElementById('aiStopBtn').style.display = 'none';
+    if (streamingMsgEl) {
+        const content = streamingMsgEl.querySelector('.streaming-content');
+        if (content) {
+            const existing = content.innerHTML;
+            content.innerHTML = existing + '<span class="streaming-cancelled"> [cancelled]</span>';
+        }
+        const cursor = streamingMsgEl.querySelector('.streaming-cursor');
+        if (cursor) cursor.remove();
+        streamingMsgEl.classList.remove('streaming');
+        streamingMsgEl = null;
+    }
+}
+
+function updateAIContext() {
+    const el = document.getElementById('aiContext');
+    if (!el) return;
+    const parts = [];
+    if (currentLang && currentLang !== 'challenge' && currentLang !== 'compiler' && currentLang !== 'quiz') {
+        parts.push(currentLang.toUpperCase());
+    }
+    if (currentTopic && currentTopic.length < 20) {
+        parts.push(currentTopic);
+    }
+    el.textContent = parts.length > 0 ? parts.join(' · ') : '';
+}
+
+function setOfflineBadge(online) {
+    isBackendReachable = online;
+    const badge = document.getElementById('aiOfflineBadge');
+    const statusLine = document.getElementById('aiStatusLine');
+    if (!badge) return;
+    if (online) {
+        badge.style.display = '';
+        badge.style.color = '#4ade80';
+        badge.textContent = '✅ Local AI Active · 🔍 Code check ready';
+    } else {
+        badge.style.display = '';
+        badge.style.color = '#fbbf24';
+        badge.textContent = '⚠ Server offline — code check only';
+    }
+}
+
+function exportChatHistory() {
+    if (!conversationHistory.length) return;
+    let md = `# Devin Chat Export\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
+    for (const msg of conversationHistory) {
+        const role = msg.role === 'user' ? '**You**' : '**Devin**';
+        md += `${role}:\n${msg.text}\n\n---\n\n`;
+    }
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `devin-chat-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 function createStreamingBotMessage() {
     removeTypingIndicator();
     const el = document.getElementById('aiMessages');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-msg-wrapper';
     const div = document.createElement('div');
     div.className = 'ai-msg bot streaming';
     div.innerHTML = '<div class="label">Devin</div><span class="streaming-content"></span><span class="streaming-cursor">▊</span>';
-    el.appendChild(div);
+    wrapper.appendChild(div);
+    el.appendChild(wrapper);
     el.scrollTop = el.scrollHeight;
     streamingMsgEl = div;
+    streamingMsgEl._wrapper = wrapper;
     streamingFullText = '';
     return div;
 }
@@ -655,6 +1192,27 @@ function finalizeStreamingBotMessage(text) {
     const content = streamingMsgEl.querySelector('.streaming-content');
     if (content) {
         content.innerHTML = formatAIText(text);
+    }
+    const fid = 'fb-' + (++aiFeedbackId);
+    const fb = document.createElement('div');
+    fb.className = 'ai-feedback';
+    fb.id = fid;
+    fb.innerHTML = `<button onclick="rateAIResponse(this,1,'${fid}')" title="Helpful">👍</button><button onclick="rateAIResponse(this,-1,'${fid}')" title="Not helpful">👎</button>`;
+    streamingMsgEl.appendChild(fb);
+    const escaped = text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+    const wrapper = streamingMsgEl._wrapper;
+    if (wrapper) {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-copy-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1500);
+            }).catch(() => {});
+        };
+        wrapper.appendChild(copyBtn);
     }
     streamingFullText = text;
     conversationHistory.push({ role: 'bot', text });
@@ -740,9 +1298,9 @@ function explainCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the explain server. Make sure the backend is running (npx tsx server.ts).", 'bot');
-    })
-    .catch(() => {});
+        const result = localCodeExplain(code, currentLang, currentTopic);
+        addAIMessage(result.explanation || 'No explanation could be generated.', 'bot');
+    });
 }
 
 function reviewCode() {
@@ -778,8 +1336,70 @@ function reviewCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the review server. Make sure the backend is running (npx tsx server.ts).", 'bot');
+        const result = localCodeReview(code, currentLang);
+        addAIMessage(result.review || 'No review could be generated.', 'bot');
     });
+}
+
+function checkCode() {
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('output');
+    const code = editor ? editor.value : '';
+    if (!code.trim()) {
+        output.innerText = "// No code to check — write some code in the editor first!";
+        return;
+    }
+
+    const result = localCodeReview(code, currentLang);
+    updateAnnotations(result.issues);
+    const score = result.score;
+    let color = '#22c55e';
+    if (score < 5) color = '#ef4444';
+    else if (score < 7) color = '#f59e0b';
+
+    let text = `// ╔══════════════════════════════════════╗\n`;
+    text += `// ║  CODE REVIEW                          ║\n`;
+    text += `// ╚══════════════════════════════════════╝\n\n`;
+    text += `Score: ${score}/10\n\n`;
+
+    if (result.issues.length === 0) {
+        text += `✓ No issues found. Great code!\n`;
+    } else {
+        const bySev = { error: [], warning: [], style: [], info: [] };
+        for (const issue of result.issues) {
+            (bySev[issue.severity] || bySev.info).push(issue);
+        }
+        for (const sev of ['error', 'warning', 'style', 'info']) {
+            for (const issue of bySev[sev]) {
+                const line = issue.line ? `(line ${issue.line})` : '';
+                text += `[${sev.toUpperCase()}] ${line} ${issue.message}\n`;
+            }
+        }
+    }
+
+    text += `\n// ── Overview ──\n`;
+    const lines = code.split('\n');
+    text += `${lines.length} lines · `;
+    if (/\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code)) text += `has functions · `;
+    if (/\bclass\s+/.test(code)) text += `has classes · `;
+    text += `score ${score}/10\n\n`;
+    text += `// Lines with issues have colored markers in the editor`;
+
+    output.innerText = text;
+    output.style.borderLeft = `3px solid ${color}`;
+}
+
+function jumpToLine(line) {
+    const editor = document.getElementById('editor');
+    if (!editor) return;
+    const lines = editor.value.split('\n');
+    let pos = 0;
+    for (let i = 0; i < Math.min(line - 1, lines.length); i++) {
+        pos += lines[i].length + 1;
+    }
+    editor.focus();
+    editor.setSelectionRange(pos, pos);
+    editor.scrollTop = (line - 1) * 20;
 }
 
 function copyCode() {
@@ -799,149 +1419,15 @@ function copyCode() {
 
 const aiTutorResponses = typeof window !== 'undefined' && window.aiTutorResponses ? window.aiTutorResponses : [];
 
-function getAIResponse(input) {
-    const q = input.toLowerCase().trim();
-    if (!q) return "Ask me something about programming!";
-
-    for (const entry of aiTutorResponses) {
-        if (entry.keywords.some(k => q.includes(k))) {
-            let reply = entry.response;
-            if (currentLang && !q.includes('language') && !q.includes(currentLang)) {
-                reply += `\n\n**You're studying:** ${currentLang.toUpperCase()}`;
-                reply += `\nTry the code example in the editor, modify it, and click Run to see what happens!`;
-            }
-            return reply;
-        }
-    }
-
-    for (const entry of aiTutorResponses) {
-        const combined = entry.keywords.join(' ');
-        if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
-            return entry.response;
-        }
-    }
-
-    if (q.includes('thank') || q.includes('thanks')) {
-        return "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step! What would you like to learn next?";
-    }
-
-    if (q.includes('hello') || q.includes('hi ') || q === 'hey' || q.includes('good')) {
-        const langInfo = currentLang ? `I see you're studying **${currentLang.toUpperCase()}**. ` : '';
-        return `Hello! ${langInfo}Ask me anything about the topic you're working on, or pick a suggestion below to get started!`;
-    }
-
-    if (currentTopic) {
-        return `Great question about **${currentTopic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far in the editor? Tell me your thought process and I'll help guide you to the right solution!`;
-    }
-
-    const fallbacks = [
-        "That's an interesting question! To help you best, could you tell me:\n1. What language are you working with?\n2. What topic are you studying?\n3. What have you tried so far?",
-        "I want to make sure I help you effectively. Could you tell me more about what you're working on? For example: \"Explain functions\" or \"Help me debug my loop\".",
-        "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
-    ];
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-}
-
-const SYNONYM_MAP = {
-    variable: ['variable', 'declare', 'let', 'const', 'var', 'declaration', 'assign'],
-    function: ['function', 'method', 'def', 'func', '=>', 'arrow', 'lambda', 'call'],
-    class: ['class', 'object', 'oop', 'inherit', 'extends', 'prototype', 'struct', 'constructor'],
-    array: ['array', 'list', 'collection', 'vector', 'slice', 'element', 'index'],
-    loop: ['loop', 'for', 'while', 'iterate', 'foreach', 'iteration', 'repeat'],
-    string: ['string', 'char', 'text', 'concatenat', 'interpolat', 'template'],
-    async: ['async', 'await', 'promise', 'callback', 'future', 'coroutine', 'goroutine'],
-    error: ['error', 'exception', 'try', 'catch', 'panic', 'throw', 'debug', 'bug'],
-    type: ['type', 'int', 'bool', 'float', 'string', 'null', 'undefined', 'void'],
-    pointer: ['pointer', 'reference', 'memory', 'malloc', 'free', 'heap', 'stack', 'borrow', 'ownership'],
-    closure: ['closure', 'scope', 'hoist', 'lexical', 'temporal dead zone', 'tdz'],
-    recursion: ['recursion', 'recursive', 'base case', 'stack overflow', 'tail call'],
-    testing: ['test', 'testing', 'assert', 'jest', 'mocha', 'pytest'],
-    sql: ['sql', 'select', 'join', 'table', 'database', 'query', 'where', 'insert', 'index'],
-    git: ['git', 'commit', 'push', 'pull', 'branch', 'merge', 'rebase', 'clone'],
-};
-
-function expandSynonyms(word) {
-    for (const [, syns] of Object.entries(SYNONYM_MAP)) {
-        if (syns.includes(word) || syns.some(s => s.includes(word))) {
-            return syns;
-        }
-    }
-    return [word];
-}
-
-function getLocalAIResponse(input) {
-    const q = input.toLowerCase().trim();
-    if (!q || q.length < 3) return null;
-
-    const words = q.split(/\s+/).filter(w => w.length > 2);
-    const meta = ['help', 'hello', 'hi', 'hey', 'thanks'];
-    if (meta.includes(q) || words.length === 0) return null;
-
-    // ── Cross-language detection ──
-    const askedLang = detectLanguageInQuery(q);
-    const searchLang = askedLang || currentLang;
-    const langData = courseData[searchLang];
-    if (!langData) return null;
-
-    // If asking about a different language, give a language intro
-    if (askedLang && askedLang !== currentLang) {
-        const intro = getLanguageIntro(askedLang);
-        if (intro) {
-            return `**${intro.displayName}** is a programming language you can study here!<br><br>${intro.exp || ''}<br><br>` +
-                `**Example code:**<br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${(intro.code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br>` +
-                `Want to switch to **${intro.displayName}**? Click the language selector at the top!<br><br>` +
-                `I can also tell you about specific topics in ${intro.displayName} — just ask!`;
-        }
-    }
-
-    // ── Curriculum search (in the detected or current language) ──
-    const expandedWords = new Set();
-    for (const w of words) {
-        for (const syn of expandSynonyms(w)) {
-            expandedWords.add(syn);
-        }
-    }
-    const allWords = [...expandedWords];
-
-    let best = null;
-    let bestScore = 0;
-
-    for (const phase in langData) {
-        for (const topic in langData[phase]) {
-            const item = langData[phase][topic];
-            const topicLow = topic.toLowerCase();
-            const expLow = (item.exp || '').toLowerCase();
-            const searchText = topicLow + ' ' + expLow;
-
-            let score = 0;
-            let matchedWords = 0;
-            let topicMatches = 0;
-
-            for (const word of allWords) {
-                if (topicLow.includes(word)) { score += 3; matchedWords++; topicMatches++; }
-                if (expLow.includes(word)) { score += 1; matchedWords++; }
-            }
-
-            if (searchText.includes(q)) score += 10;
-            if (matchedWords > 0) score = score * (1 + matchedWords / (allWords.length || 1));
-            if (topicMatches > 0) score *= 1.3;
-            if (phase === currentPhase && searchLang === currentLang) score *= 1.2;
-
-            if (score > bestScore) {
-                bestScore = score;
-                best = { phase, topic, code: item.code, exp: item.exp, lang: searchLang };
-            }
-        }
-    }
-
-    if (best && bestScore >= 1.5) {
-        const langLabel = best.lang !== currentLang ? ` (${LANG_NAMES[best.lang] || best.lang.toUpperCase()})` : '';
-        return `I found this in the curriculum that might help:<br><br><b>${best.topic}</b>${langLabel} — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br><b>Try this:</b> paste the code into the editor, modify it, and click Run to experiment!`;
-    }
-    return null;
-}
-
 function getErrorTutorTip(topic, output) {
+    const normalizedTopic = topic ? topic.toLowerCase() : '';
+
+    for (const pattern of ERROR_PATTERNS) {
+        if (pattern.re.test(output || '')) {
+            return `I see you got a **${pattern.title}**! Don't worry, this is totally normal. Let's fix it together.\n\n${pattern.tip}\n\n**Still stuck?** Share what you expected to happen vs what actually happened and I'll help more!`;
+        }
+    }
+
     const tips = {
         "variables": "Getting an error with variables? Common issues:\n- Did you declare it with `let`/`const`/`var` (JS) or just `name = value` (Python)?\n- Check the spelling — `myVariable` vs `myvariable` are different!\n- Make sure you declared it before trying to use it (variables aren't hoisted with `let`/`const`)\n\n**Try:** Declare a simple variable and log it. Once that works, add complexity step by step.",
         "functions": "Functions can be tricky! Check these:\n- Do you have the `function` keyword (JS) or `def` (Python)?\n- Did you use `return` to send back a value? Without it, the function returns `undefined`.\n- Did you call it with parentheses? `myFunc` is the function itself, `myFunc()` calls it.\n\n**Try:** Write the simplest possible function that returns a fixed value, then gradually add parameters.",
@@ -952,32 +1438,12 @@ function getErrorTutorTip(topic, output) {
     };
 
     for (const [key, tip] of Object.entries(tips)) {
-        if (topic.toLowerCase().includes(key)) {
+        if (normalizedTopic.includes(key)) {
             return "I see you're getting an error. Don't worry, this is totally normal! Let's work through it together.\n\n" + tip + "\n\n**Still stuck?** Share what you expected to happen vs what actually happened and I'll help more!";
         }
     }
 
     return "I noticed your code has an error. That's okay — debugging is how we learn!\n\n**Quick check:**\n1. Look at the error message — what line does it point to?\n2. Compare your code with the example in the curriculum\n3. Simplify: comment things out until it works, then add back one piece at a time\n\n**Can you tell me:** what did you expect to happen, and what actually happened?";
-}
-
-function analyzeUserCodeClient(code, lang) {
-    if (!code || !lang) return null;
-    const hints = [];
-
-    if (lang === 'js') {
-        const unclosedBraces = (code.match(/\{/g) || []).length - (code.match(/\}/g) || []).length;
-        const unclosedParens = (code.match(/\(/g) || []).length - (code.match(/\)/g) || []).length;
-        if (unclosedBraces > 0) hints.push('You have unclosed curly braces. Add `' + '}'.repeat(unclosedBraces) + '` at the end.');
-        if (unclosedBraces < 0) hints.push('You have ' + Math.abs(unclosedBraces) + ' too many closing braces `}`.');
-        if (unclosedParens > 0) hints.push('You have unclosed parentheses. Add `' + ')'.repeat(unclosedParens) + '`.');
-        if (unclosedParens < 0) hints.push('You have extra closing parentheses.');
-        if (!code.includes('return') && (code.includes('function') || code.includes('=>'))) {
-            hints.push('Your function has no `return` statement. It will return `undefined`.');
-        }
-        if (code.includes('==')) hints.push('Consider using `===` (strict equality) instead of `==` to avoid type coercion.');
-        if (code.includes('var ')) hints.push('Use `let` or `const` instead of `var` for block scoping.');
-    }
-    return hints.length > 0 ? hints : null;
 }
 
 async function askAI(q) {
@@ -994,6 +1460,10 @@ async function askAI(q) {
     const setConvSubject = (reply) => {
         if (reply) setTimeout(() => extractConversationSubject(reply), 0);
     };
+
+    // ── Exercise tutoring: detect if user loaded an exercise and ran it ──
+    const isExerciseMode = currentTopic && lastCodeRun && lastCodeOutput &&
+        (q.includes('my code') || q.includes('i tried') || q.includes('not working') || q.includes('help me'));
 
     // ── 1. Error-aware early return ──
     if (hasError && currentTopic && isErrorQuery(q)) {
@@ -1049,10 +1519,14 @@ async function askAI(q) {
 
     // ── 4. Stream from backend ──
     createStreamingBotMessage();
+    streamAbortController = new AbortController();
+    document.getElementById('aiStopBtn').style.display = '';
+    setOfflineBadge(true);
     try {
         const response = await fetch(BACKEND_URL + '/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: streamAbortController.signal,
             body: JSON.stringify({
                 message: enrichedQ,
                 lang: convLang || currentLang,
@@ -1061,7 +1535,8 @@ async function askAI(q) {
                 code: currentCode,
                 output: outputText,
                 hasError: hasError,
-                history: conversationHistory.slice(-8)
+                history: conversationHistory.slice(-8),
+                learnerId: LEARNER_ID
             })
         });
 
@@ -1097,15 +1572,27 @@ async function askAI(q) {
                 }
             }
         }
+        document.getElementById('aiStopBtn').style.display = 'none';
+        streamAbortController = null;
         extractConversationSubject(streamingFullText);
         finalizeStreamingBotMessage(streamingFullText);
     } catch (e) {
+        document.getElementById('aiStopBtn').style.display = 'none';
+        streamAbortController = null;
+        if (e.name === 'AbortError') {
+            if (streamingMsgEl) {
+                streamingMsgEl.remove();
+                streamingMsgEl = null;
+            }
+            return;
+        }
+        setOfflineBadge(false);
         // ── 5. Fallback to local keyword responses ──
         if (streamingMsgEl) {
             streamingMsgEl.remove();
             streamingMsgEl = null;
         }
-        const fallbackReply = getAIResponse(enrichedQ);
+        const fallbackReply = getAIResponse(enrichedQ, conversationHistory);
         addAIMessage('', 'typing');
         await sleep(200);
         removeTypingIndicator();
@@ -1118,11 +1605,17 @@ function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
 }
 
+function autoGrowAIInput(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
 function sendAI() {
     const input = document.getElementById('aiInput');
     const q = input.value.trim();
     if (!q) return;
     input.value = '';
+    autoGrowAIInput(input);
     askAI(q).catch(() => {});
 }
 
@@ -1141,7 +1634,15 @@ const suggestionSets = {
     swift: ["Optionals explained", "Protocols vs classes", "ARC memory guide", "Closures capture rules", "Practice: write a struct"],
     cloud: ["What is cloud computing?", "IaaS vs PaaS vs SaaS", "Serverless explained", "Containers vs VMs", "Practice: deploy something"],
     mongodb: ["Documents vs tables", "CRUD in MongoDB", "Aggregation pipeline", "Indexes in MongoDB", "Practice: write a query"],
-    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation guide", "Abstract vs interface", "Composition vs inheritance"]
+    oop: ["What is inheritance?", "Polymorphism explained", "Encapsulation guide", "Abstract vs interface", "Composition vs inheritance"],
+    gamedev: ["ECS explained simply", "Game loop patterns", "Physics for beginners", "Optimization tips"],
+    godot: ["GDscript basics", "Scene system explained", "Signals vs groups", "Practice: build a scene"],
+    unity: ["MonoBehaviour lifecycle", "Prefab system guide", "Unity Physics tips", "Practice: build a prefab"],
+    unreal: ["Blueprint vs C++", "Chaos physics guide", "UMG UI basics", "Practice: build a widget"],
+    mobile: ["Touch input handling", "Mobile optimization", "Battery life tips", "Store submission guide"],
+    react: ["What is JSX?", "useState vs useReducer", "Props vs state", "Practice: build a component"],
+    vue: ["Reactivity explained", "Composition API guide", "Vue Router basics", "Practice: build a component"],
+    node: ["What is Node.js?", "Express basics", "File system guide", "Practice: build a server"],
 };
 
 function getDynamicSuggestions() {
@@ -1200,9 +1701,35 @@ function getDynamicSuggestions() {
             "Testing": ["How to write tests", "What is TDD?", "Jest for beginners", "Practice: test a function"],
             "SQL": ["SELECT vs INSERT", "JOIN types explained", "WHERE clause filter", "Practice: write a query"],
             "Git": ["How to commit", "Branching explained", "Merge vs rebase", "Practice: git workflow"],
+            "DOM": ["What is the DOM?", "Query selectors guide", "Event listeners explained", "Practice: manipulate the DOM"],
+            "Events": ["Event types explained", "Event delegation", "Event propagation (bubbling)", "Practice: handle a click"],
+            "Promises": ["What is a Promise?", "Promise chaining", "Promise.all explained", "Practice: use a Promise"],
+            "Modules": ["Import vs require", "Named vs default exports", "Module bundlers explained", "Practice: create a module"],
+            "JSON": ["JSON.parse vs stringify", "Working with JSON data", "Fetching JSON from APIs", "Practice: parse JSON"],
+            "Fetch": ["How to use fetch()", "GET vs POST requests", "Handling responses", "Practice: call an API"],
+            "Closures": ["What is a closure?", "Lexical scope explained", "Practical closure examples", "Practice: write a closure"],
+            "Prototypes": ["Prototype chain explained", "Proto vs prototype", "ES6 classes are syntactic sugar", "Practice: prototype method"],
+            "this": ["How 'this' works", "Arrow functions vs this", "Call, apply, bind", "Practice: control 'this'"],
+            "Map": ["Map vs Object", "Map methods guide", "Set data structure", "Practice: use Map and Set"],
+            "Generators": ["What is a generator?", "Yield keyword explained", "Generator use cases", "Practice: write a generator"],
+            "Regex": ["Common regex patterns", "Test vs exec", "Groups and capture", "Practice: regex exercise"],
+            "Web APIs": ["LocalStorage guide", "Geolocation API", "Canvas basics", "Practice: use a Web API"],
+            "Strict Mode": ["What is strict mode?", "Benefits of strict mode", "Common strict mode errors", "Practice: use strict"],
+            "Template Literals": ["String interpolation", "Multi-line strings", "Tagged templates", "Practice: template literals"],
+            "Destructuring": ["Array destructuring", "Object destructuring", "Nested destructuring", "Practice: destructure data"],
+            "Spread": ["Spread operator guide", "Rest parameters", "Spread vs concat", "Practice: use spread"],
+            "Ternary": ["Ternary operator syntax", "When to use ternary", "Nested ternaries", "Practice: use ternary"],
+            "Nullish": ["Nullish coalescing ??", "Optional chaining ?.", "Logical OR vs ??", "Practice: use ?. and ??"],
+            "Truthy": ["Truthy and falsy values", "Equality comparisons", "Type coercion explained", "Practice: check truthiness"],
+            "Scope": ["Global vs local scope", "Block scope with let/const", "Hoisting explained", "Practice: scope exercise"],
+            "Hoisting": ["What is hoisting?", "Var vs let hoisting", "Function declarations hoisted", "Practice: hoisting quiz"],
+            "IIFE": ["What is an IIFE?", "Module pattern with IIFE", "Private variables", "Practice: write an IIFE"],
+            "Memoization": ["What is memoization?", "Caching function results", "Performance optimization", "Practice: memoize a function"],
+            "Debounce": ["What is debouncing?", "Debounce vs throttle", "Real-world use cases", "Practice: debounce input"],
         };
+        const topicLC = currentTopic.toLowerCase();
         for (const [key, hints] of Object.entries(topHints)) {
-            if (currentTopic.toLowerCase().includes(key.toLowerCase())) return hints;
+            if (topicLC.includes(key.toLowerCase())) return hints;
         }
         return [`Explain ${currentTopic}`, `Practice: ${currentTopic.toLowerCase()} exercise`, "Show me an example", "Common mistakes"];
     }
@@ -1211,6 +1738,127 @@ function getDynamicSuggestions() {
         return ["What should I learn next?", "Explain the concept behind this", "Show me a harder challenge", "Practice more exercises"];
     }
     return null;
+}
+
+// ── Learning Path ──
+function showLearningPath() {
+    const lang = currentLang || 'js';
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage('Show me my learning path', 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/learner/path?lang=' + lang, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        if (d.error) {
+            addAIMessage("Couldn't generate your learning path. Make sure the backend is running.", 'bot');
+            return;
+        }
+        let reply = `<div class="path-card" style="background:#1e293b;border-radius:10px;padding:12px;margin:8px 0;">`;
+        reply += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:800;color:var(--accent);">📚 Your Learning Path</span>
+            <span style="font-size:10px;color:#94a3b8;">${d.progress.completed}/${d.progress.total} (${d.progress.percent}%)</span>
+        </div>`;
+        const pct = d.progress.percent;
+        reply += `<div style="height:4px;background:#0f172a;border-radius:2px;margin-bottom:10px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;transition:width 0.5s;"></div>
+        </div>`;
+        if (d.nextSteps && d.nextSteps.length > 0) {
+            reply += `<div style="font-size:9px;color:#64748b;text-transform:uppercase;margin-bottom:6px;">Next Steps</div>`;
+            for (const step of d.nextSteps) {
+                const icon = step.status === 'completed' ? '✅' : step.status === 'ready' ? '→' : '🔒';
+                const color = step.status === 'completed' ? '#10b981' : step.status === 'ready' ? 'var(--accent)' : '#64748b';
+                const reason = step.reason === 'review-due' ? ' (review due)' : step.reason === 'weak-concept' ? ' (needs practice)' : '';
+                reply += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:10px;color:${color};">
+                    <span>${icon}</span>
+                    <span>${step.topic}${reason}</span>
+                </div>`;
+            }
+        }
+        if (d.weakAreas && d.weakAreas.length > 0) {
+            reply += `<div style="font-size:9px;color:#ef4444;text-transform:uppercase;margin:8px 0 4px;">Weak Areas</div>`;
+            for (const w of d.weakAreas) {
+                reply += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;font-size:10px;color:#fbbf24;">
+                    <span>⚠</span>
+                    <span>${w.topic} (${w.mastery}%)</span>
+                </div>`;
+            }
+        }
+        reply += `</div>`;
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't fetch your learning path. Make sure the backend is running.", 'bot');
+    });
+}
+
+// ── AI Quiz Generation ──
+function generateQuiz() {
+    const topic = currentTopic || 'programming basics';
+    const lang = currentLang || 'js';
+    const aiPanel = document.getElementById('aiPanel');
+    if (!aiPanel.classList.contains('open')) toggleAI();
+
+    addAIMessage(`Generate a quiz for ${topic}`, 'user');
+    addAIMessage('', 'typing');
+
+    fetch(BACKEND_URL + '/api/quiz/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, lang, count: 3, level: 'beginner' })
+    })
+    .then(r => r.json())
+    .then(d => {
+        removeTypingIndicator();
+        if (!d.questions || d.questions.length === 0) {
+            addAIMessage("Couldn't generate a quiz right now. Try asking about a specific topic!", 'bot');
+            return;
+        }
+        let reply = '<div class="quiz-card" style="background:#1e293b;border-radius:10px;padding:12px;margin:8px 0;">';
+        reply += `<div style="font-size:9px;color:#64748b;text-transform:uppercase;margin-bottom:8px;">📝 Quiz: ${topic}</div>`;
+        for (let qi = 0; qi < d.questions.length; qi++) {
+            const q = d.questions[qi];
+            const qid = 'ai-quiz-' + qi;
+            reply += `<div style="margin-bottom:12px;font-size:11px;"><strong>${qi + 1}. ${q.question}</strong><br>`;
+            for (let oi = 0; oi < q.options.length; oi++) {
+                const optId = `${qid}-opt-${oi}`;
+                reply += `<label style="display:block;padding:4px 8px;margin:2px 0;border-radius:4px;cursor:pointer;background:#0f172a;font-size:10px;" onclick="document.querySelectorAll('#${qid} label').forEach(l=>l.style.background='#0f172a'); this.style.background='#334155'; window['${qid}_selected']=${oi};" id="${optId}">
+                    <input type="radio" name="${qid}" style="display:none;"> ${q.options[oi]}
+                </label>`;
+            }
+            reply += `<button style="margin-top:4px;background:#0ea5e9;color:#000;border:none;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;cursor:pointer;" onclick="checkQuizAnswer(${qi}, ${q.correctIndex}, '${qid}', '${q.explanation.replace(/'/g, "\\'")}')">Check</button>`;
+            reply += `<span id="${qid}-result" style="margin-left:6px;font-size:10px;"></span>`;
+            reply += `</div>`;
+        }
+        reply += `</div>`;
+        reply += `<div style="font-size:9px;color:#64748b;margin-top:4px;">${d.source === 'static' ? '⚡ Static quiz' : '✨ AI-generated'}</div>`;
+        addAIMessage(reply, 'bot');
+    })
+    .catch(() => {
+        removeTypingIndicator();
+        addAIMessage("Couldn't generate a quiz. Make sure the backend is running.", 'bot');
+    });
+}
+
+function checkQuizAnswer(qi, correctIdx, qid, explanation) {
+    const selected = window[qid + '_selected'];
+    const result = document.getElementById(qid + '-result');
+    if (result === null || result === void 0 ? void 0 : result) {
+        if (selected === correctIdx) {
+            result.innerHTML = '✅ Correct!';
+            result.style.color = '#10b981';
+        } else {
+            result.innerHTML = '❌ Try again. ' + (explanation || '');
+            result.style.color = '#ef4444';
+        }
+    }
 }
 
 // ── AI Exercise Generation ──
@@ -1245,7 +1893,18 @@ function generateExercise() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't generate an exercise. Make sure the backend is running.", 'bot');
+        const result = localGenerateExercise(topic, lang, 'beginner');
+        let reply = `<div class="exercise-card"><div class="exercise-title">${result.title || 'Exercise'}</div>`;
+        reply += `<div class="exercise-desc">${result.description || 'No description'}</div>`;
+        if (result.starterCode) {
+            reply += `<pre class="ai-code-block"><code>${result.starterCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        }
+        if (result.hint) {
+            reply += `<div class="exercise-hint">💡 ${result.hint}</div>`;
+        }
+        reply += `<button class="exercise-btn" onclick="document.getElementById('editor').value = '${(result.starterCode || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'; updateHighlight();">Load into Editor</button>`;
+        reply += `</div>`;
+        addAIMessage(reply, 'bot');
     });
 }
 
@@ -1276,11 +1935,15 @@ function updateAISuggestions() {
     }
 
     const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
-    const hasExercise = currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
+    const hasAI = currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
     const buttons = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`);
-    if (hasExercise && !suggestions.some(s => s.toLowerCase().includes('exercise'))) {
-        buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+    if (hasAI) {
+        const hasExercise = currentTopic && !suggestions.some(s => s.toLowerCase().includes('exercise'));
+        if (hasExercise) buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
+        if (currentTopic) buttons.push(`<button onclick="generateQuiz()" style="background:#f59e0b;color:#000;">📝 Quiz</button>`);
+        buttons.push(`<button onclick="showLearningPath()" style="background:#8b5cf6;color:#000;">📚 Path</button>`);
     }
+    buttons.push(`<button class="ai-dismiss-btn" onclick="document.getElementById('aiSuggestions').innerHTML=''" title="Dismiss suggestions">✕</button>`);
     el.innerHTML = buttons.join('');
 }
 
@@ -2467,7 +3130,8 @@ function filterTopics(query) {
         let matchesPlatform = true;
         if (currentMobilePlatform !== 'all') {
             const prefix = currentMobilePlatform === 'android' ? 'Android:' : 'iOS:';
-            matchesPlatform = (btn.dataset.phase || '').startsWith(prefix);
+            const phase = btn.dataset.phase || '';
+            matchesPlatform = phase === '' || phase.startsWith(prefix) || (!phase.startsWith('Android:') && !phase.startsWith('iOS:'));
         }
 
         const show = matchesSearch && matchesLevel && matchesCompletion && matchesPlatform;
@@ -2592,6 +3256,17 @@ function suggestNextTopic() {
 // ── SYNTAX HIGHLIGHTING ──
 let hlEditor = null;
 let hlOverlay = null;
+let currentAnnotations = [];
+
+function updateAnnotations(issues) {
+    currentAnnotations = issues || [];
+    updateHighlight();
+}
+
+function clearAnnotations() {
+    currentAnnotations = [];
+    updateHighlight();
+}
 
 function initHighlighting() {
     const textarea = document.getElementById('editor');
@@ -2610,13 +3285,27 @@ function initHighlighting() {
         hlOverlay.scrollLeft = this.scrollLeft;
     });
     hlEditor = textarea;
+    textarea.addEventListener('input', function() {
+        if (currentAnnotations.length > 0) clearAnnotations();
+    });
     updateHighlight();
 }
 
 function updateHighlight() {
     if (!hlOverlay) return;
     const code = hlEditor ? hlEditor.value : document.getElementById('editor').value;
-    hlOverlay.firstChild.innerHTML = highlightCode(code, currentLang);
+    let html = highlightCode(code, currentLang);
+    if (currentAnnotations.length > 0) {
+        const lines = html.split('\n');
+        for (const ann of currentAnnotations) {
+            const idx = ann.line - 1;
+            if (idx >= 0 && idx < lines.length) {
+                lines[idx] = `<span class="annotation-${ann.severity}" title="${(ann.message || '').replace(/"/g, '&quot;')}">${lines[idx]}</span>`;
+            }
+        }
+        html = lines.join('\n');
+    }
+    hlOverlay.firstChild.innerHTML = html;
     if (hlEditor) {
         hlOverlay.scrollTop = hlEditor.scrollTop;
         hlOverlay.scrollLeft = hlEditor.scrollLeft;
@@ -2935,6 +3624,15 @@ setMode = function(lang) {
     document.getElementById('output').style.display = 'block';
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
+    document.getElementById('tutorial-nav').style.display = 'none';
+    document.getElementById('tutorial-progress').style.display = 'none';
+    document.getElementById('tutorial-quiz-overlay')?.classList.remove('open');
+    document.getElementById('tutorial-resume-overlay')?.classList.remove('open');
+    document.getElementById('cheatsheet-btn').style.display = '';
+    document.getElementById('schema-btn').style.display = '';
+    const stuckPanel = document.getElementById('tutorial-stuck-panel');
+    if (stuckPanel) stuckPanel.remove();
+    if (typeof tutorialManager !== 'undefined' && tutorialManager) tutorialManager.clearStuckTimer();
 
     document.querySelectorAll('.header-extra-tabs .game-nav-btn').forEach(b => b.classList.remove('active'));
 
@@ -2945,6 +3643,19 @@ setMode = function(lang) {
         roadmapBtn.title = 'View ' + (LANG_NAMES[lang] || lang) + ' Roadmap';
         roadmapBtn.style.display = (lang === 'js' || lang === 'ts' || lang === 'go' || lang === 'cpp' || lang === 'swift') ? '' : 'none';
         roadmapBtn.title = lang === 'ts' ? 'View TypeScript Roadmap' : lang === 'go' ? 'View Go Roadmap' : lang === 'cpp' ? 'View C++ Roadmap' : lang === 'swift' ? 'View Swift Roadmap' : 'View JavaScript Roadmap';
+    }
+    const searchInput = document.getElementById('topic-search');
+    if (searchInput) searchInput.style.display = '';
+
+    if (lang === 'tutorial') {
+        document.getElementById('level-bar').style.display = 'none';
+        document.getElementById('tutorial-nav').style.display = 'flex';
+        document.getElementById('tutorial-progress').style.display = 'flex';
+        const tutorialNavBtn = document.getElementById('nav-tutorial');
+        if (tutorialNavBtn) tutorialNavBtn.classList.add('active');
+        initTutorial();
+        updateAISuggestions();
+        return;
     }
 
     if (lang !== 'challenge') {
@@ -2966,6 +3677,7 @@ setMode = function(lang) {
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
+    if (lang === 'schema') { document.getElementById('level-bar').style.display = 'none'; initSchemaTutorial(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); 
         const apiBtn = document.getElementById('api-toggle-btn');
         if (apiBtn) { apiBtn.style.display = ''; apiBtn.textContent = 'API ▾'; }
@@ -3039,6 +3751,13 @@ setMode = function(lang) {
     currentCompletionFilter = 'all';
     currentEngineFilter = 'all';
     currentLang = lang;
+    currentTopic = null;
+    currentPhase = null;
+    document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active-topic'));
+    document.getElementById('explanation').innerHTML = '<div style="color:#64748b;font-size:13px;padding:20px;text-align:center;">' + (LANG_NAMES[lang] || lang) + ' — select a topic to begin</div>';
+    document.getElementById('editor').value = '// ' + (LANG_NAMES[lang] || lang) + ' — select a topic below';
+    updateHighlight();
+    document.getElementById('output').innerText = '// Ready to learn ' + (LANG_NAMES[lang] || lang);
     const appEl = document.getElementById('app');
     appEl.className = lang + '-mode';
     // Hide workspace by default for JS mode, remove for others
@@ -3110,6 +3829,7 @@ setMode = function(lang) {
     if (backBtn) backBtn.style.display = 'none';
 
     updateAISuggestions();
+    updateAIContext();
     loadLangIntro(lang === 'mobile' ? currentMobilePlatform : lang);
 };
 
@@ -3220,9 +3940,22 @@ document.addEventListener('keydown', function(e) {
             runCode();
         }
     }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const panel = document.getElementById('aiPanel');
+        if (panel) {
+            const wasOpen = panel.classList.contains('open');
+            toggleAI();
+            if (!wasOpen) updateAIContext();
+        }
+    }
     if (e.key === 'Escape') {
         const aiPanel = document.getElementById('aiPanel');
-        if (aiPanel && aiPanel.classList.contains('open')) {
+        if (aiPanel && aiPanel.classList.contains('open') && !document.activeElement?.id?.startsWith('ai')) {
+            if (streamAbortController) {
+                stopAIStream();
+                return;
+            }
             toggleAI();
             return;
         }
@@ -3288,6 +4021,10 @@ function toggleRoadmapView() {
 
     if (!wasOpen) {
         const body = document.getElementById('roadmapBody');
+        const title = document.getElementById('roadmap-title');
+        const langName = LANG_NAMES[currentLang] || currentLang;
+        if (title) title.textContent = langName.charAt(0).toUpperCase() + langName.slice(1) + ' Roadmap';
+        roadmapRendered = false;
         renderRoadmap(body);
     }
 }
@@ -3647,3 +4384,36 @@ function loadFirstPlatformTopic(lang) {
 }
 
 setMode('js');
+
+// Startup health check for status badge
+(function checkBackend() {
+    fetch(BACKEND_URL + '/api/health', { signal: AbortSignal.timeout(5000) })
+        .then(r => { if (r.ok) setOfflineBadge(true); else setOfflineBadge(false); })
+        .catch(() => setOfflineBadge(false));
+})();
+
+// Fetch tutor status
+(function fetchTutorStatus() {
+    var el = document.getElementById('tutorStatus');
+    if (!el) return;
+    fetch(BACKEND_URL + '/api/tutor/status', { signal: AbortSignal.timeout(5000) })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.mode === 'hybrid') {
+                el.textContent = '🧠 Hybrid ' + (data.modelLoaded ? '✓' : '');
+                el.title = 'Hybrid tutor: keyword cascade + ' + data.model + ' LLM' + (data.modelLoaded ? ' (loaded)' : ' (lazy load)');
+                el.style.color = data.modelLoaded ? '#22c55e' : '#f97316';
+            } else if (data.mode === 'keyword') {
+                el.textContent = '🔑 Keyword';
+                el.title = 'Keyword-based tutor (no AI model)';
+                el.style.color = '#64748b';
+            } else {
+                el.textContent = '🤖 ' + data.mode;
+                el.title = 'AI Provider: ' + data.mode;
+                el.style.color = '#0ea5e9';
+            }
+        })
+        .catch(function() {
+            el.textContent = '';
+        });
+})();
