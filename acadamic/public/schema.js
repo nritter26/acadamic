@@ -101,7 +101,7 @@ function schemaRemoveTable(id) {
 function schemaRenameTable(id, name) {
     schemaPushState();
     const table = schemaTables.find(t => t.id === id);
-    if (table) table.name = name.replace(/[^a-zA-Z0-9_]/g, '_');
+    if (table) table.name = name.replace(/[^a-zA-Z0-9_]/g, '_') || 'table_' + id;
     schemaRender();
 }
 
@@ -118,9 +118,11 @@ function schemaRemoveCol(tableId, colIdx) {
     schemaPushState();
     const table = schemaTables.find(t => t.id === tableId);
     if (!table || table.cols.length <= 1) return;
-    table.cols.forEach(c => {
-        if (c.fk && c.fk.tableId === tableId && c.fk.colIdx === colIdx) c.fk = null;
-        if (c.fk && c.fk.colIdx > colIdx && c.fk.tableId === tableId) c.fk.colIdx--;
+    schemaTables.forEach(t => {
+        t.cols.forEach(c => {
+            if (c.fk && c.fk.tableId === tableId && c.fk.colIdx === colIdx) c.fk = null;
+            if (c.fk && c.fk.colIdx > colIdx && c.fk.tableId === tableId) c.fk.colIdx--;
+        });
     });
     table.cols.splice(colIdx, 1);
     schemaRender();
@@ -212,6 +214,7 @@ function schemaLoad() {
 }
 
 function schemaLoadFromData(data) {
+    schemaPushState();
     schemaTables = data;
     const maxId = data.reduce((m, t) => Math.max(m, t.id || 0), 0);
     schemaNextId = maxId + 1;
@@ -288,13 +291,21 @@ function schemaImportSQL() {
 function schemaParseSQL(sql) {
     const tables = [];
     let idCounter = 1;
-    const createBlock = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:`?(\w+)`?\.)?`?(\w+)`?\s*\(([\s\S]*?)\)\s*;?/gi;
+    const tableRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:`?(\w+)`?\.)?`?(\w+)`?\s*\(/gi;
     let match;
-    while ((match = createBlock.exec(sql)) !== null) {
+    while ((match = tableRegex.exec(sql)) !== null) {
         const schemaName = match[1] || '';
         const tableNameRaw = match[2] || match[1] || '';
         const tableName = tableNameRaw.replace(/`/g, '');
-        const body = match[3];
+        let depth = 1;
+        let bodyStart = tableRegex.lastIndex;
+        let bodyEnd = bodyStart;
+        while (depth > 0 && bodyEnd < sql.length) {
+            if (sql[bodyEnd] === '(') depth++;
+            else if (sql[bodyEnd] === ')') depth--;
+            if (depth > 0) bodyEnd++;
+        }
+        const body = sql.slice(bodyStart, bodyEnd);
         const cols = [];
         const tPkCols = [];
         const tFks = [];
@@ -413,6 +424,12 @@ function schemaImportJSON() {
         try {
             const data = JSON.parse(e.target.result);
             if (!Array.isArray(data) || data.length === 0) { alert('Invalid schema file.'); return; }
+            for (const t of data) {
+                if (!t || typeof t !== 'object' || typeof t.name !== 'string' || !Array.isArray(t.cols)) {
+                    alert('Invalid schema: each table must have a name (string) and cols (array).');
+                    return;
+                }
+            }
             schemaPushState();
             schemaTables = data;
             const maxId = data.reduce((m, t) => Math.max(m, t.id || 0), 0);
@@ -513,12 +530,11 @@ function schemaRender() {
                 <span class="st-checkbox" title="Primary Key"><input type="checkbox" ${col.pk ? 'checked' : ''} onchange="schemaTogglePK(${table.id}, ${i})"></span>
                 <button class="st-del-col" onclick="schemaRemoveCol(${table.id}, ${i})" title="Remove column">✕</button>
             </div>`;
-            if (col.default !== null || col.comment) {
-                html += `<div class="st-row-extra" data-table-id="${table.id}" data-col-idx="${i}">
-                    <span class="st-extra-label">default:</span> <input class="st-default-input" value="${col.default || ''}" placeholder="NULL" onchange="schemaUpdateCol(${table.id}, ${i}, 'default', this.value)" spellcheck="false">
-                    <span class="st-extra-label">comment:</span> <input class="st-comment-input" value="${col.comment || ''}" placeholder="" onchange="schemaUpdateCol(${table.id}, ${i}, 'comment', this.value)" spellcheck="false">
-                </div>`;
-            }
+            html += `<div class="st-row-extra-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'" style="cursor:pointer;font-size:9px;color:#64748b;padding:0 0 2px 24px;">+ default/comment</div>`;
+            html += `<div class="st-row-extra" data-table-id="${table.id}" data-col-idx="${i}" style="${col.default !== null || col.comment ? '' : 'display:none'}">
+                <span class="st-extra-label">default:</span> <input class="st-default-input" value="${col.default || ''}" placeholder="NULL" onchange="schemaUpdateCol(${table.id}, ${i}, 'default', this.value)" spellcheck="false">
+                <span class="st-extra-label">comment:</span> <input class="st-comment-input" value="${col.comment || ''}" placeholder="" onchange="schemaUpdateCol(${table.id}, ${i}, 'comment', this.value)" spellcheck="false">
+            </div>`;
         });
 
         html += `</div><div class="st-add-row">
@@ -705,6 +721,8 @@ function linkEnd(targetTableId, targetColIdx) {
     const tgtCol = tgtTable?.cols[targetColIdx];
     if (srcCol && tgtCol) {
         srcCol.fk = { tableId: targetTableId, colIdx: targetColIdx };
+    } else if (!tgtCol) {
+        alert('Could not create FK: target column not found.');
     }
     linkClear();
     schemaRender();
@@ -862,6 +880,7 @@ function schemaRenderERD() {
         canvas.appendChild(el);
     });
 
+    canvas.removeEventListener('click', erdHandleRowClick);
     canvas.addEventListener('click', erdHandleRowClick);
 
     if (linkingState) {
@@ -950,7 +969,7 @@ function schemaDrawERDLines() {
 // ── SQL Generation ──
 function schemaSetDialect(dialect) {
     schemaDialect = dialect;
-    document.getElementById('schemaDialectBtn').textContent = dialect.charAt(0).toUpperCase() + dialect.slice(1);
+    document.getElementById('schemaDialectBtn').value = dialect;
     schemaGenerateSQL();
 }
 
@@ -993,8 +1012,8 @@ function schemaGenerateSQL() {
             if (c.default !== null) {
                 const dv = c.default;
                 if (dv === 'CURRENT_TIMESTAMP' || dv === 'NOW()' || dv.startsWith('CURRENT_')) def += ` DEFAULT ${dv}`;
-                else if (isNaN(dv)) def += ` DEFAULT '${dv}'`;
-                else def += ` DEFAULT ${dv}`;
+                else if (/^-?\d+(\.\d+)?$/.test(dv)) def += ` DEFAULT ${dv}`;
+                else def += ` DEFAULT '${dv.replace(/'/g, "''")}'`;
             }
             if (c.unique && !c.pk) def += ' UNIQUE';
 
@@ -1013,6 +1032,12 @@ function schemaGenerateSQL() {
             tConstraints.push(`    PRIMARY KEY (${pkCols.map(n => q + n + q).join(', ')})`);
         }
 
+        sql += `\nCREATE TABLE ${q}${table.name}${q} (\n`;
+        sql += [...colDefs, ...fkDefs, ...tConstraints].join(',\n');
+        sql += '\n)';
+        if (isMy) sql += ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+        sql += ';\n';
+
         for (const idx of table.indexes) {
             if (idx.cols.length === 0) continue;
             const idxName = `${q}${idx.name}${q}`;
@@ -1023,12 +1048,6 @@ function schemaGenerateSQL() {
                 sql += `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${idxName} ON ${table.name} (${idxCols});\n`;
             }
         }
-
-        sql += `\nCREATE TABLE ${q}${table.name}${q} (\n`;
-        sql += [...colDefs, ...fkDefs, ...tConstraints].join(',\n');
-        sql += '\n)';
-        if (isMy) sql += ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
-        sql += ';\n';
     }
     document.getElementById('schemaSQLOutput').textContent = sql;
 }

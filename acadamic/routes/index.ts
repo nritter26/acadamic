@@ -14,6 +14,7 @@ import benchmarkRouter from './benchmark';
 import coursesRouter from './courses';
 import authRouter from './auth';
 import projectsRouter from './projects';
+import contentRouter from './content';
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use('/benchmark', benchmarkRouter); // GET /benchmark
 router.use('/courses', coursesRouter);     // GET /courses
 router.use('/auth', authRouter);           // POST /auth/register, POST /auth/login, GET /auth/me
 router.use('/projects', projectsRouter);   // CRUD /projects
+router.use('/content', contentRouter);     // CRUD /content/:lang
 
 export default router;

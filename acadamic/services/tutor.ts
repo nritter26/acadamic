@@ -1,9 +1,10 @@
-import aiResponses from '../public/ai-responses';
+import aiResponses from '../ai/responses-data';
 import { analyzeUserCode } from './analyzer';
 import { getCurriculumContext, getTopicContext, search as semanticSearch } from '../ai/embeddings';
 import { askLLM } from '../ai/provider';
 import { getActiveAIProvider } from '../ai/config';
 import * as learner from '../ai/learner';
+import * as conv from './conversation';
 import { LANG_NAMES } from '../public/langConfig';
 
 interface HistoryEntry {
@@ -102,15 +103,16 @@ export async function buildLLMMessages(
   }
 
   if (context.length > 0) {
-    messages.push({ role: 'user', content: `Context:\n${context.join('\n\n')}\n\nUser question: ${message}` });
-  } else if (history && history.length > 0) {
+    messages.push({ role: 'system', content: context.join('\n\n') });
+  }
+
+  if (history && history.length > 0) {
     for (const msg of history.slice(-10)) {
       messages.push({ role: (msg.role === 'bot' ? 'assistant' : 'user') as 'user' | 'assistant', content: msg.text || msg.content || '' });
     }
-    messages.push({ role: 'user', content: message });
-  } else {
-    messages.push({ role: 'user', content: message });
   }
+
+  messages.push({ role: 'user', content: message });
 
   return messages;
 }
@@ -135,18 +137,22 @@ export async function handleTutorMessage(
 
   const lid = learnerId || 'default';
   try { await learner.trackAIInteraction(lid); } catch {}
+  try { await conv.addMessage(lid, 'user', message); } catch {}
 
   try {
     // 1. Try LLM first
     if (getActiveAIProvider() !== 'keyword') {
       const llmMessages = await buildLLMMessages(message, lang, topic, phase, code, output, hasError, history, learnerId);
       let gotChunk = false;
+      let fullResponse = '';
       await askLLM(llmMessages, (chunk: string) => {
         gotChunk = true;
+        fullResponse += chunk;
         sseSend(chunk);
       }, { lang, topic, code, hasError });
       if (gotChunk) {
         if (topic && lang) await learner.trackAttempt(lid, lang, topic);
+        try { await conv.addMessage(lid, 'assistant', fullResponse); } catch {}
         sseDone();
         return;
       }
@@ -177,7 +183,7 @@ export async function handleTutorMessage(
         errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
       }
       if (topic && lang) await learner.trackError(lid, lang, topic);
-      streamReply(sseSend, sseDone, errorReply);
+      await streamReply(sseSend, sseDone, errorReply, lid);
       return;
     }
 
@@ -194,13 +200,13 @@ export async function handleTutorMessage(
         };
         for (const [key, reply] of Object.entries(followUps)) {
           if (lastBotMsg.text?.toLowerCase().includes(key)) {
-            streamReply(sseSend, sseDone, reply);
+            await streamReply(sseSend, sseDone, reply, lid);
             return;
           }
         }
       }
       if (q.includes('thank')) {
-        streamReply(sseSend, sseDone, "You're welcome! Keep experimenting, keep breaking things, and keep asking questions. What would you like to explore next?");
+        await streamReply(sseSend, sseDone, "You're welcome! Keep experimenting, keep breaking things, and keep asking questions. What would you like to explore next?", lid);
         return;
       }
     }
@@ -214,7 +220,7 @@ export async function handleTutorMessage(
       reply += best.exp.slice(0, 500) + '...\n\n';
       if (best.code) reply += `**Example code:**\n\`\`\`\n${best.code}\n\`\`\`\n\n`;
       reply += `Would you like me to explain more about **${best.topic}** or help you practice it?`;
-      streamReply(sseSend, sseDone, reply);
+      await streamReply(sseSend, sseDone, reply, lid);
       return;
     }
 
@@ -225,7 +231,7 @@ export async function handleTutorMessage(
           let reply = entry.response;
           reply += `\n\n**You're currently studying:** ${topic} (${phase || ''})`;
           reply += `\nTry the code example in the editor and click Run!`;
-          streamReply(sseSend, sseDone, reply);
+          await streamReply(sseSend, sseDone, reply, lid);
           return;
         }
       }
@@ -234,7 +240,7 @@ export async function handleTutorMessage(
     // 6. Standard keyword matching
     for (const entry of aiResponses) {
       if (entry.keywords.some(k => q.includes(k))) {
-        streamReply(sseSend, sseDone, entry.response);
+        await streamReply(sseSend, sseDone, entry.response, lid);
         return;
       }
     }
@@ -243,26 +249,26 @@ export async function handleTutorMessage(
     for (const entry of aiResponses) {
       const combined = entry.keywords.join(' ');
       if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
-        streamReply(sseSend, sseDone, entry.response);
+        await streamReply(sseSend, sseDone, entry.response, lid);
         return;
       }
     }
 
     // 8. Greeting / thanks
     if (q.includes('thank')) {
-      streamReply(sseSend, sseDone, "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step!");
+      await streamReply(sseSend, sseDone, "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step!", lid);
       return;
     }
 
     if (/hello|hi |^hey$|good/.test(q)) {
       const langInfo = lang ? `I see you're studying **${lang.toUpperCase()}**. ` : '';
-      streamReply(sseSend, sseDone, `Hello! ${langInfo}Ask me anything about the topic you're working on!`);
+      await streamReply(sseSend, sseDone, `Hello! ${langInfo}Ask me anything about the topic you're working on!`, lid);
       return;
     }
 
     // 9. Socratic / generic fallback
     if (topic) {
-      streamReply(sseSend, sseDone, `Great question about **${topic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far?`);
+      await streamReply(sseSend, sseDone, `Great question about **${topic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far?`, lid);
       return;
     }
 
@@ -271,14 +277,17 @@ export async function handleTutorMessage(
       "I want to make sure I help you effectively. Could you tell me more about what you're working on?",
       "Let me help you learn! Try asking me about a specific topic you're studying, or share your code for debugging.",
     ];
-    streamReply(sseSend, sseDone, fallbacks[Math.floor(Math.random() * fallbacks.length)]);
+    await streamReply(sseSend, sseDone, fallbacks[Math.floor(Math.random() * fallbacks.length)], lid);
   } catch (e) {
     sseSend("Sorry, I encountered an error processing your request. Please try again.");
     sseDone();
   }
 }
 
-function streamReply(sseSend: (chunk: string) => void, sseDone: () => void, text: string): void {
+async function streamReply(sseSend: (chunk: string) => void, sseDone: () => void, text: string, lid?: string): Promise<void> {
+  if (lid) {
+    try { await conv.addMessage(lid, 'assistant', text); } catch {}
+  }
   sseSend(text);
   sseDone();
 }

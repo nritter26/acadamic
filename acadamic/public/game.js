@@ -289,7 +289,8 @@ function showScorePopup(text, cls) {
 function toggleGameModal() {
   const o = document.getElementById('gameOverlay');
   const open = !o.classList.contains('open');
-  if (open) {
+    if (open) {
+    clearAllGameTimers();
     try { const s = localStorage.getItem('dogeslab_game_best'); if (s) gameBestWPM = JSON.parse(s); } catch {}
     try { const x = localStorage.getItem('dogeslab_game_xp'); if (x) { const d = JSON.parse(x); gameTotalXP = d.xp || 0; gameLevel = d.lvl || 1; } } catch {}
     renderHub();
@@ -317,7 +318,16 @@ const GAMES = [
   { id:'daily',        name:'Daily Challenge',  icon:'🗓️', desc:'One challenge per day', color:'#ec4899' },
 ];
 
+function clearAllGameTimers() {
+  if (gameTimerInterval) { clearInterval(gameTimerInterval); gameTimerInterval = null; }
+  if (raceTimer) { clearInterval(raceTimer); raceTimer = null; }
+  if (bhTimer) { clearInterval(bhTimer); bhTimer = null; }
+  if (flashTimer) { clearInterval(flashTimer); flashTimer = null; }
+  if (window.gameCountdownInterval) { clearInterval(window.gameCountdownInterval); window.gameCountdownInterval = null; }
+}
+
 function renderHub() {
+  clearAllGameTimers();
   gameActive = 'hub';
   const body = document.getElementById('gamePaperBody');
   const lvlBonus = gameLevel > 1 ? `<span style="font-size:10px;color:#64748b;margin-left:auto">Lv ${gameLevel}</span>` : '';
@@ -453,7 +463,7 @@ function renderTyping() {
   }
 }
 
-function switchTypingLang(l) { if(gameStarted&&!gameFinished&&!confirm('Lose progress?'))return; if(gameTimerInterval){clearInterval(gameTimerInterval);gameTimerInterval=null} gameLang=l; gameStarted=false;gameFinished=false;gameStartTime=null; renderTyping(); }
+function switchTypingLang(l) { if(gameStarted&&!gameFinished&&!confirm('Lose progress?'))return; if(gameTimerInterval){clearInterval(gameTimerInterval);gameTimerInterval=null} if(window.gameCountdownInterval){clearInterval(window.gameCountdownInterval);window.gameCountdownInterval=null} gameLang=l; gameStarted=false;gameFinished=false;gameStartTime=null; renderTyping(); }
 function buildTargetHtml(typed) {
   const sl=gameSnippet.split('\n'); const tl=typed?typed.split('\n'):[]; let h='';
   for(let i=0;i<sl.length;i++){const l=sl[i];const t=i<tl.length?tl[i]:'';const p=i<tl.length-1||(i===tl.length-1&&typed&&typed.endsWith('\n'));const c=!gameFinished&&!p&&i===tl.length-1;const n=(i+1).toString().padStart(2,' ');
@@ -475,11 +485,12 @@ function startTyping(){
   ov.innerHTML = '<div class="game-countdown-num" id="countNum">3</div>';
   body.style.position = 'relative'; body.appendChild(ov);
   let c = 3; gameStarted = false;
-  const ci = setInterval(() => {
+  if (window.gameCountdownInterval) { clearInterval(window.gameCountdownInterval); window.gameCountdownInterval = null; }
+  window.gameCountdownInterval = setInterval(() => {
     c--; const el = document.getElementById('countNum');
     if (el) el.textContent = c > 0 ? c : 'GO!';
     if (c <= 0) {
-      clearInterval(ci);
+      clearInterval(window.gameCountdownInterval); window.gameCountdownInterval = null;
       const o = document.getElementById('typingCountdown');
       if (o) { o.remove(); body.style.position = ''; }
       gameStarted = true; gameStartTime = Date.now();
@@ -848,6 +859,7 @@ function startRace() {
   raceActive = true; raceTimeLeft = 60; raceCode = '';
   renderRace();
   const r = 24, circ = circumference(r);
+  if (raceTimer) { clearInterval(raceTimer); raceTimer = null; }
   raceTimer = setInterval(() => {
     raceTimeLeft--;
     const el = document.getElementById('raceTimerNum'); if (el) el.textContent = raceTimeLeft;

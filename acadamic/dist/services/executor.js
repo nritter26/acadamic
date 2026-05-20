@@ -1,0 +1,261 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.executeCode = executeCode;
+const child_process_1 = require("child_process");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const os_1 = __importDefault(require("os"));
+const vm_1 = __importDefault(require("vm"));
+const database = __importStar(require("../sql/database"));
+const docker_executor_1 = require("./docker-executor");
+const middleware_1 = require("../middleware");
+const EXEC_QUEUE = [];
+let EXEC_RUNNING = 0;
+const EXEC_MAX_CONCURRENT = 4;
+function processNextExec() {
+    while (EXEC_RUNNING < EXEC_MAX_CONCURRENT && EXEC_QUEUE.length > 0) {
+        const job = EXEC_QUEUE.shift();
+        EXEC_RUNNING++;
+        (0, child_process_1.exec)(job.cmd, job.opts, (err, stdout, stderr) => {
+            EXEC_RUNNING--;
+            if (err)
+                job.reject(err);
+            else
+                job.resolve({ stdout: String(stdout), stderr: String(stderr) });
+            processNextExec();
+        });
+    }
+}
+function execQueue(cmd, opts) {
+    return new Promise((resolve, reject) => {
+        EXEC_QUEUE.push({ cmd, opts, resolve, reject });
+        processNextExec();
+    });
+}
+function execWithStdin(cmd, opts, stdin) {
+    return new Promise((resolve, reject) => {
+        const child = (0, child_process_1.spawn)('sh', ['-c', cmd], opts);
+        let stdout = '';
+        let stderr = '';
+        child.stdout.on('data', (d) => stdout += d.toString());
+        child.stderr.on('data', (d) => stderr += d.toString());
+        child.on('close', code => resolve({ stdout, stderr, code }));
+        child.on('error', reject);
+        if (stdin) {
+            child.stdin.write(stdin);
+            child.stdin.end();
+        }
+    });
+}
+// ── JavaScript Sandbox Execution ──
+function analyzeJSError(code, e) {
+    const msg = e.message || '';
+    let explanation = '';
+    let fix = '';
+    if (msg.includes('Unexpected token')) {
+        const token = msg.match(/'([^']+)'/)?.[1] || 'something';
+        explanation = `**Syntax Error: Unexpected token \`${token}\`**`;
+        if (token === '}')
+            explanation += '\n- You have an extra closing brace `}`';
+        else if (token === ')')
+            explanation += '\n- You have an extra closing parenthesis `)`';
+        else
+            explanation += `\n- Check for missing operators, quotes, or commas near \`${token}\``;
+    }
+    else if (msg.includes('is not defined')) {
+        const name = msg.match(/'([^']+)'/)?.[1] || 'something';
+        explanation = `**ReferenceError: \`${name}\` is not defined**`;
+        fix = `- Declare it first: \`let ${name} = value;\`\n- Check for typos`;
+    }
+    else if (msg.includes('is not a function')) {
+        explanation = `**TypeError: Value is not a function**`;
+        fix = '- Check if the value is actually a function';
+    }
+    else if (msg.includes('Cannot read property') || msg.includes('Cannot read properties')) {
+        explanation = `**TypeError: Cannot read property of undefined/null**`;
+        fix = '- Use optional chaining: `obj?.prop`\n- Check initialization';
+    }
+    else {
+        explanation = `**Error: ${msg}**`;
+        fix = '- Check for typos, missing brackets, or incorrect syntax';
+    }
+    return `// ╔══════════════════════════════════════╗\n// ║  ERROR ANALYSIS                         ║\n// ╚══════════════════════════════════════╝\n\n${explanation}\n\n**How to fix:**\n${fix}`;
+}
+function analyzeRuntimeError(code, e) {
+    const msg = e.message || '';
+    let explanation = '';
+    let fix = '';
+    if (msg.includes('not a function')) {
+        explanation = `**Runtime Error: Value is not a function**`;
+        fix = '- Check if the variable holds a function or a different type';
+    }
+    else if (msg.includes('Cannot read property') || msg.includes('Cannot read properties')) {
+        explanation = `**Runtime Error: Accessing property on undefined/null**`;
+        fix = '- Use optional chaining: `obj?.prop`\n- Initialize variables before using them';
+    }
+    else if (msg.includes('is not iterable')) {
+        explanation = `**Runtime Error: Value is not iterable**`;
+        fix = '- Check if the value is actually an array';
+    }
+    else if (msg.includes('timeout')) {
+        explanation = `**Runtime Error: Execution timed out**`;
+        fix = '- Check for infinite loops';
+    }
+    else {
+        explanation = `**Runtime Error:** ${msg}`;
+        fix = '- Review the logic of your code';
+    }
+    return `// ╔══════════════════════════════════════╗\n// ║  RUNTIME ERROR ANALYSIS                 ║\n// ╚══════════════════════════════════════╝\n\n${explanation}\n\n**How to fix:**\n${fix}`;
+}
+function parseErrorPosition(msg) {
+    const m = msg.match(/line (\d+)/i);
+    return { line: m ? parseInt(m[1]) : 0 };
+}
+function getCodeLine(code, line) {
+    if (line <= 0)
+        return '';
+    const lines = code.split('\n');
+    if (line - 1 < lines.length) {
+        const start = Math.max(0, line - 3);
+        const end = Math.min(lines.length, line + 1);
+        let result = '';
+        for (let i = start; i < end; i++) {
+            result += `${i === line - 1 ? '>>> ' : '    '}${i + 1}: ${lines[i]}\n`;
+        }
+        return result.trim();
+    }
+    return '';
+}
+// ── Runners config ──
+const RUNNERS = {
+    py: { cmd: 'python3 -u "%f"', ext: '.py' },
+    go: { cmd: 'go run "%f"', ext: '.go' },
+    ts: { cmd: 'tsx "%f"', ext: '.ts' },
+    rs: { cmd: 'rustc -o _prog "%f" && ./_prog', ext: '.rs' },
+    c: { cmd: 'gcc -Wall -o _prog "%f" && ./_prog', ext: '.c' },
+    cpp: { cmd: 'g++ -std=c++20 -Wall -o _prog "%f" && ./_prog', ext: '.cpp' },
+    cs: { cmd: 'dotnet script "%f"', ext: '.csx' },
+    kt: { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
+    swift: { cmd: 'swift "%f"', ext: '.swift' },
+    zig: { cmd: 'zig run "%f"', ext: '.zig' },
+};
+// ── Execute ──
+async function executeCode(lang, code, stdin) {
+    if (!code)
+        return { output: 'No code provided', error: true };
+    // JavaScript sandbox
+    if (lang === 'js') {
+        try {
+            new vm_1.default.Script(code);
+        }
+        catch (e) {
+            return { output: analyzeJSError(code, e), error: true };
+        }
+        try {
+            let output = '';
+            const sandbox = {
+                console: {
+                    log: (...args) => {
+                        output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    },
+                    error: (...args) => {
+                        output += 'ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    },
+                    warn: (...args) => {
+                        output += 'WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    },
+                },
+            };
+            vm_1.default.runInNewContext(code, sandbox, { timeout: 5000 });
+            return { output: output || '(no output)' };
+        }
+        catch (e) {
+            return { output: analyzeRuntimeError(code, e), error: true };
+        }
+    }
+    // SQL
+    if (lang === 'sqlite')
+        return database.executeSQLite(code);
+    if (lang === 'pg')
+        return database.executePG(code);
+    if (lang === 'mysql')
+        return database.executeMySQL(code);
+    // Try Docker sandbox first if available
+    if ((0, docker_executor_1.isDockerAvailable)() && (0, docker_executor_1.getSupportedDockerLangs)().includes(lang)) {
+        middleware_1.logger.debug({ lang }, 'Executing via Docker sandbox');
+        const dockerResult = await (0, docker_executor_1.dockerExecute)(lang, code, stdin);
+        if (!dockerResult.error || dockerResult.dockerAvailable !== false) {
+            return dockerResult;
+        }
+    }
+    // Fallback: external compiler execution
+    const runner = RUNNERS[lang];
+    if (!runner) {
+        return { output: `// ${lang.toUpperCase()} execution not available on this server`, error: true };
+    }
+    const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'exec-'));
+    const tmpFile = path_1.default.join(tmpDir, 'code' + runner.ext);
+    fs_1.default.writeFileSync(tmpFile, code);
+    const cmd = runner.cmd.replace('%f', tmpFile);
+    const env = {
+        ...process.env,
+        PATH: `${process.env.PATH}:${path_1.default.join(os_1.default.homedir(), '.local/bin')}:${path_1.default.join(os_1.default.homedir(), '.cargo/bin')}`,
+        DOTNET_ROOT: path_1.default.join(os_1.default.homedir(), '.local/dotnet'),
+    };
+    const sandboxedCmd = `ulimit -v 262144 -t 30 2>/dev/null; ${cmd}`;
+    const execOpts = { timeout: 30000, cwd: tmpDir, env };
+    try {
+        const result = stdin
+            ? await execWithStdin(sandboxedCmd, execOpts, stdin)
+            : await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true });
+        fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+        const stdoutClean = (result.stdout || '').trimEnd();
+        const stderrClean = (result.stderr || '').trimEnd();
+        let output = stdoutClean;
+        if (stderrClean) {
+            output += (output ? '\n' : '') + '// stderr:\n' + stderrClean;
+        }
+        return { output: output || '(no output)' };
+    }
+    catch (err) {
+        fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+        return { output: 'Process failed: ' + err.message.slice(0, 200), error: true };
+    }
+}
+//# sourceMappingURL=executor.js.map

@@ -147,15 +147,11 @@ function searchTFIDF(query: string, lang?: string, topN = 5): (CurriculumDoc & {
   const qTokens = tokenize(query);
   if (qTokens.length === 0) return [];
 
-  let candidateSet: Set<number> | null = null;
+  let candidateSet: Set<number> = new Set();
   for (const t of qTokens) {
     const docs = tfidfIndex.invertedIndex[t];
     if (!docs) continue;
-    if (!candidateSet) {
-      candidateSet = new Set(docs);
-    } else {
-      candidateSet = new Set(docs.filter(d => candidateSet!.has(d)));
-    }
+    for (const d of docs) candidateSet.add(d);
   }
   if (!candidateSet) return [];
 
@@ -209,6 +205,7 @@ async function getEmbedding(text: string): Promise<number[] | null> {
 }
 
 function cosineSim(a: number[], b: number[]): number {
+  if (a.length !== b.length) return 0;
   let dot = 0, ma = 0, mb = 0;
   for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];

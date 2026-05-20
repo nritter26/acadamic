@@ -90,6 +90,13 @@ router.get('/path', async (req: Request, res: Response) => {
     const availablePhases: Record<string, Record<string, boolean>> = {};
 
     try {
+      const allowed = fs.readdirSync(path.join(__dirname, '..', 'content'))
+        .filter(f => f.endsWith('.json'))
+        .map(f => f.replace(/\.json$/, ''));
+      if (!allowed.includes(lang)) {
+        res.status(400).json({ error: 'Invalid language' });
+        return;
+      }
       const langData = JSON.parse(
         fs.readFileSync(path.join(__dirname, '..', 'content', `${lang}.json`), 'utf-8'),
       );
