@@ -52,4 +52,8 @@ export function isKeyword(): boolean {
   return config.provider === 'keyword';
 }
 
+export function getActiveAIProvider(): string {
+  return config.provider;
+}
+
 export default config;

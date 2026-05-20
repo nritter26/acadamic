@@ -3,6 +3,74 @@
 const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig'];
 let tutorialLang = 'js';
 
+function tutorialEscapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function tutorialStripHtml(value) {
+    return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function tutorialCodePreview(code) {
+    var lines = String(code || '').split('\n').filter(function (line) { return line.trim(); });
+    var firstLine = lines[0] || '';
+    return firstLine.length > 74 ? firstLine.slice(0, 71) + '...' : firstLine;
+}
+
+function getTutorialStepTask(step, item) {
+    var topic = tutorialEscapeHtml(step.topic);
+    var preview = tutorialEscapeHtml(tutorialCodePreview(item && item.code));
+    var task = '<ol class="tutorial-task-list">'
+        + '<li>Read the explanation for <strong>' + topic + '</strong>.</li>'
+        + '<li>Run the starter code and check the console output.</li>'
+        + '<li>Change one small thing, then run it again.</li>'
+        + '</ol>';
+    if (preview) {
+        task += '<div class="tutorial-code-cue"><span>Starter focus</span><code>' + preview + '</code></div>';
+    }
+    return task;
+}
+
+function getTutorialAskPrompt() {
+    if (!tutorialManager) return 'Help me with this tutorial step.';
+    var step = tutorialManager.getCurrentStep();
+    if (!step) return 'Help me with this tutorial step.';
+    var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialManager.lang]) || tutorialManager.lang;
+    var code = document.getElementById('editor')?.value || '';
+    var prompt = 'I am learning ' + langName + ' with Devin. The tutorial topic is "' + step.topic + '" in the "' + step.phase + '" chapter. ';
+    prompt += 'Explain the idea, point out what I should notice in this code, and give me one small experiment to try.';
+    if (code.trim()) prompt += '\n\nCurrent code:\n' + code;
+    return prompt;
+}
+
+function tutorialAskDevin() {
+    if (typeof toggleAI === 'function') toggleAI();
+    setTimeout(function () {
+        if (typeof askAI === 'function') askAI(getTutorialAskPrompt());
+    }, 300);
+}
+
+function clearTutorialWorkspace(lang) {
+    var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[lang]) || lang;
+    var exp = document.getElementById('explanation');
+    var editor = document.getElementById('editor');
+    var output = document.getElementById('output');
+    if (exp) {
+        exp.innerHTML = '<div class="loading-placeholder">Loading ' + tutorialEscapeHtml(langName) + ' tutorial...</div>';
+    }
+    if (editor) editor.value = '// Loading ' + langName + ' tutorial...';
+    if (output) output.innerText = '// Switching tutorial language...';
+    var nav = document.getElementById('tutorial-nav');
+    if (nav) nav.innerHTML = '';
+    var stuckPanel = document.getElementById('tutorial-stuck-panel');
+    if (stuckPanel) stuckPanel.remove();
+}
+
 function generateTutorialSteps(lang) {
     var data = courseData[lang];
     if (!data) return [];
@@ -16,7 +84,7 @@ function generateTutorialSteps(lang) {
             steps.push({
                 phase: phase,
                 topic: topic,
-                task: 'Read about <strong>"' + topic + '"</strong> in the explanation above, then click <strong>Run</strong> to see the example code in action. Try modifying it to see how it works!',
+                task: 'Run the starter code, inspect the output, then make one small edit and run it again.',
                 quizAfter: false
             });
         }
@@ -223,7 +291,6 @@ class TutorialManager {
         var step = this.getCurrentStep();
         if (!step) return;
 
-        var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[this.lang]) || this.lang;
         var panel = document.createElement('div');
         panel.id = 'tutorial-stuck-panel';
         panel.innerHTML = ''
@@ -232,12 +299,12 @@ class TutorialManager {
             + '<button onclick="this.parentElement.parentElement.remove()">\u2715</button>'
             + '</div>'
             + '<div class="tutorial-stuck-body">'
-            + '<div class="tutorial-stuck-tip"><strong>Working on:</strong> ' + step.topic + '</div>'
-            + '<div class="tutorial-stuck-tip"><strong>Your task:</strong> ' + step.task + '</div>'
+            + '<div class="tutorial-stuck-tip"><strong>Working on:</strong> ' + tutorialEscapeHtml(step.topic) + '</div>'
+            + '<div class="tutorial-stuck-tip"><strong>Try this:</strong> Run the code once, then change one value, name, message, or branch condition and run again.</div>'
             + '<div class="tutorial-stuck-actions">'
-            + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); openCheatsheet()">\uD83D\uDCD6 Open Cheatsheet</button>'
-            + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); toggleAI(); setTimeout(function() { askAI(\'I\\\'m doing a tutorial step on ' + step.topic + ' in ' + langName + '. My task is: ' + step.task.replace(/<[^>]*>/g, '') + '. Can you help me?\'); }, 300)">\uD83E\uDD16 Ask Devin</button>'
-            + '<button onclick="tutorialManager.clearStuckTimer(); document.getElementById(\'tutorial-stuck-btn\').classList.remove(\'visible\',\'pulse\',\'glow\'); this.closest(\'#tutorial-stuck-panel\').remove(); tutorialManager.resetCurrentCode()">\uD83D\uDD04 Reset code to original</button>'
+            + '<button onclick="tutorialDismissStuckPanel(); openCheatsheet()">Open Cheatsheet</button>'
+            + '<button onclick="tutorialDismissStuckPanel(); tutorialAskDevin()">Ask Devin</button>'
+            + '<button onclick="tutorialDismissStuckPanel(); tutorialManager.resetCurrentCode()">Reset code</button>'
             + '</div>'
             + '</div>';
         var nav = document.getElementById('tutorial-nav');
@@ -298,6 +365,14 @@ class TutorialManager {
 }
 
 var tutorialManager = null;
+
+function tutorialDismissStuckPanel() {
+    if (tutorialManager) tutorialManager.clearStuckTimer();
+    var stuckBtn = document.getElementById('tutorial-stuck-btn');
+    if (stuckBtn) stuckBtn.classList.remove('visible', 'pulse', 'glow');
+    var panel = document.getElementById('tutorial-stuck-panel');
+    if (panel) panel.remove();
+}
 
 function openCheatsheet() {
     var overlay = document.getElementById('cheatsheetOverlay');
@@ -439,10 +514,12 @@ function switchTutorialLang(lang) {
     if (lang === tutorialLang) return;
 
     if (tutorialManager) {
+        tutorialManager.clearStuckTimer();
         _savedProgress[tutorialLang] = tutorialManager.state;
     }
 
     tutorialLang = lang;
+    clearTutorialWorkspace(lang);
 
     if (!courseData[lang]) {
         var loadingLang = lang;
@@ -499,7 +576,14 @@ function renderTutorialSidebar() {
     var currentIdx = tutorialManager.getCurrentStepIndex();
     var completedSteps = tutorialManager.state.completedSteps;
 
+    var completedCount = tutorialManager.getCompletedCount();
+    var total = tutorialManager.getTotalSteps();
+    var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
     var html = langBar ? langBar.outerHTML : '';
+    html += '<div class="tutorial-sidebar-summary">'
+        + '<span>' + tutorialEscapeHtml(langName) + ' path</span>'
+        + '<strong>' + completedCount + '/' + total + '</strong>'
+        + '</div>';
 
     var currentChapter = '';
     for (var i = 0; i < steps.length; i++) {
@@ -512,7 +596,7 @@ function renderTutorialSidebar() {
         var isCompleted = completedSteps.includes(i);
         var isCurrent = i === currentIdx;
         var isFuture = i > currentIdx && !isCompleted;
-        var fill = isCompleted ? '\u2705' : (isCurrent ? '\u25B6' : '  ');
+        var fill = isCompleted ? '\u2713' : (isCurrent ? '\u25B6' : '');
 
         var cls = 'tutorial-step-btn';
         if (isCompleted) cls += ' completed';
@@ -561,9 +645,26 @@ function loadTutorialStep(idx) {
     loadTopic(step.phase, step.topic);
 
     var expEl = document.getElementById('explanation');
+    var item = langData[step.phase][step.topic];
+    var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
+    var coach = document.createElement('div');
+    coach.className = 'tutorial-coach-card';
+    coach.innerHTML = ''
+        + '<div class="tutorial-coach-top">'
+        + '<div><div class="tutorial-coach-kicker">Learn code with Devin</div>'
+        + '<h4>' + tutorialEscapeHtml(step.topic) + '</h4>'
+        + '<p>' + tutorialEscapeHtml(step.phase) + ' · ' + tutorialEscapeHtml(langName) + '</p></div>'
+        + '<button type="button" onclick="tutorialAskDevin()">Ask Devin</button>'
+        + '</div>'
+        + '<div class="tutorial-coach-actions">'
+        + '<button type="button" onclick="runCode()">Run example</button>'
+        + '<button type="button" onclick="tutorialManager.resetCurrentCode()">Reset starter</button>'
+        + '<button type="button" onclick="openCheatsheet()">Cheatsheet</button>'
+        + '</div>';
     var taskBox = document.createElement('div');
     taskBox.className = 'tutorial-task-box';
-    taskBox.innerHTML = '<div class="tutorial-task-header">Your Task</div><div class="tutorial-task-body">' + step.task + '</div>';
+    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>';
+    expEl.insertBefore(coach, expEl.firstChild);
     expEl.appendChild(taskBox);
 
     var output = document.getElementById('output');
@@ -584,8 +685,8 @@ function renderTutorialNav(idx) {
     nav.innerHTML = ''
         + '<div class="tutorial-nav-inner">'
         + '<button class="tutorial-nav-btn" onclick="tutorialGoBack()"' + (idx === 0 ? ' disabled' : '') + '>\u2190 Back</button>'
-        + '<div class="tutorial-step-info">Step ' + (idx + 1) + ' of ' + total + '<span class="tutorial-step-name-nav"> ' + step.topic + '</span></div>'
-        + '<button class="tutorial-nav-btn tutorial-continue-btn" id="tutorial-continue-btn" onclick="tutorialContinue()"' + (!completed ? ' disabled' : '') + '>Continue \u2192</button>'
+        + '<div class="tutorial-step-info">Step ' + (idx + 1) + ' of ' + total + '<span class="tutorial-step-name-nav"> ' + tutorialEscapeHtml(step.topic) + '</span><span class="tutorial-run-status" id="tutorial-run-status">Run the code to unlock Continue</span></div>'
+        + '<button class="tutorial-nav-btn tutorial-continue-btn" id="tutorial-continue-btn" onclick="tutorialContinue()"' + (!completed ? ' disabled' : '') + '>Run first</button>'
         + '<button class="tutorial-stuck-btn" id="tutorial-stuck-btn" onclick="tutorialManager.showStuckPanel()" title="Need help?">?</button>'
         + '</div>';
 
@@ -598,19 +699,26 @@ function renderTutorialProgress() {
     var completed = tutorialManager.getCompletedCount();
     var total = tutorialManager.getTotalSteps();
     var pct = Math.round((completed / total) * 100);
+    var current = tutorialManager.getCurrentStep();
     el.innerHTML = ''
         + '<div class="tutorial-progress-bar-track"><div class="tutorial-progress-bar-fill" style="width:' + pct + '%"></div></div>'
-        + '<div class="tutorial-progress-text">' + completed + '/' + total + ' lessons</div>';
+        + '<div class="tutorial-progress-text"><span>' + pct + '% complete</span><span>' + completed + '/' + total + ' lessons</span></div>'
+        + (current ? '<div class="tutorial-progress-topic">' + tutorialEscapeHtml(current.phase) + '</div>' : '');
 }
 
 function updateContinueButton(enabled) {
     var btn = document.getElementById('tutorial-continue-btn');
     if (!btn) return;
+    var status = document.getElementById('tutorial-run-status');
     btn.disabled = !enabled;
     if (enabled) {
         btn.classList.add('ready');
+        btn.textContent = 'Continue \u2192';
+        if (status) status.textContent = 'Run complete. Continue when you are ready.';
     } else {
         btn.classList.remove('ready');
+        btn.textContent = 'Run first';
+        if (status) status.textContent = 'Run the code to unlock Continue';
     }
 }
 
@@ -828,6 +936,8 @@ function showTutorialComplete() {
 
 function tutorialRunHook() {
     if (!tutorialManager) return;
+    if (!document.getElementById('app')?.classList.contains('tutorial-mode')) return;
+    if (currentLang !== tutorialManager.lang) return;
     var output = document.getElementById('output');
     var hasError = output && (
         output.innerText.includes('Error:') ||
@@ -842,4 +952,3 @@ function tutorialRunHook() {
         updateContinueButton(true);
     }
 }
-

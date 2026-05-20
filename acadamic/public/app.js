@@ -9,27 +9,7 @@ let currentMobilePlatform = 'all';
 let collapsedPhases = new Set();
 
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
-var LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
-    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', zig: 'zig', dk: 'docker', pg: 'postgresql', mobile: 'mobile', backend: 'backend',
-    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
-    godot: 'godot', unity: 'unity', unreal: 'unreal',
-    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    cloud: 'cloud', aws: 'aws', azure: 'azure', gcp: 'gcp',
-    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
-    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
-    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
-    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
-    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
-    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
-    bootstrap: 'bootstrap', django: 'django', flask: 'flask',
-    fastapi: 'fastapi', spring: 'spring',
-};
-var NAME_TO_LANG = {};
-for (const [code, name] of Object.entries(LANG_NAMES)) {
-    NAME_TO_LANG[name] = code;
-}
+
 
 function normalizeCourseData() {
     for (const lang of Object.keys(courseData)) {
@@ -84,37 +64,7 @@ function loadLangData(lang, callback) {
     return false;
 }
 
-function detectLanguageInQuery(q) {
-    const words = q.toLowerCase().split(/\s+/);
-    for (const word of words) {
-        for (const [code, name] of Object.entries(LANG_NAMES)) {
-            if (word === name || word === code) return code;
-        }
-        if (word === 'sql') return 'pg';
-    }
-    return null;
-}
 
-function getLanguageIntro(langCode) {
-    const data = courseData[langCode];
-    if (!data) return null;
-    // Pick the first topic from the first phase
-    const phases = Object.keys(data);
-    if (!phases.length) return null;
-    const firstPhase = phases[0];
-    const topics = Object.keys(data[firstPhase]);
-    if (!topics.length) return null;
-    const topic = topics[0];
-    const item = data[firstPhase][topic];
-    const displayName = LANG_NAMES[langCode] || langCode.toUpperCase();
-    return {
-        topic,
-        phase: firstPhase,
-        exp: item.exp || '',
-        code: item.code || '',
-        displayName: displayName.charAt(0).toUpperCase() + displayName.slice(1),
-    };
-}
 
 
 
@@ -357,7 +307,21 @@ function loadCheatsheet() {
     toggleCheatsheet();
 }
 
-const BACKEND_URL = window.location.origin;
+function resolveBackendUrl() {
+    const override = localStorage.getItem('kodex_backend_url');
+    if (override) return override.replace(/\/$/, '');
+
+    const { protocol, hostname, port, origin } = window.location;
+    const staticDevPorts = new Set(['5500', '5501', '5502', '5173', '5174']);
+    const isLocalStaticServer = (hostname === 'localhost' || hostname === '127.0.0.1') && staticDevPorts.has(port);
+    if (isLocalStaticServer) {
+        return `${protocol}//${hostname}:3000`;
+    }
+
+    return origin;
+}
+
+const BACKEND_URL = resolveBackendUrl();
 
 // Generate persistent learner ID
 const LEARNER_ID = (function() {
@@ -402,6 +366,39 @@ function updateReviewBadge() {
     }
 }
 
+async function readChatStream(response) {
+    if (!response.ok || !response.body) {
+        throw new Error('Stream not available');
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.content !== undefined) {
+                    fullText += parsed.content;
+                }
+            } catch {}
+        }
+    }
+
+    return fullText;
+}
+
 function triggerAutoDebug(errorText, code) {
     if (!errorText || !code) return;
     const out = document.getElementById('output');
@@ -411,43 +408,42 @@ function triggerAutoDebug(errorText, code) {
     btn.id = 'ai-auto-debug-btn';
     btn.textContent = '🔧 Auto-Debug';
     btn.style.cssText = 'display:block;margin-top:4px;margin-bottom:4px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:9px;font-weight:800;cursor:pointer;';
-    btn.onclick = function() {
+    btn.onclick = async function() {
         btn.textContent = '🔍 Analyzing...';
         btn.disabled = true;
         const aiPanel = document.getElementById('aiPanel');
         if (!aiPanel.classList.contains('open')) toggleAI();
         addAIMessage('', 'typing');
-        fetch(BACKEND_URL + '/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: `Debug this error and suggest a fix. Error: ${errorText.slice(0, 300)}`,
-                lang: currentLang,
-                topic: currentTopic,
-                code: code.slice(0, 2000),
-                hasError: true,
-                output: errorText.slice(0, 500),
-                history: []
-            })
-        })
-        .then(r => r.json())
-        .catch(() => ({}))
-        .then(d => {
+        try {
+            const response = await fetch(BACKEND_URL + '/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Debug this error and suggest a fix. Error: ${errorText.slice(0, 300)}`,
+                    lang: currentLang,
+                    topic: currentTopic,
+                    code: code.slice(0, 2000),
+                    hasError: true,
+                    output: errorText.slice(0, 500),
+                    history: []
+                })
+            });
+            const reply = await readChatStream(response);
             removeTypingIndicator();
-            if (d && d.content) {
-                let reply = d.content;
-                reply += '\n\n---\n<button class="exercise-btn" onclick="applyAIFix()" style="background:#10b981;">Apply Fix</button>';
+            if (reply) {
                 addAIMessage(reply, 'bot');
             } else {
                 const errorQ = `I got this error and need help fixing it:\n\`\`\`\n${errorText.slice(0, 300)}\n\`\`\`\n\nMy code:\n\`\`\`\n${code.slice(0, 800)}\n\`\`\`\n\nWhat went wrong and how do I fix it?`;
                 askAI(errorQ);
             }
-        })
-        .catch(() => {
+        } catch {
             removeTypingIndicator();
             const errorQ = `I got this error and need help fixing it. Error: ${errorText.split('\n')[0]}`;
             askAI(errorQ);
-        });
+        } finally {
+            btn.textContent = '🔧 Auto-Debug';
+            btn.disabled = false;
+        }
     };
     if (out && out.parentNode) {
         out.parentNode.appendChild(btn);
@@ -849,13 +845,32 @@ function highlightCode(code, lang) {
     }).join('\n');
 }
 
+function escapeAIHtml(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function escapeAIAttr(text) {
+    return escapeAIHtml(text)
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function safeAIHref(url) {
+    const decoded = String(url).replace(/&amp;/g, '&').trim();
+    if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
+    return '';
+}
+
 function formatAIText(text) {
     if (!text) return '';
     // 1. Extract and protect code blocks
     const codeBlocks = [];
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
         const idx = codeBlocks.length;
-        const safeCode = code.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeCode = escapeAIAttr(code);
         const highlighted = highlightCode(code, lang);
         codeBlocks.push({ lang, code, safeCode, highlighted });
         return `\x00CODEBLOCK${idx}\x00`;
@@ -885,7 +900,7 @@ function formatAIText(text) {
         if (hMatch) {
             if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
             const level = hMatch[1].length;
-            result += `<h${level} style="font-size:${14 - level}px;color:#f1f5f9;margin:8px 0 4px;font-weight:800;">${hMatch[2]}</h${level}>`;
+            result += `<h${level} style="font-size:${14 - level}px;color:#f1f5f9;margin:8px 0 4px;font-weight:800;">${inlineFormat(hMatch[2], codeBlocks, false)}</h${level}>`;
             continue;
         }
         // horizontal rule
@@ -961,7 +976,7 @@ function formatAIText(text) {
 }
 
 function inlineFormat(text, codeBlocks) {
-    let t = text;
+    let t = escapeAIHtml(text);
     // inline code
     t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;">$1</code>');
     // bold
@@ -969,7 +984,11 @@ function inlineFormat(text, codeBlocks) {
     // italic
     t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
     // links
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">$1</a>');
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+        const href = safeAIHref(url);
+        if (!href) return label;
+        return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">${label}</a>`;
+    });
     // inline code block placeholders (shouldn't be here but just in case)
     t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
         const cb = codeBlocks[parseInt(idx)];
@@ -1279,9 +1298,9 @@ function explainCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the explain server. Make sure the backend is running (npx tsx server.ts).", 'bot');
-    })
-    .catch(() => {});
+        const result = localCodeExplain(code, currentLang, currentTopic);
+        addAIMessage(result.explanation || 'No explanation could be generated.', 'bot');
+    });
 }
 
 function reviewCode() {
@@ -1317,7 +1336,8 @@ function reviewCode() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't reach the review server. Make sure the backend is running (npx tsx server.ts).", 'bot');
+        const result = localCodeReview(code, currentLang);
+        addAIMessage(result.review || 'No review could be generated.', 'bot');
     });
 }
 
@@ -1399,172 +1419,6 @@ function copyCode() {
 
 const aiTutorResponses = typeof window !== 'undefined' && window.aiTutorResponses ? window.aiTutorResponses : [];
 
-function getAIResponse(input, history) {
-    const q = input.toLowerCase().trim();
-    if (!q) return "Ask me something about programming!";
-
-    // Conversation-aware: check if this is a follow-up
-    if (history && history.length >= 2) {
-        const lastBot = [...history].reverse().find(m => m.role === 'bot');
-        if (lastBot && /^(yes|ok|sure|tell me more|example|show me|how|what|why)\b/i.test(q)) {
-            const bt = lastBot.text.toLowerCase();
-            for (const entry of aiTutorResponses) {
-                if (entry.keywords.some(k => bt.includes(k))) {
-                    return `${entry.response}\n\n---\n*Following up on our previous conversation...*`;
-                }
-            }
-            if (currentTopic) {
-                return `Let's keep exploring **${currentTopic}**! Try this:\n1. Modify the code example in the editor\n2. Click Run to see what happens\n3. Ask me about anything you notice!\n\nWhat specific part would you like to dive deeper into?`;
-            }
-        }
-    }
-
-    for (const entry of aiTutorResponses) {
-        if (entry.keywords.some(k => q.includes(k))) {
-            let reply = entry.response;
-            if (currentLang && !q.includes('language') && !q.includes(currentLang)) {
-                reply += `\n\n**You're studying:** ${currentLang.toUpperCase()}`;
-                reply += `\nTry the code example in the editor, modify it, and click Run to see what happens!`;
-            }
-            return reply;
-        }
-    }
-
-    for (const entry of aiTutorResponses) {
-        const combined = entry.keywords.join(' ');
-        if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
-            return entry.response;
-        }
-    }
-
-    if (q.includes('thank') || q.includes('thanks')) {
-        return "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step! What would you like to learn next?";
-    }
-
-    if (q.includes('hello') || q.includes('hi ') || q === 'hey' || q.includes('good')) {
-        const langInfo = currentLang ? `I see you're studying **${currentLang.toUpperCase()}**. ` : '';
-        return `Hello! ${langInfo}Ask me anything about the topic you're working on, or pick a suggestion below to get started!`;
-    }
-
-    if (currentTopic) {
-        return `Great question about **${currentTopic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far in the editor? Tell me your thought process and I'll help guide you to the right solution!`;
-    }
-
-    const fallbacks = [
-        "That's an interesting question! To help you best, could you tell me:\n1. What language are you working with?\n2. What topic are you studying?\n3. What have you tried so far?",
-        "I want to make sure I help you effectively. Could you tell me more about what you're working on? For example: \"Explain functions\" or \"Help me debug my loop\".",
-        "Let me help you learn! Try asking me about a specific topic you're studying, or tell me what you're trying to build. I can explain concepts, debug code, and suggest practice exercises."
-    ];
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-}
-
-const SYNONYM_MAP = {
-    variable: ['variable', 'declare', 'let', 'const', 'var', 'declaration', 'assign'],
-    function: ['function', 'method', 'def', 'func', '=>', 'arrow', 'lambda', 'call'],
-    class: ['class', 'object', 'oop', 'inherit', 'extends', 'prototype', 'struct', 'constructor'],
-    array: ['array', 'list', 'collection', 'vector', 'slice', 'element', 'index'],
-    loop: ['loop', 'for', 'while', 'iterate', 'foreach', 'iteration', 'repeat'],
-    string: ['string', 'char', 'text', 'concatenat', 'interpolat', 'template'],
-    async: ['async', 'await', 'promise', 'callback', 'future', 'coroutine', 'goroutine'],
-    error: ['error', 'exception', 'try', 'catch', 'panic', 'throw', 'debug', 'bug'],
-    type: ['type', 'int', 'bool', 'float', 'string', 'null', 'undefined', 'void'],
-    pointer: ['pointer', 'reference', 'memory', 'malloc', 'free', 'heap', 'stack', 'borrow', 'ownership'],
-    closure: ['closure', 'scope', 'hoist', 'lexical', 'temporal dead zone', 'tdz'],
-    recursion: ['recursion', 'recursive', 'base case', 'stack overflow', 'tail call'],
-    testing: ['test', 'testing', 'assert', 'jest', 'mocha', 'pytest'],
-    sql: ['sql', 'select', 'join', 'table', 'database', 'query', 'where', 'insert', 'index'],
-    git: ['git', 'commit', 'push', 'pull', 'branch', 'merge', 'rebase', 'clone'],
-};
-
-function expandSynonyms(word) {
-    for (const [, syns] of Object.entries(SYNONYM_MAP)) {
-        if (syns.includes(word) || syns.some(s => s.includes(word))) {
-            return syns;
-        }
-    }
-    return [word];
-}
-
-function getLocalAIResponse(input) {
-    const q = input.toLowerCase().trim();
-    if (!q || q.length < 3) return null;
-
-    const words = q.split(/\s+/).filter(w => w.length > 2);
-    const meta = ['help', 'hello', 'hi', 'hey', 'thanks'];
-    if (meta.includes(q) || words.length === 0) return null;
-
-    // ── Cross-language detection ──
-    const askedLang = detectLanguageInQuery(q);
-    const searchLang = askedLang || currentLang;
-    const langData = courseData[searchLang];
-    if (!langData) return null;
-
-    // If asking about a different language, give a language intro
-    if (askedLang && askedLang !== currentLang) {
-        const intro = getLanguageIntro(askedLang);
-        if (intro) {
-            return `**${intro.displayName}** is a programming language you can study here!<br><br>${intro.exp || ''}<br><br>` +
-                `**Example code:**<br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${(intro.code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br>` +
-                `Want to switch to **${intro.displayName}**? Click the language selector at the top!<br><br>` +
-                `I can also tell you about specific topics in ${intro.displayName} — just ask!`;
-        }
-    }
-
-    // ── Curriculum search (in the detected or current language) ──
-    const expandedWords = new Set();
-    for (const w of words) {
-        for (const syn of expandSynonyms(w)) {
-            expandedWords.add(syn);
-        }
-    }
-    const allWords = [...expandedWords];
-
-    let best = null;
-    let bestScore = 0;
-
-    for (const phase in langData) {
-        for (const topic in langData[phase]) {
-            const item = langData[phase][topic];
-            const topicLow = topic.toLowerCase();
-            const expLow = (item.exp || '').toLowerCase();
-            const searchText = topicLow + ' ' + expLow;
-
-            let score = 0;
-            let matchedWords = 0;
-            let topicMatches = 0;
-
-            for (const word of allWords) {
-                if (topicLow.includes(word)) { score += 3; matchedWords++; topicMatches++; }
-                if (expLow.includes(word)) { score += 1; matchedWords++; }
-            }
-
-            if (searchText.includes(q)) score += 10;
-            if (matchedWords > 0) score = score * (1 + matchedWords / (allWords.length || 1));
-            if (topicMatches > 0) score *= 1.3;
-            if (phase === currentPhase && searchLang === currentLang) score *= 1.2;
-
-            if (score > bestScore) {
-                bestScore = score;
-                best = { phase, topic, code: item.code, exp: item.exp, lang: searchLang };
-            }
-        }
-    }
-
-    if (best && bestScore >= 1.5) {
-        const langLabel = best.lang !== currentLang ? ` (${LANG_NAMES[best.lang] || best.lang.toUpperCase()})` : '';
-        return `I found this in the curriculum that might help:<br><br><b>${best.topic}</b>${langLabel} — ${best.phase}<br><br>${best.exp || ''}<br><br><pre style="background:#000;color:#a5f3fc;padding:12px;border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;margin:0;">${best.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br><b>Try this:</b> paste the code into the editor, modify it, and click Run to experiment!`;
-    }
-    return null;
-}
-
-const ERROR_PATTERNS = [
-    { re: /SyntaxError|Unexpected token/i, title: 'Syntax Error', tip: 'A syntax error means the parser couldn\'t understand your code. Common causes:\n- Missing bracket, parenthesis, or curly brace\n- Missing comma between elements\n- Using a keyword as a variable name\n\n**Quick fix:** Look at the line number in the error and check for unbalanced `{`, `(`, `[`, or missing `,`.' },
-    { re: /ReferenceError|is not defined/i, title: 'Reference Error', tip: 'This means you\'re trying to use a variable or function that doesn\'t exist yet.\n\nCommon causes:\n- **Typo:** Did you spell it the same everywhere? JavaScript is case-sensitive!\n- **Not declared:** Did you use `let`, `const`, or `var` to declare it?\n- **Out of scope:** Is the variable accessible from where you\'re trying to use it?' },
-    { re: /TypeError|is not a function|Cannot read property/i, title: 'Type Error', tip: 'TypeError means a value is not the type you expected.\n\nCommon causes:\n- **undefined value:** `arr[0]` might be `undefined`, then calling `.name` on it fails\n- **Wrong type:** `"hello" - 5` doesn\'t work (but `"hello" + 5` does — string concatenation!)\n- **Not a function:** `arr.length()` is wrong — `length` is a property, not a method' },
-    { re: /RangeError/i, title: 'Range Error', tip: 'RangeError means a value is outside the allowed range.\n\nCommon causes:\n- **Infinite recursion:** Your function calls itself without reaching a base case\n- **Array size:** Trying to create an array with a negative length\n- **Stack overflow:** Too many nested function calls' },
-    { re: /FAIL|Error:/i, title: 'Execution Error', tip: 'Your code ran into an error during execution. Let\'s debug it step by step:\n1. Read the error message carefully — it tells you the line number\n2. Check the line it points to and the lines just before it\n3. Add `console.log()` to print values and see where things go wrong' },
-];
-
 function getErrorTutorTip(topic, output) {
     const normalizedTopic = topic ? topic.toLowerCase() : '';
 
@@ -1590,281 +1444,6 @@ function getErrorTutorTip(topic, output) {
     }
 
     return "I noticed your code has an error. That's okay — debugging is how we learn!\n\n**Quick check:**\n1. Look at the error message — what line does it point to?\n2. Compare your code with the example in the curriculum\n3. Simplify: comment things out until it works, then add back one piece at a time\n\n**Can you tell me:** what did you expect to happen, and what actually happened?";
-}
-
-function analyzeUserCodeClient(code, lang) {
-    if (!code || !lang) return null;
-    const hints = [];
-
-    if (lang === 'js') {
-        const unclosedBraces = (code.match(/\{/g) || []).length - (code.match(/\}/g) || []).length;
-        const unclosedParens = (code.match(/\(/g) || []).length - (code.match(/\)/g) || []).length;
-        if (unclosedBraces > 0) hints.push('You have unclosed curly braces. Add `' + '}'.repeat(unclosedBraces) + '` at the end.');
-        if (unclosedBraces < 0) hints.push('You have ' + Math.abs(unclosedBraces) + ' too many closing braces `}`.');
-        if (unclosedParens > 0) hints.push('You have unclosed parentheses. Add `' + ')'.repeat(unclosedParens) + '`.');
-        if (unclosedParens < 0) hints.push('You have extra closing parentheses.');
-        if (!code.includes('return') && (code.includes('function') || code.includes('=>'))) {
-            hints.push('Your function has no `return` statement. It will return `undefined`.');
-        }
-        if (code.includes('==')) hints.push('Consider using `===` (strict equality) instead of `==` to avoid type coercion.');
-        if (code.includes('var ')) hints.push('Use `let` or `const` instead of `var` for block scoping.');
-    }
-    return hints.length > 0 ? hints : null;
-}
-
-// ── Client-side static code reviewer (91 patterns, 7 languages) ──
-const KEYWORD_ISSUES = {
-    js: [
-        { pattern: /==(?!\s*=)/, message: 'Use `===` (strict equality) instead of `==` to avoid type coercion.', severity: 'style' },
-        { pattern: /\bvar\s/, message: 'Use `let` or `const` instead of `var` for block scoping.', severity: 'style' },
-        { pattern: /for\s*\([^)]+in\s+/, message: 'Use `for...of` instead of `for...in` for arrays — `for...in` iterates keys as strings.', severity: 'warning' },
-        { pattern: /eval\s*\(/, message: 'Avoid `eval()` — it executes arbitrary code and is a security risk.', severity: 'error' },
-        { pattern: /===\s*true\b/, message: 'Redundant comparison to `true` — use `if (value)` instead.', severity: 'style' },
-        { pattern: /===\s*false\b/, message: 'Use `if (!value)` instead of comparing to `false`.', severity: 'style' },
-        { pattern: /===\s*null\b/, message: 'Use `value === null` explicitly only if you mean null specifically — otherwise use `!value`.', severity: 'style' },
-        { pattern: /\.length\s*!==\s*0/, message: 'Simpler: `if (arr.length)` instead of `if (arr.length !== 0)`.', severity: 'style' },
-        { pattern: /\.length\s*===?\s*0/, message: 'Simpler: `if (!arr.length)` instead of `if (arr.length === 0)`.', severity: 'style' },
-        { pattern: /new\s+(Array|Object|RegExp)\s*\(/, message: 'Use literal syntax: `[]`, `{}`, `/pattern/` instead of `new Array()`, etc.', severity: 'style' },
-        { pattern: /\bString\s*\(/, message: 'Use `String(value)` or template literals `` `${value}` `` for conversion.', severity: 'style' },
-        { pattern: /\bNumber\s*\(/, message: 'Use `Number(value)` or unary `+value` for numeric conversion.', severity: 'style' },
-        { pattern: /\basync\s+function\b(?![\s\S]*\bawait\b)/, message: 'Async function without `await` inside — either use `await` or remove `async`.', severity: 'warning' },
-        { pattern: /\.then\([^)]*\)\s*\.catch\(/, message: 'Mix of `await` and `.then()/.catch()` — choose one style (prefer `async/await` with try/catch).', severity: 'style' },
-        { pattern: /new\s+Promise\b(?![\s\S]*\.catch\b)/, message: 'Promise without `.catch()` — unhandled rejections crash the process.', severity: 'warning' },
-    ],
-    ts: [
-        { pattern: /\bany\b(?!\s*[)};,\]])/, message: 'Avoid `any` — use proper types or `unknown` with type guards.', severity: 'warning' },
-        { pattern: /@ts-ignore/, message: '`@ts-ignore` suppresses all type errors — use `@ts-expect-error` to document expected violations.', severity: 'warning' },
-        { pattern: /@ts-nocheck/, message: '`@ts-nocheck` disables type checking entirely — fix the types instead.', severity: 'error' },
-        { pattern: /as\s+any\b/, message: '`as any` bypasses the type system — use a proper type or assertion function.', severity: 'warning' },
-        { pattern: /!\s*[.);\],}]/, message: 'Non-null assertion `!` hides undefined — use a type guard instead.', severity: 'style' },
-    ],
-    py: [
-        { pattern: /(?:except|catch)\s*:\s*$/, message: 'Bare `except:` catches ALL exceptions including Ctrl+C — specify the exception type.', severity: 'warning' },
-        { pattern: /==\s*(?:True|False|None)/, message: 'Use `is` instead of `==` for comparing to `True`/`False`/`None`.', severity: 'style' },
-        { pattern: /\t/, message: 'Mixed tabs and spaces — use 4 spaces consistently.', severity: 'error' },
-        { pattern: /os\.system\s*\(/, message: 'Prefer `subprocess.run()` with argument list over `os.system()` — avoids shell injection.', severity: 'warning' },
-        { pattern: /shell\s*=\s*True/, message: '`shell=True` in subprocess is a security risk — use argument list instead.', severity: 'error' },
-        { pattern: /pickle\.(loads|load)\s*\(/, message: '`pickle` deserialization can execute arbitrary code — prefer JSON or safe serializers.', severity: 'error' },
-        { pattern: /exec\s*\(/, message: '`exec()` executes arbitrary code — avoid it unless absolutely necessary.', severity: 'error' },
-        { pattern: /def\s+\w+\s*\([^)]*=\s*\[/, message: 'Mutable default argument `[]` is shared across calls — use `None` and create inside the function.', severity: 'warning' },
-        { pattern: /def\s+\w+\s*\([^)]*=\s*\{/, message: 'Mutable default argument `{}` is shared across calls — use `None` and create inside the function.', severity: 'warning' },
-        { pattern: /from\s+\w+\s+import\s+\*/, message: 'Star imports pollute the namespace — import only what you need.', severity: 'style' },
-    ],
-    go: [
-        { pattern: /if\s+err\s*!=\s*nil\s*\{\s*\n\s*return/, message: 'Good error check — but consider adding error context with `fmt.Errorf("context: %w", err)`.', severity: 'info' },
-        { pattern: /ioutil\./, message: '`ioutil` is deprecated since Go 1.16 — use `os` and `io` packages instead.', severity: 'warning' },
-        { pattern: /http\.DefaultServeMux/, message: '`http.DefaultServeMux` is a global — use a local `http.ServeMux` for security.', severity: 'warning' },
-        { pattern: /defer\s+\w+[.\w]*\(\)\s*\n[^}]*\bfor\b/, message: '`defer` inside a loop accumulates — consider moving the defer outside.', severity: 'warning' },
-        { pattern: /go\s+\w+\(.*\)/, message: 'Goroutine launched without sync mechanism — ensure proper synchronization.', severity: 'info' },
-        { pattern: /time\.Sleep\s*\(/, message: 'Using `time.Sleep` for synchronization is fragile — use channels or sync primitives.', severity: 'warning' },
-        { pattern: /recover\(\)/, message: '`recover()` only works inside a deferred function — verify it is inside `defer`.', severity: 'info' },
-        { pattern: /:=.*err/, message: 'Short variable declaration `:=` can shadow existing `err`.', severity: 'info' },
-    ],
-    rs: [
-        { pattern: /\.unwrap\(\)/, message: '`.unwrap()` will panic on error — prefer pattern matching or `?` operator.', severity: 'warning' },
-        { pattern: /\.expect\(/, message: '`.expect()` will panic on error — prefer proper error handling.', severity: 'warning' },
-        { pattern: /unsafe\s*\{/, message: '`unsafe` block bypasses Rust\'s safety guarantees — avoid unless absolutely necessary.', severity: 'error' },
-        { pattern: /transmute\s*\(/, message: '`transmute` is extremely dangerous — prefer safe conversions or `bytemuck` crate.', severity: 'error' },
-        { pattern: /\bas\s+(i\d+|u\d+|f\d+|isize|usize)/, message: 'Numeric cast `as` can silently truncate — use `TryFrom` for safe conversions.', severity: 'warning' },
-        { pattern: /panic!\s*\(/, message: '`panic!` should be reserved for unrecoverable states — use `Result` for fallible operations.', severity: 'warning' },
-        { pattern: /Box::new\s*\(/, message: 'Excessive heap allocation with `Box::new` — consider stack allocation or `Cow`.', severity: 'style' },
-        { pattern: /\.clone\(\)/, message: 'Unnecessary `.clone()` creates a full copy — consider borrowing instead.', severity: 'style' },
-        { pattern: /Rc<RefCell</, message: '`Rc<RefCell<>>` is single-threaded and runtime-checked — consider `Arc<Mutex<>>`.', severity: 'info' },
-        { pattern: /Box<dyn\s/, message: 'Trait object `Box<dyn T>` has runtime overhead — prefer generics with static dispatch.', severity: 'style' },
-    ],
-    sql: [
-        { pattern: /(['"])\s*\+\s*\w+\s*\+/, message: 'String concatenation in SQL is vulnerable to injection — use parameterized queries.', severity: 'error' },
-        { pattern: /INSERT\s+INTO.*VALUES\s*\([^)]*\)/i, message: 'Use parameterized INSERT with placeholders instead of string interpolation.', severity: 'warning' },
-        { pattern: /' OR '1'='1/, message: 'SQL injection pattern detected — always use parameterized queries.', severity: 'error' },
-        { pattern: /DROP\s+TABLE/i, message: '`DROP TABLE` is irreversible in production — use migrations with rollbacks.', severity: 'warning' },
-        { pattern: /SELECT\s+\*/i, message: '`SELECT *` can break on schema changes — list columns explicitly.', severity: 'style' },
-        { pattern: /DELETE\s+FROM\s+\w+\s*(?:;|$)/i, message: 'Unconditional DELETE without WHERE clause will remove all rows.', severity: 'error' },
-        { pattern: /UPDATE\s+\w+\s+SET(?!.*\bWHERE\b)/is, message: 'Unconditional UPDATE without WHERE clause will modify all rows.', severity: 'error' },
-    ],
-    c: [
-        { pattern: /malloc\s*\([^)]*\)(?!.*free)/, message: '`malloc` without a matching `free` causes memory leaks.', severity: 'error' },
-        { pattern: /gets\s*\(/, message: '`gets()` is unsafe and removed in C11 — use `fgets()` with buffer size.', severity: 'error' },
-        { pattern: /strcpy\s*\(/, message: '`strcpy()` does not check buffer bounds — use `strncpy()` or `snprintf()`.', severity: 'warning' },
-        { pattern: /strcat\s*\(/, message: '`strcat()` does not check buffer bounds — use `strncat()` with size limit.', severity: 'warning' },
-        { pattern: /sprintf\s*\(/, message: '`sprintf()` can overflow — use `snprintf()` with buffer size.', severity: 'warning' },
-        { pattern: /\bgoto\s+/, message: '`goto` makes code harder to follow — use structured control flow (if/else, loops).', severity: 'style' },
-        { pattern: /scanf\s*\([^)]*%[^n]/, message: '`scanf()` without field width specifiers can overflow buffers.', severity: 'warning' },
-        { pattern: /printf\s*\([^)]*%n/, message: '`%n` in printf writes to memory — security risk and undefined behavior.', severity: 'error' },
-    ],
-    cpp: [
-        { pattern: /malloc\s*\(/, message: 'In C++, prefer `new`/`make_unique`/`make_shared` over `malloc`.', severity: 'warning' },
-        { pattern: /free\s*\(/, message: 'In C++, use `delete`/`delete[]` or smart pointers instead of `free`.', severity: 'warning' },
-        { pattern: /printf\s*\(/, message: 'In C++, prefer `std::cout` or `fmt::print` over `printf`.', severity: 'style' },
-        { pattern: /\bgoto\s+/, message: '`goto` makes code harder to follow — use structured control flow.', severity: 'style' },
-        { pattern: /\bnew\b(?!.*\bdelete\b)/, message: '`new` without matching `delete` causes memory leaks — use smart pointers (unique_ptr/shared_ptr).', severity: 'warning' },
-        { pattern: /using\s+namespace\s+std\b/, message: '`using namespace std` pollutes the namespace — prefer `std::` prefix or selective `using` declarations.', severity: 'style' },
-    ],
-    cs: [
-        { pattern: /async\s+void\b/, message: '`async void` can\'t be awaited and crashes on exception — use `async Task` instead.', severity: 'error' },
-        { pattern: /\bvar\s+\w+\s*=\s*null\b/, message: '`var` with `null` resolves to `object` — specify the type explicitly.', severity: 'warning' },
-        { pattern: /\.Result\b/, message: '`.Result` blocks the thread and can cause deadlocks — use `await` instead.', severity: 'warning' },
-        { pattern: /\.Wait\(\)/, message: '`.Wait()` blocks the thread and can cause deadlocks — use `await` instead.', severity: 'warning' },
-        { pattern: /\bthrow\s+new\s+Exception\b/, message: 'Throwing the base `Exception` type is too broad — use a more specific exception type.', severity: 'style' },
-        { pattern: /foreach\s*\([^)]+\.Select\b/, message: 'LINQ `.Select()` inside `foreach` adds overhead — query once and materialize with `.ToList()`.', severity: 'style' },
-        { pattern: /\"\s*\+\s*[^\"]/, message: 'String concatenation in loops is inefficient — use `StringBuilder`.', severity: 'style' },
-    ],
-    kt: [
-        { pattern: /\w+\s*!!\b/, message: '`!!` (double-bang) throws NullPointerException — use safe calls `?.` or Elvis `?:` instead.', severity: 'error' },
-        { pattern: /\blateinit\s+var\b/, message: '`lateinit var` crashes if accessed before init — consider `by lazy` or nullable with default.', severity: 'warning' },
-        { pattern: /\bas\b(?!\?)/, message: 'Unsafe cast `as` throws ClassCastException — use `as?` for safe casting.', severity: 'warning' },
-        { pattern: /\bnull\s*!=\s*\w+/, message: 'Use `?.let { }` or Elvis `?:` instead of manual null checks for idiomatic Kotlin.', severity: 'style' },
-        { pattern: /\bcompanion\s+object\b/, message: '`companion object` members are effectively static — consider top-level declarations or object expressions.', severity: 'style' },
-    ],
-    swift: [
-        { pattern: /\w+\s*!\s*\./, message: 'Force unwrap `!` crashes on nil — use `if let` or `guard let` for safe unwrapping.', severity: 'error' },
-        { pattern: /\w+\s*!\s*\)/, message: 'Force unwrap `!` crashes on nil — use optional binding instead.', severity: 'error' },
-        { pattern: /\bImplicitlyUnwrappedOptional\b/, message: 'Implicitly unwrapped optionals are unsafe — use regular optionals with `?`.', severity: 'warning' },
-        { pattern: /\btry!\s*/, message: '`try!` crashes on error — use `try?` or `do/catch` for proper error handling.', severity: 'error' },
-        { pattern: /\bself\s*!\s*/, message: 'Force unwrapping `self` is dangerous — use `guard let self = self else { return }` instead.', severity: 'warning' },
-        { pattern: /\bclass\s+\w+\s*:\s*NSObject\b/, message: 'Inheriting from `NSObject` is unnecessary for pure Swift classes.', severity: 'style' },
-        { pattern: /\bdispatch_async\b/, message: '`dispatch_async` is outdated — use Swift Concurrency (`async/await`) or `Task`.', severity: 'warning' },
-    ],
-};
-
-function localFindLineIndex(lines, matchIndex) {
-    let charCount = 0;
-    for (let i = 0; i < lines.length; i++) {
-        charCount += lines[i].length + 1;
-        if (charCount > matchIndex) return i;
-    }
-    return 0;
-}
-
-function localAnalyzeStructure(code) {
-    const issues = [];
-    const lines = code.split('\n');
-
-    const openBraces = (code.match(/\{/g) || []).length;
-    const closeBraces = (code.match(/\}/g) || []).length;
-    if (openBraces !== closeBraces) {
-        issues.push({ line: 0, message: `Unbalanced braces: ${openBraces} opening vs ${closeBraces} closing.`, severity: 'error' });
-    }
-
-    const openParens = (code.match(/\(/g) || []).length;
-    const closeParens = (code.match(/\)/g) || []).length;
-    if (openParens !== closeParens) {
-        issues.push({ line: 0, message: `Unbalanced parentheses: ${openParens} opening vs ${closeParens} closing.`, severity: 'error' });
-    }
-
-    const openBrackets = (code.match(/\[/g) || []).length;
-    const closeBrackets = (code.match(/\]/g) || []).length;
-    if (openBrackets !== closeBrackets) {
-        issues.push({ line: 0, message: `Unbalanced brackets: ${openBrackets} opening vs ${closeBrackets} closing.`, severity: 'error' });
-    }
-
-    const funcRe = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/g;
-    const funcLinesFound = new Set();
-    let funcMatch;
-    while ((funcMatch = funcRe.exec(code)) !== null) {
-        const lineIdx = localFindLineIndex(lines, funcMatch.index);
-        if (lineIdx !== undefined) funcLinesFound.add(lineIdx);
-    }
-
-    const hasReturn = /\breturn\b/.test(code);
-    if (!hasReturn && funcLinesFound.size > 0) {
-        for (const lIdx of funcLinesFound) {
-            const trimmed = lines[lIdx].trim();
-            if (!trimmed.startsWith('//') && !trimmed.startsWith('#') && !trimmed.startsWith('/*') && !trimmed.startsWith('console.log')) {
-                issues.push({ line: lIdx + 1, message: 'Function defined but no `return` statement found — will return undefined/None.', severity: 'warning' });
-                break;
-            }
-        }
-    }
-
-    return issues;
-}
-
-function localCheckKeywords(code, lang) {
-    const issues = [];
-    const patterns = KEYWORD_ISSUES[lang];
-    if (!patterns) return issues;
-    const lines = code.split('\n');
-
-    for (const { pattern, message, severity } of patterns) {
-        pattern.lastIndex = 0;
-        const match = code.match(pattern);
-        if (match && match.index !== undefined) {
-            const lineIdx = localFindLineIndex(lines, match.index);
-            issues.push({ line: lineIdx + 1, message, severity });
-        }
-    }
-    return issues;
-}
-
-function localCalculateScore(issues, lineCount) {
-    let score = 10;
-    for (const issue of issues) {
-        if (issue.severity === 'error') score -= 2;
-        else if (issue.severity === 'warning') score -= 1;
-        else if (issue.severity === 'style') score -= 0.5;
-    }
-    if (lineCount === 0) score = 0;
-    return Math.max(1, Math.round(score * 10) / 10);
-}
-
-function localCodeReview(code, lang) {
-    if (!code || !code.trim()) {
-        return { review: 'No code to review.', issues: [], score: 0 };
-    }
-
-    const lines = code.split('\n');
-    const structuralIssues = localAnalyzeStructure(code);
-    const keywordIssues = localCheckKeywords(code, lang);
-    const allIssues = [...structuralIssues, ...keywordIssues];
-
-    const hasMain = /\bmain\b/i.test(code);
-    const hasFunctions = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code);
-    const hasClass = /\bclass\s+/.test(code);
-    const hasLoop = /for\s*\(|while\s*\(|\.forEach|for\s+\w+\s+in|for\s+\w+\s+of/.test(code);
-    const hasConditional = /if\s*\(|elif\s+|else\s+/.test(code);
-    const hasTryCatch = /\btry\b/.test(code) && (/\bcatch\b/.test(code) || /\bexcept\b/.test(code));
-    const hasAsync = /\basync\b|\bawait\b|\.then\(/.test(code);
-
-    const upper = lang ? lang.toUpperCase() : 'CODE';
-    let review = `**Code Review — ${upper}**\n\n`;
-    review += `**Overview:** ${lines.length} lines, ${hasFunctions ? 'contains functions, ' : ''}${hasClass ? 'contains classes, ' : ''}${hasLoop ? 'uses loops, ' : ''}${hasConditional ? 'uses conditionals, ' : ''}${hasTryCatch ? 'has error handling, ' : ''}${hasAsync ? 'uses async patterns.' : '.'}`;
-
-    if (allIssues.length > 0) {
-        review += '\n\n**Issues Found:**\n';
-        const bySeverity = { error: [], warning: [], style: [], info: [] };
-        for (const issue of allIssues) {
-            (bySeverity[issue.severity] || bySeverity.info).push(issue);
-        }
-        for (const sev of ['error', 'warning', 'style', 'info']) {
-            for (const issue of bySeverity[sev]) {
-                const line = issue.line ? `Line ${issue.line}` : 'General';
-                review += `- [${sev.toUpperCase()}] ${line}: ${issue.message}\n`;
-            }
-        }
-    }
-
-    if (hasMain && !hasFunctions && lines.length < 10) {
-        review += '\n**Suggestion:** This code is very simple — try organizing it into functions to practice modular design.\n';
-    }
-
-    if (lines.length > 50) {
-        review += `\n**Suggestion:** This function/file is getting long (${lines.length} lines). Consider breaking it into smaller functions for readability.\n`;
-    }
-
-    if (!hasTryCatch && (/\bfetch\s*\(/.test(code) || /\breadFile\b/.test(code) || /\bwriteFile\b/.test(code))) {
-        review += '\n**Suggestion:** I/O operations like fetch/file access can fail — add error handling with try/catch.\n';
-    }
-
-    const commentRe = /^\s*(\/\/|#|\/\*)/;
-    const commentedLines = lines.filter(l => commentRe.test(l)).length;
-    const commentedRatio = commentedLines / lines.length;
-    if (commentedRatio > 0.4) {
-        review += `\n**Suggestion:** High comment-to-code ratio (${Math.round(commentedRatio * 100)}%). Comments explain WHY, not WHAT — let the code speak for itself.\n`;
-    }
-
-    const score = localCalculateScore(allIssues, lines.length);
-    review += `\n**Score:** ${score}/10`;
-    return { review, issues: allIssues, score };
 }
 
 async function askAI(q) {
@@ -2314,7 +1893,18 @@ function generateExercise() {
     })
     .catch(() => {
         removeTypingIndicator();
-        addAIMessage("Couldn't generate an exercise. Make sure the backend is running.", 'bot');
+        const result = localGenerateExercise(topic, lang, 'beginner');
+        let reply = `<div class="exercise-card"><div class="exercise-title">${result.title || 'Exercise'}</div>`;
+        reply += `<div class="exercise-desc">${result.description || 'No description'}</div>`;
+        if (result.starterCode) {
+            reply += `<pre class="ai-code-block"><code>${result.starterCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        }
+        if (result.hint) {
+            reply += `<div class="exercise-hint">💡 ${result.hint}</div>`;
+        }
+        reply += `<button class="exercise-btn" onclick="document.getElementById('editor').value = '${(result.starterCode || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'; updateHighlight();">Load into Editor</button>`;
+        reply += `</div>`;
+        addAIMessage(reply, 'bot');
     });
 }
 
@@ -4059,6 +3649,8 @@ setMode = function(lang) {
         document.getElementById('level-bar').style.display = 'none';
         document.getElementById('tutorial-nav').style.display = 'flex';
         document.getElementById('tutorial-progress').style.display = 'flex';
+        const tutorialNavBtn = document.getElementById('nav-tutorial');
+        if (tutorialNavBtn) tutorialNavBtn.classList.add('active');
         initTutorial();
         updateAISuggestions();
         return;
