@@ -478,5 +478,193 @@
    "From Professional C++: 1) Move semantics avoid deep copies. 2) Reserve vector capacity upfront. 3) Pass by const reference, not value. 4) CRTP avoids virtual dispatch in hot paths. 5) Profile first (Google Benchmark, perf). 6) Small-string optimization.",
    "#include <vector>\n#include <string>\n#include <iostream>\n\n// 1. Reserve before bulk push_back\nstd::vector<int> build_vector(size_t n) {\n    std::vector<int> v;\n    v.reserve(n);  // one allocation, no reallocs\n    for (size_t i = 0; i < n; ++i)\n        v.push_back(i);\n    return v;  // NRVO: elides copy\n}\n\n// 2. Pass by const reference (no copy)\nvoid process(const std::string& s) {\n    std::cout << s.size() << std::endl;\n}\n\n// 3. CRTP: static polymorphism, no vtable\ntemplate<typename Derived>\nstruct ShapeBase {\n    void draw() const {\n        static_cast<const Derived*>(this)->draw_impl();\n    }\n};\nstruct Circle : ShapeBase<Circle> {\n    void draw_impl() const { /* render */ }\n};\n\n// 4. Small string optimization: short strings on stack\nstd::string s = \"hi\";  // no heap allocation\n\n// 5. Profile, don't guess\n// Google Benchmark:\n// static void BM_Sort(benchmark::State& state) {\n//     auto v = build_vector(1000);\n//     for (auto _ : state) {\n//         std::sort(v.begin(), v.end());\n//     }\n// }\n// BENCHMARK(BM_Sort);\n\nint main() {\n    auto v = build_vector(1000);\n    process(\"hello\");\n    return 0;\n}"
   ]
+ },
+ "Pointers & Memory": {
+  "References": [
+   "A reference (`T&`) is an alias to an existing object. Cannot be null, must be initialized, cannot be rebound. Used for function parameters (pass by reference) and return values.",
+   "int x = 10;\nint& ref = x;\nref = 20;\n\nvoid swap(int& a, int& b) {\n    int tmp = a;\n    a = b;\n    b = tmp;\n}\n\nvoid print(const std::string& s) {\n    std::cout << s << std::endl;\n}\n\nauto& get(std::vector<int>& v, size_t i) {\n    return v[i];\n}\n\nvoid take(std::vector<int>&& v) {}"
+  ],
+  "Raw Pointers": [
+   "Pointers hold memory addresses. Declared as `T*`. Dereference with `*`, get address with `&`. Can be null (`nullptr`). Support pointer arithmetic.",
+   "int x = 42;\nint* p = &x;\n*p = 100;\n\nint* null_ptr = nullptr;\nif (null_ptr) {}\n\nint arr[4] = {10, 20, 30, 40};\nint* ptr = arr;\nint second = *(ptr + 1);\n\nint** pp = &p;\nint (*f)(int, int) = &add;\nvoid* vp = &x;"
+  ],
+  "new & delete": [
+   "Dynamic memory allocation. `new` allocates + constructs, `delete` destructs + deallocates. Array forms: `new[]`, `delete[]`. Prefer smart pointers in modern C++.",
+   "int* p = new int(42);\ndelete p;\nint* arr = new int[100];\ndelete[] arr;\n\nchar buf[sizeof(int)];\nint* placed = new(buf) int(42);\nint* safe = new(std::nothrow) int[1000000];\n\nauto smart = std::make_unique<int>(42);"
+  ],
+  "Memory Leakage": [
+   "Memory allocated with `new` that is never `delete`d. Causes: lost pointers, exception before delete, circular shared_ptr. Tools: Valgrind, AddressSanitizer.",
+   "void leak() {\n    int* p = new int[1000];\n}\n\nstruct Node {\n    std::shared_ptr<Node> next;\n};\n\n// g++ -fsanitize=address -g -o app main.cpp"
+  ],
+  "Memory Model": [
+   "C++ memory model defines how threads interact through memory. `std::memory_order` for atomics. Sequential consistency, acquire/release, relaxed.",
+   "#include <atomic>\n\nstd::atomic<int> counter{0};\ncounter.store(42);\nint x = counter.load();\n\nstd::atomic<bool> ready{false};\nint data = 0;\ndata = 100;\nready.store(true, std::memory_order_release);\nwhile (!ready.load(std::memory_order_acquire));\nstd::cout << data << std::endl;\ncounter.fetch_add(1, std::memory_order_relaxed);"
+  ],
+  "Object Lifetime": [
+   "Objects are created (constructor), live, then destroyed (destructor). Storage durations: automatic (stack), static, thread, dynamic (heap).",
+   "struct Demo {\n    Demo() { std::cout << \"ctor\\n\"; }\n    ~Demo() { std::cout << \"dtor\\n\"; }\n};\n{ Demo d; }\nstatic Demo global;\nthread_local Demo per_thread;\nDemo* p = new Demo(); delete p;"
+  ]
+ },
+ "Type Casting": {
+  "static_cast": [
+   "Compile-time cast between related types. Numeric conversions, upcasts/downcasts in class hierarchies, `void*` to typed pointer.",
+   "double d = 3.14;\nint i = static_cast<int>(d);\n\nDerived* d = new Derived();\nBase* b = static_cast<Base*>(d);\nBase* b2 = new Derived();\nDerived* d2 = static_cast<Derived*>(b2);\nvoid* vp = &i;\nint* ip = static_cast<int*>(vp);"
+  ],
+  "dynamic_cast": [
+   "Runtime-checked cast for polymorphic types. Requires at least one virtual function. Returns null for pointers on failure.",
+   "class Base { virtual ~Base() = default; };\nclass Derived : public Base {};\nclass Other : public Base {};\n\nBase* b1 = new Derived();\nBase* b2 = new Other();\n\nif (auto* d = dynamic_cast<Derived*>(b1)) {}\nif (auto* d = dynamic_cast<Derived*>(b2)) {}\n\ntry {\n    Derived& rd = dynamic_cast<Derived&>(*b2);\n} catch (const std::bad_cast& e) {}"
+  ],
+  "const_cast": [
+   "Adds or removes `const`/`volatile` qualification. Modifying a const object through const_cast is UB.",
+   "void legacy_api(char* str);\nconst char* msg = \"hello\";\nlegacy_api(const_cast<char*>(msg));\nint x = 42;\nconst int* cp = const_cast<const int*>(&x);\n\nstruct Cache {\n    mutable int cached;\n    int compute() const {\n        const_cast<Cache*>(this)->cached = 42;\n        return cached;\n    }\n};"
+  ],
+  "reinterpret_cast": [
+   "Unsafe cast that reinterprets the bit pattern. No type checking. Used for serialization, hardware access.",
+   "int x = 0x12345678;\nunsigned char* bytes = reinterpret_cast<unsigned char*>(&x);\nuintptr_t addr = reinterpret_cast<uintptr_t>(&x);\n\nstruct A { int a; };\nstruct B { int b; };\nA a;\nB* bp = reinterpret_cast<B*>(&a);\n\nstruct Header { uint32_t magic; uint32_t size; };\nHeader h{0xDEAD, 100};\nconst char* raw = reinterpret_cast<const char*>(&h);"
+  ],
+  "RTTI & typeid": [
+   "Run-Time Type Information. `typeid` returns `std::type_info`. `dynamic_cast` also uses RTTI. Disabled with `-fno-rtti`.",
+   "#include <typeinfo>\nclass Base { virtual ~Base() = default; };\nclass Derived : public Base {};\nBase* b = new Derived();\nconst std::type_info& ti = typeid(*b);\nstd::cout << ti.name() << std::endl;\nif (typeid(*b) == typeid(Derived)) {}"
+  ]
+ },
+ "Language Internals": {
+  "Undefined Behavior": [
+   "UB: program can do anything. Common: null dereference, buffer overflow, signed overflow, use-after-free, data races.",
+   "int* p = nullptr;\nint x = INT_MAX;\nint arr[4];\nint* p2 = new int(42); delete p2;\nint shared = 0;\nstd::thread t1([&]{ ++shared; });\nstd::thread t2([&]{ ++shared; });\n// g++ -fsanitize=undefined -fsanitize=address -g"
+  ],
+  "ADL": [
+   "Argument-Dependent Lookup (Koenig lookup): searches namespaces of argument types when calling a function.",
+   "namespace mylib {\n    struct Widget {};\n    void process(Widget) {}\n}\nmylib::Widget w;\nprocess(w);\n\nnamespace ns {\n    struct Point { int x, y; };\n    Point operator+(Point a, Point b) { return {a.x + b.x, a.y + b.y}; }\n}\nns::Point a{1,2}, b{3,4};\nauto c = a + b;\nusing std::swap; swap(a, b);"
+  ],
+  "Name Mangling": [
+   "Compilers encode function signatures into linker symbols. Different across compilers => no ABI compatibility. `extern \"C\"` disables mangling.",
+   "int add(int a, double b) { return a + b; }\n// Mangled: _Z3addid\nvoid foo(int);    // _Z3fooi\nvoid foo(double); // _Z3food\nextern \"C\" void bar(int) {}\n// g++ -c file.cpp && nm file.o | c++filt"
+  ],
+  "Macros": [
+   "Preprocessor directives (`#define`, `#ifdef`, `#pragma`). Text substitution before compilation. Modern C++ prefers `constexpr`, templates.",
+   "#define PI 3.14159\n#define SQUARE(x) ((x) * (x))\n#ifndef MY_HEADER_H\n#define MY_HEADER_H\n#endif\n#ifdef DEBUG\n#define LOG(x) std::cerr << x << std::endl\n#else\n#define LOG(x)\n#endif\nstd::cout << __FILE__ << \":\" << __LINE__ << std::endl;\n#define STR(x) #x\n#define CONCAT(a,b) a ## b"
+  ],
+  "Forward Declaration": [
+   "Declaring a symbol before its full definition. Reduces compilation dependencies, breaks circular references.",
+   "class Widget;\nstruct Config;\nvoid process(Widget* w);\nConfig getConfig();\nclass B;\nclass A { B* bptr; };\n#include \"a.h\"\nclass B { A a; };\nstruct Impl;\nclass MyClass { std::unique_ptr<Impl> pimpl_; };"
+  ],
+  "Scope & Storage Duration": [
+   "Scope controls name visibility. Storage duration: automatic (stack), static, thread, dynamic (heap). `::` for global scope.",
+   "int global = 1;\nnamespace ns { int x = 2; }\nvoid func() {\n    static int calls = 0;\n    ++calls;\n    int local = 3;\n    { int inner = 4; }\n}\nclass MyClass { static int s_val; int m_val; };\nthread_local int per_thread = 0;\nint x = 10;\n{ int x = 20; int y = ::x; }"
+  ]
+ },
+ "Inheritance & Advanced OOP": {
+  "Multiple Inheritance": [
+   "A class can inherit from multiple base classes. Syntax: `class D : public A, public B`. Can lead to diamond problem.",
+   "struct A { int x; };\nstruct B { int y; };\nstruct C : A, B { int sum() { return x + y; } };\nstruct A2 { void foo() {} };\nstruct B2 { void foo() {} };\nstruct C2 : A2, B2 { void test() { A2::foo(); B2::foo(); } };\nstruct Base { int val; };\nstruct D1 : Base {};\nstruct D2 : Base {};\nstruct Diamond : D1, D2 {};"
+  ],
+  "Diamond Inheritance": [
+   "Two classes share a common base. Virtual inheritance (`virtual public`) creates one shared subobject.",
+   "struct Base { int x; };\nstruct A : Base {};\nstruct B : Base {};\nstruct D : A, B { void f() {} };\nstruct VA : virtual public Base {};\nstruct VB : virtual public Base {};\nstruct VD : VA, VB { void f() { x = 42; } };\nstruct VD2 : VA, VB { VD2() : Base{}, VA{}, VB{} {} };"
+  ],
+  "Virtual Tables": [
+   "Each polymorphic class has a vtable. Each object has a vptr. `virtual` function calls dispatch through vtable at runtime.",
+   "class Base {\npublic:\n    virtual void foo() {}\n    virtual void bar() {}\n    virtual ~Base() = default;\n};\nclass Derived : public Base {\npublic:\n    void foo() override {}\n};\nBase* b = new Derived();\nb->foo(); b->bar();"
+  ],
+  "Dynamic Polymorphism": [
+   "Runtime polymorphism via virtual functions and base pointers/references. Enables substitutability.",
+   "class Shape {\npublic:\n    virtual double area() const = 0;\n    virtual ~Shape() = default;\n};\nclass Circle : public Shape {\n    double r_;\npublic:\n    double area() const override { return 3.14 * r_ * r_; }\n};\nclass Rect : public Shape {\n    double w_, h_;\npublic:\n    double area() const override { return w_ * h_; }\n};\nvoid print(const Shape& s) { std::cout << s.area() << std::endl; }"
+  ]
+ },
+ "Debugging": {
+  "GDB Basics": [
+   "GNU Debugger: step through code, inspect variables, backtrace. Commands: `run`, `break`, `next`, `step`, `print`, `backtrace`.",
+   "# g++ -g -O0 -o app main.cpp\n# gdb ./app\n# (gdb) break main\n# (gdb) run\n# (gdb) next\n# (gdb) step\n# (gdb) print x\n# (gdb) backtrace\n# (gdb) continue\n# (gdb) quit"
+  ],
+  "Debugging Symbols": [
+   "`-g` flag embeds debug info (DWARF on Linux, PDB on Windows). Levels: `-g0` none, `-g3` extra.",
+   "# g++ -g -O2 -o app main.cpp\n# g++ -g3 -O0 -o app main.cpp\n# objcopy --only-keep-debug app app.debug\n# strip app\n# nm -C app\n# readelf -w app"
+  ],
+  "Sanitizers": [
+   "Google sanitizers catch memory errors and UB. `-fsanitize=address` (ASan), `-fsanitize=undefined` (UBSan).",
+   "# g++ -fsanitize=address -fsanitize=undefined -g -o app main.cpp\nvoid use_after_free() {\n    int* p = new int(42);\n    delete p;\n}\nvoid buffer_overflow() {\n    int arr[10];\n}\nvoid signed_overflow() {\n    int x = INT_MAX;\n}"
+  ],
+  "Performance Profiling": [
+   "Profiling measures where time is spent. `perf` (Linux), Google Benchmark, `gprof`.",
+   "# perf record -g ./app\n# perf report\n# g++ -pg -O2 -o app main.cpp\n# ./app\n# gprof app gmon.out > report"
+  ]
+ },
+ "Compilers": {
+  "Compiler Stages": [
+   "Four stages: 1) Preprocessing, 2) Compilation (C++ -> assembly), 3) Assembly (asm -> .o), 4) Linking.",
+   "# g++ -E main.cpp -o main.i\n# g++ -S main.cpp -o main.s\n# g++ -c main.cpp -o main.o\n# g++ main.o utils.o -o app"
+  ],
+  "GCC & Clang": [
+   "GCC (`g++`): mature, extensive optimization. Clang (`clang++`): faster, better error messages, great tooling.",
+   "# g++ -std=c++23 -Wall -Wextra -Wpedantic -O2 -o app main.cpp\n# g++ -std=c++20 -O3 -march=native -flto -o app main.cpp\n# clang++ -std=c++23 -Wall -Wextra -Wpedantic -O2 -o app main.cpp\n# clang-tidy src/main.cpp\n# clang-format -i src/*.cpp"
+  ],
+  "MSVC": [
+   "Microsoft Visual C++: Windows-only, `/std:c++latest`. MinGW: GCC port for Windows.",
+   "# cl /std:c++latest /EHsc /W4 /O2 main.cpp\n# cl /std:c++20 /EHsc /W4 /O2 /Fe:app.exe main.cpp\n# g++ -std=c++20 -O2 -o app.exe main.cpp\n# x86_64-w64-mingw32-g++ -std=c++20 -o app.exe main.cpp\n# clang-cl /std:c++20 /EHsc main.cpp"
+  ],
+  "Linkers & LTO": [
+   "Linker combines object files into executable/library. Link-Time Optimization enables cross-TU inlining.",
+   "# g++ main.o utils.o -o app -static\n# g++ -shared -o libmylib.so mylib.cpp\n# g++ main.cpp -L. -lmylib -o app\n# g++ -flto -O2 main.cpp utils.cpp -o app\n# clang++ -flto -O2 main.cpp utils.cpp -o app\n# nm -C app.o\n# ldd app"
+  ]
+ },
+ "C++ Idioms": {
+  "CRTP": [
+   "Curiously Recurring Template Pattern: derived class passes itself as template parameter to base. Static polymorphism, no vtable overhead.",
+   "template<typename Derived>\nstruct ShapeBase {\n    void draw() const {\n        static_cast<const Derived*>(this)->draw_impl();\n    }\n};\nstruct Circle : ShapeBase<Circle> {\n    double r_;\n    void draw_impl() const {}\n};\ntemplate<typename T>\nvoid render(const ShapeBase<T>& shape) { shape.draw(); }"
+  ],
+  "Non-Copyable Idiom": [
+   "Delete copy operations to prevent unintended duplication. Essential for RAII wrappers owning unique resources.",
+   "class Socket {\n    int fd_;\npublic:\n    Socket(int fd) : fd_(fd) {}\n    Socket(const Socket&) = delete;\n    Socket& operator=(const Socket&) = delete;\n    Socket(Socket&& other) noexcept : fd_(std::exchange(other.fd_, -1)) {}\n    Socket& operator=(Socket&& other) noexcept {\n        if (this != &other) { close(); fd_ = std::exchange(other.fd_, -1); }\n        return *this;\n    }\n    ~Socket() { if (fd_ >= 0) close(fd_); }\n};"
+  ],
+  "Erase-Remove Idiom": [
+   "`remove`/`remove_if` moves elements to end, returns new logical end. Pair with `erase`. C++20 `std::erase` simplifies.",
+   "std::vector<int> v = {1, 2, 3, 2, 4, 2, 5};\nauto it = std::remove(v.begin(), v.end(), 2);\nv.erase(it, v.end());\nstd::erase(v, 3);\nstd::erase_if(v, [](int x) { return x > 5; });"
+  ],
+  "Copy on Write": [
+   "Defer copying until a write is attempted. Less beneficial with move semantics.",
+   "template<typename T>\nclass CowVector {\n    std::shared_ptr<std::vector<T>> data_;\n    void detach() {\n        if (data_.use_count() > 1)\n            data_ = std::make_shared<std::vector<T>>(*data_);\n    }\npublic:\n    CowVector() : data_(std::make_shared<std::vector<T>>()) {}\n    CowVector(const CowVector& o) : data_(o.data_) {}\n    const T& operator[](size_t i) const { return (*data_)[i]; }\n    T& operator[](size_t i) { detach(); return (*data_)[i]; }\n    void push_back(const T& val) { detach(); data_->push_back(val); }\n};"
+  ]
+ },
+ "Date & Time": {
+  "std::chrono": [
+   "Type-safe time library. `duration`, `time_point`, `clock`. C++20 adds calendar and time zones.",
+   "#include <chrono>\nusing namespace std::chrono_literals;\nauto ms = 250ms;\nauto s = 5s;\nstd::chrono::seconds sec = 1min;\nstd::chrono::milliseconds m = sec + 250ms;\nauto start = std::chrono::steady_clock::now();\nauto end = std::chrono::steady_clock::now();\nauto elapsed = end - start;\nstd::cout << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << \"ms\\n\";\nstd::this_thread::sleep_for(100ms);"
+  ],
+  "Random Number Generation": [
+   "C++11 `<random>`: engines (mt19937) and distributions (uniform_int, normal). Better than `rand()`.",
+   "#include <random>\nstd::random_device rd;\nstd::mt19937 gen(rd());\nstd::uniform_int_distribution<int> dice(1, 6);\nint roll = dice(gen);\nstd::uniform_real_distribution<double> uni(0.0, 1.0);\ndouble u = uni(gen);\nstd::normal_distribution<double> norm(100.0, 15.0);\ndouble iq = norm(gen);\nstd::bernoulli_distribution coin(0.5);\nbool heads = coin(gen);"
+  ]
+ },
+ "Iterator & I/O Streams": {
+  "Iterator Categories": [
+   "Five categories: Input, Output, Forward, Bidirectional, Random Access. Higher categories support more algorithms.",
+   "#include <iterator>\nstd::vector<int> v(std::istream_iterator<int>(std::cin), {});\nstd::copy(v.begin(), v.end(), std::ostream_iterator<int>(std::cout, \" \"));\nstd::forward_list<int> fl = {1, 2, 3};\nauto it = fl.begin(); ++it;\nstd::list<int> lst = {1, 2, 3, 4};\nauto li = lst.end(); --li;\nstd::vector<int> vec = {10, 20, 30, 40};\nauto ri = vec.begin() + 2;"
+  ],
+  "iostream Deep": [
+   "Standard I/O: `cin`, `cout`, `cerr`, `clog`. Formatting with manipulators.",
+   "#include <iostream>\n#include <iomanip>\nstd::cout << std::boolalpha << true << std::endl;\nstd::cout << std::hex << 255 << std::endl;\nstd::cout << std::setprecision(3) << 3.14159 << std::endl;\nstd::cout << std::setw(10) << std::right << 42 << std::endl;\nint age; std::string name;\nstd::cin >> age >> name;\nstd::cin.ignore();\nstd::getline(std::cin, name);\nif (std::cin.fail()) {\n    std::cin.clear();\n    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\n');\n}\nstd::stringstream ss;\nss << \"Value: \" << 42;\nstd::string result = ss.str();\nstd::ios::sync_with_stdio(false);"
+  ]
+ },
+ "Additional Libraries": {
+  "OpenCV": [
+   "Computer vision library. Core: `cv::Mat`, `cv::imread`, `cv::imshow`.",
+   "#include <opencv2/opencv.hpp>\ncv::Mat img = cv::imread(\"photo.jpg\");\ncv::Mat gray;\ncv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);\ncv::Mat edges;\ncv::Canny(gray, edges, 50, 150);\ncv::imshow(\"Edges\", edges);\ncv::waitKey(0);"
+  ],
+  "fmtlib": [
+   "Fast, safe formatting library. Basis for C++20 `std::format`. Type-safe, extensible.",
+   "#include <fmt/core.h>\n#include <fmt/ranges.h>\nstd::string s = fmt::format(\"Hello, {}!\", \"world\");\nfmt::print(\"Value: {}\\n\", 42);\nfmt::print(\"{:.2f}\\n\", 3.14159);\nstd::vector<int> v = {1, 2, 3};\nfmt::print(\"{}\\n\", fmt::join(v, \", \"));"
+  ],
+  "spdlog": [
+   "Fast, header-only logging library. Async logging, rotating files, multiple sinks.",
+   "#include <spdlog/spdlog.h>\nspdlog::info(\"Welcome to spdlog!\");\nspdlog::warn(\"Something looks fishy...\");\nspdlog::error(\"Error: {}\", 42);\nspdlog::set_pattern(\"[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v\");\nspdlog::set_level(spdlog::level::debug);\nauto file = spdlog::basic_logger_mt(\"file\", \"logs/app.log\");"
+  ],
+  "Protobuf & gRPC": [
+   "Protocol Buffers: language-agnostic serialization. gRPC: RPC framework using protobuf + HTTP/2.",
+   "// syntax = \"proto3\";\n// message Person { string name = 1; int32 age = 2; }\n#include \"message.pb.h\"\nPerson p;\np.set_name(\"Alice\");\np.set_age(30);\nstd::string data;\np.SerializeToString(&data);\nPerson p2;\np2.ParseFromString(data);"
+  ],
+  "Boost.Asio": [
+   "Cross-platform networking and async I/O. `io_context`, `tcp::socket`, `steady_timer`.",
+   "#include <boost/asio.hpp>\nnamespace asio = boost::asio;\nusing asio::ip::tcp;\nasio::io_context ioc;\ntcp::socket socket(ioc);\ntcp::resolver resolver(ioc);\nasio::connect(socket, resolver.resolve(\"example.com\", \"80\"));\nstd::string req = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\";\nasio::write(socket, asio::buffer(req));\nioc.run();"
+  ]
  }
 }

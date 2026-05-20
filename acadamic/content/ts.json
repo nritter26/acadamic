@@ -67,6 +67,32 @@
    "const palette = { // declares variable; type inferred\n  red: [255, 0, 0],\n  green: '#00ff00',\n} satisfies Record<string, string | number[]>;\n// palette.red inferred as number[], not string | number[]\npalette.red.map(x => x); // OK, typed as number[]"
   ]
  },
+ "Type Guards & Narrowing": {
+  "typeof Type Guards": [
+   "typeof narrows primitive types in conditional blocks. TypeScript understands typeof returning 'string', 'number', 'boolean', 'symbol', 'bigint', 'undefined', 'object', and 'function'. A common mistake is checking typeof null which returns 'object' — use value === null instead.",
+   "function narrow(value: string | number | null) {\n  if (typeof value === 'string') {\n    console.log(value.toUpperCase());\n  } else if (typeof value === 'number') {\n    console.log(value.toFixed(2));\n  } else {\n    console.log('null');\n  }\n}"
+  ],
+  "instanceof Type Guards": [
+   "instanceof narrows types based on constructor/prototype chain. Works with classes and built-in constructors like Date, Error, RegExp. A common mistake is using instanceof with interfaces — they are compile-time only and erased at runtime.",
+   "class Dog { bark() { return 'woof'; } }\nclass Cat { meow() { return 'meow'; } }\nfunction speak(animal: Dog | Cat) {\n  if (animal instanceof Dog) {\n    console.log(animal.bark());\n  } else {\n    console.log(animal.meow());\n  }\n}"
+  ],
+  "Equality Narrowing": [
+   "Equality checks (===, !==) narrow types by excluding mismatched values. Switch statements and strict equality against literal types narrow to the matching branch. A common mistake is using == instead of === which allows type coercion.",
+   "function move(dir: 'up' | 'down' | 'left' | 'right') {\n  if (dir === 'up') return 1;\n  if (dir === 'down') return -1;\n}\nfunction compare(a: string | number, b: string | boolean) {\n  if (a === b) {\n    console.log(a.toUpperCase()); // narrowed to string\n  }\n}"
+  ],
+  "Truthiness Narrowing": [
+   "Truthiness checks (if, &&, ||, !) narrow types by excluding falsy values: false, 0, '', null, undefined, NaN. A common mistake is forgetting that empty string '' and 0 are falsy — use ?? for null/undefined only.",
+   "function foo(x?: string | null) {\n  if (x) {\n    console.log(x.toUpperCase());\n  }\n}\nfunction getLen(s?: string) {\n  return s?.length ?? 0;\n}"
+  ],
+  "Type Predicates": [
+   "Type predicates (parameterName is Type) are custom type guard return types. They tell TypeScript what a value is when the function returns true. A common mistake is writing a predicate that doesn't actually check — TypeScript trusts your predicate blindly.",
+   "function isFish(pet: Fish | Bird): pet is Fish {\n  return (pet as Fish).swim !== undefined;\n}\nfunction feed(pet: Fish | Bird) {\n  if (isFish(pet)) {\n    pet.swim();\n  }\n}"
+  ],
+  "Discriminated Unions": [
+   "Discriminated unions use a common literal property (the discriminant) to narrow each variant. TypeScript understands switch/case and if/else checks on the discriminant. A common mistake is not using a literal type as the discriminant.",
+   "type Shape =\n  | { kind: 'circle'; radius: number }\n  | { kind: 'square'; side: number }\n  | { kind: 'triangle'; base: number; height: number };\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case 'circle': return Math.PI * s.radius ** 2;\n    case 'square': return s.side ** 2;\n    case 'triangle': return (s.base * s.height) / 2;\n  }\n}"
+  ]
+ },
  "Functions": {
   "Function Types": [
    "Function types describe callable signatures: parameter types and return type. Use type aliases or inline syntax. A common mistake is forgetting that callbacks can have optional parameters and void return types are assignable from any return value.",
@@ -171,6 +197,56 @@
   "infer Keyword": [
    "The infer keyword introduces a type variable within a conditional type's extends clause, capturing a type from a larger structure. It powers most advanced utility types like ReturnType. A common mistake is using infer outside a conditional type — it's only valid in the extends clause.",
    "type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never; // creates reusable type alias\ntype Fn = (x: number) => string; // creates reusable type alias\ntype R = ReturnType<Fn>; // string\n\ntype FirstParam<T> = T extends (first: infer F, ...args: any[]) => any ? F : never; // creates reusable type alias\ntype P = FirstParam<(name: string, age: number) => void>; // string\n\ntype PromiseValue<T> = T extends Promise<infer V> ? V : T; // creates reusable type alias\ntype PV = PromiseValue<Promise<number>>; // number"
+  ]
+ },
+ "Utility Types": {
+  "Partial<T>": [
+   "Partial<T> makes all properties of T optional. Useful for update operations where you only supply changed fields. A common mistake is applying Partial to deeply nested objects — it only affects the top level.",
+   "interface User { name: string; age: number; email: string; }\ntype PartialUser = Partial<User>;\nfunction updateUser(id: number, updates: Partial<User>) {}"
+  ],
+  "Required<T>": [
+   "Required<T> makes all properties of T required (removes optionality). Useful for transforming optional configs into full required types. A common mistake is forgetting Required does not affect nested optional properties.",
+   "interface Config { url?: string; timeout?: number; }\ntype StrictConfig = Required<Config>;"
+  ],
+  "Readonly<T>": [
+   "Readonly<T> makes all properties of T readonly. Useful for immutable objects and configs. A common mistake is thinking Readonly prevents deep mutation — use as const or DeepReadonly for nested immutability.",
+   "interface Point { x: number; y: number; }\ntype ReadonlyPoint = Readonly<Point>;\nconst origin: ReadonlyPoint = { x: 0, y: 0 };"
+  ],
+  "Record<K,T>": [
+   "Record<K,T> creates an object type with keys K and values T. K is usually a union of string literals. A common mistake is using Record<string, T> when you know the specific keys — prefer a mapped type for better autocomplete.",
+   "type Page = 'home' | 'about' | 'contact';\ntype Routes = Record<Page, string>;\nconst routes: Routes = {\n  home: '/',\n  about: '/about',\n  contact: '/contact'\n};"
+  ],
+  "Pick<T,K>": [
+   "Pick<T,K> creates a type with only the specified keys K from T. Useful for creating lightweight view types from full data types. A common mistake is picking keys that don't exist on T — TypeScript catches this at compile time.",
+   "interface User { id: number; name: string; email: string; password: string; }\ntype PublicUser = Pick<User, 'id' | 'name' | 'email'>;"
+  ],
+  "Omit<T,K>": [
+   "Omit<T,K> creates a type without the specified keys K from T. The inverse of Pick. Useful for excluding sensitive fields. A common mistake is using Omit when you want to exclude by value type rather than key name.",
+   "interface User { id: number; name: string; email: string; password: string; }\ntype SafeUser = Omit<User, 'password'>;"
+  ],
+  "Exclude<T,U>": [
+   "Exclude<T,U> removes types from T that are assignable to U. Works with union types. A common mistake is using Exclude for object properties when you should use Omit — Exclude works on union members, not object keys.",
+   "type T = string | number | boolean;\ntype WithoutString = Exclude<T, string>;"
+  ],
+  "Extract<T,U>": [
+   "Extract<T,U> extracts types from T that are assignable to U. The opposite of Exclude. Useful for filtering union types to a subset. A common mistake is expecting Extract to filter object properties — use Pick instead.",
+   "type T = string | number | boolean;\ntype OnlyString = Extract<T, string>;"
+  ],
+  "NonNullable<T>": [
+   "NonNullable<T> removes null and undefined from T. Useful for cleaning up after validation. A common mistake is using NonNullable on object types expecting it to remove null properties from fields.",
+   "type T = string | number | null | undefined;\ntype Clean = NonNullable<T>;"
+  ],
+  "ReturnType<T>": [
+   "ReturnType<T> extracts the return type of a function type T. Uses conditional types with infer internally. A common mistake is passing a function value instead of a type — use typeof to get the type first.",
+   "function greet(name: string): string { return `Hello`; }\ntype R = ReturnType<typeof greet>;\ntype Fn = (a: number) => number;\ntype FR = ReturnType<Fn>;"
+  ],
+  "Parameters<T>": [
+   "Parameters<T> extracts the parameter types of a function type T as a tuple. Useful for forwarding argument types to wrappers. A common mistake is forgetting Parameters returns a tuple, not a union.",
+   "function log(name: string, age: number): void {}\ntype P = Parameters<typeof log>;"
+  ],
+  "Awaited<T>": [
+   "Awaited<T> unwraps Promise types recursively. Useful for getting the resolved type of async functions. A common mistake is using Awaited on non-Promise types — it passes them through unchanged.",
+   "type AsyncData = Promise<string>;\ntype Data = Awaited<AsyncData>;\ntype Nested = Promise<Promise<number>>;\ntype Unwrapped = Awaited<Nested>;"
   ]
  },
  "Advanced Types": {
@@ -323,6 +399,24 @@
   "Null Checks": [
    "With strictNullChecks, null and undefined are distinct types. Use optional chaining (?.), nullish coalescing (??), and type guards to handle nullable values safely. A common mistake is using || instead of ?? for defaults — || treats empty string and 0 as falsy.",
    "interface Config { // defines object shape contract\n  timeout?: number;\n  url?: string;\n  retries?: number;\n}\nfunction process(config: Config) { // defines reusable function block\n  const timeout = config.timeout ?? 5000; // 0 is a valid value\n  const url = config.url?.toLowerCase(); // declares variable; type inferred\n  const retries = config.retries ?? 3; // declares variable; type inferred\n  // With ||: timeout would use default even if config.timeout = 0\n  if (config.url) { // conditionally executes following block\n    console.log(config.url); // narrowed to string\n  }\n}"
+  ]
+ },
+ "Ecosystem": {
+  "Formatting (Prettier)": [
+   "Prettier is the standard TypeScript formatter handling semicolons, quotes, trailing commas, and indentation. Integrate with editor format-on-save and CI checks. A common mistake is Prettier conflicting with ESLint — use eslint-config-prettier to disable formatting rules in ESLint.",
+   "{\n  \"semi\": true,\n  \"singleQuote\": true,\n  \"trailingComma\": \"all\",\n  \"printWidth\": 100\n}"
+  ],
+  "Linting (ESLint)": [
+   "ESLint with @typescript-eslint catches TypeScript-specific issues like unused variables, unsafe assertions, and promise handling errors. A common mistake is disabling strict rules like no-explicit-any — prefer incremental fixing.",
+   "module.exports = {\n  parser: '@typescript-eslint/parser',\n  plugins: ['@typescript-eslint'],\n  extends: [\n    'eslint:recommended',\n    'plugin:@typescript-eslint/recommended'\n  ]\n};"
+  ],
+  "DefinitelyTyped & @types": [
+   "DefinitelyTyped is the community repository of TypeScript type definitions. Install with @types/package-name. Most popular libraries now include bundled types. A common mistake is installing @types for a package that already ships its own types.",
+   "npm install -D @types/lodash @types/react\n\ndeclare module 'my-untyped-lib' {\n  export function doStuff(): void;\n}"
+  ],
+  "Build Tools": [
+   "Modern TypeScript projects often skip tsc for building and use bundlers instead. Vite, tsup, and SWC are popular choices. Use tsc --noEmit for type-checking only and a bundler for output. A common mistake is using tsc for both checking and bundling.",
+   "// vite.config.ts\nimport { defineConfig } from 'vite';\nexport default defineConfig({\n  esbuild: { tsconfigRaw: { compilerOptions: { target: 'es2022' } } }\n});\n\n// tsup — zero-config TS bundler\ntsup src/index.ts --format esm,cjs --dts"
   ]
  },
  "Configuration & Build": {
