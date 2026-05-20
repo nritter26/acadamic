@@ -1,16 +1,15 @@
-export function runKeywordTutor(message: any, lang: any, topic: any, code: any, hasError: any): {
-    response: any;
+interface KeywordResult {
+    response: string;
     source: string;
-} | null;
-export function detectLangFromMsg(msg: any): "py" | "js" | "ts" | "go" | "rs" | "cpp" | "cs" | "kt" | "swift" | "zig" | "c" | null;
-export function getCurrContext(message: any, topic: any): {
+}
+export declare function getSocratic(): string;
+export declare function getGreet(): string;
+export declare function getThank(): string;
+export declare function detectLangFromMsg(msg: string): string | null;
+export declare function getCurrContext(message: string, topic?: string): {
     type: string;
-    topic: any;
-} | {
-    type: string;
-    topic?: undefined;
+    topic?: string | null;
 };
-export function getThank(): string;
-export function getGreet(): string;
-export function getSocratic(): string;
+export declare function runKeywordTutor(message: string, lang?: string, topic?: string, code?: string, hasError?: boolean): KeywordResult | null;
+export {};
 //# sourceMappingURL=tutor-keywords.d.ts.map

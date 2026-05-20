@@ -109,10 +109,45 @@ function isSelectish(sql) {
     }
     return false;
 }
+function splitSQL(sql) {
+    const result = [];
+    let current = '';
+    let inString = null;
+    for (let i = 0; i < sql.length; i++) {
+        const ch = sql[i];
+        if (inString) {
+            current += ch;
+            if (ch === '\\') {
+                i++;
+                if (i < sql.length)
+                    current += sql[i];
+            }
+            else if (ch === inString)
+                inString = null;
+        }
+        else if (ch === "'" || ch === '"') {
+            current += ch;
+            inString = ch;
+        }
+        else if (ch === ';') {
+            const trimmed = current.trim();
+            if (trimmed)
+                result.push(trimmed);
+            current = '';
+        }
+        else {
+            current += ch;
+        }
+    }
+    const trimmed = current.trim();
+    if (trimmed)
+        result.push(trimmed);
+    return result;
+}
 function executeSQLite(sql) {
     if (!db)
         return { output: 'SQLite not initialized', error: true };
-    const statements = sql.split(';').map(s => s.trim()).filter(s => s.length > 0);
+    const statements = splitSQL(sql);
     if (statements.length === 0)
         return { output: '(no statements to execute)' };
     const outputs = [];

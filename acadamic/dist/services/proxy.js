@@ -8,9 +8,17 @@ exports.proxyRequest = proxyRequest;
 const http_1 = __importDefault(require("http"));
 const https_1 = __importDefault(require("https"));
 const url_1 = require("url");
+const dns_1 = __importDefault(require("dns"));
 const FORBIDDEN_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]', '169.254.169.254', 'metadata.google.internal', '100.100.100.200'];
 const FORBIDDEN_PATTERNS = [/^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^127\./, /^0\./];
-function isValidProxyUrl(urlStr) {
+function isPrivateIP(ip) {
+    if (FORBIDDEN_HOSTS.includes(ip))
+        return true;
+    if (FORBIDDEN_PATTERNS.some(p => p.test(ip)))
+        return true;
+    return false;
+}
+async function isValidProxyUrl(urlStr) {
     try {
         const parsed = new url_1.URL(urlStr);
         if (!['http:', 'https:'].includes(parsed.protocol))
@@ -18,8 +26,11 @@ function isValidProxyUrl(urlStr) {
         const host = parsed.hostname.toLowerCase();
         if (FORBIDDEN_HOSTS.some(fh => host === fh || host.endsWith('.' + fh)))
             return false;
-        if (FORBIDDEN_PATTERNS.some(p => p.test(host)))
-            return false;
+        const addresses = await dns_1.default.promises.resolve4(host).catch(() => []);
+        for (const addr of addresses) {
+            if (isPrivateIP(addr))
+                return false;
+        }
         return true;
     }
     catch {

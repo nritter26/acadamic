@@ -10,7 +10,7 @@ async function getPipeline() {
       const { pipeline } = await import('@xenova/transformers');
       _pipeline = pipeline;
     } catch (e) {
-      console.error('[tiny-llm] Failed to import @xenova/transformers:', e.message);
+      console.error('[template-matcher] Failed to import @xenova/transformers:', e.message);
       throw e;
     }
   }
@@ -20,12 +20,12 @@ async function getPipeline() {
 async function loadModel() {
   if (!_modelPromise) {
     _modelPromise = (async () => {
-      console.log(`[tiny-llm] Loading model: ${MODEL_ID} (this may take a moment on first run)...`);
+      console.log(`[template-matcher] Loading model: ${MODEL_ID} (this may take a moment on first run)...`);
       const pipe = await getPipeline();
       const model = await pipe('feature-extraction', MODEL_ID, {
         cache_dir: CACHE_DIR,
       });
-      console.log(`[tiny-llm] Model loaded: ${MODEL_ID}`);
+      console.log(`[template-matcher] Model loaded: ${MODEL_ID}`);
       return model;
     })();
   }
@@ -52,7 +52,7 @@ async function generateResponse(messages) {
   if (!isQuestionLike && !isLongEnough) {
     return {
       response: "I understand you're asking something, but could you be more specific? Tell me what programming topic you'd like help with, or paste a code snippet you're working on.",
-      source: 'tiny-llm'
+      source: 'template-matcher'
     };
   }
 
@@ -87,7 +87,7 @@ async function generateResponse(messages) {
     response = `That's an interesting question! Based on what you're asking, here are some general tips:\n\n1. **Check your understanding** — What do you expect this code to do?\n2. **Simplify** — Try a minimal example that isolates just the part you're curious about\n3. **Experiment** — Change one thing at a time and observe the result\n\nIf you can share more context or specific code, I'll be able to give you a more helpful answer!`;
   }
 
-  return { response, source: 'tiny-llm' };
+  return { response, source: 'template-matcher' };
 }
 
 async function getTinyLLMResponse(messages, onStream) {
@@ -104,7 +104,7 @@ async function getTinyLLMResponse(messages, onStream) {
 
     return result.response;
   } catch (e) {
-    console.error('[tiny-llm] Error:', e.message);
+    console.error('[template-matcher] Error:', e.message);
     return null;
   }
 }
@@ -122,7 +122,7 @@ async function isModelLoaded() {
 function disposeTinyLLM() {
   _modelPromise = null;
   _pipeline = null;
-  console.log('[tiny-llm] Disposed model reference');
+  console.log('[template-matcher] Disposed model reference');
 }
 
 module.exports = {

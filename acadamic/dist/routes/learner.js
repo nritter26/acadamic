@@ -122,6 +122,13 @@ router.get('/path', async (req, res) => {
         const dueReviews = await learner.getDueReviews(learnerId);
         const availablePhases = {};
         try {
+            const allowed = fs_1.default.readdirSync(path_1.default.join(__dirname, '..', 'content'))
+                .filter(f => f.endsWith('.json'))
+                .map(f => f.replace(/\.json$/, ''));
+            if (!allowed.includes(lang)) {
+                res.status(400).json({ error: 'Invalid language' });
+                return;
+            }
             const langData = JSON.parse(fs_1.default.readFileSync(path_1.default.join(__dirname, '..', 'content', `${lang}.json`), 'utf-8'));
             for (const phase of Object.keys(langData)) {
                 availablePhases[phase] = Object.keys(langData[phase]).reduce((acc, t) => ({ ...acc, [t]: true }), {});

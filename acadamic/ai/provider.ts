@@ -1,6 +1,6 @@
 import config from './config';
 import { runKeywordTutor } from './tutor-keywords';
-import { getTinyLLMResponse } from './tiny-llm';
+import { getTinyLLMResponse } from './template-matcher';
 
 interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -296,7 +296,7 @@ export async function askLLM(
     return callProvider(PROVIDERS.local, messages, onStream);
   }
   if (provider === 'keyword') {
-    const { runKeywordTutor } = require('./tutor-keywords.js');
+    const { runKeywordTutor } = require('./tutor-keywords');
     const lastMsg = messages[messages.length - 1]?.content || '';
     return runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError) || null;
   }

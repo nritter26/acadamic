@@ -1,4 +1,4 @@
-export declare function isValidProxyUrl(urlStr: string): boolean;
+export declare function isValidProxyUrl(urlStr: string): Promise<boolean>;
 export interface ProxyResult {
     status: number;
     statusText: string;

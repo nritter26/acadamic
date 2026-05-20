@@ -52,19 +52,42 @@ function processNextExec() {
     while (EXEC_RUNNING < EXEC_MAX_CONCURRENT && EXEC_QUEUE.length > 0) {
         const job = EXEC_QUEUE.shift();
         EXEC_RUNNING++;
-        (0, child_process_1.exec)(job.cmd, job.opts, (err, stdout, stderr) => {
-            EXEC_RUNNING--;
-            if (err)
-                job.reject(err);
-            else
-                job.resolve({ stdout: String(stdout), stderr: String(stderr) });
-            processNextExec();
-        });
+        if (job.stdin !== undefined) {
+            const child = (0, child_process_1.spawn)('sh', ['-c', job.cmd], job.opts);
+            let stdout = '';
+            let stderr = '';
+            child.stdout.on('data', (d) => stdout += d.toString());
+            child.stderr.on('data', (d) => stderr += d.toString());
+            child.on('close', (code) => {
+                EXEC_RUNNING--;
+                job.resolve({ stdout, stderr });
+                processNextExec();
+            });
+            child.on('error', (e) => {
+                EXEC_RUNNING--;
+                job.reject(e);
+                processNextExec();
+            });
+            if (job.stdin) {
+                child.stdin.write(job.stdin);
+                child.stdin.end();
+            }
+        }
+        else {
+            (0, child_process_1.exec)(job.cmd, job.opts, (err, stdout, stderr) => {
+                EXEC_RUNNING--;
+                if (err)
+                    job.reject(err);
+                else
+                    job.resolve({ stdout: String(stdout), stderr: String(stderr) });
+                processNextExec();
+            });
+        }
     }
 }
-function execQueue(cmd, opts) {
+function execQueue(cmd, opts, stdin) {
     return new Promise((resolve, reject) => {
-        EXEC_QUEUE.push({ cmd, opts, resolve, reject });
+        EXEC_QUEUE.push({ cmd, opts, resolve, reject, stdin });
         processNextExec();
     });
 }
@@ -241,9 +264,7 @@ async function executeCode(lang, code, stdin) {
     const sandboxedCmd = `ulimit -v 262144 -t 30 2>/dev/null; ${cmd}`;
     const execOpts = { timeout: 30000, cwd: tmpDir, env };
     try {
-        const result = stdin
-            ? await execWithStdin(sandboxedCmd, execOpts, stdin)
-            : await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true });
+        const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true }, stdin);
         fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
         const stdoutClean = (result.stdout || '').trimEnd();
         const stderrClean = (result.stderr || '').trimEnd();

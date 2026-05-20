@@ -8,7 +8,7 @@ import fs from 'fs';
 import http from 'http';
 
 import { requestLogger, errorHandler, notFound, optionalAuth } from './middleware';
-import { rateLimit, detectOllama, setupWebSocket, getWSStats, metricsHandler, trackRequest, openapiHandler, swaggerUIHandler } from './services';
+import { rateLimit, detectOllama, setupWebSocket, getWSStats, metricsHandler, trackRequest, openapiHandler, swaggerUIHandler, pruneOldConversations } from './services';
 import { logger } from './middleware';
 import * as database from './sql/database';
 import apiRoutes from './routes';
@@ -101,6 +101,9 @@ const server = http.createServer(app);
 
 // ── Setup WebSocket ──
 setupWebSocket(server);
+
+// ── Schedule periodic cleanup ──
+setInterval(pruneOldConversations, 3_600_000);
 
 // ── Start ──
 server.listen(PORT, () => {

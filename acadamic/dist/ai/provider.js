@@ -8,7 +8,7 @@ exports.runHybridLLM = runHybridLLM;
 exports.askLLM = askLLM;
 const config_1 = __importDefault(require("./config"));
 const tutor_keywords_1 = require("./tutor-keywords");
-const tiny_llm_1 = require("./tiny-llm");
+const template_matcher_1 = require("./template-matcher");
 async function streamSSEResponse(response, onStream, parser) {
     if (!response.body) {
         throw new Error('Response body is null — streaming not supported');
@@ -213,7 +213,7 @@ async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
         return keywordResult.response;
     }
     try {
-        const llmResponse = await (0, tiny_llm_1.getTinyLLMResponse)(messages, onStream);
+        const llmResponse = await (0, template_matcher_1.getTinyLLMResponse)(messages, onStream);
         return llmResponse;
     }
     catch (e) {
@@ -234,6 +234,11 @@ async function askLLM(messages, onStream, options) {
     }
     if (provider === 'local') {
         return callProvider(PROVIDERS.local, messages, onStream);
+    }
+    if (provider === 'keyword') {
+        const { runKeywordTutor } = require('./tutor-keywords');
+        const lastMsg = messages[messages.length - 1]?.content || '';
+        return runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError) || null;
     }
     return null;
 }

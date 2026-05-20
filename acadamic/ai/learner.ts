@@ -175,7 +175,9 @@ export async function getLearner(learnerId: string): Promise<Learner> {
   }
 }
 
-async function saveLearner(learner: Learner): Promise<void> {
+const writeQueue = new Map<string, { learner: Learner; timeout: NodeJS.Timeout }>();
+
+async function doSaveLearner(learner: Learner): Promise<void> {
   try {
     await ensureDir();
     learner.lastSeen = new Date().toISOString();
@@ -187,6 +189,39 @@ async function saveLearner(learner: Learner): Promise<void> {
     console.error('saveLearner error:', (e as Error).message);
   }
 }
+
+async function saveLearner(learner: Learner): Promise<void> {
+  const existing = writeQueue.get(learner.id);
+  if (existing) {
+    clearTimeout(existing.timeout);
+  }
+  writeQueue.set(learner.id, {
+    learner,
+    timeout: setTimeout(() => {
+      doSaveLearner(learner);
+      writeQueue.delete(learner.id);
+    }, 2000),
+  });
+}
+
+function flushAll(): void {
+  for (const [id, entry] of writeQueue) {
+    clearTimeout(entry.timeout);
+    const learner = entry.learner;
+    try {
+      const fp = getLearnerPath(learner.id);
+      const dir = path.dirname(fp);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      const tmp = fp + '.tmp';
+      fs.writeFileSync(tmp, JSON.stringify(learner, null, 2));
+      fs.renameSync(tmp, fp);
+    } catch (e: unknown) {
+      console.error('flushAll error for', id, ':', (e as Error).message);
+    }
+    writeQueue.delete(id);
+  }
+}
+process.on('beforeExit', flushAll);
 
 function updatePhaseMastery(learner: Learner, lang: string, phase: string): void {
   const phaseKey = `${lang}:${phase}`;

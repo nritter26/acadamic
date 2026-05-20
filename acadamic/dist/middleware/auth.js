@@ -13,7 +13,7 @@ function generateToken(payload) {
     return jsonwebtoken_1.default.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 function verifyToken(token) {
-    return jsonwebtoken_1.default.verify(token, JWT_SECRET);
+    return jsonwebtoken_1.default.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
 }
 function optionalAuth(req, _res, next) {
     const header = req.headers.authorization;

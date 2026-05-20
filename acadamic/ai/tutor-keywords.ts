@@ -1,26 +1,29 @@
-const LANG_NAMES_AI = {
+import fs from 'fs';
+import path from 'path';
+
+const LANG_NAMES_AI: Record<string, string> = {
   js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
   c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
-  swift: 'Swift', ts: 'TypeScript', zig: 'Zig'
+  swift: 'Swift', ts: 'TypeScript', zig: 'Zig',
 };
 
-const GREETINGS = [
+const GREETINGS: RegExp[] = [
   /^(hi|hello|hey|howdy|yo|sup|greetings|good\s*(morning|afternoon|evening))[.!]*$/i,
   /^(what'?s up|wassup|how are you|how'?s it going)[!?]*$/i,
 ];
 
-const THANKS = [
+const THANKS: RegExp[] = [
   /\b(thanks?|thank\s*you|thx|ty|appreciate\s*(it|that)|that\s*helps|got\s*it)\b/i,
   /\b(make\s*sense|clear|understood|understood)\b/i,
 ];
 
-const FOLLOW_UP = [
+const FOLLOW_UP: RegExp[] = [
   /\b(what\s*about|how\s*(about|do\s*i)|what\s*next|next|continue|more|elaborate|expand)\b/i,
   /\b(can\s*you\s*(give|show|tell)\s*(me\s*)?(more|an?\s*example))\b/i,
   /^(and\s*then|so\s*what|tell\s*me\s*more|go\s*on)$/i,
 ];
 
-const ERROR_KEYWORDS = [
+const ERROR_KEYWORDS: RegExp[] = [
   /error|bug|fix|wrong|not\s*working|issue|broken|crash|fail|exception|unexpected/i,
   /(doesn'?t|does\s*not|isn'?t|is\s*not|won'?t|will\s*not)\s*work/i,
   /\b(TypeError|ReferenceError|SyntaxError|RangeError|undefined|null|NaN)\b/,
@@ -28,7 +31,7 @@ const ERROR_KEYWORDS = [
   /(stack\s*trace|traceback|error\s*message)/i,
 ];
 
-const TOPIC_KEYWORDS = {
+const TOPIC_KEYWORDS: Record<string, RegExp> = {
   variable: /variab|let|const|var|declar|assign|muta|scope/i,
   function: /function|func|fn|method|def|return|arrow|lambda|callback/i,
   string: /string|str|template.*literal|concatenat|char|text/i,
@@ -56,7 +59,12 @@ const TOPIC_KEYWORDS = {
   module: /module|package|crate|namespace|import|export|pub/i,
 };
 
-const SOCRATIC_PROMPTS = [
+interface KeywordResult {
+  response: string;
+  source: string;
+}
+
+const SOCRATIC_PROMPTS: string[] = [
   "What have you tried so far? Let's start there.",
   "Let me ask you: what do you think should happen here?",
   "Can you explain what this code is supposed to do, in your own words?",
@@ -69,13 +77,13 @@ const SOCRATIC_PROMPTS = [
   "What similar problems have you solved before? Can you apply the same pattern here?",
 ];
 
-function getSocratic() {
+export function getSocratic(): string {
   return SOCRATIC_PROMPTS[Math.floor(Math.random() * SOCRATIC_PROMPTS.length)];
 }
 
-function getGreet() {
+export function getGreet(): string {
   const greets = [
-    "Hey there! 👋 I'm Devin, your coding buddy. What are you working on?",
+    "Hey there! I'm Devin, your coding buddy. What are you working on?",
     "Hello! Ready to learn some code? I'm here to help!",
     "Hi! Stuck on something? Just ask — I've got your back.",
     "Hey! What programming challenge are we tackling today?",
@@ -83,9 +91,9 @@ function getGreet() {
   return greets[Math.floor(Math.random() * greets.length)];
 }
 
-function getThank() {
+export function getThank(): string {
   const thanks = [
-    "You're welcome! Keep up the great work! 🎉",
+    "You're welcome! Keep up the great work!",
     "Happy to help! That's what I'm here for.",
     "No problem! What's next on your learning journey?",
     "Glad that helped! Don't forget to practice to make it stick.",
@@ -93,7 +101,7 @@ function getThank() {
   return thanks[Math.floor(Math.random() * thanks.length)];
 }
 
-function detectLangFromMsg(msg) {
+export function detectLangFromMsg(msg: string): string | null {
   const lower = msg.toLowerCase();
   if (/\b(python|py\b)/.test(lower) && !/\b(py\s+script|pypy)\b/.test(lower)) return 'py';
   if (/\b(javascript|js\b)/.test(lower) && !/\b(jsx|json)\b/.test(lower)) return 'js';
@@ -109,7 +117,7 @@ function detectLangFromMsg(msg) {
   return null;
 }
 
-function getCurrContext(message, topic) {
+export function getCurrContext(message: string, topic?: string): { type: string; topic?: string | null } {
   const lower = message.toLowerCase();
   const isFollowUp = FOLLOW_UP.some(r => r.test(message));
   if (topic && isFollowUp) return { type: 'followup', topic };
@@ -118,9 +126,9 @@ function getCurrContext(message, topic) {
   return { type: 'general' };
 }
 
-function matchTopic(message) {
+function matchTopic(message: string): string[] {
   const lower = message.toLowerCase();
-  const matches = [];
+  const matches: string[] = [];
   for (const [topic, pattern] of Object.entries(TOPIC_KEYWORDS)) {
     if (pattern.test(lower)) {
       matches.push(topic);
@@ -129,20 +137,18 @@ function matchTopic(message) {
   return matches;
 }
 
-function curriculumSearch(message, lang) {
+function curriculumSearch(message: string, lang?: string): { phase: string; topic: string; content: string }[] {
   try {
-    const fs = require('fs');
-    const path = require('path');
     const contentDir = path.join(__dirname, '..', 'content');
     const langFile = path.join(contentDir, (lang || 'js') + '.json');
     if (fs.existsSync(langFile)) {
       const data = JSON.parse(fs.readFileSync(langFile, 'utf-8'));
       const topics = matchTopic(message);
-      const results = [];
+      const results: { phase: string; topic: string; content: string }[] = [];
       for (const [phase, phaseData] of Object.entries(data)) {
-        for (const [topicName, topicContent] of Object.entries(phaseData)) {
+        for (const [topicName, topicContent] of Object.entries(phaseData as Record<string, unknown>)) {
           const lowerTopic = topicName.toLowerCase();
-          const contentStr = Array.isArray(topicContent) ? topicContent[0] : (topicContent.exp || topicContent.code || '');
+          const contentStr = Array.isArray(topicContent) ? (topicContent as string[])[0] : ((topicContent as Record<string, string>).exp || (topicContent as Record<string, string>).code || '');
           if (topics.some(t => lowerTopic.includes(t)) ||
               topics.some(t => contentStr.toLowerCase().includes(t))) {
             results.push({ phase, topic: topicName, content: contentStr.slice(0, 200) });
@@ -151,13 +157,13 @@ function curriculumSearch(message, lang) {
       }
       return results.slice(0, 3);
     }
-  } catch (e) {
+  } catch {
     return [];
   }
   return [];
 }
 
-function handleErrorHelp(message, code, lang, hasError) {
+function handleErrorHelp(message: string, code?: string, lang?: string, hasError?: boolean): string | null {
   const lower = message.toLowerCase();
   let response = '';
   if (hasError === undefined || hasError === null) {
@@ -165,14 +171,14 @@ function handleErrorHelp(message, code, lang, hasError) {
   }
 
   if (hasError || code) {
-    const langName = LANG_NAMES_AI[lang] || lang || 'your code';
+    const langName = LANG_NAMES_AI[lang || ''] || lang || 'your code';
 
-    if (/undefined/.test(lower) || /undefined/.test(code || '')) {
+    if (/undefined/.test(lower) || (code && /undefined/.test(code))) {
       response = `It looks like you're dealing with an **undefined** value. This usually means:\n\n1. The variable hasn't been declared yet\n2. The variable is out of scope\n3. A function didn't return what you expected\n4. A property doesn't exist on the object\n\n**Try this:** add a \`console.log()\` right before the error to check what the value actually is. Also check that the variable name is spelled exactly the same everywhere (JavaScript is case-sensitive!).`;
       return response;
     }
 
-    if (/null/.test(lower) || /null/.test(code || '')) {
+    if (/null/.test(lower) || (code && /null/.test(code))) {
       response = `A **null** value error means something that should have a value is empty.\n\nCommon causes:\n1. A function returned \`null\` because it couldn't find what you asked for\n2. An API call hasn't loaded yet\n3. A DOM element doesn't exist yet\n\n**Fix:** Check if the value is \`null\` before using it: \`if (value !== null) { ... }\` or use optional chaining: \`value?.property\`.`;
       return response;
     }
@@ -190,14 +196,14 @@ function handleErrorHelp(message, code, lang, hasError) {
   return null;
 }
 
-function handleTopicHelp(message, lang) {
+function handleTopicHelp(message: string, lang?: string): string | null {
   const topics = matchTopic(message);
   if (topics.length === 0) return null;
 
-  const langName = LANG_NAMES_AI[lang] || lang || 'programming';
+  const langName = LANG_NAMES_AI[lang || ''] || lang || 'programming';
   const topic = topics[0];
 
-  const topicResponses = {
+  const topicResponses: Record<string, string> = {
     variable: `**Variables** are containers for storing data values. In ${langName}:\n\n• Use descriptive names like \`userCount\` instead of \`x\`\n• Choose the right declaration keyword\n• Think about scope — where can this variable be accessed?\n\nWant me to show you an example of declaring and using variables in ${langName}?`,
     function: `**Functions** are reusable blocks of code. In ${langName}:\n\n• They take inputs (parameters) and return outputs\n• Good functions do ONE thing well\n• Name them with verbs like \`calculateTotal\` or \`getUserName\`\n\nWould you like to see a ${langName} function example?`,
     string: `**Strings** represent text data. In ${langName}:\n\n• Use quotes or template literals to create them\n• Common operations: concatenation, slicing, searching, replacing\n• Strings are usually immutable — operations return new strings\n\nWant string manipulation examples for ${langName}?`,
@@ -213,7 +219,13 @@ function handleTopicHelp(message, lang) {
   return topicResponses[topic] || null;
 }
 
-function runKeywordTutor(message, lang, topic, code, hasError) {
+export function runKeywordTutor(
+  message: string,
+  lang?: string,
+  topic?: string,
+  code?: string,
+  hasError?: boolean,
+): KeywordResult | null {
   const lower = message.trim().toLowerCase();
 
   if (GREETINGS.some(r => r.test(message))) {
@@ -227,7 +239,7 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
   if (/w(hat|ho|hy|hen|here|hich|hom)|how|can you|could you|please|tell/i.test(lower) &&
       /\b(i('m| am|'d| would)|you|your)\b/i.test(lower) &&
       /(devin|buddy|tutor|bot|assistant)/i.test(lower)) {
-    return { response: "I'm Devin! I'm here to help you learn programming. Ask me about specific topics, paste your code if something's broken, or tell me what you're trying to build. What do you need help with? 😊", source: 'keyword' };
+    return { response: "I'm Devin! I'm here to help you learn programming. Ask me about specific topics, paste your code if something's broken, or tell me what you're trying to build. What do you need help with?", source: 'keyword' };
   }
 
   if (code && code.length > 3) {
@@ -259,7 +271,7 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
 
   if (/practice|exercis|challenge|problem|project/i.test(lower) &&
       /(give|want|need|have|some|a\s)/i.test(lower)) {
-    const langName = LANG_NAMES_AI[lang] || 'programming';
+    const langName = LANG_NAMES_AI[lang || ''] || 'programming';
     return { response: `Here's a quick ${langName} practice idea: try writing a program that converts temperatures between Celsius and Fahrenheit. Start with a function that takes a temperature and the conversion direction. Want more specific practice problems?`, source: 'keyword' };
   }
 
@@ -269,12 +281,3 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
 
   return null;
 }
-
-module.exports = {
-  runKeywordTutor,
-  detectLangFromMsg,
-  getCurrContext,
-  getThank,
-  getGreet,
-  getSocratic,
-};
