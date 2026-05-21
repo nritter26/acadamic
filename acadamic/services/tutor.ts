@@ -50,7 +50,17 @@ function resolveFollowUp(q: string, history?: HistoryEntry[]): string {
   if (!lastBot || !lastBot.text) return q;
 
   const subject = extractSubject(lastBot.text);
-  return subject ? `${subject} ${q}` : q;
+  const lang = detectLanguage(lastBot.text);
+  let result = subject ? `${subject} ${q}` : q;
+  if (lang) {
+    const rawName = LANG_NAMES[lang as keyof typeof LANG_NAMES] || lang;
+    const alreadyMentions = trimmed.includes(lang) || trimmed.includes(rawName);
+    if (!alreadyMentions) {
+      const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      result = `in ${displayName}, ${result.toLowerCase()}`;
+    }
+  }
+  return result;
 }
 
 export async function buildLLMMessages(

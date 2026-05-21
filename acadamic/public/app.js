@@ -1263,6 +1263,12 @@ function resolveFollowUp(q) {
     if (PRONOUN_PATTERN.test(trimmed) || PRONOUN_WORDS.test(trimmed)) {
         return `${convSubject} ${trimmed}`;
     }
+    if (convLang) {
+        const langDisplay = LANG_NAMES[convLang];
+        if (langDisplay && !trimmed.toLowerCase().includes(langDisplay.toLowerCase())) {
+            return `in ${langDisplay}, ${trimmed}`;
+        }
+    }
     return q;
 }
 
@@ -1454,6 +1460,8 @@ function getErrorTutorTip(topic, output) {
 async function askAI(q) {
     streamingFullText = '';
     const enrichedQ = resolveFollowUp(q);
+    const detectedLang = detectLanguageInQuery(q.toLowerCase());
+    if (detectedLang) convLang = detectedLang;
     addAIMessage(q, 'user');
 
     const editor = document.getElementById('editor');

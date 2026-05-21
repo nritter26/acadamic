@@ -11,7 +11,7 @@ An interactive multi-language programming textbook, code playground, and compile
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 26 curated responses + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
+| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (6+ languages, 3 difficulty levels each). |
 | **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
 | **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
@@ -118,7 +118,7 @@ acadamic/
 │   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
 │   ├── db.js                    # Database tab frontend (~126 lines)
 │   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
-│   ├── ai-responses.js          # 26 AI tutor keyword responses
+│   ├── ai-responses.js          # 52+ AI tutor keyword responses
 │   ├── schema-tutorial.js       # Schema designer guided tutorial
 │   ├── tutorial.js              # App tutorial/onboarding helpers
 │   └── logos/                   # 57 SVG logos for supported technologies

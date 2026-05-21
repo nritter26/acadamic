@@ -674,39 +674,116 @@
     const langLabel = (lang || 'code').toUpperCase();
     const reviewResult = localCodeReview(code, lang || 'js');
 
-    let explanation = `**Code Overview — ${langLabel}**\n\n`;
-    explanation += `- **${lines.length} lines** of code\n`;
+    // Extract function names, variable names, etc.
+    const funcNames: string[] = [];
+    const funcRe = /(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*)?(?:=>|\bfunction\b)|def\s+(\w+)|func\s+(\w+)|fn\s+(\w+))/g;
+    let fm: RegExpExecArray | null;
+    while ((fm = funcRe.exec(code)) !== null) {
+      const name = fm[1] || fm[2] || fm[3] || fm[4] || fm[5];
+      if (name) funcNames.push(name);
+    }
 
-    if (/\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code)) {
-      explanation += "- Defines one or more **functions**\n";
+    const varDecls: { name: string; val: string }[] = [];
+    const varRe = /(?:const|let|var)\s+(\w+)\s*=\s*([^;]+)/g;
+    let vm: RegExpExecArray | null;
+    while ((vm = varRe.exec(code)) !== null) {
+      const val = vm[2].trim();
+      let shortVal = val.slice(0, 30);
+      if (val.length > 30) shortVal += '...';
+      varDecls.push({ name: vm[1], val: shortVal });
     }
-    if (/for\s*\(|for\s+\w+|while\s*\(|\.forEach/.test(code)) {
-      explanation += "- Contains **loop constructs**\n";
+
+    const patterns: string[] = [];
+    if (/\btry\b/.test(code) && /\bcatch\b/.test(code)) patterns.push('error handling');
+    if (/\basync\b|\bawait\b/.test(code)) patterns.push('async/await');
+    if (/\.map\s*\(/.test(code)) patterns.push('Array.map');
+    if (/\.filter\s*\(/.test(code)) patterns.push('Array.filter');
+    if (/\.reduce\s*\(/.test(code)) patterns.push('Array.reduce');
+    if (/fetch\s*\(/.test(code)) patterns.push('HTTP requests');
+    if (/Promise/.test(code)) patterns.push('Promises');
+    if (/addEventListener/.test(code)) patterns.push('event handling');
+
+    let explanation = `**Code Explanation — ${langLabel}**\n\n`;
+    explanation += `This code is **${lines.length} lines** long.`;
+
+    if (funcNames.length > 0) {
+      explanation += ` It defines **${funcNames.length} function(s)**: \`${funcNames.join('`, `')}\`.`;
     }
-    if (/if\s*\(|elif\s+|else\s+/.test(code)) {
-      explanation += "- Contains **conditional logic** (if/else)\n";
+
+    if (varDecls.length > 0) {
+      explanation += `\n\n**Variables:**\n`;
+      for (const v of varDecls) {
+        explanation += `• \`${v.name}\` = ${v.val}\n`;
+      }
     }
-    if (/\bclass\s+/.test(code)) {
-      explanation += "- Defines a **class**\n";
+
+    if (patterns.length > 0) {
+      explanation += `\n**Techniques used:** ${patterns.join(', ')}.\n`;
     }
+
     if (/\breturn\b/.test(code)) {
-      explanation += "- Uses **return statements**\n";
+      const retLines = lines.filter(l => /^\s*return\b/.test(l));
+      if (retLines.length > 0) {
+        explanation += `\n**Returns:** The function${retLines.length > 1 ? 's' : ''} return${retLines.length === 1 ? 's' : ''} a value at line${retLines.length > 1 ? 's' : ''}: \`${retLines[0].trim()}\`\n`;
+      }
     }
-    if (/\b(const|let|var)\s+/.test(code)) {
-      explanation += "- Declares **variables**\n";
+
+    if (/console\.log/.test(code)) {
+      const logLines = lines.filter(l => /console\.log/.test(l));
+      explanation += `\n**Output:** Prints ${logLines.length} value(s) to the console.\n`;
     }
-    if (/\.\w+\s*\(/.test(code)) {
-      explanation += "- Calls **methods** on objects\n";
-    }
-    if (/\btry\b/.test(code) && /\bcatch\b/.test(code)) {
-      explanation += "- Includes **error handling** (try/catch)\n";
-    }
-    if (/\basync\b|\bawait\b|\.then\(/.test(code)) {
-      explanation += "- Uses **async patterns**\n";
+
+    explanation += `\n**How it works (step by step):**`;
+    const relevantLines = lines.filter(l => l.trim() && !l.trim().match(/^\s*(\/\/|#)/));
+    if (relevantLines.length <= 20) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        if (/^\s*(\/\/|#)/.test(line)) {
+          explanation += `\n• *(comment)* ${trimmed.replace(/^\/\/\s*|^#\s*/, '')}`;
+        } else if (/^\s*(import|require|from)\b/.test(line)) {
+          explanation += `\n• **import** — loads dependencies`;
+        } else if (/^\s*(const|let|var)\s+\w+\s*=/.test(line)) {
+          const vn = trimmed.match(/(?:const|let|var)\s+(\w+)/)?.[1] || '';
+          const vv = trimmed.match(/=\s*(.+)/)?.[1] || '';
+          explanation += `\n• Declares \`${vn}\` = ${vv.slice(0, 40)}`;
+        } else if (/^\s*(function|def|func|fn)\s/.test(line)) {
+          const fn = trimmed.match(/(?:function|def|func|fn)\s+(\w+)/)?.[1] || '';
+          explanation += `\n• Defines **\`${fn}\`** function`;
+        } else if (/^\s*return\b/.test(line)) {
+          explanation += `\n• **Returns** ${trimmed.replace(/^return\s*/, '').slice(0, 50)}`;
+        } else if (/^\s*(if|elif|else if|else)\b/.test(line)) {
+          explanation += `\n• **Conditional** branch`;
+        } else if (/^\s*(for|while)\b/.test(line)) {
+          explanation += `\n• **Loop** — repeats execution`;
+        } else if (/^\s*console\.log/.test(line)) {
+          const lg = trimmed.match(/console\.log\s*\((.+)\)/)?.[1] || '';
+          explanation += `\n• **Prints** ${lg.slice(0, 50)}`;
+        } else if (/^\s*try\b/.test(line)) {
+          explanation += `\n• **Try** — starts error handling`;
+        } else if (/^\s*catch\b/.test(line)) {
+          explanation += `\n• **Catch** — handles errors`;
+        } else if (/^\s*throw\b/.test(line)) {
+          explanation += `\n• **Throws** an error`;
+        } else if (/^\s*class\s/.test(line)) {
+          const cn = trimmed.match(/class\s+(\w+)/)?.[1] || '';
+          explanation += `\n• Defines **class** \`${cn}\``;
+        } else if (/^\s*\}\s*$/.test(line)) {
+          explanation += `\n• *End of block*`;
+        } else {
+          explanation += `\n• \`${trimmed.slice(0, 60)}\``;
+        }
+      }
+    } else {
+      explanation += `\n• Runs ${relevantLines.length} lines of code`;
+      if (/\breturn\b/.test(code)) explanation += `\n• **Returns** a value at the end`;
+      if (/console\.log/.test(code)) explanation += `\n• **Outputs** results to console`;
+      explanation += `\n• *(code too long for full line-by-line explanation)*`;
     }
 
     if (topic) {
-      explanation += `\n**Context:** Relates to topic **"${topic}"**\n`;
+      explanation += `\n\n**Context:** Relates to **"${topic}"**. Focus on how this concept is applied.`;
     }
 
     if (reviewResult.issues && reviewResult.issues.length > 0) {
@@ -721,7 +798,7 @@
       explanation += `\n**Code Score:** ${reviewResult.score}/10`;
     }
 
-    explanation += '\n\n**Suggestion:** Try modifying the code and running it to see how the output changes!';
+    explanation += '\n\n**Try this:** Modify the values in the editor and click **Run ▶** to see how output changes!';
 
     return { explanation, issues: reviewResult.issues, score: reviewResult.score };
   }

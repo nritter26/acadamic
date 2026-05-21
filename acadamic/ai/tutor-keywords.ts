@@ -230,7 +230,33 @@ function handleTopicHelp(message: string, lang?: string): string | null {
     module: `**Modules** let you split code across files, each with a clear responsibility. They prevent naming collisions and make projects maintainable. In ${langName}:\n\n**Key concepts:**\n- **Export:** make functions/variables/types available to other files\n- **Import:** bring in exports from other files\n- **One module = one concern** — keep files focused (< 200 lines)\n\n**Syntax by language:**\n- **JS (ESM):** \`export function foo() {}\` / \`import { foo } from './bar.js'\`\n- **Python:** \`def foo(): ...\` (everything is public) / \`from bar import foo\`\n- **Go:** lowercase = private, uppercase = exported / \`import "module/pkg"\`\n- **Rust:** \`pub fn foo() {}\` / \`use crate::module::foo;\`\n- **C#:** \`public class Foo {}\` / \`using Namespace;\`\n\n**Circular dependencies** — when A imports B and B imports A — cause bugs in every language. Break the cycle by extracting shared logic into a third module.`,
   };
 
-  return topicResponses[topic] || null;
+  const langSpecificContent: Record<string, Record<string, string>> = {
+    type: {
+      js: `**Types** in JavaScript are dynamic — a variable can hold any type. Use \`typeof\` to check: \`typeof 'hello'\` → \`'string'\`. JS has **primitives** (string, number, boolean, null, undefined, symbol, bigint) and **reference types** (objects, arrays, functions). Type mismatches show up at runtime.\n\n**Key difference from static languages:** no compile-time type checking. Use \`typeof\` and \`instanceof\` for runtime checks, or switch to TypeScript for static types.`,
+      ts: `**Types** in TypeScript are static and checked at compile time. Annotate: \`let name: string = 'hello'\`. TS adds: interfaces, type aliases, union types (\`string | number\`), generics, and utility types (\`Partial<T>\`, \`Pick<T,K>\`). Type inference means you don't always need annotations.\n\n**The real power:** the type system catches entire classes of bugs before you run the code. Use strict mode (\`"strict": true\`) for maximum safety.`,
+      rs: `**Types** in Rust are statically checked and fully inferred within function bodies. Key types: \`i32\`, \`u64\`, \`f64\`, \`bool\`, \`char\`, \`String\`, \`&str\`, tuples, arrays, \`Vec<T>\`, \`Option<T>\`, \`Result<T, E>\`.\n\n**Rust's type system enforces memory safety through ownership** — no garbage collector needed! The borrow checker verifies your types at compile time.`,
+      py: `**Types** in Python are dynamic and checked at runtime. Python 3.5+ supports **type hints** (PEP 484) for documentation and tooling: \`def greet(name: str) -> str:\`. These aren't enforced at runtime — use \`mypy\` for static checking.\n\n**Duck typing:** "If it walks like a duck and quacks like a duck, it's a duck." Python cares about behavior, not explicit types.`,
+      go: `**Types** in Go are static with type inference via \`:=\`. Go has basic types (\`int\`, \`float64\`, \`string\`, \`bool\`) and composite types (\`struct\`, \`slice\`, \`map\`, \`chan\`, \`interface\`).\n\n**Zero values:** variables without explicit initialization get zero values (0, "", false, nil). No null pointer exceptions from uninitialized variables!`,
+    },
+    object: {
+      js: `**Objects** in JavaScript are key-value collections with prototype-based inheritance. Every object has a hidden \`[[Prototype]]\` link. Use \`Object.keys()\`, \`Object.values()\`, \`Object.entries()\` for iteration.\n\n**Reference semantics:** objects are passed by reference — \`obj2 = obj1\` doesn't copy! Use \`Object.assign()\`, spread (\`{...obj}\`), or \`structuredClone(obj)\` for copies.\n\n**Prototype chain:** \`obj.toString()\` works because JS walks up the prototype chain until it finds \`toString\` on \`Object.prototype\`.`,
+      py: `**Dictionaries** in Python store key-value pairs: \`{'name': 'Alice', 'age': 30}\`. Access with \`d['key']\` (raises KeyError if missing) or \`d.get('key', default)\` (safe). Python 3.7+ preserves insertion order.\n\n**Everything is an object in Python!** Classes, functions, even modules are objects. Use \`__dict__\` to access an object's attribute dictionary.`,
+      rs: `**Structs** in Rust are custom data types: \`struct User { name: String, age: u32 }\`. Access fields with dot notation: \`user.name\`. Structs can have methods via \`impl\` blocks.\n\n**Ownership:** structs own their data. To share without moving ownership, use references (\`&User\`) or smart pointers (\`Rc<T>\`, \`Arc<T>\`).`,
+    },
+    pointer: {
+      js: `JavaScript doesn't have explicit **pointers**, but understanding reference vs value is crucial:\n\n• **Primitives** (string, number, boolean, null, undefined, symbol, bigint): passed by **value** — \`let a = 5; let b = a; b = 10;\` doesn't change \`a\`\n• **Objects** (arrays, functions, dates): passed by **reference** — \`let obj1 = {x: 1}; let obj2 = obj1; obj2.x = 2;\` changes \`obj1.x\` too!\n• For deep copies: \`JSON.parse(JSON.stringify(obj))\` or \`structuredClone(obj)\``,
+      rs: `Rust has **references** (\`&T\`, \`&mut T\`) which are safe pointers checked by the borrow checker:\n• Only **one** mutable reference OR **many** immutable references (never both)\n• References are **always valid** — no dangling pointers\n• \`*\` dereferences, \`&\` takes a reference\n• Raw pointers (\`*const T\`, \`*mut T\`) exist but require \`unsafe\` to dereference\n\n**The Rust guarantee:** no garbage collector, no null pointer exceptions, no use-after-free.`,
+      go: `Go has **pointers** but no pointer arithmetic: \`var p *int\`. Use \`&\` to get address, \`*\` to dereference: \`p = &x; fmt.Println(*p)\`.\n\n**Key differences from C:**\n• No pointer arithmetic (prevents buffer overflows)\n• Zero value of pointer is \`nil\` — dereferencing \`nil\` panics\n• Slices and maps are reference types — they already contain pointers to underlying data\n• Pass by value, but use pointers to mutate: \`func update(p *Person) { p.Name = "new" }\``,
+    },
+  };
+
+  const generic = topicResponses[topic];
+  if (!generic) return null;
+  const perLang = langSpecificContent[topic];
+  if (perLang && lang && perLang[lang]) {
+    return perLang[lang] + `\n\nWant to learn more about ${topic}s in ${langName}?`;
+  }
+  return generic;
 }
 
 export function runKeywordTutor(

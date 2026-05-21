@@ -8,6 +8,10 @@ let _tutorialFeedbackEl = null;
 let _tutorialLearnerId = (typeof LEARNER_ID !== 'undefined') ? LEARNER_ID : (localStorage.getItem('kodex_learner_id') || (function () { var id = 'tutorial_' + Date.now().toString(36); localStorage.setItem('kodex_learner_id', id); return id; })());
 let _tutorialBackendUrl = (typeof BACKEND_URL !== 'undefined') ? BACKEND_URL : '';
 var _tutorialLastExercise = null;
+var _tutorialTaskState = [false, false, false];
+var _tutorialAutoRan = false;
+var _tutorialExplanationOpen = false;
+var _tutorialQuickQShown = false;
 
 function tutorialEscapeHtml(value) {
     return String(value || '')
@@ -153,6 +157,63 @@ function _tutorialSyncProgress(lang, topic, completed) {
 
 var _tutorialPathShowing = false;
 
+function tutorialInitKeys() {
+    document.addEventListener('keydown', _tutorialKeyHandler);
+}
+
+function tutorialDestroyKeys() {
+    document.removeEventListener('keydown', _tutorialKeyHandler);
+}
+
+function _tutorialKeyHandler(e) {
+    var app = document.getElementById('app');
+    if (!app || !app.classList.contains('tutorial-mode')) return;
+    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+        if (e.key === 'Escape' && document.activeElement.id !== 'editor') return;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') return;
+    }
+    var isCtrl = e.ctrlKey || e.metaKey;
+
+    if (isCtrl && e.key === 'ArrowRight') {
+        e.preventDefault();
+        var continueBtn = document.getElementById('tutorial-continue-btn');
+        if (continueBtn && !continueBtn.disabled) tutorialContinue();
+        return;
+    }
+    if (isCtrl && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        tutorialGoBack();
+        return;
+    }
+    if (e.key === '?' && !isCtrl) {
+        e.preventDefault();
+        if (tutorialManager) tutorialManager.showStuckPanel();
+        return;
+    }
+    if (e.key === 'Escape' && !isCtrl) {
+        var quizOverlay = document.getElementById('tutorial-quiz-overlay');
+        if (quizOverlay && quizOverlay.classList.contains('open')) {
+            quizOverlay.classList.remove('open');
+            return;
+        }
+        var resumeOverlay = document.getElementById('tutorial-resume-overlay');
+        if (resumeOverlay && resumeOverlay.classList.contains('open')) {
+            resumeOverlay.classList.remove('open');
+            return;
+        }
+        tutorialClearAnnotations();
+        var stuckBtn = document.getElementById('tutorial-stuck-btn');
+        if (stuckBtn) stuckBtn.classList.remove('visible', 'pulse', 'glow');
+    }
+    if (isCtrl && (e.key === 'Enter' || e.key === 'Shift')) {
+        if (e.shiftKey) {
+            e.preventDefault();
+            var btn = document.getElementById('tutorial-continue-btn');
+            if (btn && !btn.disabled) tutorialContinue();
+        }
+    }
+}
+
 function tutorialToggleLearningPath() {
     var content = document.getElementById('tutorial-path-content');
     if (!content) return;
@@ -195,6 +256,43 @@ function tutorialToggleLearningPath() {
         });
 }
 
+function tutorialFindChallenge(topic, lang) {
+    if (typeof challengeData === 'undefined' || !challengeData) return null;
+    var challenges = challengeData[lang || tutorialLang];
+    if (!challenges) return null;
+    var lower = (topic || '').toLowerCase();
+    var words = lower.split(/[\s,-]+/).filter(function (w) { return w.length > 2; });
+    var best = null, bestScore = 0;
+    for (var i = 0; i < challenges.length; i++) {
+        var c = challenges[i];
+        var title = (c.title || '').toLowerCase();
+        var desc = (c.desc || '').toLowerCase();
+        var score = 0;
+        for (var w = 0; w < words.length; w++) {
+            if (title.indexOf(words[w]) !== -1) score += 2;
+            if (desc.indexOf(words[w]) !== -1) score += 1;
+        }
+        if (lower.indexOf('variable') !== -1 && title.indexOf('variable') !== -1) score += 3;
+        if (score > bestScore) { bestScore = score; best = { challenge: c, index: i }; }
+    }
+    return best && bestScore >= 2 ? best : null;
+}
+
+function tutorialLoadChallenge() {
+    if (!tutorialManager) return;
+    var step = tutorialManager.getCurrentStep();
+    if (!step) return;
+    var match = tutorialFindChallenge(step.topic, tutorialManager.lang);
+    if (!match) {
+        var output = document.getElementById('output');
+        if (output) output.innerText = '// No related challenge found for this topic.';
+        return;
+    }
+    if (typeof setMode === 'function') {
+        setMode('challenge');
+    }
+}
+
 function tutorialLoadExercise() {
     if (!_tutorialLastExercise) return;
     var editor = document.getElementById('editor');
@@ -234,13 +332,12 @@ function getTutorialStepTask(step, item) {
     var topic = step.topic;
     var code = (item && item.code) || '';
     var escapedTopic = tutorialEscapeHtml(topic);
-    var escapedCode = tutorialEscapeHtml(code);
     var lowerTopic = topic.toLowerCase();
     var lowerCode = code.toLowerCase();
 
-    var task1 = 'Read the explanation for <strong>' + escapedTopic + '</strong>.';
-    var task2 = 'Run the starter code and check the console output.';
-    var task3 = '';
+    var task2Hint = '';
+    var task3Text = '';
+    var task3Hint = '';
 
     var hasLoop = /\b(for|while|do)\s*\(/.test(code) || /\b(for|while|do)\b/.test(lowerCode);
     var hasFunction = /\bfunction\s+\w+\s*\(/.test(code) || /\b(def\s+\w+|func\s+\w+|fn\s+\w+)\b/.test(code);
@@ -256,86 +353,192 @@ function getTutorialStepTask(step, item) {
     var hasEvent = /\b(addEventListener|onclick|onSubmit|onChange|\.on\()/.test(code);
 
     if (hasEvent) {
-        task3 = 'Try changing the event handler to do something different (e.g., change what happens on click).';
+        task3Text = 'Change the event handler to do something different.';
+        task3Hint = 'Look for the event listener and modify what happens when the event fires.';
     } else if (hasLoop && hasConditional) {
-        task3 = 'Change the loop condition or the if-condition inside the loop, then predict how the output changes.';
+        task3Text = 'Change the loop or if-condition and predict the output.';
+        task3Hint = 'Try modifying the condition inside the loop to see how it changes the flow.';
     } else if (hasLoop && hasArray) {
-        task3 = 'Add a new item to the array and see how the loop output changes.';
+        task3Text = 'Add a new item to the array and re-run.';
+        task3Hint = 'Push a new element into the array and observe how the loop output changes.';
     } else if (hasLoop) {
-        task3 = 'Change the loop\'s iteration count or step value, then run it again to see the difference.';
+        task3Text = 'Change how many times the loop runs.';
+        task3Hint = 'Modify the loop counter or condition to change the iteration count.';
     } else if (hasFunction && hasReturn) {
-        task3 = 'Change the return value or add a new parameter to the function and call it with different arguments.';
+        task3Text = 'Change the return value or add a parameter.';
+        task3Hint = 'Try returning a different value or adding a parameter to the function.';
     } else if (hasFunction && hasParam) {
-        task3 = 'Call the function with different argument values and observe the output.';
+        task3Text = 'Call with different arguments and observe.';
+        task3Hint = 'Pass different values to the function and watch how the output changes.';
     } else if (hasFunction) {
-        task3 = 'Add a second function that uses the first one, or modify the existing function\'s body.';
+        task3Text = 'Add a second function or modify this one.';
+        task3Hint = 'Write a new function that uses or extends the existing one.';
     } else if (hasClass) {
-        task3 = 'Add a new property or method to the class, then create an instance and use it.';
+        task3Text = 'Add a property or method to the class.';
+        task3Hint = 'Try adding a new property in the constructor or a new method.';
     } else if (hasConditional) {
-        task3 = 'Change the condition(s) to use different comparisons (e.g., > to <, === to !==) and see what changes.';
+        task3Text = 'Change a condition to use a different comparison.';
+        task3Hint = 'Switch > to <, or === to !==, and see what changes.';
     } else if (hasVariable && hasConsole) {
-        task3 = 'Change the variable\'s value or name, update the print statement, and run again.';
+        task3Text = 'Change the variable value and re-run.';
+        task3Hint = 'Modify the variable assignment, then run to see the new output.';
     } else if (hasVariable) {
-        task3 = 'Change the variable\'s initial value and add a console.log/print to see the result.';
+        task3Text = 'Change the variable and add a print statement.';
+        task3Hint = 'Update the variable\'s value and add console.log() to see it.';
     } else if (hasStringOp) {
-        task3 = 'Try a different string method on the same text and compare the outputs.';
+        task3Text = 'Try a different string method.';
+        task3Hint = 'Replace the method with another (e.g., toUpperCase -> toLowerCase).';
     } else if (hasAsync) {
-        task3 = 'Modify the async function to do something after the await completes.';
+        task3Text = 'Modify what happens after the await.';
+        task3Hint = 'Add a console.log or transform the data after the async operation.';
     } else if (hasArray) {
-        task3 = 'Add an element to the array or try a different array method.';
+        task3Text = 'Add an element or try a different array method.';
+        task3Hint = 'Use push, pop, map, or filter to modify the array.';
     } else if (hasConsole) {
-        task3 = 'Change the message being printed, or add another console.log with different content.';
+        task3Text = 'Change the printed message or add more output.';
+        task3Hint = 'Modify the string inside console.log or add another print statement.';
     } else {
         var kwPatterns = {
-            variable: 'Change the variable name and value, then add code to use it in a different way.',
-            function: 'Modify the function body or create a new function that calls the existing one.',
-            loop: 'Change how many times the loop runs or what it does inside the body.',
-            array: 'Add more items to the array and try accessing them by index.',
-            string: 'Modify the string value or try a different string operation.',
-            class: 'Add another method to the class or create a subclass.',
-            object: 'Add a new property to the object and access it.',
-            'hello world': 'Change the greeting message to something personalized!',
-            print: 'Change what is being printed or add more print statements.',
-            'data type': 'Try using a different data type and observe how the code behaves.',
-            operator: 'Change the operator (+, -, *, /, %) and see how the result changes.',
-            comparison: 'Try different comparison operators (>, <, >=, <=, ===, !==).',
-            boolean: 'Flip the boolean value (true to false) and run again.',
-            input: 'Change the input value and observe how the output changes.',
-            output: 'Modify the format of the output message.',
-            math: 'Change the numbers in the calculation and predict the new result.',
-            null: 'Try assigning a different value (0, null, undefined, "") and compare.'
+            variable: { text: 'Change the variable name and value.', hint: 'Try a different variable name and a new value, then print it.' },
+            function: { text: 'Modify the function or create a new one.', hint: 'Change what the function does, or write a second function that calls it.' },
+            loop: { text: 'Change the loop count or behavior.', hint: 'Modify how many times the loop runs or what it does inside.' },
+            array: { text: 'Add more items or try array methods.', hint: 'Push new elements or try .map, .filter, .reduce.' },
+            string: { text: 'Modify the string or try a different operation.', hint: 'Change the string value or try a different string method.' },
+            class: { text: 'Add another method or create a subclass.', hint: 'Extend the class with a new method or create a child class.' },
+            object: { text: 'Add a new property and access it.', hint: 'Assign a new key-value pair and log it to the console.' },
+            'hello world': { text: 'Change the greeting message!', hint: 'Personalize the message to say something different.' },
+            print: { text: 'Change what is printed or add more.', hint: 'Modify the print statement or add another one.' },
+            'data type': { text: 'Try a different data type.', hint: 'Change the type (string -> number, int -> float) and observe.' },
+            operator: { text: 'Change the operator and see the result.', hint: 'Swap +, -, *, /, % and see how the output changes.' },
+            comparison: { text: 'Try different comparison operators.', hint: 'Use >, <, >=, <=, ===, !== and compare.' },
+            boolean: { text: 'Flip the boolean value.', hint: 'Change true to false (or vice versa) and re-run.' },
+            input: { text: 'Change the input value.', hint: 'Modify the input data and see how the output differs.' },
+            output: { text: 'Modify the output format.', hint: 'Change how the result is formatted or displayed.' },
+            math: { text: 'Change the numbers and predict the result.', hint: 'Modify the numeric values and mentally calculate the new output.' },
+            null: { text: 'Try a different value (0, null, "").', hint: 'Assign different falsy values and compare behavior.' }
         };
-        task3 = null;
+        task3Text = null;
         for (var kw in kwPatterns) {
             if (lowerTopic.includes(kw) || lowerCode.includes(kw)) {
-                task3 = kwPatterns[kw];
+                task3Text = kwPatterns[kw].text;
+                task3Hint = kwPatterns[kw].hint;
                 break;
             }
         }
-        if (!task3) {
+        if (!task3Text) {
             var topics = topic.split(/[\s,-]+/);
             for (var t = 0; t < topics.length; t++) {
                 if (kwPatterns[topics[t].toLowerCase()]) {
-                    task3 = kwPatterns[topics[t].toLowerCase()];
+                    task3Text = kwPatterns[topics[t].toLowerCase()].text;
+                    task3Hint = kwPatterns[topics[t].toLowerCase()].hint;
                     break;
                 }
             }
         }
-        if (!task3) task3 = 'Change one value, name, message, or condition, then run it again to see what happens.';
-    }
-
-    var task = '<ol class="tutorial-task-list">'
-        + '<li>' + task1 + '</li>'
-        + '<li>' + task2 + '</li>'
-        + '<li>' + task3 + '</li>'
-        + '</ol>';
-    if (code.trim()) {
-        var preview = tutorialEscapeHtml(tutorialCodePreview(code));
-        if (preview) {
-            task += '<div class="tutorial-code-cue"><span>Starter focus</span><code>' + preview + '</code></div>';
+        if (!task3Text) {
+            task3Text = 'Change one value, name, or condition and run again.';
+            task3Hint = 'Pick any number, string, or operator and modify it slightly.';
         }
     }
-    return task;
+
+    if (hasConsole || lowerCode.indexOf('console.log') !== -1 || lowerCode.indexOf('print') !== -1) {
+        task2Hint = 'Look at the output panel to see what the code prints.';
+    } else if (hasVariable) {
+        task2Hint = 'The code declares variables — check the console for their values.';
+    } else if (hasFunction) {
+        task2Hint = 'The code defines a function — running it will execute the function body.';
+    } else {
+        task2Hint = 'See what output appears in the panel below.';
+    }
+
+    var html = ''
+        + '<button class="tutorial-task-item" onclick="tutorialTaskClick(0)" data-idx="0">'
+        + '<span class="tutorial-task-icon">1</span>'
+        + '<span class="tutorial-task-text"><strong>Run</strong> the starter code and see what it does<div class="tutorial-task-hint">Click to execute the code</div></span>'
+        + '</button>'
+        + '<button class="tutorial-task-item" onclick="tutorialTaskClick(1)" data-idx="1">'
+        + '<span class="tutorial-task-icon">2</span>'
+        + '<span class="tutorial-task-text"><strong>Change</strong> ' + tutorialEscapeHtml(task3Text.toLowerCase().replace(/^(change|modify|try|add|flip|call|swap|pick)\s+/i, '')) + '<div class="tutorial-task-hint">' + tutorialEscapeHtml(task2Hint || 'Edit the code in the editor') + '</div></span>'
+        + '</button>'
+        + '<button class="tutorial-task-item" onclick="tutorialTaskClick(2)" data-idx="2">'
+        + '<span class="tutorial-task-icon">3</span>'
+        + '<span class="tutorial-task-text"><strong>Experiment:</strong> ' + tutorialEscapeHtml(task3Text) + '<div class="tutorial-task-hint">' + tutorialEscapeHtml(task3Hint) + '</div></span>'
+        + '</button>';
+
+    return html;
+}
+
+function tutorialTaskClick(idx) {
+    if (_tutorialTaskState[idx]) return;
+    var items = document.querySelectorAll('.tutorial-task-item');
+    items.forEach(function (i) { i.classList.remove('active'); });
+    if (items[idx]) items[idx].classList.add('active');
+
+    if (idx === 0) {
+        var runBtn = document.querySelector('.tutorial-interact-btn.run');
+        if (runBtn) {
+            runBtn.style.transition = 'box-shadow 0.15s';
+            runBtn.style.boxShadow = '0 0 0 2px var(--accent)';
+            setTimeout(function () { runBtn.style.boxShadow = ''; }, 1500);
+        }
+        runCode();
+    } else if (idx === 1) {
+        var ed = document.getElementById('editor');
+        if (ed) {
+            ed.focus();
+            var text = ed.value;
+            if (text.length > 0) {
+                var mid = Math.floor(text.length / 3);
+                var end = Math.min(text.length, mid + Math.floor(text.length / 4));
+                ed.setSelectionRange(mid, end);
+                ed.scrollTop = Math.max(0, (text.slice(0, mid).split('\n').length - 3)) * 20;
+            }
+        }
+        tutorialShowFeedback('<strong>\u270F\uFE0F Edit the code</strong> \u2014 try changing a value, name, or condition as suggested. Then click <strong>Run</strong> \u25B6 to see the difference.', 'info');
+        var walkBtn = document.querySelector('.tutorial-interact-btn.run');
+        if (walkBtn) {
+            walkBtn.style.transition = 'box-shadow 0.15s';
+            walkBtn.style.boxShadow = '0 0 0 2px #22c55e';
+            setTimeout(function () { walkBtn.style.boxShadow = ''; }, 2000);
+        }
+    } else if (idx === 2) {
+        var ed2 = document.getElementById('editor');
+        if (ed2) {
+            ed2.focus();
+            ed2.setSelectionRange(ed2.value.length, ed2.value.length);
+        }
+        tutorialShowFeedback('<strong>\U0001F52C Experiment time!</strong> Make a meaningful change and run the code again. Try something you haven\'t tried yet.', 'info');
+        var expBtn = document.querySelector('.tutorial-interact-btn.run');
+        if (expBtn) {
+            expBtn.style.transition = 'box-shadow 0.15s';
+            expBtn.style.boxShadow = '0 0 0 2px #8b5cf6';
+            setTimeout(function () { expBtn.style.boxShadow = ''; }, 2500);
+        }
+    }
+}
+
+function tutorialUpdateTask(idx) {
+    if (_tutorialTaskState[idx]) return;
+    _tutorialTaskState[idx] = true;
+    var items = document.querySelectorAll('.tutorial-task-item');
+    if (items[idx]) {
+        items[idx].classList.remove('active');
+        items[idx].classList.add('done');
+    }
+
+    var allDone = _tutorialTaskState.every(function (s) { return s; });
+    if (allDone) {
+        var taskHeader = document.querySelector('.tutorial-task-header');
+        if (taskHeader) {
+            taskHeader.innerHTML = 'Your task \u2714\uFE0F <span style="color:#10b981;font-size:10px;">All done!</span>';
+        }
+        if (typeof showToast === 'function') showToast('All tasks complete!', 'success');
+    }
+}
+
+function tutorialResetTaskState() {
+    _tutorialTaskState = [false, false, false];
+    _tutorialQuickQShown = false;
 }
 
 function getTutorialAskPrompt() {
@@ -355,6 +558,9 @@ function tutorialAskDevin() {
     setTimeout(function () {
         if (typeof askAI === 'function') askAI(getTutorialAskPrompt());
     }, 300);
+    setTimeout(function () {
+        if (typeof updateAISuggestions === 'function') updateAISuggestions();
+    }, 100);
 }
 
 function clearTutorialWorkspace(lang) {
@@ -371,6 +577,7 @@ function clearTutorialWorkspace(lang) {
     if (nav) nav.innerHTML = '';
     var stuckPanel = document.getElementById('tutorial-stuck-panel');
     if (stuckPanel) stuckPanel.remove();
+    tutorialDestroyKeys();
     tutorialClearAnnotations();
     tutorialClearFeedback();
     _tutorialStarterCode = '';
@@ -506,6 +713,9 @@ class TutorialManager {
                 _tutorialTrackEvent('complete-topic', { lang: this.lang, topic: step.topic, phase: step.phase });
                 _tutorialSyncProgress(this.lang, step.topic, true);
             }
+
+            if (typeof createConfetti === 'function') createConfetti(25);
+            if (typeof showToast === 'function') showToast('Step complete!', 'success');
         }
     }
 
@@ -747,6 +957,7 @@ function initTutorial(lang) {
 
     tutorialClearAnnotations();
     tutorialClearFeedback();
+    tutorialInitKeys();
     _tutorialStarterCode = '';
     _tutorialWalkStep = -1;
 
@@ -817,7 +1028,13 @@ function renderTutorial() {
     var roadmapBtn = document.getElementById('roadmap-btn');
     if (roadmapBtn) roadmapBtn.style.display = 'none';
     var searchInput = document.getElementById('topic-search');
-    if (searchInput) searchInput.style.display = 'none';
+    if (searchInput) {
+        searchInput.style.display = '';
+        searchInput.placeholder = 'Search tutorial topics...';
+        searchInput.oninput = function () {
+            if (typeof debounceFilterTopics === 'function') debounceFilterTopics(this.value);
+        };
+    }
 
     renderTutorialLangBar();
     renderTutorialSidebar();
@@ -929,15 +1146,22 @@ function renderTutorialSidebar() {
         var isCompleted = completedSteps.includes(i);
         var isCurrent = i === currentIdx;
         var isFuture = i > currentIdx && !isCompleted;
-        var fill = isCompleted ? '\u2713' : (isCurrent ? '\u25B6' : '');
+        var prereqMet = i === 0 || completedSteps.includes(i - 1) || isCompleted;
+        var isLocked = isFuture && !prereqMet;
+
+        var dotContent = isCompleted ? '\u2713' : (isCurrent ? '\u25B6' : (isLocked ? '\uD83D\uDD12' : ''));
 
         var cls = 'tutorial-step-btn';
         if (isCompleted) cls += ' completed';
         if (isCurrent) cls += ' current';
         if (isFuture) cls += ' future';
+        if (isLocked) cls += ' locked';
 
-        html += '<button class="' + cls + '" onclick="' + (isFuture ? '' : 'goToTutorialStep(' + i + ')') + '" ' + (isFuture ? 'disabled' : '') + '>'
-            + '<span class="tutorial-step-icon">' + fill + '</span>'
+        var clickable = !isFuture || prereqMet;
+        var title = isLocked ? 'Complete the previous step first' : '';
+
+        html += '<button class="' + cls + '" onclick="' + (clickable ? 'goToTutorialStep(' + i + ')' : '') + '" ' + (!clickable ? 'disabled' : '') + ' title="' + title + '">'
+            + '<span class="tutorial-step-dot">' + dotContent + '</span>'
             + '<span class="tutorial-step-name">' + s.topic + '</span>'
             + '</button>';
     }
@@ -977,6 +1201,13 @@ function loadTutorialStep(idx) {
         return;
     }
 
+    var prevExplanation = document.getElementById('explanation').innerHTML;
+    var prevExpContent = '';
+    if (prevExplanation) {
+        var expBody = document.getElementById('tutorial-exp-body');
+        if (expBody) prevExpContent = expBody.innerHTML;
+    }
+
     loadTopic(step.phase, step.topic);
 
     var expEl = document.getElementById('explanation');
@@ -984,43 +1215,96 @@ function loadTutorialStep(idx) {
     _tutorialStarterCode = item.code || '';
     _tutorialWalkStep = -1;
     _tutorialLastExercise = null;
+    _tutorialAutoRan = false;
+    _tutorialExplanationOpen = false;
+    _tutorialQuickQShown = false;
+    _tutorialTaskState = [false, false, false];
     tutorialClearAnnotations();
     tutorialClearFeedback();
     var hintBar = document.getElementById('tutorial-hint-bar');
     if (hintBar) hintBar.className = 'tutorial-hint-bar';
 
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
+    var totalSteps = tutorialManager.getTotalSteps();
+
     var coach = document.createElement('div');
     coach.className = 'tutorial-coach-card';
     coach.innerHTML = ''
         + '<div class="tutorial-coach-top">'
-        + '<div><div class="tutorial-coach-kicker">Learn code with Devin</div>'
+        + '<div><div class="tutorial-coach-kicker">Step ' + (idx + 1) + ' of ' + totalSteps + '</div>'
         + '<h4>' + tutorialEscapeHtml(step.topic) + '</h4>'
-        + '<p>' + tutorialEscapeHtml(step.phase) + ' · ' + tutorialEscapeHtml(langName) + '</p></div>'
+        + '<p>' + tutorialEscapeHtml(step.phase) + ' \u00B7 ' + tutorialEscapeHtml(langName) + '</p></div>'
         + '<button type="button" onclick="tutorialAskDevin()">Ask Devin</button>'
         + '</div>'
         + '<div class="tutorial-coach-actions">'
-        + '<button type="button" class="tutorial-interact-btn run" onclick="runCode()">\u25B6 Run</button>'
+        + '<button type="button" class="tutorial-interact-btn run" id="tutorial-run-btn" onclick="runCode()">\u25B6 Run</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="tutorialWalkCode()">\uD83D\uDD0D Walk</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="tutorialExplainCurrent()">\uD83D\uDCD6 Explain</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="tutorialShowExpectedOutput()">\uD83D\uDD2D Predict</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="tutorialShowDiff()">\uD83D\uDCDD Diff</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="tutorialManager.resetCurrentCode()">\u21BA Reset</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialLoadChallenge()">\uD83C\uDFC6 Challenge</button>'
         + '<button type="button" class="tutorial-interact-btn" onclick="openCheatsheet()">\uD83D\uDCCB Ref</button>'
         + '</div>';
+
     var taskBox = document.createElement('div');
     taskBox.className = 'tutorial-task-box';
-    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>'
+    taskBox.id = 'tutorial-task-box';
+    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body" id="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>'
         + '<div class="tutorial-hint-bar" id="tutorial-hint-bar"></div>';
-    expEl.insertBefore(coach, expEl.firstChild);
+
+    var explanationContent = expEl.innerHTML;
+    var toggleBtn = document.createElement('button');
+    toggleBtn.className = 'tutorial-exp-toggle';
+    toggleBtn.id = 'tutorial-exp-toggle';
+    toggleBtn.innerHTML = '\uD83D\uDCD6 Read about <strong>' + tutorialEscapeHtml(step.topic) + '</strong> <span class="tutorial-exp-arrow">\u25B6</span>';
+    toggleBtn.onclick = function () { tutorialToggleExplanation(); };
+
+    var expWrapper = document.createElement('div');
+    expWrapper.className = 'tutorial-exp-body';
+    expWrapper.id = 'tutorial-exp-body';
+    expWrapper.style.display = 'none';
+    expWrapper.innerHTML = explanationContent;
+
+    expEl.innerHTML = '';
+    expEl.appendChild(coach);
     expEl.appendChild(taskBox);
+    expEl.appendChild(toggleBtn);
+    expEl.appendChild(expWrapper);
 
     var output = document.getElementById('output');
-    output.innerText = '// Click Run to start \u2014 try the task above!\n// Tip: use Walk \u2192 to step through code line-by-line';
+    output.innerText = '// \u26A1 Auto-running starter code...\n// Once it finishes, try the tasks above!';
 
     renderTutorialNav(idx);
     renderTutorialProgress();
     updateContinueButton(false);
+
+    var ed = document.getElementById('editor');
+    if (ed) {
+        ed.focus();
+        var firstEnd = ed.value.indexOf('\n');
+        if (firstEnd === -1) firstEnd = ed.value.length;
+        ed.setSelectionRange(0, firstEnd);
+    }
+
+    setTimeout(function () {
+        if (typeof runCode === 'function') {
+            _tutorialAutoRan = true;
+            runCode();
+        }
+    }, 400);
+}
+
+function tutorialToggleExplanation() {
+    var body = document.getElementById('tutorial-exp-body');
+    var toggle = document.getElementById('tutorial-exp-toggle');
+    if (!body || !toggle) return;
+    _tutorialExplanationOpen = !_tutorialExplanationOpen;
+    body.style.display = _tutorialExplanationOpen ? 'block' : 'none';
+    toggle.classList.toggle('open', _tutorialExplanationOpen);
+    toggle.innerHTML = _tutorialExplanationOpen
+        ? '\uD83D\uDCD6 Hide explanation <span class="tutorial-exp-arrow">\u25BC</span>'
+        : '\uD83D\uDCD6 Read about <strong>' + tutorialEscapeHtml(tutorialManager.getCurrentStep().topic) + '</strong> <span class="tutorial-exp-arrow">\u25B6</span>';
 }
 
 function renderTutorialNav(idx) {
@@ -1092,6 +1376,7 @@ function tutorialContinue() {
         return;
     }
 
+    var wasCompleted = tutorialManager.isStepCompleted(currentIdx);
     tutorialManager.markStepComplete(currentIdx);
     renderTutorialSidebar();
 
@@ -1100,7 +1385,13 @@ function tutorialContinue() {
         return;
     }
 
-    loadTutorialStep(tutorialManager.getCurrentStepIndex());
+    var nextIdx = tutorialManager.getCurrentStepIndex();
+    var checkpointInterval = 4;
+    if (!wasCompleted && nextIdx > 0 && nextIdx % checkpointInterval === 0 && nextIdx < tutorialManager.getTotalSteps()) {
+        setTimeout(function () { tutorialTriggerCheckpoint(); }, 300);
+    }
+
+    loadTutorialStep(nextIdx);
 }
 
 function showQuizCheckpoint() {
@@ -1250,6 +1541,12 @@ function doTutorialAdvance() {
 function showTutorialComplete() {
     tutorialClearAnnotations();
     tutorialClearFeedback();
+    if (typeof createConfetti === 'function') {
+        createConfetti(60);
+        setTimeout(function () { createConfetti(40); }, 400);
+    }
+    if (typeof showToast === 'function') showToast('Tutorial complete! Great work!', 'success');
+    if (typeof showScorePopup === 'function') showScorePopup('Completed!', 'game-xp-popup');
     var expEl = document.getElementById('explanation');
     var completed = tutorialManager.getCompletedCount();
     var total = tutorialManager.getTotalSteps();
@@ -1276,12 +1573,614 @@ function showTutorialComplete() {
         + '<div class="tutorial-complete-stat"><span class="stat-value">' + totalQuizCorrect + '/' + totalQuizQuestions + '</span><span class="stat-label">Quiz Correct</span></div>'
         + '</div>'
         + '<p class="tutorial-complete-tip">Ready to go deeper? Try the <strong>Code Lab</strong> for challenges, or explore another language from the language bar!</p>'
+        + (typeof challengeData !== 'undefined' && challengeData[tutorialLang] ? '<div class="tutorial-complete-challenge"><span>\uD83C\uDFC6</span> <span>' + challengeData[tutorialLang].length + ' challenges available for ' + tutorialEscapeHtml(langName) + ' — <a href="#" onclick="setMode(\'challenge\'); return false;">Go to Code Lab</a></span></div>' : '')
         + '<button class="tutorial-complete-btn" onclick="tutorialManager.reset(); renderTutorial();">Start Again</button>'
         + '</div>';
 
     document.getElementById('editor').value = '// Congratulations on completing the ' + langName + ' tutorial!\n';
     document.getElementById('output').innerText = '// \uD83C\uDF89 Tutorial complete!';
     document.getElementById('tutorial-nav').style.display = 'none';
+}
+
+var _tutorialCheckpointIdx = 0;
+
+function tutorialTriggerCheckpoint() {
+    if (!tutorialManager) return;
+    var step = tutorialManager.getCurrentStep();
+    if (!step) return;
+    var langData = courseData[tutorialLang];
+    if (!langData || !langData[step.phase] || !langData[step.phase][step.topic]) return;
+    var item = langData[step.phase][step.topic];
+    var code = (item && item.code) || '';
+    if (!code.trim()) return;
+
+    var types = ['spotbug', 'scramble', 'fillblank', 'predict'];
+    var type = types[_tutorialCheckpointIdx % types.length];
+    _tutorialCheckpointIdx++;
+    tutorialShowCheckpoint(type, step, code);
+}
+
+function tutorialShowCheckpoint(type, step, code) {
+    var existing = document.getElementById('tutorial-checkpoint-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'tutorial-checkpoint-overlay';
+    overlay.className = 'tutorial-checkpoint-overlay';
+    overlay.onclick = function (e) { if (e.target === overlay) tutorialCloseCheckpoint(); };
+
+    var paper = document.createElement('div');
+    paper.className = 'tutorial-checkpoint-paper';
+    paper.onclick = function (e) { e.stopPropagation(); };
+
+    var typeLabels = { spotbug: '\uD83D\uDD0D Spot the Bug', scramble: '\uD83D\uDD00 Code Scramble', fillblank: '\u2753 Fill in the Blank', predict: '\uD83D\uDD2E Predict Output' };
+    var typeLabel = typeLabels[type] || '\u2753 Checkpoint';
+
+    var header = document.createElement('div');
+    header.className = 'tutorial-checkpoint-header';
+    header.textContent = typeLabel;
+
+    var subtitle = document.createElement('div');
+    subtitle.className = 'tutorial-checkpoint-subtitle';
+    subtitle.textContent = step.phase + ' \u00B7 ' + step.topic;
+
+    paper.appendChild(header);
+    paper.appendChild(subtitle);
+
+    var body = document.createElement('div');
+    body.id = 'tutorial-checkpoint-body';
+    paper.appendChild(body);
+
+    if (type === 'spotbug') renderSpotBug(body, code);
+    else if (type === 'scramble') renderScramble(body, code);
+    else if (type === 'fillblank') renderFillBlank(body, code);
+    else if (type === 'predict') renderPredict(body, code);
+
+    overlay.appendChild(paper);
+    document.body.appendChild(overlay);
+
+    setTimeout(function () { overlay.classList.add('open'); }, 10);
+}
+
+function tutorialCloseCheckpoint() {
+    var overlay = document.getElementById('tutorial-checkpoint-overlay');
+    if (overlay) overlay.classList.remove('open');
+    setTimeout(function () { if (overlay) overlay.remove(); }, 250);
+}
+
+function renderSpotBug(container, code) {
+    var lines = code.split('\n');
+    if (lines.length < 3) {
+        container.innerHTML = '<div class="tutorial-checkpoint-desc">Not enough code for this exercise type.</div><div class="tutorial-checkpoint-actions"><button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">OK</button></div>';
+        return;
+    }
+
+    var bugIdx = -1;
+    var buggyLines = [];
+    for (var i = 0; i < lines.length; i++) {
+        var t = lines[i].trim();
+        if (t && !t.startsWith('//') && !t.startsWith('#') && !t.startsWith('/*') && !t.startsWith('*')) {
+            buggyLines.push(i);
+        }
+    }
+    if (buggyLines.length === 0) { buggyLines.push(0); }
+    bugIdx = buggyLines[Math.floor(Math.random() * buggyLines.length)];
+
+    var original = lines[bugIdx];
+    var buggyLine = original;
+    var bugMap = [
+        { pattern: /===/g, replacement: '==' },
+        { pattern: /!==/g, replacement: '!=' },
+        { pattern: /<=/g, replacement: '<' },
+        { pattern: />=/g, replacement: '>' },
+        { pattern: /\+\+/g, replacement: ' + 1' },
+        { pattern: /--/g, replacement: ' - 1' },
+        { pattern: /\b(let|var|const)\s+/g, replacement: '' },
+        { pattern: /\+=/g, replacement: '= ' },
+        { pattern: /\bconsole\.log\b/g, replacement: 'console.lg' },
+        { pattern: /\breturn\b/g, replacement: 'retrun' },
+        { pattern: /\bfunction\b/g, replacement: 'functon' },
+        { pattern: /\bif\s*\(/g, replacement: 'if ' },
+        { pattern: /\bfor\s*\(/g, replacement: 'for ' },
+        { pattern: /\bwhile\s*\(/g, replacement: 'while ' },
+    ];
+    var availableBugs = bugMap.filter(function (b) { return b.pattern.test(original); });
+
+    if (availableBugs.length > 0) {
+        var chosen = availableBugs[Math.floor(Math.random() * availableBugs.length)];
+        buggyLine = original.replace(chosen.pattern, chosen.replacement);
+    } else {
+        buggyLine = original + ' // BUG';
+    }
+    lines[bugIdx] = buggyLine;
+
+    var desc = document.createElement('div');
+    desc.className = 'tutorial-checkpoint-desc';
+    desc.textContent = 'One line in this code has a bug. Click the line that you think is wrong.';
+    container.appendChild(desc);
+
+    var codeEl = document.createElement('div');
+    codeEl.className = 'tutorial-checkpoint-code';
+    codeEl.id = 'tutorial-spotbug-code';
+
+    for (var li = 0; li < lines.length; li++) {
+        var lineSpan = document.createElement('div');
+        lineSpan.textContent = lines[li] || ' ';
+        lineSpan.dataset.lineIndex = li;
+        if (li === bugIdx) {
+            lineSpan.className = 'bug-line';
+            lineSpan.onclick = function (idx) {
+                return function () { checkSpotBug(idx, bugIdx); };
+            }(li);
+        }
+        codeEl.appendChild(lineSpan);
+    }
+    container.appendChild(codeEl);
+
+    var result = document.createElement('div');
+    result.id = 'tutorial-spotbug-result';
+    container.appendChild(result);
+
+    var actions = document.createElement('div');
+    actions.className = 'tutorial-checkpoint-actions';
+    actions.innerHTML = '<button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint()">Skip</button>';
+    container.appendChild(actions);
+
+    container._bugIdx = bugIdx;
+    container._checked = false;
+}
+
+function checkSpotBug(selectedIdx, bugIdx) {
+    var container = document.getElementById('tutorial-checkpoint-body');
+    if (!container || container._checked) return;
+    container._checked = true;
+
+    var codeEl = document.getElementById('tutorial-spotbug-code');
+    if (codeEl) {
+        var lines = codeEl.querySelectorAll('.bug-line');
+        lines.forEach(function (el) { el.onclick = null; });
+    }
+
+    var resultEl = document.getElementById('tutorial-spotbug-result');
+    if (!resultEl) return;
+
+    var correct = selectedIdx === bugIdx;
+    resultEl.className = 'tutorial-checkpoint-result ' + (correct ? 'pass' : 'fail');
+    resultEl.innerHTML = correct
+        ? '\u2705 Correct! You spotted the bug in the right line.'
+        : '\u274C Not quite. The bug was on line ' + (bugIdx + 1) + '. Review the code and try to understand the error.';
+
+    var actions = container.querySelector('.tutorial-checkpoint-actions');
+    if (!actions) return;
+    var continueBtn = document.createElement('button');
+    continueBtn.className = 'tutorial-checkpoint-btn primary';
+    continueBtn.textContent = correct ? 'Continue \u2192' : 'Try Again';
+    continueBtn.onclick = function () { tutorialCloseCheckpoint(); };
+    actions.appendChild(continueBtn);
+
+    if (typeof showToast === 'function') showToast(correct ? 'Spot on!' : 'Keep practicing!', correct ? 'success' : 'error');
+    if (correct && typeof showScorePopup === 'function') showScorePopup('+5 XP', 'game-xp-popup');
+}
+
+function renderScramble(container, code) {
+    var lines = code.split('\n').filter(function (l) { return l.trim(); });
+    if (lines.length < 3) {
+        container.innerHTML = '<div class="tutorial-checkpoint-desc">Not enough lines for scrambling.</div><div class="tutorial-checkpoint-actions"><button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">OK</button></div>';
+        return;
+    }
+
+    var shuffled = [...lines];
+    for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+    }
+
+    var desc = document.createElement('div');
+    desc.className = 'tutorial-checkpoint-desc';
+    desc.textContent = 'The code lines are scrambled. Click the lines in the correct order to reconstruct the program.';
+    container.appendChild(desc);
+
+    var sourcePool = document.createElement('div');
+    sourcePool.id = 'tutorial-scramble-pool';
+    sourcePool.style.marginBottom = '12px';
+
+    var targetZone = document.createElement('div');
+    targetZone.id = 'tutorial-scramble-target';
+    targetZone.style.minHeight = '60px';
+    targetZone.style.background = '#0f172a';
+    targetZone.style.border = '1px dashed #334155';
+    targetZone.style.borderRadius = '6px';
+    targetZone.style.padding = '8px';
+    targetZone.style.marginBottom = '12px';
+    targetZone.innerHTML = '<div style="font-size:9px;color:#475569;text-align:center;">Click lines below to add them here in order</div>';
+
+    var activeLines = [];
+    var ordered = [];
+
+    function rebuildPool() {
+        sourcePool.innerHTML = '';
+        for (var li = 0; li < lines.length; li++) {
+            if (activeLines.includes(li)) continue;
+            var btn = document.createElement('button');
+            btn.className = 'tutorial-checkpoint-scramble-line';
+            btn.textContent = shuffled[li];
+            btn.onclick = (function (idx) {
+                return function () {
+                    ordered.push(shuffled[idx]);
+                    activeLines.push(idx);
+                    rebuildPool();
+                    rebuildTarget();
+                };
+            })(li);
+            sourcePool.appendChild(btn);
+        }
+        if (sourcePool.children.length === 0) {
+            sourcePool.innerHTML = '<div style="font-size:9px;color:#475569;text-align:center;">All lines placed!</div>';
+        }
+    }
+
+    function rebuildTarget() {
+        targetZone.innerHTML = '';
+        for (var oi = 0; oi < ordered.length; oi++) {
+            var lineBtn = document.createElement('button');
+            lineBtn.className = 'tutorial-checkpoint-scramble-line';
+            lineBtn.style.borderColor = '#334155';
+            lineBtn.style.cursor = 'pointer';
+            lineBtn.textContent = ordered[oi];
+            lineBtn.onclick = (function (idx) {
+                return function () {
+                    var removed = ordered.splice(idx, 1)[0];
+                    var foundIdx = -1;
+                    for (var si = 0; si < shuffled.length; si++) {
+                        if (shuffled[si] === removed && !activeLines.includes(si)) continue;
+                        if (shuffled[si] === removed) { foundIdx = si; break; }
+                    }
+                    if (foundIdx !== -1) {
+                        activeLines.splice(activeLines.indexOf(foundIdx), 1);
+                    } else {
+                        var cleanIdx = ordered.indexOf(removed);
+                        if (cleanIdx === -1) activeLines.pop();
+                    }
+                    rebuildPool();
+                    rebuildTarget();
+                };
+            })(oi);
+            targetZone.appendChild(lineBtn);
+        }
+        if (ordered.length === 0) {
+            targetZone.innerHTML = '<div style="font-size:9px;color:#475569;text-align:center;">Click lines below to add them here in order</div>';
+        }
+    }
+
+    container.appendChild(targetZone);
+    container.appendChild(sourcePool);
+    rebuildPool();
+
+    var result = document.createElement('div');
+    result.id = 'tutorial-scramble-result';
+    container.appendChild(result);
+
+    var actions = document.createElement('div');
+    actions.className = 'tutorial-checkpoint-actions';
+    actions.innerHTML = ''
+        + '<button class="tutorial-checkpoint-btn primary" onclick="checkScramble()">Check Order</button>'
+        + '<button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint()">Skip</button>';
+    container.appendChild(actions);
+}
+
+function checkScramble() {
+    var container = document.getElementById('tutorial-checkpoint-body');
+    if (!container) return;
+
+    var code = container.parentElement ? container.parentElement.querySelector('.tutorial-checkpoint-subtitle') : null;
+    var langData = tutorialManager ? courseData[tutorialManager.lang] : null;
+    var step = tutorialManager ? tutorialManager.getCurrentStep() : null;
+    if (!step || !langData || !langData[step.phase] || !langData[step.phase][step.topic]) return;
+    var item = langData[step.phase][step.topic];
+    var originalLines = (item.code || '').split('\n').filter(function (l) { return l.trim(); });
+
+    var ordered = [];
+    var targetZone = document.getElementById('tutorial-scramble-target');
+    if (targetZone) {
+        var buttons = targetZone.querySelectorAll('.tutorial-checkpoint-scramble-line');
+        buttons.forEach(function (b) { ordered.push(b.textContent); });
+    }
+
+    var correctCount = 0;
+    for (var i = 0; i < Math.min(ordered.length, originalLines.length); i++) {
+        if (ordered[i].trim() === originalLines[i].trim()) correctCount++;
+    }
+    var allCorrect = correctCount === originalLines.length && ordered.length === originalLines.length;
+
+    var resultEl = document.getElementById('tutorial-scramble-result');
+    if (!resultEl) return;
+
+    resultEl.className = 'tutorial-checkpoint-result ' + (allCorrect ? 'pass' : 'fail');
+    resultEl.innerHTML = allCorrect
+        ? '\u2705 Perfect! ' + correctCount + '/' + originalLines.length + ' lines in the right order.'
+        : '\u274C ' + correctCount + '/' + originalLines.length + ' correct. Review the order and try again.';
+
+    if (allCorrect) {
+        var actions = container.querySelector('.tutorial-checkpoint-actions');
+        if (actions) {
+            actions.innerHTML = '<button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">Continue \u2192</button>';
+        }
+        if (typeof showToast === 'function') showToast('Scramble solved!', 'success');
+        if (typeof showScorePopup === 'function') showScorePopup('+5 XP', 'game-xp-popup');
+    }
+}
+
+function renderFillBlank(container, code) {
+    var lines = code.split('\n');
+    if (lines.length < 2) {
+        container.innerHTML = '<div class="tutorial-checkpoint-desc">Not enough code for this exercise.</div><div class="tutorial-checkpoint-actions"><button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">OK</button></div>';
+        return;
+    }
+
+    var targetWords = [];
+    var wordCandidates = [];
+    var lineText = '';
+    for (var li = 0; li < lines.length; li++) {
+        var t = lines[li].trim();
+        if (!t || t.startsWith('//') || t.startsWith('#')) continue;
+        var words = t.split(/\b/);
+        for (var wi = 0; wi < words.length; wi++) {
+            var w = words[wi].trim();
+            if (w && /^[a-zA-Z_$][a-zA-Z0-9_$]{2,}$/.test(w) && !/^(var|let|const|function|if|else|for|while|do|switch|case|break|continue|return|class|new|this|typeof|void|import|export|from|try|catch|finally|throw)$/i.test(w)) {
+                wordCandidates.push({ word: w, line: li, full: lines[li] });
+            }
+        }
+        lineText += t + ' ';
+    }
+
+    if (wordCandidates.length < 2) {
+        container.innerHTML = '<div class="tutorial-checkpoint-desc">Not enough suitable words to blank out.</div><div class="tutorial-checkpoint-actions"><button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">OK</button></div>';
+        return;
+    }
+
+    var blanksCount = Math.min(3, wordCandidates.length);
+    var selected = [];
+    var usedIndices = {};
+    while (selected.length < blanksCount) {
+        var idx = Math.floor(Math.random() * wordCandidates.length);
+        if (!usedIndices[idx]) {
+            usedIndices[idx] = true;
+            selected.push(wordCandidates[idx]);
+        }
+    }
+
+    var blankedLines = lines.slice();
+    for (var bi = 0; bi < selected.length; bi++) {
+        var sel = selected[bi];
+        blankedLines[sel.line] = blankedLines[sel.line].replace(sel.word, '____');
+    }
+
+    var desc = document.createElement('div');
+    desc.className = 'tutorial-checkpoint-desc';
+    desc.textContent = 'Fill in the ' + blanksCount + ' blank' + (blanksCount > 1 ? 's' : '') + ' with the correct word' + (blanksCount > 1 ? 's' : '') + '.';
+    container.appendChild(desc);
+
+    var codeEl = document.createElement('div');
+    codeEl.className = 'tutorial-checkpoint-code';
+    codeEl.id = 'tutorial-fillblank-code';
+    codeEl.innerHTML = tutorialEscapeHtml(blankedLines.join('\n')).replace(/____/g, '<span class="blank">____</span>');
+    container.appendChild(codeEl);
+
+    var inputs = [];
+    for (var fi = 0; fi < blanksCount; fi++) {
+        var input = document.createElement('input');
+        input.className = 'tutorial-checkpoint-input';
+        input.placeholder = 'Enter word ' + (fi + 1) + '...';
+        input.dataset.blankIdx = fi;
+        container.appendChild(input);
+        inputs.push({ input: input, answer: selected[fi].word });
+    }
+
+    container._fillAnswers = selected;
+
+    var result = document.createElement('div');
+    result.id = 'tutorial-fillblank-result';
+    container.appendChild(result);
+
+    var actions = document.createElement('div');
+    actions.className = 'tutorial-checkpoint-actions';
+    actions.innerHTML = ''
+        + '<button class="tutorial-checkpoint-btn primary" onclick="checkFillBlank()">Check Answers</button>'
+        + '<button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint()">Skip</button>';
+    container.appendChild(actions);
+}
+
+function checkFillBlank() {
+    var container = document.getElementById('tutorial-checkpoint-body');
+    if (!container) return;
+
+    var inputs = container.querySelectorAll('.tutorial-checkpoint-input');
+    var answers = container._fillAnswers;
+    if (!answers || answers.length === 0) return;
+
+    var correct = 0;
+    inputs.forEach(function (inp, idx) {
+        var val = inp.value.trim().toLowerCase();
+        var ans = (answers[idx] && answers[idx].word || '').toLowerCase();
+        if (val === ans) {
+            correct++;
+            inp.style.borderColor = '#10b981';
+        } else {
+            inp.style.borderColor = '#ef4444';
+        }
+        inp.disabled = true;
+    });
+
+    var allCorrect = correct === answers.length;
+
+    var resultEl = document.getElementById('tutorial-fillblank-result');
+    if (!resultEl) return;
+    resultEl.className = 'tutorial-checkpoint-result ' + (allCorrect ? 'pass' : 'fail');
+    resultEl.innerHTML = allCorrect
+        ? '\u2705 All ' + correct + ' correct! Great memory!'
+        : '\u274C ' + correct + '/' + answers.length + ' correct. Check the code and try again.';
+
+    if (allCorrect) {
+        var actions = container.querySelector('.tutorial-checkpoint-actions');
+        if (actions) {
+            actions.innerHTML = '<button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">Continue \u2192</button>';
+        }
+        if (typeof showToast === 'function') showToast('Fill-in complete!', 'success');
+        if (typeof showScorePopup === 'function') showScorePopup('+5 XP', 'game-xp-popup');
+    }
+}
+
+function renderPredict(container, code) {
+    var lines = code.split('\n').filter(function (l) { return l.trim() && !l.trim().startsWith('//') && !l.trim().startsWith('#'); });
+    if (lines.length < 2) {
+        container.innerHTML = '<div class="tutorial-checkpoint-desc">Not enough code to predict output.</div><div class="tutorial-checkpoint-actions"><button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">OK</button></div>';
+        return;
+    }
+
+    var desc = document.createElement('div');
+    desc.className = 'tutorial-checkpoint-desc';
+    desc.textContent = 'Read the code below. What output do you expect when this program runs? Type your prediction.';
+    container.appendChild(desc);
+
+    var codeEl = document.createElement('div');
+    codeEl.className = 'tutorial-checkpoint-code';
+    codeEl.textContent = code;
+    container.appendChild(codeEl);
+
+    var examples = [
+        { lang: 'js', output: 'Hello World' },
+        { lang: 'js', output: '5' },
+        { lang: 'js', output: 'true' },
+        { lang: 'js', output: '10' },
+        { lang: 'js', output: 'Hello' },
+        { lang: 'py', output: 'Hello World' },
+        { lang: 'py', output: '5' },
+        { lang: 'py', output: 'True' },
+    ];
+    var outputHint = '';
+    for (var ei = 0; ei < examples.length; ei++) {
+        if (examples[ei].lang === tutorialLang && code.toLowerCase().includes('console.log') || code.toLowerCase().includes('print')) {
+            outputHint = 'Hint: look for console.log / print statements to predict the output.';
+            break;
+        }
+    }
+
+    var input = document.createElement('input');
+    input.className = 'tutorial-checkpoint-input';
+    input.id = 'tutorial-predict-input';
+    input.placeholder = outputHint || 'Type the expected output...';
+    container.appendChild(input);
+
+    var result = document.createElement('div');
+    result.id = 'tutorial-predict-result';
+    container.appendChild(result);
+
+    var actions = document.createElement('div');
+    actions.className = 'tutorial-checkpoint-actions';
+    actions.innerHTML = ''
+        + '<button class="tutorial-checkpoint-btn primary" onclick="checkPredict()">Check Prediction</button>'
+        + '<button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint()">Skip</button>'
+        + '<button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint(); runCode();">Run to See</button>';
+    container.appendChild(actions);
+}
+
+function checkPredict() {
+    var container = document.getElementById('tutorial-checkpoint-body');
+    if (!container) return;
+
+    var input = document.getElementById('tutorial-predict-input');
+    if (!input) return;
+    var prediction = input.value.trim();
+    if (!prediction) {
+        if (typeof showToast === 'function') showToast('Type your predicted output first!', 'error');
+        return;
+    }
+
+    var resultEl = document.getElementById('tutorial-predict-result');
+    if (!resultEl) return;
+
+    var step = tutorialManager ? tutorialManager.getCurrentStep() : null;
+    var langData = step && courseData[tutorialLang] ? courseData[tutorialLang][step.phase] : null;
+    var item = langData && step ? langData[step.topic] : null;
+    var actualOutput = '';
+    if (item && item.output) {
+        actualOutput = item.output;
+    } else {
+        actualOutput = 'Run the code to see the actual output.';
+    }
+
+    var isClose = false;
+    if (actualOutput && actualOutput !== 'Run the code to see the actual output.') {
+        var predLower = prediction.toLowerCase().trim();
+        var actualLower = String(actualOutput).toLowerCase().trim();
+        isClose = predLower === actualLower || predLower.indexOf(actualLower) !== -1 || actualLower.indexOf(predLower) !== -1;
+    }
+
+    var wasGuided = !actualOutput || actualOutput === 'Run the code to see the actual output.';
+
+    resultEl.className = 'tutorial-checkpoint-result ' + (isClose || wasGuided ? 'pass' : 'fail');
+    resultEl.innerHTML = isClose
+        ? '\u2705 Great prediction! Expected output: "' + tutorialEscapeHtml(actualOutput) + '"'
+        : wasGuided
+            ? '\uD83D\uDCA1 You predicted: "' + tutorialEscapeHtml(prediction) + '". Click "Run to See" to check the actual output!'
+            : '\uD83D\uDCC4 You predicted: "' + tutorialEscapeHtml(prediction) + '". Expected was: "' + tutorialEscapeHtml(actualOutput) + '". Run the code to see for yourself!';
+
+    input.disabled = true;
+
+    var actions = container.querySelector('.tutorial-checkpoint-actions');
+    if (actions) {
+        if (isClose || wasGuided) {
+            actions.innerHTML = '<button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint()">Continue \u2192</button>';
+        }
+        if (!isClose && !wasGuided) {
+            actions.innerHTML = '<button class="tutorial-checkpoint-btn primary" onclick="tutorialCloseCheckpoint(); runCode();">Run to Check</button><button class="tutorial-checkpoint-btn" onclick="tutorialCloseCheckpoint()">Skip</button>';
+        }
+    }
+
+    if (isClose && typeof showScorePopup === 'function') showScorePopup('+5 XP', 'game-xp-popup');
+}
+
+function _tutorialGenerateQuickQuestion(topic, code) {
+    var lower = (topic + ' ' + code).toLowerCase();
+    var questions = [];
+    if (/\bconsole\.log\b/.test(code) || /\bprint\b/.test(code)) {
+        questions.push({ q: 'What does the <code>console.log()</code> / <code>print()</code> function do?', opts: ['Prints output to the console', 'Declares a variable', 'Creates a loop', 'Defines a function'], ans: 0 });
+        questions.push({ q: 'Where does <code>console.log()</code> output appear?', opts: ['In the editor', 'In the output panel', 'In a popup', 'In a file'], ans: 1 });
+    }
+    if (/\b(let|var|const)\b/.test(code)) {
+        questions.push({ q: 'Which keyword declares a variable that cannot be reassigned?', opts: ['let', 'var', 'const', 'function'], ans: 2 });
+        questions.push({ q: 'What is the difference between <code>let</code> and <code>var</code>?', opts: ['No difference', 'let has block scope, var has function scope', 'var has block scope', 'let is for numbers only'], ans: 1 });
+    }
+    if (/\b(function|def|func|fn)\b/.test(code)) {
+        questions.push({ q: 'What is the purpose of a function?', opts: ['To store data', 'To reuse a block of code', 'To create variables', 'To import modules'], ans: 1 });
+        questions.push({ q: 'What keyword returns a value from a function?', opts: ['return', 'exit', 'break', 'continue'], ans: 0 });
+    }
+    if (/\b(for|while)\b/.test(code)) {
+        questions.push({ q: 'What does a loop do?', opts: ['Repeats code multiple times', 'Declares a variable', 'Defines a class', 'Creates an array'], ans: 0 });
+        questions.push({ q: 'What happens if a loop condition is always true?', opts: ['The loop runs once', 'The loop never runs', 'Infinite loop (program may hang)', 'Syntax error'], ans: 2 });
+    }
+    if (/\b(if|else|switch)\b/.test(code)) {
+        questions.push({ q: 'What does an <code>if</code> statement do?', opts: ['Repeats code', 'Executes code based on a condition', 'Declares a function', 'Creates an object'], ans: 1 });
+        questions.push({ q: 'What operator checks equality in JavaScript?', opts: ['=', '== or ===', '!=', '=>'], ans: 1 });
+    }
+    if (/\b(class|constructor)\b/.test(code)) {
+        questions.push({ q: 'What is a class?', opts: ['A function', 'A blueprint for creating objects', 'A type of loop', 'A variable declaration'], ans: 1 });
+        questions.push({ q: 'What method is called when a new object is created from a class?', opts: ['init()', 'start()', 'constructor()', 'new()'], ans: 2 });
+    }
+    if (/\[.*\]/.test(code) && /\.(push|pop)/.test(code)) {
+        questions.push({ q: 'What does <code>.push()</code> do to an array?', opts: ['Removes the last element', 'Adds an element to the end', 'Sorts the array', 'Finds an element'], ans: 1 });
+        questions.push({ q: 'How do you get the number of elements in an array?', opts: ['.size()', '.length', '.count()', '.len()'], ans: 1 });
+    }
+    if (/\b(for\s+|while\s+)/.test(code) && /\[/.test(code)) {
+        questions.push({ q: 'How do you access each element in an array using a loop?', opts: ['By index (array[i])', 'By name', 'By value only', 'You cannot'], ans: 0 });
+    }
+
+    if (questions.length === 0) {
+        questions.push({ q: 'What happens when you click Run?', opts: ['The code is executed and output appears', 'The code is saved', 'The page refreshes', 'Nothing'], ans: 0 });
+        questions.push({ q: 'What should you do after seeing the output?', opts: ['Close the page', 'Try changing the code and running again', 'Ignore it', 'Copy it somewhere'], ans: 1 });
+    }
+
+    return questions[Math.floor(Math.random() * questions.length)];
 }
 
 function tutorialRunHook() {
@@ -1298,13 +2197,18 @@ function tutorialRunHook() {
         outputText.includes('ReferenceError') ||
         outputText.includes('TypeError')
     );
-    tutorialManager.markRun(hasError);
-
     var currentIdx = tutorialManager.getCurrentStepIndex();
     var step = tutorialManager.getCurrentStep();
 
-    if (!hasError && tutorialManager.runCount > 0 && !tutorialManager.isStepCompleted(currentIdx)) {
-        updateContinueButton(true);
+    var isAutoRun = _tutorialAutoRan;
+    _tutorialAutoRan = false;
+
+    if (!isAutoRun) {
+        tutorialManager.markRun(hasError);
+
+        if (!hasError && tutorialManager.runCount > 0 && !tutorialManager.isStepCompleted(currentIdx)) {
+            updateContinueButton(true);
+        }
     }
 
     tutorialClearFeedback();
@@ -1316,7 +2220,87 @@ function tutorialRunHook() {
         }
     }
 
+    if (isAutoRun && !hasError) {
+        var taskBody = document.getElementById('tutorial-task-body');
+        if (taskBody && !taskBody.querySelector('.tutorial-auto-run-notice')) {
+            var notice = document.createElement('div');
+            notice.className = 'tutorial-auto-run-notice';
+            notice.innerHTML = '\u26A1 Code ran automatically \u2014 this is the starter output. Now try the tasks above!';
+            taskBody.insertBefore(notice, taskBody.firstChild);
+        }
+        if (typeof showToast === 'function') showToast('Code auto-ran \u2014 showing starter output', 'info');
+    }
+
     if (!hasError && code.trim()) {
+        if (!isAutoRun) {
+            var codeChanged = code !== _tutorialStarterCode;
+
+            if (_tutorialTaskState[0] === false) {
+                tutorialUpdateTask(0);
+            }
+
+            if (codeChanged && _tutorialTaskState[1] === false) {
+                tutorialUpdateTask(1);
+            }
+
+            if (codeChanged && tutorialManager.runCount >= 2 && _tutorialTaskState[2] === false) {
+                tutorialUpdateTask(2);
+            }
+
+            if (typeof showScorePopup === 'function') showScorePopup('+10 XP', 'game-xp-popup');
+
+            if (!_tutorialQuickQShown && !tutorialManager.isStepCompleted(currentIdx)) {
+                _tutorialQuickQShown = true;
+                var q = _tutorialGenerateQuickQuestion(step ? step.topic : '', code);
+                if (q) {
+                    var taskBox = document.getElementById('tutorial-task-box');
+                    if (taskBox) {
+                        var quickQ = document.createElement('div');
+                        quickQ.className = 'tutorial-quick-q';
+                        quickQ.id = 'tutorial-quick-q';
+                        quickQ.innerHTML = ''
+                            + '<div class="tutorial-quick-q-header">\uD83D\uDCA1 Quick check</div>'
+                            + '<div class="tutorial-quick-q-text">' + q.q + '</div>'
+                            + '<div class="tutorial-quick-q-opts"></div>'
+                            + '<div class="tutorial-quick-q-result" id="tutorial-quick-q-result"></div>'
+                            + '<span class="tutorial-quick-q-skip" onclick="document.getElementById(\'tutorial-quick-q\')?.remove()">Skip \u2192</span>';
+                        taskBox.appendChild(quickQ);
+                        var optsContainer = quickQ.querySelector('.tutorial-quick-q-opts');
+                        if (optsContainer) {
+                            for (var oi = 0; oi < q.opts.length; oi++) {
+                                var optBtn = document.createElement('button');
+                                optBtn.className = 'tutorial-quick-q-opt';
+                                optBtn.textContent = String.fromCharCode(65 + oi) + '. ' + q.opts[oi];
+                                optBtn.onclick = (function (idx, answer, questionObj) {
+                                    return function () {
+                                        if (this.disabled) return;
+                                        var parent = this.parentElement;
+                                        if (!parent) return;
+                                        var btns = parent.querySelectorAll('.tutorial-quick-q-opt');
+                                        btns.forEach(function (b) { b.disabled = true; });
+                                        var allCorrect = idx === answer;
+                                        this.classList.add(allCorrect ? 'correct' : 'wrong');
+                                        btns[answer].classList.add('correct');
+                                        var resultEl = document.getElementById('tutorial-quick-q-result');
+                                        if (resultEl) {
+                                            resultEl.className = 'tutorial-quick-q-result ' + (allCorrect ? 'pass' : 'fail');
+                                            resultEl.innerHTML = allCorrect
+                                                ? '\u2705 Correct! ' + (questionObj.explain || '')
+                                                : '\u274C Not quite. The answer was: <strong>' + questionObj.opts[answer] + '</strong>';
+                                        }
+                                        var skipEl = parent.parentElement ? parent.parentElement.querySelector('.tutorial-quick-q-skip') : null;
+                                        if (skipEl) skipEl.textContent = allCorrect ? 'Dismiss \u2192' : 'Continue \u2192';
+                                        if (allCorrect && typeof showScorePopup === 'function') showScorePopup('+2 XP', 'game-xp-popup');
+                                    };
+                                })(oi, q.ans, q);
+                                optsContainer.appendChild(optBtn);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         var review = typeof localCodeReview === 'function' ? localCodeReview(code, tutorialLang) : null;
         if (review && review.issues && review.issues.length > 0) {
             var errors = review.issues.filter(function (i) { return i.severity === 'error'; });
