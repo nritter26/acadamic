@@ -12,6 +12,28 @@ var _tutorialTaskState = [false, false, false];
 var _tutorialAutoRan = false;
 var _tutorialExplanationOpen = false;
 var _tutorialQuickQShown = false;
+var _tutorialEditorListener = null;
+var _tutorialDebounceTimer = null;
+
+var _tutorialHintLevels = [0, 0, 0];
+
+var _tutorialHints = {
+    0: [
+        'Click the <strong>Run \u25B6</strong> button above to execute the starter code.',
+        'Look at the <strong>output panel</strong> below the editor \u2014 it shows what the code produces.',
+        'The output is the result of running the code. Try the next task to modify it!'
+    ],
+    1: [
+        'Find a <strong>value, name, or condition</strong> in the code and change it.',
+        'Try changing a <strong>number, string, or variable name</strong>, then click Run \u25B6.',
+        'Small changes can have big effects \u2014 experiment and observe the difference!'
+    ],
+    2: [
+        'Make a <strong>meaningful modification</strong> to the code\u2019s behavior.',
+        'Try <strong>adding a new statement</strong>, changing a loop counter, or adding a condition.',
+        'What else could this code do? <strong>Extend it</strong> with something new!'
+    ]
+};
 
 function tutorialEscapeHtml(value) {
     return String(value || '')
@@ -468,11 +490,51 @@ function getTutorialStepTask(step, item) {
     return html;
 }
 
+function tutorialGetAnnotatableLines(code) {
+    var lines = code.split('\n');
+    var targets = [];
+    for (var i = 0; i < lines.length; i++) {
+        var t = lines[i].trim();
+        if (!t || t.startsWith('//') || t.startsWith('#') || t.startsWith('/*') || t.startsWith('*')) continue;
+        if (/\b(let|var|const|int|float|string|bool)\s+\w+\s*=/.test(t)) targets.push(i);
+        else if (/\b(if|else if|elif)\b/.test(t)) targets.push(i);
+        else if (/\b(for|while|do)\b/.test(t)) targets.push(i);
+        else if (/\bfunction\s+\w+\s*\(/.test(t) || /\b(def|func|fn)\s+\w+\s*\(/.test(t)) targets.push(i);
+        else if (/\breturn\b/.test(t)) targets.push(i);
+        else if (/\bclass\s+\w+/.test(t)) targets.push(i);
+        else if (/\bconsole\.log|print\(|println!?/.test(t)) targets.push(i);
+        else if (/=\s*['"`]/.test(t)) targets.push(i);
+        else if (/\bswitch\s*\(/.test(t)) targets.push(i);
+        else if (/\btry\b/.test(t)) targets.push(i);
+    }
+    return targets;
+}
+
+function tutorialAnnotateTargetLines(code) {
+    if (typeof updateAnnotations !== 'function') return;
+    var targets = tutorialGetAnnotatableLines(code);
+    if (targets.length === 0) {
+        var ed = document.getElementById('editor');
+        if (ed && ed.value.length > 0) {
+            updateAnnotations([{ line: 1, message: 'Try editing any line of code', severity: 'info' }]);
+        }
+        return;
+    }
+    var annotateCount = Math.min(3, targets.length);
+    var startIdx = Math.floor(Math.random() * Math.max(1, targets.length - annotateCount + 1));
+    var anns = [];
+    for (var i = startIdx; i < startIdx + annotateCount && i < targets.length; i++) {
+        anns.push({ line: targets[i] + 1, message: 'Try changing this line', severity: 'info' });
+    }
+    updateAnnotations(anns);
+}
+
 function tutorialTaskClick(idx) {
     if (_tutorialTaskState[idx]) return;
     var items = document.querySelectorAll('.tutorial-task-item');
     items.forEach(function (i) { i.classList.remove('active'); });
     if (items[idx]) items[idx].classList.add('active');
+    _tutorialHintLevels[idx] = 0;
 
     if (idx === 0) {
         var runBtn = document.querySelector('.tutorial-interact-btn.run');
@@ -481,25 +543,37 @@ function tutorialTaskClick(idx) {
             runBtn.style.boxShadow = '0 0 0 2px var(--accent)';
             setTimeout(function () { runBtn.style.boxShadow = ''; }, 1500);
         }
+        tutorialClearAnnotations();
         runCode();
     } else if (idx === 1) {
         var ed = document.getElementById('editor');
         if (ed) {
             ed.focus();
-            var text = ed.value;
-            if (text.length > 0) {
-                var mid = Math.floor(text.length / 3);
-                var end = Math.min(text.length, mid + Math.floor(text.length / 4));
+            var code = ed.value;
+            var lines = code.split('\n');
+            var targets = tutorialGetAnnotatableLines(code);
+            if (targets.length > 0) {
+                var midTarget = targets[Math.floor(targets.length / 2)];
+                var pos = 0;
+                for (var li = 0; li < midTarget; li++) { pos += lines[li].length + 1; }
+                var endPos = pos + lines[midTarget].length;
+                ed.setSelectionRange(pos, endPos);
+                ed.scrollTop = Math.max(0, (midTarget - 2)) * 20;
+            } else {
+                var mid = Math.floor(code.length / 3);
+                var end = Math.min(code.length, mid + Math.floor(code.length / 4));
                 ed.setSelectionRange(mid, end);
-                ed.scrollTop = Math.max(0, (text.slice(0, mid).split('\n').length - 3)) * 20;
             }
+            tutorialAnnotateTargetLines(code);
+        } else {
+            tutorialClearAnnotations();
         }
-        tutorialShowFeedback('<strong>\u270F\uFE0F Edit the code</strong> \u2014 try changing a value, name, or condition as suggested. Then click <strong>Run</strong> \u25B6 to see the difference.', 'info');
-        var walkBtn = document.querySelector('.tutorial-interact-btn.run');
-        if (walkBtn) {
-            walkBtn.style.transition = 'box-shadow 0.15s';
-            walkBtn.style.boxShadow = '0 0 0 2px #22c55e';
-            setTimeout(function () { walkBtn.style.boxShadow = ''; }, 2000);
+        tutorialShowFeedback('<strong>\u270F\uFE0F Edit the code</strong> \u2014 change a value, name, or condition. Then click <strong>Run</strong> \u25B6.', 'info');
+        var runBtn2 = document.querySelector('.tutorial-interact-btn.run');
+        if (runBtn2) {
+            runBtn2.style.transition = 'box-shadow 0.15s';
+            runBtn2.style.boxShadow = '0 0 0 2px #22c55e';
+            setTimeout(function () { runBtn2.style.boxShadow = ''; }, 2000);
         }
     } else if (idx === 2) {
         var ed2 = document.getElementById('editor');
@@ -507,7 +581,8 @@ function tutorialTaskClick(idx) {
             ed2.focus();
             ed2.setSelectionRange(ed2.value.length, ed2.value.length);
         }
-        tutorialShowFeedback('<strong>\U0001F52C Experiment time!</strong> Make a meaningful change and run the code again. Try something you haven\'t tried yet.', 'info');
+        tutorialClearAnnotations();
+        tutorialShowFeedback('<strong>\U0001F52C Experiment time!</strong> Make a meaningful change \u2014 try something you haven\u2019t tried yet.', 'info');
         var expBtn = document.querySelector('.tutorial-interact-btn.run');
         if (expBtn) {
             expBtn.style.transition = 'box-shadow 0.15s';
@@ -515,6 +590,31 @@ function tutorialTaskClick(idx) {
             setTimeout(function () { expBtn.style.boxShadow = ''; }, 2500);
         }
     }
+
+    tutorialShowHintForTask(idx);
+}
+
+function tutorialShowHintForTask(idx) {
+    var hintBar = document.getElementById('tutorial-hint-bar');
+    if (!hintBar) return;
+    var level = _tutorialHintLevels[idx];
+    var hints = _tutorialHints[idx];
+    if (!hints || level >= hints.length) return;
+
+    hintBar.className = 'tutorial-hint-bar visible';
+    var hintText = hints[level];
+    var hasMore = level + 1 < hints.length;
+    hintBar.innerHTML = ''
+        + '<div style="display:flex;align-items:flex-start;gap:8px;">'
+        + '<span style="flex-shrink:0;font-size:12px;\uD83D\uDCA1"></span>'
+        + '<div style="flex:1;font-size:10px;line-height:1.5;color:#7dd3fc;">' + hintText + '</div>'
+        + (hasMore ? '<button class="tutorial-feedback-btn" onclick="tutorialNextHint(' + idx + ')" style="flex-shrink:0;">More help \u2192</button>' : '')
+        + '</div>';
+}
+
+function tutorialNextHint(idx) {
+    _tutorialHintLevels[idx]++;
+    tutorialShowHintForTask(idx);
 }
 
 function tutorialUpdateTask(idx) {
@@ -526,13 +626,31 @@ function tutorialUpdateTask(idx) {
         items[idx].classList.add('done');
     }
 
+    if (typeof showToast === 'function') {
+        var msgs = ['Task 1 done!', 'Nice edit!', 'Awesome experiment!'];
+        showToast(msgs[idx] || 'Task complete!', 'success');
+    }
+
     var allDone = _tutorialTaskState.every(function (s) { return s; });
     if (allDone) {
         var taskHeader = document.querySelector('.tutorial-task-header');
         if (taskHeader) {
             taskHeader.innerHTML = 'Your task \u2714\uFE0F <span style="color:#10b981;font-size:10px;">All done!</span>';
         }
-        if (typeof showToast === 'function') showToast('All tasks complete!', 'success');
+        if (typeof showToast === 'function') showToast('All tasks complete! Great work!', 'success');
+        if (typeof createConfetti === 'function') createConfetti(15);
+        var contBtn = document.getElementById('tutorial-continue-btn');
+        if (contBtn) {
+            updateContinueButton(true);
+            contBtn.style.transition = 'box-shadow 0.3s';
+            contBtn.style.boxShadow = '0 0 12px rgba(249,115,22,0.5)';
+            setTimeout(function () { if (contBtn) contBtn.style.boxShadow = ''; }, 3000);
+        }
+        var hintBar = document.getElementById('tutorial-hint-bar');
+        if (hintBar) {
+            hintBar.className = 'tutorial-hint-bar visible';
+            hintBar.innerHTML = '<span style="color:#22c55e;font-weight:700;">\u2714\uFE0F All tasks done! Click Continue \u2192 to move on.</span>';
+        }
     }
 }
 
@@ -1285,6 +1403,17 @@ function loadTutorialStep(idx) {
         var firstEnd = ed.value.indexOf('\n');
         if (firstEnd === -1) firstEnd = ed.value.length;
         ed.setSelectionRange(0, firstEnd);
+
+        if (_tutorialEditorListener) {
+            ed.removeEventListener('input', _tutorialEditorListener);
+        }
+        _tutorialEditorListener = function () {
+            if (_tutorialDebounceTimer) clearTimeout(_tutorialDebounceTimer);
+            _tutorialDebounceTimer = setTimeout(function () {
+                _tutorialDebouncedEditorCheck();
+            }, 600);
+        };
+        ed.addEventListener('input', _tutorialEditorListener);
     }
 
     setTimeout(function () {
@@ -1293,6 +1422,43 @@ function loadTutorialStep(idx) {
             runCode();
         }
     }, 400);
+}
+
+function _tutorialDebouncedEditorCheck() {
+    if (!tutorialManager) return;
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    var code = editor.value;
+    if (!code.trim()) return;
+
+    var step = tutorialManager.getCurrentStep();
+    if (!step) return;
+
+    var codeChanged = code !== _tutorialStarterCode;
+
+    if (codeChanged && !_tutorialTaskState[1]) {
+        var output = document.getElementById('output');
+        if (output && output.innerText.indexOf('Detected code changes') === -1) {
+            if (!tutorialManager.isStepCompleted(tutorialManager.getCurrentStepIndex())) {
+                if (typeof showToast === 'function') showToast('Code changed! Run it to see the difference.', 'info');
+            }
+        }
+    }
+
+    if (typeof localAnalyzeStructure === 'function') {
+        var issues = localAnalyzeStructure(code);
+        if (issues && issues.length > 0) {
+            var hintBar = document.getElementById('tutorial-hint-bar');
+            if (hintBar && !hintBar.querySelector('.tutorial-structural-issue')) {
+                var hasError = issues.some(function (i) { return i.severity === 'error'; });
+                var msg = hasError
+                    ? '<span class="tutorial-structural-issue" style="color:#fca5a5;">\u26A0\uFE0F ' + tutorialEscapeHtml(issues[0].message) + '</span>'
+                    : '<span class="tutorial-structural-issue" style="color:#fbbf24;">\uD83D\uDCA1 ' + tutorialEscapeHtml(issues[0].message) + '</span>';
+                hintBar.className = 'tutorial-hint-bar visible';
+                hintBar.innerHTML = msg;
+            }
+        }
+    }
 }
 
 function tutorialToggleExplanation() {
@@ -1370,15 +1536,22 @@ function tutorialContinue() {
     }
 
     if (currentStep && currentStep.quizAfter) {
+        var qTopic = currentStep.topic;
         tutorialManager.markStepComplete(currentIdx);
         renderTutorialSidebar();
+        if (typeof showToast === 'function') showToast('Completed: ' + qTopic + ' \u2014 time for a quiz!', 'success');
         showQuizCheckpoint();
         return;
     }
 
     var wasCompleted = tutorialManager.isStepCompleted(currentIdx);
+    var prevTopic = currentStep ? currentStep.topic : '';
     tutorialManager.markStepComplete(currentIdx);
     renderTutorialSidebar();
+
+    if (!wasCompleted && prevTopic) {
+        if (typeof showToast === 'function') showToast('\u2714\uFE0F Done with "' + prevTopic + '" \u2014 moving on!', 'success');
+    }
 
     if (tutorialManager.isComplete()) {
         showTutorialComplete();

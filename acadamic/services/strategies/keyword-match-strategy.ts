@@ -1,6 +1,7 @@
 import aiResponses from '../../ai/responses-data';
 import * as conv from '../conversation';
 import type { TutorStrategy, TutorContext } from './types';
+import { matchTopic } from '../../ai/tutor-keywords';
 
 const SINGLE_TOPIC_ALIASES: Record<string, string[]> = {
   variable: ['variables', 'var', 'declare', 'declaration', 'let', 'const'],
@@ -52,8 +53,9 @@ export class KeywordMatchStrategy implements TutorStrategy {
             if (entry.keywords.some(k => topicKey.includes(k) || k.includes(topicKey))) {
               let reply = entry.response;
               const normalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+              const langName = ctx.lang ? ctx.lang.toUpperCase() + ' ' : '';
               if (words.length === 1) {
-                reply += `\n\n💡 **Quick exercise:** Open the **${normalizedWord}** topic in the curriculum, read the explanation, then try modifying the code example and click **Run ▶**!`;
+                reply += `\n\n**Try this:** Open the **${normalizedWord}** topic in the ${langName}curriculum, read the explanation, then modify the code example and click **Run ▶**!`;
               }
               if (ctx.lid) {
                 try { await conv.addMessage(ctx.lid, 'assistant', reply); } catch {}
@@ -63,6 +65,50 @@ export class KeywordMatchStrategy implements TutorStrategy {
               return true;
             }
           }
+        }
+      }
+    }
+
+    // Step 1c: Compound query handling — "difference between X and Y", "diff between X and Y", "X vs Y", "X or Y"
+    // Runs before regex topic matching so comparisons get comparison-style answers
+    const diffMatch = ctx.q.match(/(?:(?:diff|difference)\s+between\s+)?(\w+(?:\s+\w+)?)\s+(?:vs|vs\.|versus|or|and)\s+(\w+(?:\s+\w+)?)/i);
+    if (diffMatch) {
+      const left = matchTopic(diffMatch[1]);
+      const right = matchTopic(diffMatch[2]);
+      const allTopics = [...new Set([...left, ...right])];
+      if (allTopics.length > 0) {
+        for (const topicName of allTopics) {
+          for (const entry of aiResponses) {
+            if (entry.keywords.some(k => topicName.includes(k) || k.includes(topicName))) {
+              let reply = entry.response;
+              reply += `\n\n**Tip:** Try writing a small program that uses each approach and compare the results side by side.`;
+              if (ctx.lid) {
+                try { await conv.addMessage(ctx.lid, 'assistant', reply); } catch {}
+              }
+              sseSend(reply);
+              sseDone();
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // Step 1b: Regex-based topic matching (uses server-side TOPIC_KEYWORDS patterns)
+    // Handles queries like "variable scope", "let vs const", "how to use async await"
+    const matchedTopics = matchTopic(ctx.message);
+    if (matchedTopics.length > 0) {
+      for (const entry of aiResponses) {
+        if (entry.keywords.some(k => matchedTopics.some(t => t.includes(k) || k.includes(t)))) {
+          let reply = entry.response;
+          const langName = ctx.lang ? ctx.lang.toUpperCase() + ' ' : '';
+          reply += `\n\n**In ${langName}curriculum:** Open the **${matchedTopics[0]}** topic and experiment with the code to make it stick.`;
+          if (ctx.lid) {
+            try { await conv.addMessage(ctx.lid, 'assistant', reply); } catch {}
+          }
+          sseSend(reply);
+          sseDone();
+          return true;
         }
       }
     }
