@@ -1464,6 +1464,37 @@ function checkCode() {
     output.style.borderLeft = `3px solid ${color}`;
 }
 
+let autoSyntaxEnabled = false;
+let autoSyntaxTimer = null;
+
+function toggleAutoSyntax() {
+    autoSyntaxEnabled = !autoSyntaxEnabled;
+    const btn = document.getElementById('auto-syntax-btn');
+    if (!btn) return;
+    btn.classList.toggle('active', autoSyntaxEnabled);
+    if (autoSyntaxEnabled) {
+        runAutoSyntax();
+    } else {
+        clearAnnotations();
+    }
+}
+
+function runAutoSyntax() {
+    if (!autoSyntaxEnabled) return;
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    if (code.trim()) {
+        const result = localCodeReview(code, currentLang);
+        updateAnnotations(result.issues.filter(i => i.severity === 'error' || i.severity === 'warning'));
+    }
+}
+
+function scheduleAutoSyntax() {
+    if (!autoSyntaxEnabled) return;
+    clearTimeout(autoSyntaxTimer);
+    autoSyntaxTimer = setTimeout(runAutoSyntax, 500);
+}
+
 function jumpToLine(line) {
     const editor = document.getElementById('editor');
     if (!editor) return;
@@ -3370,7 +3401,11 @@ function initHighlighting() {
     });
     hlEditor = textarea;
     textarea.addEventListener('input', function() {
-        if (currentAnnotations.length > 0) clearAnnotations();
+        if (autoSyntaxEnabled) {
+            scheduleAutoSyntax();
+        } else if (currentAnnotations.length > 0) {
+            clearAnnotations();
+        }
     });
     updateHighlight();
 }

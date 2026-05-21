@@ -47,8 +47,8 @@ const TOPIC_KEYWORDS: Record<string, RegExp> = {
   number: /number|int|float|numeric|arithmetic|math|parseInt|parseFloat|toFixed/i,
   null: /null|undefined|nil|none|option|maybe|optional/i,
   error_handling: /try|catch|throw|except|error.*handl|panic|result|unwrap/i,
-  import: /import|export|require|module|include|using|namespace|use\s+/i,
-  io: /print|log|read|input|output|file|console|stdin|stdout/i,
+  import: /import|export|require|include|using|namespace|use\s+/i,
+  io: /print|log|read|input|output|file|console|stdin|stdout|io/i,
   comment: /comment|docstring|document|documentation|\/\/|\/\*/i,
   operator: /operator|\+|-|\*|\/|%|\+\+|--|compound|assignment/i,
   recursion: /recurs|stack|base\s*case|tail\s*call/i,
@@ -201,7 +201,6 @@ function handleTopicHelp(message: string, lang?: string): string | null {
   if (topics.length === 0) return null;
 
   const langName = LANG_NAMES_AI[lang || ''] || lang || 'programming';
-  const topic = topics[0];
 
   const topicResponses: Record<string, string> = {
     variable: `**Variables** are containers for storing data values. In ${langName}:\n\n• Use descriptive names like \`userCount\` instead of \`x\`\n• Choose the right declaration keyword\n• Think about scope — where can this variable be accessed?\n\nWant me to show you an example of declaring and using variables in ${langName}?`,
@@ -286,8 +285,12 @@ function handleTopicHelp(message: string, lang?: string): string | null {
     },
   };
 
+  let topic: string | null = null;
+  for (const t of topics) {
+    if (topicResponses[t]) { topic = t; break; }
+  }
+  if (!topic) return null;
   const generic = topicResponses[topic];
-  if (!generic) return null;
   const perLang = langSpecificContent[topic];
   if (perLang && lang && perLang[lang]) {
     return perLang[lang] + `\n\nWant to learn more about ${topic}s in ${langName}?`;
