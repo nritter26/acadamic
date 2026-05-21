@@ -104,6 +104,7 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .game-nav-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); }
 .header-extra-tabs .game-nav-btn:hover { color: #000 !important; background: currentColor; border-color: currentColor !important; }
 .header-extra-tabs #nav-backend:hover { background: #6366F1; color: #000; border-color: #6366F1; }
+.header-extra-tabs #nav-cicd:hover { background: #e24329; color: #000; border-color: #e24329; }
 .header-extra-tabs #nav-challenge:hover { background: #a855f7; }
 .header-extra-tabs #nav-compiler:hover { background: #a5f3fc; }
 .header-extra-tabs #nav-gamedev:hover { background: #10b981; }
@@ -112,6 +113,8 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .header-extra-tabs #nav-techstack.active { background: #2DD4BF; color: #000; border-color: #2DD4BF; }
 .header-extra-tabs #nav-quiz:hover { background: #f59e0b; }
 .header-extra-tabs #nav-mobile:hover { background: #ec4899; }
+.header-extra-tabs #nav-tutorial:hover,
+.header-extra-tabs #nav-tutorial.active { background: #000; color: #fff; border-color: #000; }
 .selector { display: flex; gap: 8px; flex-wrap: wrap; }
 .selector button { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; transition: all 0.25s ease; position: relative; overflow: hidden; }
 .selector button:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-1px); }
@@ -1749,6 +1752,36 @@ body.api-mode #apiResponse { display: flex !important; }
     font-size: 10px;
     flex-shrink: 0;
 }
+.tutorial-path-toggle {
+    font-size: 9px;
+    font-weight: 800;
+    color: #64748b;
+    padding: 6px 9px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    user-select: none;
+}
+.tutorial-path-toggle:hover {
+    background: rgba(255,255,255,0.04);
+    color: #94a3b8;
+}
+.tutorial-path-arrow {
+    font-size: 7px;
+    color: #475569;
+}
+.tutorial-path-content {
+    display: none;
+    margin-bottom: 8px;
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px;
+    overflow: hidden;
+}
 .tutorial-chapter-label {
     font-size: 9px;
     color: #475569;
@@ -2189,6 +2222,94 @@ body.api-mode #apiResponse { display: flex !important; }
 .tutorial-complete-btn:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
+}
+
+/* ── Tutorial Interactive Elements ── */
+.tutorial-interact-btn {
+    background: #0f172a;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.tutorial-interact-btn:hover {
+    border-color: var(--accent);
+    color: #fff;
+    background: rgba(249,115,22,0.1);
+}
+.tutorial-interact-btn.run {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+.tutorial-interact-btn.run:hover {
+    filter: brightness(1.1);
+}
+.tutorial-hint-bar {
+    margin-top: 10px;
+    padding: 6px 10px;
+    background: rgba(14,165,233,0.08);
+    border: 1px solid rgba(14,165,233,0.2);
+    border-radius: 6px;
+    font-size: 10px;
+    color: #7dd3fc;
+    display: none;
+}
+.tutorial-hint-bar.visible {
+    display: block;
+}
+.tutorial-feedback {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    line-height: 1.6;
+    animation: fadeIn 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.tutorial-feedback-info {
+    background: rgba(14,165,233,0.1);
+    border: 1px solid rgba(14,165,233,0.25);
+    color: #7dd3fc;
+}
+.tutorial-feedback-success {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.25);
+    color: #34d399;
+}
+.tutorial-feedback-error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    color: #fca5a5;
+}
+.tutorial-feedback-btn {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.tutorial-feedback-btn:hover {
+    background: #334155;
+    color: #fff;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Tutorial Quiz Overlay ── */

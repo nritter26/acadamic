@@ -633,18 +633,18 @@ function runCode() {
     out.innerText = "// Running...";
 
     if (currentLang === 'js') {
+        let localOut = "";
+        const savedLog = console.log;
         try {
-            const log = console.log;
-            let localOut = "";
             console.log = (m) => localOut += "> " + (typeof m === 'object' ? JSON.stringify(m) : m) + "\n";
             eval(code);
-            console.log = log;
+            console.log = savedLog;
             out.innerText = localOut || "(no output)";
             appendAutoReview(out, code, currentLang);
         } catch(e) {
+            console.log = savedLog;
             const errMsg = "Error: " + e.message;
             out.innerText = errMsg;
-            console.log = log;
             addErrorExplainButton(out, errMsg);
             triggerAutoDebug(errMsg, code);
             appendAutoReview(out, code, currentLang);
@@ -2603,12 +2603,12 @@ function testChallenge() {
     const out = document.getElementById('output');
 
     if (challengeLang === 'js') {
+        const savedLog = console.log;
+        let captured = '';
         try {
-            const log = console.log;
-            let captured = '';
             console.log = (m) => captured += "> " + (typeof m === 'object' ? JSON.stringify(m) : m) + "\n";
             eval(code);
-            console.log = log;
+            console.log = savedLog;
             let html = '';
             if (captured) html += '<pre style="font-size:10px;color:#94a3b8;margin:0 0 8px 0;">' + escapeHtml(captured) + '</pre>';
 
@@ -2637,7 +2637,7 @@ function testChallenge() {
             }
             out.innerHTML = html;
         } catch(e) {
-            console.log = log;
+            console.log = savedLog;
             out.innerHTML = `<div class="challenge-result fail">Error: ${escapeHtml(e.message)}</div>`;
         }
     } else {
@@ -3660,6 +3660,8 @@ setMode = function(lang) {
         document.getElementById('tutorial-progress').style.display = 'flex';
         const tutorialNavBtn = document.getElementById('nav-tutorial');
         if (tutorialNavBtn) tutorialNavBtn.classList.add('active');
+        const apiBtn = document.getElementById('api-toggle-btn');
+        if (apiBtn) apiBtn.style.display = 'none';
         initTutorial();
         updateAISuggestions();
         return;
@@ -4275,6 +4277,13 @@ const langIntro = {
         usedFor: 'Building and maintaining server-side components of web and mobile applications, RESTful APIs, microservices, database management, authentication systems, cloud infrastructure, and real-time services.',
         creator: 'Backend development has evolved alongside the World Wide Web since Tim Berners-Lee invented the first web server in 1990. The field grew from simple CGI scripts to modern architectures including microservices, serverless computing, and event-driven systems.',
         code: '// Backend — the engine behind the web\n// Example: Node.js Express API\nconst express = require(\'express\');\nconst app = express();\n\napp.get(\'/api/hello\', (req, res) => {\n    res.json({ message: "Hello from the backend!" });\n});\n\napp.listen(3000, () => {\n    console.log(\'Server running on port 3000\');\n});'
+    },
+    cicd: {
+        name: 'CI/CD',
+        what: 'CI/CD (Continuous Integration/Continuous Delivery) is an automated software delivery method that bridges development and operations. Continuous Integration automatically builds and tests every code change, catching bugs early. Continuous Delivery/Deployment extends this by automatically deploying code to production-like environments or directly to users.',
+        usedFor: 'Automating build, test, and deployment pipelines, ensuring code quality through automated checks, enabling rapid and reliable software releases, reducing manual deployment errors, and providing fast feedback to developers on every commit.',
+        creator: 'The concepts of CI and CD were formalized by Martin Fowler and Kent Beck (Extreme Programming, late 1990s). Continuous Integration was first practiced in the 1990s. Modern CI/CD was popularized by tools like Jenkins (2005), Travis CI (2011), GitHub Actions (2018), and GitLab CI/CD with its built-in Auto DevOps capabilities.',
+        code: '# .gitlab-ci.yml example\nstages:\n  - test\n  - build\n  - deploy\n\nunit-tests:\n  stage: test\n  script:\n    - npm install\n    - npm test\n\nbuild-app:\n  stage: build\n  script:\n    - npm run build\n  artifacts:\n    paths:\n      - dist/\n\ndeploy-prod:\n  stage: deploy\n  script:\n    - npm run deploy\n  only:\n    - main'
     },
     android: {
         name: 'Android',

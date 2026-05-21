@@ -2,6 +2,12 @@
 
 const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig'];
 let tutorialLang = 'js';
+let _tutorialStarterCode = '';
+let _tutorialWalkStep = -1;
+let _tutorialFeedbackEl = null;
+let _tutorialLearnerId = (typeof LEARNER_ID !== 'undefined') ? LEARNER_ID : (localStorage.getItem('kodex_learner_id') || (function () { var id = 'tutorial_' + Date.now().toString(36); localStorage.setItem('kodex_learner_id', id); return id; })());
+let _tutorialBackendUrl = (typeof BACKEND_URL !== 'undefined') ? BACKEND_URL : '';
+var _tutorialLastExercise = null;
 
 function tutorialEscapeHtml(value) {
     return String(value || '')
@@ -16,6 +22,208 @@ function tutorialStripHtml(value) {
     return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+function tutorialAnnotateLine(line, message, severity) {
+    if (typeof updateAnnotations === 'function') {
+        updateAnnotations([{ line: line, message: message || '', severity: severity || 'info' }]);
+    }
+}
+
+function tutorialClearAnnotations() {
+    if (typeof clearAnnotations === 'function') clearAnnotations();
+}
+
+function tutorialWalkCode() {
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    var lines = editor.value.split('\n');
+    var filtered = [];
+    for (var i = 0; i < lines.length; i++) {
+        var trimmed = lines[i].trim();
+        if (trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('#') && !trimmed.startsWith('--')) {
+            filtered.push({ index: i, text: lines[i] });
+        }
+    }
+    if (filtered.length === 0) {
+        tutorialAnnotateLine(1, 'No significant code lines to walk through', 'info');
+        return;
+    }
+    _tutorialWalkStep = (_tutorialWalkStep + 1) % filtered.length;
+    var step = filtered[_tutorialWalkStep];
+    tutorialClearAnnotations();
+    tutorialAnnotateLine(step.index + 1, 'Line ' + (step.index + 1) + ' of ' + lines.length + ': ' + step.text.trim(), 'info');
+    var output = document.getElementById('output');
+    if (output) {
+        output.innerText = '// Walking through line ' + (step.index + 1) + ' of ' + lines.length + '\n// "' + step.text.trim() + '"\n// Click again for next line \u2192';
+    }
+    editor.focus();
+    var pos = 0;
+    for (var j = 0; j < step.index; j++) {
+        pos += lines[j].length + 1;
+    }
+    editor.setSelectionRange(pos, pos + lines[step.index].length);
+    editor.scrollTop = Math.max(0, (step.index - 2)) * 20;
+}
+
+function tutorialExplainCurrent() {
+    if (typeof explainCode === 'function') explainCode();
+}
+
+function tutorialShowExpectedOutput() {
+    var editor = document.getElementById('editor');
+    var output = document.getElementById('output');
+    if (!editor) return;
+    var preview = typeof getLogicalPreview === 'function' ? getLogicalPreview(editor.value, tutorialLang) : null;
+    if (preview) {
+        output.innerText = '// Expected output preview:\n' + preview;
+    } else {
+        output.innerText = '// No expected output preview available for this code.\n// Click Run to see what happens!';
+    }
+}
+
+function tutorialShowDiff() {
+    var editor = document.getElementById('editor');
+    var output = document.getElementById('output');
+    if (!editor || !_tutorialStarterCode) {
+        if (output) output.innerText = '// No starter code to compare against.';
+        return;
+    }
+    var current = editor.value;
+    if (current === _tutorialStarterCode) {
+        output.innerText = '// No changes yet \u2014 edit the code and run it to see your changes highlighted!';
+        return;
+    }
+    if (typeof computeDiff === 'function') {
+        var diff = computeDiff(_tutorialStarterCode, current);
+        var hasChanges = false;
+        var html = '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px;">Changes from starter code:</div>';
+        html += '<div style="max-height:200px;overflow-y:auto;background:#0f172a;border-radius:6px;padding:8px;">';
+        for (var d = 0; d < diff.length; d++) {
+            var entry = diff[d];
+            if (entry.status === 'same') continue;
+            hasChanges = true;
+            var cls = entry.status === 'added' ? 'diff-added' : 'diff-removed';
+            var prefix = entry.status === 'added' ? '+' : '-';
+            var num = entry.status === 'added' ? entry.lineB + 1 : entry.lineA + 1;
+            html += '<div class="diff-line ' + cls + '"><span class="diff-line-num" style="width:24px;display:inline-block;">' + num + '</span>' + prefix + ' ' + tutorialEscapeHtml(entry.text) + '</div>';
+        }
+        html += '</div>';
+        output.innerHTML = hasChanges ? html : '<div style="color:#64748b;font-size:10px;">No meaningful differences detected.</div>';
+    }
+}
+
+function tutorialShowFeedback(message, type) {
+    var nav = document.getElementById('tutorial-nav');
+    if (!nav) return;
+    if (_tutorialFeedbackEl && _tutorialFeedbackEl.parentNode) _tutorialFeedbackEl.remove();
+    _tutorialFeedbackEl = document.createElement('div');
+    _tutorialFeedbackEl.className = 'tutorial-feedback tutorial-feedback-' + (type || 'info');
+    _tutorialFeedbackEl.innerHTML = message;
+    nav.parentNode.insertBefore(_tutorialFeedbackEl, nav.nextSibling);
+}
+
+function tutorialClearFeedback() {
+    if (_tutorialFeedbackEl && _tutorialFeedbackEl.parentNode) {
+        _tutorialFeedbackEl.remove();
+        _tutorialFeedbackEl = null;
+    }
+}
+
+function _tutorialTrackEvent(event, data) {
+    var url = _tutorialBackendUrl + '/api/learner/track';
+    var body = { event: event, learnerId: _tutorialLearnerId };
+    if (data) Object.assign(body, data);
+    try {
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }).catch(function () {});
+    } catch (e) {}
+}
+
+function _tutorialSyncProgress(lang, topic, completed) {
+    try {
+        fetch(_tutorialBackendUrl + '/api/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lang: lang, topic: topic, completed: completed })
+        }).catch(function () {});
+    } catch (e) {}
+}
+
+var _tutorialPathShowing = false;
+
+function tutorialToggleLearningPath() {
+    var content = document.getElementById('tutorial-path-content');
+    if (!content) return;
+    _tutorialPathShowing = !_tutorialPathShowing;
+    var arrow = document.querySelector('.tutorial-path-arrow');
+    if (arrow) arrow.textContent = _tutorialPathShowing ? '\u25B2' : '\u25BC';
+    if (!_tutorialPathShowing) {
+        content.style.display = 'none';
+        return;
+    }
+    content.style.display = 'block';
+    content.innerHTML = '<div style="padding:8px;font-size:9px;color:#64748b;">Loading your learning path...</div>';
+    fetch(_tutorialBackendUrl + '/api/learner/path?lang=' + tutorialLang)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            if (d.error || !d.progress) {
+                content.innerHTML = '<div style="padding:8px;font-size:9px;color:#64748b;">Learning path unavailable</div>';
+                return;
+            }
+            var pct = d.progress.percent;
+            var html = '<div style="padding:8px;">'
+                + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+                + '<span style="font-size:9px;font-weight:800;color:' + (d.weakAreas && d.weakAreas.length > 0 ? '#f59e0b' : 'var(--accent)') + ';">\uD83D\uDCC8 Progress</span>'
+                + '<span style="font-size:8px;color:#94a3b8;">' + d.progress.completed + '/' + d.progress.total + '</span>'
+                + '</div>'
+                + '<div style="height:3px;background:#1e293b;border-radius:2px;margin-bottom:8px;overflow:hidden;">'
+                + '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:2px;transition:width 0.5s;"></div>'
+                + '</div>';
+            if (d.weakAreas && d.weakAreas.length > 0) {
+                html += '<div style="font-size:8px;color:#ef4444;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Needs review</div>';
+                for (var w = 0; w < d.weakAreas.length; w++) {
+                    html += '<div style="font-size:8px;color:#fbbf24;padding:2px 0;">\u26A0 ' + tutorialEscapeHtml(d.weakAreas[w].topic) + ' (' + d.weakAreas[w].mastery + '%)</div>';
+                }
+            }
+            html += '</div>';
+            content.innerHTML = html;
+        })
+        .catch(function () {
+            content.innerHTML = '<div style="padding:8px;font-size:9px;color:#64748b;">Could not load path</div>';
+        });
+}
+
+function tutorialLoadExercise() {
+    if (!_tutorialLastExercise) return;
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    editor.value = _tutorialLastExercise.starterCode || '';
+    if (typeof updateHighlight === 'function') updateHighlight();
+    var output = document.getElementById('output');
+    if (output) output.innerText = '// Exercise loaded! Click Run to test your solution\n// Hint: ' + (_tutorialLastExercise.hint || '');
+    var hintBar = document.getElementById('tutorial-hint-bar');
+    if (hintBar) {
+        hintBar.className = 'tutorial-hint-bar visible';
+        var hint = _tutorialLastExercise.hint || '';
+        var sol = _tutorialLastExercise.solution || '';
+        hintBar.innerHTML = ''
+            + '<div style="font-size:9px;color:#7dd3fc;line-height:1.6;"><strong>Hint:</strong> ' + tutorialEscapeHtml(hint) + '</div>'
+            + (sol ? '<button class="tutorial-feedback-btn" style="margin-top:4px;" onclick="tutorialShowSolution()">\uD83D\uDD11 Show solution</button>' : '');
+    }
+}
+
+function tutorialShowSolution() {
+    if (!_tutorialLastExercise || !_tutorialLastExercise.solution) return;
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    editor.value = _tutorialLastExercise.solution;
+    if (typeof updateHighlight === 'function') updateHighlight();
+    var output = document.getElementById('output');
+    if (output) output.innerText = '// Solution loaded \u2014 run it to see the expected output, then try to recreate it from memory!';
+}
+
 function tutorialCodePreview(code) {
     var lines = String(code || '').split('\n').filter(function (line) { return line.trim(); });
     var firstLine = lines[0] || '';
@@ -23,15 +231,109 @@ function tutorialCodePreview(code) {
 }
 
 function getTutorialStepTask(step, item) {
-    var topic = tutorialEscapeHtml(step.topic);
-    var preview = tutorialEscapeHtml(tutorialCodePreview(item && item.code));
+    var topic = step.topic;
+    var code = (item && item.code) || '';
+    var escapedTopic = tutorialEscapeHtml(topic);
+    var escapedCode = tutorialEscapeHtml(code);
+    var lowerTopic = topic.toLowerCase();
+    var lowerCode = code.toLowerCase();
+
+    var task1 = 'Read the explanation for <strong>' + escapedTopic + '</strong>.';
+    var task2 = 'Run the starter code and check the console output.';
+    var task3 = '';
+
+    var hasLoop = /\b(for|while|do)\s*\(/.test(code) || /\b(for|while|do)\b/.test(lowerCode);
+    var hasFunction = /\bfunction\s+\w+\s*\(/.test(code) || /\b(def\s+\w+|func\s+\w+|fn\s+\w+)\b/.test(code);
+    var hasConditional = /\b(if|else|switch|case|elif)\b/.test(code);
+    var hasVariable = /\b(let|var|const|int|float|string|bool)\s+\w+\s*=/.test(code) || /^\s*\w+\s*=\s*/.test(code);
+    var hasConsole = /\bconsole\.log\b/.test(code) || /\bprint\b/.test(code) || /\bprintln\b/.test(code) || /\bfmt\.Print/.test(code);
+    var hasClass = /\bclass\s+\w+/.test(code);
+    var hasArray = /\[.*\]/.test(code) && /\.(push|pop|map|filter|reduce|length|sort|forEach|join)/.test(code);
+    var hasStringOp = /\.(toUpperCase|toLowerCase|trim|replace|split|substring|slice|charAt|length)/.test(code);
+    var hasAsync = /\b(async|await|\.then\(|\.catch\()/.test(code);
+    var hasReturn = /\breturn\b/.test(code);
+    var hasParam = /function\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code) || /def\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code);
+    var hasEvent = /\b(addEventListener|onclick|onSubmit|onChange|\.on\()/.test(code);
+
+    if (hasEvent) {
+        task3 = 'Try changing the event handler to do something different (e.g., change what happens on click).';
+    } else if (hasLoop && hasConditional) {
+        task3 = 'Change the loop condition or the if-condition inside the loop, then predict how the output changes.';
+    } else if (hasLoop && hasArray) {
+        task3 = 'Add a new item to the array and see how the loop output changes.';
+    } else if (hasLoop) {
+        task3 = 'Change the loop\'s iteration count or step value, then run it again to see the difference.';
+    } else if (hasFunction && hasReturn) {
+        task3 = 'Change the return value or add a new parameter to the function and call it with different arguments.';
+    } else if (hasFunction && hasParam) {
+        task3 = 'Call the function with different argument values and observe the output.';
+    } else if (hasFunction) {
+        task3 = 'Add a second function that uses the first one, or modify the existing function\'s body.';
+    } else if (hasClass) {
+        task3 = 'Add a new property or method to the class, then create an instance and use it.';
+    } else if (hasConditional) {
+        task3 = 'Change the condition(s) to use different comparisons (e.g., > to <, === to !==) and see what changes.';
+    } else if (hasVariable && hasConsole) {
+        task3 = 'Change the variable\'s value or name, update the print statement, and run again.';
+    } else if (hasVariable) {
+        task3 = 'Change the variable\'s initial value and add a console.log/print to see the result.';
+    } else if (hasStringOp) {
+        task3 = 'Try a different string method on the same text and compare the outputs.';
+    } else if (hasAsync) {
+        task3 = 'Modify the async function to do something after the await completes.';
+    } else if (hasArray) {
+        task3 = 'Add an element to the array or try a different array method.';
+    } else if (hasConsole) {
+        task3 = 'Change the message being printed, or add another console.log with different content.';
+    } else {
+        var kwPatterns = {
+            variable: 'Change the variable name and value, then add code to use it in a different way.',
+            function: 'Modify the function body or create a new function that calls the existing one.',
+            loop: 'Change how many times the loop runs or what it does inside the body.',
+            array: 'Add more items to the array and try accessing them by index.',
+            string: 'Modify the string value or try a different string operation.',
+            class: 'Add another method to the class or create a subclass.',
+            object: 'Add a new property to the object and access it.',
+            'hello world': 'Change the greeting message to something personalized!',
+            print: 'Change what is being printed or add more print statements.',
+            'data type': 'Try using a different data type and observe how the code behaves.',
+            operator: 'Change the operator (+, -, *, /, %) and see how the result changes.',
+            comparison: 'Try different comparison operators (>, <, >=, <=, ===, !==).',
+            boolean: 'Flip the boolean value (true to false) and run again.',
+            input: 'Change the input value and observe how the output changes.',
+            output: 'Modify the format of the output message.',
+            math: 'Change the numbers in the calculation and predict the new result.',
+            null: 'Try assigning a different value (0, null, undefined, "") and compare.'
+        };
+        task3 = null;
+        for (var kw in kwPatterns) {
+            if (lowerTopic.includes(kw) || lowerCode.includes(kw)) {
+                task3 = kwPatterns[kw];
+                break;
+            }
+        }
+        if (!task3) {
+            var topics = topic.split(/[\s,-]+/);
+            for (var t = 0; t < topics.length; t++) {
+                if (kwPatterns[topics[t].toLowerCase()]) {
+                    task3 = kwPatterns[topics[t].toLowerCase()];
+                    break;
+                }
+            }
+        }
+        if (!task3) task3 = 'Change one value, name, message, or condition, then run it again to see what happens.';
+    }
+
     var task = '<ol class="tutorial-task-list">'
-        + '<li>Read the explanation for <strong>' + topic + '</strong>.</li>'
-        + '<li>Run the starter code and check the console output.</li>'
-        + '<li>Change one small thing, then run it again.</li>'
+        + '<li>' + task1 + '</li>'
+        + '<li>' + task2 + '</li>'
+        + '<li>' + task3 + '</li>'
         + '</ol>';
-    if (preview) {
-        task += '<div class="tutorial-code-cue"><span>Starter focus</span><code>' + preview + '</code></div>';
+    if (code.trim()) {
+        var preview = tutorialEscapeHtml(tutorialCodePreview(code));
+        if (preview) {
+            task += '<div class="tutorial-code-cue"><span>Starter focus</span><code>' + preview + '</code></div>';
+        }
     }
     return task;
 }
@@ -69,6 +371,10 @@ function clearTutorialWorkspace(lang) {
     if (nav) nav.innerHTML = '';
     var stuckPanel = document.getElementById('tutorial-stuck-panel');
     if (stuckPanel) stuckPanel.remove();
+    tutorialClearAnnotations();
+    tutorialClearFeedback();
+    _tutorialStarterCode = '';
+    _tutorialWalkStep = -1;
 }
 
 function generateTutorialSteps(lang) {
@@ -175,6 +481,14 @@ class TutorialManager {
         this.clearStuckTimer();
         this.setupStuckDetection();
         this.saveState();
+
+        var step = this.getCurrentStep();
+        if (step) {
+            _tutorialTrackEvent('attempt', { lang: this.lang, topic: step.topic, phase: step.phase });
+            if (hasError) {
+                _tutorialTrackEvent('error', { lang: this.lang, topic: step.topic, phase: step.phase });
+            }
+        }
     }
 
     markStepComplete(index) {
@@ -186,6 +500,12 @@ class TutorialManager {
             this.stuckLevel = 0;
             this.clearStuckTimer();
             this.saveState();
+
+            var step = this.steps[index];
+            if (step) {
+                _tutorialTrackEvent('complete-topic', { lang: this.lang, topic: step.topic, phase: step.phase });
+                _tutorialSyncProgress(this.lang, step.topic, true);
+            }
         }
     }
 
@@ -318,6 +638,10 @@ class TutorialManager {
         if (!langData || !langData[step.phase] || !langData[step.phase][step.topic]) return;
         var item = langData[step.phase][step.topic];
         document.getElementById('editor').value = item.code || '';
+        _tutorialStarterCode = item.code || '';
+        _tutorialWalkStep = -1;
+        tutorialClearAnnotations();
+        tutorialClearFeedback();
         if (typeof updateHighlight === 'function') updateHighlight();
         document.getElementById('output').innerText = '// Code has been reset to the original example';
         this.runCount = 0;
@@ -360,6 +684,7 @@ class TutorialManager {
         var key = 'chk_' + this.state.currentStep;
         this.state.quizScores[key] = { correct: correct, total: questions.length, answers: answers };
         this.saveState();
+        _tutorialTrackEvent('quiz', { data: { correct: correct, total: questions.length } });
         return { correct: correct, total: questions.length };
     }
 }
@@ -419,6 +744,11 @@ function initTutorial(lang) {
         });
         return;
     }
+
+    tutorialClearAnnotations();
+    tutorialClearFeedback();
+    _tutorialStarterCode = '';
+    _tutorialWalkStep = -1;
 
     if (!tutorialManager || tutorialManager.lang !== tutorialLang) {
         tutorialManager = new TutorialManager(tutorialLang);
@@ -540,6 +870,7 @@ function switchTutorialLang(lang) {
 }
 
 function finishSwitchTutorialLang(lang) {
+    currentLang = lang;
     var saved = _savedProgress[lang];
     if (saved) {
         tutorialManager = new TutorialManager(lang);
@@ -583,7 +914,9 @@ function renderTutorialSidebar() {
     html += '<div class="tutorial-sidebar-summary">'
         + '<span>' + tutorialEscapeHtml(langName) + ' path</span>'
         + '<strong>' + completedCount + '/' + total + '</strong>'
-        + '</div>';
+        + '</div>'
+        + '<div class="tutorial-path-toggle" onclick="tutorialToggleLearningPath()">\uD83D\uDCDA Learning Path <span class="tutorial-path-arrow">\u25BC</span></div>'
+        + '<div class="tutorial-path-content" id="tutorial-path-content"></div>';
 
     var currentChapter = '';
     for (var i = 0; i < steps.length; i++) {
@@ -626,6 +959,8 @@ function goToTutorialStep(idx) {
     tutorialManager.errorCount = 0;
     tutorialManager.lastInteraction = Date.now();
     tutorialManager.saveState();
+    tutorialClearAnnotations();
+    tutorialClearFeedback();
     renderTutorialSidebar();
     loadTutorialStep(idx);
 }
@@ -646,6 +981,14 @@ function loadTutorialStep(idx) {
 
     var expEl = document.getElementById('explanation');
     var item = langData[step.phase][step.topic];
+    _tutorialStarterCode = item.code || '';
+    _tutorialWalkStep = -1;
+    _tutorialLastExercise = null;
+    tutorialClearAnnotations();
+    tutorialClearFeedback();
+    var hintBar = document.getElementById('tutorial-hint-bar');
+    if (hintBar) hintBar.className = 'tutorial-hint-bar';
+
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
     var coach = document.createElement('div');
     coach.className = 'tutorial-coach-card';
@@ -657,18 +1000,23 @@ function loadTutorialStep(idx) {
         + '<button type="button" onclick="tutorialAskDevin()">Ask Devin</button>'
         + '</div>'
         + '<div class="tutorial-coach-actions">'
-        + '<button type="button" onclick="runCode()">Run example</button>'
-        + '<button type="button" onclick="tutorialManager.resetCurrentCode()">Reset starter</button>'
-        + '<button type="button" onclick="openCheatsheet()">Cheatsheet</button>'
+        + '<button type="button" class="tutorial-interact-btn run" onclick="runCode()">\u25B6 Run</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialWalkCode()">\uD83D\uDD0D Walk</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialExplainCurrent()">\uD83D\uDCD6 Explain</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialShowExpectedOutput()">\uD83D\uDD2D Predict</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialShowDiff()">\uD83D\uDCDD Diff</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="tutorialManager.resetCurrentCode()">\u21BA Reset</button>'
+        + '<button type="button" class="tutorial-interact-btn" onclick="openCheatsheet()">\uD83D\uDCCB Ref</button>'
         + '</div>';
     var taskBox = document.createElement('div');
     taskBox.className = 'tutorial-task-box';
-    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>';
+    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>'
+        + '<div class="tutorial-hint-bar" id="tutorial-hint-bar"></div>';
     expEl.insertBefore(coach, expEl.firstChild);
     expEl.appendChild(taskBox);
 
     var output = document.getElementById('output');
-    output.innerText = '// Click Run to start — try the task above!';
+    output.innerText = '// Click Run to start \u2014 try the task above!\n// Tip: use Walk \u2192 to step through code line-by-line';
 
     renderTutorialNav(idx);
     renderTutorialProgress();
@@ -900,6 +1248,8 @@ function doTutorialAdvance() {
 }
 
 function showTutorialComplete() {
+    tutorialClearAnnotations();
+    tutorialClearFeedback();
     var expEl = document.getElementById('explanation');
     var completed = tutorialManager.getCompletedCount();
     var total = tutorialManager.getTotalSteps();
@@ -939,16 +1289,68 @@ function tutorialRunHook() {
     if (!document.getElementById('app')?.classList.contains('tutorial-mode')) return;
     if (currentLang !== tutorialManager.lang) return;
     var output = document.getElementById('output');
+    var editor = document.getElementById('editor');
+    var code = editor ? editor.value : '';
+    var outputText = output ? output.innerText : '';
     var hasError = output && (
-        output.innerText.includes('Error:') ||
-        output.innerText.includes('SyntaxError') ||
-        output.innerText.includes('ReferenceError') ||
-        output.innerText.includes('TypeError')
+        outputText.includes('Error:') ||
+        outputText.includes('SyntaxError') ||
+        outputText.includes('ReferenceError') ||
+        outputText.includes('TypeError')
     );
     tutorialManager.markRun(hasError);
 
     var currentIdx = tutorialManager.getCurrentStepIndex();
+    var step = tutorialManager.getCurrentStep();
+
     if (!hasError && tutorialManager.runCount > 0 && !tutorialManager.isStepCompleted(currentIdx)) {
         updateContinueButton(true);
+    }
+
+    tutorialClearFeedback();
+
+    if (hasError && step) {
+        var tip = typeof getErrorTutorTip === 'function' ? getErrorTutorTip(step.topic, outputText) : null;
+        if (tip) {
+            tutorialShowFeedback('<strong>\uD83D\uDCA1 Hint:</strong> ' + tip.replace(/\*\*/g, '').split('\n')[0], 'error');
+        }
+    }
+
+    if (!hasError && code.trim()) {
+        var review = typeof localCodeReview === 'function' ? localCodeReview(code, tutorialLang) : null;
+        if (review && review.issues && review.issues.length > 0) {
+            var errors = review.issues.filter(function (i) { return i.severity === 'error'; });
+            var warnings = review.issues.filter(function (i) { return i.severity === 'warning'; });
+            var msg = '<strong>\u2713 Code ran!</strong>';
+            if (errors.length > 0 || warnings.length > 0) {
+                msg += ' <span style="color:#f59e0b;">Review found ' + errors.length + ' errors, ' + warnings.length + ' warnings</span>';
+                msg += ' <button class="tutorial-feedback-btn" onclick="checkCode()">\uD83D\uDD0D Check</button>';
+            } else {
+                msg += ' <span style="color:#22c55e;">Clean code \u2014 no issues!</span>';
+            }
+            msg += ' <button class="tutorial-feedback-btn" onclick="tutorialShowDiff()">\u2194 Diff</button>';
+            tutorialShowFeedback(msg, 'success');
+        } else {
+            tutorialShowFeedback('<strong>\u2713 Code ran successfully!</strong> <button class="tutorial-feedback-btn" onclick="tutorialShowDiff()">\u2194 See changes</button>', 'success');
+        }
+
+        if (step && typeof localGenerateExercise === 'function') {
+            _tutorialLastExercise = localGenerateExercise(step.topic, tutorialLang, 'beginner');
+            if (_tutorialLastExercise && _tutorialLastExercise.starterCode && _tutorialLastExercise.description) {
+                var hintBar = document.getElementById('tutorial-hint-bar');
+                if (hintBar) {
+                    hintBar.className = 'tutorial-hint-bar visible';
+                    hintBar.innerHTML = ''
+                        + '<div style="display:flex;align-items:flex-start;gap:8px;">'
+                        + '<span style="flex-shrink:0;font-size:14px;">\uD83C\uDFAF</span>'
+                        + '<div style="flex:1;">'
+                        + '<div style="font-weight:800;font-size:10px;margin-bottom:2px;">' + tutorialEscapeHtml(_tutorialLastExercise.title) + '</div>'
+                        + '<div style="font-size:9px;color:#94a3b8;line-height:1.5;">' + tutorialEscapeHtml(_tutorialLastExercise.description) + '</div>'
+                        + '<button class="tutorial-feedback-btn" style="margin-top:6px;" onclick="tutorialLoadExercise()">\u2B06 Try this variation</button>'
+                        + '</div>'
+                        + '</div>';
+                }
+            }
+        }
     }
 }

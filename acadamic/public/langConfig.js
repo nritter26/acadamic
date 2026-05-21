@@ -12,7 +12,7 @@ const LANG_NAMES = {
     rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
     playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
     godot: 'godot', unity: 'unity', unreal: 'unreal',
-    mobile: 'mobile game development',
+    mobile: 'mobile game development', cicd: 'ci/cd',
 };
 const NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {

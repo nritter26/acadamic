@@ -9,6 +9,8 @@ const FALLBACK_DIR = path.join(os.tmpdir(), 'koded-learners');
 let activeLearnerDir = LEARNER_DIR;
 
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30] as const;
+const STALE_TOPIC_DAYS = parseInt(process.env.STALE_TOPIC_DAYS || '90', 10);
+const MAX_TOPICS_PER_LANG = 500;
 
 interface LearnerTopic {
   completedAt: string | null;
@@ -29,6 +31,7 @@ interface LearnerPhase {
 interface Learner {
   id: string;
   topics: Record<string, LearnerTopic>;
+  archivedTopics: Record<string, LearnerTopic>;
   phases: Record<string, LearnerPhase>;
   quizzes: { total: number; correct: number };
   challenges: { total: number; solved: number };
@@ -82,6 +85,7 @@ interface RecommendedTopic {
 const DEFAULT_LEARNER: Learner = {
   id: '',
   topics: {},
+  archivedTopics: {},
   phases: {},
   quizzes: { total: 0, correct: 0 },
   challenges: { total: 0, solved: 0 },
@@ -91,10 +95,10 @@ const DEFAULT_LEARNER: Learner = {
   masteryByConcept: {},
   reviewQueue: [],
   aiInteractions: 0,
-  schemaVersion: 2,
+  schemaVersion: 3,
 };
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 function getLearnerPath(learnerId: string): string {
   const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -150,7 +154,39 @@ function migrateLearner(data: Record<string, unknown>): Learner {
     }
     data.topics = migrated;
   }
+  if (!data.archivedTopics) {
+    data.archivedTopics = {};
+  }
   return { ...DEFAULT_LEARNER, ...data, schemaVersion: SCHEMA_VERSION } as Learner;
+}
+
+function pruneStaleTopics(learner: Learner): Learner {
+  const now = Date.now();
+  const staleCutoff = now - STALE_TOPIC_DAYS * 24 * 60 * 60 * 1000;
+  if (!learner.archivedTopics) learner.archivedTopics = {};
+  const active: Record<string, LearnerTopic> = {};
+  for (const [key, topic] of Object.entries(learner.topics)) {
+    if (topic.completedAt && new Date(topic.completedAt).getTime() < staleCutoff && topic.reviews >= 3) {
+      learner.archivedTopics[key] = topic;
+    } else {
+      active[key] = topic;
+    }
+  }
+  learner.topics = active;
+  const topicCount = Object.keys(learner.topics).length;
+  if (topicCount > MAX_TOPICS_PER_LANG) {
+    const sorted = Object.entries(learner.topics).sort((a, b) => {
+      const aCompleted = a[1].completedAt || '';
+      const bCompleted = b[1].completedAt || '';
+      return aCompleted.localeCompare(bCompleted);
+    });
+    const toArchive = sorted.slice(0, topicCount - MAX_TOPICS_PER_LANG);
+    for (const [key, topic] of toArchive) {
+      learner.archivedTopics[key] = topic;
+      delete learner.topics[key];
+    }
+  }
+  return learner;
 }
 
 export async function getLearner(learnerId: string): Promise<Learner> {
@@ -163,9 +199,10 @@ export async function getLearner(learnerId: string): Promise<Learner> {
       return { ...DEFAULT_LEARNER, id: learnerId };
     }
     if (data.schemaVersion !== SCHEMA_VERSION) {
-      return migrateLearner(data as unknown as Record<string, unknown>);
+      const migrated = migrateLearner(data as unknown as Record<string, unknown>);
+      return pruneStaleTopics(migrated);
     }
-    return data;
+    return pruneStaleTopics(data as Learner);
   } catch (e: unknown) {
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
       return { ...DEFAULT_LEARNER, id: learnerId };
