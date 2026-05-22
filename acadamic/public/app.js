@@ -426,7 +426,7 @@ function triggerAutoDebug(errorText, code) {
                 body: JSON.stringify({
                     message: `Debug this error and suggest a fix. Error: ${errorText.slice(0, 300)}`,
                     lang: currentLang,
-                    topic: currentTopic,
+                    topic: convSubject || currentTopic,
                     code: code.slice(0, 2000),
                     hasError: true,
                     output: errorText.slice(0, 500),
@@ -620,11 +620,14 @@ function appendAutoReview(outEl, code, lang) {
     outEl.innerText += summary;
 }
 
+var _tutorialLastRunHadError = false;
+
 function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
     const existingBtn = document.getElementById('ai-explain-error-btn');
     if (existingBtn) existingBtn.remove();
+    _tutorialLastRunHadError = false;
     if (!code.trim()) { out.innerText = "// No code to run"; return; }
     if (currentLang === 'git') {
         out.innerText = processGitCommand(code);
@@ -646,6 +649,7 @@ function runCode() {
             console.log = savedLog;
             const errMsg = "Error: " + e.message;
             out.innerText = errMsg;
+            _tutorialLastRunHadError = true;
             addErrorExplainButton(out, errMsg);
             triggerAutoDebug(errMsg, code);
             appendAutoReview(out, code, currentLang);
@@ -663,6 +667,7 @@ function runCode() {
     .then(r => r.json())
     .then(d => {
         out.innerText = d.output;
+        _tutorialLastRunHadError = !!(d.error || d.output.includes('Error:') || d.output.includes('FAIL'));
         setRunLoading(false);
         if (typeof tutorialRunHook === 'function') tutorialRunHook();
         if (d.error || d.output.includes('Error:') || d.output.includes('FAIL')) {
@@ -673,6 +678,7 @@ function runCode() {
     })
     .catch(e => {
         setRunLoading(false);
+        _tutorialLastRunHadError = true;
         const preview = getLogicalPreview(code, currentLang);
         if (preview) {
             out.innerText = preview;
@@ -863,7 +869,7 @@ function dismissReviewReminder() {
 }
 
 let aiCodeId = 0;
-function highlightCode(code, lang) {
+function highlightAICode(code, lang) {
     const kw = {
         js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
         ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
@@ -879,19 +885,15 @@ function highlightCode(code, lang) {
         const tokens = [];
         let i = 0;
         while (i < line.length) {
-            // single-line comment
             const rest = line.slice(i);
             const sCm = rest.match(/^\/\/.*/);
             if (sCm) { tokens.push('<span class="syn-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
             const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
             if (bCm) { tokens.push('<span class="syn-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
-            // string
             const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
             if (str) { tokens.push('<span class="syn-string">' + str[1] + '</span>'); i += str[1].length; continue; }
-            // number
             const num = rest.match(/^\b(\d+\.?\d*|0x[0-9a-fA-F]+)\b/);
             if (num) { tokens.push('<span class="syn-number">' + num[1] + '</span>'); i += num[1].length; continue; }
-            // word (keyword or identifier)
             const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
             if (word) {
                 if (kw.includes(word[1])) tokens.push('<span class="syn-keyword">' + word[1] + '</span>');
@@ -932,7 +934,7 @@ function formatAIText(text) {
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
         const idx = codeBlocks.length;
         const safeCode = escapeAIAttr(code);
-        const highlighted = highlightCode(code, lang);
+        const highlighted = highlightAICode(code, lang);
         codeBlocks.push({ lang, code, safeCode, highlighted });
         return `\x00CODEBLOCK${idx}\x00`;
     });
@@ -1308,8 +1310,13 @@ function extractSubject(text) {
             if (name === display) return langMatch[1];
         }
     }
-    const topicMatch = text.match(/\*\*([^*]+)\*\*/);
-    if (topicMatch) return topicMatch[1];
+    const boldMatches = text.match(/\*\*([^*]+)\*\*/g);
+    if (boldMatches) {
+        for (const bm of boldMatches) {
+            const candidate = bm.slice(2, -2);
+            if (detectTopicInQuery(candidate)) return candidate;
+        }
+    }
     return currentTopic || '';
 }
 
@@ -1559,7 +1566,22 @@ async function askAI(q) {
     if (detectedLang) convLang = detectedLang;
     const detectedTopic = detectTopicInQuery(q);
     if (detectedTopic) {
-        const topicName = detectedTopic.charAt(0).toUpperCase() + detectedTopic.slice(1).replace(/_/g, ' ');
+        const TOPIC_CURRICULUM_NAMES = {
+            variable: 'var let const', function: 'Function Declarations',
+            string: 'String Methods', number: 'Math & Number',
+            boolean: 'Truthy & Falsy', array: 'Array Methods',
+            object: 'Objects', class: 'Classes', promise: 'Promises',
+            loop: 'for Loops', type: 'Primitive Types',
+            null: 'null vs undefined', error_handling: 'Error Handling',
+            io: 'Console Debugging', comment: 'Syntax & Comments',
+            operator: 'Arithmetic Operators', recursion: 'Iterators & Generators',
+            closure: 'Closures', generics: 'Spread & Rest',
+            pointer: 'Reference Types', pattern_match: 'Destructuring',
+            concurrency: 'Async/Await', testing: 'Console Debugging',
+            module: 'ES Modules',
+        };
+        const topicName = TOPIC_CURRICULUM_NAMES[detectedTopic] ||
+            (detectedTopic.charAt(0).toUpperCase() + detectedTopic.slice(1).replace(/_/g, ' '));
         convSubject = topicName;
     }
     addAIMessage(q, 'user');
@@ -3413,7 +3435,7 @@ function initHighlighting() {
 function updateHighlight() {
     if (!hlOverlay) return;
     const code = hlEditor ? hlEditor.value : document.getElementById('editor').value;
-    let html = highlightCode(code, currentLang);
+    let html = highlightEditorCode(code, currentLang);
     if (currentAnnotations.length > 0) {
         const lines = html.split('\n');
         for (const ann of currentAnnotations) {
@@ -3431,19 +3453,43 @@ function updateHighlight() {
     }
 }
 
-function highlightCode(code, lang) {
-    let h = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    h = h.replace(/(\/\/.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/(#.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/(--.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/\/\*[\s\S]*?\*\//g, '<span class="hl-comment">$&</span>');
-    h = h.replace(/(["'`])(?:(?!\1|\\).|\\.)*\1/g, '<span class="hl-string">$&</span>');
-    h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-number">$1</span>');
+function highlightEditorCode(code, lang) {
     const kws = LANG_KEYWORDS[lang] || LANG_KEYWORDS.js;
-    const sorted = [...kws].sort((a, b) => b.length - a.length);
-    const escaped = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-    if (escaped) h = h.replace(new RegExp('\\b(' + escaped + ')\\b', 'gi'), '<span class="hl-keyword">$1</span>');
-    return h;
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const tokens = [];
+    let i = 0;
+    while (i < escaped.length) {
+        const rest = escaped.slice(i);
+        const newl = rest.match(/^\n/);
+        if (newl) { tokens.push('\n'); i++; continue; }
+        const wsp = rest.match(/^[ \t]+/);
+        if (wsp) { tokens.push(wsp[0]); i += wsp[0].length; continue; }
+        const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
+        if (bCm) { tokens.push('<span class="hl-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
+        const sCm = rest.match(/^\/\/[^\n]*/);
+        if (sCm) { tokens.push('<span class="hl-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
+        const hCm = rest.match(/^#[^\n]*/);
+        if (hCm && ['py','rs','sh','bash'].includes(lang)) { tokens.push('<span class="hl-comment">' + hCm[0] + '</span>'); i += hCm[0].length; continue; }
+        const sqlCm = rest.match(/^--[^\n]*/);
+        if (sqlCm && ['pg','mysql','sqlite'].includes(lang)) { tokens.push('<span class="hl-comment">' + sqlCm[0] + '</span>'); i += sqlCm[0].length; continue; }
+        const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
+        if (str) { tokens.push('<span class="hl-string">' + str[0] + '</span>'); i += str[0].length; continue; }
+        const num = rest.match(/^\b(0x[0-9a-fA-F]+|\d+\.?\d*)\b/);
+        if (num) { tokens.push('<span class="hl-number">' + num[0] + '</span>'); i += num[0].length; continue; }
+        const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
+        if (word) {
+            if (kws.some(k => k.toLowerCase() === word[1].toLowerCase())) {
+                tokens.push('<span class="hl-keyword">' + word[1] + '</span>');
+            } else {
+                tokens.push(word[1]);
+            }
+            i += word[1].length;
+            continue;
+        }
+        tokens.push(escaped[i]);
+        i++;
+    }
+    return tokens.join('');
 }
 
 // ── Compiler Pipeline ──

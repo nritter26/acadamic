@@ -19,6 +19,8 @@ export class SemanticSearchStrategy implements TutorStrategy {
   priority = 30;
 
   async canHandle(): Promise<boolean> {
+    const provider = process.env.AI_PROVIDER || 'hybrid';
+    if (provider !== 'keyword' && provider !== 'hybrid') return false;
     return true;
   }
 

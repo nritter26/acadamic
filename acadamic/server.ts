@@ -63,10 +63,11 @@ logger.info({ db: dbStatus }, 'Database initialized');
 // ── AI Provider Config ──
 const AI_PROVIDER = process.env.AI_PROVIDER || 'hybrid';
 if (AI_PROVIDER !== 'keyword' && AI_PROVIDER !== 'hybrid') {
-  const REQUIRED_FOR_AI = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'LOCAL_LLM_ENDPOINT'];
-  const missingKeys = REQUIRED_FOR_AI.filter(key => !process.env[key]);
-  if (missingKeys.length > 0) {
-    logger.warn({ missingKeys }, `AI_PROVIDER="${AI_PROVIDER}" but missing keys — falling back to keyword`);
+  const REQUIRED_FOR_AI: Record<string, string> = { OPENAI_API_KEY: 'openai', ANTHROPIC_API_KEY: 'anthropic', LOCAL_LLM_ENDPOINT: 'local' };
+  const keyForProvider = AI_PROVIDER === 'openai' ? 'OPENAI_API_KEY' : AI_PROVIDER === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'LOCAL_LLM_ENDPOINT';
+  if (!process.env[keyForProvider]) {
+    logger.error({ AI_PROVIDER }, `AI_PROVIDER="${AI_PROVIDER}" requires ${keyForProvider} but it's not set. Set the env var or use AI_PROVIDER=keyword`);
+    process.exit(1);
   }
 }
 if (!process.env.AI_SYSTEM_PROMPT) {
@@ -103,7 +104,16 @@ const server = http.createServer(app);
 setupWebSocket(server);
 
 // ── Schedule periodic cleanup ──
-setInterval(pruneOldConversations, 3_600_000);
+const cleanupInterval = setInterval(pruneOldConversations, 3_600_000);
+
+// ── Graceful shutdown ──
+function shutdown() {
+  logger.info('Shutting down...');
+  clearInterval(cleanupInterval);
+  server.close(() => process.exit(0));
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 // ── Start ──
 server.listen(PORT, () => {

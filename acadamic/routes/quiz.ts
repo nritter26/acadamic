@@ -30,7 +30,7 @@ Format your response as a JSON array of objects, each with:
 Make questions educational and appropriate for ${level || 'beginner'} level. Return ONLY valid JSON.`;
 
     const reply = await askLLM([{ role: 'user', content: prompt }]);
-    if (reply) {
+    if (typeof reply === 'string' && reply) {
       const jsonMatch = reply.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         const questions = JSON.parse(jsonMatch[0]) as QuizQuestion[];

@@ -1,6 +1,6 @@
 // ── Multi-Language Tutorial System ──
 
-const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig'];
+const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig', 'pg', 'mysql', 'sqlite'];
 let tutorialLang = 'js';
 let _tutorialStarterCode = '';
 let _tutorialWalkStep = -1;
@@ -361,6 +361,23 @@ function getTutorialStepTask(step, item) {
     var task3Text = '';
     var task3Hint = '';
 
+    // --- SQL pattern detection ---
+    var isSql = (tutorialLang === 'pg' || tutorialLang === 'mysql' || tutorialLang === 'sqlite');
+    var hasSelect = /\bSELECT\b/i.test(code);
+    var hasJoin = /\b(JOIN|INNER\s+JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|FULL\s+JOIN|CROSS\s+JOIN|LATERAL)\b/i.test(code);
+    var hasSubquery = /\(\s*SELECT\b/i.test(code);
+    var hasDDL = /\b(CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|CREATE\s+INDEX|CREATE\s+VIEW|CREATE\s+TYPE|TRUNCATE)\b/i.test(code);
+    var hasDML = /\b(INSERT\s+INTO|UPDATE\s+.*SET|DELETE\s+FROM|MERGE\s+INTO)\b/i.test(code);
+    var hasAggregate = /\b(GROUP\s+BY|HAVING|COUNT\(|SUM\(|AVG\(|MIN\(|MAX\()\b/i.test(code);
+    var hasOrderBy = /\bORDER\s+BY\b/i.test(code);
+    var hasWhere = /\bWHERE\b/i.test(code);
+    var hasWindow = /\b(OVER\s*\(|ROW_NUMBER|RANK|DENSE_RANK|LAG|LEAD|FIRST_VALUE|LAST_VALUE|NTILE)\b/i.test(code);
+    var hasCTE = /\bWITH\b/i.test(code) && /\bAS\s*\(/i.test(code);
+    var hasSetOp = /\b(UNION|INTERSECT|EXCEPT)\b/i.test(code);
+    var hasLimit = /\b(LIMIT|OFFSET|FETCH\s+FIRST|TOP)\b/i.test(code);
+    var hasGroupBy = /\bGROUP\s+BY\b/i.test(code);
+
+    // --- General programming pattern detection ---
     var hasLoop = /\b(for|while|do)\s*\(/.test(code) || /\b(for|while|do)\b/.test(lowerCode);
     var hasFunction = /\bfunction\s+\w+\s*\(/.test(code) || /\b(def\s+\w+|func\s+\w+|fn\s+\w+)\b/.test(code);
     var hasConditional = /\b(if|else|switch|case|elif)\b/.test(code);
@@ -373,7 +390,6 @@ function getTutorialStepTask(step, item) {
     var hasReturn = /\breturn\b/.test(code);
     var hasParam = /function\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code) || /def\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code);
     var hasEvent = /\b(addEventListener|onclick|onSubmit|onChange|\.on\()/.test(code);
-
     if (hasEvent) {
         task3Text = 'Change the event handler to do something different.';
         task3Hint = 'Look for the event listener and modify what happens when the event fires.';
@@ -1083,10 +1099,108 @@ function initTutorial(lang) {
         tutorialManager = new TutorialManager(tutorialLang);
     }
 
-    var hasProgress = tutorialManager.getCompletedCount() > 0;
-    if (hasProgress) {
-        showResumePrompt();
-    } else {
+    showTutorialTopicBrowser();
+}
+
+function showTutorialTopicBrowser() {
+    var expEl = document.getElementById('explanation');
+    var editor = document.getElementById('editor');
+    var output = document.getElementById('output');
+    var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
+    var data = courseData[tutorialLang];
+    if (!data) return;
+
+    currentLang = tutorialLang;
+    document.getElementById('app').className = 'tutorial-mode';
+    var titleEl = document.getElementById('header-title');
+    if (titleEl) titleEl.innerText = 'TUTORIAL — ' + langName.toUpperCase();
+
+    document.querySelectorAll('.selector button').forEach(function (b) { b.classList.remove('active'); });
+    document.getElementById('engine-bar').style.display = 'none';
+    document.getElementById('platform-bar').style.display = 'none';
+    document.getElementById('level-bar').style.display = 'none';
+    document.getElementById('schema-btn').style.display = 'none';
+    document.getElementById('cheatsheet-btn').style.display = 'none';
+
+    renderTutorialLangBar();
+    renderTutorialSidebar();
+
+    var completed = tutorialManager.getCompletedCount();
+    var total = tutorialManager.getTotalSteps();
+    var step = tutorialManager.getCurrentStep();
+
+    var resumeHtml = '';
+    if (completed > 0 && step) {
+        resumeHtml = '<div class="tutorial-resume-banner" onclick="resumeTutorial()">'
+            + '\u25B6 Resume where you left off: <strong>' + tutorialEscapeHtml(step.topic) + '</strong>'
+            + ' (' + completed + '/' + total + ' completed)'
+            + '</div>';
+    }
+
+    var phases = Object.keys(data);
+    var browserHtml = '';
+    for (var p = 0; p < phases.length; p++) {
+        var phase = phases[p];
+        var topics = Object.keys(data[phase]);
+        var topicCount = topics.length;
+        var completedInPhase = 0;
+        for (var t = 0; t < topics.length; t++) {
+            for (var ci = 0; ci < tutorialManager.state.completedSteps.length; ci++) {
+                var si = tutorialManager.steps[tutorialManager.state.completedSteps[ci]];
+                if (si && si.phase === phase && si.topic === topics[t]) {
+                    completedInPhase++;
+                    break;
+                }
+            }
+        }
+        browserHtml += '<div class="tutorial-browser-phase">'
+            + '<div class="tutorial-browser-phase-header">'
+            + '<span class="tutorial-browser-phase-name">' + tutorialEscapeHtml(phase) + '</span>'
+            + '<span class="tutorial-browser-phase-count">' + completedInPhase + '/' + topicCount + '</span>'
+            + '</div>'
+            + '<div class="tutorial-browser-topics">';
+        for (var t = 0; t < topics.length; t++) {
+            var topic = topics[t];
+            var isCompleted = false;
+            for (var ci = 0; ci < tutorialManager.state.completedSteps.length; ci++) {
+                var si = tutorialManager.steps[tutorialManager.state.completedSteps[ci]];
+                if (si && si.phase === phase && si.topic === topic) {
+                    isCompleted = true;
+                    break;
+                }
+            }
+            var stepIdx = -1;
+            for (var si2 = 0; si2 < tutorialManager.steps.length; si2++) {
+                if (tutorialManager.steps[si2].phase === phase && tutorialManager.steps[si2].topic === topic) {
+                    stepIdx = si2;
+                    break;
+                }
+            }
+            var completedCls = isCompleted ? ' completed' : '';
+            browserHtml += '<button class="tutorial-browser-topic' + completedCls + '" onclick="goToTutorialStep(' + stepIdx + ')">'
+                + (isCompleted ? '\u2713 ' : '') + tutorialEscapeHtml(topic)
+                + '</button>';
+        }
+        browserHtml += '</div></div>';
+    }
+
+    expEl.innerHTML = ''
+        + '<div class="tutorial-browser">'
+        + '<div class="tutorial-browser-header">'
+        + '<h2>' + tutorialEscapeHtml(langName) + '</h2>'
+        + '<p>Pick any topic to start learning. No prerequisites needed \u2014 explore freely!</p>'
+        + '</div>'
+        + resumeHtml
+        + browserHtml
+        + '</div>';
+
+    if (editor) editor.value = '// Pick a topic from the browser above to get started!';
+    if (output) output.innerText = '// ' + tutorialEscapeHtml(langName) + ' \u2014 ' + total + ' topics available';
+}
+
+function resumeTutorial() {
+    var step = tutorialManager.getCurrentStep();
+    if (step) {
         startTutorial();
     }
 }
@@ -1229,8 +1343,7 @@ function finishSwitchTutorialLang(lang) {
 
     renderTutorialLangBar();
     renderTutorialSidebar();
-    loadTutorialStep(tutorialManager.getCurrentStepIndex());
-    var lName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[lang]) || lang;
+    showTutorialTopicBrowser();
 }
 
 function renderTutorialSidebar() {
@@ -1263,22 +1376,14 @@ function renderTutorialSidebar() {
 
         var isCompleted = completedSteps.includes(i);
         var isCurrent = i === currentIdx;
-        var isFuture = i > currentIdx && !isCompleted;
-        var prereqMet = i === 0 || completedSteps.includes(i - 1) || isCompleted;
-        var isLocked = isFuture && !prereqMet;
 
-        var dotContent = isCompleted ? '\u2713' : (isCurrent ? '\u25B6' : (isLocked ? '\uD83D\uDD12' : ''));
+        var dotContent = isCompleted ? '\u2713' : (isCurrent ? '\u25B6' : '\u25CB');
 
         var cls = 'tutorial-step-btn';
         if (isCompleted) cls += ' completed';
         if (isCurrent) cls += ' current';
-        if (isFuture) cls += ' future';
-        if (isLocked) cls += ' locked';
 
-        var clickable = !isFuture || prereqMet;
-        var title = isLocked ? 'Complete the previous step first' : '';
-
-        html += '<button class="' + cls + '" onclick="' + (clickable ? 'goToTutorialStep(' + i + ')' : '') + '" ' + (!clickable ? 'disabled' : '') + ' title="' + title + '">'
+        html += '<button class="' + cls + '" onclick="goToTutorialStep(' + i + ')" title="' + tutorialEscapeHtml(s.topic) + '">'
             + '<span class="tutorial-step-dot">' + dotContent + '</span>'
             + '<span class="tutorial-step-name">' + s.topic + '</span>'
             + '</button>';
@@ -1294,8 +1399,7 @@ function renderTutorialSidebar() {
 
 function goToTutorialStep(idx) {
     if (idx < 0 || idx >= tutorialManager.steps.length) return;
-    var completed = tutorialManager.state.completedSteps;
-    if (!completed.includes(idx) && idx > tutorialManager.getCurrentStepIndex()) return;
+    currentLang = tutorialLang;
     tutorialManager.state.currentStep = idx;
     tutorialManager.runCount = 0;
     tutorialManager.errorCount = 0;
@@ -1387,15 +1491,74 @@ function loadTutorialStep(idx) {
     expEl.innerHTML = '';
     expEl.appendChild(coach);
     expEl.appendChild(taskBox);
+
+    var testSelfBtn = document.createElement('button');
+    testSelfBtn.className = 'tutorial-test-self-btn';
+    testSelfBtn.innerHTML = '\uD83E\uDDEA Test Yourself';
+    testSelfBtn.onclick = function () {
+        var q = _tutorialGenerateQuickQuestion(step.topic, item.code || '');
+        if (q) {
+            var existingQ = document.getElementById('tutorial-quick-q');
+            if (existingQ) existingQ.remove();
+            var quickQ = document.createElement('div');
+            quickQ.className = 'tutorial-quick-q';
+            quickQ.id = 'tutorial-quick-q';
+            quickQ.innerHTML = ''
+                + '<div class="tutorial-quick-q-header">\uD83D\uDCA1 Quick check</div>'
+                + '<div class="tutorial-quick-q-text">' + q.q + '</div>'
+                + '<div class="tutorial-quick-q-opts"></div>'
+                + '<div class="tutorial-quick-q-result" id="tutorial-quick-q-result"></div>'
+                + '<span class="tutorial-quick-q-skip" onclick="document.getElementById(\'tutorial-quick-q\')?.remove()">Dismiss \u2192</span>';
+            taskBox.appendChild(quickQ);
+            var optsContainer = quickQ.querySelector('.tutorial-quick-q-opts');
+            if (optsContainer) {
+                for (var oi = 0; oi < q.opts.length; oi++) {
+                    var optBtn = document.createElement('button');
+                    optBtn.className = 'tutorial-quick-q-opt';
+                    optBtn.textContent = String.fromCharCode(65 + oi) + '. ' + q.opts[oi];
+                    optBtn.onclick = (function (idx, answer, questionObj) {
+                        return function () {
+                            if (this.disabled) return;
+                            var parent = this.parentElement;
+                            if (!parent) return;
+                            var btns = parent.querySelectorAll('.tutorial-quick-q-opt');
+                            btns.forEach(function (b) { b.disabled = true; });
+                            var allCorrect = idx === answer;
+                            this.classList.add(allCorrect ? 'correct' : 'wrong');
+                            btns[answer].classList.add('correct');
+                            var resultEl = document.getElementById('tutorial-quick-q-result');
+                            if (resultEl) {
+                                resultEl.className = 'tutorial-quick-q-result ' + (allCorrect ? 'pass' : 'fail');
+                                resultEl.innerHTML = allCorrect
+                                    ? '\u2705 Correct! ' + (questionObj.explain || '')
+                                    : '\u274C Not quite. The answer was: <strong>' + questionObj.opts[answer] + '</strong>';
+                            }
+                            var skipEl = parent.parentElement ? parent.parentElement.querySelector('.tutorial-quick-q-skip') : null;
+                            if (skipEl) skipEl.textContent = allCorrect ? 'Dismiss \u2192' : 'Continue \u2192';
+                            if (allCorrect && typeof showScorePopup === 'function') showScorePopup('+2 XP', 'game-xp-popup');
+                        };
+                    })(oi, q.ans, q);
+                    optsContainer.appendChild(optBtn);
+                }
+            }
+        }
+    };
+    expEl.appendChild(testSelfBtn);
+
     expEl.appendChild(toggleBtn);
     expEl.appendChild(expWrapper);
+
+    tutorialAddInlineExercise(expEl, step, item.code || '');
+
+    var relatedEl = buildRelatedTopics(step, idx);
+    if (relatedEl) expEl.appendChild(relatedEl);
 
     var output = document.getElementById('output');
     output.innerText = '// \u26A1 Auto-running starter code...\n// Once it finishes, try the tasks above!';
 
     renderTutorialNav(idx);
     renderTutorialProgress();
-    updateContinueButton(false);
+    updateContinueButton(true);
 
     var ed = document.getElementById('editor');
     if (ed) {
@@ -1422,6 +1585,175 @@ function loadTutorialStep(idx) {
             runCode();
         }
     }, 400);
+}
+
+function tutorialAddInlineExercise(expEl, step, code) {
+    if (!code || !code.trim()) return;
+    var lines = code.split('\n').filter(function (l) { return l.trim(); });
+    if (lines.length < 2) return;
+
+    var exercises = [];
+    var lowerCode = code.toLowerCase();
+
+    if (/\b(console\.log|print)\b/.test(code)) {
+        exercises.push({
+            task: 'Change the message being printed to say something else.',
+            hint: 'Find the text inside quotes and change it.',
+            check: function (val) { return val.length > 0; }
+        });
+    }
+    if (/\b(let|var|const)\s+\w+\s*=/.test(code)) {
+        exercises.push({
+            task: 'Change the variable value and predict what will happen.',
+            hint: 'Modify the number or string on the right side of the = sign.',
+            check: function (val) { return val.length > 0; }
+        });
+    }
+    if (/\b(for|while)\b/.test(code)) {
+        exercises.push({
+            task: 'Change how many times the loop runs.',
+            hint: 'Modify the condition or counter in the loop header.',
+            check: function (val) { return val.length > 0; }
+        });
+    }
+    if (/\b(if|else|switch)\b/.test(code)) {
+        exercises.push({
+            task: 'Change the condition in the if-statement and see how output changes.',
+            hint: 'Flip a comparison (>, <, ===) to change the behavior.',
+            check: function (val) { return val.length > 0; }
+        });
+    }
+    if (/\b(function|def|func|fn)\b/.test(code)) {
+        exercises.push({
+            task: 'Call the function with different arguments.',
+            hint: 'Change the values passed to the function call.',
+            check: function (val) { return val.length > 0; }
+        });
+    }
+
+    if (exercises.length === 0) return;
+
+    var ex = exercises[Math.floor(Math.random() * exercises.length)];
+
+    var container = document.createElement('div');
+    container.className = 'tutorial-inline-exercise';
+
+    var header = document.createElement('div');
+    header.className = 'tutorial-inline-exercise-header';
+    header.textContent = '\uD83D\uDC45 Try This';
+    container.appendChild(header);
+
+    var text = document.createElement('div');
+    text.className = 'tutorial-inline-exercise-text';
+    text.textContent = ex.task;
+    container.appendChild(text);
+
+    var ta = document.createElement('textarea');
+    ta.placeholder = ex.hint + ' (Then run the code to see)';
+    ta.rows = 2;
+    container.appendChild(ta);
+
+    var btnRow = document.createElement('div');
+    btnRow.style.display = 'flex';
+    btnRow.style.gap = '8px';
+    btnRow.style.alignItems = 'center';
+
+    var btn = document.createElement('button');
+    btn.className = 'tutorial-inline-exercise-btn';
+    btn.textContent = 'I did it!';
+    btn.onclick = function () {
+        if (ta.value.trim().length > 0) {
+            var result = document.getElementById('tutorial-inline-ex-result');
+            if (result) {
+                result.className = 'tutorial-inline-exercise-result show pass';
+                result.innerHTML = '\u2705 Great! Now click <strong>Run \u25B6</strong> to see the effect of your change!';
+            }
+            btn.disabled = true;
+            btn.textContent = '\u2713 Done';
+            btn.style.background = '#10b981';
+            if (!_tutorialTaskState[1]) tutorialUpdateTask(1);
+        } else {
+            var result = document.getElementById('tutorial-inline-ex-result');
+            if (result) {
+                result.className = 'tutorial-inline-exercise-result show fail';
+                result.innerHTML = '\uD83D\uDCA1 Try making a change to the code in the editor first!';
+            }
+        }
+        var editor = document.getElementById('editor');
+        if (editor) editor.focus();
+    };
+    btnRow.appendChild(btn);
+
+    var hintBtn = document.createElement('button');
+    hintBtn.className = 'tutorial-inline-exercise-btn';
+    hintBtn.textContent = 'Show Hint';
+    hintBtn.style.background = '#475569';
+    hintBtn.onclick = function () {
+        var hintEl = document.getElementById('tutorial-inline-hint');
+        if (hintEl) {
+            hintEl.style.display = hintEl.style.display === 'none' ? 'block' : 'none';
+        }
+    };
+    btnRow.appendChild(hintBtn);
+    container.appendChild(btnRow);
+
+    var hint = document.createElement('div');
+    hint.id = 'tutorial-inline-hint';
+    hint.style.cssText = 'display:none;margin-top:8px;padding:8px;background:#1e293b;border-radius:4px;font-size:10px;color:#94a3b8;line-height:1.5;';
+    hint.textContent = ex.hint + ' After you make the change, click Run to see the new output.';
+    container.appendChild(hint);
+
+    var result = document.createElement('div');
+    result.id = 'tutorial-inline-ex-result';
+    result.className = 'tutorial-inline-exercise-result';
+    container.appendChild(result);
+
+    expEl.appendChild(container);
+}
+
+function buildRelatedTopics(currentStep, currentIdx) {
+    if (!tutorialManager || !tutorialManager.steps) return null;
+    var steps = tutorialManager.steps;
+    var related = [];
+    var currentPhase = currentStep.phase;
+    var currentTopic = currentStep.topic;
+
+    for (var i = 0; i < steps.length; i++) {
+        if (i === currentIdx) continue;
+        var s = steps[i];
+        if (s.phase === currentPhase) {
+            related.push({ idx: i, topic: s.topic, phase: s.phase, samePhase: true });
+        }
+    }
+
+    if (related.length === 0) return null;
+
+    var container = document.createElement('div');
+    container.className = 'tutorial-related-topics';
+    var header = document.createElement('div');
+    header.className = 'tutorial-related-topics-header';
+    header.textContent = 'Related Topics in ' + currentPhase;
+    container.appendChild(header);
+
+    var list = document.createElement('div');
+    list.className = 'tutorial-related-topics-list';
+
+    var shown = 0;
+    for (var r = 0; r < related.length && shown < 12; r++) {
+        var rel = related[r];
+        if (rel.topic === currentTopic) continue;
+        var btn = document.createElement('button');
+        btn.className = 'tutorial-related-topic-btn';
+        btn.textContent = rel.topic;
+        btn.onclick = (function (idx) {
+            return function () { goToTutorialStep(idx); };
+        })(rel.idx);
+        list.appendChild(btn);
+        shown++;
+    }
+
+    container.appendChild(list);
+    return container;
 }
 
 function _tutorialDebouncedEditorCheck() {
@@ -1483,12 +1815,12 @@ function renderTutorialNav(idx) {
     nav.innerHTML = ''
         + '<div class="tutorial-nav-inner">'
         + '<button class="tutorial-nav-btn" onclick="tutorialGoBack()"' + (idx === 0 ? ' disabled' : '') + '>\u2190 Back</button>'
-        + '<div class="tutorial-step-info">Step ' + (idx + 1) + ' of ' + total + '<span class="tutorial-step-name-nav"> ' + tutorialEscapeHtml(step.topic) + '</span><span class="tutorial-run-status" id="tutorial-run-status">Run the code to unlock Continue</span></div>'
-        + '<button class="tutorial-nav-btn tutorial-continue-btn" id="tutorial-continue-btn" onclick="tutorialContinue()"' + (!completed ? ' disabled' : '') + '>Run first</button>'
+        + '<div class="tutorial-step-info">Step ' + (idx + 1) + ' of ' + total + '<span class="tutorial-step-name-nav"> ' + tutorialEscapeHtml(step.topic) + '</span><span class="tutorial-run-status" id="tutorial-run-status">Pick any topic from the sidebar</span></div>'
+        + '<button class="tutorial-nav-btn tutorial-continue-btn" id="tutorial-continue-btn" onclick="tutorialContinue()">Next \u2192</button>'
         + '<button class="tutorial-stuck-btn" id="tutorial-stuck-btn" onclick="tutorialManager.showStuckPanel()" title="Need help?">?</button>'
         + '</div>';
 
-    if (completed) updateContinueButton(true);
+    updateContinueButton(true);
 }
 
 function renderTutorialProgress() {
@@ -1507,17 +1839,9 @@ function renderTutorialProgress() {
 function updateContinueButton(enabled) {
     var btn = document.getElementById('tutorial-continue-btn');
     if (!btn) return;
-    var status = document.getElementById('tutorial-run-status');
-    btn.disabled = !enabled;
-    if (enabled) {
-        btn.classList.add('ready');
-        btn.textContent = 'Continue \u2192';
-        if (status) status.textContent = 'Run complete. Continue when you are ready.';
-    } else {
-        btn.classList.remove('ready');
-        btn.textContent = 'Run first';
-        if (status) status.textContent = 'Run the code to unlock Continue';
-    }
+    btn.disabled = false;
+    btn.classList.add('ready');
+    btn.textContent = 'Next \u2192';
 }
 
 function tutorialGoBack() {
@@ -1530,38 +1854,30 @@ function tutorialContinue() {
     var currentIdx = tutorialManager.getCurrentStepIndex();
     var currentStep = tutorialManager.steps[currentIdx];
 
-    if (tutorialManager.isOnLastStep() && tutorialManager.isComplete()) {
-        showTutorialComplete();
+    if (tutorialManager.isOnLastStep()) {
+        if (tutorialManager.isComplete()) {
+            showTutorialComplete();
+        } else {
+            tutorialManager.markStepComplete(currentIdx);
+            showTutorialComplete();
+        }
         return;
     }
 
-    if (currentStep && currentStep.quizAfter) {
-        var qTopic = currentStep.topic;
-        tutorialManager.markStepComplete(currentIdx);
-        renderTutorialSidebar();
-        if (typeof showToast === 'function') showToast('Completed: ' + qTopic + ' \u2014 time for a quiz!', 'success');
-        showQuizCheckpoint();
-        return;
-    }
-
-    var wasCompleted = tutorialManager.isStepCompleted(currentIdx);
     var prevTopic = currentStep ? currentStep.topic : '';
     tutorialManager.markStepComplete(currentIdx);
     renderTutorialSidebar();
 
-    if (!wasCompleted && prevTopic) {
-        if (typeof showToast === 'function') showToast('\u2714\uFE0F Done with "' + prevTopic + '" \u2014 moving on!', 'success');
-    }
-
-    if (tutorialManager.isComplete()) {
-        showTutorialComplete();
-        return;
+    if (prevTopic) {
+        if (typeof showToast === 'function') showToast('\u2714\uFE0F Moving on from "' + prevTopic + '"', 'success');
     }
 
     var nextIdx = tutorialManager.getCurrentStepIndex();
-    var checkpointInterval = 4;
-    if (!wasCompleted && nextIdx > 0 && nextIdx % checkpointInterval === 0 && nextIdx < tutorialManager.getTotalSteps()) {
-        setTimeout(function () { tutorialTriggerCheckpoint(); }, 300);
+
+    if (currentStep && currentStep.quizAfter) {
+        if (typeof showToast === 'function') showToast('Quiz checkpoint available!', 'info');
+        showQuizCheckpoint();
+        return;
     }
 
     loadTutorialStep(nextIdx);
@@ -2364,17 +2680,14 @@ function tutorialRunHook() {
     var editor = document.getElementById('editor');
     var code = editor ? editor.value : '';
     var outputText = output ? output.innerText : '';
-    var hasError = output && (
-        outputText.includes('Error:') ||
-        outputText.includes('SyntaxError') ||
-        outputText.includes('ReferenceError') ||
-        outputText.includes('TypeError')
-    );
+    var hasError = typeof _tutorialLastRunHadError !== 'undefined' ? _tutorialLastRunHadError : false;
     var currentIdx = tutorialManager.getCurrentStepIndex();
     var step = tutorialManager.getCurrentStep();
 
     var isAutoRun = _tutorialAutoRan;
     _tutorialAutoRan = false;
+
+    var isStarterCode = code === _tutorialStarterCode;
 
     if (!isAutoRun) {
         tutorialManager.markRun(hasError);
@@ -2386,14 +2699,25 @@ function tutorialRunHook() {
 
     tutorialClearFeedback();
 
-    if (hasError && step) {
+    if (hasError && step && !isAutoRun) {
         var tip = typeof getErrorTutorTip === 'function' ? getErrorTutorTip(step.topic, outputText) : null;
         if (tip) {
             tutorialShowFeedback('<strong>\uD83D\uDCA1 Hint:</strong> ' + tip.replace(/\*\*/g, '').split('\n')[0], 'error');
         }
     }
 
-    if (isAutoRun && !hasError) {
+    if (isAutoRun && isStarterCode) {
+        if (hasError) {
+            var taskBody = document.getElementById('tutorial-task-body');
+            if (taskBody && !taskBody.querySelector('.tutorial-auto-run-notice')) {
+                var notice = document.createElement('div');
+                notice.className = 'tutorial-auto-run-notice';
+                notice.innerHTML = '\u26A1 The starter code shows an expected error \u2014 this demonstrates a concept! Read the explanation and try the tasks above.';
+                taskBody.insertBefore(notice, taskBody.firstChild);
+            }
+            if (typeof showToast === 'function') showToast('Starter code ran \u2014 notice the expected behavior', 'info');
+            return;
+        }
         var taskBody = document.getElementById('tutorial-task-body');
         if (taskBody && !taskBody.querySelector('.tutorial-auto-run-notice')) {
             var notice = document.createElement('div');

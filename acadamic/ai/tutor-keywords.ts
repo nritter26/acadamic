@@ -338,6 +338,12 @@ export function runKeywordTutor(
     return { response: topicHelp, source: 'keyword' };
   }
 
+  const curriculumResult = curriculumSearch(message, lang);
+  if (curriculumResult.length > 0) {
+    const parts = curriculumResult.map(r => `**${r.topic}** (${r.phase}): ${r.content}`);
+    return { response: `I found these topics in the curriculum that might help:\n\n${parts.join('\n\n')}`, source: 'keyword' };
+  }
+
   if (/lang|program|learn/i.test(lower) &&
       /(recommend|suggest|which|best|what|start|beginner)/i.test(lower)) {
     return { response: "Great question! If you're new to programming:\n\n• **JavaScript**: Great all-rounder, runs in browsers and servers\n• **Python**: Beginner-friendly, popular for data science and automation\n• **Go**: Fast, simple, great for backend services\n\nWhat kind of projects interest you? I can help you pick the best language for your goals!", source: 'keyword' };

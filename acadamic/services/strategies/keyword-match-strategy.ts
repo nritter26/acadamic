@@ -69,9 +69,12 @@ export class KeywordMatchStrategy implements TutorStrategy {
       }
     }
 
-    // Step 1c: Compound query handling — "difference between X and Y", "diff between X and Y", "X vs Y", "X or Y"
-    // Runs before regex topic matching so comparisons get comparison-style answers
-    const diffMatch = ctx.q.match(/(?:(?:diff|difference)\s+between\s+)?(\w+(?:\s+\w+)?)\s+(?:vs|vs\.|versus|or|and)\s+(\w+(?:\s+\w+)?)/i);
+    // Step 1c: Compound query handling — only "difference between X and Y" or "X vs Y" (NOT plain "X or Y")
+    const isExplicitComparison = /diff(?:erence)?\s+between\b/i.test(ctx.q);
+    const diffMatch = ctx.q.match(isExplicitComparison
+      ? /diff(?:erence)?\s+between\s+(\w+(?:\s+\w+)?)\s+and\s+(\w+(?:\s+\w+)?)/i
+      : /(\w+(?:\s+\w+)?)\s+(?:vs|vs\.|versus)\s+(\w+(?:\s+\w+)?)/i
+    );
     if (diffMatch) {
       const left = matchTopic(diffMatch[1]);
       const right = matchTopic(diffMatch[2]);
@@ -130,31 +133,34 @@ export class KeywordMatchStrategy implements TutorStrategy {
       }
     }
 
-    // Step 3: Standard keyword matching
+    // Step 3: Standard keyword matching (must match at least 2 keywords to avoid false positives)
+    const matchedEntries: { entry: typeof aiResponses[0]; count: number }[] = [];
     for (const entry of aiResponses) {
-      if (entry.keywords.some(k => ctx.q.includes(k))) {
-        if (ctx.lid) {
-          try { await conv.addMessage(ctx.lid, 'assistant', entry.response); } catch {}
-        }
-        sseSend(entry.response);
-        sseDone();
-        return true;
+      const matchCount = entry.keywords.filter(k => ctx.q.includes(k)).length;
+      if (matchCount > 0) {
+        matchedEntries.push({ entry, count: matchCount });
       }
     }
-
-    // Step 4: Secondary keyword matching
-    const cleaned = ctx.q.replace(/[^a-z\s]/g, '').trim();
-    for (const entry of aiResponses) {
-      const combined = entry.keywords.join(' ');
-      if (combined.includes(cleaned)) {
-        if (ctx.lid) {
-          try { await conv.addMessage(ctx.lid, 'assistant', entry.response); } catch {}
-        }
-        sseSend(entry.response);
-        sseDone();
-        return true;
+    matchedEntries.sort((a, b) => b.count - a.count);
+    const bestMatch = matchedEntries[0];
+    if (bestMatch && bestMatch.count >= 2) {
+      if (ctx.lid) {
+        try { await conv.addMessage(ctx.lid, 'assistant', bestMatch.entry.response); } catch {}
       }
+      sseSend(bestMatch.entry.response);
+      sseDone();
+      return true;
     }
+    // Single keyword match — only respond if query is short (likely a direct topic query)
+    if (bestMatch && ctx.q.split(/\s+/).length <= 4) {
+      if (ctx.lid) {
+        try { await conv.addMessage(ctx.lid, 'assistant', bestMatch.entry.response); } catch {}
+      }
+      sseSend(bestMatch.entry.response);
+      sseDone();
+      return true;
+    }
+    // Single keyword match with long query — let it fall through to LLM or general response
 
     return false;
   }

@@ -2,9 +2,10 @@ import { analyzeUserCode } from './analyzer';
 import { getTopicContext, searchWithSources } from '../ai/embeddings';
 import * as learner from '../ai/learner';
 import * as conv from './conversation';
-import { LANG_NAMES } from '../public/langConfig';
 import { logger } from '../middleware';
 import { executeStrategies } from './strategies';
+import { detectLanguage as detectLang } from './strategies/utils';
+import { LANG_NAMES } from '../public/langConfig';
 import type { TutorContext } from './strategies';
 import { expandQuery } from '../ai/query-expander';
 import { getSystemPrompt } from '../ai/config';
@@ -19,19 +20,6 @@ interface HistoryEntry {
 interface LLMMsg {
   role: 'system' | 'user' | 'assistant';
   content: string;
-}
-
-function detectLanguage(query: string): string | null {
-  const words = query.toLowerCase().split(/\s+/);
-  for (const raw of words) {
-    const word = raw.replace(/[^a-z0-9]/g, '');
-    if (!word) continue;
-    for (const [code, name] of Object.entries(LANG_NAMES)) {
-      if (word === name || word === code) return code;
-    }
-    if (word === 'sql') return 'pg';
-  }
-  return null;
 }
 
 function extractSubject(text: string): string {
@@ -57,7 +45,7 @@ function resolveFollowUp(q: string, history?: HistoryEntry[]): string {
   const subjectLower = subject.toLowerCase();
   if (topics.length > 0 && !topics.some(t => subjectLower.startsWith(t))) return q;
 
-  const lang = detectLanguage(lastBot.text);
+  const lang = detectLang(lastBot.text);
   let result = subject ? `${subject} ${q}` : q;
   if (lang) {
     const rawName = LANG_NAMES[lang as keyof typeof LANG_NAMES] || lang;
@@ -104,6 +92,7 @@ export async function buildLLMMessages(
   if (topic) {
     const topicCtx = getTopicContext(topic, lang);
     if (topicCtx) context.push(topicCtx);
+    context.push(`The user is asking specifically about the topic "${topic}". Focus your response on this topic.`);
   }
 
   if (code) {
@@ -119,25 +108,23 @@ export async function buildLLMMessages(
     context.push(`The code produced this output/error:\n\`\`\`\n${output.replace(/<[^>]*>/g, '').trim()}\n\`\`\``);
   }
 
-  if (!topic) {
-    try {
-      const expanded = expandQuery(message);
-      const queryStr = expanded.join(' ');
-      const { results, mode } = await searchWithSources(queryStr, lang, 3);
-      if (results.length > 0) {
-        const sourceLines = results.map((r, i) =>
-          `[${i + 1}] ${r.lang.toUpperCase()} / ${r.phase} / ${r.topic} (score: ${(r.score * 100).toFixed(0)}%)`
-        );
-        let ragCtx = `\n**Relevant curriculum content (${mode} search):**\n${sourceLines.join('\n')}\n\n`;
-        for (const r of results) {
-          if (r.exp) ragCtx += `[${r.topic}] ${r.exp.slice(0, 400)}\n`;
-          if (r.code) ragCtx += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
-        }
-        context.push(ragCtx);
+  try {
+    const expanded = expandQuery(message + (topic ? ' ' + topic : ''));
+    const queryStr = expanded.join(' ');
+    const { results, mode } = await searchWithSources(queryStr, lang, 3);
+    if (results.length > 0) {
+      const sourceLines = results.map((r, i) =>
+        `[${i + 1}] ${r.lang.toUpperCase()} / ${r.phase} / ${r.topic} (score: ${(r.score * 100).toFixed(0)}%)`
+      );
+      let ragCtx = `\n**Relevant curriculum content (${mode} search):**\n${sourceLines.join('\n')}\n\n`;
+      for (const r of results) {
+        if (r.exp) ragCtx += `[${r.topic}] ${r.exp.slice(0, 400)}\n`;
+        if (r.code) ragCtx += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
       }
-    } catch (e: unknown) {
-      logger.debug({ err: e }, 'RAG search failed, skipping');
+      context.push(ragCtx);
     }
+  } catch (e: unknown) {
+    logger.debug({ err: e }, 'RAG search failed, skipping');
   }
 
   if (context.length > 0) {
@@ -188,7 +175,9 @@ export async function handleTutorMessage(
     };
     const handled = await executeStrategies(ctx, sseSend, sseDone);
     if (!handled) {
-      sseSend("Sorry, I couldn't process your request. Please try again.");
+      const fallback = "Sorry, I couldn't process your request. Please try asking in a different way or mention a specific topic.";
+      try { await conv.addMessage(lid, 'assistant', fallback); } catch {}
+      sseSend(fallback);
       sseDone();
     }
   } catch (e) {
@@ -197,12 +186,4 @@ export async function handleTutorMessage(
   }
 }
 
-async function streamReply(sseSend: (chunk: string) => void, sseDone: () => void, text: string, lid?: string): Promise<void> {
-  if (lid) {
-    try { await conv.addMessage(lid, 'assistant', text); } catch (err: unknown) {
-      logger.warn({ err }, 'tutor: failed to add streamed message');
-    }
-  }
-  sseSend(text);
-  sseDone();
-}
+

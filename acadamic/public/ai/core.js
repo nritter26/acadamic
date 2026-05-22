@@ -485,8 +485,8 @@ Try fixing the code and running it again. If you're still stuck, share what you 
       { open: "[", close: "]", name: "brackets" }
     ];
     for (const pair of pairs) {
-      const openCount = (code.match(new RegExp("\\" + pair.open.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
-      const closeCount = (code.match(new RegExp("\\" + pair.close.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
+      const openCount = (code.match(new RegExp(pair.open.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
+      const closeCount = (code.match(new RegExp(pair.close.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
       if (openCount !== closeCount) {
         let problemLine = 0;
         if (openCount > closeCount) {

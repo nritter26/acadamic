@@ -1,12 +1,19 @@
 import * as conv from '../conversation';
 import type { TutorStrategy, TutorContext } from './types';
+import { matchTopic } from '../../ai/tutor-keywords';
 
 export class SocraticStrategy implements TutorStrategy {
   name = 'socratic';
   priority = 4;
 
-  async canHandle(_ctx: TutorContext): Promise<boolean> {
-    return true;
+  async canHandle(ctx: TutorContext): Promise<boolean> {
+    if (ctx.topic) return true;
+    const matchedTopics = matchTopic(ctx.message || ctx.q);
+    if (matchedTopics.length > 0) return false;
+    const words = ctx.q.split(/\s+/);
+    if (words.length <= 3) return true;
+    if (/help|confused|stuck|lost|where do I|how do I|what should/i.test(ctx.q)) return true;
+    return false;
   }
 
   async handle(

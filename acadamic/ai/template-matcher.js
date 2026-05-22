@@ -1,50 +1,5 @@
-let _modelPromise = null;
-let _pipeline = null;
-
-const MODEL_ID = process.env.TINY_LLM_MODEL || 'Xenova/gte-small';
-const CACHE_DIR = process.env.TINY_LLM_CACHE_DIR || undefined;
-
-async function getPipeline() {
-  if (!_pipeline) {
-    try {
-      const { pipeline } = await import('@xenova/transformers');
-      _pipeline = pipeline;
-    } catch (e) {
-      console.error('[template-matcher] Failed to import @xenova/transformers:', e.message);
-      throw e;
-    }
-  }
-  return _pipeline;
-}
-
-async function loadModel() {
-  if (!_modelPromise) {
-    _modelPromise = (async () => {
-      console.log(`[template-matcher] Loading model: ${MODEL_ID} (this may take a moment on first run)...`);
-      const pipe = await getPipeline();
-      const model = await pipe('feature-extraction', MODEL_ID, {
-        cache_dir: CACHE_DIR,
-      });
-      console.log(`[template-matcher] Model loaded: ${MODEL_ID}`);
-      return model;
-    })();
-  }
-  return _modelPromise;
-}
-
 async function generateResponse(messages) {
-  const model = await loadModel();
   const lastMsg = messages[messages.length - 1]?.content || '';
-  const context = messages.slice(0, -1).map(m => m.content).join('\n').slice(-500);
-
-  const input = context ? `Context: ${context}\nQuestion: ${lastMsg}` : lastMsg;
-
-  const result = await model(input, {
-    pooling: 'mean',
-    normalize: true,
-  });
-
-  const embedding = Array.from(result.data);
 
   const isQuestionLike = /\b(what|how|why|when|where|which|can|could|would|should|explain|tell|describe|show|help|difference|example|mean|define)\b/i.test(lastMsg);
   const isLongEnough = lastMsg.split(/\s+/).length > 3;
@@ -109,24 +64,6 @@ async function getTinyLLMResponse(messages, onStream) {
   }
 }
 
-async function isModelLoaded() {
-  if (!_modelPromise) return false;
-  try {
-    await _modelPromise;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function disposeTinyLLM() {
-  _modelPromise = null;
-  _pipeline = null;
-  console.log('[template-matcher] Disposed model reference');
-}
-
 module.exports = {
   getTinyLLMResponse,
-  isModelLoaded,
-  disposeTinyLLM,
 };

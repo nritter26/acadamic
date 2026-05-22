@@ -14,7 +14,7 @@ export interface AppConfig {
 }
 
 const config: AppConfig = {
-  provider: (process.env.AI_PROVIDER as AppConfig['provider']) || 'keyword',
+  provider: (process.env.AI_PROVIDER as AppConfig['provider']) || 'hybrid',
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
@@ -51,7 +51,9 @@ const TIERED_PROMPTS = {
 };
 
 export function getSystemPrompt(level: 'beginner' | 'intermediate' | 'advanced'): string {
-  return TIERED_PROMPTS[level];
+  const base = config.systemPrompt;
+  const tiered = TIERED_PROMPTS[level];
+  return `${base}\n\n${tiered}`;
 }
 
 export function isHybrid(): boolean {
