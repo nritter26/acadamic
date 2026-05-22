@@ -113,7 +113,8 @@ async function getLearner(learnerId) {
         return { ...DEFAULT_LEARNER, id: learnerId };
     }
 }
-async function saveLearner(learner) {
+const writeQueue = new Map();
+async function doSaveLearner(learner) {
     try {
         await ensureDir();
         learner.lastSeen = new Date().toISOString();
@@ -126,6 +127,39 @@ async function saveLearner(learner) {
         console.error('saveLearner error:', e.message);
     }
 }
+async function saveLearner(learner) {
+    const existing = writeQueue.get(learner.id);
+    if (existing) {
+        clearTimeout(existing.timeout);
+    }
+    writeQueue.set(learner.id, {
+        learner,
+        timeout: setTimeout(() => {
+            doSaveLearner(learner);
+            writeQueue.delete(learner.id);
+        }, 2000),
+    });
+}
+function flushAll() {
+    for (const [id, entry] of writeQueue) {
+        clearTimeout(entry.timeout);
+        const learner = entry.learner;
+        try {
+            const fp = getLearnerPath(learner.id);
+            const dir = path_1.default.dirname(fp);
+            if (!fs_1.default.existsSync(dir))
+                fs_1.default.mkdirSync(dir, { recursive: true });
+            const tmp = fp + '.tmp';
+            fs_1.default.writeFileSync(tmp, JSON.stringify(learner, null, 2));
+            fs_1.default.renameSync(tmp, fp);
+        }
+        catch (e) {
+            console.error('flushAll error for', id, ':', e.message);
+        }
+        writeQueue.delete(id);
+    }
+}
+process.on('beforeExit', flushAll);
 function updatePhaseMastery(learner, lang, phase) {
     const phaseKey = `${lang}:${phase}`;
     const prefix = `${lang}:${phase}:`;
@@ -154,7 +188,8 @@ async function trackTopicCompletion(learnerId, lang, topic, phase) {
     else {
         learner.topics[key].completedAt = new Date().toISOString();
         learner.topics[key].reviews += 1;
-        learner.topics[key].nextReview = new Date(Date.now() + 86400000 * REVIEW_INTERVALS[0]).toISOString();
+        const intervalIdx = Math.min(learner.topics[key].reviews, REVIEW_INTERVALS.length - 1);
+        learner.topics[key].nextReview = new Date(Date.now() + 86400000 * REVIEW_INTERVALS[intervalIdx]).toISOString();
     }
     learner.sessions += 1;
     updatePhaseMastery(learner, lang, phase || 'general');

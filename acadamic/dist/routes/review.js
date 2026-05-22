@@ -40,20 +40,25 @@ const middleware_1 = require("../middleware");
 const types_1 = require("../types");
 const router = (0, express_1.Router)();
 router.post('/', (0, middleware_1.validate)(types_1.ReviewSchema), async (req, res) => {
-    const { code, lang, topic, learnerId } = req.body;
-    if (!code) {
-        res.json({ review: 'No code provided.', issues: [], score: 0 });
-        return;
-    }
-    const result = await (0, reviewer_1.review)(code, lang || 'js', topic || 'general');
-    if (learnerId && result.issues) {
-        const errorCount = result.issues.filter(i => i.severity === 'error' || i.severity === 'warning').length;
-        if (errorCount > 0) {
-            await learner.trackError(learnerId, lang || 'js', topic || 'general');
+    try {
+        const { code, lang, topic, learnerId } = req.body;
+        if (!code) {
+            res.json({ review: 'No code provided.', issues: [], score: 0 });
+            return;
         }
-        await learner.trackAttempt(learnerId, lang || 'js', topic || 'general');
+        const result = await (0, reviewer_1.review)(code, lang || 'js', topic || 'general');
+        if (learnerId && result.issues) {
+            const errorCount = result.issues.filter(i => i.severity === 'error' || i.severity === 'warning').length;
+            if (errorCount > 0) {
+                await learner.trackError(learnerId, lang || 'js', topic || 'general');
+            }
+            await learner.trackAttempt(learnerId, lang || 'js', topic || 'general');
+        }
+        res.json(result);
     }
-    res.json(result);
+    catch (e) {
+        res.status(500).json({ review: 'Error: ' + e.message, issues: [], score: 0 });
+    }
 });
 exports.default = router;
 //# sourceMappingURL=review.js.map

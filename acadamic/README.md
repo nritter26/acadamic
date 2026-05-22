@@ -1,17 +1,17 @@
 # Kodex's Lab: Full Mastery Edition
 
-An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 50+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, game development curriculum, mobile development curriculum, and 16 mini-games.
+An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 50+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, CI/CD curriculum, game development curriculum, mobile development curriculum, and 16 mini-games.
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-topic curriculum** | 56 content files covering 12 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,100+ indexed topics across 636 phases |
+| **Multi-topic curriculum** | 57 content files covering 12 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,130+ indexed topics across 646 phases |
 | **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Swift, Zig via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. |
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 26 curated responses + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
+| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (6+ languages, 3 difficulty levels each). |
 | **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
 | **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
@@ -22,6 +22,7 @@ An interactive multi-language programming textbook, code playground, and compile
 | **Gaming mode** | 16 mini-games: Typing Speed, Code Scramble, Debug the Bug, Syntax Sprint, Memory Match, Speed Read, Race Compiler, Syntax Swipe, Code Golf, Binary/Hex Blitz, Crossword, Regex Rally, SQL JOIN Match, Errorpedia, API Arcade, Daily Challenge. |
 | **GameDev mode** | Full game development curriculum covering Godot, Unity, and Unreal Engine with engine-specific topic filters. Each engine has 14 topics across dedicated phases. Also includes 5 general gamedev phases (Game Loop, Physics, Audio, Input, Rendering, ECS, Networking, Optimization, Save Systems, Build/Deploy, Accessibility). |
 | **Mobile mode** | Android and iOS development curriculum with platform toggle filter. 98 topics across 16 phases (8 Android, 8 iOS) covering Kotlin, Jetpack Compose, Swift, SwiftUI, UIKit, architecture patterns, testing, distribution, and more. |
+| **CI/CD mode** | Full CI/CD curriculum with 10 phases and ~30 topics covering CI/CD fundamentals, version control, CI tools (GitHub Actions, Jenkins, CircleCI, Azure DevOps), GitLab CI/CD (dedicated 4-topic phase), deployment strategies, IaC, containers, GitOps, security (SAST/DAST/SBOM), and monitoring. |
 | **REST API client** | Built-in Thunderclient-style workspace with HTTP method selection, URL input, headers/body/auth tabs (Bearer/Basic), and response display with status, headers, and formatted JSON. |
 | **Git visualizer** | Interactive Git learning mode with visualized branching, commits, merges, and common workflows. |
 | **Tech Stack mode** | Explore full technology stacks (backend, frontend, database, DevOps) for different application types. |
@@ -37,8 +38,9 @@ JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Swift — eac
 ### Databases
 PostgreSQL, MySQL, SQLite, MongoDB, Firebase — with curriculum; SQLite/PG/MySQL with live SQL execution.
 
-### DevOps & Cloud
+### DevOps, Cloud & CI/CD
 Docker, Git, Firebase, AWS, Azure, GCP, Cloud, Kubernetes, Terraform — curriculum with compile hints.
+CI/CD — dedicated tab with 10 phases covering fundamentals, Git integration, CI tools (GitHub Actions, Jenkins, CircleCI, Azure DevOps), GitLab CI/CD (4-topic deep dive), deployment strategies, IaC, containers, GitOps, security, and monitoring.
 
 ### Frontend Frameworks
 React, Vue, Angular, Svelte, Next.js, Nuxt, SvelteKit, Remix, Vite, Webpack, Tailwind, Bootstrap — curriculum.
@@ -118,18 +120,19 @@ acadamic/
 │   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
 │   ├── db.js                    # Database tab frontend (~126 lines)
 │   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
-│   ├── ai-responses.js          # 26 AI tutor keyword responses
+│   ├── ai-responses.js          # 52+ AI tutor keyword responses
 │   ├── schema-tutorial.js       # Schema designer guided tutorial
 │   ├── tutorial.js              # App tutorial/onboarding helpers
-│   └── logos/                   # 57 SVG logos for supported technologies
+│   └── logos/                   # 58 SVG logos for supported technologies
 │
-├── content/                     # Course curriculum data (56 JSON files, 636 phases, 3,100+ topics)
+├── content/                     # Course curriculum data (57 JSON files, 646 phases, 3,130+ topics)
 │   ├── js.json, py.json, ...    # 12 programming languages
 │   ├── pg.json, mysql.json, ... # 10 databases (PG, MySQL, SQLite, MongoDB, Firebase, + frameworks)
 │   ├── dk.json, git.json, ...   # 11 cloud/DevOps tools
 │   ├── react.json, vue.json,... # 14 frontend frameworks
 │   ├── node.json, express.json  # 17 backend/tech tools (incl. FastAPI, Flask, Django, Spring)
 │   ├── cypress.json, k8s.json   # 4 testing/infra tools
+│   ├── cicd.json                # CI/CD curriculum (10 phases, ~30 topics)
 │   ├── gamedev.json             # Game development (17 phases, 143 topics)
 │   ├── godot.json               # Godot Engine (phases reference)
 │   ├── unity.json               # Unity Engine (phases reference)
@@ -264,7 +267,7 @@ The AI system (`ai/`) is a full-stack TypeScript module supporting multiple prov
 - **`local`** — Set `AI_PROVIDER=local`. Connects to any OpenAI-compatible local endpoint (Ollama, LM Studio, etc.).
 
 The curriculum search pipeline:
-1. **Curriculum index** — regex-based topic extraction from 56 JSON course files (3,100+ topics)
+1. **Curriculum index** — regex-based topic extraction from 57 JSON course files (3,130+ topics)
 2. **TF-IDF** (always available) — keyword-based relevance scoring with cosine similarity
 3. **OpenAI embeddings** (if API key configured) — semantic vector search via `text-embedding-3-small` with batch caching to disk
 
@@ -376,7 +379,7 @@ The workspace includes a full Thunderclient-style HTTP client:
 
 ## Course Data Format
 
-Course files in `content/` are 56 lazy-loaded JSON files with topics organized by phase:
+Course files in `content/` are 57 lazy-loaded JSON files with topics organized by phase:
 
 ```json
 {
@@ -393,7 +396,7 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 
 ## UI Features
 
-- **Header extra tabs** — API, Code Lab, Compiler, GameDev, Mobile, Quiz, Gaming — each with distinct accent colors and hover effects
+- **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, GameDev, Mobile, Tech Stack, Quiz, Gaming — each with distinct accent colors and hover effects
 - **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
 - **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
 - **Cyberpunk-themed header** — Animated "Just code — don't overthink" motto with glow/flicker CSS effects

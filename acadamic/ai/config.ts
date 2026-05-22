@@ -14,7 +14,7 @@ export interface AppConfig {
 }
 
 const config: AppConfig = {
-  provider: (process.env.AI_PROVIDER as AppConfig['provider']) || 'keyword',
+  provider: (process.env.AI_PROVIDER as AppConfig['provider']) || 'hybrid',
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
@@ -43,6 +43,18 @@ const config: AppConfig = {
 Keep explanations concise but thorough. Include code examples when relevant.
 The user is working through an interactive programming curriculum.`,
 };
+
+const TIERED_PROMPTS = {
+  beginner: "You are tutoring a programming beginner. Use simple analogies. Avoid jargon. Give step-by-step instructions. Praise effort. Break down concepts into smallest possible pieces.",
+  intermediate: "You are tutoring an intermediate programmer. Discuss tradeoffs between approaches. Introduce design patterns. Challenge assumptions. Reference common pitfalls.",
+  advanced: "You are tutoring an advanced programmer. Discuss performance implications, architecture patterns, and edge cases. Recommend further reading and advanced techniques.",
+};
+
+export function getSystemPrompt(level: 'beginner' | 'intermediate' | 'advanced'): string {
+  const base = config.systemPrompt;
+  const tiered = TIERED_PROMPTS[level];
+  return `${base}\n\n${tiered}`;
+}
 
 export function isHybrid(): boolean {
   return config.provider === 'hybrid';

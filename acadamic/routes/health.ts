@@ -31,7 +31,7 @@ router.get('/ollama/status', (_req: Request, res: Response) => {
 router.get('/tutor/status', async (_req: Request, res: Response) => {
   let modelLoaded = false;
   try {
-    const { isModelLoaded } = require('../ai/tiny-llm');
+    const { isModelLoaded } = require('../ai/template-matcher');
     modelLoaded = await isModelLoaded();
   } catch {}
   const activeProvider = process.env.AI_PROVIDER || 'hybrid';

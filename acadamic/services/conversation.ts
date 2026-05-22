@@ -18,6 +18,7 @@ interface Conversation {
 const cache = new Map<string, Conversation>();
 const MAX_CACHE_SIZE = 100;
 const TTL_MS = 24 * 60 * 60 * 1000;
+const addLocks = new Map<string, Promise<void>>();
 
 function getPath(learnerId: string): string {
   const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -63,15 +64,24 @@ export async function addMessage(
   role: 'user' | 'assistant',
   content: string,
 ): Promise<void> {
-  const conv = await load(learnerId);
-  conv.messages.push({ role, content, timestamp: Date.now() });
-  if (conv.messages.length > 100) {
-    conv.messages = conv.messages.slice(-100);
-  }
-  await save(conv);
+  const prev = addLocks.get(learnerId) || Promise.resolve();
+  const next = prev.then(async () => {
+    const conv = await load(learnerId);
+    conv.messages.push({ role, content, timestamp: Date.now() });
+    if (conv.messages.length > 100) {
+      conv.messages = conv.messages.slice(-100);
+    }
+    await save(conv);
+  }).finally(() => {
+    if (addLocks.get(learnerId) === next) addLocks.delete(learnerId);
+  });
+  addLocks.set(learnerId, next);
+  await next;
+
   if (cache.size > MAX_CACHE_SIZE) {
-    const oldest = [...cache.entries()].sort((a, b) => a[1].updatedAt - b[1].updatedAt)[0];
-    if (oldest) cache.delete(oldest[0]);
+    const entries = [...cache.entries()].sort((a, b) => a[1].updatedAt - b[1].updatedAt);
+    const toEvict = entries.slice(0, Math.ceil(MAX_CACHE_SIZE / 2));
+    for (const [key] of toEvict) cache.delete(key);
   }
 }
 

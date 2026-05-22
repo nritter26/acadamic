@@ -62,7 +62,7 @@ router.get('/ollama/status', (_req, res) => {
 router.get('/tutor/status', async (_req, res) => {
     let modelLoaded = false;
     try {
-        const { isModelLoaded } = require('../ai/tiny-llm');
+        const { isModelLoaded } = require('../ai/template-matcher');
         modelLoaded = await isModelLoaded();
     }
     catch { }

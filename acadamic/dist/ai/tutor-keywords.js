@@ -1,8 +1,20 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSocratic = getSocratic;
+exports.getGreet = getGreet;
+exports.getThank = getThank;
+exports.detectLangFromMsg = detectLangFromMsg;
+exports.getCurrContext = getCurrContext;
+exports.runKeywordTutor = runKeywordTutor;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const LANG_NAMES_AI = {
     js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
     c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
-    swift: 'Swift', ts: 'TypeScript', zig: 'Zig'
+    swift: 'Swift', ts: 'TypeScript', zig: 'Zig',
 };
 const GREETINGS = [
     /^(hi|hello|hey|howdy|yo|sup|greetings|good\s*(morning|afternoon|evening))[.!]*$/i,
@@ -68,7 +80,7 @@ function getSocratic() {
 }
 function getGreet() {
     const greets = [
-        "Hey there! 👋 I'm Devin, your coding buddy. What are you working on?",
+        "Hey there! I'm Devin, your coding buddy. What are you working on?",
         "Hello! Ready to learn some code? I'm here to help!",
         "Hi! Stuck on something? Just ask — I've got your back.",
         "Hey! What programming challenge are we tackling today?",
@@ -77,7 +89,7 @@ function getGreet() {
 }
 function getThank() {
     const thanks = [
-        "You're welcome! Keep up the great work! 🎉",
+        "You're welcome! Keep up the great work!",
         "Happy to help! That's what I'm here for.",
         "No problem! What's next on your learning journey?",
         "Glad that helped! Don't forget to practice to make it stick.",
@@ -112,9 +124,10 @@ function detectLangFromMsg(msg) {
 }
 function getCurrContext(message, topic) {
     const lower = message.toLowerCase();
-    if (topic)
+    const isFollowUp = FOLLOW_UP.some(r => r.test(message));
+    if (topic && isFollowUp)
         return { type: 'followup', topic };
-    if (FOLLOW_UP.some(r => r.test(message)))
+    if (isFollowUp)
         return { type: 'followup', topic: null };
     if (topic)
         return { type: 'topic', topic };
@@ -132,42 +145,43 @@ function matchTopic(message) {
 }
 function curriculumSearch(message, lang) {
     try {
-        const fs = require('fs');
-        const path = require('path');
-        const contentDir = path.join(__dirname, '..', 'content');
-        const langFile = path.join(contentDir, (lang || 'js') + '.json');
-        if (fs.existsSync(langFile)) {
-            const data = JSON.parse(fs.readFileSync(langFile, 'utf-8'));
+        const contentDir = path_1.default.join(__dirname, '..', 'content');
+        const langFile = path_1.default.join(contentDir, (lang || 'js') + '.json');
+        if (fs_1.default.existsSync(langFile)) {
+            const data = JSON.parse(fs_1.default.readFileSync(langFile, 'utf-8'));
             const topics = matchTopic(message);
             const results = [];
             for (const [phase, phaseData] of Object.entries(data)) {
                 for (const [topicName, topicContent] of Object.entries(phaseData)) {
                     const lowerTopic = topicName.toLowerCase();
+                    const contentStr = Array.isArray(topicContent) ? topicContent[0] : (topicContent.exp || topicContent.code || '');
                     if (topics.some(t => lowerTopic.includes(t)) ||
-                        topics.some(t => topicContent[0].toLowerCase().includes(t))) {
-                        results.push({ phase, topic: topicName, content: topicContent[0].slice(0, 200) });
+                        topics.some(t => contentStr.toLowerCase().includes(t))) {
+                        results.push({ phase, topic: topicName, content: contentStr.slice(0, 200) });
                     }
                 }
             }
             return results.slice(0, 3);
         }
     }
-    catch (e) {
+    catch {
         return [];
     }
     return [];
 }
-function handleErrorHelp(message, code, lang) {
+function handleErrorHelp(message, code, lang, hasError) {
     const lower = message.toLowerCase();
     let response = '';
-    const hasError = /error|bug|fix|wrong|not\s*working|issue|broken|crash|fail|exception/i.test(lower);
+    if (hasError === undefined || hasError === null) {
+        hasError = /error|bug|fix|wrong|not\s*working|issue|broken|crash|fail|exception/i.test(lower);
+    }
     if (hasError || code) {
-        const langName = LANG_NAMES_AI[lang] || lang || 'your code';
-        if (/undefined/.test(lower) || /undefined/.test(code || '')) {
+        const langName = LANG_NAMES_AI[lang || ''] || lang || 'your code';
+        if (/undefined/.test(lower) || (code && /undefined/.test(code))) {
             response = `It looks like you're dealing with an **undefined** value. This usually means:\n\n1. The variable hasn't been declared yet\n2. The variable is out of scope\n3. A function didn't return what you expected\n4. A property doesn't exist on the object\n\n**Try this:** add a \`console.log()\` right before the error to check what the value actually is. Also check that the variable name is spelled exactly the same everywhere (JavaScript is case-sensitive!).`;
             return response;
         }
-        if (/null/.test(lower) || /null/.test(code || '')) {
+        if (/null/.test(lower) || (code && /null/.test(code))) {
             response = `A **null** value error means something that should have a value is empty.\n\nCommon causes:\n1. A function returned \`null\` because it couldn't find what you asked for\n2. An API call hasn't loaded yet\n3. A DOM element doesn't exist yet\n\n**Fix:** Check if the value is \`null\` before using it: \`if (value !== null) { ... }\` or use optional chaining: \`value?.property\`.`;
             return response;
         }
@@ -186,7 +200,7 @@ function handleTopicHelp(message, lang) {
     const topics = matchTopic(message);
     if (topics.length === 0)
         return null;
-    const langName = LANG_NAMES_AI[lang] || lang || 'programming';
+    const langName = LANG_NAMES_AI[lang || ''] || lang || 'programming';
     const topic = topics[0];
     const topicResponses = {
         variable: `**Variables** are containers for storing data values. In ${langName}:\n\n• Use descriptive names like \`userCount\` instead of \`x\`\n• Choose the right declaration keyword\n• Think about scope — where can this variable be accessed?\n\nWant me to show you an example of declaring and using variables in ${langName}?`,
@@ -213,7 +227,7 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
     if (/w(hat|ho|hy|hen|here|hich|hom)|how|can you|could you|please|tell/i.test(lower) &&
         /\b(i('m| am|'d| would)|you|your)\b/i.test(lower) &&
         /(devin|buddy|tutor|bot|assistant)/i.test(lower)) {
-        return { response: "I'm Devin! I'm here to help you learn programming. Ask me about specific topics, paste your code if something's broken, or tell me what you're trying to build. What do you need help with? 😊", source: 'keyword' };
+        return { response: "I'm Devin! I'm here to help you learn programming. Ask me about specific topics, paste your code if something's broken, or tell me what you're trying to build. What do you need help with?", source: 'keyword' };
     }
     if (code && code.length > 3) {
         if (hasError || /error|bug|fix|wrong|issue|broken/i.test(lower)) {
@@ -239,7 +253,7 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
     }
     if (/practice|exercis|challenge|problem|project/i.test(lower) &&
         /(give|want|need|have|some|a\s)/i.test(lower)) {
-        const langName = LANG_NAMES_AI[lang] || 'programming';
+        const langName = LANG_NAMES_AI[lang || ''] || 'programming';
         return { response: `Here's a quick ${langName} practice idea: try writing a program that converts temperatures between Celsius and Fahrenheit. Start with a function that takes a temperature and the conversion direction. Want more specific practice problems?`, source: 'keyword' };
     }
     if (lower.length < 3) {
@@ -247,12 +261,4 @@ function runKeywordTutor(message, lang, topic, code, hasError) {
     }
     return null;
 }
-module.exports = {
-    runKeywordTutor,
-    detectLangFromMsg,
-    getCurrContext,
-    getThank,
-    getGreet,
-    getSocratic,
-};
 //# sourceMappingURL=tutor-keywords.js.map

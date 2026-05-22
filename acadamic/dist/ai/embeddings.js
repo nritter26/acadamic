@@ -3,7 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.hybridSearch = hybridSearch;
 exports.search = search;
+exports.searchWithSources = searchWithSources;
 exports.getContext = getContext;
 exports.getTopicContext = getTopicContext;
 exports.getCurriculumContext = getCurriculumContext;
@@ -120,17 +122,13 @@ function searchTFIDF(query, lang, topN = 5) {
     const qTokens = tokenize(query);
     if (qTokens.length === 0)
         return [];
-    let candidateSet = null;
+    let candidateSet = new Set();
     for (const t of qTokens) {
         const docs = tfidfIndex.invertedIndex[t];
         if (!docs)
             continue;
-        if (!candidateSet) {
-            candidateSet = new Set(docs);
-        }
-        else {
-            candidateSet = new Set(docs.filter(d => candidateSet.has(d)));
-        }
+        for (const d of docs)
+            candidateSet.add(d);
     }
     if (!candidateSet)
         return [];
@@ -184,6 +182,8 @@ async function getEmbedding(text) {
     return null;
 }
 function cosineSim(a, b) {
+    if (a.length !== b.length)
+        return 0;
     let dot = 0, ma = 0, mb = 0;
     for (let i = 0; i < a.length; i++) {
         dot += a[i] * b[i];
@@ -274,7 +274,21 @@ async function buildEmbeddingCache() {
         console.error('buildEmbeddingCache error:', e.message);
     }
 }
-async function search(query, lang, topN = 5) {
+function rrfFusion(resultsA, resultsB, k = 60) {
+    const rankMap = new Map();
+    const docMap = new Map();
+    const key = (r) => `${r.lang}:${r.phase}:${r.topic}`;
+    resultsA.forEach((r, i) => rankMap.set(key(r), (rankMap.get(key(r)) || 0) + 1 / (k + i + 1)));
+    resultsB.forEach((r, i) => rankMap.set(key(r), (rankMap.get(key(r)) || 0) + 1 / (k + i + 1)));
+    for (const r of [...resultsA, ...resultsB]) {
+        const k2 = key(r);
+        if (!docMap.has(k2) || rankMap.get(k2) > (docMap.get(k2)?.score || 0)) {
+            docMap.set(k2, { ...r, score: rankMap.get(k2) || 0 });
+        }
+    }
+    return [...docMap.values()].sort((a, b) => b.score - a.score);
+}
+async function hybridSearch(query, lang, topN = 5) {
     if (curriculumDocs.length === 0 && !initPromise) {
         initPromise = init();
         await initPromise;
@@ -282,10 +296,24 @@ async function search(query, lang, topN = 5) {
     else if (initPromise) {
         await initPromise;
     }
-    const embResults = await searchEmbedding(query, lang, topN);
-    if (embResults)
+    const tfidfResults = searchTFIDF(query, lang, topN * 2);
+    const embResults = await searchEmbedding(query, lang, topN * 2);
+    if (!embResults || embResults.length === 0)
+        return tfidfResults;
+    if (tfidfResults.length === 0)
         return embResults;
-    return searchTFIDF(query, lang, topN);
+    return rrfFusion(tfidfResults, embResults, 60).slice(0, topN);
+}
+async function search(query, lang, topN = 5) {
+    return hybridSearch(query, lang, topN);
+}
+async function searchWithSources(query, lang, topN = 3) {
+    const results = await hybridSearch(query, lang, topN);
+    let mode = 'tfidf';
+    const embResults = await searchEmbedding(query, lang, 1);
+    if (embResults && embResults.length > 0)
+        mode = 'hybrid';
+    return { results, mode };
 }
 async function getContext(query, lang, topN = 3) {
     const results = await search(query, lang, topN);

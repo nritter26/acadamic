@@ -410,13 +410,14 @@ function triggerAutoDebug(errorText, code) {
     if (existingDebug) existingDebug.remove();
     const btn = document.createElement('button');
     btn.id = 'ai-auto-debug-btn';
+    btn.type = 'button';
     btn.textContent = '🔧 Auto-Debug';
     btn.style.cssText = 'display:block;margin-top:4px;margin-bottom:4px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:9px;font-weight:800;cursor:pointer;';
     btn.onclick = async function() {
         btn.textContent = '🔍 Analyzing...';
         btn.disabled = true;
         const aiPanel = document.getElementById('aiPanel');
-        if (!aiPanel.classList.contains('open')) toggleAI();
+        if (aiPanel && !aiPanel.classList.contains('open')) toggleAI();
         addAIMessage('', 'typing');
         try {
             const response = await fetch(BACKEND_URL + '/api/chat', {
@@ -425,7 +426,7 @@ function triggerAutoDebug(errorText, code) {
                 body: JSON.stringify({
                     message: `Debug this error and suggest a fix. Error: ${errorText.slice(0, 300)}`,
                     lang: currentLang,
-                    topic: currentTopic,
+                    topic: convSubject || currentTopic,
                     code: code.slice(0, 2000),
                     hasError: true,
                     output: errorText.slice(0, 500),
@@ -619,11 +620,14 @@ function appendAutoReview(outEl, code, lang) {
     outEl.innerText += summary;
 }
 
+var _tutorialLastRunHadError = false;
+
 function runCode() {
     const out = document.getElementById('output');
     const code = document.getElementById('editor').value;
     const existingBtn = document.getElementById('ai-explain-error-btn');
     if (existingBtn) existingBtn.remove();
+    _tutorialLastRunHadError = false;
     if (!code.trim()) { out.innerText = "// No code to run"; return; }
     if (currentLang === 'git') {
         out.innerText = processGitCommand(code);
@@ -633,18 +637,19 @@ function runCode() {
     out.innerText = "// Running...";
 
     if (currentLang === 'js') {
+        let localOut = "";
+        const savedLog = console.log;
         try {
-            const log = console.log;
-            let localOut = "";
             console.log = (m) => localOut += "> " + (typeof m === 'object' ? JSON.stringify(m) : m) + "\n";
             eval(code);
-            console.log = log;
+            console.log = savedLog;
             out.innerText = localOut || "(no output)";
             appendAutoReview(out, code, currentLang);
         } catch(e) {
+            console.log = savedLog;
             const errMsg = "Error: " + e.message;
             out.innerText = errMsg;
-            console.log = log;
+            _tutorialLastRunHadError = true;
             addErrorExplainButton(out, errMsg);
             triggerAutoDebug(errMsg, code);
             appendAutoReview(out, code, currentLang);
@@ -662,6 +667,7 @@ function runCode() {
     .then(r => r.json())
     .then(d => {
         out.innerText = d.output;
+        _tutorialLastRunHadError = !!(d.error || d.output.includes('Error:') || d.output.includes('FAIL'));
         setRunLoading(false);
         if (typeof tutorialRunHook === 'function') tutorialRunHook();
         if (d.error || d.output.includes('Error:') || d.output.includes('FAIL')) {
@@ -672,6 +678,7 @@ function runCode() {
     })
     .catch(e => {
         setRunLoading(false);
+        _tutorialLastRunHadError = true;
         const preview = getLogicalPreview(code, currentLang);
         if (preview) {
             out.innerText = preview;
@@ -711,6 +718,61 @@ let lastCodeRun = '';
 let lastCodeOutput = '';
 let convSubject = '';
 let convLang = '';
+
+const TOPIC_KEYWORDS_CLIENT = {
+    variable: ['variable', 'variables', 'declare', 'declaration', 'let', 'const', 'var', 'assignment', 'mutable', 'immutable', 'scope'],
+    function: ['function', 'functions', 'func', 'method', 'methods', 'def', 'fn', 'return', 'lambda', 'arrow', 'callback', 'callbacks'],
+    string: ['string', 'strings', 'str', 'template literal', 'template literals', 'concatenation', 'char', 'text', 'substring'],
+    number: ['number', 'numbers', 'int', 'float', 'integer', 'numeric', 'arithmetic', 'math', 'random'],
+    boolean: ['boolean', 'booleans', 'bool', 'true', 'false', 'truthy', 'falsy', 'logical', 'comparison', 'condition', 'conditional'],
+    array: ['array', 'arrays', 'list', 'lists', 'vector', 'slice', 'splice', 'push', 'pop', 'map', 'filter', 'reduce', 'foreach', 'forEach'],
+    object: ['object', 'objects', 'dictionary', 'map', 'hash', 'property', 'key value', 'json', 'record', 'struct', 'prototype'],
+    class: ['class', 'classes', 'constructor', 'extend', 'extends', 'inherit', 'inheritance', 'prototype', 'oop'],
+    promise: ['promise', 'promises', 'async', 'await', 'then', 'catch', 'future', 'defer', 'callback', 'callbacks'],
+    loop: ['loop', 'loops', 'for loop', 'while loop', 'iterate', 'iteration', 'foreach'],
+    type: ['type', 'types', 'interface', 'interfaces', 'generic', 'generics', 'enum', 'typedef', 'type annotation', 'static typing', 'typeof'],
+    null: ['null', 'undefined', 'nil', 'none', 'option', 'maybe', 'optional'],
+    error_handling: ['error handling', 'try catch', 'throw', 'throws', 'except', 'exception', 'exceptions', 'panic', 'result', 'unwrap'],
+    io: ['input', 'output', 'file', 'files', 'console', 'print', 'log', 'read', 'write', 'stdin', 'stdout'],
+    comment: ['comment', 'comments', 'docstring', 'documentation', 'jsdoc'],
+    operator: ['operator', 'operators', 'arithmetic', 'comparison', 'assignment', 'bitwise'],
+    recursion: ['recursion', 'recursive', 'stack overflow', 'base case', 'tail call'],
+    closure: ['closure', 'closures', 'lexical scope', 'scope chain', 'capture', 'inner function'],
+    generics: ['generic', 'generics', 'template', 'templates', 'type parameter', 'type parameters', 'trait bound'],
+    pointer: ['pointer', 'pointers', 'reference', 'references', 'memory address', 'dereference', 'borrow', 'borrowing'],
+    pattern_match: ['pattern matching', 'match', 'switch', 'destructure', 'destructuring', 'deconstruct'],
+    concurrency: ['concurrency', 'concurrent', 'parallel', 'parallelism', 'thread', 'threads', 'goroutine', 'goroutines', 'channel', 'channels'],
+    testing: ['testing', 'test', 'tests', 'assert', 'assertion', 'unit test', 'unit tests', 'mock', 'mocks', 'tdd'],
+    module: ['module', 'modules', 'import', 'export', 'require', 'package', 'packages', 'namespace', 'crate', 'npm'],
+};
+
+function detectTopicInQuery(q) {
+    const lower = q.toLowerCase().trim();
+    const words = lower.split(/\s+/);
+
+    // Direct single-word or two-word topic query — "variables", "closures", "error handling"
+    for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_CLIENT)) {
+        const phrase = words.join(' ');
+        if (keywords.some(kw => kw === phrase || kw === lower || (kw.includes(' ') && phrase.includes(kw)))) {
+            return topic;
+        }
+        if (words.length <= 4 && keywords.some(kw => words.includes(kw))) {
+            return topic;
+        }
+    }
+
+    // Phrase with topic indicator: "what is X", "explain X", "tell me about X", "what about X"
+    const hasIndicator = /^(what|how|why|explain|define|tell|describe|show)\b/i.test(lower) || /\b(what about|tell me about|how about|explain|difference between)\b/i.test(lower);
+    if (hasIndicator) {
+        for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_CLIENT)) {
+            if (keywords.some(kw => kw.length > 2 && lower.includes(kw))) {
+                return topic;
+            }
+        }
+    }
+
+    return null;
+}
 
 function saveChatHistory() {
     try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
@@ -807,7 +869,7 @@ function dismissReviewReminder() {
 }
 
 let aiCodeId = 0;
-function highlightCode(code, lang) {
+function highlightAICode(code, lang) {
     const kw = {
         js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
         ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
@@ -823,19 +885,15 @@ function highlightCode(code, lang) {
         const tokens = [];
         let i = 0;
         while (i < line.length) {
-            // single-line comment
             const rest = line.slice(i);
             const sCm = rest.match(/^\/\/.*/);
             if (sCm) { tokens.push('<span class="syn-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
             const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
             if (bCm) { tokens.push('<span class="syn-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
-            // string
             const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
             if (str) { tokens.push('<span class="syn-string">' + str[1] + '</span>'); i += str[1].length; continue; }
-            // number
             const num = rest.match(/^\b(\d+\.?\d*|0x[0-9a-fA-F]+)\b/);
             if (num) { tokens.push('<span class="syn-number">' + num[1] + '</span>'); i += num[1].length; continue; }
-            // word (keyword or identifier)
             const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
             if (word) {
                 if (kw.includes(word[1])) tokens.push('<span class="syn-keyword">' + word[1] + '</span>');
@@ -876,7 +934,7 @@ function formatAIText(text) {
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
         const idx = codeBlocks.length;
         const safeCode = escapeAIAttr(code);
-        const highlighted = highlightCode(code, lang);
+        const highlighted = highlightAICode(code, lang);
         codeBlocks.push({ lang, code, safeCode, highlighted });
         return `\x00CODEBLOCK${idx}\x00`;
     });
@@ -1252,18 +1310,37 @@ function extractSubject(text) {
             if (name === display) return langMatch[1];
         }
     }
-    const topicMatch = text.match(/\*\*([^*]+)\*\*/);
-    if (topicMatch) return topicMatch[1];
+    const boldMatches = text.match(/\*\*([^*]+)\*\*/g);
+    if (boldMatches) {
+        for (const bm of boldMatches) {
+            const candidate = bm.slice(2, -2);
+            if (detectTopicInQuery(candidate)) return candidate;
+        }
+    }
     return currentTopic || '';
 }
 
 function resolveFollowUp(q) {
     if (!convSubject) return q;
     const trimmed = q.trim();
-    if (PRONOUN_PATTERN.test(trimmed) || PRONOUN_WORDS.test(trimmed)) {
-        return `${convSubject} ${trimmed}`;
+    const lowerTrimmed = trimmed.toLowerCase();
+    const newTopic = detectTopicInQuery(trimmed);
+    const convSubjectLower = convSubject.toLowerCase();
+    if (newTopic) {
+        if (!convSubjectLower.startsWith(newTopic)) return q;
     }
-    return q;
+    let result = q;
+    if (PRONOUN_PATTERN.test(trimmed) || PRONOUN_WORDS.test(trimmed)) {
+        result = `${convSubject} ${trimmed}`;
+    }
+    if (convLang) {
+        const langDisplay = LANG_NAMES[convLang];
+        if (langDisplay && !lowerTrimmed.includes(langDisplay.toLowerCase()) && !result.toLowerCase().includes(langDisplay.toLowerCase())) {
+            const display = langDisplay.charAt(0).toUpperCase() + langDisplay.slice(1);
+            result = `in ${display}, ${result.toLowerCase()}`;
+        }
+    }
+    return result;
 }
 
 function extractConversationSubject(response) {
@@ -1394,6 +1471,37 @@ function checkCode() {
     output.style.borderLeft = `3px solid ${color}`;
 }
 
+let autoSyntaxEnabled = false;
+let autoSyntaxTimer = null;
+
+function toggleAutoSyntax() {
+    autoSyntaxEnabled = !autoSyntaxEnabled;
+    const btn = document.getElementById('auto-syntax-btn');
+    if (!btn) return;
+    btn.classList.toggle('active', autoSyntaxEnabled);
+    if (autoSyntaxEnabled) {
+        runAutoSyntax();
+    } else {
+        clearAnnotations();
+    }
+}
+
+function runAutoSyntax() {
+    if (!autoSyntaxEnabled) return;
+    const editor = document.getElementById('editor');
+    const code = editor ? editor.value : '';
+    if (code.trim()) {
+        const result = localCodeReview(code, currentLang);
+        updateAnnotations(result.issues.filter(i => i.severity === 'error' || i.severity === 'warning'));
+    }
+}
+
+function scheduleAutoSyntax() {
+    if (!autoSyntaxEnabled) return;
+    clearTimeout(autoSyntaxTimer);
+    autoSyntaxTimer = setTimeout(runAutoSyntax, 500);
+}
+
 function jumpToLine(line) {
     const editor = document.getElementById('editor');
     if (!editor) return;
@@ -1454,6 +1562,28 @@ function getErrorTutorTip(topic, output) {
 async function askAI(q) {
     streamingFullText = '';
     const enrichedQ = resolveFollowUp(q);
+    const detectedLang = detectLanguageInQuery(q.toLowerCase());
+    if (detectedLang) convLang = detectedLang;
+    const detectedTopic = detectTopicInQuery(q);
+    if (detectedTopic) {
+        const TOPIC_CURRICULUM_NAMES = {
+            variable: 'var let const', function: 'Function Declarations',
+            string: 'String Methods', number: 'Math & Number',
+            boolean: 'Truthy & Falsy', array: 'Array Methods',
+            object: 'Objects', class: 'Classes', promise: 'Promises',
+            loop: 'for Loops', type: 'Primitive Types',
+            null: 'null vs undefined', error_handling: 'Error Handling',
+            io: 'Console Debugging', comment: 'Syntax & Comments',
+            operator: 'Arithmetic Operators', recursion: 'Iterators & Generators',
+            closure: 'Closures', generics: 'Spread & Rest',
+            pointer: 'Reference Types', pattern_match: 'Destructuring',
+            concurrency: 'Async/Await', testing: 'Console Debugging',
+            module: 'ES Modules',
+        };
+        const topicName = TOPIC_CURRICULUM_NAMES[detectedTopic] ||
+            (detectedTopic.charAt(0).toUpperCase() + detectedTopic.slice(1).replace(/_/g, ' '));
+        convSubject = topicName;
+    }
     addAIMessage(q, 'user');
 
     const editor = document.getElementById('editor');
@@ -2603,12 +2733,12 @@ function testChallenge() {
     const out = document.getElementById('output');
 
     if (challengeLang === 'js') {
+        const savedLog = console.log;
+        let captured = '';
         try {
-            const log = console.log;
-            let captured = '';
             console.log = (m) => captured += "> " + (typeof m === 'object' ? JSON.stringify(m) : m) + "\n";
             eval(code);
-            console.log = log;
+            console.log = savedLog;
             let html = '';
             if (captured) html += '<pre style="font-size:10px;color:#94a3b8;margin:0 0 8px 0;">' + escapeHtml(captured) + '</pre>';
 
@@ -2637,7 +2767,7 @@ function testChallenge() {
             }
             out.innerHTML = html;
         } catch(e) {
-            console.log = log;
+            console.log = savedLog;
             out.innerHTML = `<div class="challenge-result fail">Error: ${escapeHtml(e.message)}</div>`;
         }
     } else {
@@ -3293,7 +3423,11 @@ function initHighlighting() {
     });
     hlEditor = textarea;
     textarea.addEventListener('input', function() {
-        if (currentAnnotations.length > 0) clearAnnotations();
+        if (autoSyntaxEnabled) {
+            scheduleAutoSyntax();
+        } else if (currentAnnotations.length > 0) {
+            clearAnnotations();
+        }
     });
     updateHighlight();
 }
@@ -3301,7 +3435,7 @@ function initHighlighting() {
 function updateHighlight() {
     if (!hlOverlay) return;
     const code = hlEditor ? hlEditor.value : document.getElementById('editor').value;
-    let html = highlightCode(code, currentLang);
+    let html = highlightEditorCode(code, currentLang);
     if (currentAnnotations.length > 0) {
         const lines = html.split('\n');
         for (const ann of currentAnnotations) {
@@ -3319,19 +3453,43 @@ function updateHighlight() {
     }
 }
 
-function highlightCode(code, lang) {
-    let h = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    h = h.replace(/(\/\/.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/(#.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/(--.*)/g, '<span class="hl-comment">$1</span>');
-    h = h.replace(/\/\*[\s\S]*?\*\//g, '<span class="hl-comment">$&</span>');
-    h = h.replace(/(["'`])(?:(?!\1|\\).|\\.)*\1/g, '<span class="hl-string">$&</span>');
-    h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-number">$1</span>');
+function highlightEditorCode(code, lang) {
     const kws = LANG_KEYWORDS[lang] || LANG_KEYWORDS.js;
-    const sorted = [...kws].sort((a, b) => b.length - a.length);
-    const escaped = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-    if (escaped) h = h.replace(new RegExp('\\b(' + escaped + ')\\b', 'gi'), '<span class="hl-keyword">$1</span>');
-    return h;
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const tokens = [];
+    let i = 0;
+    while (i < escaped.length) {
+        const rest = escaped.slice(i);
+        const newl = rest.match(/^\n/);
+        if (newl) { tokens.push('\n'); i++; continue; }
+        const wsp = rest.match(/^[ \t]+/);
+        if (wsp) { tokens.push(wsp[0]); i += wsp[0].length; continue; }
+        const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
+        if (bCm) { tokens.push('<span class="hl-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
+        const sCm = rest.match(/^\/\/[^\n]*/);
+        if (sCm) { tokens.push('<span class="hl-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
+        const hCm = rest.match(/^#[^\n]*/);
+        if (hCm && ['py','rs','sh','bash'].includes(lang)) { tokens.push('<span class="hl-comment">' + hCm[0] + '</span>'); i += hCm[0].length; continue; }
+        const sqlCm = rest.match(/^--[^\n]*/);
+        if (sqlCm && ['pg','mysql','sqlite'].includes(lang)) { tokens.push('<span class="hl-comment">' + sqlCm[0] + '</span>'); i += sqlCm[0].length; continue; }
+        const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
+        if (str) { tokens.push('<span class="hl-string">' + str[0] + '</span>'); i += str[0].length; continue; }
+        const num = rest.match(/^\b(0x[0-9a-fA-F]+|\d+\.?\d*)\b/);
+        if (num) { tokens.push('<span class="hl-number">' + num[0] + '</span>'); i += num[0].length; continue; }
+        const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
+        if (word) {
+            if (kws.some(k => k.toLowerCase() === word[1].toLowerCase())) {
+                tokens.push('<span class="hl-keyword">' + word[1] + '</span>');
+            } else {
+                tokens.push(word[1]);
+            }
+            i += word[1].length;
+            continue;
+        }
+        tokens.push(escaped[i]);
+        i++;
+    }
+    return tokens.join('');
 }
 
 // ── Compiler Pipeline ──
@@ -3660,6 +3818,8 @@ setMode = function(lang) {
         document.getElementById('tutorial-progress').style.display = 'flex';
         const tutorialNavBtn = document.getElementById('nav-tutorial');
         if (tutorialNavBtn) tutorialNavBtn.classList.add('active');
+        const apiBtn = document.getElementById('api-toggle-btn');
+        if (apiBtn) apiBtn.style.display = 'none';
         initTutorial();
         updateAISuggestions();
         return;
@@ -4275,6 +4435,13 @@ const langIntro = {
         usedFor: 'Building and maintaining server-side components of web and mobile applications, RESTful APIs, microservices, database management, authentication systems, cloud infrastructure, and real-time services.',
         creator: 'Backend development has evolved alongside the World Wide Web since Tim Berners-Lee invented the first web server in 1990. The field grew from simple CGI scripts to modern architectures including microservices, serverless computing, and event-driven systems.',
         code: '// Backend — the engine behind the web\n// Example: Node.js Express API\nconst express = require(\'express\');\nconst app = express();\n\napp.get(\'/api/hello\', (req, res) => {\n    res.json({ message: "Hello from the backend!" });\n});\n\napp.listen(3000, () => {\n    console.log(\'Server running on port 3000\');\n});'
+    },
+    cicd: {
+        name: 'CI/CD',
+        what: 'CI/CD (Continuous Integration/Continuous Delivery) is an automated software delivery method that bridges development and operations. Continuous Integration automatically builds and tests every code change, catching bugs early. Continuous Delivery/Deployment extends this by automatically deploying code to production-like environments or directly to users.',
+        usedFor: 'Automating build, test, and deployment pipelines, ensuring code quality through automated checks, enabling rapid and reliable software releases, reducing manual deployment errors, and providing fast feedback to developers on every commit.',
+        creator: 'The concepts of CI and CD were formalized by Martin Fowler and Kent Beck (Extreme Programming, late 1990s). Continuous Integration was first practiced in the 1990s. Modern CI/CD was popularized by tools like Jenkins (2005), Travis CI (2011), GitHub Actions (2018), and GitLab CI/CD with its built-in Auto DevOps capabilities.',
+        code: '# .gitlab-ci.yml example\nstages:\n  - test\n  - build\n  - deploy\n\nunit-tests:\n  stage: test\n  script:\n    - npm install\n    - npm test\n\nbuild-app:\n  stage: build\n  script:\n    - npm run build\n  artifacts:\n    paths:\n      - dist/\n\ndeploy-prod:\n  stage: deploy\n  script:\n    - npm run deploy\n  only:\n    - main'
     },
     android: {
         name: 'Android',

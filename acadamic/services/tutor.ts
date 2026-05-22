@@ -1,11 +1,15 @@
-import aiResponses from '../ai/responses-data';
 import { analyzeUserCode } from './analyzer';
-import { getCurriculumContext, getTopicContext, search as semanticSearch } from '../ai/embeddings';
-import { askLLM } from '../ai/provider';
-import { getActiveAIProvider } from '../ai/config';
+import { getTopicContext, searchWithSources } from '../ai/embeddings';
 import * as learner from '../ai/learner';
 import * as conv from './conversation';
+import { logger } from '../middleware';
+import { executeStrategies } from './strategies';
+import { detectLanguage as detectLang } from './strategies/utils';
 import { LANG_NAMES } from '../public/langConfig';
+import type { TutorContext } from './strategies';
+import { expandQuery } from '../ai/query-expander';
+import { getSystemPrompt } from '../ai/config';
+import { matchTopic } from '../ai/tutor-keywords';
 
 interface HistoryEntry {
   role: string;
@@ -16,17 +20,6 @@ interface HistoryEntry {
 interface LLMMsg {
   role: 'system' | 'user' | 'assistant';
   content: string;
-}
-
-function detectLanguage(query: string): string | null {
-  const words = query.toLowerCase().split(/\s+/);
-  for (const word of words) {
-    for (const [code, name] of Object.entries(LANG_NAMES)) {
-      if (word === name || word === code) return code;
-    }
-    if (word === 'sql') return 'pg';
-  }
-  return null;
 }
 
 function extractSubject(text: string): string {
@@ -47,8 +40,22 @@ function resolveFollowUp(q: string, history?: HistoryEntry[]): string {
   const lastBot = [...history].reverse().find(m => m.role === 'bot');
   if (!lastBot || !lastBot.text) return q;
 
+  const topics = matchTopic(q);
   const subject = extractSubject(lastBot.text);
-  return subject ? `${subject} ${q}` : q;
+  const subjectLower = subject.toLowerCase();
+  if (topics.length > 0 && !topics.some(t => subjectLower.startsWith(t))) return q;
+
+  const lang = detectLang(lastBot.text);
+  let result = subject ? `${subject} ${q}` : q;
+  if (lang) {
+    const rawName = LANG_NAMES[lang as keyof typeof LANG_NAMES] || lang;
+    const alreadyMentions = trimmed.includes(lang) || trimmed.includes(rawName);
+    if (!alreadyMentions) {
+      const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      result = `in ${displayName}, ${result.toLowerCase()}`;
+    }
+  }
+  return result;
 }
 
 export async function buildLLMMessages(
@@ -64,6 +71,7 @@ export async function buildLLMMessages(
 ): Promise<LLMMsg[]> {
   const messages: LLMMsg[] = [];
   const context: string[] = [];
+  let learnerLevel: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
 
   if (learnerId && lang) {
     try {
@@ -71,17 +79,20 @@ export async function buildLLMMessages(
       if (mastery?.topics?.length > 0) {
         const avgMastery = mastery.overall;
         const weakTopics = mastery.topics.filter(t => t.completed && t.mastery < 60).map(t => t.topic);
-        let level = 'beginner';
-        if (avgMastery > 70) level = 'intermediate';
-        if (avgMastery > 85) level = 'expert';
-        context.push(`[Learner Profile] Current level: ${level}. Overall mastery: ${avgMastery}%. Weak areas: ${weakTopics.join(', ') || 'none'}.`);
+        if (avgMastery > 85) learnerLevel = 'advanced';
+        else if (avgMastery > 70) learnerLevel = 'intermediate';
+        else learnerLevel = 'beginner';
+        context.push(`[Learner Profile] Current level: ${learnerLevel}. Overall mastery: ${avgMastery}%. Weak areas: ${weakTopics.join(', ') || 'none'}.`);
       }
-    } catch {}
+    } catch (e) { logger.debug({ error: String(e) }, 'Learner profile failed'); }
   }
+
+  messages.push({ role: 'system', content: getSystemPrompt(learnerLevel) });
 
   if (topic) {
     const topicCtx = getTopicContext(topic, lang);
     if (topicCtx) context.push(topicCtx);
+    context.push(`The user is asking specifically about the topic "${topic}". Focus your response on this topic.`);
   }
 
   if (code) {
@@ -97,9 +108,23 @@ export async function buildLLMMessages(
     context.push(`The code produced this output/error:\n\`\`\`\n${output.replace(/<[^>]*>/g, '').trim()}\n\`\`\``);
   }
 
-  if (!topic) {
-    const curriculumCtx = getCurriculumContext(message, lang);
-    if (curriculumCtx) context.push(curriculumCtx);
+  try {
+    const expanded = expandQuery(message + (topic ? ' ' + topic : ''));
+    const queryStr = expanded.join(' ');
+    const { results, mode } = await searchWithSources(queryStr, lang, 3);
+    if (results.length > 0) {
+      const sourceLines = results.map((r, i) =>
+        `[${i + 1}] ${r.lang.toUpperCase()} / ${r.phase} / ${r.topic} (score: ${(r.score * 100).toFixed(0)}%)`
+      );
+      let ragCtx = `\n**Relevant curriculum content (${mode} search):**\n${sourceLines.join('\n')}\n\n`;
+      for (const r of results) {
+        if (r.exp) ragCtx += `[${r.topic}] ${r.exp.slice(0, 400)}\n`;
+        if (r.code) ragCtx += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
+      }
+      context.push(ragCtx);
+    }
+  } catch (e: unknown) {
+    logger.debug({ err: e }, 'RAG search failed, skipping');
   }
 
   if (context.length > 0) {
@@ -136,158 +161,29 @@ export async function handleTutorMessage(
   const q = resolveFollowUp(message, history).toLowerCase().trim();
 
   const lid = learnerId || 'default';
-  try { await learner.trackAIInteraction(lid); } catch {}
-  try { await conv.addMessage(lid, 'user', message); } catch {}
+  try { await learner.trackAIInteraction(lid); } catch (err: unknown) {
+    logger.warn({ err }, 'tutor: failed to track AI interaction');
+  }
+  try { await conv.addMessage(lid, 'user', message); } catch (err: unknown) {
+    logger.warn({ err }, 'tutor: failed to add user message');
+  }
 
   try {
-    // 1. Try LLM first
-    if (getActiveAIProvider() !== 'keyword') {
-      const llmMessages = await buildLLMMessages(message, lang, topic, phase, code, output, hasError, history, learnerId);
-      let gotChunk = false;
-      let fullResponse = '';
-      await askLLM(llmMessages, (chunk: string) => {
-        gotChunk = true;
-        fullResponse += chunk;
-        sseSend(chunk);
-      }, { lang, topic, code, hasError });
-      if (gotChunk) {
-        if (topic && lang) await learner.trackAttempt(lid, lang, topic);
-        try { await conv.addMessage(lid, 'assistant', fullResponse); } catch {}
-        sseDone();
-        return;
-      }
+    const ctx: TutorContext = {
+      message, q, lang, topic, phase, code, output,
+      hasError, history, learnerId, lid,
+    };
+    const handled = await executeStrategies(ctx, sseSend, sseDone);
+    if (!handled) {
+      const fallback = "Sorry, I couldn't process your request. Please try asking in a different way or mention a specific topic.";
+      try { await conv.addMessage(lid, 'assistant', fallback); } catch {}
+      sseSend(fallback);
+      sseDone();
     }
-
-    // 2. Code-aware, error-aware help
-    if (hasError || /error|bug|fix|wrong|not working|issue/.test(q)) {
-      let errorReply = '';
-      if (code) {
-        const analysis = analyzeUserCode(code, lang || 'js');
-        if (analysis?.length) {
-          errorReply = "I looked at your code and found some issues:\n\n" +
-            analysis.map((h, i) => `${i + 1}. ${h}`).join('\n') + '\n\n';
-        }
-      }
-      if (output && /Error|ReferenceError|TypeError|SyntaxError|FAIL/.test(output)) {
-        errorReply += `**Your code produced this output:**\n\`\`\`\n${output.replace(/<[^>]*>/g, '').trim()}\n\`\`\`\n\n`;
-      }
-      if (code && topic) {
-        errorReply += `Since you're working on **${topic}**, here's a hint:\n`;
-        errorReply += `- Look at the example in the curriculum and compare it with your code line by line\n`;
-        errorReply += `- Try simplifying: comment out parts until it works, then add them back one at a time\n`;
-        errorReply += `- Check the most common mistake for this topic and see if it applies to you\n\n`;
-      }
-      if (!errorReply) {
-        errorReply = "Let's debug this systematically:\n\n**1. What did you expect?**\n**2. What actually happened?**\n**3. What have you tried?**\n\nShare your code and the error message, and I'll help!";
-      } else {
-        errorReply += "**Need more help?** Describe what you expected to happen and I'll guide you to the fix step by step.";
-      }
-      if (topic && lang) await learner.trackError(lid, lang, topic);
-      await streamReply(sseSend, sseDone, errorReply, lid);
-      return;
-    }
-
-    // 3. Follow-up detection
-    if (history && history.length >= 2) {
-      const lastBotMsg = history.filter(h => h.role === 'bot').pop();
-      if (lastBotMsg && /yes|ok|sure|tell me more|example|show me/.test(q)) {
-        const followUps: Record<string, string> = {
-          variable: "Let's practice! Try this in the editor:\n```\nlet name = 'Your Name';\nlet age = 25;\nconsole.log(name, age);\n```\nThen click Run!",
-          function: "Here's a simple exercise: Write a function called `add` that takes two parameters and returns their sum.",
-          loop: "Practice: Write a loop that prints the numbers 1 through 10. Then modify it to only print even numbers.",
-          array: "Try this: Create an array of your 3 favorite foods. Write a loop that prints each one.",
-          class: "Exercise: Create a `Person` class with `name` and `age` properties. Add a `greet()` method.",
-        };
-        for (const [key, reply] of Object.entries(followUps)) {
-          if (lastBotMsg.text?.toLowerCase().includes(key)) {
-            await streamReply(sseSend, sseDone, reply, lid);
-            return;
-          }
-        }
-      }
-      if (q.includes('thank')) {
-        await streamReply(sseSend, sseDone, "You're welcome! Keep experimenting, keep breaking things, and keep asking questions. What would you like to explore next?", lid);
-        return;
-      }
-    }
-
-    // 4. Semantic curriculum search
-    const searchLang = detectLanguage(message) || lang;
-    const semanticResults = await semanticSearch(q, searchLang, 1);
-    if (semanticResults.length > 0 && semanticResults[0].score > 0.15) {
-      const best = semanticResults[0];
-      let reply = `I found relevant content in the curriculum related to your question.\n\n**${best.topic}** (${best.lang.toUpperCase()} - ${best.phase})\n\n`;
-      reply += best.exp.slice(0, 500) + '...\n\n';
-      if (best.code) reply += `**Example code:**\n\`\`\`\n${best.code}\n\`\`\`\n\n`;
-      reply += `Would you like me to explain more about **${best.topic}** or help you practice it?`;
-      await streamReply(sseSend, sseDone, reply, lid);
-      return;
-    }
-
-    // 5. Context-aware topic matching
-    if (topic && /what|how|explain|tell me|\?/.test(q)) {
-      for (const entry of aiResponses) {
-        if (entry.keywords.some(k => topic.toLowerCase().includes(k))) {
-          let reply = entry.response;
-          reply += `\n\n**You're currently studying:** ${topic} (${phase || ''})`;
-          reply += `\nTry the code example in the editor and click Run!`;
-          await streamReply(sseSend, sseDone, reply, lid);
-          return;
-        }
-      }
-    }
-
-    // 6. Standard keyword matching
-    for (const entry of aiResponses) {
-      if (entry.keywords.some(k => q.includes(k))) {
-        await streamReply(sseSend, sseDone, entry.response, lid);
-        return;
-      }
-    }
-
-    // 7. Secondary keyword matching
-    for (const entry of aiResponses) {
-      const combined = entry.keywords.join(' ');
-      if (combined.includes(q.replace(/[^a-z\s]/g, '').trim())) {
-        await streamReply(sseSend, sseDone, entry.response, lid);
-        return;
-      }
-    }
-
-    // 8. Greeting / thanks
-    if (q.includes('thank')) {
-      await streamReply(sseSend, sseDone, "You're welcome! Keep up the great work. Learning programming is a journey — enjoy every step!", lid);
-      return;
-    }
-
-    if (/hello|hi |^hey$|good/.test(q)) {
-      const langInfo = lang ? `I see you're studying **${lang.toUpperCase()}**. ` : '';
-      await streamReply(sseSend, sseDone, `Hello! ${langInfo}Ask me anything about the topic you're working on!`, lid);
-      return;
-    }
-
-    // 9. Socratic / generic fallback
-    if (topic) {
-      await streamReply(sseSend, sseDone, `Great question about **${topic}**! Instead of giving you the answer directly, let me ask: what do you think the answer might be? What have you tried so far?`, lid);
-      return;
-    }
-
-    const fallbacks = [
-      "That's an interesting question! To help you best, could you tell me: what language are you working with?",
-      "I want to make sure I help you effectively. Could you tell me more about what you're working on?",
-      "Let me help you learn! Try asking me about a specific topic you're studying, or share your code for debugging.",
-    ];
-    await streamReply(sseSend, sseDone, fallbacks[Math.floor(Math.random() * fallbacks.length)], lid);
   } catch (e) {
     sseSend("Sorry, I encountered an error processing your request. Please try again.");
     sseDone();
   }
 }
 
-async function streamReply(sseSend: (chunk: string) => void, sseDone: () => void, text: string, lid?: string): Promise<void> {
-  if (lid) {
-    try { await conv.addMessage(lid, 'assistant', text); } catch {}
-  }
-  sseSend(text);
-  sseDone();
-}
+

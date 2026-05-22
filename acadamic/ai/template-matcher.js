@@ -1,50 +1,5 @@
-let _modelPromise = null;
-let _pipeline = null;
-
-const MODEL_ID = process.env.TINY_LLM_MODEL || 'Xenova/gte-small';
-const CACHE_DIR = process.env.TINY_LLM_CACHE_DIR || undefined;
-
-async function getPipeline() {
-  if (!_pipeline) {
-    try {
-      const { pipeline } = await import('@xenova/transformers');
-      _pipeline = pipeline;
-    } catch (e) {
-      console.error('[tiny-llm] Failed to import @xenova/transformers:', e.message);
-      throw e;
-    }
-  }
-  return _pipeline;
-}
-
-async function loadModel() {
-  if (!_modelPromise) {
-    _modelPromise = (async () => {
-      console.log(`[tiny-llm] Loading model: ${MODEL_ID} (this may take a moment on first run)...`);
-      const pipe = await getPipeline();
-      const model = await pipe('feature-extraction', MODEL_ID, {
-        cache_dir: CACHE_DIR,
-      });
-      console.log(`[tiny-llm] Model loaded: ${MODEL_ID}`);
-      return model;
-    })();
-  }
-  return _modelPromise;
-}
-
 async function generateResponse(messages) {
-  const model = await loadModel();
   const lastMsg = messages[messages.length - 1]?.content || '';
-  const context = messages.slice(0, -1).map(m => m.content).join('\n').slice(-500);
-
-  const input = context ? `Context: ${context}\nQuestion: ${lastMsg}` : lastMsg;
-
-  const result = await model(input, {
-    pooling: 'mean',
-    normalize: true,
-  });
-
-  const embedding = Array.from(result.data);
 
   const isQuestionLike = /\b(what|how|why|when|where|which|can|could|would|should|explain|tell|describe|show|help|difference|example|mean|define)\b/i.test(lastMsg);
   const isLongEnough = lastMsg.split(/\s+/).length > 3;
@@ -52,7 +7,7 @@ async function generateResponse(messages) {
   if (!isQuestionLike && !isLongEnough) {
     return {
       response: "I understand you're asking something, but could you be more specific? Tell me what programming topic you'd like help with, or paste a code snippet you're working on.",
-      source: 'tiny-llm'
+      source: 'template-matcher'
     };
   }
 
@@ -87,7 +42,7 @@ async function generateResponse(messages) {
     response = `That's an interesting question! Based on what you're asking, here are some general tips:\n\n1. **Check your understanding** — What do you expect this code to do?\n2. **Simplify** — Try a minimal example that isolates just the part you're curious about\n3. **Experiment** — Change one thing at a time and observe the result\n\nIf you can share more context or specific code, I'll be able to give you a more helpful answer!`;
   }
 
-  return { response, source: 'tiny-llm' };
+  return { response, source: 'template-matcher' };
 }
 
 async function getTinyLLMResponse(messages, onStream) {
@@ -104,29 +59,11 @@ async function getTinyLLMResponse(messages, onStream) {
 
     return result.response;
   } catch (e) {
-    console.error('[tiny-llm] Error:', e.message);
+    console.error('[template-matcher] Error:', e.message);
     return null;
   }
 }
 
-async function isModelLoaded() {
-  if (!_modelPromise) return false;
-  try {
-    await _modelPromise;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function disposeTinyLLM() {
-  _modelPromise = null;
-  _pipeline = null;
-  console.log('[tiny-llm] Disposed model reference');
-}
-
 module.exports = {
   getTinyLLMResponse,
-  isModelLoaded,
-  disposeTinyLLM,
 };

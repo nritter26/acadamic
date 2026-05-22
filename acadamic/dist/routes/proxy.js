@@ -11,7 +11,7 @@ router.post('/', (0, middleware_1.validate)(types_1.ProxySchema), async (req, re
         res.status(400).json({ error: 'No URL provided' });
         return;
     }
-    if (!(0, services_1.isValidProxyUrl)(url)) {
+    if (!(await (0, services_1.isValidProxyUrl)(url))) {
         res.status(400).json({ error: 'Invalid or forbidden URL' });
         return;
     }

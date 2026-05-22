@@ -49,6 +49,7 @@ const middleware_2 = require("./middleware");
 const database = __importStar(require("./sql/database"));
 const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path_1.default.join(__dirname, 'data');
 // ── CORS (local dev) ──
@@ -121,6 +122,8 @@ app.use(middleware_1.errorHandler);
 const server = http_1.default.createServer(app);
 // ── Setup WebSocket ──
 (0, services_1.setupWebSocket)(server);
+// ── Schedule periodic cleanup ──
+setInterval(services_1.pruneOldConversations, 3_600_000);
 // ── Start ──
 server.listen(PORT, () => {
     middleware_2.logger.info(`Kodex's Lab running at http://localhost:${PORT}`);

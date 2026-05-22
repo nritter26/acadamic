@@ -43,13 +43,15 @@ let tfidfIndex: TFIDFIndex | null = null;
 let embedCache: Record<string, number[]> | null = null;
 let initPromise: Promise<void> | null = null;
 
+const LANG_CODE_WHITELIST = new Set(['js','ts','py','go','rs','c','kt','cs','sw','rb','sh','sql']);
+
 function tokenize(text: string): string[] {
   return (text || '')
     .toLowerCase()
     .replace(/<[^>]*>/g, ' ')
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length > 2 && w.length < 50);
+    .filter(w => (w.length > 2 || LANG_CODE_WHITELIST.has(w)) && w.length < 50);
 }
 
 async function buildCurriculumDocs(): Promise<void> {
@@ -296,7 +298,30 @@ async function buildEmbeddingCache(): Promise<void> {
   }
 }
 
-export async function search(
+function rrfFusion(
+  resultsA: (CurriculumDoc & { score: number })[],
+  resultsB: (CurriculumDoc & { score: number })[],
+  k = 60,
+): (CurriculumDoc & { score: number })[] {
+  const rankMap = new Map<string, number>();
+  const docMap = new Map<string, CurriculumDoc & { score: number }>();
+
+  const key = (r: CurriculumDoc) => `${r.lang}:${r.phase}:${r.topic}`;
+
+  resultsA.forEach((r, i) => rankMap.set(key(r), (rankMap.get(key(r)) || 0) + 1 / (k + i + 1)));
+  resultsB.forEach((r, i) => rankMap.set(key(r), (rankMap.get(key(r)) || 0) + 1 / (k + i + 1)));
+
+  for (const r of [...resultsA, ...resultsB]) {
+    const k2 = key(r);
+    if (!docMap.has(k2) || rankMap.get(k2)! > (docMap.get(k2)?.score || 0)) {
+      docMap.set(k2, { ...r, score: rankMap.get(k2) || 0 });
+    }
+  }
+
+  return [...docMap.values()].sort((a, b) => b.score - a.score);
+}
+
+export async function hybridSearch(
   query: string,
   lang?: string,
   topN = 5,
@@ -307,9 +332,34 @@ export async function search(
   } else if (initPromise) {
     await initPromise;
   }
-  const embResults = await searchEmbedding(query, lang, topN);
-  if (embResults) return embResults;
-  return searchTFIDF(query, lang, topN);
+
+  const tfidfResults = searchTFIDF(query, lang, topN * 2);
+  const embResults = await searchEmbedding(query, lang, topN * 2);
+
+  if (!embResults || embResults.length === 0) return tfidfResults;
+  if (tfidfResults.length === 0) return embResults;
+
+  return rrfFusion(tfidfResults, embResults, 60).slice(0, topN);
+}
+
+export async function search(
+  query: string,
+  lang?: string,
+  topN = 5,
+): Promise<(CurriculumDoc & { score: number })[]> {
+  return hybridSearch(query, lang, topN);
+}
+
+export async function searchWithSources(
+  query: string,
+  lang?: string,
+  topN = 3,
+): Promise<{ results: (CurriculumDoc & { score: number })[]; mode: string }> {
+  const results = await hybridSearch(query, lang, topN);
+  let mode = 'tfidf';
+  const embResults = await searchEmbedding(query, lang, 1);
+  if (embResults && embResults.length > 0) mode = 'hybrid';
+  return { results, mode };
 }
 
 export async function getContext(query: string, lang?: string, topN = 3): Promise<string> {

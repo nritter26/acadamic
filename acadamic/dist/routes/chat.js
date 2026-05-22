@@ -10,6 +10,8 @@ router.post('/', (0, middleware_1.validate)(types_1.ChatSchema), async (req, res
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
+    let aborted = false;
+    req.on('close', () => { aborted = true; });
     if (!message) {
         res.write(`data: ${JSON.stringify({ content: "Ask me something about programming!" })}\n\n`);
         res.write('data: [DONE]\n\n');
@@ -17,13 +19,26 @@ router.post('/', (0, middleware_1.validate)(types_1.ChatSchema), async (req, res
         return;
     }
     const sseSend = (chunk) => {
+        if (aborted)
+            return;
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
     };
     const sseDone = () => {
+        if (aborted)
+            return;
         res.write('data: [DONE]\n\n');
         res.end();
     };
-    await (0, services_1.handleTutorMessage)(message, { lang, topic, phase, code, output, hasError, history, learnerId }, sseSend, sseDone);
+    try {
+        await (0, services_1.handleTutorMessage)(message, { lang, topic, phase, code, output, hasError, history, learnerId }, sseSend, sseDone);
+    }
+    catch (e) {
+        if (!aborted) {
+            res.write(`data: ${JSON.stringify({ content: 'Error: ' + e.message })}\n\n`);
+            res.write('data: [DONE]\n\n');
+            res.end();
+        }
+    }
 });
 exports.default = router;
 //# sourceMappingURL=chat.js.map
