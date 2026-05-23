@@ -8,6 +8,8 @@ let currentEngineFilter = 'all';
 let currentMobilePlatform = 'all';
 let collapsedPhases = new Set();
 
+const DEVIN_MAINTENANCE = true;
+
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
 
 
@@ -337,7 +339,7 @@ const LEARNER_ID = (function() {
     return id;
 })();
 
-const runBtn = document.querySelector('.run-btn');
+const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
 
 let dueReviewCount = 0;
 
@@ -800,6 +802,10 @@ function loadChatHistory() {
 function clearChatHistory() {
     conversationHistory = [];
     try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
+    if (DEVIN_MAINTENANCE) {
+        showMaintenanceMessage();
+        return;
+    }
     const el = document.getElementById('aiMessages');
     if (el) {
         el.innerHTML = `<div class="ai-msg bot"><div class="label">Devin</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
@@ -813,6 +819,10 @@ function toggleAI() {
     panel.classList.toggle('open');
     document.getElementById('aiToggle').classList.toggle('open');
     if (!wasOpen) {
+        if (DEVIN_MAINTENANCE) {
+            showMaintenanceMessage();
+            return;
+        }
         loadChatHistory();
         setTimeout(() => document.getElementById('aiInput').focus(), 100);
         updateAIContext();
@@ -829,6 +839,30 @@ function toggleAI() {
         }
     }
     if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
+}
+
+function showMaintenanceMessage() {
+    const el = document.getElementById('aiMessages');
+    if (el) {
+        el.innerHTML = `<div class="ai-maintenance">🚧 Devin is currently under maintenance.<br><br>Please check back later.</div>`;
+    }
+    const suggestions = document.getElementById('aiSuggestions');
+    if (suggestions) suggestions.innerHTML = '';
+    const input = document.getElementById('aiInput');
+    if (input) {
+        input.placeholder = 'Devin is under maintenance...';
+        input.disabled = true;
+    }
+    const sendBtn = document.querySelector('.ai-input-row button:last-child');
+    if (sendBtn) sendBtn.disabled = true;
+    const stopBtn = document.getElementById('aiStopBtn');
+    if (stopBtn) stopBtn.style.display = 'none';
+    const badge = document.getElementById('aiOfflineBadge');
+    if (badge) {
+        badge.style.display = '';
+        badge.style.color = '#fbbf24';
+        badge.textContent = '🚧 Under Maintenance';
+    }
 }
 
 function startReviewSession() {
@@ -1746,6 +1780,7 @@ function autoGrowAIInput(el) {
 }
 
 function sendAI() {
+    if (DEVIN_MAINTENANCE) return;
     const input = document.getElementById('aiInput');
     const q = input.value.trim();
     if (!q) return;
@@ -3441,16 +3476,65 @@ function updateHighlight() {
         for (const ann of currentAnnotations) {
             const idx = ann.line - 1;
             if (idx >= 0 && idx < lines.length) {
-                lines[idx] = `<span class="annotation-${ann.severity}" title="${(ann.message || '').replace(/"/g, '&quot;')}">${lines[idx]}</span>`;
+                const msg = (ann.message || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+                lines[idx] = `<span class="annotation-${ann.severity}" title="${msg}">${lines[idx]}</span>`;
+                const errChar = getErrorChar(ann.message);
+                if (errChar) {
+                    lines[idx] = highlightCharInLine(lines[idx], errChar);
+                }
             }
         }
         html = lines.join('\n');
     }
-    hlOverlay.firstChild.innerHTML = html;
+    const codeEl = hlOverlay.querySelector('code') || hlOverlay.firstChild;
+    if (codeEl && codeEl.innerHTML !== html) {
+        codeEl.innerHTML = html;
+    }
     if (hlEditor) {
         hlOverlay.scrollTop = hlEditor.scrollTop;
         hlOverlay.scrollLeft = hlEditor.scrollLeft;
     }
+}
+
+function getErrorChar(message) {
+    if (!message) return null;
+    const m = message.match(/\((\d+)\s+open,\s*(\d+)\s+close\)/);
+    if (!m) return null;
+    const opens = parseInt(m[1]);
+    const closes = parseInt(m[2]);
+    const lower = message.toLowerCase();
+    if (opens > closes) {
+        if (lower.includes('parenthes')) return '(';
+        if (lower.includes('curly') || lower.includes('brace')) return '{';
+        if (lower.includes('bracket')) return '[';
+    } else {
+        if (lower.includes('parenthes')) return ')';
+        if (lower.includes('curly') || lower.includes('brace')) return '}';
+        if (lower.includes('bracket')) return ']';
+    }
+    return null;
+}
+
+function highlightCharInLine(html, char) {
+    let result = '';
+    let inTag = false;
+    let found = false;
+    for (let i = 0; i < html.length; i++) {
+        const c = html[i];
+        if (c === '<') {
+            inTag = true;
+            result += c;
+        } else if (c === '>') {
+            inTag = false;
+            result += c;
+        } else if (!inTag && !found && c === char) {
+            result += '<span class="hl-error-char">' + c + '</span>';
+            found = true;
+        } else {
+            result += c;
+        }
+    }
+    return result;
 }
 
 function highlightEditorCode(code, lang) {
@@ -3832,7 +3916,7 @@ setMode = function(lang) {
         if (controls) controls.style.display = 'none';
     }
 
-    const runBtn = document.querySelector('.run-btn');
+const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
     document.getElementById('cheatsheet-btn').textContent = lang === 'challenge' ? 'Reveal Answer' : 'Cheatsheet';
     if (runBtn) runBtn.textContent = lang === 'challenge' ? 'Test ▶' : 'Run ▶';
     const apiBtn = document.getElementById('api-toggle-btn');
