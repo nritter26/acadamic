@@ -4030,7 +4030,7 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
         return sum + Object.keys(topics).filter(t => completedTopics.has(currentLang + ':' + t)).length;
     }, 0);
     const pct = progressTotal > 0 ? Math.round(progressDone / progressTotal * 100) : 0;
-    document.getElementById('header-title').innerHTML = lang.toUpperCase() + (pct > 0 ? ` <span style="font-size:10px;opacity:0.6;">${pct}%</span>` : '');
+    document.getElementById('header-title').textContent = lang.toUpperCase();
     document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
     const navBtn = document.getElementById('nav-' + lang);
     if (navBtn) navBtn.classList.add('active');
@@ -4162,7 +4162,7 @@ function updateLineNumbers() {
     const lines = textarea.value.split('\n').length;
     const nums = [];
     for (let i = 1; i <= lines; i++) {
-        nums.push('<span>' + i + '</span>');
+        nums.push('<span style="display:block">' + i + '</span>');
     }
     lineNumbersEl.innerHTML = nums.join('\n');
 }

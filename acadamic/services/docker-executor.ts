@@ -13,15 +13,17 @@ interface DockerRunnerConfig {
 }
 
 const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
-  py:  { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog', needsCompile: false },
-  js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog', needsCompile: false },
-  ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog', needsCompile: false },
-  go:  { image: 'kodex-go', ext: '.go', runCmd: 'go run /code/prog', needsCompile: false },
-  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog -o /code/out && /code/out', runCmd: '', needsCompile: true },
-  c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog -o /code/out && /code/out', runCmd: '', needsCompile: true },
-  cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog -o /code/out && /code/out', runCmd: '', needsCompile: true },
-  zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog', needsCompile: false },
-  swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog', needsCompile: false },
+  py:  { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
+  js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
+  ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
+  go:  { image: 'kodex-go', ext: '.go', runCmd: 'go run /code/prog.go', needsCompile: false },
+  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true },
+  c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
+  cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
+  zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog.zig', needsCompile: false },
+  swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false },
+  kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true },
+  cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false },
 };
 
 export interface DockerExecResult {
@@ -141,6 +143,23 @@ WORKDIR /code
     'Dockerfile.swift': `
 FROM swift:6.0-jammy-slim
 RUN useradd -m -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.kt': `
+FROM openjdk:22-slim
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \\
+    curl -sL https://github.com/JetBrains/kotlin/releases/download/v2.0.21/kotlin-compiler-2.0.21.zip -o /tmp/kc.zip && \\
+    unzip -q /tmp/kc.zip -d /opt && rm /tmp/kc.zip && \\
+    ln -s /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc
+RUN useradd -m -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.cs': `
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+RUN dotnet tool install -g dotnet-script && useradd -m -u 1000 code
+ENV PATH="$PATH:/root/.dotnet/tools"
 USER code
 WORKDIR /code
 `.trim(),
