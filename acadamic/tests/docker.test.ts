@@ -10,7 +10,7 @@ describe('Docker Sandbox Service', () => {
     try {
       generateDockerfiles(tmpDir);
       const files = fs.readdirSync(tmpDir).filter(f => f.startsWith('Dockerfile.'));
-      expect(files.length).toBeGreaterThanOrEqual(8);
+      expect(files.length).toBeGreaterThanOrEqual(11);
       expect(files).toContain('Dockerfile.py');
       expect(files).toContain('Dockerfile.js');
       expect(files).toContain('Dockerfile.go');
@@ -18,6 +18,10 @@ describe('Docker Sandbox Service', () => {
       expect(files).toContain('Dockerfile.c');
       expect(files).toContain('Dockerfile.cpp');
       expect(files).toContain('Dockerfile.zig');
+      expect(files).toContain('Dockerfile.kt');
+      expect(files).toContain('Dockerfile.cs');
+      expect(files).toContain('Dockerfile.ts');
+      expect(files).toContain('Dockerfile.swift');
 
       // Verify Python Dockerfile content
       const pyDf = fs.readFileSync(path.join(tmpDir, 'Dockerfile.py'), 'utf-8');
@@ -40,6 +44,8 @@ describe('Docker Sandbox Service', () => {
     expect(langs).toContain('rs');
     expect(langs).toContain('c');
     expect(langs).toContain('zig');
+    expect(langs).toContain('kt');
+    expect(langs).toContain('cs');
   });
 
   it('checks Docker availability without throwing', () => {

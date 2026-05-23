@@ -16,12 +16,11 @@ const TOPIC_NAMES: Record<string, string> = {
 
 export class SemanticSearchStrategy implements TutorStrategy {
   name = 'semantic-search';
-  priority = 30;
+  priority = 3;
 
   async canHandle(): Promise<boolean> {
     const provider = process.env.AI_PROVIDER || 'hybrid';
-    if (provider !== 'keyword' && provider !== 'hybrid') return false;
-    return true;
+    return provider === 'keyword';
   }
 
   async handle(
