@@ -4,8 +4,8 @@
   "description": "Koded: Interactive Programming Textbook",
   "main": "server.ts",
   "scripts": {
-    "build:ai": "esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser",
-    "build:ai:watch": "esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser --watch",
+"build:ai": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser && esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser",
+"build:ai:watch": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser --watch & esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser --watch",
     "start": "npm run build:ai && tsx server.ts",
     "dev": "npm run build:ai && tsx watch server.ts",
     "build": "npm run build:ai && tsc",

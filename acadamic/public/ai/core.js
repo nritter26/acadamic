@@ -20,6 +20,7 @@
     swift: "Swift",
     java: "Java",
     rb: "Ruby",
+    scala: "Scala",
     php: "PHP",
     sqlite: "SQLite",
     pg: "PostgreSQL",

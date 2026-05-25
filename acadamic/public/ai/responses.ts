@@ -1,4 +1,4 @@
-import AI_TUTOR_RESPONSES from '../../ai/responses-data';
+declare var AI_TUTOR_RESPONSES: Array<{keywords: string[], response: string}>;
 
 (function (root: Record<string, unknown>) {
   root.aiTutorResponses = AI_TUTOR_RESPONSES;

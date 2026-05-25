@@ -1,16 +1,5 @@
-let dbProvider = 'pg';
-
-const dbProviderNames = {
-    pg: 'PostgreSQL', mysql: 'MySQL', sqlite: 'SQLite',
-    mongodb: 'MongoDB', firebase: 'Firebase', cloud: 'General Cloud',
-    aws: 'AWS', azure: 'Azure', gcp: 'GCP',
-};
-
-const dbProviderColors = {
-    pg: '#336791', mysql: '#F29111', sqlite: '#003B57',
-    mongodb: '#47A248', firebase: '#FFCA28', cloud: '#4285F4',
-    aws: '#FF9900', azure: '#0078D4', gcp: '#4285F4',
-};
+let dbProvider = 'pg'// dbProviderNames extracted to content/app-data.json
+// dbProviderColors extracted to content/app-data.json
 
 function initDatabase() {
     currentLevel = 'all';

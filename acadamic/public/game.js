@@ -1,242 +1,20 @@
-// ────────── DATA ──────────
-const gameLangNames = {
-  js:'JavaScript', py:'Python', go:'Go', rs:'Rust', c:'C', cpp:'C++', cs:'C#', kt:'Kotlin', swift:'Swift', zig:'Zig'
-};
-const gameLangList = ['js','py','go','rs','c','cpp','cs','kt','swift','zig'];
+// ────────── DATA ──────────// gameLangNames extracted to content/app-data.json
+// gameLangList extracted to content/app-data.json
+// gameSnippets extracted to content/app-data.json
 
-const gameSnippets = {
-  js: [
-`function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}`,
-`const numbers = [1, 2, 3, 4, 5];\nconst doubled = numbers.map(function(n) { return n * 2; });\nconsole.log(doubled);`,
-`class Person {\n  constructor(name, age) {\n    this.name = name;\n    this.age = age;\n  }\n  greet() { return "Hi, I'm " + this.name; }\n}`,
-`async function fetchData(url) {\n  try {\n    const res = await fetch(url);\n    return await res.json();\n  } catch (err) {\n    console.error("Failed:", err);\n  }\n}`,
-`function sumArray(arr) {\n  return arr.reduce(function(acc, n) { return acc + n; }, 0);\n}\nconst nums = [1, 2, 3, 4, 5];\nconsole.log(sumArray(nums));`,
-`const items = ["apple", "banana", "cherry"];\nconst filtered = items.filter(function(item) { return item.length > 5; });\nconsole.log(filtered);` ],
-  py: [
-`def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)`,
-`numbers = [1, 2, 3, 4, 5]\ndoubled = [n * 2 for n in numbers]\nprint(doubled)`,
-`class Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n    def greet(self):\n        return f"Hi, I'm {self.name}"`,
-`import json\nimport urllib.request\n\ndef fetch_data(url):\n    with urllib.request.urlopen(url) as res:\n        return json.loads(res.read())`,
-`def sum_array(arr):\n    total = 0\n    for n in arr:\n        total += n\n    return total\n\nnums = [1, 2, 3, 4, 5]\nprint(sum_array(nums))` ],
-  go: [
-`func fibonacci(n int) int {\n  if n <= 1 { return n }\n  return fibonacci(n-1) + fibonacci(n-2)\n}`,
-`package main\nimport "fmt"\nfunc main() {\n  numbers := []int{1, 2, 3, 4, 5}\n  for _, n := range numbers { fmt.Println(n * 2) }\n}`,
-`type Person struct { Name string; Age int }\nfunc (p Person) Greet() string { return "Hi, I'm " + p.Name }`,
-`func sumArray(arr []int) int {\n  sum := 0\n  for _, n := range arr { sum += n }\n  return sum\n}` ],
-  rs: [
-`fn fibonacci(n: u32) -> u32 {\n  if n <= 1 { return n; }\n  fibonacci(n - 1) + fibonacci(n - 2)\n}`,
-`fn main() {\n  let numbers = vec![1, 2, 3, 4, 5];\n  let doubled: Vec<i32> = numbers.iter().map(|n| n * 2).collect();\n  println!("{:?}", doubled);\n}`,
-`struct Person { name: String, age: u32 }\nimpl Person {\n  fn greet(&self) -> String { format!("Hi, I'm {}", self.name) }\n}`,
-`fn sum_array(arr: &[i32]) -> i32 {\n  arr.iter().sum()\n}\nfn main() { let nums = vec![1, 2, 3, 4, 5]; println!("{}", sum_array(&nums)); }` ],
-  c: [
-`int fibonacci(int n) { if (n <= 1) return n; return fibonacci(n - 1) + fibonacci(n - 2); }`,
-`#include <stdio.h>\nint main() {\n  int nums[] = {1,2,3,4,5};\n  for(int i=0;i<5;i++) printf("%d\\n",nums[i]*2);\n  return 0;\n}`,
-`typedef struct { char name[50]; int age; } Person;\nvoid greet(Person p) { printf("Hi, I'm %s\\n", p.name); }`,
-`int sumArray(int arr[], int len) { int t=0; for(int i=0;i<len;i++) t+=arr[i]; return t; }` ],
-  cpp: [
-`int fibonacci(int n) { if (n <= 1) return n; return fibonacci(n-1)+fibonacci(n-2); }`,
-`#include <iostream>\n#include <vector>\nint main() {\n  std::vector<int> nums = {1,2,3,4,5};\n  for(int n:nums) std::cout<<n*2<<std::endl;\n}`,
-`class Person {\npublic:\n  Person(std::string n, int a):name_(n),age_(a){}\n  std::string Greet(){return "Hi, I'm "+name_;}\nprivate:\n  std::string name_;int age_;\n};`,
-`int sumArray(std::vector<int> arr) { int t=0; for(int n:arr) t+=n; return t; }` ],
-  cs: [
-`int Fibonacci(int n) { if (n <= 1) return n; return Fibonacci(n-1)+Fibonacci(n-2); }`,
-`int[] numbers = {1,2,3,4,5};\nvar doubled = numbers.Select(n=>n*2).ToArray();\nforeach(var n in doubled) Console.WriteLine(n);`,
-`class Person {\n  public string Name{get;set;}\n  public int Age{get;set;}\n  public string Greet(){return $"Hi, I'm {Name}";}\n}`,
-`int SumArray(int[] arr) { return arr.Sum(); }\nint[] nums = {1,2,3,4,5};\nConsole.WriteLine(SumArray(nums));` ],
-  kt: [
-`fun fibonacci(n: Int): Int { return if (n <= 1) n else fibonacci(n-1)+fibonacci(n-2) }`,
-`fun main() {\n  val numbers = listOf(1,2,3,4,5)\n  val doubled = numbers.map { it * 2 }\n  println(doubled)\n}`,
-`class Person(val name: String, val age: Int) { fun greet() = "Hi, I'm $name" }`,
-`fun sumArray(arr: IntArray): Int { return arr.sum() }\nfun main() { val nums = intArrayOf(1,2,3,4,5); println(sumArray(nums)) }` ],
-  swift: [
-`func fibonacci(_ n: Int) -> Int { if n <= 1 { return n }; return fibonacci(n-1)+fibonacci(n-2) }`,
-`let numbers = [1,2,3,4,5]\nlet doubled = numbers.map { $0 * 2 }\nprint(doubled)`,
-`class Person {\n  var name:String; var age:Int\n  init(name:String,age:Int){self.name=name;self.age=age}\n  func greet()->String{return "Hi, I'm \\(name)"}\n}`,
-`func sumArray(_ arr:[Int])->Int{return arr.reduce(0,+)}; let nums=[1,2,3,4,5]; print(sumArray(nums))` ],
-  zig: [
-`fn fibonacci(n: u64) u64 { if (n <= 1) return n; return fibonacci(n-1)+fibonacci(n-2); }`,
-`const std = @import(\"std\");\npub fn main() void {\n  var i: u32 = 0;\n  while (i < 10) { if (i % 2 == 0) std.debug.print(\"{d}\\n\", .{i}); i += 1; }\n}`,
-`const Person = struct { name: []const u8, age: u32, fn greet(self: Person) []const u8 { return \"Hi \" ++ self.name; } };`,
-`const std = @import(\"std\");\npub fn main() void {\n  const nums = [_]u32{ 1, 2, 3, 4, 5 };\n  var sum: u32 = 0;\n  for (nums) |n| { sum += n; }\n  std.debug.print(\"{d}\\n\", .{sum});\n}` ]
-};
+// ── SCRAMBLE DATA ──// scrambleSets extracted to content/app-data.json
 
-// ── SCRAMBLE DATA ──
-const scrambleSets = [
-  { lines: ['function fibonacci(n) {', '  if (n <= 1) return n;', '  return fibonacci(n - 1) + fibonacci(n - 2);', '}'], lang: 'js' },
-  { lines: ['const numbers = [1, 2, 3, 4, 5];', 'const doubled = numbers.map(n => n * 2);', 'console.log(doubled);'], lang: 'js' },
-  { lines: ['class Person {', '  constructor(name, age) {', '    this.name = name;', '    this.age = age;', '  }', '  greet() { return "Hi"; }', '}'], lang: 'js' },
-  { lines: ['def fibonacci(n):', '    if n <= 1:', '        return n', '    return fibonacci(n - 1) + fibonacci(n - 2)'], lang: 'py' },
-  { lines: ['numbers = [1, 2, 3, 4, 5]', 'doubled = [n * 2 for n in numbers]', 'print(doubled)'], lang: 'py' },
-  { lines: ['func fibonacci(n int) int {', '  if n <= 1 { return n }', '  return fibonacci(n-1) + fibonacci(n-2)', '}'], lang: 'go' },
-  { lines: ['package main', 'import "fmt"', 'func main() {', '  fmt.Println("Hello, Go!")', '}'], lang: 'go' },
-  { lines: ['fn main() {', '  let numbers = vec![1, 2, 3, 4, 5];', '  let sum: i32 = numbers.iter().sum();', '  println!("{}", sum);', '}'], lang: 'rs' },
-];
+// ── DEBUG DATA ──// debugChallenges extracted to content/app-data.json
 
-// ── DEBUG DATA ──
-const debugChallenges = [
-  { bug: 'function add(a, b) {\n  return a - b;\n}', fix: 'function add(a, b) {\n  return a + b;\n}', hint: 'Wrong operator', lang: 'js' },
-  { bug: 'for (let i = 0; i < 10; i--;) {\n  console.log(i);\n}', fix: 'for (let i = 0; i < 10; i++) {\n  console.log(i);\n}', hint: 'Increment direction', lang: 'js' },
-  { bug: 'const PI = 3.14;\nPI = 3.14159;', fix: 'let PI = 3.14;\nPI = 3.14159;', hint: 'Constant cannot change', lang: 'js' },
-  { bug: 'def add(a, b):\n  return a - b', fix: 'def add(a, b):\n  return a + b', hint: 'Wrong operator', lang: 'py' },
-  { bug: 'for i in range(10):\nprint(i)', fix: 'for i in range(10):\n    print(i)', hint: 'Missing indent', lang: 'py' },
-  { bug: 'for i in range(5);\n  print(i)', fix: 'for i in range(5):\n  print(i)', hint: 'Wrong punctuation', lang: 'py' },
-  { bug: 'func add(a int, b int) int {\n  return a - b\n}', fix: 'func add(a int, b int) int {\n  return a + b\n}', hint: 'Wrong operator', lang: 'go' },
-  { bug: 'fn main() {\n  let x = 5;\n  x = 10;\n  println!("{}", x);\n}', fix: 'fn main() {\n  let mut x = 5;\n  x = 10;\n  println!("{}", x);\n}', hint: 'Need mut keyword', lang: 'rs' },
-];
+// ── SPRINT DATA ──// sprintChallenges extracted to content/app-data.json
 
-// ── SPRINT DATA ──
-const sprintChallenges = [
-  { desc: 'Print "Hello World" to the console', code: 'console.log("Hello World");', lang: 'js' },
-  { desc: 'Print "Hello World"', code: 'print("Hello World")', lang: 'py' },
-  { desc: 'Declare a variable x = 10 and print it', code: 'let x = 10;\nconsole.log(x);', lang: 'js' },
-  { desc: 'Create a list of 1-5 and print it', code: 'numbers = list(range(1, 6))\nprint(numbers)', lang: 'py' },
-  { desc: 'Define a function that returns the sum of two numbers', code: 'function add(a, b) {\n  return a + b;\n}', lang: 'js' },
-  { desc: 'Print "Hello" using fmt', code: 'package main\nimport "fmt"\nfunc main() {\n  fmt.Println("Hello")\n}', lang: 'go' },
-];
+// ── SPOT THE BUG DATA ──// spotBugQuestions extracted to content/app-data.json
 
-// ── SPOT THE BUG DATA ──
-const spotBugQuestions = [
-  {
-    code: 'function add(a, b) {\n  return a * b;\n}',
-    bugLine: 1, explain: 'The function <strong>multiplies</strong> (a * b) instead of <strong>adding</strong> (a + b). The return statement uses the wrong operator.',
-    lang: 'js'
-  },
-  {
-    code: 'const PI = 3.14;\nPI = 3.14159;',
-    bugLine: 1, explain: 'Cannot reassign a <strong>const</strong> variable. Use <strong>let</strong> instead of const if reassignment is needed.',
-    lang: 'js'
-  },
-  {
-    code: 'if (x = 5) {\n  console.log("x is 5");\n}',
-    bugLine: 0, explain: 'Using <strong>=</strong> (assignment) instead of <strong>===</strong> (comparison). This assigns 5 to x and the condition is always truthy.',
-    lang: 'js'
-  },
-  {
-    code: 'let i = 10;\nwhile (i >= 0) {\n  console.log(i);\n  i++;\n}',
-    bugLine: 3, explain: 'The loop <strong>increments</strong> i (i++) instead of <strong>decrementing</strong> (i--), causing an infinite loop.',
-    lang: 'js'
-  },
-  {
-    code: 'const nums = [1, 2, 3];\nconsole.log(nums[3]);',
-    bugLine: 1, explain: 'Index <strong>3</strong> is out of bounds for a 3-element array. Arrays are 0-indexed, so valid indices are 0-2.',
-    lang: 'js'
-  },
-  {
-    code: 'function greet(name) {\n  return "Hello, " + name;\n}\nconsole.log(greet());',
-    bugLine: 3, explain: '<strong>greet()</strong> is called without an argument, so <strong>name</strong> is undefined. The output will be "Hello, undefined".',
-    lang: 'js'
-  },
-  {
-    code: 'const obj = { name: "Alice" };\nconsole.log(obj.Name);',
-    bugLine: 1, explain: 'JavaScript is <strong>case-sensitive</strong>. obj.Name should be <strong>obj.name</strong> (lowercase n).',
-    lang: 'js'
-  },
-  {
-    code: 'const nums = [1, 2, 3];\nnums = [4, 5, 6];',
-    bugLine: 1, explain: 'Cannot reassign a <strong>const</strong> variable. Use <strong>let</strong> to declare nums if you need to reassign it.',
-    lang: 'js'
-  },
-  {
-    code: 'for i in range(5)\n  print(i)',
-    bugLine: 0, explain: 'Missing <strong>colon</strong> (:) after the for loop condition. Python requires a colon at the end of for/while/if/def lines.',
-    lang: 'py'
-  },
-  {
-    code: 'x = 10\nif x = 5:\n  print("five")',
-    bugLine: 1, explain: 'Using <strong>=</strong> (assignment) instead of <strong>==</strong> (comparison) in the condition. Python uses == for equality checks.',
-    lang: 'py'
-  },
-  {
-    code: 'def square(n):\n  retrun n * n',
-    bugLine: 1, explain: '<strong>Typo:</strong> "retrun" should be <strong>return</strong>. This will cause a SyntaxError.',
-    lang: 'py'
-  },
-  {
-    code: 'numbers = [1, 2, 3]\nprint(numbers[3])',
-    bugLine: 1, explain: 'Index <strong>3</strong> is out of range for a 3-element list. Python lists are 0-indexed (valid indices: 0-2).',
-    lang: 'py'
-  },
-  {
-    code: 'print("Hello',
-    bugLine: 0, explain: 'Missing <strong>closing quote</strong> and <strong>closing parenthesis</strong>. The string and function call are never terminated.',
-    lang: 'py'
-  },
-  {
-    code: 'func add(a int, b int) int {\n  return a - b\n}',
-    bugLine: 1, explain: 'The function <strong>subtracts</strong> (a - b) instead of <strong>adding</strong> (a + b). The return statement uses the wrong operator.',
-    lang: 'go'
-  },
-  {
-    code: 'package main\nfunc main() {\n  var x int\n  x = "hello"\n  fmt.Println(x)\n}',
-    bugLine: 3, explain: '<strong>Type mismatch:</strong> x is declared as int but assigned a string. Go is statically typed and does not allow implicit type conversions.',
-    lang: 'go'
-  },
-  {
-    code: 'package main\nimport "fmt"\nfunc main() {\n  var x int\n  fmt.Println(X)\n}',
-    bugLine: 4, explain: 'Go is <strong>case-sensitive</strong>. <strong>X</strong> is not defined; should be <strong>x</strong> (lowercase). This causes a compilation error.',
-    lang: 'go'
-  },
-  {
-    code: 'package main\nfunc main() {\n  const x = 5\n  x = 10\n}',
-    bugLine: 3, explain: 'Cannot reassign a <strong>const</strong> in Go. Constants are immutable and must be initialized with a compile-time known value.',
-    lang: 'go'
-  },
-  {
-    code: 'fn main() {\n  let x = 5;\n  x = 10;\n  println!("{}", x);\n}',
-    bugLine: 2, explain: 'Rust variables are <strong>immutable by default</strong>. Add <strong>mut</strong> (let mut x = 5) to make it mutable.',
-    lang: 'rs'
-  },
-  {
-    code: 'fn main() {\n  let v = vec![1, 2, 3];\n  println!("{}", v[3]);\n}',
-    bugLine: 2, explain: 'Index <strong>3</strong> is out of bounds for a vector with 3 elements. Valid indices are 0-2. Rust panics at runtime for out-of-bounds access.',
-    lang: 'rs'
-  },
-  {
-    code: 'fn main() {\n  let s = String::from("hello");\n  println!("{}", s[1]);\n}',
-    bugLine: 2, explain: 'Cannot index <strong>String</strong> directly in Rust. Strings are UTF-8 encoded, use <strong>.chars()</strong> or slicing for byte access.',
-    lang: 'rs'
-  },
-];
+// ── FLASH DATA ──// flashQuestions extracted to content/app-data.json
 
-// ── FLASH DATA ──
-const flashQuestions = [
-  { code: 'console.log(2 + 2);', asks: 'What does this print?', ans: 0, opts: ['4', '"22"', 'undefined', 'Error'] },
-  { code: 'const x = 5;\nconsole.log(x * 2);', asks: 'What is the output?', ans: 0, opts: ['10', '52', '25', 'Error'] },
-  { code: 'console.log(typeof "hello");', asks: 'What type is printed?', ans: 1, opts: ['hello', 'string', 'String', 'undefined'] },
-  { code: 'const nums = [1, 2, 3];\nconsole.log(nums.length);', asks: 'What is the output?', ans: 2, opts: ['1', '2', '3', 'undefined'] },
-  { code: 'console.log(10 > 5);', asks: 'What is the output?', ans: 0, opts: ['true', 'false', '10', 'Error'] },
-  { code: 'const s = "hello";\nconsole.log(s[1]);', asks: 'What is the output?', ans: 2, opts: ['h', 'o', 'e', 'l'] },
-  { code: 'print(2 ** 3)', asks: 'What does Python print?', ans: 3, opts: ['6', '5', '9', '8'], lang: 'py' },
-  { code: 'print("ab" + "cd")', asks: 'What is the output?', ans: 0, opts: ['abcd', '"abcd"', 'ab+cd', 'Error'] },
-  { code: 'console.log(true && false);', asks: 'What is the output?', ans: 1, opts: ['true', 'false', '0', 'undefined'] },
-  { code: 'let x;\nconsole.log(x);', asks: 'What is the output?', ans: 3, opts: ['null', '0', '""', 'undefined'] },
-];
+// ── RACE DATA ──// raceProblems extracted to content/app-data.json
 
-// ── RACE DATA ──
-const raceProblems = [
-  { desc: 'Write a function that returns the sum of two numbers', check: (c) => c.includes('return') && (c.includes('+') || c.includes('plus')), hint: 'Use function and return' },
-  { desc: 'Print numbers 1 to 5 using a loop', check: (c) => (c.includes('for') || c.includes('while')) && c.includes('console.log'), hint: 'Use a for loop' },
-  { desc: 'Create an array with numbers 1-5', check: (c) => c.includes('[') && c.includes('1') && c.includes('2'), hint: 'Use bracket syntax' },
-];
-
-// ── SWIPE DATA ──
-const swipeQuestions = [
-  { code: 'let x = 5;', valid: true, explain: 'Valid JS: declares mutable variable' },
-  { code: 'const x = 5; x = 6;', valid: false, explain: 'Cannot reassign a const' },
-  { code: 'function add(a, b) { return a + b }', valid: true, explain: 'Valid JS function declaration' },
-  { code: 'if x > 0 { console.log(x) }', valid: false, explain: 'Missing parentheses around condition' },
-  { code: 'for (let i = 0; i < 10; i++) {}', valid: true, explain: 'Valid for loop syntax' },
-  { code: 'console.log("hello);', valid: false, explain: 'Unclosed string literal' },
-  { code: 'const obj = { name: "Alice" };', valid: true, explain: 'Valid object literal' },
-  { code: 'def add(a, b):\n  return a + b', valid: true, explain: 'Valid Python function' },
-  { code: 'numbers = [1, 2, 3\nprint(numbers)', valid: false, explain: 'Unclosed list bracket' },
-  { code: 'for i in range(10):\n    print(i)', valid: true, explain: 'Valid Python for loop' },
-  { code: 'func main() {\n  fmt.Println("hi")\n}', valid: true, explain: 'Valid Go main function' },
-  { code: 'fn main() {\n  let x = 5;\n  x = 6;\n}', valid: false, explain: 'Rust variables are immutable by default, need mut' },
-  { code: 'int x = 5;', valid: false, explain: 'JS uses let/const, not type prefix' },
-  { code: 'const a = [1, 2, 3]; a.push(4);', valid: true, explain: 'Valid: const array can be mutated' },
-  { code: 'if (x = 5) { }', valid: false, explain: 'Using = instead of == in condition, always truthy' },
-];
+// ── SWIPE DATA ──// swipeQuestions extracted to content/app-data.json
 
 // ── SHARED STATE ──
 let gameActive = 'hub';
@@ -298,25 +76,7 @@ function toggleGameModal() {
   o.classList.toggle('open');
 }
 
-// ── HUB ──
-const GAMES = [
-  { id:'typing',       name:'Typing Speed',     icon:'⌨️', desc:'Type code, test your WPM', color:'#ff6b6b' },
-  { id:'scramble',     name:'Code Scramble',    icon:'🔀', desc:'Reorder shuffled code lines', color:'#f59e0b' },
-  { id:'debug',        name:'Debug the Bug',    icon:'🐛', desc:'Find and fix the bug', color:'#10b981' },
-  { id:'sprint',       name:'Syntax Sprint',    icon:'🏃', desc:'Write code from a description', color:'#3b82f6' },
-  { id:'spotbug',      name:'Spot the Bug',     icon:'🔍', desc:'Find the buggy line in code', color:'#8b5cf6' },
-  { id:'flash',        name:'Speed Read',       icon:'⚡', desc:'Read code then answer', color:'#ec4899' },
-  { id:'race',         name:'Race Compiler',    icon:'🏎️', desc:'Solve under time pressure', color:'#14b8a6' },
-  { id:'swipe',        name:'Syntax Swipe',     icon:'👆', desc:'Valid syntax or not?', color:'#f97316' },
-  { id:'codegolf',     name:'Code Golf',        icon:'⛳', desc:'Solve in fewest characters', color:'#ff6b6b' },
-  { id:'binaryhex',    name:'Binary/Hex Blitz', icon:'🔄', desc:'Quick base conversions', color:'#a855f7' },
-  { id:'crossword',    name:'Crossword',        icon:'🧩', desc:'Programming term puzzle', color:'#06b6d4' },
-  { id:'regexrally',   name:'Regex Rally',      icon:'🎯', desc:'Write patterns to match', color:'#22c55e' },
-  { id:'sqljoin',      name:'SQL JOIN Match',   icon:'🔗', desc:'Pick the right JOIN', color:'#3b82f6' },
-  { id:'errorpedia',   name:'Errorpedia',       icon:'❌', desc:'Guess the error cause', color:'#ef4444' },
-  { id:'apiarcade',    name:'API Arcade',       icon:'📡', desc:'Match endpoints & methods', color:'#f97316' },
-  { id:'daily',        name:'Daily Challenge',  icon:'🗓️', desc:'One challenge per day', color:'#ec4899' },
-];
+// ── HUB ──// GAMES extracted to content/app-data.json
 
 function clearAllGameTimers() {
   if (gameTimerInterval) { clearInterval(gameTimerInterval); gameTimerInterval = null; }
@@ -687,8 +447,8 @@ function checkSprint() {
 // ════════════════════════════════════════
 // 5. SPOT THE BUG
 // ════════════════════════════════════════
-let spotBugRound = 0, spotBugCorrect = 0, spotBugTotal = 0, spotBugAns = -1, spotBugLocked = false;
-const SPOT_BUG_ROUNDS = 10;
+let spotBugRound = 0, spotBugCorrect = 0, spotBugTotal = 0, spotBugAns = -1, spotBugLocked = false
+// SPOT_BUG_ROUNDS extracted to content/app-data.json
 
 function initSpotBug() {
   spotBugQuestions.sort(() => Math.random() - 0.5);
@@ -1031,34 +791,7 @@ function renderLeaderboard() {
 
 // ════════════════════════════════════════
 // ACHIEVEMENTS
-// ════════════════════════════════════════
-const ACHIEVEMENT_DEFS = [
-  { id:'first_game',    name:'First Steps',     desc:'Complete your first game',        icon:'🎮', check: s => s.totalPlays >= 1 },
-  { id:'five_games',    name:'Getting Started',  desc:'Play 5 games',                    icon:'🎯', check: s => s.totalPlays >= 5 },
-  { id:'twenty_games',  name:'Dedicated',        desc:'Play 20 games',                   icon:'🔥', check: s => s.totalPlays >= 20 },
-  { id:'hundred_xp',    name:'Three Digits',     desc:'Earn 100 XP',                     icon:'💯', check: s => s.totalXP >= 100 },
-  { id:'five_hundred_xp',name:'Half Kilo',       desc:'Earn 500 XP',                     icon:'🏅', check: s => s.totalXP >= 500 },
-  { id:'thousand_xp',   name:'XP Master',        desc:'Earn 1000 XP',                    icon:'👑', check: s => s.totalXP >= 1000 },
-  { id:'level_5',       name:'Level Up!',        desc:'Reach level 5',                   icon:'⭐', check: s => s.level >= 5 },
-  { id:'level_10',      name:'Double Digits',    desc:'Reach level 10',                  icon:'🌟', check: s => s.level >= 10 },
-  { id:'typing_50',     name:'Finger Flex',      desc:'Get 50 WPM in Typing',            icon:'⌨️', check: s => s.typingBest >= 50 },
-  { id:'typing_80',     name:'Speed Demon',      desc:'Get 80 WPM in Typing',            icon:'⚡', check: s => s.typingBest >= 80 },
-  { id:'scramble_5',    name:'Puzzle Solver',    desc:'Win 5 Scramble rounds',           icon:'🧩', check: s => s.scrambleWins >= 5 },
-  { id:'debug_10',      name:'Bug Hunter',       desc:'Fix 10 bugs',                     icon:'🐛', check: s => s.debugFixed >= 10 },
-  { id:'spotbug_5',     name:'Bug Spotter',      desc:'Find 5 bugs correctly',           icon:'🔍', check: s => s.spotBugCorrect >= 5 },
-  { id:'flash_perfect', name:'Speed Reader',     desc:'Get all Flash questions right',   icon:'📖', check: s => s.flashPerfect >= 1 },
-  { id:'swipe_10',      name:'Syntax Expert',    desc:'Get 10 Swipe questions right',    icon:'👆', check: s => s.swipeCorrect >= 10 },
-  { id:'daily_3',       name:'Daily Devotee',    desc:'Complete 3 Daily Challenges',     icon:'🗓️', check: s => s.dailyDone >= 3 },
-  { id:'daily_7',       name:'Week Warrior',     desc:'Complete 7 Daily Challenges',     icon:'📅', check: s => s.dailyDone >= 7 },
-  { id:'golf_par',      name:'Code Golfer',      desc:'Get under par in Code Golf',      icon:'⛳', check: s => s.golfUnderPar >= 1 },
-  { id:'golf_3_par',    name:'Golf Pro',         desc:'Get 3 under-par scores',          icon:'🏌️', check: s => s.golfUnderPar >= 3 },
-  { id:'regex_5',       name:'Pattern Seeker',   desc:'Solve 5 Regex challenges',        icon:'🎯', check: s => s.regexSolved >= 5 },
-  { id:'sql_5',         name:'Query Master',     desc:'Answer 5 SQL JOIN questions',     icon:'🗄️', check: s => s.sqlCorrect >= 5 },
-  { id:'api_5',         name:'API Whisperer',    desc:'Answer 5 API Arcade questions',   icon:'📡', check: s => s.apiCorrect >= 5 },
-  { id:'binary_10',     name:'Base Jumper',      desc:'Convert 10 numbers correctly',    icon:'🔄', check: s => s.binaryCorrect >= 10 },
-  { id:'crossword_5',   name:'Word Wizard',      desc:'Solve 5 Crossword terms',         icon:'🔤', check: s => s.crosswordSolved >= 5 },
-  { id:'error_5',       name:'Error Handler',     desc:'Answer 5 Errorpedia questions',  icon:'🚫', check: s => s.errorCorrect >= 5 },
-];
+// ════════════════════════════════════════// ACHIEVEMENT_DEFS extracted to content/app-data.json
 
 function loadAchievements() {
   try { return JSON.parse(localStorage.getItem('dogeslab_ach') || '[]'); } catch { return []; }
@@ -1120,15 +853,7 @@ function renderAchievements() {
 
 // ════════════════════════════════════════
 // THEMES
-// ════════════════════════════════════════
-const THEMES = [
-  { id:'default',  name:'Default',       accent:'var(--js)',       bg:'#020617',   card:'#1e293b',  unlockXP: 0 },
-  { id:'midnight', name:'Midnight',      accent:'#818cf8',        bg:'#0f0e17',   card:'#1a1a2e',  unlockXP: 100 },
-  { id:'forest',   name:'Forest',        accent:'#34d399',        bg:'#022c22',   card:'#064e3b',  unlockXP: 250 },
-  { id:'sunset',   name:'Sunset',        accent:'#fb923c',        bg:'#1c1917',   card:'#292524',  unlockXP: 500 },
-  { id:'ocean',    name:'Ocean',         accent:'#38bdf8',        bg:'#082f49',   card:'#0c4a6e',  unlockXP: 750 },
-  { id:'cherry',   name:'Cherry Blossom',accent:'#f472b6',        bg:'#1f0f1a',   card:'#2d1b2e',  unlockXP: 1000 },
-];
+// ════════════════════════════════════════// THEMES extracted to content/app-data.json
 function renderThemes() {
   const body = document.getElementById('gamePaperBody');
   const curTheme = localStorage.getItem('dogeslab_theme') || 'default';
@@ -1169,19 +894,7 @@ loadTheme();
 
 // ════════════════════════════════════════
 // 9. CODE GOLF
-// ════════════════════════════════════════
-const golfChallenges = [
-  { desc: 'Return the sum of two numbers',         par: 14, check: function(c) { return c.includes('=>') && c.includes('+'); } },
-  { desc: 'Return the square of n',                par: 12, check: function(c) { return c.includes('=>') && (c.includes('*') || c.includes('**')); } },
-  { desc: 'Return true if n is even',               par: 16, check: function(c) { return c.includes('%') && c.includes('==='); } },
-  { desc: 'Return the first element of an array',   par: 13, check: function(c) { return c.includes('=>') && c.includes('['); } },
-  { desc: 'Double each element of an array',        par: 20, check: function(c) { return c.includes('map') && c.includes('=>'); } },
-  { desc: 'Return the length of a string',           par: 15, check: function(c) { return c.includes('=>') && c.includes('length'); } },
-  { desc: 'Concatenate two strings',                 par: 10, check: function(c) { return c.includes('=>') || (c.includes('function') && c.includes('+')); } },
-  { desc: 'Return max of two numbers',               par: 18, check: function(c) { return c.includes('=>') && (c.includes('>') || c.includes('Math')); } },
-  { desc: 'Return absolute value of n',              par: 15, check: function(c) { return c.includes('=>') && (c.includes('<') || c.includes('Math')); } },
-  { desc: 'Capitalize first letter of a string',    par: 24, check: function(c) { return c.includes('charAt') || (c.includes('[') && c.includes('toUpperCase') && c.includes('slice')); } },
-];
+// ════════════════════════════════════════// golfChallenges extracted to content/app-data.json
 let golfIdx = 0, golfScore = 0;
 function initGolf() { golfIdx = Math.floor(Math.random() * golfChallenges.length); golfScore = 0; renderGolf(); }
 function renderGolf() {
@@ -1209,29 +922,7 @@ function checkGolf() {
 
 // ════════════════════════════════════════
 // 10. BINARY/HEX BLITZ
-// ════════════════════════════════════════
-const baseConvQuestions = [
-  { num: 42,  from: 'dec', to: 'bin', answer: '101010' },
-  { num: 255, from: 'dec', to: 'bin', answer: '11111111' },
-  { num: 15,  from: 'dec', to: 'bin', answer: '1111' },
-  { num: 128, from: 'dec', to: 'bin', answer: '10000000' },
-  { num: 7,   from: 'dec', to: 'bin', answer: '111' },
-  { num: 10,  from: 'dec', to: 'bin', answer: '1010' },
-  { num: 100, from: 'dec', to: 'bin', answer: '1100100' },
-  { num: 16,  from: 'dec', to: 'bin', answer: '10000' },
-  { num: 31,  from: 'dec', to: 'bin', answer: '11111' },
-  { num: 64,  from: 'dec', to: 'bin', answer: '1000000' },
-  { num: 255, from: 'dec', to: 'hex', answer: 'ff' },
-  { num: 42,  from: 'dec', to: 'hex', answer: '2a' },
-  { num: 16,  from: 'dec', to: 'hex', answer: '10' },
-  { num: 100, from: 'dec', to: 'hex', answer: '64' },
-  { num: 0,   from: 'dec', to: 'hex', answer: '0' },
-  { num: 10,  from: 'dec', to: 'hex', answer: 'a' },
-  { num: 31,  from: 'dec', to: 'hex', answer: '1f' },
-  { num: 128, from: 'dec', to: 'hex', answer: '80' },
-  { num: 200, from: 'dec', to: 'hex', answer: 'c8' },
-  { num: 15,  from: 'dec', to: 'hex', answer: 'f' },
-];
+// ════════════════════════════════════════// baseConvQuestions extracted to content/app-data.json
 var bhIdx = 0, bhScore = 0, bhTotal = 0, bhCorrect = 0, bhTimer = null, bhTimeLeft = 45;
 function initBinaryHex() { bhIdx = 0; bhScore = 0; bhTotal = 0; bhCorrect = 0; bhTimeLeft = 45; renderBinaryHex(); }
 function renderBinaryHex() {
@@ -1257,34 +948,7 @@ function checkBinaryHex() {
 
 // ════════════════════════════════════════
 // 11. CROSSWORD (Word Fill)
-// ════════════════════════════════════════
-const crosswordTerms = [
-  { term: 'variable', clue: 'A named storage location for a value' },
-  { term: 'function', clue: 'A reusable block of code' },
-  { term: 'array', clue: 'An ordered collection of elements' },
-  { term: 'object', clue: 'A collection of key-value pairs in JS' },
-  { term: 'string', clue: 'A sequence of characters' },
-  { term: 'number', clue: 'A numeric data type' },
-  { term: 'boolean', clue: 'A true/false value' },
-  { term: 'method', clue: 'A function that belongs to an object' },
-  { term: 'loop', clue: 'Repeats a block of code' },
-  { term: 'class', clue: 'A blueprint for creating objects' },
-  { term: 'module', clue: 'A reusable piece of code, often a file' },
-  { term: 'import', clue: 'Bring external code into scope' },
-  { term: 'export', clue: 'Make code available to other modules' },
-  { term: 'promise', clue: 'Represents an asynchronous operation' },
-  { term: 'callback', clue: 'A function passed as an argument' },
-  { term: 'closure', clue: 'A function with access to outer scope' },
-  { term: 'prototype', clue: 'JS inheritance mechanism' },
-  { term: 'recursion', clue: 'A function that calls itself' },
-  { term: 'operator', clue: 'A symbol that performs an operation (e.g., +)' },
-  { term: 'console', clue: 'A built-in object for logging' },
-  { term: 'debugger', clue: 'A tool for finding bugs' },
-  { term: 'syntax', clue: 'The set of rules for writing code' },
-  { term: 'compile', clue: 'Transform source code into machine code' },
-  { term: 'server', clue: 'A computer that serves data to clients' },
-  { term: 'client', clue: 'A device or program that requests data' },
-];
+// ════════════════════════════════════════// crosswordTerms extracted to content/app-data.json
 var cwIdx = 0, cwScore = 0;
 function initCrossword() { cwIdx = Math.floor(Math.random() * crosswordTerms.length); cwScore = 0; renderCrossword(); }
 function cwBuildBlanks(typed) {
@@ -1331,15 +995,7 @@ function checkCrossword() {
 
 // ════════════════════════════════════════
 // 12. REGEX RALLY
-// ════════════════════════════════════════
-const regexChallenges = [
-  { desc: 'Match any string containing "hello"',           hint: 'hello',     check: function(r) { return /hello/.test(r.pattern ? r.pattern : r); }, testPass: ['hello', 'say hello', 'hello!'], testFail: ['hi', 'bye', 'help'] },
-  { desc: 'Match a string that starts with "abc"',          hint: '^abc',      check: function(r) { return /^abc/.test(r.pattern ? r.pattern : r); }, testPass: ['abc', 'abc123', 'abcdef'], testFail: ['xabc', 'ab', 'ABC'] },
-  { desc: 'Match a string that ends with "end"',            hint: 'end$',      check: function(r) { return /end$/.test(r.pattern ? r.pattern : r); }, testPass: ['theend', 'end', 'friend'], testFail: ['ending', 'endless', 'e'] },
-  { desc: 'Match digits only (one or more)',                hint: '^\\d+$',    check: function(r) { return /^\d+$/.test(r.pattern ? r.pattern : r); }, testPass: ['123', '0', '999'], testFail: ['a', '123a', ''] },
-  { desc: 'Match a valid email (simple)',                   hint: '\\S+@\\S+', check: function(r) { return /\S+@\S+\.\S+/.test(r.pattern ? r.pattern : r); }, testPass: ['a@b.com', 'x@y.io'], testFail: ['a@b', '@b.com', 'no'] },
-  { desc: 'Match strings with only lowercase letters',      hint: '^[a-z]+$',  check: function(r) { return /^[a-z]+$/.test(r.pattern ? r.pattern : r); }, testPass: ['hello', 'abc', 'test'], testFail: ['Hello', '123', 'hi!'] },
-];
+// ════════════════════════════════════════// regexChallenges extracted to content/app-data.json
 var regexIdx = 0, regexScore = 0;
 function initRegexRally() { regexIdx = Math.floor(Math.random() * regexChallenges.length); regexScore = 0; renderRegexRally(); }
 function renderRegexRally() {
@@ -1369,17 +1025,7 @@ function checkRegexRally() {
 
 // ════════════════════════════════════════
 // 13. SQL JOIN MATCH
-// ════════════════════════════════════════
-const sqlJoinQuestions = [
-  { desc: 'Return rows where both tables have matching values',     opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL OUTER JOIN'], ans: 0 },
-  { desc: 'Return ALL rows from the left table, matched from right', opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL OUTER JOIN'], ans: 1 },
-  { desc: 'Return ALL rows from the right table, matched from left', opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL OUTER JOIN'], ans: 2 },
-  { desc: 'Return ALL rows when there is a match in either table',   opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL OUTER JOIN'], ans: 3 },
-  { desc: 'Select users and their orders (keep users without orders)', opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN'], ans: 1 },
-  { desc: 'Only products that have been ordered (no nulls)',          opts: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'], ans: 0 },
-  { desc: 'Combine two tables without a join condition',              opts: ['INNER JOIN', 'CROSS JOIN', 'LEFT JOIN', 'SELF JOIN'], ans: 1 },
-  { desc: 'Join a table to itself',                                  opts: ['SELF JOIN', 'CROSS JOIN', 'INNER JOIN', 'OUTER JOIN'], ans: 0 },
-];
+// ════════════════════════════════════════// sqlJoinQuestions extracted to content/app-data.json
 var sqlIdx = 0, sqlScore = 0;
 function initSqlJoin() { sqlIdx = Math.floor(Math.random() * sqlJoinQuestions.length); sqlScore = 0; renderSqlJoin(); }
 function renderSqlJoin() {
@@ -1403,17 +1049,7 @@ function checkSqlJoin(idx) {
 
 // ════════════════════════════════════════
 // 14. ERRORPEDIA
-// ════════════════════════════════════════
-const errorQuestions = [
-  { error: 'TypeError: Cannot read properties of undefined (reading \'x\')', opts: ['Accessing a property on null/undefined', 'Calling a function that doesn\'t exist', 'Using an undefined variable', 'Syntax error'], ans: 0 },
-  { error: 'ReferenceError: x is not defined', opts: ['Variable x doesn\'t exist in scope', 'x is null', 'x is a reserved word', 'x has no value'], ans: 0 },
-  { error: 'SyntaxError: Unexpected token', opts: ['Invalid syntax in the code', 'Network error', 'File not found', 'Type mismatch'], ans: 0 },
-  { error: 'TypeError: "x" is not a function', opts: ['Trying to call a non-function value', 'x is not defined', 'Function expects more arguments', 'Function returns undefined'], ans: 0 },
-  { error: 'RangeError: Maximum call stack size exceeded', opts: ['Infinite recursion', 'Too many variables', 'Stack is full of data', 'Loop runs too many times'], ans: 0 },
-  { error: 'TypeError: Assignment to constant variable', opts: ['Trying to reassign a const', 'Variable is read-only', 'Wrong assignment operator', 'Constant is frozen'], ans: 0 },
-  { error: 'URIError: URI malformed', opts: ['Invalid URL/URI encoding', 'File not found', 'Network timeout', 'Server error'], ans: 0 },
-  { error: 'TypeError: "undefined" is not iterable', opts: ['Trying to spread/loop over undefined', 'Undefined is not an array', 'Function returned undefined', 'Variable not initialized'], ans: 0 },
-];
+// ════════════════════════════════════════// errorQuestions extracted to content/app-data.json
 var errIdx = 0, errScore = 0;
 function initErrorpedia() { errIdx = Math.floor(Math.random() * errorQuestions.length); errScore = 0; renderErrorpedia(); }
 function renderErrorpedia() {
@@ -1437,17 +1073,7 @@ function checkErrorpedia(idx) {
 
 // ════════════════════════════════════════
 // 15. API ARACDE
-// ════════════════════════════════════════
-const apiQuestions = [
-  { desc: 'Retrieve a list of all users',          opts: ['GET /users', 'POST /users', 'PUT /users', 'DELETE /users'], ans: 0 },
-  { desc: 'Create a new user',                     opts: ['GET /users', 'POST /users', 'PUT /users', 'PATCH /users'], ans: 1 },
-  { desc: 'Update an existing user completely',    opts: ['GET /users/1', 'POST /users/1', 'PUT /users/1', 'DELETE /users/1'], ans: 2 },
-  { desc: 'Partially update a user',               opts: ['PUT /users/1', 'PATCH /users/1', 'POST /users/1', 'DELETE /users/1'], ans: 1 },
-  { desc: 'Delete a user',                         opts: ['GET /users/1', 'POST /users/1', 'PUT /users/1', 'DELETE /users/1'], ans: 3 },
-  { desc: 'Retrieve a single user by ID',          opts: ['GET /users', 'GET /users/1', 'POST /users/1', 'PUT /users/1'], ans: 1 },
-  { desc: 'List all posts by a user',              opts: ['GET /posts', 'GET /users/1/posts', 'POST /users/1/posts', 'GET /users/posts'], ans: 1 },
-  { desc: 'Replace the email of a user',           opts: ['POST /users/1/email', 'PATCH /users/1', 'PUT /users/1', 'DELETE /users/1/email'], ans: 2 },
-];
+// ════════════════════════════════════════// apiQuestions extracted to content/app-data.json
 var apiIdx = 0, apiScore = 0;
 function initApiArcade() { apiIdx = Math.floor(Math.random() * apiQuestions.length); apiScore = 0; renderApiArcade(); }
 function renderApiArcade() {

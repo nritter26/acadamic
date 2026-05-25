@@ -10,6 +10,29 @@ let collapsedPhases = new Set();
 
 const DEVIN_MAINTENANCE = true;
 
+var LANG_KEYWORDS = {
+    js: ['let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'typeof', 'class', 'extends', 'import', 'export', 'default', 'from', 'async', 'await', 'yield', 'null', 'undefined', 'true', 'false', 'console.log', 'console.error', 'Array', 'Object', 'Promise', 'Map', 'Set', 'Number', 'String', 'Boolean', 'Symbol', 'Date', 'RegExp', 'JSON', 'Math', 'parseInt', 'parseFloat', 'setTimeout', 'setInterval', 'addEventListener', 'querySelector', 'document', 'window'],
+    ts: ['let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'interface', 'type', 'enum', 'class', 'extends', 'implements', 'abstract', 'private', 'protected', 'public', 'readonly', 'static', 'as', 'is', 'keyof', 'typeof', 'Record', 'Partial', 'Required', 'Pick', 'Omit', 'Exclude', 'Extract', 'NonNullable', 'async', 'await', 'import', 'export', 'from', 'null', 'undefined', 'true', 'false', 'string', 'number', 'boolean', 'any', 'void', 'never', 'unknown'],
+    py: ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'try', 'except', 'finally', 'raise', 'import', 'from', 'as', 'class', 'with', 'open', 'pass', 'None', 'True', 'False', 'in', 'not', 'and', 'or', 'is', 'lambda', 'yield', 'async', 'await', 'self', 'print', 'len', 'range', 'list', 'dict', 'set', 'tuple', 'str', 'int', 'float', 'bool', 'sorted', 'enumerate', 'zip', 'map', 'filter', 'reduce', 'any', 'all', 'sum', 'min', 'max', 'abs', 'type', 'isinstance', 'hasattr', 'getattr', 'setattr', 'super', 'property', 'staticmethod', 'classmethod'],
+    go: ['func', 'return', 'if', 'else', 'for', 'range', 'switch', 'case', 'default', 'break', 'continue', 'go', 'defer', 'select', 'chan', 'map', 'struct', 'interface', 'type', 'package', 'import', 'var', 'const', 'nil', 'true', 'false', 'make', 'new', 'append', 'len', 'cap', 'error', 'string', 'int', 'bool', 'float64', 'float32', 'byte', 'rune', 'int64', 'int32', 'uint', 'uint64', 'slice', 'Println', 'Printf', 'Sprintf', 'Fprintf'],
+    rs: ['fn', 'let', 'mut', 'const', 'if', 'else', 'for', 'while', 'loop', 'match', 'return', 'struct', 'enum', 'trait', 'impl', 'type', 'pub', 'use', 'mod', 'crate', 'self', 'super', 'where', 'as', 'in', 'ref', 'move', 'async', 'await', 'unsafe', 'Some', 'None', 'Ok', 'Err', 'Result', 'Option', 'true', 'false', 'String', 'Vec', 'println!', 'format!', 'print!', 'vec!', 'match', 'if let', 'while let', 'Box', 'Rc', 'Arc', 'Cell', 'RefCell', 'HashMap', 'HashSet', 'Iterator', 'Clone', 'Copy', 'Debug', 'Display', 'PartialEq', 'Eq', 'PartialOrd', 'Ord'],
+    zig: ['fn', 'var', 'const', 'if', 'else', 'for', 'while', 'switch', 'return', 'struct', 'enum', 'union', 'comptime', 'pub', 'usingnamespace', 'test', 'defer', 'errdefer', 'try', 'catch', 'null', 'undefined', 'true', 'false', 'allocator', 'std', 'print', 'ArrayList', 'HashMap', 'AutoHashMap', 'StringHashMap', 'Arraylist', 'Allocator', 'arena', 'page_allocator', 'heap', 'fmt', 'log', 'debug', 'panic'],
+    c: ['int', 'char', 'float', 'double', 'void', 'long', 'short', 'unsigned', 'signed', 'struct', 'union', 'enum', 'typedef', 'const', 'static', 'extern', 'volatile', 'register', 'auto', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'goto', 'sizeof', 'NULL', 'printf', 'scanf', 'malloc', 'calloc', 'realloc', 'free', 'FILE', 'fopen', 'fclose', 'fread', 'fwrite', 'fprintf', 'fscanf', 'fgets', 'fputs', 'fgetc', 'fputc', 'feof', 'ferror', '#include', '#define', '#ifdef', '#ifndef', '#endif', '#pragma', 'main'],
+    cpp: ['int', 'char', 'float', 'double', 'void', 'bool', 'long', 'short', 'unsigned', 'signed', 'struct', 'class', 'enum', 'typedef', 'const', 'static', 'extern', 'virtual', 'override', 'final', 'private', 'protected', 'public', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'new', 'delete', 'this', 'namespace', 'using', 'template', 'typename', '#include', '#define', '#ifdef', '#ifndef', '#endif', 'auto', 'nullptr', 'true', 'false', 'std', 'cout', 'cin', 'vector', 'string', 'map', 'set', 'shared_ptr', 'unique_ptr', 'make_shared', 'make_unique', 'pair', 'tuple', 'array', 'list', 'forward_list', 'deque', 'unordered_map', 'unordered_set', 'stack', 'queue', 'priority_queue', 'fstream', 'ifstream', 'ofstream', 'stringstream'],
+    cs: ['class', 'struct', 'interface', 'enum', 'record', 'namespace', 'using', 'public', 'private', 'protected', 'internal', 'static', 'readonly', 'virtual', 'override', 'abstract', 'sealed', 'async', 'await', 'var', 'int', 'string', 'bool', 'float', 'double', 'void', 'char', 'object', 'null', 'true', 'false', 'if', 'else', 'for', 'foreach', 'while', 'do', 'switch', 'case', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'base', 'is', 'as', 'typeof', 'sizeof', 'nameof', 'get', 'set', 'value', 'yield', 'Console.WriteLine', 'Console.Write', 'Console.ReadLine', 'Console.ReadKey', 'Console.Clear', 'var', 'List', 'Dictionary', 'HashSet', 'IEnumerable', 'IQueryable', 'Task', 'async', 'await', 'HttpClient', 'JsonSerializer', 'StringBuilder', 'Regex', 'DateTime', 'TimeSpan', 'Guid', 'Path', 'File', 'Directory', 'StreamReader', 'StreamWriter'],
+    kt: ['fun', 'val', 'var', 'if', 'else', 'when', 'for', 'while', 'do', 'return', 'class', 'data', 'object', 'companion', 'interface', 'enum', 'sealed', 'open', 'abstract', 'override', 'private', 'protected', 'public', 'internal', 'inline', 'suspend', 'import', 'package', 'null', 'true', 'false', 'this', 'super', 'is', 'as', 'in', 'out', 'reified', 'crossinline', 'noinline', 'vararg', 'by', 'delegate', 'get', 'set', 'init', 'constructor', 'Unit', 'Any', 'Nothing', 'String', 'Int', 'Boolean', 'List', 'Map', 'Set', 'MutableList', 'arrayOf', 'listOf', 'mapOf', 'setOf', 'mutableListOf', 'println', 'print', 'readLine', 'filter', 'map', 'forEach', 'flatMap', 'groupBy', 'sortedBy', 'distinct', 'reduce', 'fold', 'let', 'apply', 'run', 'with', 'also', 'takeIf', 'takeUnless', 'repeat', 'require', 'check', 'error'],
+    swift: ['var', 'let', 'func', 'return', 'if', 'else', 'guard', 'for', 'while', 'repeat', 'switch', 'case', 'default', 'break', 'continue', 'fallthrough', 'class', 'struct', 'enum', 'protocol', 'extension', 'init', 'deinit', 'subscript', 'mutating', 'nonmutating', 'static', 'class', 'override', 'convenience', 'required', 'public', 'private', 'internal', 'fileprivate', 'open', 'import', 'nil', 'true', 'false', 'self', 'super', 'in', 'is', 'as', 'try', 'catch', 'throw', 'throws', 'rethrows', 'async', 'await', 'actor', 'nonisolated', 'isolated', 'String', 'Int', 'Double', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'print', 'debugPrint', 'map', 'filter', 'reduce', 'compactMap', 'flatMap', 'forEach', 'sorted', 'first', 'last', 'count', 'isEmpty', 'append', 'remove', 'insert', 'contains'],
+    pg: ['SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'VIEW', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'CROSS', 'ON', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'DISTINCT', 'EXISTS', 'ANY', 'ALL', 'SOME', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'CAST', 'TRUE', 'FALSE', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'COALESCE', 'NULLIF', 'GREATEST', 'LEAST', 'NOW', 'CURRENT_DATE', 'EXTRACT', 'DATE_TRUNC', 'TO_CHAR', 'TO_DATE', 'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'LAG', 'LEAD', 'FIRST_VALUE', 'LAST_VALUE', 'OVER', 'PARTITION', 'WINDOW', 'WITH', 'RECURSIVE', 'RETURNING', 'SERIAL', 'BIGSERIAL', 'VARCHAR', 'TEXT', 'INTEGER', 'BIGINT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'JSONB', 'UUID', 'DECIMAL', 'FLOAT', 'ENUM', 'ARRAY', 'NUMERIC'],
+    dk: ['FROM', 'RUN', 'CMD', 'ENTRYPOINT', 'WORKDIR', 'COPY', 'ADD', 'ENV', 'ARG', 'EXPOSE', 'VOLUME', 'LABEL', 'MAINTAINER', 'USER', 'SHELL', 'HEALTHCHECK', 'ONBUILD', 'STOPSIGNAL', 'docker', 'build', 'run', 'exec', 'ps', 'images', 'pull', 'push', 'login', 'logout', 'tag', 'rm', 'rmi', 'logs', 'inspect', 'network', 'volume', 'compose', 'docker-compose', 'up', 'down', 'start', 'stop', 'restart', 'kill', 'pause', 'unpause', 'commit', 'save', 'load', 'export', 'import', 'cp', 'diff', 'events', 'port', 'top', 'version', 'info', 'system', 'prune', 'container', 'image', 'service', 'stack', 'swarm', 'secret', 'config', 'node', 'plugin', 'trust'],
+    git: ['git', 'init', 'clone', 'add', 'commit', 'push', 'pull', 'fetch', 'merge', 'rebase', 'branch', 'checkout', 'switch', 'restore', 'stash', 'log', 'diff', 'status', 'reset', 'revert', 'cherry-pick', 'tag', 'remote', 'config', 'help', 'rm', 'mv', 'clean', 'gc', 'fsck', 'bisect', 'blame', 'grep', 'show', 'shortlog', 'describe', 'archive', 'bundle', 'worktree', 'submodule', 'notes', 'reflog', 'format-patch', 'am', 'apply', 'range-diff', 'sparse-checkout', 'main', 'master', 'origin', 'HEAD', '--force', '--hard', '--soft', '--mixed', '--amend', '--no-ff', '--abort', '--continue', '--skip', '--all', '--oneline', '--graph', '--decorate', '--author', '--since', '--until', '--grep'],
+    mongodb: ['db', 'use', 'show', 'createCollection', 'insertOne', 'insertMany', 'find', 'findOne', 'updateOne', 'updateMany', 'deleteOne', 'deleteMany', 'aggregate', 'countDocuments', 'estimatedDocumentCount', 'distinct', 'sort', 'limit', 'skip', 'project', 'lookup', 'group', 'match', 'project', 'unwind', 'addFields', 'bucket', 'replaceRoot', 'out', 'merge', 'collStats', 'indexStats', 'createIndex', 'dropIndex', 'getIndexes', 'drop', 'renameCollection', 'bulkWrite', 'watch', 'mapReduce', 'cloneCollection', 'copyTo', 'convertToCapped', 'ObjectId', 'ISODate', 'NumberInt', 'NumberLong', 'NumberDecimal', 'Timestamp', 'RegExp', 'MinKey', 'MaxKey', 'null', 'true', 'false', '$match', '$group', '$sort', '$project', '$lookup', '$unwind', '$addFields', '$bucket', '$replaceRoot', '$out', '$merge', '$count', '$limit', '$skip', '$sample'],
+    gamedev: ['Vector2', 'Vector3', 'Transform', 'Quaternion', 'Matrix4x4', 'GameObject', 'Component', 'MonoBehaviour', 'Start', 'Update', 'FixedUpdate', 'LateUpdate', 'Awake', 'OnEnable', 'OnDisable', 'OnDestroy', 'Instantiate', 'Destroy', 'Find', 'GetComponent', 'AddComponent', 'transform', 'position', 'rotation', 'scale', 'Translate', 'Rotate', 'LookAt', 'Input', 'GetKey', 'GetKeyDown', 'GetKeyUp', 'GetAxis', 'GetButton', 'GetButtonDown', 'Rigidbody', 'Collider', 'Collision', 'Trigger', 'Raycast', 'Physics', 'OverlapSphere', 'SceneManager', 'LoadScene', 'Application', 'Quit', 'OpenURL', 'Time', 'deltaTime', 'time', 'timeScale', 'Mathf', 'Random', 'Range', 'Lerp', 'SmoothDamp', 'Color', 'Material', 'Mesh', 'Renderer', 'Animation', 'Animator', 'AudioSource', 'AudioClip', 'Play', 'Stop', 'ParticleSystem', 'Camera', 'Screen', 'Cursor', 'ScreenToWorldPoint', 'WorldToScreenPoint', 'Debug', 'Log', 'DrawRay', 'DrawLine', 'Gizmos', 'Physics2D', 'Collider2D', 'Rigidbody2D'],
+    bash: ['if', 'then', 'else', 'elif', 'fi', 'for', 'while', 'until', 'do', 'done', 'in', 'case', 'esac', 'select', 'function', 'return', 'local', 'export', 'readonly', 'unset', 'exit', 'break', 'continue', 'declare', 'typeset', 'echo', 'printf', 'read', 'source', '.', 'exec', 'eval', 'set', 'unset', 'shift', 'trap', 'kill', 'test', '[', ']', '[[', ']]', 'true', 'false', 'cd', 'pwd', 'ls', 'mkdir', 'rmdir', 'rm', 'cp', 'mv', 'cat', 'less', 'more', 'head', 'tail', 'grep', 'sed', 'awk', 'cut', 'sort', 'uniq', 'wc', 'find', 'xargs', 'tee', 'chmod', 'chown', 'chgrp', 'ps', 'top', 'kill', 'jobs', 'bg', 'fg', 'nohup', 'disown', 'crontab', 'at', 'curl', 'wget', 'ssh', 'scp', 'rsync'],
+    php: ['echo', 'print', 'printf', 'var_dump', 'print_r', 'die', 'exit', 'return', 'include', 'include_once', 'require', 'require_once', 'if', 'else', 'elseif', 'endif', 'for', 'endforeach', 'while', 'endwhile', 'foreach', 'foreach', 'do', 'switch', 'endswitch', 'case', 'break', 'continue', 'match', 'default', 'function', 'fn', 'use', 'return', 'class', 'interface', 'trait', 'enum', 'abstract', 'final', 'extends', 'implements', 'new', 'clone', 'self', 'parent', 'static', 'public', 'private', 'protected', 'readonly', 'const', 'var', 'global', 'declare', 'strict_types', 'namespace', 'use', 'as', 'instanceof', 'throw', 'try', 'catch', 'finally', 'null', 'true', 'false', 'array', 'list', 'isset', 'unset', 'empty', 'count', 'implode', 'explode', 'array_map', 'array_filter', 'array_reduce', 'array_merge', 'array_keys', 'array_values', 'in_array', 'strlen', 'strpos', 'substr', 'str_replace', 'preg_match', 'preg_replace', 'htmlspecialchars', 'json_encode', 'json_decode', 'file_get_contents', 'file_put_contents', 'fopen', 'fclose', 'fgets', 'fwrite', 'mkdir', 'rmdir', 'unlink', 'copy', 'rename', 'move_uploaded_file', 'session_start', 'session_destroy', 'setcookie', 'filter_var', 'filter_input', 'header', 'mail', 'date', 'time', 'strtotime', 'define', 'defined'],
+    rb: ['def', 'end', 'if', 'else', 'elsif', 'unless', 'case', 'when', 'while', 'until', 'for', 'in', 'do', 'begin', 'rescue', 'ensure', 'raise', 'throw', 'catch', 'return', 'yield', 'class', 'module', 'include', 'extend', 'prepend', 'attr_reader', 'attr_writer', 'attr_accessor', 'private', 'protected', 'public', 'self', 'super', 'true', 'false', 'nil', 'puts', 'print', 'gets', 'chomp', 'require', 'load', 'new', 'initialize', 'each', 'map', 'select', 'reject', 'reduce', 'inject', 'filter', 'times', 'upto', 'downto', 'step', 'lambda', 'proc', 'Proc', 'block_given?', 'defined?', 'alias', 'undef', 'BEGIN', 'END', '__FILE__', '__LINE__', 'Array', 'Hash', 'String', 'Integer', 'Float', 'Symbol', 'Range', 'Enumerable', 'Comparable', 'Object', 'Kernel', 'BasicObject', 'Numeric'],
+    scala: ['def', 'val', 'var', 'lazy', 'if', 'else', 'match', 'case', 'for', 'yield', 'while', 'do', 'return', 'class', 'object', 'trait', 'extends', 'with', 'sealed', 'abstract', 'case', 'implicit', 'implicitly', 'override', 'private', 'protected', 'public', 'final', 'import', 'package', 'type', 'new', 'this', 'super', 'null', 'true', 'false', 'Unit', 'Int', 'Double', 'Float', 'Long', 'Boolean', 'Char', 'Short', 'Byte', 'String', 'Any', 'AnyVal', 'AnyRef', 'Nothing', 'Nil', 'None', 'Some', 'Option', 'Either', 'Try', 'Future', 'Promise', 'List', 'Map', 'Set', 'Seq', 'Array', 'Vector', 'Range', 'Tuple', 'println', 'print', 'printf', 'readLine', 'Map', 'flatMap', 'filter', 'foreach', 'fold', 'foldLeft', 'foldRight', 'reduce', 'collect', 'partition', 'groupBy', 'sortBy', 'sortWith', 'sorted', 'zip', 'mkString'],
+};
+
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
 
 
@@ -37,29 +60,29 @@ normalizeCourseData();
 
 const LANG_TO_FILE = {
     rs: 'rust',
+    wasm: 'wasm',
+    asm: 'asm',
 };
 const LOADING_LANGS = new Set();
+
+let _curriculumData = null;
+let _curriculumLoading = false;
+const _curriculumLoaders = [];
 
 function loadLangData(lang, callback) {
     if (courseData[lang]) {
         if (callback) callback();
         return true;
     }
-    if (LOADING_LANGS.has(lang)) {
-        return false;
-    }
-    LOADING_LANGS.add(lang);
-    const filename = (LANG_TO_FILE[lang] || lang) + '.json';
+    var filename = (LANG_TO_FILE[lang] || lang) + '.json';
     fetch('content/' + filename)
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (data) {
             courseData[lang] = data;
-            LOADING_LANGS.delete(lang);
             normalizeCourseData();
             if (callback) callback();
         })
         .catch(function (err) {
-            LOADING_LANGS.delete(lang);
             console.error('Failed to load data for', lang + ':', err);
             if (callback) callback();
         });
@@ -542,6 +565,8 @@ function getLogicalPreview(code, lang) {
         kt: ['println(', 'print('],
         swift: ['print('],
         zig: ['print(', 'std.debug.print('],
+        wasm: ['print('],
+        asm: ['print('],
     };
 
     const output = [];
@@ -691,7 +716,7 @@ function runCode() {
             ts: 'npx ts-node program.ts', c: 'gcc -Wall -o program program.c && ./program',
             cpp: 'g++ -std=c++20 -Wall -o program program.cpp && ./program',
             cs: 'dotnet run', kt: 'kotlinc program.kt -include-runtime -d program.jar && java -jar program.jar',
-            swift: 'swift program.swift', zig: 'zig build-exe program.zig && ./program',
+            swift: 'swift program.swift', zig: 'zig build-exe program.zig && ./program',             wasm: 'wasmtime program.wat', asm: 'nasm -f elf64 program.asm && ld -o program program.o',
             sqlite: 'SQLite is built-in, just click Run!',
             pg: 'psql -f query.sql', mysql: 'mysql < query.sql',
             dk: 'docker build -t myapp . && docker run myapp',
@@ -2268,8 +2293,8 @@ function renderQuiz() {
     const list = document.getElementById('topic-list');
     
     let html = '<div class="quiz-lang-bar">';
-    for (const l of ['js','ts','py','go','java','cs','kt','rs','swift','git','pg','backend','c','cpp','zig']) {
-        const names = { js:'JS', ts:'TS', py:'Python', go:'Go', java:'Java', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', git:'Git', pg:'SQL', backend:'Backend', c:'C', cpp:'C++', zig:'Zig' };
+    for (const l of ['js','ts','py','go','java','cs','kt','rs','swift','asm','wasm','bash','php','git','pg','backend','c','cpp','zig','rb','scala']) {
+        const names = { js:'JS', ts:'TS', py:'Python', go:'Go', java:'Java', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', asm:'ASM', wasm:'Wasm', bash:'Bash', php:'PHP', git:'Git', pg:'SQL', backend:'Backend', c:'C', cpp:'C++', zig:'Zig', rb:'Ruby', scala:'Scala' };
         const active = l === quizLang ? 'active' : '';
         html += '<button class="quiz-lang-btn ' + active + '" onclick="switchQuizLang(\'' + l + '\')">' + names[l] + '</button>';
     }
@@ -2567,8 +2592,8 @@ function renderChallengeList() {
     const totalAll = challenges.length;
 
     let html = `<div class="challenge-lang-bar">`;
-    for (const l of ['js','py','go','java','ts','rs','swift','backend']) {
-        const names = { js:'JS', py:'Python', go:'Go', java:'Java', ts:'TS', rs:'Rust', swift:'Swift', backend:'Backend' };
+    for (const l of ['js','py','go','java','ts','rs','swift','backend','c','cpp','cs','kt','zig','php','bash','rb','scala']) {
+        const names = { js:'JS', py:'Python', go:'Go', java:'Java', ts:'TS', rs:'Rust', swift:'Swift', backend:'Backend', c:'C', cpp:'C++', cs:'C#', kt:'Kotlin', zig:'Zig', php:'PHP', bash:'Bash', rb:'Ruby', scala:'Scala' };
         const active = l === challengeLang ? 'active' : '';
         const solved = Object.keys(progress).filter(k => k.startsWith(l + '_')).length;
         const total = (challengeData[l] || []).length;
@@ -2936,24 +2961,7 @@ document.getElementById('editor').addEventListener('blur', function() {
 
 // ── AUTO-COMPLETE ──
 
-const LANG_KEYWORDS = {
-    js: ['let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'typeof', 'class', 'extends', 'import', 'export', 'default', 'from', 'async', 'await', 'yield', 'null', 'undefined', 'true', 'false', 'console.log', 'console.error', 'Array', 'Object', 'Promise', 'Map', 'Set', 'Number', 'String', 'Boolean', 'Symbol', 'Date', 'RegExp', 'JSON', 'Math', 'parseInt', 'parseFloat', 'setTimeout', 'setInterval', 'addEventListener', 'querySelector', 'document', 'window'],
-    ts: ['let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'interface', 'type', 'enum', 'class', 'extends', 'implements', 'abstract', 'private', 'protected', 'public', 'readonly', 'static', 'as', 'is', 'keyof', 'typeof', 'Record', 'Partial', 'Required', 'Pick', 'Omit', 'Exclude', 'Extract', 'NonNullable', 'async', 'await', 'import', 'export', 'from', 'null', 'undefined', 'true', 'false', 'string', 'number', 'boolean', 'any', 'void', 'never', 'unknown'],
-    py: ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'try', 'except', 'finally', 'raise', 'import', 'from', 'as', 'class', 'with', 'open', 'pass', 'None', 'True', 'False', 'in', 'not', 'and', 'or', 'is', 'lambda', 'yield', 'async', 'await', 'self', 'print', 'len', 'range', 'list', 'dict', 'set', 'tuple', 'str', 'int', 'float', 'bool', 'sorted', 'enumerate', 'zip', 'map', 'filter', 'reduce', 'any', 'all', 'sum', 'min', 'max', 'abs', 'type', 'isinstance', 'hasattr', 'getattr', 'setattr', 'super', 'property', 'staticmethod', 'classmethod'],
-    go: ['func', 'return', 'if', 'else', 'for', 'range', 'switch', 'case', 'default', 'break', 'continue', 'go', 'defer', 'select', 'chan', 'map', 'struct', 'interface', 'type', 'package', 'import', 'var', 'const', 'nil', 'true', 'false', 'make', 'new', 'append', 'len', 'cap', 'error', 'string', 'int', 'bool', 'float64', 'float32', 'byte', 'rune', 'int64', 'int32', 'uint', 'uint64', 'slice', 'Println', 'Printf', 'Sprintf', 'Fprintf'],
-    rs: ['fn', 'let', 'mut', 'const', 'if', 'else', 'for', 'while', 'loop', 'match', 'return', 'struct', 'enum', 'trait', 'impl', 'type', 'pub', 'use', 'mod', 'crate', 'self', 'super', 'where', 'as', 'in', 'ref', 'move', 'async', 'await', 'unsafe', 'Some', 'None', 'Ok', 'Err', 'Result', 'Option', 'true', 'false', 'String', 'Vec', 'println!', 'format!', 'print!', 'vec!', 'match', 'if let', 'while let', 'Box', 'Rc', 'Arc', 'Cell', 'RefCell', 'HashMap', 'HashSet', 'Iterator', 'Clone', 'Copy', 'Debug', 'Display', 'PartialEq', 'Eq', 'PartialOrd', 'Ord'],
-    zig: ['fn', 'var', 'const', 'if', 'else', 'for', 'while', 'switch', 'return', 'struct', 'enum', 'union', 'comptime', 'pub', 'usingnamespace', 'test', 'defer', 'errdefer', 'try', 'catch', 'null', 'undefined', 'true', 'false', 'allocator', 'std', 'print', 'ArrayList', 'HashMap', 'AutoHashMap', 'StringHashMap', 'Arraylist', 'Allocator', 'arena', 'page_allocator', 'heap', 'fmt', 'log', 'debug', 'panic'],
-    c: ['int', 'char', 'float', 'double', 'void', 'long', 'short', 'unsigned', 'signed', 'struct', 'union', 'enum', 'typedef', 'const', 'static', 'extern', 'volatile', 'register', 'auto', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'goto', 'sizeof', 'NULL', 'printf', 'scanf', 'malloc', 'calloc', 'realloc', 'free', 'FILE', 'fopen', 'fclose', 'fread', 'fwrite', 'fprintf', 'fscanf', 'fgets', 'fputs', 'fgetc', 'fputc', 'feof', 'ferror', '#include', '#define', '#ifdef', '#ifndef', '#endif', '#pragma', 'main'],
-    cpp: ['int', 'char', 'float', 'double', 'void', 'bool', 'long', 'short', 'unsigned', 'signed', 'struct', 'class', 'enum', 'typedef', 'const', 'static', 'extern', 'virtual', 'override', 'final', 'private', 'protected', 'public', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'new', 'delete', 'this', 'namespace', 'using', 'template', 'typename', '#include', '#define', '#ifdef', '#ifndef', '#endif', 'auto', 'nullptr', 'true', 'false', 'std', 'cout', 'cin', 'vector', 'string', 'map', 'set', 'shared_ptr', 'unique_ptr', 'make_shared', 'make_unique', 'pair', 'tuple', 'array', 'list', 'forward_list', 'deque', 'unordered_map', 'unordered_set', 'stack', 'queue', 'priority_queue', 'fstream', 'ifstream', 'ofstream', 'stringstream'],
-    cs: ['class', 'struct', 'interface', 'enum', 'record', 'namespace', 'using', 'public', 'private', 'protected', 'internal', 'static', 'readonly', 'virtual', 'override', 'abstract', 'sealed', 'async', 'await', 'var', 'int', 'string', 'bool', 'float', 'double', 'void', 'char', 'object', 'null', 'true', 'false', 'if', 'else', 'for', 'foreach', 'while', 'do', 'switch', 'case', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'base', 'is', 'as', 'typeof', 'sizeof', 'nameof', 'get', 'set', 'value', 'yield', 'Console.WriteLine', 'Console.Write', 'Console.ReadLine', 'Console.ReadKey', 'Console.Clear', 'var', 'List', 'Dictionary', 'HashSet', 'IEnumerable', 'IQueryable', 'Task', 'async', 'await', 'HttpClient', 'JsonSerializer', 'StringBuilder', 'Regex', 'DateTime', 'TimeSpan', 'Guid', 'Path', 'File', 'Directory', 'StreamReader', 'StreamWriter'],
-    kt: ['fun', 'val', 'var', 'if', 'else', 'when', 'for', 'while', 'do', 'return', 'class', 'data', 'object', 'companion', 'interface', 'enum', 'sealed', 'open', 'abstract', 'override', 'private', 'protected', 'public', 'internal', 'inline', 'suspend', 'import', 'package', 'null', 'true', 'false', 'this', 'super', 'is', 'as', 'in', 'out', 'reified', 'crossinline', 'noinline', 'vararg', 'by', 'delegate', 'get', 'set', 'init', 'constructor', 'Unit', 'Any', 'Nothing', 'String', 'Int', 'Boolean', 'List', 'Map', 'Set', 'MutableList', 'arrayOf', 'listOf', 'mapOf', 'setOf', 'mutableListOf', 'println', 'print', 'readLine', 'filter', 'map', 'forEach', 'flatMap', 'groupBy', 'sortedBy', 'distinct', 'reduce', 'fold', 'let', 'apply', 'run', 'with', 'also', 'takeIf', 'takeUnless', 'repeat', 'require', 'check', 'error'],
-    swift: ['var', 'let', 'func', 'return', 'if', 'else', 'guard', 'for', 'while', 'repeat', 'switch', 'case', 'default', 'break', 'continue', 'fallthrough', 'class', 'struct', 'enum', 'protocol', 'extension', 'init', 'deinit', 'subscript', 'mutating', 'nonmutating', 'static', 'class', 'override', 'convenience', 'required', 'public', 'private', 'internal', 'fileprivate', 'open', 'import', 'nil', 'true', 'false', 'self', 'super', 'in', 'is', 'as', 'try', 'catch', 'throw', 'throws', 'rethrows', 'async', 'await', 'actor', 'nonisolated', 'isolated', 'String', 'Int', 'Double', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'print', 'debugPrint', 'map', 'filter', 'reduce', 'compactMap', 'flatMap', 'forEach', 'sorted', 'first', 'last', 'count', 'isEmpty', 'append', 'remove', 'insert', 'contains'],
-    pg: ['SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'VIEW', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'CROSS', 'ON', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'DISTINCT', 'EXISTS', 'ANY', 'ALL', 'SOME', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'CAST', 'TRUE', 'FALSE', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'COALESCE', 'NULLIF', 'GREATEST', 'LEAST', 'NOW', 'CURRENT_DATE', 'EXTRACT', 'DATE_TRUNC', 'TO_CHAR', 'TO_DATE', 'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'LAG', 'LEAD', 'FIRST_VALUE', 'LAST_VALUE', 'OVER', 'PARTITION', 'WINDOW', 'WITH', 'RECURSIVE', 'RETURNING', 'SERIAL', 'BIGSERIAL', 'VARCHAR', 'TEXT', 'INTEGER', 'BIGINT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'JSONB', 'UUID', 'DECIMAL', 'FLOAT', 'ENUM', 'ARRAY', 'NUMERIC'],
-    dk: ['FROM', 'RUN', 'CMD', 'ENTRYPOINT', 'WORKDIR', 'COPY', 'ADD', 'ENV', 'ARG', 'EXPOSE', 'VOLUME', 'LABEL', 'MAINTAINER', 'USER', 'SHELL', 'HEALTHCHECK', 'ONBUILD', 'STOPSIGNAL', 'docker', 'build', 'run', 'exec', 'ps', 'images', 'pull', 'push', 'login', 'logout', 'tag', 'rm', 'rmi', 'logs', 'inspect', 'network', 'volume', 'compose', 'docker-compose', 'up', 'down', 'start', 'stop', 'restart', 'kill', 'pause', 'unpause', 'commit', 'save', 'load', 'export', 'import', 'cp', 'diff', 'events', 'port', 'top', 'version', 'info', 'system', 'prune', 'container', 'image', 'service', 'stack', 'swarm', 'secret', 'config', 'node', 'plugin', 'trust'],
-    git: ['git', 'init', 'clone', 'add', 'commit', 'push', 'pull', 'fetch', 'merge', 'rebase', 'branch', 'checkout', 'switch', 'restore', 'stash', 'log', 'diff', 'status', 'reset', 'revert', 'cherry-pick', 'tag', 'remote', 'config', 'help', 'rm', 'mv', 'clean', 'gc', 'fsck', 'bisect', 'blame', 'grep', 'show', 'shortlog', 'describe', 'archive', 'bundle', 'worktree', 'submodule', 'notes', 'reflog', 'format-patch', 'am', 'apply', 'range-diff', 'sparse-checkout', 'main', 'master', 'origin', 'HEAD', '--force', '--hard', '--soft', '--mixed', '--amend', '--no-ff', '--abort', '--continue', '--skip', '--all', '--oneline', '--graph', '--decorate', '--author', '--since', '--until', '--grep'],
-    mongodb: ['db', 'use', 'show', 'createCollection', 'insertOne', 'insertMany', 'find', 'findOne', 'updateOne', 'updateMany', 'deleteOne', 'deleteMany', 'aggregate', 'countDocuments', 'estimatedDocumentCount', 'distinct', 'sort', 'limit', 'skip', 'project', 'lookup', 'group', 'match', 'project', 'unwind', 'addFields', 'bucket', 'replaceRoot', 'out', 'merge', 'collStats', 'indexStats', 'createIndex', 'dropIndex', 'getIndexes', 'drop', 'renameCollection', 'bulkWrite', 'watch', 'mapReduce', 'cloneCollection', 'copyTo', 'convertToCapped', 'ObjectId', 'ISODate', 'NumberInt', 'NumberLong', 'NumberDecimal', 'Timestamp', 'RegExp', 'MinKey', 'MaxKey', 'null', 'true', 'false', '$match', '$group', '$sort', '$project', '$lookup', '$unwind', '$addFields', '$bucket', '$replaceRoot', '$out', '$merge', '$count', '$limit', '$skip', '$sample'],
-    gamedev: ['Vector2', 'Vector3', 'Transform', 'Quaternion', 'Matrix4x4', 'GameObject', 'Component', 'MonoBehaviour', 'Start', 'Update', 'FixedUpdate', 'LateUpdate', 'Awake', 'OnEnable', 'OnDisable', 'OnDestroy', 'Instantiate', 'Destroy', 'Find', 'GetComponent', 'AddComponent', 'transform', 'position', 'rotation', 'scale', 'Translate', 'Rotate', 'LookAt', 'Input', 'GetKey', 'GetKeyDown', 'GetKeyUp', 'GetAxis', 'GetButton', 'GetButtonDown', 'Rigidbody', 'Collider', 'Collision', 'Trigger', 'Raycast', 'Physics', 'OverlapSphere', 'SceneManager', 'LoadScene', 'Application', 'Quit', 'OpenURL', 'Time', 'deltaTime', 'time', 'timeScale', 'Mathf', 'Random', 'Range', 'Lerp', 'SmoothDamp', 'Color', 'Material', 'Mesh', 'Renderer', 'Animation', 'Animator', 'AudioSource', 'AudioClip', 'Play', 'Stop', 'ParticleSystem', 'Camera', 'Screen', 'Cursor', 'ScreenToWorldPoint', 'WorldToScreenPoint', 'Debug', 'Log', 'DrawRay', 'DrawLine', 'Gizmos', 'Physics2D', 'Collider2D', 'Rigidbody2D'],
-};
+// LANG_KEYWORDS is now in app-data.js (content/app-data.json)
 
 let compState = null;
 
@@ -3553,7 +3561,7 @@ function highlightEditorCode(code, lang) {
         const sCm = rest.match(/^\/\/[^\n]*/);
         if (sCm) { tokens.push('<span class="hl-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
         const hCm = rest.match(/^#[^\n]*/);
-        if (hCm && ['py','rs','sh','bash'].includes(lang)) { tokens.push('<span class="hl-comment">' + hCm[0] + '</span>'); i += hCm[0].length; continue; }
+        if (hCm && ['py','rs','sh','bash','php'].includes(lang)) { tokens.push('<span class="hl-comment">' + hCm[0] + '</span>'); i += hCm[0].length; continue; }
         const sqlCm = rest.match(/^--[^\n]*/);
         if (sqlCm && ['pg','mysql','sqlite'].includes(lang)) { tokens.push('<span class="hl-comment">' + sqlCm[0] + '</span>'); i += sqlCm[0].length; continue; }
         const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
@@ -3956,7 +3964,7 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
             const langs = [
                 ['js','JS'],['py','Python'],['go','Go'],['rs','Rust'],['ts','TypeScript'],
                 ['c','C'],['cpp','C++'],['cs','C#'],['kt','Kotlin'],['swift','Swift'],
-                ['zig','Zig'],['pg','SQL'],['dk','Docker'],['git','Git'],
+                ['asm','ASM'],['wasm','Wasm'],['zig','Zig'],['pg','SQL'],['dk','Docker'],['git','Git'],
                 ['mongodb','MongoDB'],['gamedev','GameDev']
             ];
             const opts = langs.map(([v,l]) => `<option value="${v}"${v==='js'?' selected':''}>${l}</option>`).join('');
@@ -3984,6 +3992,19 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
     }
 
     if (!courseData[lang]) {
+        // If curriculum data is already loaded but this language isn't in it, don't retry
+        if (_curriculumData) {
+            document.getElementById('topic-list').innerHTML = '';
+            document.getElementById('explanation').innerHTML = '<div style="color:#64748b;font-size:13px;padding:20px;text-align:center;">Curriculum not available for ' + (LANG_NAMES[lang] || lang) + '</div>';
+            document.getElementById('editor').value = '// ' + (LANG_NAMES[lang] || lang) + ' — no curriculum data';
+            document.getElementById('output').innerText = '// Curriculum not loaded';
+            document.getElementById('app').className = lang + '-mode';
+            document.getElementById('header-title').innerText = LANG_NAMES[lang] || lang;
+            document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+            const navBtn = document.getElementById('nav-' + lang);
+            if (navBtn) navBtn.classList.add('active');
+            return;
+        }
         document.getElementById('topic-list').innerHTML =
             '<div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-line med"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>';
         document.getElementById('explanation').innerHTML =
@@ -4365,211 +4386,7 @@ function renderRoadmap(container, lang) {
 
 // ── LANGUAGE INTRO ──
 
-const langIntro = {
-    js: {
-        name: 'JavaScript',
-        what: 'JavaScript is a high-level, interpreted programming language that is one of the core technologies of the World Wide Web. It enables interactive web pages and is an essential part of web applications.',
-        usedFor: 'Building interactive web pages, web and mobile applications, server-side applications (Node.js), browser extensions, game development, and automation scripts.',
-        creator: 'Brendan Eich at Netscape Communications Corporation. Created in just 10 days in May 1995, it was originally called Mocha, then LiveScript, and finally JavaScript.',
-        code: '// JavaScript — the language of the web\nconsole.log("Hello, World!");\n\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet("JavaScript"));'
-    },
-    ts: {
-        name: 'TypeScript',
-        what: 'TypeScript is a strongly typed programming language that builds on JavaScript by adding static type definitions. It compiles to plain JavaScript and provides better tooling, error checking, and code maintainability at scale.',
-        usedFor: 'Large-scale web applications, enterprise software, Angular applications, and any project where type safety and better developer tooling are valuable.',
-        creator: 'Anders Hejlsberg at Microsoft. First released in October 2012, after two years of internal development at Microsoft.',
-        code: '// TypeScript — JavaScript with types\nfunction greet(name: string): string {\n  return `Hello, ${name}!`;\n}\n\nconst message: string = greet("TypeScript");\nconsole.log(message);'
-    },
-    py: {
-        name: 'Python',
-        what: 'Python is a high-level, interpreted programming language known for its readable syntax and comprehensive standard library. It emphasizes code readability and simplicity, making it one of the most beginner-friendly languages.',
-        usedFor: 'Web development, data science, machine learning, artificial intelligence, scientific computing, automation, scripting, backend services, and education.',
-        creator: 'Guido van Rossum. First released in 1991 as a successor to the ABC language. The name Python comes from Monty Python\'s Flying Circus.',
-        code: '# Python — readable and powerful\nprint("Hello, World!")\n\ndef greet(name):\n    return f"Hello, {name}!"\n\nprint(greet("Python"))'
-    },
-    go: {
-        name: 'Go',
-        what: 'Go (also called Golang) is a statically typed, compiled programming language designed for simplicity, efficiency, and concurrent programming. It features built-in concurrency primitives and fast compilation.',
-        usedFor: 'Cloud services, microservices, CLI tools, DevOps tooling, web servers, networking applications, and concurrent systems requiring high performance.',
-        creator: 'Robert Griesemer, Rob Pike, and Ken Thompson at Google. First announced in November 2009. Inspired by C, but with memory safety, garbage collection, and structural typing.',
-        code: '// Go — simple and fast\npackage main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, Go!")\n}\n\nfunc greet(name string) string {\n    return fmt.Sprintf("Hello, %s!", name)\n}'
-    },
-    rs: {
-        name: 'Rust',
-        what: 'Rust is a systems programming language focused on safety, speed, and concurrency. It guarantees memory safety without a garbage collector through its ownership system and borrow checker.',
-        usedFor: 'Systems programming, embedded devices, WebAssembly, CLI tools, game engines, operating systems, networking, and performance-critical applications.',
-        creator: 'Graydon Hoare at Mozilla Research. First released in 2010 as a personal project, then sponsored by Mozilla. Now governed by the Rust Foundation.',
-        code: '// Rust — safe and fast\nfn main() {\n    println!("Hello, Rust!");\n}\n\nfn greet(name: &str) -> String {\n    format!("Hello, {}!", name)\n}'
-    },
-    c: {
-        name: 'C',
-        what: 'C is a general-purpose, procedural programming language that gives developers low-level access to memory and system resources. It is one of the most influential languages in computing history.',
-        usedFor: 'Operating systems, embedded systems, firmware, hardware drivers, compilers, game engines, and performance-critical applications where direct hardware control is needed.',
-        creator: 'Dennis Ritchie at Bell Labs. Created between 1969 and 1973 for use with the Unix operating system. C remains one of the most widely used languages.',
-        code: '// C — the foundation of modern computing\n#include <stdio.h>\n\nint main() {\n    printf("Hello, C!\\n");\n    return 0;\n}\n\nvoid greet(char* name) {\n    printf("Hello, %s!\\n", name);\n}'
-    },
-    cpp: {
-        name: 'C++',
-        what: 'C++ is a cross-platform language that extends C with object-oriented, generic, and functional features. It provides high-level abstractions with low-level control over system resources.',
-        usedFor: 'Game development, GUI applications, real-time systems, high-frequency trading, embedded systems, browser engines, and performance-critical software.',
-        creator: 'Bjarne Stroustrup at Bell Labs. First developed in 1979 as "C with Classes". The name C++ was coined in 1983, with the ++ operator implying an increment to C.',
-        code: '// C++ — object-oriented and powerful\n#include <iostream>\n#include <string>\n\nint main() {\n    std::cout << "Hello, C++!" << std::endl;\n    return 0;\n}\n\nstd::string greet(std::string name) {\n    return "Hello, " + name + "!";\n}'
-    },
-    cs: {
-        name: 'C#',
-        what: 'C# (pronounced "C sharp") is a modern, object-oriented programming language designed for the .NET platform. It combines the power of C++ with the simplicity of Visual Basic.',
-        usedFor: 'Windows applications, web applications (ASP.NET), game development (Unity), mobile apps (Xamarin), cloud services, and enterprise software.',
-        creator: 'Anders Hejlsberg at Microsoft. First released in 2000 as part of the .NET initiative. C# has evolved significantly with features like async/await, LINQ, and pattern matching.',
-        code: '// C# — elegant and modern\nusing System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, C#!");\n    }\n    \n    static string Greet(string name) {\n        return $"Hello, {name}!";\n    }\n}'
-    },
-    kt: {
-        name: 'Kotlin',
-        what: 'Kotlin is a modern, statically typed programming language that runs on the Java Virtual Machine. It is fully interoperable with Java while offering more concise syntax and null safety.',
-        usedFor: 'Android app development, server-side applications, web development (Kotlin/JS), multiplatform mobile apps, and replacing Java in existing projects.',
-        creator: 'JetBrains (the company behind IntelliJ IDEA). First released in 2011, with the first stable version in 2016. Google announced first-class support for Kotlin on Android in 2017.',
-        code: '// Kotlin — concise and safe\nfun main() {\n    println("Hello, Kotlin!")\n}\n\nfun greet(name: String): String {\n    return "Hello, $name!"\n}'
-    },
-    swift: {
-        name: 'Swift',
-        what: 'Swift is a powerful and intuitive programming language for Apple platforms. It is designed to be safe, fast, and expressive, with modern language features and a clean syntax.',
-        usedFor: 'iOS, macOS, watchOS, and tvOS app development. Swift is also used for server-side development and system programming on Apple platforms.',
-        creator: 'Chris Lattner at Apple. First announced in 2014 at WWDC, with the goal of replacing Objective-C as the primary language for Apple development.',
-        code: '// Swift — powerful and intuitive\nimport Foundation\n\nprint("Hello, Swift!")\n\nfunc greet(name: String) -> String {\n    return "Hello, \\(name)!"\n}'
-    },
-    zig: {
-        name: 'Zig',
-        what: 'Zig is a general-purpose programming language designed for robustness, optimality, and clarity. It provides low-level control like C but with modern features like comptime (compile-time execution).',
-        usedFor: 'Systems programming, embedded development, building cross-platform libraries, and as a C compiler replacement. Zig is often used for performance-critical and low-level software.',
-        creator: 'Andrew Kelley. First released in 2016 as a response to the complexity and shortcomings of existing systems programming languages.',
-        code: '// Zig — robust and optimal\nconst std = @import("std");\n\npub fn main() void {\n    std.debug.print("Hello, Zig!\\n", .{});\n}\n\nfn greet(name: []const u8) []const u8 {\n    return std.fmt.comptimePrint("Hello, {s}!", .{name});\n}'
-    },
-    pg: {
-        name: 'PostgreSQL',
-        what: 'PostgreSQL is a powerful, open-source object-relational database system known for reliability, feature robustness, and performance. It supports advanced data types and concurrent access.',
-        usedFor: 'Primary database for web applications, data warehousing, geospatial applications (PostGIS), financial systems, and any application requiring ACID compliance and complex queries.',
-        creator: 'Michael Stonebraker at the University of California, Berkeley. Started as the POSTGRES project in 1986. PostgreSQL (Post-Ingres SQL) has been actively developed for over 35 years.',
-        code: '-- PostgreSQL — the most advanced open-source database\nCREATE TABLE users (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    email VARCHAR(255) UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
-    },
-    mongodb: {
-        name: 'MongoDB',
-        what: 'MongoDB is a source-available, NoSQL document database that stores data in flexible, JSON-like documents. It is designed for scalability, high performance, and ease of development.',
-        usedFor: 'Applications requiring flexible schema, rapid prototyping, real-time analytics, content management, IoT data storage, and large-scale data processing.',
-        creator: 'Dwight Merriman, Eliot Horowitz, and Kevin Ryan at MongoDB Inc. (originally 10gen). First released in 2009 as a solution for scalability challenges with traditional databases.',
-        code: '// MongoDB — flexible document database\n// Insert a document\ndb.users.insertOne({\n    name: "Alice",\n    email: "alice@example.com",\n    roles: ["admin", "editor"]\n})\n\n// Query documents\ndb.users.find({ name: "Alice" })'
-    },
-    git: {
-        name: 'Git',
-        what: 'Git is a distributed version control system that tracks changes in source code during software development. It enables multiple developers to work on the same project simultaneously.',
-        usedFor: 'Source code management, collaboration, version control, continuous integration, code review workflows, and maintaining project history across distributed teams.',
-        creator: 'Linus Torvalds in 2005, originally created to manage Linux kernel development. Git was designed for speed, data integrity, and support for distributed, non-linear workflows.',
-        code: '# Git — version control for everything\n# Initialize a repository\ngit init\n\n# Add and commit changes\ngit add .\ngit commit -m "Initial commit"\n\n# Create and switch branches\ngit checkout -b feature-branch\n\n# Push to remote\ngit push origin main'
-    },
-    mysql: {
-        name: 'MySQL',
-        what: 'MySQL is an open-source relational database management system known for its reliability, performance, and ease of use. It uses SQL for querying and managing data.',
-        usedFor: 'Web applications (especially with LAMP stack), e-commerce platforms, content management systems, data warehousing, and as a general-purpose database for small to large applications.',
-        creator: 'Michael Widenius and David Axmark at MySQL AB. First released in 1995. Now owned by Oracle Corporation, but remains open-source under the GPL license.',
-        code: '-- MySQL — reliable and fast\nCREATE TABLE users (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    email VARCHAR(255) UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
-    },
-    sqlite: {
-        name: 'SQLite',
-        what: 'SQLite is a self-contained, serverless, zero-configuration SQL database engine. It is the most widely deployed database engine in the world, embedded in countless applications.',
-        usedFor: 'Mobile apps, embedded systems, IoT devices, desktop applications, browser storage, prototyping, and testing. SQLite is built into Android, iOS, and most major browsers.',
-        creator: 'D. Richard Hipp. First released in August 2000. The design philosophy was simplicity: a database that requires no setup, no server, and stores data in a single file.',
-        code: '-- SQLite — serverless and self-contained\nCREATE TABLE users (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT NOT NULL,\n    email TEXT UNIQUE NOT NULL\n);\n\nINSERT INTO users (name, email)\nVALUES (\'Alice\', \'alice@example.com\');\n\nSELECT * FROM users WHERE name = \'Alice\';'
-    },
-    firebase: {
-        name: 'Firebase',
-        what: 'Firebase is a platform developed by Google for creating mobile and web applications. It provides a suite of cloud-based tools including real-time database, authentication, hosting, and analytics.',
-        usedFor: 'Building full-stack apps without managing servers, real-time features (chat, notifications), user authentication, cloud storage, push notifications, and app analytics.',
-        creator: 'Andrew Lee and James Tamplin at Firebase Inc. (originally Envolve). Founded in 2011, acquired by Google in 2014. Firebase has grown into Google\'s primary app development platform.',
-        code: '// Firebase — backend made simple\nimport { initializeApp } from \'firebase/app\';\nimport { getFirestore } from \'firebase/firestore\';\n\nconst app = initializeApp({\n    apiKey: "YOUR_API_KEY",\n    projectId: "YOUR_PROJECT"\n});\n\nconst db = getFirestore(app);\n\n// Real-time data sync\n// No server code needed'
-    },
-    cloud: {
-        name: 'Cloud Computing',
-        what: 'Cloud computing is the on-demand delivery of computing services over the internet, including servers, storage, databases, networking, software, and analytics. It enables flexible resources and economies of scale.',
-        usedFor: 'Hosting applications, storing and analyzing data, running virtual machines, deploying machine learning models, content delivery, and building scalable infrastructure without physical hardware.',
-        creator: 'The concept evolved from early time-sharing systems (1960s), with modern cloud pioneered by Amazon Web Services (2006), followed by Google Cloud and Microsoft Azure.',
-        code: '# Cloud Computing — infrastructure on demand\n# Deploy a server with AWS CLI\naws ec2 run-instances \\\n    --image-id ami-0abcdef1234567890 \\\n    --instance-type t2.micro \\\n    --key-name MyKeyPair \\\n    --security-groups my-sg\n\n# Scale with load balancer\necho "Your infrastructure is ready"'
-    },
-    aws: {
-        name: 'AWS',
-        what: 'Amazon Web Services (AWS) is the world\'s most comprehensive and broadly adopted cloud platform, offering over 200 fully featured services from data centers globally.',
-        usedFor: 'Cloud computing, storage (S3), compute (EC2), databases (RDS, DynamoDB), AI/ML services, serverless computing (Lambda), content delivery (CloudFront), and enterprise infrastructure.',
-        creator: 'Amazon.com. AWS launched in 2006, initially offering S3 (storage) and SQS (queuing). It pioneered the modern cloud computing market and remains the market leader.',
-        code: '# AWS — cloud leader\n# List S3 buckets\naws s3 ls\n\n# Deploy a Lambda function\naws lambda create-function \\\n    --function-name my-function \\\n    --runtime nodejs18.x \\\n    --handler index.handler \\\n    --role arn:aws:iam::account-id:role/lambda-role\n\n# Launch an EC2 instance\naws ec2 run-instances --image-id ami-xxx'
-    },
-    azure: {
-        name: 'Azure',
-        what: 'Microsoft Azure is a cloud computing platform offering infrastructure, platform, and software as a service. It integrates deeply with Microsoft\'s enterprise ecosystem including Active Directory and Visual Studio.',
-        usedFor: 'Cloud hosting, Windows-based applications, enterprise identity management, hybrid cloud solutions, AI and machine learning services, and IoT applications.',
-        creator: 'Microsoft. Announced in October 2008 as "Windows Azure", later renamed to Microsoft Azure in 2014. Azure has grown to be the second-largest cloud platform after AWS.',
-        code: '# Azure — Microsoft\'s cloud platform\n# Create a resource group\naz group create \\\n    --name myResourceGroup \\\n    --location eastus\n\n# Deploy a VM\naz vm create \\\n    --resource-group myResourceGroup \\\n    --name myVM \\\n    --image UbuntuLTS\n\n# List resources\naz resource list'
-    },
-    java: {
-        name: 'Java',
-        what: 'Java is a versatile, object-oriented programming language designed for platform independence through the "write once, run anywhere" principle. It runs on the Java Virtual Machine (JVM), making it compatible across all platforms that support the JVM, from mainframes to smartphones.',
-        usedFor: 'Enterprise applications, Android app development, web applications (Spring Boot), big data processing (Apache Hadoop, Spark), cloud microservices, embedded systems, and scientific computing.',
-        creator: 'James Gosling at Sun Microsystems. First released in 1995 as part of the Sun\'s Java platform. Originally called Oak, it was renamed to Java after Java coffee. Oracle Corporation acquired Sun Microsystems in 2010 and now maintains Java.',
-        code: '// Java — write once, run anywhere\npublic class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n    }\n\n    public static String greet(String name) {\n        return "Hello, " + name + "!";\n    }\n}'
-    },
-    backend: {
-        name: 'Backend',
-        what: 'Backend development refers to the server-side aspect of web development, focusing on creating and managing server logic, databases, and APIs. It involves handling user authentication, authorization, processing requests, and ensuring system performance and scalability.',
-        usedFor: 'Building and maintaining server-side components of web and mobile applications, RESTful APIs, microservices, database management, authentication systems, cloud infrastructure, and real-time services.',
-        creator: 'Backend development has evolved alongside the World Wide Web since Tim Berners-Lee invented the first web server in 1990. The field grew from simple CGI scripts to modern architectures including microservices, serverless computing, and event-driven systems.',
-        code: '// Backend — the engine behind the web\n// Example: Node.js Express API\nconst express = require(\'express\');\nconst app = express();\n\napp.get(\'/api/hello\', (req, res) => {\n    res.json({ message: "Hello from the backend!" });\n});\n\napp.listen(3000, () => {\n    console.log(\'Server running on port 3000\');\n});'
-    },
-    cicd: {
-        name: 'CI/CD',
-        what: 'CI/CD (Continuous Integration/Continuous Delivery) is an automated software delivery method that bridges development and operations. Continuous Integration automatically builds and tests every code change, catching bugs early. Continuous Delivery/Deployment extends this by automatically deploying code to production-like environments or directly to users.',
-        usedFor: 'Automating build, test, and deployment pipelines, ensuring code quality through automated checks, enabling rapid and reliable software releases, reducing manual deployment errors, and providing fast feedback to developers on every commit.',
-        creator: 'The concepts of CI and CD were formalized by Martin Fowler and Kent Beck (Extreme Programming, late 1990s). Continuous Integration was first practiced in the 1990s. Modern CI/CD was popularized by tools like Jenkins (2005), Travis CI (2011), GitHub Actions (2018), and GitLab CI/CD with its built-in Auto DevOps capabilities.',
-        code: '# .gitlab-ci.yml example\nstages:\n  - test\n  - build\n  - deploy\n\nunit-tests:\n  stage: test\n  script:\n    - npm install\n    - npm test\n\nbuild-app:\n  stage: build\n  script:\n    - npm run build\n  artifacts:\n    paths:\n      - dist/\n\ndeploy-prod:\n  stage: deploy\n  script:\n    - npm run deploy\n  only:\n    - main'
-    },
-    android: {
-        name: 'Android',
-        what: 'Android is a mobile operating system based on a modified version of the Linux kernel and other open-source software, designed primarily for touchscreen mobile devices. Developed by Google, it powers billions of devices worldwide and offers deep customization, a vast app ecosystem, and strong integration with Google services.',
-        usedFor: 'Building native Android apps using Kotlin or Java, developing for phones, tablets, Wear OS, Android TV, and Android Auto. Android apps are distributed via Google Play and other app stores.',
-        creator: 'Android was founded by Andy Rubin, Rich Miner, Nick Sears, and Chris White in 2003. It was acquired by Google in 2005 and the first commercial device (HTC Dream) launched in 2008. Google has led its development ever since.',
-        code: '// Android — built with Kotlin\nfun main() {\n    println("Hello, Android!")\n}\n\n// Android apps use:\n// - Kotlin/Java for logic\n// - Jetpack Compose or XML for UI\n// - Android Studio as IDE'
-    },
-    ios: {
-        name: 'iOS',
-        what: 'iOS is a mobile operating system created by Apple Inc. exclusively for its hardware, powering iPhone, iPad, and iPod Touch. Known for its smooth performance, strong security, privacy focus, and seamless ecosystem integration, iOS is the second most popular mobile OS worldwide.',
-        usedFor: 'Building native iOS apps using Swift or Objective-C, developing for iPhone, iPad, Apple Watch, and Apple TV. iOS apps are distributed exclusively through the Apple App Store with strict review guidelines.',
-        creator: 'iOS was created by Apple Inc. under the leadership of Steve Jobs. First released in 2007 alongside the original iPhone. It was derived from macOS and has undergone major redesigns with iOS 7 (flat design) and subsequent versions.',
-        code: '// iOS — built with Swift\nimport Foundation\nprint("Hello, iOS!")\n\n// iOS apps use:\n// - Swift/Objective-C for logic\n// - SwiftUI or UIKit for UI\n// - Xcode as IDE'
-    },
-    gcp: {
-        name: 'Google Cloud',
-        what: 'Google Cloud Platform (GCP) is a suite of cloud computing services that runs on the same infrastructure Google uses internally for its own products like Search, Gmail, and YouTube.',
-        usedFor: 'Cloud computing, data analytics (BigQuery), machine learning (AI Platform), container orchestration (GKE), serverless computing (Cloud Functions), and scalable application hosting.',
-        creator: 'Google. Launched in 2008 with App Engine. GCP leverages Google\'s massive infrastructure and expertise in data processing, machine learning, and containerized applications.',
-        code: '# GCP — data and AI at scale\n# List Compute Engine instances\ngcloud compute instances list\n\n# Deploy a Cloud Function\ngcloud functions deploy my-function \\\n    --runtime nodejs18 \\\n    --trigger-http\n\n# Query BigQuery\ngcloud bigquery query \\\n    --sql "SELECT name FROM mydataset.users LIMIT 10"'
-    },
-    godot: {
-        name: 'Godot Engine',
-        what: 'Godot is a free, open-source game engine that provides a comprehensive set of common tools for game development. It features a unique scene-node architecture, a dedicated scripting language (GDScript) that is easy to learn, full C# support, and a visual editor that runs on any platform.',
-        usedFor: 'Creating 2D and 3D games, game prototypes, interactive applications, educational software, and simulations. Godot excels at 2D with its dedicated 2D engine, pixel-perfect rendering, and powerful animation tools.',
-        creator: 'Juan Linietsky and Ariel Manzur (Reduz and PunkPanda). First released as open-source in 2014 after being developed privately for several years. Now maintained by the Godot Foundation and a large community of contributors.',
-        code: 'extends Node\n\n# Called when the node enters the scene tree for the first time.\nfunc _ready():\n    print("Hello, Godot!")\n    print("Welcome to open-source game development!")\n\n# Called every frame.\nfunc _process(delta):\n    # Put your game logic here\n    pass'
-    },
-    unity: {
-        name: 'Unity Engine',
-        what: 'Unity is one of the world\'s most popular real-time 3D development platforms. It provides a complete ecosystem for creating games, simulations, and interactive experiences with a component-based architecture, a robust editor, and extensive asset store integration.',
-        usedFor: 'Game development (2D, 3D, VR, AR), architectural visualization, film and animation, automotive design, training simulations, and interactive installations across 25+ platforms.',
-        creator: 'Unity Technologies, founded by David Helgason, Nicholas Francis, and Joachim Ante in Copenhagen. First released in 2005 for Mac OS X, it has grown into a multi-billion dollar platform used by millions of developers worldwide.',
-        code: 'using UnityEngine;\n\npublic class HelloUnity : MonoBehaviour\n{\n    void Start()\n    {\n        Debug.Log("Hello, Unity!");\n        Debug.Log("Welcome to real-time 3D development!");\n    }\n\n    void Update()\n    {\n        // Game logic runs here each frame\n    }\n}'
-    },
-    unreal: {
-        name: 'Unreal Engine',
-        what: 'Unreal Engine is a cutting-edge game engine developed by Epic Games, known for its high-fidelity graphics, robust toolset, and industry-leading rendering capabilities. It features Blueprint visual scripting alongside full C++ support, making it accessible to both artists and engineers.',
-        usedFor: 'AAA game development, architectural visualization, film and broadcast production, virtual production (used in The Mandalorian), automotive design, simulation, and digital twin applications.',
-        creator: 'Epic Games, founded by Tim Sweeney. Originally developed as a first-person shooter engine for the 1998 game Unreal. The first publicly available version (UE2) released in 2002, with UE5 launching in 2022 featuring Nanite and Lumen.',
-        code: '#include "CoreMinimal.h"\n#include "GameFramework/Actor.h"\n#include "HelloUnreal.generated.h"\n\nUCLASS()\nclass AHelloUnreal : public AActor\n{\n    GENERATED_BODY()\n\nprotected:\n    virtual void BeginPlay() override\n    {\n        Super::BeginPlay();\n        UE_LOG(LogTemp, Warning, TEXT("Hello, Unreal!"));\n        UE_LOG(LogTemp, Warning, TEXT("Welcome to cutting-edge game development!"));\n    }\n};'
-    }
-};
+// langIntro is now in app-data.js (content/app-data.json)
 
 function loadLangIntro(lang) {
     const intro = langIntro[lang];

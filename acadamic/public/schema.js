@@ -12,27 +12,8 @@ let schemaAutoGenerateTimer = null;
 let schemaDialect = 'postgresql';
 
 const SCHEMA_STORAGE_KEY = 'dogeslab_schema';
-const SCHEMA_VERSIONS_KEY = 'dogeslab_schema_versions';
-
-const schemaTypes = ['INT', 'SERIAL', 'BIGINT', 'VARCHAR(255)', 'TEXT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'DECIMAL', 'UUID', 'JSONB', 'FLOAT'];
-
-const dialectTypeMap = {
-    postgresql: {
-        'INT': 'INT', 'SERIAL': 'SERIAL', 'BIGINT': 'BIGINT', 'VARCHAR(255)': 'VARCHAR(255)',
-        'TEXT': 'TEXT', 'BOOLEAN': 'BOOLEAN', 'DATE': 'DATE', 'TIMESTAMP': 'TIMESTAMP',
-        'DECIMAL': 'DECIMAL', 'UUID': 'UUID', 'JSONB': 'JSONB', 'FLOAT': 'FLOAT'
-    },
-    mysql: {
-        'INT': 'INT', 'SERIAL': 'INT AUTO_INCREMENT', 'BIGINT': 'BIGINT', 'VARCHAR(255)': 'VARCHAR(255)',
-        'TEXT': 'TEXT', 'BOOLEAN': 'TINYINT(1)', 'DATE': 'DATE', 'TIMESTAMP': 'TIMESTAMP',
-        'DECIMAL': 'DECIMAL(10,2)', 'UUID': 'CHAR(36)', 'JSONB': 'JSON', 'FLOAT': 'FLOAT'
-    },
-    sqlite: {
-        'INT': 'INTEGER', 'SERIAL': 'INTEGER', 'BIGINT': 'INTEGER', 'VARCHAR(255)': 'TEXT',
-        'TEXT': 'TEXT', 'BOOLEAN': 'INTEGER', 'DATE': 'TEXT', 'TIMESTAMP': 'TEXT',
-        'DECIMAL': 'REAL', 'UUID': 'TEXT', 'JSONB': 'TEXT', 'FLOAT': 'REAL'
-    }
-};
+const SCHEMA_VERSIONS_KEY = 'dogeslab_schema_versions'// schemaTypes extracted to content/app-data.json
+// dialectTypeMap extracted to content/app-data.json
 
 // ── Undo / Redo ──
 function schemaPushState() {

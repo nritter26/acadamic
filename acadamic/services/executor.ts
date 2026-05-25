@@ -168,7 +168,11 @@ const RUNNERS: Record<string, RunnerConfig> = {
   cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
   kt:  { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
   swift: { cmd: 'swift "%f"', ext: '.swift' },
+  wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
+  asm: { cmd: 'nasm -f elf64 "%f" -o _prog.o && ld -o _prog _prog.o && ./_prog', ext: '.asm' },
   zig: { cmd: 'zig run "%f"', ext: '.zig' },
+  bash: { cmd: 'bash "%f"', ext: '.sh' },
+  php:  { cmd: 'php "%f"', ext: '.php' },
 };
 
 // ── Execute ──
@@ -233,8 +237,10 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
   const env = {
     ...process.env,
     PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`,
-    DOTNET_ROOT: path.join(os.homedir(), '.local/dotnet'),
   } as NodeJS.ProcessEnv;
+  if (!process.env.DOTNET_ROOT) {
+    env.DOTNET_ROOT = path.join(os.homedir(), '.local/dotnet');
+  }
 
   const sandboxedCmd = `ulimit -v 262144 -t 30 2>/dev/null; ${cmd}`;
   const execOpts = { timeout: 30000, cwd: tmpDir, env };
