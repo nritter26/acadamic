@@ -26,6 +26,8 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false },
   wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
   asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
+  bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
+  php:  { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
 };
 
 export interface DockerExecResult {
@@ -174,6 +176,18 @@ WORKDIR /code
     'Dockerfile.asm': `
 FROM alpine:latest
 RUN apk add --no-cache nasm binutils && adduser -D -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.bash': `
+FROM alpine:latest
+RUN apk add --no-cache bash && adduser -D -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.php': `
+FROM php:8.3-cli-alpine
+RUN adduser -D -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),

@@ -109,6 +109,38 @@
     code: "; x86-64 Linux\nsection .data\n    msg db 'Hello, World!', 0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n\n_start:\n    mov eax, 1\n    mov edi, 1\n    mov rsi, msg\n    mov edx, len\n    syscall\n\n    mov eax, 60\n    xor edi, edi\n    syscall"
   };
 
+  intro.php = {
+    name: "PHP",
+    what: "PHP (Hypertext Preprocessor) is a widely-used open-source server-side scripting language designed for web development. It can be embedded directly into HTML and integrates seamlessly with databases like MySQL, PostgreSQL, and SQLite.",
+    usedFor: "Building dynamic websites and web applications, content management systems (WordPress, Drupal), e-commerce platforms, REST APIs, server-side form handling, and database-driven applications.",
+    creator: "Rasmus Lerdorf, created in 1994 as a set of Perl scripts. PHP/FI 2.0 was released in 1997, and PHP 3 (the first modern version) was released in 1998 by Andi Gutmans and Zeev Suraski.",
+    code: "<?php\n// Hello from PHP\necho \"Hello, PHP!\";\n\n// Variables\n$name = \"World\";\necho \"Hello, $name!\";\n\n// Arrays\n$fruits = ['apple', 'banana', 'cherry'];\nforeach ($fruits as $fruit) {\n    echo $fruit;\n}\n?>"
+  };
+
+  intro.bash = {
+    name: "Bash",
+    what: "Bash (Bourne Again SHell) is a Unix shell and command language that provides a command-line interface for interacting with operating systems. It supports scripting with variables, control flow, functions, and job control, making it a powerful tool for automation and system administration.",
+    usedFor: "System administration, automation, file manipulation, program execution, text processing, DevOps pipelines, server management, and rapid prototyping of complex workflows through shell scripting.",
+    creator: "Brian Fox, created in 1987 for the GNU Project as a free replacement for the Bourne shell. Bash is the default shell on most Linux distributions and macOS.",
+    code: "#!/bin/bash\n# Hello from Bash\n\necho \"Hello, Bash!\"\n\n# Variables\nname=\"World\"\necho \"Hello, $name!\"\n\n# Loop\nfor i in {1..3}; do\n    echo \"Count: $i\"\ndone"
+  };
+
+  intro.rb = {
+    name: "Ruby",
+    what: "Ruby is a dynamic, open-source programming language focused on simplicity and productivity. It has an elegant syntax that is natural to read and easy to write, with everything in Ruby being an object.",
+    usedFor: "Web development (Ruby on Rails), scripting and automation, data processing, DevOps tooling (Chef, Puppet), prototyping, and building APIs. Ruby emphasizes developer happiness and convention over configuration.",
+    creator: "Yukihiro 'Matz' Matsumoto, created in 1995. Ruby combines features from Perl, Smalltalk, Eiffel, Ada, and Lisp, with a focus on object-oriented programming and programmer-friendly syntax.",
+    code: "# Hello from Ruby\nputs \"Hello, Ruby!\"\n\n# Everything is an object\n5.times { puts \"Ruby!\" }\n\n# Methods and blocks\ndef greet(name)\n  \"Hello, #{name}!\"\nend\n\nputs greet(\"World\")\n\n# Arrays and each\n[1, 2, 3].each { |n| puts n }"
+  };
+
+  intro.scala = {
+    name: "Scala",
+    what: "Scala (scalable language) is a statically-typed, general-purpose programming language that combines object-oriented and functional programming paradigms. It runs on the JVM and can seamlessly interoperate with Java code. Scala's concise syntax and powerful type system make it ideal for building robust, high-performance applications.",
+    usedFor: "Building scalable backend systems, data processing pipelines (Apache Spark is written in Scala), distributed systems, web applications (Play Framework, http4s), domain-driven design, and functional programming education. Scala's type safety and expressiveness reduce runtime errors and improve code maintainability.",
+    creator: "Martin Odersky, a programming language researcher at EPFL, who created Scala in 2003. Odersky previously worked on Java generics and the javac compiler. Scala 3 (Dotty), released in 2021, introduced significant improvements to the type system and syntax.",
+    code: "// Hello from Scala\nobject Hello extends App {\n  println(\"Hello, Scala!\")\n}\n\n// Functional programming\nval numbers = List(1, 2, 3, 4, 5)\nval doubled = numbers.map(_ * 2)\nval sum = numbers.fold(0)(_ + _)\n\n// Pattern matching\ndef describe(x: Any): String = x match {\n  case i: Int => s\"Integer: $i\"\n  case s: String => s\"String: $s\"\n  case _ => \"Unknown\"\n}\n\n// Case classes (immutable data)\ncase class User(id: Int, name: String)\nval user = User(1, \"Alice\")\nprintln(user.name)"
+  };
+
   intro.wasm = {
     name: "WebAssembly",
     what: "WebAssembly (Wasm) is a binary instruction format for a stack-based virtual machine designed as a portable compilation target. It enables high-performance applications to run in web browsers at near-native speed.",

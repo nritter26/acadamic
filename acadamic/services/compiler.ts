@@ -16,6 +16,8 @@ const COMPILERS: Record<string, [string, string]> = {
   asm: ['nasm', '--version'],
   zig: ['zig', 'version'],
   ts:  ['tsx', '--version'],
+  bash: ['bash', '--version'],
+  php:  ['php', '--version'],
 };
 
 const compilerCache = new Map<string, CompilerEntry>();
@@ -64,6 +66,8 @@ export function getCompileHint(lang: string): string {
     rs: '// rustc program.rs && ./program',
     wasm: '// wasmtime program.wat',
     asm: '// nasm -f elf64 program.asm && ld -o program program.o && ./program',
+    bash: '// bash program.sh',
+    php: '// php program.php',
     dk: '// docker build -t myapp . && docker run myapp',
     git: '// git commands run in your terminal directly',
     sqlite: '// SQLite execution is built-in. Click Run!',
