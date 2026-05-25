@@ -69,7 +69,9 @@
     unreal: "Unreal Engine",
     mobile: "Mobile",
     android: "Android",
-    ios: "iOS"
+    ios: "iOS",
+    asm: "Assembly",
+    wasm: "WebAssembly"
   };
   const NAME_TO_LANG = {};
   for (const [k, v] of Object.entries(LANG_NAMES)) {

@@ -89,7 +89,7 @@ async function handleHealth() {
   const checks = {
     py: ['python3', '--version'], go: ['go', 'version'], rs: ['rustc', '--version'],
     c: ['gcc', '--version'], cpp: ['g++', '--version'], cs: ['dotnet', '--version'],
-    kt: ['kotlinc', '-version'], swift: ['swift', '--version'], zig: ['zig', 'version'],
+    kt: ['kotlinc', '-version'], swift: ['swift', '--version'], asm: ['nasm', '--version'], zig: ['zig', 'version'],
     ts: ['tsx', '--version'],
   };
   for (const [lang, [cmd, flag]] of Object.entries(checks)) {
@@ -180,6 +180,8 @@ async function handleExecute(event, body) {
     cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
     kt:  { cmd: `kotlinc -include-runtime -d ${prog}.jar "%f" && java -jar ${prog}.jar`, ext: '.kt' },
     swift: { cmd: 'swift "%f"', ext: '.swift' },
+    wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
+    asm: { cmd: `nasm -f elf64 "%f" -o ${prog}.o && ld -o ${prog} ${prog}.o && ./${prog}`, ext: '.asm' },
     zig: { cmd: 'zig run "%f"', ext: '.zig' },
   };
 

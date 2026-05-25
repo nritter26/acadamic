@@ -24,6 +24,8 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false },
   kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true },
   cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false },
+  wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
+  asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
 };
 
 export interface DockerExecResult {
@@ -160,6 +162,18 @@ WORKDIR /code
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 RUN dotnet tool install -g dotnet-script && useradd -m -u 1000 code
 ENV PATH="$PATH:/root/.dotnet/tools"
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.wasm': `
+FROM alpine:latest
+RUN apk add --no-cache wasmtime && adduser -D -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.asm': `
+FROM alpine:latest
+RUN apk add --no-cache nasm binutils && adduser -D -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),

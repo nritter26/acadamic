@@ -7,42 +7,14 @@
 const COMPILER = (() => {
   'use strict';
 
-  // ── Language Configuration ──
-  const LANG_CONFIG = {
-    js:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    ts:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    py:   { lineComment: '#',  blockComment: null,           strings: ['"', "'", '"""', "'''"], blockOpen: ':', blockClose: null, stmtTerm: '\n', indentBased: true, caseSensitive: true },
-    go:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '`'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    rs:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    zig:  { lineComment: '//', blockComment: null,           strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    c:    { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    cpp:  { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    cs:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    kt:   { lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'", '"""'], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-    swift:{ lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: '\n', indentBased: false, caseSensitive: true },
-    pg:   { lineComment: '--', blockComment: null,           strings: ["'"], blockOpen: null, blockClose: null, stmtTerm: ';', indentBased: false, caseSensitive: false },
-    dk:   { lineComment: '#',  blockComment: null,           strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: '\n', indentBased: false, caseSensitive: false },
-    git:  { lineComment: '#',  blockComment: null,           strings: ['"', "'"], blockOpen: null, blockClose: null, stmtTerm: '\n', indentBased: false, caseSensitive: true },
-    mongodb:{ lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: null, blockClose: null, stmtTerm: '\n', indentBased: false, caseSensitive: true },
-    gamedev:{ lineComment: '//', blockComment: ['/*', '*/'], strings: ['"', "'"], blockOpen: '{', blockClose: '}', stmtTerm: ';', indentBased: false, caseSensitive: true },
-  };
+  // ── Language Configuration ──// LANG_CONFIG extracted to content/app-data.json
 
   function _getKeywords(lang) {
     const kw = (typeof LANG_KEYWORDS !== 'undefined' ? LANG_KEYWORDS : {});
     return kw[lang] || [];
   }
-
-  const TOKEN_TYPES = {
-    KEYWORD: 'keyword', IDENTIFIER: 'identifier', NUMBER: 'number',
-    STRING: 'string', OPERATOR: 'operator', PUNCTUATION: 'punctuation',
-    COMMENT: 'comment', WHITESPACE: 'whitespace', UNKNOWN: 'unknown',
-  };
-
-  const TOKEN_COLORS = {
-    keyword: '#c084fc', identifier: '#e2e8f0', number: '#34d399',
-    string: '#fbbf24', operator: '#f472b6', punctuation: '#64748b',
-    comment: '#64748b', whitespace: 'transparent', unknown: '#ef4444',
-  };
+// TOKEN_TYPES extracted to content/app-data.json
+// TOKEN_COLORS extracted to content/app-data.json
 
   // ── Tokenizer ──
   function tokenize(code, lang) {

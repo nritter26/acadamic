@@ -168,6 +168,8 @@ const RUNNERS: Record<string, RunnerConfig> = {
   cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
   kt:  { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
   swift: { cmd: 'swift "%f"', ext: '.swift' },
+  wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
+  asm: { cmd: 'nasm -f elf64 "%f" -o _prog.o && ld -o _prog _prog.o && ./_prog', ext: '.asm' },
   zig: { cmd: 'zig run "%f"', ext: '.zig' },
 };
 

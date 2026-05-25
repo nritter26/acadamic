@@ -12,6 +12,8 @@ const COMPILERS: Record<string, [string, string]> = {
   cs:  ['dotnet', '--version'],
   kt:  ['kotlinc', '-version'],
   swift: ['swift', '--version'],
+  wasm: ['wasmtime', '--version'],
+  asm: ['nasm', '--version'],
   zig: ['zig', 'version'],
   ts:  ['tsx', '--version'],
 };
@@ -60,6 +62,8 @@ export function getCompileHint(lang: string): string {
     kt: '// kotlinc program.kt -include-runtime -d program.jar && java -jar program.jar',
     ts: '// tsc program.ts && node program.js',
     rs: '// rustc program.rs && ./program',
+    wasm: '// wasmtime program.wat',
+    asm: '// nasm -f elf64 program.asm && ld -o program program.o && ./program',
     dk: '// docker build -t myapp . && docker run myapp',
     git: '// git commands run in your terminal directly',
     sqlite: '// SQLite execution is built-in. Click Run!',
