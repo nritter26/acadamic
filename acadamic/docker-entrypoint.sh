@@ -30,6 +30,9 @@ check php --version
 check tsx --version
 check cargo --version
 check g++ --version
+check scalac -version
+check java -version
+check ruby --version
 
 echo ""
 echo "All runtimes verified. Starting server..."

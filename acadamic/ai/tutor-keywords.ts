@@ -5,6 +5,7 @@ const LANG_NAMES_AI: Record<string, string> = {
   js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
   c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
   swift: 'Swift', ts: 'TypeScript', zig: 'Zig',
+  scala: 'Scala',
 };
 
 const GREETINGS: RegExp[] = [
@@ -111,6 +112,7 @@ export function detectLangFromMsg(msg: string): string | null {
   if (/\b(c\s*(\+\+|plus\s*plus)|cpp)\b/.test(lower)) return 'cpp';
   if (/\b(c\s*sharp|csharp)\b/.test(lower)) return 'cs';
   if (/\bkotlin\b/.test(lower)) return 'kt';
+  if (/\bscala\b/.test(lower)) return 'scala';
   if (/\bswift\b/.test(lower)) return 'swift';
   if (/\bzig\b/.test(lower)) return 'zig';
   if (/\bc\b/.test(lower) && /\b(pointer|malloc|free|printf|scanf|struct|union|sizeof)\b/.test(lower)) return 'c';

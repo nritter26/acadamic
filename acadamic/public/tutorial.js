@@ -1,6 +1,6 @@
 // ── Multi-Language Tutorial System ──
 
-const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig', 'java', 'asm', 'wasm', 'bash', 'php', 'pg', 'mysql', 'sqlite'];
+const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig', 'java', 'asm', 'wasm', 'bash', 'php', 'pg', 'mysql', 'sqlite', 'scala'];
 let tutorialLang = 'js';
 let _tutorialStarterCode = '';
 let _tutorialWalkStep = -1;
@@ -1061,7 +1061,7 @@ function openCheatsheet() {
             html += '<div class="cs-section-title">' + section + '</div>';
             for (var code of snippets) {
                 var safe = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                html += '<div class="cs-code">' + safe + '</div>';
+                html += '<div class="cs-code notranslate">' + safe + '</div>';
                 idx++;
             }
             html += '</div>';
@@ -1071,6 +1071,7 @@ function openCheatsheet() {
         var bodyEl = document.getElementById('cheatsheetBody');
         if (bodyEl) bodyEl.innerHTML = html;
         if (overlay) overlay.classList.add('open');
+        setTimeout(triggerGTranslate, 50);
     }
 }
 

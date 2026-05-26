@@ -2,6 +2,7 @@ const LANG_NAMES: Record<string, string> = {
   js: 'javascript', py: 'python', go: 'golang', rs: 'rust',
   java: 'java', ts: 'typescript', rb: 'ruby', php: 'php',
   cpp: 'cpp', c: 'c', sql: 'sql', html: 'html', css: 'css',
+  scala: 'scala',
 };
 
 export function detectLanguage(query: string): string | null {

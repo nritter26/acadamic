@@ -115,7 +115,7 @@ function loadTopic(phase, topic) {
     const depth = getTopicDepth(item.exp);
     const safeTopic = escapeHtml(topic);
     const safePhase = escapeHtml(phase);
-    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${safeTopic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${safePhase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${item.exp}`;
+    expEl.innerHTML = `<h3 style="margin:0; color:#fff">${safeTopic}</h3><p style="color:#94a3b8; font-size:11px; margin-bottom:10px;">${safePhase} <span style="font-size:9px;color:#64748b;margin-left:8px;">${depth.icon} ${depth.label}</span></p>${protectCode(item.exp)}`;
     if (item.prereq) {
         const parts = item.prereq.split('::');
         if (parts.length === 2) {
@@ -137,12 +137,28 @@ function loadTopic(phase, topic) {
     document.getElementById('output').innerText = "// Ready to practice: " + topic + " — click the cheatsheet button for reference";
     setTimeout(suggestNextTopic, 100);
     updateAIContext();
+    setTimeout(triggerGTranslate, 50);
 }
 
 let filterDebounceTimer;
 function debounceFilterTopics(query) {
     clearTimeout(filterDebounceTimer);
     filterDebounceTimer = setTimeout(() => filterTopics(query), 200);
+}
+
+function protectCode(html) {
+    return html.replace(/`([^`]+)`/g, '<code class="notranslate">$1</code>');
+}
+
+function triggerGTranslate() {
+    try {
+        if (typeof google !== 'undefined' && google.translate && google.translate.TranslateElement) {
+            var teCombo = document.querySelector('.goog-te-combo');
+            if (teCombo && teCombo.value && teCombo.value !== 'en') {
+                teCombo.dispatchEvent(new Event('change'));
+            }
+        }
+    } catch(e) {}
 }
 
 function renderLevelBar() {
@@ -294,7 +310,7 @@ function loadCheatsheet() {
                     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                     .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
                     .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
-                html += `<div class="cs-code">${codeHtml}</div>`;
+                html += `<div class="cs-code notranslate">${codeHtml}</div>`;
                 idx++;
             }
             html += `</div>`;
@@ -302,6 +318,7 @@ function loadCheatsheet() {
         document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} snippets)`;
         document.getElementById('cheatsheetBody').innerHTML = html;
         toggleCheatsheet();
+        setTimeout(triggerGTranslate, 50);
         return;
     }
 
@@ -325,7 +342,7 @@ function loadCheatsheet() {
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
                 .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|async|await|new|this|typeof|throw|try|catch|switch|case|break|continue|true|false|null|undefined)\b/g, '<span class="keyword">$1</span>');
-            html += `<div class="cs-code">${codeHtml}</div>`;
+            html += `<div class="cs-code notranslate">${codeHtml}</div>`;
             idx++;
         }
         html += `</div>`;
@@ -334,6 +351,7 @@ function loadCheatsheet() {
     document.getElementById('cheatsheetTitle').textContent = `${currentLang.toUpperCase()} Cheatsheet (${idx} snippets)`;
     document.getElementById('cheatsheetBody').innerHTML = html;
     toggleCheatsheet();
+    setTimeout(triggerGTranslate, 50);
 }
 
 function resolveBackendUrl() {
@@ -567,6 +585,7 @@ function getLogicalPreview(code, lang) {
         zig: ['print(', 'std.debug.print('],
         wasm: ['print('],
         asm: ['print('],
+        scala: ['println(', 'print('],
     };
 
     const output = [];
@@ -717,6 +736,7 @@ function runCode() {
             cpp: 'g++ -std=c++20 -Wall -o program program.cpp && ./program',
             cs: 'dotnet run', kt: 'kotlinc program.kt -include-runtime -d program.jar && java -jar program.jar',
             swift: 'swift program.swift', zig: 'zig build-exe program.zig && ./program',             wasm: 'wasmtime program.wat', asm: 'nasm -f elf64 program.asm && ld -o program program.o',
+            java: 'javac Main.java && java Main', rb: 'ruby program.rb',
             sqlite: 'SQLite is built-in, just click Run!',
             pg: 'psql -f query.sql', mysql: 'mysql < query.sql',
             dk: 'docker build -t myapp . && docker run myapp',
@@ -836,6 +856,7 @@ function clearChatHistory() {
         el.innerHTML = `<div class="ai-msg bot"><div class="label">Devin</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
     }
     updateAISuggestions();
+    setTimeout(triggerGTranslate, 50);
 }
 
 function toggleAI() {
@@ -864,6 +885,7 @@ function toggleAI() {
         }
     }
     if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
+    setTimeout(triggerGTranslate, 50);
 }
 
 function showMaintenanceMessage() {
@@ -1014,7 +1036,7 @@ function formatAIText(text) {
         if (cbPlaceholder) {
             if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
             const cb = codeBlocks[parseInt(cbPlaceholder[1])];
-            result += `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+            result += `<div class="ai-code-wrapper"><pre class="ai-code-block notranslate"><code class="notranslate">${cb.highlighted}</code></pre><button class="ai-run-code notranslate" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
             continue;
         }
         // heading
@@ -1100,7 +1122,7 @@ function formatAIText(text) {
 function inlineFormat(text, codeBlocks) {
     let t = escapeAIHtml(text);
     // inline code
-    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;">$1</code>');
+    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;" class="notranslate">$1</code>');
     // bold
     t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
     // italic
@@ -1184,6 +1206,7 @@ function addAIMessage(text, role, skipSave) {
         }
         saveChatHistory();
     }
+    setTimeout(triggerGTranslate, 50);
 }
 
 function rateAIResponse(btn, dir, fid) {
@@ -2564,8 +2587,42 @@ function initChallenge() {
         controls.style.display = 'flex';
     }
     
+    showChallengeIntro();
+}
+
+function showChallengeIntro() {
+    challengeIdx = -1;
     renderChallengeList();
-    loadChallenge(0);
+    document.getElementById('editor').value = '// Welcome to Code Lab!\n//\n// Here you can practice coding by solving bite-sized challenges.\n//\n// HOW IT WORKS:\n// 1. Choose a language from the bar above\n// 2. Pick a challenge from the list\n// 3. Fix the buggy code in the editor\n// 4. Click "Test ▶" to check your solution\n//\n// Each challenge has a test — your code passes when the test returns true.\n// Stuck? Click the "Hint" button for clues, or "Reveal Answer" to see the solution.\n//\n// Happy coding! 🚀\n\n// Tip: Start by selecting a language above ☝️';
+    updateHighlight();
+    document.getElementById('output').innerText = '// Welcome to the Code Lab!\n// Select a challenge from the list to begin.';
+    document.getElementById('explanation').innerHTML =
+        '<div style="padding:20px;max-width:600px;">' +
+            '<h2 style="color:#a855f7;margin:0 0 4px 0;font-size:22px;">🧪 Code Lab</h2>' +
+            '<p style="color:#94a3b8;font-size:11px;margin:0 0 16px 0;">Practice makes perfect — sharpen your skills with hands-on coding challenges.</p>' +
+            '<div style="background:#1e293b;border-radius:8px;padding:16px;margin-bottom:16px;">' +
+                '<h3 style="color:#fff;margin:0 0 8px 0;font-size:13px;">How it works</h3>' +
+                '<ol style="color:#94a3b8;font-size:11px;margin:0;padding-left:18px;line-height:1.8;">' +
+                    '<li><strong style="color:#e2e8f0;">Choose a language</strong> — pick from the language bar at the top of the sidebar</li>' +
+                    '<li><strong style="color:#e2e8f0;">Pick a challenge</strong> — click any challenge card to load it</li>' +
+                    '<li><strong style="color:#e2e8f0;">Fix the code</strong> — the editor shows buggy starter code; edit until it works</li>' +
+                    '<li><strong style="color:#e2e8f0;">Test your fix</strong> — click <strong style="color:#a855f7;">Test ▶</strong> to run the challenge test</li>' +
+                    '<li><strong style="color:#e2e8f0;">Level up</strong> — complete Beginner → Intermediate → Expert challenges</li>' +
+                '</ol>' +
+            '</div>' +
+            '<div style="background:#1e293b;border-radius:8px;padding:16px;">' +
+                '<h3 style="color:#fff;margin:0 0 8px 0;font-size:13px;">Features</h3>' +
+                '<ul style="color:#94a3b8;font-size:11px;margin:0;padding-left:18px;line-height:1.8;">' +
+                    '<li>2,100+ challenges across 17 languages</li>' +
+                    '<li>Three difficulty levels: <span style="color:#22c55e;">Beginner</span> · <span style="color:#f59e0b;">Intermediate</span> · <span style="color:#ef4444;">Expert</span></li>' +
+                    '<li>Hint system — 3 levels of help when you\'re stuck</li>' +
+                    '<li>Progress tracking — see solved vs total per language</li>' +
+                    '<li>Search — find challenges by keyword</li>' +
+                '</ul>' +
+            '</div>' +
+        '</div>';
+    const hintBtn = document.getElementById('challenge-hint-btn');
+    if (hintBtn) { hintBtn.textContent = 'Hint (0/3)'; hintBtn.disabled = true; hintBtn.className = 'challenge-btn'; }
 }
 
 function setChallengeLevel(level) {
@@ -2602,6 +2659,11 @@ function renderChallengeList() {
     html += `</div>`;
     html += `<input class="challenge-search-input" type="text" placeholder="Search challenges..." id="challenge-search" oninput="filterChallengeList(this.value)">`;
     html += `<div style="font-size:9px;color:#64748b;margin-bottom:8px;"><a href="#" onclick="setMode('js');return false;" style="color:var(--accent);text-decoration:none;">← Back to topics</a></div>`;
+    
+    html += `<div class="challenge-card ${challengeIdx === -1 ? 'active' : ''}" onclick="showChallengeIntro()" style="border-color:#a855f7;background:#1e293b;">
+        <div><span class="ch-title" style="color:#a855f7;">📖 About Code Lab</span></div>
+        <div class="ch-desc" style="color:#94a3b8;">How challenges work and what you can practice</div>
+    </div>`;
     
     let filteredChallenges = [];
     challenges.forEach((ch, i) => {
@@ -2652,8 +2714,12 @@ function loadChallenge(idx) {
 }
 
 function switchChallengeLang(lang) {
-    if (!challengeData[lang] || challengeData[lang].length === 0) return;
     challengeLang = lang;
+    if (!challengeData[lang] || challengeData[lang].length === 0) {
+        showChallengeIntro();
+        renderChallengeList();
+        return;
+    }
     challengeIdx = 0;
     loadChallenge(0);
 }
@@ -3280,11 +3346,12 @@ function filterTopics(query) {
 
     document.querySelectorAll('.item-btn').forEach(btn => {
         total++;
-        const topicName = btn.textContent.replace(/^[★☆]\s*/, '').trim();
+        const topicName = btn.dataset.topic || btn.textContent.replace(/^[★☆]\s*/, '').trim();
+        const visibleText = btn.textContent.toLowerCase();
 
         let matchesSearch = !q;
         if (q) {
-            matchesSearch = topicName.toLowerCase().includes(q);
+            matchesSearch = topicName.toLowerCase().includes(q) || visibleText.includes(q);
             if (!matchesSearch && langData) {
                 for (const phase in langData) {
                     for (const topic in langData[phase]) {
@@ -4151,6 +4218,7 @@ function renderTopicList(lang, prefixHtml) {
     const searchInput = document.getElementById('topic-search');
     if (searchInput) searchInput.value = '';
     updateTopicDisplay();
+    setTimeout(triggerGTranslate, 50);
 }
 
 // ── EDITOR LINE NUMBERS ──
@@ -4484,4 +4552,13 @@ setMode('js');
         .catch(function() {
             el.textContent = '';
         });
+})();
+
+// ── GTranslate: ensure code elements are protected and initial content is translatable ──
+(function gtranslateInit() {
+    var ed = document.getElementById('editor');
+    var out = document.getElementById('output');
+    if (ed) ed.classList.add('notranslate');
+    if (out) out.classList.add('notranslate');
+    setTimeout(triggerGTranslate, 500);
 })();

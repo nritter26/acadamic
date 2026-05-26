@@ -6438,6 +6438,93 @@
     "mov rax, 60 ; sys_exit  // exit: rdi=exit_code",
     "syscall  // invoke kernel (clobbers rcx and r11)"
    ]
+  },
+  "scala": {
+   "Variables & Types": [
+    "val x = 5  // immutable read-only reference",
+    "var y = 5  // mutable variable",
+    "val name: String = \"Scala\"  // explicit type annotation",
+    "val nums = List(1, 2, 3)  // type inference",
+    "val nullable: String? = null  // nullable type (Scala 3)",
+    "lazy val expensive = compute()  // lazy initialization",
+    "val z: Byte = 127  // explicit byte type",
+    "val pi = 3.14159  // inferred Double"
+   ],
+   "Functions": [
+    "def add(a: Int, b: Int): Int = a + b  // method declaration",
+    "def greet(name: String) = s\"Hello $name\"  // expression body, string interpolation",
+    "def applyTwice(f: Int => Int, x: Int) = f(f(x))  // higher-order function",
+    "(x: Int) => x * 2  // anonymous function/lambda",
+    "_ * 2  // short lambda (placeholder syntax)",
+    "def sum(a: Int)(b: Int) = a + b  // curried function",
+    "def addFive = add(5) _  // partially applied function",
+    "@tailrec def fact(n: Int, acc: Int = 1): Int = ...  // tail recursion"
+   ],
+   "Control Flow": [
+    "if (x > 0) \"pos\" else \"neg\"  // if expression",
+    "x match { case 1 => \"one\"; case _ => \"other\" }  // pattern matching",
+    "for (n <- List(1,2,3)) println(n)  // for loop",
+    "for (n <- 1 to 10 if n % 2 == 0) yield n * 2  // for-comprehension",
+    "while (i < 10) { i += 1 }  // while loop",
+    "try { \"42\".toInt } catch { case e: Exception => 0 }  // try-catch expression"
+   ],
+   "Collections": [
+    "List(1, 2, 3)  // immutable linked list",
+    "Vector(1, 2, 3)  // indexed sequence",
+    "Set(1, 2, 3)  // immutable set",
+    "Map(\"a\" -> 1, \"b\" -> 2)  // immutable map",
+    "Seq(1, 2, 3)  // ordered sequence trait",
+    "Range(1, 10, 2)  // numeric range",
+    "nums.map(_ * 2)  // transform each element",
+    "nums.filter(_ > 0)  // keep matching elements",
+    "nums.flatMap(x => List(x, -x))  // map then flatten",
+    "nums.foldLeft(0)(_ + _)  // left fold with initial value",
+    "nums.reduce(_ + _)  // reduce without initial",
+    "nums.groupBy(_ % 2)  // partition into groups",
+    "Option(42).getOrElse(0)  // optional value"
+   ],
+   "OOP": [
+    "class Person(val name: String, var age: Int)  // class with constructor",
+    "object Config { val url = \"...\" }  // singleton object",
+    "object Math { def apply(x: Int) = x * 2 }  // companion object with apply",
+    "trait Showable { def show: String }  // trait declaration",
+    "case class User(id: Int, name: String)  // case class (immutable, value semantics)",
+    "sealed trait Shape  // sealed hierarchy (exhaustive matching)",
+    "class Dog extends Animal with Pet  // class with mixins",
+    "u1.copy(name = \"Bob\")  // case class copy with modifications"
+   ],
+   "Pattern Matching": [
+    "x match { case 0 => \"zero\"; case _ => \"non-zero\" }  // basic match",
+    "case class Point(x: Int, y: Int)  // case class for destructuring",
+    "case Email(user, domain) => ...  // extractor pattern",
+    "case List(a, b, _*) => ...  // sequence pattern",
+    "case n: Int if n > 0 => ...  // typed pattern with guard",
+    "try { ... } catch { case e: IOException => ... }  // exception pattern"
+   ],
+   "Functional": [
+    "Option(42).map(_ * 2).filter(_ > 50)  // monadic chaining",
+    "for { x <- optA; y <- optB } yield x + y  // for-comprehension on Options",
+    "List(1,2,3).flatMap(x => List(x, -x))  // flatMap for collections",
+    "Future { 42 }.map(_ * 2)  // asynchronous computation",
+    "val Right(result) = parse(input)  // Either destructuring"
+   ],
+   "Scala 3": [
+    "extension (n: Int) def isEven = n % 2 == 0  // extension method",
+    "type Name = String  // type alias",
+    "val x: Int | String = 42  // union type",
+    "given intOrd: Ord[Int] with ...  // given instance",
+    "def max[T](a: T, b: T)(using Ord[T]) = ...  // using clause",
+    "@main def run() = println(\"Hello\")  // top-level main",
+    "enum Color { case Red, Green, Blue }  // enum type"
+   ],
+   "Build Tools": [
+    "sbt compile  // compile project",
+    "sbt run  // run main class",
+    "sbt test  // run tests",
+    "sbt console  // start REPL with project dependencies",
+    "scala-cli run script.scala  // run script with Scala CLI",
+    "scala-cli repl  // start REPL with Scala CLI"
+   ]
   }
  },
  "quizData": {
@@ -39313,6 +39400,470 @@
     "ans": 1,
     "level": "expert"
    }
+  ],
+  "scala": [
+   {
+    "q": "Keyword for immutable variable?",
+    "opts": [
+     "def",
+     "var",
+     "val",
+     "let"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "How to declare function in Scala?",
+    "opts": [
+     "func",
+     "fn",
+     "function",
+     "def"
+    ],
+    "ans": 3,
+    "level": "beginner"
+   },
+   {
+    "q": "What is the base class of all types?",
+    "opts": [
+     "Object",
+     "Any",
+     "AnyRef",
+     "AnyVal"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "String interpolation prefix?",
+    "opts": [
+     "f\"",
+     "i\"",
+     "s\"",
+     "$\""
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "Immutable linked list type?",
+    "opts": [
+     "LinkedList",
+     "ArrayList",
+     "List",
+     "Vector"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "What does Option represent?",
+    "opts": [
+     "Required value",
+     "Optional value (nullable)",
+     "Default choice",
+     "List of values"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Companion objects hold?",
+    "opts": [
+     "Instance methods",
+     "Static-like members",
+     "Private fields",
+     "Constant values"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Scala runs on?",
+    "opts": [
+     "CLR",
+     "JVM",
+     "V8",
+     "LLVM"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Method to transform collection?",
+    "opts": [
+     "forEach",
+     "loop",
+     "map",
+     "each"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "What is REPL?",
+    "opts": [
+     "Build tool",
+     "Read-Eval-Print Loop",
+     "Package manager",
+     "Testing framework"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Singleton declaration?",
+    "opts": [
+     "class",
+     "struct",
+     "object",
+     "singleton"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "Function return type separator?",
+    "opts": [
+     "->",
+     "=>",
+     ":",
+     "::"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "Append to List?",
+    "opts": [
+     ".add()",
+     "::",
+     "++",
+     ":"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Null-safe alternative?",
+    "opts": [
+     "Nullable",
+     "Option",
+     "Maybe",
+     "Optional"
+    ],
+    "ans": 1,
+    "level": "beginner"
+   },
+   {
+    "q": "Tuple access syntax?",
+    "opts": [
+     ".get(i)",
+     "[i]",
+     "._i",
+     "(i)"
+    ],
+    "ans": 2,
+    "level": "beginner"
+   },
+   {
+    "q": "What does @tailrec ensure?",
+    "opts": [
+     "Function is inlined",
+     "Recursion is tail-optimized",
+     "Function is memoized",
+     "Parameter is lazy"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "For-comprehension with yield?",
+    "opts": [
+     "Produces Unit",
+     "Produces a new collection",
+     "Modifies in place",
+     "Throws exception"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Purpose of flatMap?",
+    "opts": [
+     "Filter elements",
+     "Map and flatten",
+     "Group elements",
+     "Sort elements"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "What is a sealed trait?",
+    "opts": [
+     "Final trait",
+     "Trait with restricted subclasses",
+     "Abstract trait",
+     "Private trait"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Pattern matching on type?",
+    "opts": [
+     "match type",
+     "case x: Type",
+     "type match",
+     "isInstanceOf"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "What does Future.apply need?",
+    "opts": [
+     "ThreadPool",
+     "ExecutionContext",
+     "ExecutorService",
+     "ActorSystem"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "foldLeft vs reduce?",
+    "opts": [
+     "Same operation",
+     "foldLeft needs initial value",
+     "reduce is faster",
+     "No difference"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Variance annotation +T means?",
+    "opts": [
+     "Contravariant",
+     "Covariant",
+     "Invariant",
+     "Bivariant"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "What is a partially applied function?",
+    "opts": [
+     "Broken function",
+     "Function with some args bound",
+     "Lambda",
+     "Inline function"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Purpose of Either type?",
+    "opts": [
+     "Boolean choice",
+     "One of two possible types",
+     "Collection of two",
+     "Tuple type"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "What does sbt stand for?",
+    "opts": [
+     "Simple Build Tool",
+     "Scala Build Tool",
+     "Standard Build Tool",
+     "System Build Tool"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "By-name parameter syntax?",
+    "opts": [
+     "=> T",
+     "T =>",
+     "-> T",
+     "T ->"
+    ],
+    "ans": 0,
+    "level": "intermediate"
+   },
+   {
+    "q": "What is LazyList?",
+    "opts": [
+     "Eager sequence",
+     "Lazy potentially infinite sequence",
+     "Mutable list",
+     "Array wrapper"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Case class auto-generates?",
+    "opts": [
+     "Only constructor",
+     "equals, hashCode, toString, copy",
+     "Only getters",
+     "Only setters"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "What does unapply do?",
+    "opts": [
+     "Creates object",
+     "Extracts values for pattern matching",
+     "Applies function",
+     "Updates object"
+    ],
+    "ans": 1,
+    "level": "intermediate"
+   },
+   {
+    "q": "Scala 3 given/using replaces?",
+    "opts": [
+     "implicit parameters",
+     "inheritance",
+     "overloading",
+     "generics"
+    ],
+    "ans": 0,
+    "level": "expert"
+   },
+   {
+    "q": "What are intersection types?",
+    "opts": [
+     "A | B",
+     "A & B",
+     "A => B",
+     "(A, B)"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Extension methods are defined with?",
+    "opts": [
+     "implicit class",
+     "extension keyword",
+     "using clause",
+     "given block"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Multiversal equality requires?",
+    "opts": [
+     "Eq trait",
+     "CanEqual given",
+     "equals override",
+     "== operator"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "What does inline modifier do?",
+    "opts": [
+     "Makes code async",
+     "Inlines at call site",
+     "Creates object",
+     "Adds logging"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Type class pattern in Scala 2 uses?",
+    "opts": [
+     "inheritance",
+     "implicits",
+     "generics",
+     "reflection"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "What is Akka?",
+    "opts": [
+     "Web framework",
+     "Actor-based concurrency toolkit",
+     "Build tool",
+     "Database ORM"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Path-dependent types depend on?",
+    "opts": [
+     "Package path",
+     "Instance path",
+     "Class path",
+     "File path"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "What does transparent inline do?",
+    "opts": [
+     "Public method",
+     "Inlines with preserved type",
+     "Debug mode",
+     "Recursive inline"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Match type allows?",
+    "opts": [
+     "Pattern matching on values",
+     "Pattern matching on types",
+     "String matching",
+     "Regex matching"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Opaque type alias?",
+    "opts": [
+     "type Alias = T",
+     "opaque type Alias = T",
+     "type Alias <: T",
+     "type Alias >: T"
+    ],
+    "ans": 1,
+    "level": "expert"
+   },
+   {
+    "q": "Scala 3 braceless syntax is based on?",
+    "opts": [
+     "Curly braces",
+     "Indentation",
+     "Parentheses",
+     "Keywords"
+    ],
+    "ans": 1,
+    "level": "expert"
+   }
   ]
  },
  "challengeData": {
@@ -62467,6 +63018,136 @@
     "solution": "module StringExt\n  refine String do\n    def shout\n      upcase + \"!\"\n    end\n  end\nend\nusing StringExt\nputs \"hello\".shout",
     "test": "true"
    }
+  ],
+  "scala": [
+   {
+    "title": "Fix Variable Declaration",
+    "level": "beginner",
+    "desc": "The variable declaration uses wrong keyword for an immutable value.",
+    "bug": "object Main extends App {\n  var name = \"Scala\"\n  name = \"Changed\"\n  println(name)\n}",
+    "solution": "object Main extends App {\n  val name = \"Scala\"\n  println(name)\n}",
+    "test": "true"
+   },
+   {
+    "title": "Complete the Function",
+    "level": "beginner",
+    "desc": "Complete the add function that sums two integers.",
+    "bug": "object Main extends App {\n  def add(a: Int, b: Int) = \n    // TODO: return sum\n  \n  println(add(3, 4))\n}",
+    "solution": "object Main extends App {\n  def add(a: Int, b: Int) = a + b\n  \n  println(add(3, 4))\n}",
+    "test": "add(3,4) == 7"
+   },
+   {
+    "title": "Use Option Safely",
+    "level": "beginner",
+    "desc": "Handle the optional value safely using getOrElse.",
+    "bug": "object Main extends App {\n  val maybeNum: Option[Int] = Some(42)\n  // get value safely with default 0\n  val num = \n  println(num)\n}",
+    "solution": "object Main extends App {\n  val maybeNum: Option[Int] = Some(42)\n  val num = maybeNum.getOrElse(0)\n  println(num)\n}",
+    "test": "num == 42"
+   },
+   {
+    "title": "Fix Match Expression",
+    "level": "beginner",
+    "desc": "The match expression syntax is incorrect.",
+    "bug": "object Main extends App {\n  val x = 3\n  val desc = x match {\n    case 1: \"one\"\n    case 2: \"two\"\n    case _: \"other\"\n  }\n  println(desc)\n}",
+    "solution": "object Main extends App {\n  val x = 3\n  val desc = x match {\n    case 1 => \"one\"\n    case 2 => \"two\"\n    case _ => \"other\"\n  }\n  println(desc)\n}",
+    "test": "desc == \"other\""
+   },
+   {
+    "title": "Map Transformation",
+    "level": "beginner",
+    "desc": "Transform a list by doubling each element using map.",
+    "bug": "object Main extends App {\n  val nums = List(1, 2, 3, 4, 5)\n  val doubled = nums.____(_ * 2)\n  println(doubled)\n}",
+    "solution": "object Main extends App {\n  val nums = List(1, 2, 3, 4, 5)\n  val doubled = nums.map(_ * 2)\n  println(doubled)\n}",
+    "test": "doubled == List(2, 4, 6, 8, 10)"
+   },
+   {
+    "title": "Fix Object Declaration",
+    "level": "beginner",
+    "desc": "The singleton object has incorrect syntax.",
+    "bug": "object Main extends App {\n  object Config {\n    val url: String = \"http://localhost\"\n    port: Int = 8080\n  }\n  println(Config.url)\n}",
+    "solution": "object Main extends App {\n  object Config {\n    val url: String = \"http://localhost\"\n    val port: Int = 8080\n  }\n  println(Config.url)\n}",
+    "test": "Config.port == 8080"
+   },
+   {
+    "title": "Filter Even Numbers",
+    "level": "beginner",
+    "desc": "Use filter to keep only even numbers from a list.",
+    "bug": "object Main extends App {\n  val nums = (1 to 10).toList\n  val evens = nums.filter(_ % 2 __ 0)\n  println(evens)\n}",
+    "solution": "object Main extends App {\n  val nums = (1 to 10).toList\n  val evens = nums.filter(_ % 2 == 0)\n  println(evens)\n}",
+    "test": "evens == List(2, 4, 6, 8, 10)"
+   },
+   {
+    "title": "Case Class Usage",
+    "level": "intermediate",
+    "desc": "Define a case class User and create an instance.",
+    "bug": "object Main extends App {\n  // Define case class User with id and name\n  \n  val user = User(1, \"Alice\")\n  println(user)\n}",
+    "solution": "object Main extends App {\n  case class User(id: Int, name: String)\n  val user = User(1, \"Alice\")\n  println(user)\n}",
+    "test": "user.name == \"Alice\""
+   },
+   {
+    "title": "Fix Tail Recursion",
+    "level": "intermediate",
+    "desc": "Make the factorial function properly tail-recursive.",
+    "bug": "import scala.annotation.tailrec\n\nobject Main extends App {\n  @tailrec\n  def factorial(n: Int): Int = {\n    if (n <= 1) 1\n    else n * factorial(n - 1)\n  }\n  println(factorial(5))\n}",
+    "solution": "import scala.annotation.tailrec\n\nobject Main extends App {\n  @tailrec\n  def factorial(n: Int, acc: Int = 1): Int = {\n    if (n <= 1) acc\n    else factorial(n - 1, n * acc)\n  }\n  println(factorial(5))\n}",
+    "test": "factorial(5) == 120"
+   },
+   {
+    "title": "For-Comprehension",
+    "level": "intermediate",
+    "desc": "Use a for-comprehension to combine two Option values.",
+    "bug": "object Main extends App {\n  val a = Some(10)\n  val b = Some(20)\n  // Combine a and b using for-comprehension\n  val result = for {\n    x <- a\n    y <- b\n  } ___ (x + y)\n  println(result)\n}",
+    "solution": "object Main extends App {\n  val a = Some(10)\n  val b = Some(20)\n  val result = for {\n    x <- a\n    y <- b\n  } yield (x + y)\n  println(result)\n}",
+    "test": "result == Some(30)"
+   },
+   {
+    "title": "Future Execution",
+    "level": "intermediate",
+    "desc": "Correctly execute a Future and await its result.",
+    "bug": "import scala.concurrent.Future\nimport scala.concurrent.ExecutionContext.Implicits.global\n\nobject Main extends App {\n  val future = Future {\n    42\n  }\n  // Use Await to get result\n  println(result)\n}",
+    "solution": "import scala.concurrent.{Future, Await}\nimport scala.concurrent.ExecutionContext.Implicits.global\nimport scala.concurrent.duration._\n\nobject Main extends App {\n  val future = Future { 42 }\n  val result = Await.result(future, 1.second)\n  println(result)\n}",
+    "test": "result == 42"
+   },
+   {
+    "title": "Fix Variance",
+    "level": "intermediate",
+    "desc": "Fix the variance annotation to make the code compile.",
+    "bug": "object Main extends App {\n  class Box[+T](val value: T)\n  \n  val box1: Box[Int] = Box(42)\n  val box2: Box[Any] = box1  // should work with covariance\n  println(box2.value)\n}",
+    "solution": "object Main extends App {\n  class Box[+T](val value: T)\n  \n  val box1: Box[Int] = Box(42)\n  val box2: Box[Any] = box1\n  println(box2.value)\n}",
+    "test": "box2.value == 42"
+   },
+   {
+    "title": "Sealed Trait Matching",
+    "level": "intermediate",
+    "desc": "Complete the sealed trait hierarchy and exhaustive pattern match.",
+    "bug": "object Main extends App {\n  sealed trait Shape\n  case class Circle(r: Double) extends Shape\n  case class Rectangle(w: Double, h: Double) extends Shape\n  \n  def area(s: Shape): Double = s match {\n    case Circle(r) => math.Pi * r * r\n    // TODO: add Rectangle case\n  }\n  \n  println(area(Rectangle(3, 4)))\n}",
+    "solution": "object Main extends App {\n  sealed trait Shape\n  case class Circle(r: Double) extends Shape\n  case class Rectangle(w: Double, h: Double) extends Shape\n  \n  def area(s: Shape): Double = s match {\n    case Circle(r) => math.Pi * r * r\n    case Rectangle(w, h) => w * h\n  }\n  \n  println(area(Rectangle(3, 4)))\n}",
+    "test": "area(Rectangle(3,4)) == 12.0"
+   },
+   {
+    "title": "Implicit Parameter",
+    "level": "expert",
+    "desc": "Pass an implicit parameter for the greeting prefix.",
+    "bug": "object Main extends App {\n  def greet(name: String)(implicit prefix: String) = s\" \"\n  \n  // Define implicit greeting prefix\n  println(greet(\"Alice\"))\n}",
+    "solution": "object Main extends App {\n  def greet(name: String)(implicit prefix: String) = s\" \"\n  \n  implicit val defaultPrefix: String = \"Hello\"\n  println(greet(\"Alice\"))\n}",
+    "test": "greet(\"Alice\") == \"Hello Alice\""
+   },
+   {
+    "title": "Extension Method",
+    "level": "expert",
+    "desc": "Add an isEven extension method to Int using Scala 3 syntax.",
+    "bug": "object Main extends App {\n  // Add extension method isEven to Int\n  \n  println(42.isEven)\n}",
+    "solution": "object Main extends App {\n  extension (n: Int)\n    def isEven: Boolean = n % 2 == 0\n  \n  println(42.isEven)\n}",
+    "test": "42.isEven == true"
+   },
+   {
+    "title": "Given/Using in Scala 3",
+    "level": "expert",
+    "desc": "Implement a type class using Scala 3 given/using syntax.",
+    "bug": "object Main extends App {\n  trait Show[T]:\n    def show(t: T): String\n  \n  // Define given Show[Int]\n  \n  def printIt[T](t: T)(using s: Show[T]) = println(s.show(t))\n  \n  printIt(42)\n}",
+    "solution": "object Main extends App {\n  trait Show[T]:\n    def show(t: T): String\n  \n  given Show[Int] with\n    def show(t: Int) = s\"Int()\"\n  \n  def printIt[T](t: T)(using s: Show[T]) = println(s.show(t))\n  \n  printIt(42)\n}",
+    "test": "true"
+   }
   ]
  },
  "techStackProviderNames": {
@@ -63813,7 +64494,8 @@
   "mobile": "Mobile",
   "android": "Android",
   "ios": "iOS",
-  "asm": "Assembly"
+  "asm": "Assembly",
+  "scala": "Scala"
  },
  "SYNONYM_MAP": {
   "variable": [

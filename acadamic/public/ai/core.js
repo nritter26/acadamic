@@ -20,7 +20,6 @@
     swift: "Swift",
     java: "Java",
     rb: "Ruby",
-    scala: "Scala",
     php: "PHP",
     sqlite: "SQLite",
     pg: "PostgreSQL",
@@ -70,7 +69,8 @@
     unreal: "Unreal Engine",
     mobile: "Mobile",
     android: "Android",
-    ios: "iOS"
+    ios: "iOS",
+    scala: "Scala"
   };
   const NAME_TO_LANG = {};
   for (const [k, v] of Object.entries(LANG_NAMES)) {
