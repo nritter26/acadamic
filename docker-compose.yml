@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - AI_PROVIDER=keyword
+      - PORT=3000
+      - NODE_ENV=development
+
+  # Uncomment to use Ollama for AI:
+  # ollama:
+  #   image: ollama/ollama
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   ports:
+  #     - "11434:11434"
+
+# volumes:
+#   ollama_data:

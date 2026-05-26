@@ -1,0 +1,60 @@
+{
+  "phases": [
+    {
+      "id": 0,
+      "name": "Foundation Fixes",
+      "description": "Schedule pruneOldConversations in server.ts, add logging to catch {}, write coalescing for learner.ts",
+      "files": "server.ts, services/tutor.ts, ai/learner.ts",
+      "status": "done",
+      "claimed_by": "agent-2"
+    },
+    {
+      "id": 1,
+      "name": "Architecture Unification",
+      "description": "Convert tutor-keywords.js→.ts, single response data source, rename tiny-llm→template-matcher, strategy pattern for handleTutorMessage",
+      "files": "ai/tutor-keywords.js→.ts, public/ai/responses.ts, ai/tiny-llm.js, services/tutor.ts, services/strategies/*.ts",
+      "status": "done",
+      "claimed_by": null
+    },
+    {
+      "id": 2,
+      "name": "RAG Pipeline",
+      "description": "Smart curriculum chunking (ai/chunker.ts), hybrid TF-IDF+embedding search with RRF fusion, query expansion, source citations",
+      "files": "ai/chunker.ts, ai/query-expander.ts, ai/embeddings.ts, services/tutor.ts",
+      "status": "done",
+      "claimed_by": "agent-2"
+    },
+    {
+      "id": 4,
+      "name": "Adaptive Learning",
+      "description": "Learner-aware system prompts (3 tiers), response personalization, weak-spot remediation, dynamic exercise difficulty",
+      "files": "ai/config.ts, services/tutor.ts, ai/exercises.ts",
+      "status": "in_progress",
+      "claimed_by": "agent-3"
+    },
+    {
+      "id": 5,
+      "name": "Conversation Intelligence",
+      "description": "LLM intent classification (ai/intent.ts), LLM follow-up resolution, conversation summarization (ai/summarizer.ts), proactive suggestions",
+      "files": "ai/intent.ts, ai/summarizer.ts, services/conversation.ts, services/tutor.ts",
+      "status": "in_progress",
+      "claimed_by": "agent-4"
+    },
+    {
+      "id": 6,
+      "name": "Code Understanding",
+      "description": "AST analysis using TypeScript compiler API, structured error parsing per language, weighted quality scoring",
+      "files": "services/analyzer.ts, services/executor.ts, ai/reviewer.ts",
+      "status": "unclaimed",
+      "claimed_by": null
+    },
+    {
+      "id": 7,
+      "name": "Testing & Observability",
+      "description": "Test suite for all AI components, LLM telemetry (tokens/latency/model), A/B comparison infra",
+      "files": "tests/ai/*.test.ts, ai/provider.ts, services/metrics.ts, ai/ab-test.ts",
+      "status": "unclaimed",
+      "claimed_by": null
+    }
+  ]
+}
