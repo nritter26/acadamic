@@ -18,6 +18,7 @@ const COMPILERS: Record<string, [string, string]> = {
   ts:  ['tsx', '--version'],
   bash: ['bash', '--version'],
   php:  ['php', '--version'],
+  scala: ['scalac', '-version'],
 };
 
 const compilerCache = new Map<string, CompilerEntry>();
@@ -73,6 +74,7 @@ export function getCompileHint(lang: string): string {
     sqlite: '// SQLite execution is built-in. Click Run!',
     pg: '// PostgreSQL: set PG_CONNECTION_STRING in .env or use psql -f query.sql',
     mysql: '// MySQL: set MYSQL_CONNECTION_STRING in .env or use mysql < query.sql',
+    scala: '// scalac -d program.jar Main.scala && scala -cp program.jar Main',
     mongodb: '// mongosh < script.js or paste into mongosh',
     gamedev: '// Use your game engine IDE to run this code',
     quiz: '// Quiz questions are interactive in the UI',

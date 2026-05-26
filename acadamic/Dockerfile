@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
     nasm \
     php-cli php-mbstring php-xml \
+    ruby \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Node.js 22 ──
@@ -43,6 +44,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends openjdk-17-jdk-
     && rm /tmp/kc.zip \
     && ln -s /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc \
     && ln -s /opt/kotlinc/bin/kotlin /usr/local/bin/kotlin
+
+# ── Scala 3.3.3 ──
+RUN curl -fsSL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz \
+    && tar -xzf /tmp/scala3.tar.gz -C /opt \
+    && rm /tmp/scala3.tar.gz \
+    && ln -s /opt/scala3-3.3.3/bin/scalac /usr/local/bin/scalac \
+    && ln -s /opt/scala3-3.3.3/bin/scala /usr/local/bin/scala
 
 # ── Swift 6.0 ──
 RUN curl -fsSL https://download.swift.org/swift-6.0-release/ubuntu2204/swift-6.0-RELEASE/swift-6.0-RELEASE-ubuntu22.04.tar.gz \

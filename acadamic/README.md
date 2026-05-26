@@ -6,15 +6,15 @@ An interactive multi-language programming textbook, code playground, and compile
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-topic curriculum** | 57 content files covering 12 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,130+ indexed topics across 646 phases |
-| **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Swift, Zig via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. |
+| **Multi-topic curriculum** | 64 content files covering 18 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,571+ indexed topics across 797 phases |
+| **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Scala, Swift, Zig, Bash, PHP, WebAssembly, Assembly via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. Docker sandbox also available for isolated execution. |
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 56 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
-| **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (6+ languages, 3 difficulty levels each). |
-| **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift — each with test expressions and solution code. |
-| **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
+| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 64 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
+| **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (18+ languages, 3 difficulty levels each). |
+| **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift, Scala, Bash, PHP, Ruby, C, C++, C#, Kotlin, Zig — each with test expressions and solution code. |
+| **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL, Scala), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
 | **AI exercises** | On-demand generated practice exercises per topic/level — fix-bug, fill-blank, write-function, predict-output, refactor, implement, optimize, debug, design, analyze, extend. LLM-generated with static fallback. |
 | **Learner profile** | Per-user progress tracking with SM-2 spaced-repetition review scheduling (1/3/7/14/30 day intervals), concept mastery metrics, error/attempt tracking, and personalized next-topic recommendations. |
 | **Auto-complete & smart indent** | Editor helper with keyword completion, bracket pairing, and auto-indentation across all languages. |
@@ -33,7 +33,7 @@ An interactive multi-language programming textbook, code playground, and compile
 ## Supported Topics
 
 ### Programming Languages (curriculum + code execution)
-JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Swift — each with full topic trees and live server-side execution.
+JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Scala, Swift, Bash, PHP, Ruby, WebAssembly, Assembly — each with full topic trees and live server-side execution.
 
 ### Databases
 PostgreSQL, MySQL, SQLite, MongoDB, Firebase — with curriculum; SQLite/PG/MySQL with live SQL execution.
@@ -77,11 +77,16 @@ Complete compiler curriculum: tokenization, AST, parsing, code generation, optim
 | C++ | `g++` + run | `ulimit -v 262144 -t 30` |
 | C# | `dotnet script` | `ulimit -v 262144 -t 30` |
 | Kotlin | `kotlinc` + `kotlin` | `ulimit -v 262144 -t 30` |
+| Scala | `scalac` + `scala` | `ulimit -v 262144 -t 30` |
 | Swift | `swift` | `ulimit -v 262144 -t 30` |
 | Zig | `zig run` | `ulimit -v 262144 -t 30` |
+| Bash | `bash` | `ulimit -v 262144 -t 30` |
+| PHP | `php` | `ulimit -v 262144 -t 30` |
+| WebAssembly | `wasmtime` | `ulimit -v 262144 -t 30` |
+| Assembly | `nasm` + `gcc` | `ulimit -v 262144 -t 30` |
 | SQLite / PostgreSQL / MySQL | Built-in database engine | Concurrency-guarded |
 
-All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of 4 concurrent processes.
+All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of 4 concurrent processes. Docker sandbox images are also available for each language (see Docker section).
 
 ## Tech Stack
 
@@ -92,82 +97,7 @@ All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of
 | Runtime | Node.js 18+, Go 1.22+ |
 | Database (SQL) | better-sqlite3 (built-in), optional pg + mysql2 |
 | AI | Hybrid keyword + tiny-LLM tutor (default), OpenAI, Anthropic, local Ollama/LM Studio |
-| Deploy | Netlify (static + serverless functions) |
-
-## Project Structure
-
-```
-acadamic/
-├── server.ts                    # Express backend entry point (~1,217 lines)
-├── index.html                   # Single-page frontend app (327 lines)
-├── package.json                 # Dependencies & scripts
-├── tsconfig.json                # TypeScript configuration (ai/, server.ts, sql/ → dist/)
-├── .env.example                 # Env var template
-├── netlify.toml                 # Netlify deployment config
-│
-├── public/                      # Client-side source files
-│   ├── app.js                   # Main frontend logic (~4,802 lines)
-│   ├── style.css                # Application stylesheet (~2,344 lines)
-│   ├── courseData.js            # Course metadata container
-│   ├── langConfig.js            # Language code ↔ name mappings (47 entries)
-│   ├── schema.js                # Schema designer (full visual DB designer, ~1,052 lines)
-│   ├── git-visualize.js         # Git visualizer learning mode (~993 lines)
-│   ├── techstack.js             # Tech stack explorer (~341 lines)
-│   ├── compiler-core.js         # Multi-language lexer/parser/AST (~428 lines)
-│   ├── compiler-curriculum.js   # Compiler design curriculum (~352 lines)
-│   ├── challenges.js            # 2,100+ code challenges across 6 langs
-│   ├── quiz.js                  # Quiz questions per language (~2,780 lines)
-│   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
-│   ├── db.js                    # Database tab frontend (~126 lines)
-│   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
-│   ├── ai-responses.js          # 52+ AI tutor keyword responses
-│   ├── schema-tutorial.js       # Schema designer guided tutorial
-│   ├── tutorial.js              # App tutorial/onboarding helpers
-│   └── logos/                   # 58 SVG logos for supported technologies
-│
-├── content/                     # Course curriculum data (57 JSON files, 646 phases, 3,130+ topics)
-│   ├── js.json, py.json, ...    # 12 programming languages
-│   ├── pg.json, mysql.json, ... # 10 databases (PG, MySQL, SQLite, MongoDB, Firebase, + frameworks)
-│   ├── dk.json, git.json, ...   # 11 cloud/DevOps tools
-│   ├── react.json, vue.json,... # 14 frontend frameworks
-│   ├── node.json, express.json  # 17 backend/tech tools (incl. FastAPI, Flask, Django, Spring)
-│   ├── cypress.json, k8s.json   # 4 testing/infra tools
-│   ├── cicd.json                # CI/CD curriculum (10 phases, ~30 topics)
-│   ├── gamedev.json             # Game development (17 phases, 143 topics)
-│   ├── godot.json               # Godot Engine (phases reference)
-│   ├── unity.json               # Unity Engine (phases reference)
-│   ├── unreal.json              # Unreal Engine (phases reference)
-│   └── mobile.json              # Android + iOS development (16 phases, 98 topics)
-│
-├── data/                        # Runtime data (learner profiles, progress)
-│   ├── progress.json            # Topic completion progress
-│   └── learners/                # Per-user learner profiles (JSON, SM-2)
-│
-├── ai/                          # AI tutoring & analysis engine (TypeScript)
-│   ├── config.ts                # Provider config (hybrid/keyword/openai/anthropic/local)
-│   ├── provider.ts              # LLM request handler with SSE streaming, retry
-│   ├── embeddings.ts            # TF-IDF + OpenAI embedding semantic search
-│   ├── learner.ts               # SM-2 spaced-repetition learner profiles
-│   ├── reviewer.ts              # Static + LLM code review (JS/TS/PY/GO/RS/SQL)
-│   ├── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
-│   ├── tiny-llm.js              # Transformers.js tiny model helper for hybrid tutor
-│   └── tutor-keywords.js        # Keyword cascade for fast tutor responses
-│
-├── dist/                        # Compiled JS + declarations from tsconfig
-│
-├── sql/                         # SQL database engine
-│   ├── database.js              # SQLite in-memory DB + PG/MySQL pools
-│   ├── database.ts              # TypeScript source for database engine
-│   └── seed.sql                 # Sample data (20+ tables, 7 schemas)
-│
-├── backend-go/                  # Alternative Go backend
-│   ├── main.go                  # Go HTTP server (~329 lines)
-│   └── go.mod                   # Go module (Go 1.22)
-│
-└── netlify/                     # Netlify serverless functions
-    └── functions/
-        └── api.js               # Unified handler for all API routes (~521 lines)
-```
+| Deploy | Docker, Netlify (static + serverless functions) |
 
 ## Quick Start
 
@@ -175,7 +105,19 @@ acadamic/
 
 - Node.js 18+
 - Go 1.22+ (optional, for Go backend)
-- System compilers/interpreters for languages you want to execute
+- System compilers/interpreters for languages you want to execute (or use Docker)
+
+### Docker (recommended — includes all runtimes)
+
+```bash
+cd acadamic
+docker compose build
+docker compose up
+```
+
+Open http://localhost:3001
+
+This builds a single image with all 16 language runtimes pre-installed (Node.js, Python, Go, Rust, .NET, Kotlin, Scala, Swift, Zig, Wasmtime, PHP, C/C++, Bash).
 
 ### Node.js Backend
 
@@ -196,6 +138,20 @@ go run main.go
 
 The Go backend runs on port 8080 and serves the core API subset plus static files.
 
+### Docker Sandbox Images (optional, for isolated code execution)
+
+Per-language sandbox images can be built individually for isolated code execution:
+
+```bash
+bash docker/build-all.sh
+```
+
+Or build a single language sandbox:
+
+```bash
+docker build -t kodex-scala -f docker/Dockerfile.scala docker/
+```
+
 ### Scripts
 
 | Script | Command | Purpose |
@@ -206,12 +162,173 @@ The Go backend runs on port 8080 and serves the core API subset plus static file
 | `npm run build:watch` | `tsc --watch` | Watch mode for TS compilation |
 | `npm run typecheck` | `tsc --noEmit` | Type-check without writing build output |
 
+## Project Structure
+
+```
+acadamic/
+├── server.ts                    # Express backend entry point (~124 lines)
+├── index.html                   # Single-page frontend app (355 lines)
+├── package.json                 # Dependencies & scripts
+├── tsconfig.json                # TypeScript configuration
+├── types.ts                     # Shared TypeScript type definitions
+├── vitest.config.ts             # Test runner configuration
+├── .env.example                 # Env var template
+├── docker-compose.yml           # Docker Compose (single image, all runtimes)
+├── Dockerfile                   # Multi-language Docker image (16 runtimes)
+├── docker-entrypoint.sh         # Container startup runtime verifier
+├── netlify.toml                 # Netlify deployment config
+│
+├── public/                      # Client-side source files
+│   ├── app.js                   # Main frontend logic (~4,531 lines)
+│   ├── app-data.js              # All quiz/challenge/cheatsheet data (embedded JSON)
+│   ├── style.css                # Application stylesheet (~3,371 lines)
+│   ├── ai/                      # Client-side AI module (TypeScript)
+│   │   └── core.ts              # AI tutor, language detection, embeddings
+│   ├── courseData.js            # Course metadata container
+│   ├── langConfig.js            # Language code ↔ name mappings (65 entries)
+│   ├── schema.js                # Schema designer (full visual DB designer, ~1,052 lines)
+│   ├── git-visualize.js         # Git visualizer learning mode (~993 lines)
+│   ├── techstack.js             # Tech stack explorer (~341 lines)
+│   ├── compiler-core.js         # Multi-language lexer/parser/AST (~428 lines)
+│   ├── compiler-curriculum.js   # Compiler design curriculum (~352 lines)
+│   ├── challenges.js            # 2,100+ code challenges across 15+ langs
+│   ├── quiz.js                  # Quiz questions per language (~2,780 lines)
+│   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
+│   ├── db.js                    # Database tab frontend (~126 lines)
+│   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
+│   ├── ai-responses.js          # 52+ AI tutor keyword responses
+│   ├── schema-tutorial.js       # Schema designer guided tutorial
+│   ├── tutorial.js              # App tutorial/onboarding helpers
+│   └── logos/                   # 58 SVG logos for supported technologies
+│
+├── content/                     # Course curriculum data (64 JSON files, 797 phases, 3,571+ topics)
+│   ├── js.json, py.json, ...    # 18 programming languages (incl. scala, bash, php, rb)
+│   ├── pg.json, mysql.json, ... # 10 databases (PG, MySQL, SQLite, MongoDB, Firebase, + frameworks)
+│   ├── dk.json, git.json, ...   # 11 cloud/DevOps tools
+│   ├── react.json, vue.json,... # 14 frontend frameworks
+│   ├── node.json, express.json  # 17 backend/tech tools (incl. FastAPI, Flask, Django, Spring)
+│   ├── cypress.json, k8s.json   # 4 testing/infra tools
+│   ├── cicd.json                # CI/CD curriculum (10 phases, ~30 topics)
+│   ├── gamedev.json             # Game development (17 phases, 143 topics)
+│   ├── godot.json               # Godot Engine (phases reference)
+│   ├── unity.json               # Unity Engine (phases reference)
+│   ├── unreal.json              # Unreal Engine (phases reference)
+│   └── mobile.json              # Android + iOS development (16 phases, 98 topics)
+│
+├── services/                    # Server-side service modules (TypeScript)
+│   ├── executor.ts              # Code execution engine (15 language runners)
+│   ├── docker-executor.ts       # Docker sandbox execution (16 sandbox images)
+│   ├── compiler.ts              # Compiler detection and hints
+│   ├── analyzer.ts              # Static code analysis
+│   ├── tutor.ts                 # AI tutor orchestration
+│   ├── conversation.ts          # Conversation context management
+│   ├── metrics.ts               # Performance metrics
+│   ├── proxy.ts                 # HTTP proxy with SSRF protection
+│   ├── rateLimit.ts             # Rate limiting middleware
+│   ├── ollama.ts                # Ollama LLM integration
+│   ├── websocket.ts             # WebSocket server
+│   ├── openapi.ts               # OpenAPI docs generation
+│   └── strategies/              # AI tutoring strategies
+│       └── utils.ts             # Language detection utilities
+│
+├── routes/                      # Express route handlers
+│   ├── index.ts                 # Route aggregator
+│   ├── health.ts                # Health check endpoint
+│   ├── execute.ts               # Code execution endpoint
+│   ├── analyze.ts               # Code analysis endpoint
+│   ├── review.ts                # Code review endpoint
+│   ├── explain.ts               # Code explanation endpoint
+│   ├── chat.ts                  # AI chat endpoint
+│   ├── quiz.ts                  # Quiz generation endpoint
+│   ├── exercise.ts              # Exercise generation endpoint
+│   ├── progress.ts              # Progress tracking endpoints
+│   ├── learner.ts               # Learner profile endpoints
+│   ├── courses.ts               # Course listing endpoint
+│   ├── content.ts               # Content serving endpoint
+│   ├── benchmark.ts             # Performance benchmark endpoint
+│   ├── projects.ts              # Projects endpoint
+│   ├── auth.ts                  # Authentication endpoints
+│   └── proxy.ts                 # Proxy request endpoint
+│
+├── middleware/                   # Express middleware
+│   ├── auth.ts                  # Authentication middleware
+│   ├── errorHandler.ts          # Global error handler
+│   ├── logger.ts                # Request logger
+│   ├── validator.ts             # Request validation
+│   └── index.ts                 # Middleware aggregator
+│
+├── data/                        # Runtime data (learner profiles, progress)
+│   ├── progress.json            # Topic completion progress
+│   └── learners/                # Per-user learner profiles (JSON, SM-2)
+│
+├── ai/                          # AI tutoring & analysis engine (TypeScript)
+│   ├── config.ts                # Provider config (hybrid/keyword/openai/anthropic/local)
+│   ├── provider.ts              # LLM request handler with SSE streaming, retry
+│   ├── embeddings.ts            # TF-IDF + OpenAI embedding semantic search
+│   ├── learner.ts               # SM-2 spaced-repetition learner profiles
+│   ├── reviewer.ts              # Static + LLM code review (JS/TS/PY/GO/RS/SQL)
+│   ├── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
+│   ├── tiny-llm.js              # Transformers.js tiny model helper for hybrid tutor
+│   └── tutor-keywords.ts        # Keyword cascade for fast tutor responses
+│
+├── dist/                        # Compiled JS + declarations from tsconfig
+│
+├── sql/                         # SQL database engine
+│   ├── database.js              # SQLite in-memory DB + PG/MySQL pools
+│   ├── database.ts              # TypeScript source for database engine
+│   └── seed.sql                 # Sample data (20+ tables, 7 schemas)
+│
+├── docker/                      # Docker sandbox images (per-language)
+│   ├── build-all.sh             # Build all sandbox images
+│   ├── Dockerfile.scala         # Scala 3.3.3 sandbox
+│   ├── Dockerfile.py            # Python sandbox
+│   ├── Dockerfile.js            # Node.js sandbox
+│   ├── Dockerfile.ts            # TypeScript sandbox
+│   ├── Dockerfile.go            # Go sandbox
+│   ├── Dockerfile.rs            # Rust sandbox
+│   ├── Dockerfile.kt            # Kotlin sandbox
+│   ├── Dockerfile.swift         # Swift sandbox
+│   ├── Dockerfile.zig           # Zig sandbox
+│   ├── Dockerfile.c             # C sandbox
+│   ├── Dockerfile.cpp           # C++ sandbox
+│   ├── Dockerfile.cs            # C# sandbox
+│   ├── Dockerfile.php           # PHP sandbox
+│   ├── Dockerfile.bash          # Bash sandbox
+│   └── Dockerfile.scala         # Scala sandbox
+│
+├── backend-go/                  # Alternative Go backend
+│   ├── main.go                  # Go HTTP server (~329 lines)
+│   └── go.mod                   # Go module (Go 1.22)
+│
+├── scripts/                     # Utility scripts
+│   ├── build-app-data-js.js     # Regenerate app-data.js from app-data.json
+│   ├── extract-app-data.js      # Extract data from source
+│   ├── cleanup-source-data.js   # Clean up source data
+│   └── fix-formatting.js        # Fix formatting issues
+│
+├── tests/                       # Test suites
+│   ├── execute.test.ts          # Code execution tests
+│   ├── analyze.test.ts          # Analysis tests
+│   ├── auth.test.ts             # Authentication tests
+│   ├── content.test.ts          # Content tests
+│   ├── docker.test.ts           # Docker executor tests
+│   ├── health.test.ts           # Health endpoint tests
+│   ├── openapi.test.ts          # OpenAPI tests
+│   ├── projects.test.ts         # Projects tests
+│   └── services.test.ts         # Service tests
+│
+└── netlify/                     # Netlify serverless functions
+    └── functions/
+        └── api.js               # Unified handler for all API routes (~521 lines)
+```
+
 ## API Endpoints
 
 ### Health & System
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/health` | Health check: node version, compiler availability, database status, rate limit info |
+| GET | `/api/ws/stats` | WebSocket connection statistics |
 
 ### Progress
 | Method | Path | Description |
@@ -222,7 +339,7 @@ The Go backend runs on port 8080 and serves the core API subset plus static file
 ### Code Execution
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/execute` | Execute code `{lang, code, stdin?}` — supports js, ts, py, go, rs, zig, c, cpp, cs, kt, swift, sqlite, pg, mysql |
+| POST | `/api/execute` | Execute code `{lang, code, stdin?}` — supports py, go, ts, rs, c, cpp, cs, kt, swift, wasm, asm, zig, bash, php, scala, sqlite, pg, mysql |
 | POST | `/api/proxy` | Proxy HTTP requests with SSRF protection (blocks private IPs, metadata endpoints) |
 
 ### Analysis
@@ -253,6 +370,9 @@ The Go backend runs on port 8080 and serves the core API subset plus static file
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/benchmark` | Performance benchmark (Node.js vs Go) `(?n=iterations)` |
+| GET | `/api/metrics` | Application metrics |
+| GET | `/api/openapi.json` | OpenAPI specification |
+| GET | `/api/docs` | Swagger UI documentation |
 
 Rate limiting: 30 requests per 60 seconds per IP across all `/api/*` routes.
 
@@ -267,7 +387,7 @@ The AI system (`ai/`) is a full-stack TypeScript module supporting multiple prov
 - **`local`** — Set `AI_PROVIDER=local`. Connects to any OpenAI-compatible local endpoint (Ollama, LM Studio, etc.).
 
 The curriculum search pipeline:
-1. **Curriculum index** — regex-based topic extraction from 57 JSON course files (3,130+ topics)
+1. **Curriculum index** — regex-based topic extraction from 64 JSON course files (3,571+ topics)
 2. **TF-IDF** (always available) — keyword-based relevance scoring with cosine similarity
 3. **OpenAI embeddings** (if API key configured) — semantic vector search via `text-embedding-3-small` with batch caching to disk
 
@@ -377,9 +497,53 @@ The workspace includes a full Thunderclient-style HTTP client:
 | API Arcade | Match API endpoints with HTTP methods |
 | Daily Challenge | One unique challenge per day |
 
+## Docker
+
+### Single Image (all runtimes)
+
+The root `Dockerfile` builds a single image with all 16 language runtimes pre-installed, alongside the Express backend:
+
+```bash
+docker compose build
+docker compose up
+```
+
+The `docker-entrypoint.sh` script verifies all runtimes at container startup.
+
+### Per-Language Sandbox Images
+
+Individual sandbox images are available in `docker/` for isolated code execution (used by the Docker executor):
+
+```bash
+bash docker/build-all.sh
+```
+
+Each sandbox image is tagged `kodex-<lang>` (e.g., `kodex-py`, `kodex-scala`) and contains only the runtime needed for that language, plus a dedicated `code` user.
+
+### Supported Sandbox Languages
+
+| Image | Language | Base Image |
+|-------|----------|------------|
+| `kodex-py` | Python | python:3.12-slim |
+| `kodex-js` | JavaScript | node:22-slim |
+| `kodex-ts` | TypeScript | node:22-slim |
+| `kodex-go` | Go | golang:1.23 |
+| `kodex-rs` | Rust | rust:1.83 |
+| `kodex-c` | C | gcc:13-bookworm |
+| `kodex-cpp` | C++ | gcc:13-bookworm |
+| `kodex-cs` | C# | mcr.microsoft.com/dotnet/sdk:8.0 |
+| `kodex-kt` | Kotlin | eclipse-temurin:22-jdk |
+| `kodex-scala` | Scala | eclipse-temurin:22-jdk |
+| `kodex-swift` | Swift | swift:6.0 |
+| `kodex-zig` | Zig | zig:0.13 |
+| `kodex-bash` | Bash | ubuntu:22.04 |
+| `kodex-php` | PHP | php:8.3-cli |
+| `kodex-wasm` | WebAssembly | rust:1.83 (wasmtime) |
+| `kodex-asm` | Assembly | gcc:13-bookworm (nasm) |
+
 ## Course Data Format
 
-Course files in `content/` are 57 lazy-loaded JSON files with topics organized by phase:
+Course files in `content/` are 64 JSON files with topics organized by phase:
 
 ```json
 {
@@ -392,7 +556,7 @@ Course files in `content/` are 57 lazy-loaded JSON files with topics organized b
 }
 ```
 
-Each file has multiple phases, each phase has multiple topics. Topics can optionally include a `prereq` field.
+Each file has multiple phases, each phase has multiple topics. Topics can optionally include a `prereq` field. All course data is aggregated into `content/app-data.json` and embedded into `public/app-data.js` for browser delivery.
 
 ## UI Features
 
@@ -408,6 +572,16 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 - **Collapsible phases** — Expand/collapse all phases, with per-phase completion counters
 
 ## Deployment
+
+### Docker
+
+```bash
+docker compose up -d
+```
+
+Builds and runs a self-contained image with all language runtimes. Listens on port 3001 (maps to container port 3000).
+
+### Netlify
 
 The project is configured for Netlify deployment:
 

@@ -15,6 +15,7 @@ export interface StreamChunk {
 export interface RunnerConfig {
   cmd: string;
   ext: string;
+  src?: string;
 }
 
 export interface CompilerEntry {

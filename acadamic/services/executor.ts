@@ -173,6 +173,9 @@ const RUNNERS: Record<string, RunnerConfig> = {
   zig: { cmd: 'zig run "%f"', ext: '.zig' },
   bash: { cmd: 'bash "%f"', ext: '.sh' },
   php:  { cmd: 'php "%f"', ext: '.php' },
+  scala: { cmd: 'scalac -d _prog.jar "%f" && scala -cp _prog.jar Main', ext: '.scala' },
+  java: { cmd: 'javac "Main.java" && java -cp . Main', ext: '.java', src: 'Main' },
+  rb: { cmd: 'ruby "%f"', ext: '.rb' },
 };
 
 // ── Execute ──
@@ -230,7 +233,8 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'exec-'));
-  const tmpFile = path.join(tmpDir, 'code' + runner.ext);
+  const srcName = runner.src || 'code';
+  const tmpFile = path.join(tmpDir, srcName + runner.ext);
   fs.writeFileSync(tmpFile, code);
 
   const cmd = runner.cmd.replace('%f', tmpFile);

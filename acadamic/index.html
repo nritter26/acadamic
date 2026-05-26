@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kodex's Lab: Full Mastery Edition</title>
     <link rel="stylesheet" href="public/style.css">
+    <script>
+    function googleTranslateElementInit2() {
+        new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element2');
+    }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2"></script>
 </head>
 <body id="app" class="js-mode">
 <header>
@@ -52,7 +58,7 @@
 <main>
     <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="tutorial-progress"></div><div id="topic-list" class="scroll"></div></div>
     <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button><button id="api-toggle-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Toggle API client" style="display:none">API ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
-    <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client" id="apiClient">
+    <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client notranslate" id="apiClient">
     <div class="api-toolbar">
         <select id="apiMethod" class="api-method-select">
             <option value="GET">GET</option>
@@ -84,7 +90,7 @@
                 <option value="form">Form URL-encoded</option>
             </select>
         </div>
-        <textarea id="apiBody" class="api-body-input" spellcheck="false" placeholder='{"key": "value"}'></textarea>
+        <textarea id="apiBody" class="api-body-input notranslate" spellcheck="false" placeholder='{"key": "value"}'></textarea>
     </div>
     <div class="api-tab-content" id="apiContentAuth" style="display:none;">
         <div class="api-auth-type-bar">
@@ -103,7 +109,7 @@
         </div>
     </div>
 </div>
-<div class="schema-designer" id="schemaDesigner">
+<div class="schema-designer notranslate" id="schemaDesigner">
     <div class="schema-tabs">
         <button id="schemaTabDesign" class="schema-tab active" onclick="schemaSwitchTab('design')">Design</button>
         <button id="schemaTabErd" class="schema-tab" onclick="schemaSwitchTab('erd')">ERD</button>
@@ -152,7 +158,7 @@
 <div class="schema-import-overlay" id="schemaImportOverlay">
     <div class="schema-import-modal">
         <h3>Import SQL</h3>
-        <textarea id="schemaImportText" class="schema-import-textarea" placeholder="Paste CREATE TABLE statements here...&#10;&#10;CREATE TABLE users (&#10;    id SERIAL PRIMARY KEY,&#10;    name VARCHAR(255) NOT NULL,&#10;    email VARCHAR(255) UNIQUE&#10);"></textarea>
+        <textarea id="schemaImportText" class="schema-import-textarea notranslate" placeholder="Paste CREATE TABLE statements here...&#10;&#10;CREATE TABLE users (&#10;    id SERIAL PRIMARY KEY,&#10;    name VARCHAR(255) NOT NULL,&#10;    email VARCHAR(255) UNIQUE&#10);"></textarea>
         <div class="schema-import-actions">
             <button class="primary" onclick="schemaImportSQL()">Import</button>
             <button onclick="schemaCloseImport()">Cancel</button>
@@ -160,11 +166,11 @@
     </div>
 </div>
 <div id="schemaTutorialPage" style="display:none;"></div>
-<textarea id="editor" spellcheck="false" aria-label="Code editor">for n in range(5):
+<textarea id="editor" class="notranslate" spellcheck="false" aria-label="Code editor">for n in range(5):
     if n == 2: continue
     if n == 4: break
     print(n)</textarea><div class="workspace-actions"><button id="auto-syntax-btn" class="run-btn" onclick="toggleAutoSyntax()" title="Toggle real-time syntax checking">🔍 Auto</button><button class="run-btn" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="check-code-btn" class="run-btn" onclick="checkCode()" title="Run static code analysis on current code">Check Code</button><button id="explain-ai-btn" class="run-btn" onclick="explainCode()" title="Get AI explanation of current code">Explain</button><button id="review-ai-btn" class="run-btn" onclick="reviewCode()" title="Get AI review of current code">Review</button><button id="exercise-ai-btn" class="run-btn" onclick="generateExercise()" title="Generate an AI exercise">Exercise</button><button id="quiz-ai-btn" class="run-btn" onclick="generateQuiz()" title="Generate a quiz">Quiz</button><button id="copy-btn" class="run-btn" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="tutorial-nav"></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
-    <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="scroll" style="display:none;">
+    <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="notranslate scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="notranslate scroll" style="display:none;">
     <div class="api-res-topbar">
         <span class="api-res-status" id="apiResStatus">—</span>
         <span class="api-res-meta" id="apiResMeta"></span>
@@ -175,7 +181,7 @@
         <pre id="apiResHeadersContent" class="api-res-pre" style="display:none;"></pre>
     </div>
     <pre id="apiResBody" class="api-res-body">Send a request to see the response</pre>
-</div><div id="compiler-output" class="scroll" style="display:none;"><div class="cp-pipeline-tabs"><button class="cp-tab active" data-stage="0">Source</button><button class="cp-tab" data-stage="1">Tokens</button><button class="cp-tab" data-stage="2">AST</button><button class="cp-tab" data-stage="3">Stats</button></div><div id="cp-pipeline-content" class="cp-pipeline-content"><div class="cp-placeholder">Click any pipeline stage button (Source ▶, Tokens ▶, AST ▶, Stats ▶, Full Pipeline ▶) to analyze your code.</div></div></div></div>
+</div><div id="compiler-output" class="notranslate scroll" style="display:none;"><div class="cp-pipeline-tabs"><button class="cp-tab active" data-stage="0">Source</button><button class="cp-tab" data-stage="1">Tokens</button><button class="cp-tab" data-stage="2">AST</button><button class="cp-tab" data-stage="3">Stats</button></div><div id="cp-pipeline-content" class="cp-pipeline-content notranslate"><div class="cp-placeholder">Click any pipeline stage button (Source ▶, Tokens ▶, AST ▶, Stats ▶, Full Pipeline ▶) to analyze your code.</div></div></div></div>
 </main>
 <script src="public/courseData.js"></script>
 <script src="public/app-data.js"></script>
@@ -193,6 +199,8 @@
 <script src="public/app-data-globals.js"></script>
 <script src="public/app.js"></script>
 <script>
+var gtCurrentLang = 'en';
+
 function toggleKodexModal() {
     document.getElementById('kodexOverlay').classList.toggle('open');
 }
@@ -201,6 +209,26 @@ function toggleLangMenu() {
 }
 function setUILang(code) {
     document.getElementById('langPopup').classList.remove('open');
+    if (code === 'en') {
+        doGTranslate('en|en');
+    } else {
+        doGTranslate('en|' + code);
+    }
+}
+
+function doGTranslate(lang_pair) {
+    if (lang_pair.value) lang_pair = lang_pair.value;
+    if (lang_pair === '') return;
+    var lang = lang_pair.split('|')[1];
+    if (lang === gtCurrentLang) return;
+    gtCurrentLang = lang;
+    document.getElementById('lang-btn').textContent = lang.toUpperCase();
+    var teCombo = document.querySelector('.goog-te-combo');
+    if (teCombo) {
+        document.cookie = 'googtrans=/en/' + lang;
+        teCombo.value = lang;
+        teCombo.dispatchEvent(new Event('change'));
+    }
 }
 </script>
 
@@ -292,10 +320,11 @@ function setUILang(code) {
             <button onclick="toggleLangMenu()">✕</button>
         </div>
         <div class="lang-popup-body">
-            <button onclick="setUILang('en')">🇬🇧 English</button>
-            <button onclick="setUILang('th')">🇹🇭 Thai</button>
-            <button onclick="setUILang('de')">🇩🇪 German</button>
-            <button onclick="setUILang('es')">🇪🇸 Spanish</button>
+            <a href="#" onclick="doGTranslate('en|en');return false;" class="gtranslate-option" data-gt-lang="en">🇬🇧 English</a>
+            <a href="#" onclick="doGTranslate('en|th');return false;" class="gtranslate-option" data-gt-lang="th">🇹🇭 Thai</a>
+            <a href="#" onclick="doGTranslate('en|de');return false;" class="gtranslate-option" data-gt-lang="de">🇩🇪 German</a>
+            <a href="#" onclick="doGTranslate('en|es');return false;" class="gtranslate-option" data-gt-lang="es">🇪🇸 Spanish</a>
+            <div id="google_translate_element2" style="display:none;"></div>
         </div>
     </div>
 </div>

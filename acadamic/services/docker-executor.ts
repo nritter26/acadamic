@@ -28,6 +28,9 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
   bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
   php:  { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
+  scala: { image: 'kodex-scala', ext: '.scala', compileCmd: 'scalac -d /code/out.jar /code/prog.scala && scala -cp /code/out.jar Main', runCmd: '', needsCompile: true },
+  rb:   { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
+  sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
 
 export interface DockerExecResult {
@@ -61,6 +64,14 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
 
   if (!isDockerAvailable()) {
     return { output: 'Docker is not available on this server', error: true, dockerAvailable: false };
+  }
+
+  // Check if the sandbox image exists before attempting to run
+  try {
+    execSync(`docker image inspect ${config.image}`, { timeout: 10000, stdio: 'pipe' });
+  } catch {
+    logger.debug({ lang, image: config.image }, 'Docker sandbox image not found, falling back to direct runner');
+    return { output: `Docker image ${config.image} not found`, error: true, dockerAvailable: false };
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-exec-'));
@@ -104,13 +115,13 @@ WORKDIR /code
 `.trim(),
     'Dockerfile.js': `
 FROM node:22-slim
-RUN useradd -m -u 1000 code
+RUN userdel node 2>/dev/null; useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.ts': `
 FROM node:22-slim
-RUN npm install -g tsx && useradd -m -u 1000 code
+RUN userdel node 2>/dev/null; npm install -g tsx && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
@@ -122,19 +133,19 @@ WORKDIR /code
 `.trim(),
     'Dockerfile.rs': `
 FROM rust:1.78-slim
-RUN useradd -m -u 1000 code
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.c': `
 FROM gcc:13-bookworm
-RUN useradd -m -u 1000 code
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.cpp': `
 FROM gcc:13-bookworm
-RUN useradd -m -u 1000 code
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
@@ -145,31 +156,35 @@ USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.swift': `
-FROM swift:6.0-jammy-slim
-RUN useradd -m -u 1000 code
+FROM swift:6.0-jammy
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.kt': `
-FROM openjdk:22-slim
-RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \\
-    curl -sL https://github.com/JetBrains/kotlin/releases/download/v2.0.21/kotlin-compiler-2.0.21.zip -o /tmp/kc.zip && \\
-    unzip -q /tmp/kc.zip -d /opt && rm /tmp/kc.zip && \\
-    ln -s /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc
-RUN useradd -m -u 1000 code
+FROM eclipse-temurin:22-jdk
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \
+    curl -sL https://github.com/JetBrains/kotlin/releases/download/v2.0.21/kotlin-compiler-2.0.21.zip -o /tmp/kc.zip && \
+    unzip -q /tmp/kc.zip -d /opt && rm /tmp/kc.zip && \
+    ln -s /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc && \
+    if id -u 1001 >/dev/null 2>&1; then userdel "$(id -un 1001)"; fi && useradd -m -u 1001 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.cs': `
 FROM mcr.microsoft.com/dotnet/sdk:8.0
-RUN dotnet tool install -g dotnet-script && useradd -m -u 1000 code
+RUN dotnet tool install -g dotnet-script && if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 ENV PATH="$PATH:/root/.dotnet/tools"
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.wasm': `
 FROM alpine:latest
-RUN apk add --no-cache wasmtime && adduser -D -u 1000 code
+RUN apk add --no-cache curl ca-certificates xz && \
+    curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v25.0.0/wasmtime-v25.0.0-x86_64-linux.tar.xz | \
+    tar -C /usr/local -xJ --strip-components=1 && \
+    rm -rf /var/cache/apk/* && \
+    adduser -D -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
@@ -188,6 +203,29 @@ WORKDIR /code
     'Dockerfile.php': `
 FROM php:8.3-cli-alpine
 RUN adduser -D -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.scala': `
+FROM eclipse-temurin:22-jdk
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \
+    curl -sL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz && \
+    tar -xzf /tmp/scala3.tar.gz -C /opt && rm /tmp/scala3.tar.gz && \
+    ln -s /opt/scala3-3.3.3/bin/scalac /usr/local/bin/scalac && \
+    ln -s /opt/scala3-3.3.3/bin/scala /usr/local/bin/scala && \
+    if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.rb': `
+FROM ruby:3.2-slim
+RUN useradd -m -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.sqlite': `
+FROM alpine:latest
+RUN apk add --no-cache sqlite && adduser -D -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
