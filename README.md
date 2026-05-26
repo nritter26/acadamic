@@ -1,6 +1,6 @@
 # Kodex's Lab: Full Mastery Edition
 
-An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 50+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, CI/CD curriculum, game development curriculum, mobile development curriculum, and 16 mini-games.
+An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, CI/CD curriculum, game development curriculum, mobile development curriculum, and 16 mini-games.
 
 ## Features
 
