@@ -1,3 +1,9 @@
 [build]
-  publish = "acadamic"
   functions = "netlify/functions"
+  publish = "."
+  command = "npm run build"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api"
+  status = 200
