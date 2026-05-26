@@ -563,8 +563,6 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 - **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, GameDev, Mobile, Tech Stack, Quiz, Gaming — each with distinct accent colors and hover effects
 - **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
 - **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
-- **Cyberpunk-themed header** — Animated "Just code — don't overthink" motto with glow/flicker CSS effects
-- **Devin mascot** — Animated SVG backpack robot with talking animation (triggered by Tab in AI input)
 - **Roadmap view** — SVG-based visual learning roadmap for topic progression
 - **Language-specific theming** — Dynamic accent colors per language via CSS custom properties
 - **Skeleton loading** — Placeholder UI while curriculum content lazy-loads
