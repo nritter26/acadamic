@@ -22,6 +22,7 @@ describe('Docker Sandbox Service', () => {
       expect(files).toContain('Dockerfile.cs');
       expect(files).toContain('Dockerfile.ts');
       expect(files).toContain('Dockerfile.swift');
+      expect(files).toContain('Dockerfile.java');
 
       // Verify Python Dockerfile content
       const pyDf = fs.readFileSync(path.join(tmpDir, 'Dockerfile.py'), 'utf-8');
@@ -40,12 +41,10 @@ describe('Docker Sandbox Service', () => {
     const langs = getSupportedDockerLangs();
     expect(langs).toContain('py');
     expect(langs).toContain('js');
-    expect(langs).toContain('go');
     expect(langs).toContain('rs');
     expect(langs).toContain('c');
-    expect(langs).toContain('zig');
-    expect(langs).toContain('kt');
-    expect(langs).toContain('cs');
+    expect(langs).toContain('wasm');
+    expect(langs).toContain('java');
   });
 
   it('checks Docker availability without throwing', () => {

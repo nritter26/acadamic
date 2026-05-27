@@ -38,6 +38,23 @@ describe('Code Execution Service', () => {
     expect(result.error).toBe(true);
   });
 
+  it('executes Go', { timeout: 60000 }, async () => {
+    const result = await executeCode('go', 'package main\nimport "fmt"\nfunc main() { fmt.Println("hello go") }');
+    expect(result.output.trim()).toBe('hello go');
+    expect(result.error).toBeFalsy();
+  });
+
+  it('handles Go syntax errors', { timeout: 30000 }, async () => {
+    const result = await executeCode('go', 'package main\nfunc main() { bad syntax }');
+    expect(result.error).toBe(true);
+  });
+
+  it('executes Zig', { timeout: 60000 }, async () => {
+    const result = await executeCode('zig', 'const std = @import("std"); pub fn main() !void { std.debug.print("hello zig\\n", .{}); }');
+    expect(result.output).toContain('hello zig');
+    expect(result.error).toBeFalsy();
+  });
+
   it('returns hint for unsupported language', async () => {
     const result = await executeCode('nonexistent', 'code');
     expect(result.error).toBe(true);

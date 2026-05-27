@@ -140,11 +140,45 @@ async function handleExecute(event, body) {
   if (lang === 'js') {
     try {
       let output = '';
+      const consoleCounts = {};
+      const consoleTimers = {};
       const sandbox = {
         console: {
           log: (...args) => { output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
-          error: (...args) => { output += 'ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+          info: (...args) => { output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+          debug: (...args) => { output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
           warn: (...args) => { output += 'WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+          error: (...args) => { output += 'ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+          assert: (condition, ...args) => { if (!condition) output += 'Assertion failed: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+          trace: () => { output += 'console.trace()\n'; },
+          dir: (obj) => { output += JSON.stringify(obj, null, 2) + '\n'; },
+          table: (data) => {
+            if (Array.isArray(data)) {
+              output += data.map((item, i) => `${i}: ${JSON.stringify(item)}`).join('\n') + '\n';
+            } else {
+              output += JSON.stringify(data, null, 2) + '\n';
+            }
+          },
+          count: (label = 'default') => {
+            consoleCounts[label] = (consoleCounts[label] || 0) + 1;
+            output += `${label}: ${consoleCounts[label]}\n`;
+          },
+          countReset: (label = 'default') => { delete consoleCounts[label]; },
+          time: (label = 'default') => { consoleTimers[label] = Date.now(); },
+          timeEnd: (label = 'default') => {
+            const start = consoleTimers[label];
+            if (start !== undefined) {
+              output += `${label}: ${Date.now() - start}ms\n`;
+              delete consoleTimers[label];
+            }
+          },
+          timeLog: (label = 'default') => {
+            const start = consoleTimers[label];
+            if (start !== undefined) output += `${label}: ${Date.now() - start}ms\n`;
+          },
+          group: () => {},
+          groupEnd: () => {},
+          clear: () => { output = ''; },
         }
       };
       vm.runInNewContext(code, sandbox, { timeout: 5000 });
@@ -170,6 +204,16 @@ async function handleExecute(event, body) {
   const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const prog = `_prog_${token}`;
 
+  const javaHome = (() => {
+    try {
+      const p = require('child_process').execSync('readlink -f $(which javac)', { timeout: 5000 }).toString().trim();
+      const jdkDir = require('path').dirname(require('path').dirname(p));
+      const javaBin = require('path').join(jdkDir, 'bin', 'java');
+      if (require('fs').existsSync(javaBin)) return javaBin;
+    } catch {}
+    return 'java';
+  })();
+
   const runners = {
     py:  { cmd: 'python3 -u "%f"', ext: '.py' },
     go:  { cmd: 'go run "%f"', ext: '.go' },
@@ -179,6 +223,7 @@ async function handleExecute(event, body) {
     cpp: { cmd: `g++ -std=c++20 -Wall -o ${prog} "%f" && ./${prog}`, ext: '.cpp' },
     cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
     kt:  { cmd: `kotlinc -include-runtime -d ${prog}.jar "%f" && java -jar ${prog}.jar`, ext: '.kt' },
+    java: { cmd: `javac "%f" && ${javaHome} -cp "%f" Main`, ext: '.java', src: 'Main' },
     swift: { cmd: 'swift "%f"', ext: '.swift' },
     wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
     asm: { cmd: `nasm -f elf64 "%f" -o ${prog}.o && ld -o ${prog} ${prog}.o && ./${prog}`, ext: '.asm' },
@@ -191,10 +236,15 @@ async function handleExecute(event, body) {
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nflx-'));
-  const tmpFile = path.join(tmpDir, 'code' + runner.ext);
+  const srcName = runner.src || 'code';
+  const tmpFile = path.join(tmpDir, srcName + runner.ext);
   fs.writeFileSync(tmpFile, code);
 
-  const cmd = runner.cmd.replace('%f', tmpFile);
+  let cmd = runner.cmd.replace('%f', tmpFile);
+  if (lang === 'java') {
+    const javacmd = javaHome !== 'java' ? javaHome : 'java';
+    cmd = `javac "${tmpFile}" && ${javacmd} -cp "${tmpDir}" Main`;
+  }
   const env = { ...process.env, PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}` };
 
   try {
