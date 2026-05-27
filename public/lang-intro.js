@@ -330,4 +330,51 @@
   }
 
   window.langIntro = intro;
+
+  window.loadLangIntro = function loadLangIntro(lang) {
+    const intro = window.langIntro[lang];
+    if (!intro) {
+      const langData = window.courseData && window.courseData[lang];
+      if (langData) {
+        const phases = Object.keys(langData);
+        if (phases.length > 0) {
+          const firstPhase = phases[0];
+          const topics = Object.keys(langData[firstPhase]);
+          if (topics.length > 0) {
+            window.loadTopic(firstPhase, topics[0]);
+            return;
+          }
+        }
+      }
+      return;
+    }
+
+    document.getElementById('explanation').innerHTML = `
+        <div class="techstack-intro" onclick="loadFirstPlatformTopic('${lang}')" style="cursor:pointer;">
+            <div class="techstack-intro-header">
+                <img class="techstack-intro-logo" src="public/logos/${lang}.svg"
+                     alt="${intro.name}"
+                     onerror="this.style.display='none'">
+                <h2>${intro.name}</h2>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it?</h3>
+                <p>${intro.what}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>What is it used for?</h3>
+                <p>${intro.usedFor}</p>
+            </div>
+            <div class="techstack-intro-section">
+                <h3>Who created it?</h3>
+                <p>${intro.creator}</p>
+            </div>
+            <p style="color:var(--accent);font-size:10px;margin-top:12px;opacity:0.7;">Click to start learning →</p>
+        </div>
+    `;
+
+    document.getElementById('editor').value = intro.code;
+    updateHighlight();
+    document.getElementById('output').innerText = '// ' + intro.name + ' — explore the topics below to start learning';
+  };
 })();
