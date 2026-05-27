@@ -110,7 +110,6 @@ All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of
 ### Docker (recommended — includes all runtimes)
 
 ```bash
-cd acadamic
 docker compose build
 docker compose up
 ```
@@ -122,7 +121,6 @@ This builds a single image with all 16 language runtimes pre-installed (Node.js,
 ### Node.js Backend
 
 ```bash
-cd acadamic
 npm install
 npm start
 ```
@@ -132,7 +130,7 @@ Open http://localhost:3000
 ### Go Backend (alternative)
 
 ```bash
-cd acadamic/backend-go
+cd backend-go
 go run main.go
 ```
 
@@ -165,7 +163,7 @@ docker build -t kodex-scala -f docker/Dockerfile.scala docker/
 ## Project Structure
 
 ```
-acadamic/
+./
 ├── server.ts                    # Express backend entry point (~124 lines)
 ├── index.html                   # Single-page frontend app (355 lines)
 ├── package.json                 # Dependencies & scripts
