@@ -4,6 +4,14 @@ import path from 'path';
 import os from 'os';
 import { logger } from '../middleware';
 
+const execAsync = (cmd: string, opts: { timeout?: number } = {}): Promise<{ stdout: string; stderr: string }> =>
+  new Promise((resolve, reject) => {
+    exec(cmd, { maxBuffer: 1024 * 1024, ...opts }, (err, stdout, stderr) => {
+      if (err) reject(err);
+      else resolve({ stdout: stdout || '', stderr: stderr || '' });
+    });
+  });
+
 interface DockerRunnerConfig {
   image: string;
   ext: string;
@@ -16,19 +24,20 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   py:  { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
   js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
   ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
-  go:  { image: 'kodex-go', ext: '.go', runCmd: 'go run /code/prog.go', needsCompile: false },
+  // go removed from DOCKER_RUNNERS — uses local runner with higher ulimit for Go's parallel compilation
   rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true },
   c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
   cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
-  zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog.zig', needsCompile: false },
+  // zig removed from DOCKER_RUNNERS — std.debug.print goes to stderr, local runner handles it properly
   swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false },
-  kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true },
-  cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false },
+  // kt removed from DOCKER_RUNNERS — kotlinc on JVM times out with 256m memory limit
+  // cs removed from DOCKER_RUNNERS — dotnet restore OOMs with 256m limit
   wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
   asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
   bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
   php:  { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
-  scala: { image: 'kodex-scala', ext: '.scala', compileCmd: 'scalac -d /code/out.jar /code/prog.scala && scala -cp /code/out.jar Main', runCmd: '', needsCompile: true },
+  scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false },
+  java: { image: 'kodex-java', ext: '.java', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true },
   rb:   { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
   sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
@@ -80,23 +89,27 @@ async function ensureLangPool(lang: string): Promise<void> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) return;
 
-  for (let i = 0; i < POOL_SIZE; i++) {
-    try {
-      execSync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { stdio: 'pipe' });
-    } catch { /* ignore */ }
-  }
+  await Promise.allSettled(
+    Array.from({ length: POOL_SIZE }, (_, i) =>
+      execAsync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { timeout: 5000 }).catch(() => {})
+    )
+  );
 
   const entries: WarmPoolEntry[] = [];
   for (let i = 0; i < POOL_SIZE; i++) {
     const workspaceDir = path.join(WARM_POOL_BASE, `${lang}-${i}`);
     fs.mkdirSync(workspaceDir, { recursive: true });
 
-    const containerId = execSync(
-      `docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory 256m --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`,
-      { timeout: 30000, stdio: 'pipe' }
-    ).toString().trim();
-
-    entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
+    try {
+      const { stdout } = await execAsync(
+        `docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory 256m --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`,
+        { timeout: 30000 }
+      );
+      const containerId = stdout.trim();
+      entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
+    } catch {
+      logger.debug({ lang }, 'Failed to start warm pool container');
+    }
   }
   warmPool.set(lang, entries);
 }
@@ -140,9 +153,8 @@ async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: 
   fs.writeFileSync(progFile, code);
 
   try {
-    const execCmd = config.needsCompile && config.compileCmd
-      ? `docker exec -i ${entry.containerId} sh -c "${config.compileCmd}"`
-      : `docker exec -i ${entry.containerId} ${config.runCmd}`;
+    const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+    const execCmd = `docker exec -i ${entry.containerId} sh -c "${cmd} 2>&1"`;
 
     const stdout = execSync(execCmd, {
       timeout: 30000,
@@ -178,9 +190,10 @@ export async function initWarmPool(): Promise<void> {
   }
 
   try {
-    const existing = execSync('docker ps -aq --filter "name=kodex-warm-" 2>/dev/null', { stdio: 'pipe' }).toString().trim();
+    const { stdout } = await execAsync('docker ps -aq --filter "name=kodex-warm-"', { timeout: 10000 });
+    const existing = stdout.trim();
     if (existing) {
-      execSync(`docker rm -f ${existing} 2>/dev/null`, { stdio: 'pipe' });
+      await execAsync(`docker rm -f ${existing} 2>/dev/null`, { timeout: 30000 }).catch(() => {});
     }
   } catch { /* ignore */ }
 
@@ -198,13 +211,16 @@ export async function initWarmPool(): Promise<void> {
 }
 
 export async function shutdownWarmPool(): Promise<void> {
+  const tasks: Promise<void>[] = [];
   for (const [, entries] of warmPool) {
     for (const entry of entries) {
-      try {
-        execSync(`docker stop ${entry.containerId} 2>/dev/null && docker rm ${entry.containerId} 2>/dev/null`, { stdio: 'pipe', timeout: 10000 });
-      } catch { /* ignore */ }
+      tasks.push(
+        execAsync(`docker stop ${entry.containerId} 2>/dev/null && docker rm ${entry.containerId} 2>/dev/null`, { timeout: 10000 })
+          .then(() => {}).catch(() => {})
+      );
     }
   }
+  await Promise.allSettled(tasks);
   warmPool.clear();
   try { fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true }); } catch { /* ignore */ }
 }
@@ -238,9 +254,8 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
   fs.writeFileSync(tmpFile, code);
 
   try {
-    const cmd = config.needsCompile && config.compileCmd
-      ? `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${config.compileCmd}"`
-      : `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code:ro" ${config.image} ${config.runCmd}`;
+    const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+    const cmd = `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
 
     logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
 
@@ -332,24 +347,30 @@ WORKDIR /code
 `.trim(),
     'Dockerfile.cs': `
 FROM mcr.microsoft.com/dotnet/sdk:8.0
-RUN dotnet tool install -g dotnet-script && if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
-ENV PATH="$PATH:/root/.dotnet/tools"
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
+ENV PATH="$PATH:/home/code/.dotnet/tools"
+RUN dotnet tool install -g dotnet-script
 WORKDIR /code
 `.trim(),
     'Dockerfile.wasm': `
-FROM alpine:latest
-RUN apk add --no-cache curl ca-certificates xz && \
+FROM debian:stable-slim
+RUN apt-get update && apt-get install -y curl ca-certificates xz-utils && rm -rf /var/lib/apt/lists/* && \
     curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v25.0.0/wasmtime-v25.0.0-x86_64-linux.tar.xz | \
-    tar -C /usr/local -xJ --strip-components=1 && \
-    rm -rf /var/cache/apk/* && \
-    adduser -D -u 1000 code
+    tar -C /usr/local/bin -xJ --strip-components=1 && \
+    if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),
     'Dockerfile.asm': `
 FROM alpine:latest
 RUN apk add --no-cache nasm binutils && adduser -D -u 1000 code
+USER code
+WORKDIR /code
+`.trim(),
+    'Dockerfile.java': `
+FROM eclipse-temurin:22-jdk
+RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
 `.trim(),

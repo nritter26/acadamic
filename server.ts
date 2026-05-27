@@ -116,13 +116,13 @@ function shutdown() {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
-// ── Initialize Warm Container Pool ──
-initWarmPool().catch(err => logger.warn({ err: (err as Error).message }, 'Warm pool init deferred to first request'));
-
 // ── Start ──
 server.listen(PORT, () => {
   logger.info(`Kodex's Lab running at http://localhost:${PORT}`);
   logger.info(`WebSocket ready at ws://localhost:${PORT}/ws`);
 });
+
+// ── Initialize Warm Container Pool (after listen so server is ready) ──
+initWarmPool().catch(err => logger.warn({ err: (err as Error).message }, 'Warm pool init deferred to first request'));
 
 export default app;
