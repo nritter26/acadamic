@@ -1,0 +1,8 @@
+FROM alpine:latest
+RUN apk add --no-cache curl ca-certificates xz && \
+    curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v25.0.0/wasmtime-v25.0.0-x86_64-linux.tar.xz | \
+    tar -C /usr/local -xJ --strip-components=1 && \
+    rm -rf /var/cache/apk/* && \
+    adduser -D -u 1000 code
+USER code
+WORKDIR /code

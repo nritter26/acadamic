@@ -1,0 +1,37 @@
+services:
+  # Your main multi-language application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Directly in the main folder
+    read_only: false
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/code  # Shares your local project root folder
+    environment:
+      - AI_PROVIDER=keyword
+      - PORT=3000
+      - NODE_ENV=development
+
+  # Your dedicated Scala workspace container
+  scala-runner:
+    build:
+      context: .
+      dockerfile: docker/dockerfile.scala  # Look inside the docker/ subfolder
+    volumes:
+      - .:/code  # Shares your local project root folder
+    environment:
+      - PORT=3000
+
+  # Uncomment to use Ollama for AI:
+  # ollama:
+  #   image: ollama/ollama
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   ports:
+  #     - "11434:11434"
+
+# volumes:
+#   ollama_data:
+
