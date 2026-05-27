@@ -1,6 +1,6 @@
 // ── Multi-Language Tutorial System ──
 
-const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig', 'java', 'asm', 'wasm', 'bash', 'php', 'pg', 'mysql', 'sqlite', 'scala'];
+const TUTORIAL_LANGS = ['js', 'py', 'go', 'rs', 'c', 'cpp', 'cs', 'kt', 'swift', 'ts', 'zig', 'java', 'asm', 'wasm', 'bash', 'php', 'scala'];
 let tutorialLang = 'js';
 let _tutorialStarterCode = '';
 let _tutorialWalkStep = -1;

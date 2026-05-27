@@ -4015,6 +4015,7 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
     if (lang === 'db') { document.getElementById('level-bar').style.display = 'none'; initDatabase(); updateAISuggestions(); return; }
     if (lang === 'techstack') { document.getElementById('level-bar').style.display = 'none'; initTechStack(); updateAISuggestions(); return; }
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
+    if (lang === 'dblab') { document.getElementById('level-bar').style.display = 'none'; initDbLab(); updateAISuggestions(); return; }
     if (lang === 'schema') { document.getElementById('level-bar').style.display = 'none'; initSchemaTutorial(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); 
         const apiBtn = document.getElementById('api-toggle-btn');
