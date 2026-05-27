@@ -7,14 +7,17 @@
 const COMPILER = (() => {
   'use strict';
 
-  // ── Language Configuration ──// LANG_CONFIG extracted to content/app-data.json
+  const isNodeModule = typeof module !== 'undefined' && typeof module.exports !== 'undefined';
+  const compilerData = isNodeModule ? require('../content/app-data.json') : null;
+
+  const LANG_CONFIG = (typeof globalThis !== 'undefined' && globalThis.LANG_CONFIG) || (compilerData && compilerData.LANG_CONFIG) || {};
+  const TOKEN_TYPES = (typeof globalThis !== 'undefined' && globalThis.TOKEN_TYPES) || (compilerData && compilerData.TOKEN_TYPES) || {};
+  const TOKEN_COLORS = (typeof globalThis !== 'undefined' && globalThis.TOKEN_COLORS) || (compilerData && compilerData.TOKEN_COLORS) || {};
 
   function _getKeywords(lang) {
     const kw = (typeof LANG_KEYWORDS !== 'undefined' ? LANG_KEYWORDS : {});
     return kw[lang] || [];
   }
-// TOKEN_TYPES extracted to content/app-data.json
-// TOKEN_COLORS extracted to content/app-data.json
 
   // ── Tokenizer ──
   function tokenize(code, lang) {

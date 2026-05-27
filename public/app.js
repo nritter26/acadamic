@@ -2316,8 +2316,8 @@ function renderQuiz() {
     const list = document.getElementById('topic-list');
     
     let html = '<div class="quiz-lang-bar">';
-    for (const l of ['js','ts','py','go','java','cs','kt','rs','swift','asm','wasm','bash','php','git','pg','backend','c','cpp','zig','rb','scala']) {
-        const names = { js:'JS', ts:'TS', py:'Python', go:'Go', java:'Java', cs:'C#', kt:'Kotlin', rs:'Rust', swift:'Swift', asm:'ASM', wasm:'Wasm', bash:'Bash', php:'PHP', git:'Git', pg:'SQL', backend:'Backend', c:'C', cpp:'C++', zig:'Zig', rb:'Ruby', scala:'Scala' };
+    for (const l of ['asm','bash','backend','c','cpp','cs','git','go','java','js','kt','php','pg','py','rb','rs','scala','swift','ts','wasm','zig']) {
+        const names = { asm:'ASM', bash:'Bash', backend:'Backend', c:'C', cpp:'C++', cs:'C#', git:'Git', go:'Go', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', pg:'SQL', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', wasm:'Wasm', zig:'Zig' };
         const active = l === quizLang ? 'active' : '';
         html += '<button class="quiz-lang-btn ' + active + '" onclick="switchQuizLang(\'' + l + '\')">' + names[l] + '</button>';
     }
@@ -2603,7 +2603,7 @@ function showChallengeIntro() {
             '<div style="background:#1e293b;border-radius:8px;padding:16px;margin-bottom:16px;">' +
                 '<h3 style="color:#fff;margin:0 0 8px 0;font-size:13px;">How it works</h3>' +
                 '<ol style="color:#94a3b8;font-size:11px;margin:0;padding-left:18px;line-height:1.8;">' +
-                    '<li><strong style="color:#e2e8f0;">Choose a language</strong> — pick from the language bar at the top of the sidebar</li>' +
+                    '<li><strong style="color:#e2e8f0;">Choose a language</strong> — pick from the language panel on the left</li>' +
                     '<li><strong style="color:#e2e8f0;">Pick a challenge</strong> — click any challenge card to load it</li>' +
                     '<li><strong style="color:#e2e8f0;">Fix the code</strong> — the editor shows buggy starter code; edit until it works</li>' +
                     '<li><strong style="color:#e2e8f0;">Test your fix</strong> — click <strong style="color:#a855f7;">Test ▶</strong> to run the challenge test</li>' +
@@ -2649,8 +2649,8 @@ function renderChallengeList() {
     const totalAll = challenges.length;
 
     let html = `<div class="challenge-lang-bar">`;
-    for (const l of ['js','py','go','java','ts','rs','swift','backend','c','cpp','cs','kt','zig','php','bash','rb','scala']) {
-        const names = { js:'JS', py:'Python', go:'Go', java:'Java', ts:'TS', rs:'Rust', swift:'Swift', backend:'Backend', c:'C', cpp:'C++', cs:'C#', kt:'Kotlin', zig:'Zig', php:'PHP', bash:'Bash', rb:'Ruby', scala:'Scala' };
+    for (const l of ['backend','bash','c','cpp','cs','go','java','js','kt','php','py','rb','rs','scala','swift','ts','zig']) {
+        const names = { backend:'Backend', bash:'Bash', c:'C', cpp:'C++', cs:'C#', go:'Go', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', zig:'Zig' };
         const active = l === challengeLang ? 'active' : '';
         const solved = Object.keys(progress).filter(k => k.startsWith(l + '_')).length;
         const total = (challengeData[l] || []).length;
@@ -3955,6 +3955,12 @@ function formatSize(bytes) {
 let _prevModeForApi = null;
 
 setMode = function(lang) {
+    const sidebar = document.getElementById('nav-menu');
+    const hamburger = document.getElementById('hamburger-btn');
+    if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        if (hamburger) hamburger.classList.remove('open');
+    }
     document.getElementById('schemaDesigner').classList.remove('open');
     document.getElementById('editor').style.display = 'block';
     document.getElementById('output').style.display = 'block';
@@ -4279,6 +4285,34 @@ initHighlighting();
 initLineNumbers();
 loadProgress();
 
+function initSidebarResize() {
+    const handle = document.getElementById('sidebar-resize-handle');
+    const sidebar = document.getElementById('nav-menu');
+    if (!handle || !sidebar) return;
+    const saved = localStorage.getItem('sidebarWidth');
+    if (saved) { sidebar.style.width = saved; }
+    let startX, startW;
+    function onMouseMove(e) {
+        const w = Math.min(120, Math.max(40, startW + e.clientX - startX));
+        sidebar.style.width = w + 'px';
+    }
+    function onMouseUp() {
+        handle.classList.remove('active');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        localStorage.setItem('sidebarWidth', sidebar.style.width);
+    }
+    handle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        startX = e.clientX;
+        startW = sidebar.offsetWidth;
+        handle.classList.add('active');
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+}
+initSidebarResize();
+
 function toggleNav() {
     const menu = document.getElementById('nav-menu');
     const hamburger = document.getElementById('hamburger-btn');
@@ -4532,7 +4566,98 @@ function loadFirstPlatformTopic(lang) {
     }
 }
 
-setMode('js');
+function showLandingState() {
+    const appEl = document.getElementById('app');
+    const headerTitle = document.getElementById('header-title');
+    const topicList = document.getElementById('topic-list');
+    const explanation = document.getElementById('explanation');
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('output');
+    const levelBar = document.getElementById('level-bar');
+    const engineBar = document.getElementById('engine-bar');
+    const platformBar = document.getElementById('platform-bar');
+    const tutorialProgress = document.getElementById('tutorial-progress');
+
+    if (appEl) {
+        appEl.className = 'js-mode';
+        appEl.classList.add('hide-workspace');
+        appEl.classList.remove('workspace-open');
+    }
+    if (headerTitle) headerTitle.textContent = 'WELCOME';
+    document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
+
+    if (topicList) {
+        topicList.innerHTML = `
+            <div class="phase-header" style="cursor:default; pointer-events:none;">
+                <span class="phase-toggle">▶</span>
+                <span class="phase-label-text">Start Here</span>
+            </div>
+            <div class="item-btn active-topic" style="cursor:default; transform:none; border-left:3px solid var(--accent);">
+                Pick a language on the left to load its lessons, exercises, and tools.
+            </div>
+            <div class="item-btn" style="cursor:default; transform:none;">
+                DB Lab, Git Grounds, Quiz, and Code Lab all open from the top tabs.
+            </div>
+        `;
+    }
+    if (explanation) {
+        explanation.innerHTML = `
+            <div class="landing-panel">
+                <div class="landing-hero">
+                    <div class="landing-badge">Start here</div>
+                    <h2>Welcome to Kodex's Lab</h2>
+                    <p>
+                        Pick a language from the left rail or jump straight into a tool from the cards below.
+                        The editor, explanation pane, and output console will follow your choice.
+                    </p>
+                </div>
+                <div class="landing-quick-grid">
+                    <button class="landing-quick-card" onclick="setMode('js')">
+                        <span class="landing-card-icon">&lt;/&gt;</span>
+                        <span class="landing-card-title">JavaScript</span>
+                        <span class="landing-card-desc">Core lessons and topic explorer</span>
+                    </button>
+                    <button class="landing-quick-card" onclick="setMode('dblab')">
+                        <span class="landing-card-icon">⛁</span>
+                        <span class="landing-card-title">DB Lab</span>
+                        <span class="landing-card-desc">Design tables and draw relations</span>
+                    </button>
+                    <button class="landing-quick-card" onclick="setMode('git')">
+                        <span class="landing-card-icon">⌘</span>
+                        <span class="landing-card-title">Git Grounds</span>
+                        <span class="landing-card-desc">Visualize branch and merge flow</span>
+                    </button>
+                    <button class="landing-quick-card" onclick="setMode('challenge')">
+                        <span class="landing-card-icon">✎</span>
+                        <span class="landing-card-title">Code Lab</span>
+                        <span class="landing-card-desc">Fix bugs and solve challenges</span>
+                    </button>
+                    <button class="landing-quick-card" onclick="setMode('quiz')">
+                        <span class="landing-card-icon">★</span>
+                        <span class="landing-card-title">Quiz</span>
+                        <span class="landing-card-desc">Practice questions by language</span>
+                    </button>
+                    <button class="landing-quick-card" onclick="setMode('compiler')">
+                        <span class="landing-card-icon">▶</span>
+                        <span class="landing-card-title">Compiler</span>
+                        <span class="landing-card-desc">Run pipelines across languages</span>
+                    </button>
+                </div>
+                <div class="landing-tip">
+                    Tip: use the top tabs for broader tools, or the left rail to switch languages quickly.
+                </div>
+            </div>
+        `;
+    }
+    if (editor) editor.value = '// Select a language or mode to begin';
+    if (output) output.innerText = '// Welcome to Kodex\'s Lab';
+    if (levelBar) levelBar.style.display = 'none';
+    if (engineBar) engineBar.style.display = 'none';
+    if (platformBar) platformBar.style.display = 'none';
+    if (tutorialProgress) tutorialProgress.style.display = 'none';
+}
+
+showLandingState();
 
 // Startup health check for status badge
 (function checkBackend() {
