@@ -7,6 +7,6 @@ export { detectOllama, getOllamaStatus } from './ollama';
 export { rateLimit, getRateLimitInfo } from './rateLimit';
 export { proxyRequest, isValidProxyUrl } from './proxy';
 export { setupWebSocket, getWSStats, broadcastToProject } from './websocket';
-export { dockerExecute, isDockerAvailable, getSupportedDockerLangs, generateDockerfiles } from './docker-executor';
+export { dockerExecute, isDockerAvailable, getSupportedDockerLangs, generateDockerfiles, initWarmPool, shutdownWarmPool } from './docker-executor';
 export { metricsHandler, trackRequest } from './metrics';
 export { openapiHandler, swaggerUIHandler } from './openapi';
