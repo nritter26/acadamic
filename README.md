@@ -61,7 +61,7 @@ Cypress, Playwright — curriculum.
 - **Android**: Kotlin & Java, App Components, UI Toolkit (Jetpack Compose + Views), Architecture (MVVM, Hilt, Clean Architecture), Data & Networking (Retrofit, Room, Firebase), Async & Concurrency (Coroutines, Flow), Testing & Debug, Distribution (50 topics across 8 phases)
 - **iOS**: Swift & Objective-C, Xcode & Architecture, UIKit & SwiftUI, App Components & Navigation, Data & Networking (URLSession, CoreData, SwiftData), Concurrency & Memory (GCD, async/await, Actors), Testing & Debug, Distribution (48 topics across 8 phases)
 
-### Compiler Design
+### Compiler Design (Experimental Stage)
 Complete compiler curriculum: tokenization, AST, parsing, code generation, optimization — with hands-on pipeline explorer.
 
 ### Code Execution Runtimes
