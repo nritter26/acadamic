@@ -14,8 +14,16 @@ This codebase is intentionally large, but it becomes easier to work with if you 
 - `middleware/` for shared Express middleware
 - `sql/database.ts` for the SQL engine implementation
 - `ai/` for AI and tutor logic
-- `public/app.js` for the browser app shell and mode switching
-- `public/style.css` for the application stylesheet
+- `core-typescript/*.ts` for the browser app feature slices and mode handling
+- `core-typescript/app-core.ts` for the browser app shell
+- `core-typescript/app-run.ts` for run/debug/review flow
+- `core-typescript/app-editor.ts` for editor helpers and completions
+- `core-typescript/app-ai.ts` for AI chat, prompts, and tutor flow
+- `core-typescript/app-layout.ts` for mode switching and layout wiring
+- `core-typescript/app-quiz-challenge.ts` for quiz/challenge modes
+- `browser-build/core-typescript/*.js` for the generated browser outputs that `index.html` loads
+- `public/styles/*.css` for the stylesheet slices
+- `public/style.css` as the stylesheet entry point that imports the component files
 - `content/*.json` for curriculum data
 
 ## Generated Or Build-Adjacent Files
@@ -26,6 +34,7 @@ These files are useful, but they are not the best place to make manual edits:
 - `public/app-data.js`
 - `public/app-data-globals.js`
 - `public/ai/*.js`
+- `public/components/*.js` no longer exists; browser JS now lands in `browser-build/core-typescript/*.js`
 - `sql/database.js`
 - `dist/*`
 
@@ -33,25 +42,27 @@ These files are useful, but they are not the best place to make manual edits:
 
 These are the best candidates for future refactoring because they are doing too much at once:
 
-- `public/app.js`
-- `public/style.css`
 - `public/compiler-core.js`
 - `index.html`
+- `browser-build/core-typescript/app-ai.js`
+- `browser-build/core-typescript/app-layout.js`
+- `public/styles/base.css`
+- `public/styles/tutorial-overlays.css`
 
 ## Likely Next Refactor Steps
 
-1. Split `public/app.js` by feature:
+1. Continue splitting `core-typescript/` by feature:
    - bootstrap
    - navigation
    - landing
    - editor helpers
    - per-mode modules
-2. Split `public/style.css` by concern:
+2. Continue splitting `public/styles/` by concern:
    - base
    - layout
    - shared components
    - mode-specific styles
-3. Move generated browser assets into a clearer build output folder.
+3. Keep browser JS outputs in `browser-build/core-typescript/` and source in `core-typescript/`.
 4. Keep only one source file per runtime module when possible.
 
 ## Files To Leave Alone For Now
@@ -63,4 +74,3 @@ These are related to runtime behavior or user workflows, so moving them should w
 - `coordinate.sh`
 - `payload.json`
 - `.env` files
-

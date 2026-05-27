@@ -154,9 +154,9 @@ docker build -t kodex-scala -f docker/Dockerfile.scala docker/
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `npm start` | `tsx server.ts` | Run server with TypeScript execution |
-| `npm run dev` | `tsx watch server.ts` | Run server in watch mode with hot reload |
-| `npm run build` | `tsc` | Compile TypeScript (`ai/`, `server.ts`, `sql/` → `dist/`) |
+| `npm start` | `npm run build:ai && npm run build:browser && tsx server.ts` | Build browser assets, then run the server |
+| `npm run dev` | `npm run build:ai && npm run build:browser && tsx watch server.ts` | Build browser assets, then run in watch mode |
+| `npm run build` | `npm run build:ai && npm run build:browser && tsc` | Compile server TS and browser TS outputs |
 | `npm run build:watch` | `tsc --watch` | Watch mode for TS compilation |
 | `npm run typecheck` | `tsc --noEmit` | Type-check without writing build output |
 
@@ -170,7 +170,10 @@ The repo is organized around these boundaries:
 - [`middleware/`](./middleware) contains shared Express middleware.
 - [`sql/`](./sql) contains the database layer and seed data.
 - [`ai/`](./ai) contains the AI orchestration and analysis helpers.
-- [`public/`](./public) contains the browser app, visual tools, landing/bootstrap helpers, and generated client assets.
+- [`public/`](./public) contains the browser app, visual tools, landing/bootstrap helpers, and source assets.
+- [`core-typescript/`](./core-typescript) contains the browser app TypeScript source slices split out of the old monolith.
+- [`browser-build/core-typescript/`](./browser-build/core-typescript) contains the generated browser JS outputs that `index.html` loads.
+- [`public/styles/`](./public/styles) contains the stylesheet slices imported by [`public/style.css`](./public/style.css).
 - [`content/`](./content) contains curriculum JSON files.
 - [`data/`](./data) contains runtime state and learner profiles.
 - [`tests/`](./tests) contains integration and service tests.
