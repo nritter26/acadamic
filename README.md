@@ -170,7 +170,7 @@ The repo is organized around these boundaries:
 - [`middleware/`](./middleware) contains shared Express middleware.
 - [`sql/`](./sql) contains the database layer and seed data.
 - [`ai/`](./ai) contains the AI orchestration and analysis helpers.
-- [`public/`](./public) contains the browser app, visual tools, and generated client assets.
+- [`public/`](./public) contains the browser app, visual tools, landing/bootstrap helpers, and generated client assets.
 - [`content/`](./content) contains curriculum JSON files.
 - [`data/`](./data) contains runtime state and learner profiles.
 - [`tests/`](./tests) contains integration and service tests.
@@ -180,6 +180,13 @@ The repo is organized around these boundaries:
 - [`netlify/`](./netlify) contains the serverless function entry point.
 
 For a cleaner breakdown of source files, generated assets, and refactor candidates, see [`docs/project-layout.md`](./docs/project-layout.md).
+
+Recent frontend splits:
+
+- [`public/bootstrap.js`](./public/bootstrap.js) handles shared startup globals.
+- [`public/landing.js`](./public/landing.js) handles the welcome screen.
+- [`public/mobile-helpers.js`](./public/mobile-helpers.js) handles the mobile/tech stack intro handoff.
+- [`public/lang-intro.js`](./public/lang-intro.js) owns language intro content rendering.
 
 ## API Endpoints
 
