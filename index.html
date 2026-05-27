@@ -24,41 +24,43 @@
     <button id="nav-cicd" onclick="setMode('cicd')" class="game-nav-btn" style="color:#e24329;border-color:#e24329;">CI/CD</button>
     <button id="nav-challenge" onclick="setMode('challenge')" class="game-nav-btn" style="color:#a855f7;border-color:#a855f7;">Code Lab</button>
             <button id="nav-compiler" onclick="setMode('compiler')" class="game-nav-btn" style="color:#a5f3fc;border-color:#a5f3fc;">Compiler</button>
+            <button id="nav-dblab" onclick="setMode('dblab')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">DB Lab</button>
             <button id="nav-gamedev" onclick="setMode('gamedev')" class="game-nav-btn" style="color:#10b981;border-color:#10b981;">GameDev</button>
-            <button id="nav-mobile" onclick="setMode('mobile')" class="game-nav-btn" style="color:#ec4899;border-color:#ec4899;">Mobile</button>
             <button id="nav-game" onclick="toggleGameModal()" class="game-nav-btn">Gaming</button>
-            <button id="nav-techstack" onclick="setMode('techstack')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">Tech Stack</button>
+            <button id="nav-git" onclick="setMode('git')" class="game-nav-btn" style="color:#f1502f;border-color:#f1502f;">Git Grounds</button>
+            <button id="nav-mobile" onclick="setMode('mobile')" class="game-nav-btn" style="color:#ec4899;border-color:#ec4899;">Mobile</button>
             <button id="nav-quiz" onclick="setMode('quiz')" class="game-nav-btn" style="color:#f59e0b;border-color:#f59e0b;">Quiz</button>
             <button id="nav-tutorial" onclick="setMode('tutorial')" class="game-nav-btn" style="color:#f97316;border-color:#f97316;">Learn Code</button>
+            <button id="nav-techstack" onclick="setMode('techstack')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">Tech Stack</button>
         </div>
     </div>
     <div class="cyber-motto" id="cyberMotto"><span class="cyber-line"></span><span class="cyber-text">Just code <span class="cyber-dash">&mdash;</span> don't overthink</span><span class="cyber-line"></span></div>
     <button id="hamburger-btn" class="hamburger-btn" onclick="toggleNav()" aria-label="Toggle navigation menu">☰</button>
+</header>
+<div class="workspace">
     <div class="selector" id="nav-menu" role="tablist" aria-label="Programming languages">
+        <button id="nav-asm" onclick="setMode('asm')" role="tab" aria-label="Assembly">ASM</button>
         <button id="nav-bash" onclick="setMode('bash')" role="tab" aria-label="Bash">Bash</button>
-        <button id="nav-php" onclick="setMode('php')" role="tab" aria-label="PHP">PHP</button>
-        <button id="nav-rb" onclick="setMode('rb')" role="tab" aria-label="Ruby">Ruby</button>
-        <button id="nav-scala" onclick="setMode('scala')" role="tab" aria-label="Scala">Scala</button>
         <button id="nav-c" onclick="setMode('c')" role="tab" aria-label="C language">C</button>
         <button id="nav-cs" onclick="setMode('cs')" role="tab" aria-label="C sharp">C#</button>
         <button id="nav-cpp" onclick="setMode('cpp')" role="tab" aria-label="C plus plus">C++</button>
-        <button id="nav-asm" onclick="setMode('asm')" role="tab" aria-label="Assembly">ASM</button>
         <button id="nav-db" onclick="setMode('db')" role="tab" aria-label="Database">Database</button>
-        <button id="nav-git" onclick="setMode('git')" role="tab" aria-label="Git">Git</button>
         <button id="nav-go" onclick="setMode('go')" role="tab" aria-label="Go">Go</button>
         <button id="nav-java" onclick="setMode('java')" role="tab" aria-label="Java">Java</button>
         <button id="nav-js" onclick="setMode('js')" role="tab" aria-label="JavaScript">JavaScript</button>
         <button id="nav-kt" onclick="setMode('kt')" role="tab" aria-label="Kotlin">Kotlin</button>
+        <button id="nav-php" onclick="setMode('php')" role="tab" aria-label="PHP">PHP</button>
         <button id="nav-py" onclick="setMode('py')" role="tab" aria-label="Python">Python</button>
+        <button id="nav-rb" onclick="setMode('rb')" role="tab" aria-label="Ruby">Ruby</button>
         <button id="nav-rs" onclick="setMode('rs')" role="tab" aria-label="Rust">Rust</button>
+        <button id="nav-scala" onclick="setMode('scala')" role="tab" aria-label="Scala">Scala</button>
         <button id="nav-swift" onclick="setMode('swift')" role="tab" aria-label="Swift">Swift</button>
         <button id="nav-ts" onclick="setMode('ts')" role="tab" aria-label="TypeScript">TypeScript</button>
         <button id="nav-wasm" onclick="setMode('wasm')" role="tab" aria-label="WebAssembly">Wasm</button>
         <button id="nav-zig" onclick="setMode('zig')" role="tab" aria-label="Zig">Zig</button>
     </div>
-    </div>
-</header>
-<main>
+    <div class="resize-handle" id="sidebar-resize-handle"></div>
+    <main>
     <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="tutorial-progress"></div><div id="topic-list" class="scroll"></div></div>
     <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button><button id="api-toggle-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Toggle API client" style="display:none">API ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
     <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client notranslate" id="apiClient">
@@ -186,6 +188,7 @@
     <pre id="apiResBody" class="api-res-body">Send a request to see the response</pre>
 </div><div id="compiler-output" class="notranslate scroll" style="display:none;"><div class="cp-pipeline-tabs"><button class="cp-tab active" data-stage="0">Source</button><button class="cp-tab" data-stage="1">Tokens</button><button class="cp-tab" data-stage="2">AST</button><button class="cp-tab" data-stage="3">Stats</button></div><div id="cp-pipeline-content" class="cp-pipeline-content notranslate"><div class="cp-placeholder">Click any pipeline stage button (Source ▶, Tokens ▶, AST ▶, Stats ▶, Full Pipeline ▶) to analyze your code.</div></div></div></div>
 </main>
+</div>
 <script src="public/courseData.js"></script>
 <script src="public/app-data.js"></script>
 <script src="public/lang-intro.js"></script>
@@ -194,6 +197,7 @@
     <script src="public/schema.js"></script>
     <script src="public/schema-tutorial.js"></script>
 <script src="public/git-visualize.js"></script>
+    <script src="public/db-lab.js"></script>
 <script src="public/techstack.js"></script>
 <script src="public/compiler-core.js"></script>
 <script src="public/ai/responses-data.js"></script>
