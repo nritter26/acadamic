@@ -1,0 +1,625 @@
+/* Tutorial mode: quiz overlay and final shared animations */
+.tutorial-feedback-btn:hover {
+    background: #334155;
+    color: #fff;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tutorial Quiz Overlay ── */
+.tutorial-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(2,6,23,0.85);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+}
+.tutorial-overlay.open {
+    display: flex;
+}
+.tutorial-quiz-paper {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-radius: 12px;
+    width: min(95vw, 520px);
+    max-height: min(95vh, 700px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: fadeSlide 0.25s ease;
+    border: 1px solid #334155;
+    overflow-y: auto;
+}
+.tutorial-quiz-body {
+    padding: 20px;
+    flex: 1;
+}
+.tutorial-quiz-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.tutorial-quiz-header {
+    font-size: 16px;
+    font-weight: 900;
+    text-align: center;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.tutorial-quiz-subtitle {
+    font-size: 11px;
+    font-weight: 400;
+    color: #64748b;
+}
+.tutorial-quiz-progress {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+.quiz-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #475569;
+    transition: all 0.2s;
+}
+.quiz-dot.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(249,115,22,0.1);
+}
+.quiz-dot.done {
+    background: rgba(16,185,129,0.15);
+    border-color: #10b981;
+    color: #10b981;
+}
+.quiz-dot.done.wrong {
+    background: rgba(239,68,68,0.15);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+.tutorial-q-num {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.tutorial-q-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+.tutorial-q-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.tutorial-q-opt {
+    width: 100%;
+    text-align: left;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.tutorial-q-opt:hover:not(:disabled) {
+    background: #334155;
+    border-color: rgba(255,255,255,0.1);
+    color: #fff;
+}
+.tutorial-q-opt.correct {
+    background: rgba(16,185,129,0.15);
+    border-color: #10b981;
+    color: #10b981;
+}
+.tutorial-q-opt.wrong {
+    background: rgba(239,68,68,0.15);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+.tutorial-q-opt:disabled {
+    cursor: default;
+}
+.tutorial-quiz-feedback {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-weight: 700;
+}
+.tutorial-quiz-feedback.correct {
+    background: rgba(16,185,129,0.1);
+    color: #10b981;
+    border: 1px solid rgba(16,185,129,0.2);
+}
+.tutorial-quiz-feedback.wrong {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.2);
+}
+.tutorial-quiz-feedback strong {
+    color: #fff;
+}
+.tutorial-quiz-next-btn {
+    width: 100%;
+    margin-top: 14px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.tutorial-quiz-next-btn:hover {
+    filter: brightness(1.1);
+}
+.tutorial-quiz-result {
+    text-align: center;
+}
+.tutorial-quiz-result.pass {
+    color: #10b981;
+}
+.tutorial-quiz-result.fail {
+    color: #f59e0b;
+}
+.tutorial-quiz-score {
+    font-size: 36px;
+    font-weight: 900;
+}
+.tutorial-quiz-score-label {
+    font-size: 13px;
+    margin-top: 6px;
+    opacity: 0.8;
+}
+.tutorial-quiz-retry-btn,
+.tutorial-quiz-continue-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.tutorial-quiz-retry-btn {
+    background: #1e293b;
+    color: #f59e0b;
+    border: 1px solid #334155;
+}
+.tutorial-quiz-retry-btn:hover {
+    background: #334155;
+}
+.tutorial-quiz-continue-btn {
+    background: var(--accent);
+    color: #000;
+}
+.tutorial-quiz-continue-btn:hover {
+    filter: brightness(1.1);
+}
+
+/* ── Tutorial Resume Overlay ── */
+.tutorial-resume-paper {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-radius: 12px;
+    width: min(95vw, 400px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: fadeSlide 0.25s ease;
+    border: 1px solid #334155;
+}
+.tutorial-resume-body {
+    padding: 30px 24px;
+    text-align: center;
+}
+.tutorial-resume-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+.tutorial-resume-body h2 {
+    font-size: 18px;
+    margin: 0 0 8px 0;
+    color: #fff;
+}
+.tutorial-resume-body p {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+.tutorial-resume-stats {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 6px;
+}
+.tutorial-resume-name {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+.tutorial-resume-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.tutorial-resume-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.tutorial-resume-btn:hover {
+    background: #334155;
+    color: #fff;
+}
+.tutorial-resume-btn.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+.tutorial-resume-btn.primary:hover {
+    filter: brightness(1.1);
+}
+
+/* ── Tutorial Language Selector Bar ── */
+.tutorial-lang-bar { display:flex; flex-wrap:wrap; gap:4px; padding:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:8px; margin-bottom:8px; }
+.tutorial-lang-btn { flex:1 1 auto; min-width:0; background:#1e293b; color:#64748b; border:1px solid #334155; padding:5px 8px; border-radius:5px; cursor:pointer; font-size:9px; font-weight:700; transition:all 0.2s; text-align:center; white-space:nowrap; }
+.tutorial-lang-btn:hover { background:#334155; color:#94a3b8; }
+.tutorial-lang-btn.active { background:rgba(249,115,22,0.15); color:var(--accent); border-color:var(--accent); }
+
+@media (max-width: 760px) {
+    .tutorial-coach-top {
+        flex-direction: column;
+    }
+    .tutorial-coach-top > button {
+        width: 100%;
+    }
+    .tutorial-nav-inner {
+        align-items: stretch;
+    }
+    .tutorial-step-info {
+        order: -1;
+        flex-basis: 100%;
+        text-align: left;
+    }
+    .tutorial-nav-btn {
+        flex: 1;
+    }
+    .tutorial-stuck-btn.visible {
+        width: auto;
+        min-width: 38px;
+        border-radius: 6px;
+    }
+}
+
+/* ── Tutorial Quick Question (inline) ── */
+.tutorial-quick-q {
+    margin-top: 14px;
+    padding: 12px;
+    background: rgba(168,85,247,0.06);
+    border: 1px solid rgba(168,85,247,0.2);
+    border-radius: 8px;
+}
+.tutorial-quick-q-header {
+    font-size: 10px;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tutorial-quick-q-text {
+    font-size: 12px;
+    color: #e2e8f0;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+.tutorial-quick-q-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.tutorial-quick-q-opt {
+    text-align: left;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    padding: 7px 10px;
+    color: #cbd5e1;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.tutorial-quick-q-opt:hover {
+    background: #1e293b;
+    border-color: #475569;
+}
+.tutorial-quick-q-opt.correct {
+    border-color: #10b981;
+    background: rgba(16,185,129,0.1);
+    color: #10b981;
+}
+.tutorial-quick-q-opt.wrong {
+    border-color: #ef4444;
+    background: rgba(239,68,68,0.08);
+    color: #ef4444;
+}
+.tutorial-quick-q-opt:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+.tutorial-quick-q-opt:disabled:hover {
+    background: #0f172a;
+}
+.tutorial-quick-q-result {
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    line-height: 1.5;
+}
+.tutorial-quick-q-result.pass {
+    color: #10b981;
+    background: rgba(16,185,129,0.08);
+}
+.tutorial-quick-q-result.fail {
+    color: #fca5a5;
+    background: rgba(239,68,68,0.08);
+}
+.tutorial-quick-q-skip {
+    font-size: 9px;
+    color: #64748b;
+    cursor: pointer;
+    margin-top: 6px;
+    display: inline-block;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.tutorial-quick-q-skip:hover {
+    color: #94a3b8;
+}
+
+/* ── Tutorial Checkpoint Overlay ── */
+.tutorial-checkpoint-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+.tutorial-checkpoint-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.tutorial-checkpoint-paper {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 560px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.tutorial-checkpoint-header {
+    font-size: 13px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+}
+.tutorial-checkpoint-subtitle {
+    font-size: 9px;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+}
+.tutorial-checkpoint-desc {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+.tutorial-checkpoint-code {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    white-space: pre;
+    cursor: default;
+}
+.tutorial-checkpoint-code .bug-line {
+    background: rgba(239,68,68,0.15);
+    border-left: 2px solid #ef4444;
+    padding: 0 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+.tutorial-checkpoint-code .bug-line:hover {
+    background: rgba(239,68,68,0.3);
+}
+.tutorial-checkpoint-code .bug-line.selected {
+    background: rgba(239,68,68,0.4);
+    box-shadow: 0 0 0 1px #ef4444;
+}
+.tutorial-checkpoint-code .blank {
+    display: inline-block;
+    min-width: 60px;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 800;
+}
+.tutorial-checkpoint-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+.tutorial-checkpoint-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+.tutorial-checkpoint-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+.tutorial-checkpoint-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.tutorial-checkpoint-btn:hover {
+    background: #334155;
+}
+.tutorial-checkpoint-btn.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+.tutorial-checkpoint-btn.primary:hover {
+    filter: brightness(1.1);
+}
+.tutorial-checkpoint-btn.success {
+    background: #10b981;
+    color: #000;
+    border-color: #10b981;
+}
+.tutorial-checkpoint-result {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 12px;
+    line-height: 1.5;
+}
+.tutorial-checkpoint-result.pass {
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: #10b981;
+}
+.tutorial-checkpoint-result.fail {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #ef4444;
+}
+.tutorial-checkpoint-scramble-line {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: grab;
+    transition: background 0.15s;
+    user-select: none;
+}
+.tutorial-checkpoint-scramble-line:hover {
+    background: #1e293b;
+}
+.tutorial-checkpoint-scramble-line.dragging {
+    opacity: 0.5;
+    border-color: var(--accent);
+}
+
+/* ── AI Toggle Button ── */
+.ai-toggle {
+    position: fixed;
+}
+
+/* ── GTranslate / Google Translate Overrides ── */
+.goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }
+.goog-logo-link, .goog-logo-link:link, .goog-logo-link:visited, .goog-logo-link:hover, .goog-logo-link:active { display: none !important; }
+.goog-te-gadget { font-size: 0 !important; color: transparent !important; }
+#goog-gt-tt { display: none !important; }
+.goog-te-spinner-pos { display: none !important; }
+.goog-te-spinner { display: none !important; }
+
+.lang-popup-body .gtranslate-option {
+    display: block;
+    padding: 8px 16px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.lang-popup-body .gtranslate-option:hover {
+    background: #1e293b;
+    color: #fff;
+}

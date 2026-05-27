@@ -154,171 +154,42 @@ docker build -t kodex-scala -f docker/Dockerfile.scala docker/
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `npm start` | `tsx server.ts` | Run server with TypeScript execution |
-| `npm run dev` | `tsx watch server.ts` | Run server in watch mode with hot reload |
-| `npm run build` | `tsc` | Compile TypeScript (`ai/`, `server.ts`, `sql/` → `dist/`) |
+| `npm start` | `npm run build:ai && npm run build:browser && tsx server.ts` | Build browser assets, then run the server |
+| `npm run dev` | `npm run build:ai && npm run build:browser && tsx watch server.ts` | Build browser assets, then run in watch mode |
+| `npm run build` | `npm run build:ai && npm run build:browser && tsc` | Compile server TS and browser TS outputs |
 | `npm run build:watch` | `tsc --watch` | Watch mode for TS compilation |
 | `npm run typecheck` | `tsc --noEmit` | Type-check without writing build output |
 
 ## Project Structure
 
-```
-./
-├── server.ts                    # Express backend entry point (~124 lines)
-├── index.html                   # Single-page frontend app (355 lines)
-├── package.json                 # Dependencies & scripts
-├── tsconfig.json                # TypeScript configuration
-├── types.ts                     # Shared TypeScript type definitions
-├── vitest.config.ts             # Test runner configuration
-├── .env.example                 # Env var template
-├── docker-compose.yml           # Docker Compose (single image, all runtimes)
-├── Dockerfile                   # Multi-language Docker image (16 runtimes)
-├── docker-entrypoint.sh         # Container startup runtime verifier
-├── netlify.toml                 # Netlify deployment config
-│
-├── public/                      # Client-side source files
-│   ├── app.js                   # Main frontend logic (~4,531 lines)
-│   ├── app-data.js              # All quiz/challenge/cheatsheet data (embedded JSON)
-│   ├── style.css                # Application stylesheet (~3,371 lines)
-│   ├── ai/                      # Client-side AI module (TypeScript)
-│   │   └── core.ts              # AI tutor, language detection, embeddings
-│   ├── courseData.js            # Course metadata container
-│   ├── langConfig.js            # Language code ↔ name mappings (65 entries)
-│   ├── schema.js                # Schema designer (full visual DB designer, ~1,052 lines)
-│   ├── git-visualize.js         # Git visualizer learning mode (~993 lines)
-│   ├── techstack.js             # Tech stack explorer (~341 lines)
-│   ├── compiler-core.js         # Multi-language lexer/parser/AST (~428 lines)
-│   ├── compiler-curriculum.js   # Compiler design curriculum (~352 lines)
-│   ├── challenges.js            # 2,100+ code challenges across 15+ langs
-│   ├── quiz.js                  # Quiz questions per language (~2,780 lines)
-│   ├── game.js                  # Gaming mode logic (16 mini-games, ~1,497 lines)
-│   ├── db.js                    # Database tab frontend (~126 lines)
-│   ├── cheatsheets.js           # Per-language reference cheatsheets (~6,248 lines)
-│   ├── ai-responses.js          # 52+ AI tutor keyword responses
-│   ├── schema-tutorial.js       # Schema designer guided tutorial
-│   ├── tutorial.js              # App tutorial/onboarding helpers
-│   └── logos/                   # 58 SVG logos for supported technologies
-│
-├── content/                     # Course curriculum data (64 JSON files, 797 phases, 3,571+ topics)
-│   ├── js.json, py.json, ...    # 18 programming languages (incl. scala, bash, php, rb)
-│   ├── pg.json, mysql.json, ... # 10 databases (PG, MySQL, SQLite, MongoDB, Firebase, + frameworks)
-│   ├── dk.json, git.json, ...   # 11 cloud/DevOps tools
-│   ├── react.json, vue.json,... # 14 frontend frameworks
-│   ├── node.json, express.json  # 17 backend/tech tools (incl. FastAPI, Flask, Django, Spring)
-│   ├── cypress.json, k8s.json   # 4 testing/infra tools
-│   ├── cicd.json                # CI/CD curriculum (10 phases, ~30 topics)
-│   ├── gamedev.json             # Game development (17 phases, 143 topics)
-│   ├── godot.json               # Godot Engine (phases reference)
-│   ├── unity.json               # Unity Engine (phases reference)
-│   ├── unreal.json              # Unreal Engine (phases reference)
-│   └── mobile.json              # Android + iOS development (16 phases, 98 topics)
-│
-├── services/                    # Server-side service modules (TypeScript)
-│   ├── executor.ts              # Code execution engine (15 language runners)
-│   ├── docker-executor.ts       # Docker sandbox execution (16 sandbox images)
-│   ├── compiler.ts              # Compiler detection and hints
-│   ├── analyzer.ts              # Static code analysis
-│   ├── tutor.ts                 # AI tutor orchestration
-│   ├── conversation.ts          # Conversation context management
-│   ├── metrics.ts               # Performance metrics
-│   ├── proxy.ts                 # HTTP proxy with SSRF protection
-│   ├── rateLimit.ts             # Rate limiting middleware
-│   ├── ollama.ts                # Ollama LLM integration
-│   ├── websocket.ts             # WebSocket server
-│   ├── openapi.ts               # OpenAPI docs generation
-│   └── strategies/              # AI tutoring strategies
-│       └── utils.ts             # Language detection utilities
-│
-├── routes/                      # Express route handlers
-│   ├── index.ts                 # Route aggregator
-│   ├── health.ts                # Health check endpoint
-│   ├── execute.ts               # Code execution endpoint
-│   ├── analyze.ts               # Code analysis endpoint
-│   ├── review.ts                # Code review endpoint
-│   ├── explain.ts               # Code explanation endpoint
-│   ├── chat.ts                  # AI chat endpoint
-│   ├── quiz.ts                  # Quiz generation endpoint
-│   ├── exercise.ts              # Exercise generation endpoint
-│   ├── progress.ts              # Progress tracking endpoints
-│   ├── learner.ts               # Learner profile endpoints
-│   ├── courses.ts               # Course listing endpoint
-│   ├── content.ts               # Content serving endpoint
-│   ├── benchmark.ts             # Performance benchmark endpoint
-│   ├── projects.ts              # Projects endpoint
-│   ├── auth.ts                  # Authentication endpoints
-│   └── proxy.ts                 # Proxy request endpoint
-│
-├── middleware/                   # Express middleware
-│   ├── auth.ts                  # Authentication middleware
-│   ├── errorHandler.ts          # Global error handler
-│   ├── logger.ts                # Request logger
-│   ├── validator.ts             # Request validation
-│   └── index.ts                 # Middleware aggregator
-│
-├── data/                        # Runtime data (learner profiles, progress)
-│   ├── progress.json            # Topic completion progress
-│   └── learners/                # Per-user learner profiles (JSON, SM-2)
-│
-├── ai/                          # AI tutoring & analysis engine (TypeScript)
-│   ├── config.ts                # Provider config (hybrid/keyword/openai/anthropic/local)
-│   ├── provider.ts              # LLM request handler with SSE streaming, retry
-│   ├── embeddings.ts            # TF-IDF + OpenAI embedding semantic search
-│   ├── learner.ts               # SM-2 spaced-repetition learner profiles
-│   ├── reviewer.ts              # Static + LLM code review (JS/TS/PY/GO/RS/SQL)
-│   ├── exercises.ts             # On-demand exercise generation (11 types, 3 levels)
-│   ├── tiny-llm.js              # Transformers.js tiny model helper for hybrid tutor
-│   └── tutor-keywords.ts        # Keyword cascade for fast tutor responses
-│
-├── dist/                        # Compiled JS + declarations from tsconfig
-│
-├── sql/                         # SQL database engine
-│   ├── database.js              # SQLite in-memory DB + PG/MySQL pools
-│   ├── database.ts              # TypeScript source for database engine
-│   └── seed.sql                 # Sample data (20+ tables, 7 schemas)
-│
-├── docker/                      # Docker sandbox images (per-language)
-│   ├── build-all.sh             # Build all sandbox images
-│   ├── Dockerfile.scala         # Scala 3.3.3 sandbox
-│   ├── Dockerfile.py            # Python sandbox
-│   ├── Dockerfile.js            # Node.js sandbox
-│   ├── Dockerfile.ts            # TypeScript sandbox
-│   ├── Dockerfile.go            # Go sandbox
-│   ├── Dockerfile.rs            # Rust sandbox
-│   ├── Dockerfile.kt            # Kotlin sandbox
-│   ├── Dockerfile.swift         # Swift sandbox
-│   ├── Dockerfile.zig           # Zig sandbox
-│   ├── Dockerfile.c             # C sandbox
-│   ├── Dockerfile.cpp           # C++ sandbox
-│   ├── Dockerfile.cs            # C# sandbox
-│   ├── Dockerfile.php           # PHP sandbox
-│   ├── Dockerfile.bash          # Bash sandbox
-│   └── Dockerfile.scala         # Scala sandbox
-│
-├── backend-go/                  # Alternative Go backend
-│   ├── main.go                  # Go HTTP server (~329 lines)
-│   └── go.mod                   # Go module (Go 1.22)
-│
-├── scripts/                     # Utility scripts
-│   ├── build-app-data-js.js     # Regenerate app-data.js from app-data.json
-│   ├── extract-app-data.js      # Extract data from source
-│   ├── cleanup-source-data.js   # Clean up source data
-│   └── fix-formatting.js        # Fix formatting issues
-│
-├── tests/                       # Test suites
-│   ├── execute.test.ts          # Code execution tests
-│   ├── analyze.test.ts          # Analysis tests
-│   ├── auth.test.ts             # Authentication tests
-│   ├── content.test.ts          # Content tests
-│   ├── docker.test.ts           # Docker executor tests
-│   ├── health.test.ts           # Health endpoint tests
-│   ├── openapi.test.ts          # OpenAPI tests
-│   ├── projects.test.ts         # Projects tests
-│   └── services.test.ts         # Service tests
-│
-└── netlify/                     # Netlify serverless functions
-    └── functions/
-        └── api.js               # Unified handler for all API routes (~521 lines)
-```
+The repo is organized around these boundaries:
+
+- [`server.ts`](./server.ts) boots Express, WebSockets, cleanup jobs, and the API mount.
+- [`routes/`](./routes) contains HTTP handlers.
+- [`services/`](./services) contains execution, compiler, AI, proxy, metrics, and WebSocket logic.
+- [`middleware/`](./middleware) contains shared Express middleware.
+- [`sql/`](./sql) contains the database layer and seed data.
+- [`ai/`](./ai) contains the AI orchestration and analysis helpers.
+- [`public/`](./public) contains the browser app, visual tools, landing/bootstrap helpers, and source assets.
+- [`core-typescript/`](./core-typescript) contains the browser app TypeScript source slices split out of the old monolith.
+- [`browser-build/core-typescript/`](./browser-build/core-typescript) contains the generated browser JS outputs that `index.html` loads.
+- [`public/styles/`](./public/styles) contains the stylesheet slices imported by [`public/style.css`](./public/style.css).
+- [`content/`](./content) contains curriculum JSON files.
+- [`data/`](./data) contains runtime state and learner profiles.
+- [`tests/`](./tests) contains integration and service tests.
+- [`docker/`](./docker) contains the language sandbox images.
+- [`scripts/`](./scripts) contains build and maintenance helpers.
+- [`backend-go/`](./backend-go) contains the alternative Go backend.
+- [`netlify/`](./netlify) contains the serverless function entry point.
+
+For a cleaner breakdown of source files, generated assets, and refactor candidates, see [`docs/project-layout.md`](./docs/project-layout.md).
+
+Recent frontend splits:
+
+- [`public/bootstrap.js`](./public/bootstrap.js) handles shared startup globals.
+- [`public/landing.js`](./public/landing.js) handles the welcome screen.
+- [`public/mobile-helpers.js`](./public/mobile-helpers.js) handles the mobile/tech stack intro handoff.
+- [`public/lang-intro.js`](./public/lang-intro.js) owns language intro content rendering.
 
 ## API Endpoints
 
