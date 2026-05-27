@@ -56,6 +56,159 @@ export function getSupportedDockerLangs(): string[] {
   return Object.keys(DOCKER_RUNNERS);
 }
 
+// ── Warm Container Pool ──
+
+interface WarmPoolEntry {
+  containerId: string;
+  lang: string;
+  busy: boolean;
+  workspaceDir: string;
+  lastUsed: number;
+}
+
+let warmPool: Map<string, WarmPoolEntry[]> = new Map();
+const POOL_SIZE = Math.max(1, parseInt(process.env.WARM_POOL_SIZE || '1', 10));
+const WARM_POOL_BASE = path.join(os.tmpdir(), 'kodex-warm-pool');
+
+function warmPoolContainerName(lang: string, idx: number): string {
+  return `kodex-warm-${lang}-${idx}`;
+}
+
+async function ensureLangPool(lang: string): Promise<void> {
+  if (warmPool.has(lang) && warmPool.get(lang)!.length > 0) return;
+
+  const config = DOCKER_RUNNERS[lang];
+  if (!config) return;
+
+  for (let i = 0; i < POOL_SIZE; i++) {
+    try {
+      execSync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { stdio: 'pipe' });
+    } catch { /* ignore */ }
+  }
+
+  const entries: WarmPoolEntry[] = [];
+  for (let i = 0; i < POOL_SIZE; i++) {
+    const workspaceDir = path.join(WARM_POOL_BASE, `${lang}-${i}`);
+    fs.mkdirSync(workspaceDir, { recursive: true });
+
+    const containerId = execSync(
+      `docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory 256m --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`,
+      { timeout: 30000, stdio: 'pipe' }
+    ).toString().trim();
+
+    entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
+  }
+  warmPool.set(lang, entries);
+}
+
+async function acquirePoolContainer(lang: string): Promise<WarmPoolEntry | null> {
+  try {
+    await ensureLangPool(lang);
+  } catch (err) {
+    return null;
+  }
+
+  const entries = warmPool.get(lang);
+  if (!entries) return null;
+
+  const available = entries.find(e => !e.busy);
+  if (!available) return null;
+
+  available.busy = true;
+  available.lastUsed = Date.now();
+  return available;
+}
+
+function releasePoolContainer(entry: WarmPoolEntry): void {
+  try {
+    const files = fs.readdirSync(entry.workspaceDir);
+    for (const file of files) {
+      fs.rmSync(path.join(entry.workspaceDir, file), { recursive: true, force: true });
+    }
+  } catch { /* ignore */ }
+  entry.busy = false;
+}
+
+async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: string, stdin?: string): Promise<DockerExecResult> {
+  const config = DOCKER_RUNNERS[lang];
+  if (!config) {
+    releasePoolContainer(entry);
+    return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: true };
+  }
+
+  const progFile = path.join(entry.workspaceDir, 'prog' + config.ext);
+  fs.writeFileSync(progFile, code);
+
+  try {
+    const execCmd = config.needsCompile && config.compileCmd
+      ? `docker exec -i ${entry.containerId} sh -c "${config.compileCmd}"`
+      : `docker exec -i ${entry.containerId} ${config.runCmd}`;
+
+    const stdout = execSync(execCmd, {
+      timeout: 30000,
+      stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
+      input: stdin,
+      maxBuffer: 1024 * 1024,
+    });
+
+    releasePoolContainer(entry);
+    return { output: stdout.toString().trim() || '(no output)' };
+  } catch (err: any) {
+    const entries = warmPool.get(lang);
+    if (entries) {
+      const idx = entries.indexOf(entry);
+      if (idx >= 0) entries.splice(idx, 1);
+    }
+    try {
+      execSync(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
+    } catch { /* ignore */ }
+    ensureLangPool(lang).catch(() => {});
+
+    const stderr = err.stderr?.toString().trim() || '';
+    const stdout = err.stdout?.toString().trim() || '';
+    const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
+    return { output, error: true, dockerAvailable: true };
+  }
+}
+
+export async function initWarmPool(): Promise<void> {
+  if (!isDockerAvailable()) {
+    logger.warn('Docker not available, skipping warm pool initialization');
+    return;
+  }
+
+  try {
+    const existing = execSync('docker ps -aq --filter "name=kodex-warm-" 2>/dev/null', { stdio: 'pipe' }).toString().trim();
+    if (existing) {
+      execSync(`docker rm -f ${existing} 2>/dev/null`, { stdio: 'pipe' });
+    }
+  } catch { /* ignore */ }
+
+  try { fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true }); } catch { /* ignore */ }
+  fs.mkdirSync(WARM_POOL_BASE, { recursive: true });
+
+  const langs = Object.keys(DOCKER_RUNNERS);
+  const results = await Promise.allSettled(langs.map(lang => ensureLangPool(lang)));
+  const failed = results.filter(r => r.status === 'rejected').length;
+
+  if (failed > 0) {
+    logger.warn({ total: langs.length, failed }, 'Some warm pool containers failed to start');
+  }
+  logger.info({ langs: langs.length - failed, poolSize: POOL_SIZE }, 'Warm container pool ready');
+}
+
+export async function shutdownWarmPool(): Promise<void> {
+  for (const [, entries] of warmPool) {
+    for (const entry of entries) {
+      try {
+        execSync(`docker stop ${entry.containerId} 2>/dev/null && docker rm ${entry.containerId} 2>/dev/null`, { stdio: 'pipe', timeout: 10000 });
+      } catch { /* ignore */ }
+    }
+  }
+  warmPool.clear();
+  try { fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true }); } catch { /* ignore */ }
+}
+
 export async function dockerExecute(lang: string, code: string, stdin?: string): Promise<DockerExecResult> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) {
@@ -64,6 +217,12 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
 
   if (!isDockerAvailable()) {
     return { output: 'Docker is not available on this server', error: true, dockerAvailable: false };
+  }
+
+  // Try warm pool first
+  const warmPoolEntry = await acquirePoolContainer(lang);
+  if (warmPoolEntry) {
+    return executeOnWarmContainer(warmPoolEntry, lang, code, stdin);
   }
 
   // Check if the sandbox image exists before attempting to run
@@ -80,7 +239,7 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
 
   try {
     const cmd = config.needsCompile && config.compileCmd
-      ? `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code:ro" ${config.image} sh -c "${config.compileCmd}"`
+      ? `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${config.compileCmd}"`
       : `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code:ro" ${config.image} ${config.runCmd}`;
 
     logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
