@@ -967,6 +967,7 @@ textarea:focus { border-color: var(--accent); }
 .hl-keyword { color:#c084fc; }
 .hl-string { color:#fbbf24; }
 .hl-comment { color:#64748b; font-style:italic; }
+.hl-pair-ghost { color: rgba(148,163,184,0.08); }
 .hl-number { color:#34d399; }
 .hl-builtin { color:#38bdf8; }
 
@@ -1837,6 +1838,122 @@ body.api-mode #apiResponse { display: flex !important; }
     font-size: 10px;
     flex-shrink: 0;
 }
+.tutorial-sidebar-note {
+    padding: 8px 9px;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, rgba(30,41,59,0.92), rgba(15,23,42,0.82));
+    border: 1px solid rgba(34,197,94,0.16);
+    border-radius: 8px;
+}
+.tutorial-sidebar-note-title {
+    font-size: 9px;
+    font-weight: 800;
+    color: #a7f3d0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+}
+.tutorial-sidebar-note-body {
+    font-size: 10px;
+    line-height: 1.55;
+    color: #cbd5e1;
+}
+.tutorial-blueprint-card {
+    margin: 10px 0 12px;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.95));
+    border: 1px solid rgba(249,115,22,0.22);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(2,6,23,0.24);
+}
+.tutorial-blueprint-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.tutorial-blueprint-kicker {
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fdba74;
+    margin-bottom: 4px;
+}
+.tutorial-blueprint-overview {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #e2e8f0;
+    max-width: 62ch;
+}
+.tutorial-blueprint-progress {
+    font-size: 11px;
+    font-weight: 900;
+    color: #000;
+    background: var(--accent);
+    padding: 4px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+.tutorial-blueprint-section {
+    margin-top: 10px;
+}
+.tutorial-blueprint-section strong {
+    display: block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+.tutorial-blueprint-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.tutorial-blueprint-pill {
+    font-size: 9px;
+    color: #0f172a;
+    background: #fde68a;
+    border-radius: 999px;
+    padding: 3px 7px;
+    font-weight: 800;
+}
+.tutorial-blueprint-list {
+    margin: 0;
+    padding-left: 16px;
+    color: #cbd5e1;
+    font-size: 10px;
+    line-height: 1.55;
+}
+.tutorial-blueprint-current {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #7dd3fc;
+    padding-top: 8px;
+    border-top: 1px solid rgba(148,163,184,0.14);
+}
+.tutorial-blueprint-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+}
+.tutorial-blueprint-btn {
+    font-size: 10px;
+    font-weight: 900;
+    color: #0f172a;
+    background: linear-gradient(180deg, #fde68a, #f59e0b);
+    border: none;
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(245, 158, 11, 0.25);
+}
+.tutorial-blueprint-btn:hover {
+    filter: brightness(1.03);
+    transform: translateY(-1px);
+}
 .tutorial-path-toggle {
     font-size: 9px;
     font-weight: 800;
@@ -2199,6 +2316,95 @@ body.api-mode #apiResponse { display: flex !important; }
     background: rgba(239,68,68,0.1);
     color: #fca5a5;
     border: 1px solid rgba(239,68,68,0.2);
+}
+
+.tutorial-teachback {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.72));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.tutorial-teachback-top {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.tutorial-teachback-kicker {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.tutorial-teachback-prompt {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #e2e8f0;
+}
+.tutorial-teachback-input {
+    width: 100%;
+    min-height: 84px;
+    resize: vertical;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: #0b1220;
+    color: #f8fafc;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.45;
+    outline: none;
+}
+.tutorial-teachback-input:focus {
+    border-color: rgba(247,223,30,0.6);
+    box-shadow: 0 0 0 3px rgba(247,223,30,0.1);
+}
+.tutorial-teachback-result {
+    margin-top: 10px;
+    min-height: 18px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #94a3b8;
+}
+.tutorial-teachback-result.pass {
+    color: #4ade80;
+}
+.tutorial-teachback-result.fail {
+    color: #fca5a5;
+}
+.tutorial-teachback-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.tutorial-teachback-btn {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.tutorial-teachback-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+}
+.tutorial-teachback-btn.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+.tutorial-teachback-btn.primary:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.24);
 }
 
 .tutorial-task-box {

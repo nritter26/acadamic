@@ -536,6 +536,105 @@ Try fixing the code and running it again. If you're still stuck, share what you 
     }
     return issues;
   }
+  function localLanguageReviewIssues(code, lang) {
+    const issues = [];
+    const lines = code.split("\n");
+    if (lang === "ts") {
+      const anyMatch = /\bany\b/.exec(code);
+      if (anyMatch) {
+        issues.push({
+          message: "Avoid `any` when possible. Prefer `unknown`, unions, or a narrower interface so TypeScript can help you.",
+          severity: "warning",
+          line: localFindLineIndex(code, anyMatch.index) + 1
+        });
+      }
+      const asMatch = /\s+as\s+[A-Za-z_][\w<>\[\]\|?]*/.exec(code);
+      if (asMatch) {
+        issues.push({
+          message: "Type assertions (`as`) bypass safety checks. Use narrowing or a type guard if you can.",
+          severity: "info",
+          line: localFindLineIndex(code, asMatch.index) + 1
+        });
+      }
+      const bangMatch = /\w+!\b/.exec(code);
+      if (bangMatch) {
+        issues.push({
+          message: "Non-null assertions (`!`) can hide bugs. Prefer a null check or optional chaining when possible.",
+          severity: "warning",
+          line: localFindLineIndex(code, bangMatch.index) + 1
+        });
+      }
+      if (/\binterface\b/.test(code) || /\btype\b/.test(code)) {
+        issues.push({
+          message: "Good: TypeScript is using explicit types. Keep leaning on interfaces, unions, and narrowing.",
+          severity: "info",
+          line: 1
+        });
+      }
+    } else if (lang === "py") {
+      const mutableDefault = /def\s+\w+\s*\([^)]*=\s*(\[\]|\{\})[^)]*\)/.exec(code);
+      if (mutableDefault) {
+        issues.push({
+          message: "Avoid mutable default arguments like `[]` or `{}`. Use `None` and create the object inside the function.",
+          severity: "warning",
+          line: localFindLineIndex(code, mutableDefault.index) + 1
+        });
+      }
+      const tabs = lines.some((line) => /^\t+/.test(line));
+      const spaces = lines.some((line) => /^ +/.test(line));
+      if (tabs && spaces) {
+        issues.push({
+          message: "Mixing tabs and spaces in indentation causes hard-to-debug errors. Stick to 4 spaces.",
+          severity: "error",
+          line: 1
+        });
+      }
+      const bareExcept = /^\s*except\s*:/m.exec(code);
+      if (bareExcept) {
+        issues.push({
+          message: "Avoid bare `except:` blocks. Catch a specific exception so you do not hide real bugs.",
+          severity: "warning",
+          line: localFindLineIndex(code, bareExcept.index) + 1
+        });
+      }
+    } else if (lang === "go") {
+      const errMentioned = /\berr\b/.test(code);
+      const hasErrorCheck = /if\s+\w+\s*!=\s*nil/.test(code);
+      if (errMentioned && !hasErrorCheck) {
+        issues.push({
+          message: "You mention `err` but do not appear to check it. Go code usually needs explicit `if err != nil` handling.",
+          severity: "warning",
+          line: 1
+        });
+      }
+      const panicMatch = /\bpanic\s*\(/.exec(code);
+      if (panicMatch) {
+        issues.push({
+          message: "Prefer returning errors instead of calling `panic()` for normal failure paths.",
+          severity: "warning",
+          line: localFindLineIndex(code, panicMatch.index) + 1
+        });
+      }
+      const fmtPrint = /\bfmt\.Print(ln|f)?\s*\(/.exec(code);
+      if (fmtPrint) {
+        issues.push({
+          message: "Great for learning: `fmt.Println` shows output clearly. In real code, keep output focused and structured.",
+          severity: "info",
+          line: localFindLineIndex(code, fmtPrint.index) + 1
+        });
+      }
+    } else if (lang === "js") {
+      const arrowMatch = /=>/.exec(code);
+      if (arrowMatch && !/\breturn\b/.test(code)) {
+        issues.push({
+          message: "Arrow functions without `return` can be intentional, but make sure that is what you want.",
+          severity: "info",
+          line: localFindLineIndex(code, arrowMatch.index) + 1
+        });
+      }
+    }
+    return issues;
+  }
   function localCalculateScore(issues, lineCount) {
     let score = 10;
     for (const issue of issues) {
@@ -555,7 +654,8 @@ Try fixing the code and running it again. If you're still stuck, share what you 
     const lines = code.split("\n");
     const structuralIssues = localAnalyzeStructure(code);
     const keywordIssues = localCheckKeywords(code, lang);
-    const allIssues = [...structuralIssues, ...keywordIssues];
+    const languageIssues = localLanguageReviewIssues(code, lang);
+    const allIssues = [...structuralIssues, ...keywordIssues, ...languageIssues];
     const hasMain = /\bmain\b/i.test(code);
     const hasFunctions = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code);
     const hasClass = /\bclass\s+/.test(code);
@@ -589,6 +689,25 @@ Try fixing the code and running it again. If you're still stuck, share what you 
       review += `
 **Suggestion:** This function/file is getting long (${lines.length} lines). Consider breaking it into smaller functions for readability.
 `;
+    }
+    if (lang === "ts" && /\bany\b/.test(code)) {
+      review += "\n**Suggestion:** TypeScript works best when the compiler can infer or narrow types. Replace `any` with `unknown`, unions, or a concrete interface where possible.\n";
+    }
+    if (lang === "py") {
+      if (/def\s+\w+\s*\([^)]*=\s*(\[\]|\{\})[^)]*\)/.test(code)) {
+        review += "\n**Suggestion:** Avoid mutable default arguments in Python. Use `None` and create the list/dict inside the function.\n";
+      }
+      if (/^\s*except\s*:/m.test(code)) {
+        review += "\n**Suggestion:** Bare `except:` blocks hide bugs. Catch a specific exception when you know what can fail.\n";
+      }
+    }
+    if (lang === "go") {
+      if (/\berr\b/.test(code) && !/if\s+\w+\s*!=\s*nil/.test(code)) {
+        review += "\n**Suggestion:** Go is explicit about failures. If you use `err`, handle it with `if err != nil`.\n";
+      }
+      if (/\bpanic\s*\(/.test(code)) {
+        review += "\n**Suggestion:** `panic()` is usually for unrecoverable problems. Prefer returning an error for normal failure paths.\n";
+      }
     }
     if (!hasTryCatch && (/\bfetch\s*\(/.test(code) || /\breadFile\b/.test(code) || /\bwriteFile\b/.test(code))) {
       review += "\n**Suggestion:** I/O operations like fetch/file access can fail \u2014 add error handling with try/catch.\n";

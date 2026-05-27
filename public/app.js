@@ -3614,38 +3614,50 @@ function highlightCharInLine(html, char) {
 
 function highlightEditorCode(code, lang) {
     const kws = LANG_KEYWORDS[lang] || LANG_KEYWORDS.js;
-    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const ghostPairs = {
+        '(': ')',
+        '{': '}',
+        '[': ']',
+        '<': '>'
+    };
     const tokens = [];
     let i = 0;
-    while (i < escaped.length) {
-        const rest = escaped.slice(i);
+    while (i < code.length) {
+        const rest = code.slice(i);
         const newl = rest.match(/^\n/);
         if (newl) { tokens.push('\n'); i++; continue; }
         const wsp = rest.match(/^[ \t]+/);
-        if (wsp) { tokens.push(wsp[0]); i += wsp[0].length; continue; }
+        if (wsp) { tokens.push(escapeHtml(wsp[0])); i += wsp[0].length; continue; }
         const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
-        if (bCm) { tokens.push('<span class="hl-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
+        if (bCm) { tokens.push('<span class="hl-comment">' + escapeHtml(bCm[0]) + '</span>'); i += bCm[0].length; continue; }
         const sCm = rest.match(/^\/\/[^\n]*/);
-        if (sCm) { tokens.push('<span class="hl-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
+        if (sCm) { tokens.push('<span class="hl-comment">' + escapeHtml(sCm[0]) + '</span>'); i += sCm[0].length; continue; }
         const hCm = rest.match(/^#[^\n]*/);
-        if (hCm && ['py','rs','sh','bash','php'].includes(lang)) { tokens.push('<span class="hl-comment">' + hCm[0] + '</span>'); i += hCm[0].length; continue; }
+        if (hCm && ['py','rs','sh','bash','php'].includes(lang)) { tokens.push('<span class="hl-comment">' + escapeHtml(hCm[0]) + '</span>'); i += hCm[0].length; continue; }
         const sqlCm = rest.match(/^--[^\n]*/);
-        if (sqlCm && ['pg','mysql','sqlite'].includes(lang)) { tokens.push('<span class="hl-comment">' + sqlCm[0] + '</span>'); i += sqlCm[0].length; continue; }
+        if (sqlCm && ['pg','mysql','sqlite'].includes(lang)) { tokens.push('<span class="hl-comment">' + escapeHtml(sqlCm[0]) + '</span>'); i += sqlCm[0].length; continue; }
         const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
-        if (str) { tokens.push('<span class="hl-string">' + str[0] + '</span>'); i += str[0].length; continue; }
+        if (str) { tokens.push('<span class="hl-string">' + escapeHtml(str[0]) + '</span>'); i += str[0].length; continue; }
         const num = rest.match(/^\b(0x[0-9a-fA-F]+|\d+\.?\d*)\b/);
-        if (num) { tokens.push('<span class="hl-number">' + num[0] + '</span>'); i += num[0].length; continue; }
+        if (num) { tokens.push('<span class="hl-number">' + escapeHtml(num[0]) + '</span>'); i += num[0].length; continue; }
         const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
         if (word) {
             if (kws.some(k => k.toLowerCase() === word[1].toLowerCase())) {
-                tokens.push('<span class="hl-keyword">' + word[1] + '</span>');
+                tokens.push('<span class="hl-keyword">' + escapeHtml(word[1]) + '</span>');
             } else {
-                tokens.push(word[1]);
+                tokens.push(escapeHtml(word[1]));
             }
             i += word[1].length;
             continue;
         }
-        tokens.push(escaped[i]);
+        const opener = code[i];
+        const closer = ghostPairs[opener];
+        if (closer && code[i + 1] === closer) {
+            tokens.push(escapeHtml(opener) + '<span class="hl-pair-ghost">' + escapeHtml(closer) + '</span>');
+            i += 2;
+            continue;
+        }
+        tokens.push(escapeHtml(opener));
         i++;
     }
     return tokens.join('');

@@ -48,6 +48,268 @@ function tutorialStripHtml(value) {
     return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+var _tutorialBlueprints = {
+    js: {
+        title: 'JavaScript track',
+        overview: 'Learn runtime behavior first: values, scopes, objects, arrays, the DOM, then async and modules.',
+        focus: ['truthy vs falsy', 'closures and scope', 'array methods', 'DOM events', 'Promises and async/await'],
+        pitfalls: ['coercion and equality', 'hoisting surprises', 'callback nesting', 'mutating shared objects'],
+        phaseOrder: ['Fundamentals', 'Variables & Types', 'Operators', 'Control Flow', 'Functions', 'Objects & Classes', 'Arrays & Collections', 'DOM & Browser APIs', 'Async JavaScript', 'Modern JavaScript', 'Modules', 'Equality Comparisons', 'Hoisting & Scopes', 'Async Details', 'Built-in Objects', 'Memory Management', 'Frameworks & Tools', 'Using Browser DevTools']
+    },
+    ts: {
+        title: 'TypeScript track',
+        overview: 'Treat types as a tool: start with unions and narrowing, then interfaces, generics, utilities, and configuration.',
+        focus: ['union narrowing', 'interfaces and shapes', 'generics', 'utility types', 'strict compiler settings'],
+        pitfalls: ['`any` leaks', '`as` assertions', 'non-null assumptions', 'ignoring compiler errors'],
+        phaseOrder: ['Fundamentals', 'Type System', 'Type Guards & Narrowing', 'Functions', 'Classes & OOP', 'Generics', 'Utility Types', 'Advanced Types', 'Modules & Tooling', 'Asynchronous TypeScript', 'Modern Patterns', 'DOM & TypeScript', 'Error Handling', 'Configuration & Build', 'Ecosystem', 'AI & LLMs in TypeScript']
+    },
+    py: {
+        title: 'Python track',
+        overview: 'Focus on readable control flow, rich data structures, functions, modules, and the practical standard library.',
+        focus: ['indentation and blocks', 'lists/dicts/sets', 'functions and defaults', 'exceptions', 'comprehensions and iteration'],
+        pitfalls: ['mutable defaults', 'mixing tabs and spaces', 'bare except', 'overusing globals'],
+        phaseOrder: ['Getting Started', 'Operators', 'Control Flow', 'Data Structures', 'Comprehensions', 'Functions', 'Classes', 'Modules & Errors', 'Files & Inputs', 'Additions', 'Standard Libraries', 'Async Python', 'File System & Paths', 'Logging', 'Itertools & Functools', 'Decorators & Closures', 'Testing & Debugging', 'Packaging & Distribution', 'Working with Data', 'Concurrency Deep Dive', 'Web & APIs', 'Type Hints', 'Performance', 'Automation & Browsing', 'Fluent Python Deep Dive', 'Data Science & AI', 'AI & LLM Engineering', 'AI Engineering Pro']
+    }
+};
+
+function tutorialGetBlueprint(lang) {
+    return _tutorialBlueprints[lang] || null;
+}
+
+function tutorialOrderPhases(lang, phases) {
+    var bp = tutorialGetBlueprint(lang);
+    if (!bp || !bp.phaseOrder || bp.phaseOrder.length === 0) return phases.slice();
+    var orderMap = {};
+    for (var i = 0; i < bp.phaseOrder.length; i++) orderMap[bp.phaseOrder[i]] = i;
+    return phases.slice().sort(function (a, b) {
+        var ai = Object.prototype.hasOwnProperty.call(orderMap, a) ? orderMap[a] : 9999;
+        var bi = Object.prototype.hasOwnProperty.call(orderMap, b) ? orderMap[b] : 9999;
+        if (ai !== bi) return ai - bi;
+        return a.localeCompare(b);
+    });
+}
+
+function tutorialGetRecommendedStepIndex(lang) {
+    var steps = getTutorialSteps(lang);
+    if (!steps || steps.length === 0) return -1;
+    var bp = tutorialGetBlueprint(lang);
+    if (!bp || !bp.phaseOrder || bp.phaseOrder.length === 0) return 0;
+    for (var p = 0; p < bp.phaseOrder.length; p++) {
+        var phase = bp.phaseOrder[p];
+        for (var i = 0; i < steps.length; i++) {
+            if (steps[i].phase === phase) return i;
+        }
+    }
+    return 0;
+}
+
+function tutorialGetPrimaryActionLabel(lang, completed) {
+    var idx = tutorialGetRecommendedStepIndex(lang);
+    if (idx < 0) return 'Start learning';
+    return completed > 0 ? 'Restart from beginning' : 'Start here';
+}
+
+function tutorialGetTeachBackPrompt(step, code) {
+    var topic = (step && step.topic) ? step.topic : '';
+    var lang = tutorialLang;
+    var lower = (topic + ' ' + (code || '')).toLowerCase();
+
+    if (lang === 'js') {
+        if (/\bdom\b|\bevent\b|\baddEventListener\b/.test(lower)) {
+            return {
+                prompt: 'Explain what this JavaScript code does when the event happens.',
+                expected: ['event', 'handler', 'output']
+            };
+        }
+        if (/\bfunction\b|\b=>/.test(lower)) {
+            return {
+                prompt: 'Explain what this function returns or changes.',
+                expected: ['function', 'return', 'value']
+            };
+        }
+        if (/\barray\b|\bpush\b|\bmap\b|\bfilter\b|\breduce\b/.test(lower)) {
+            return {
+                prompt: 'Explain how the array changes when this code runs.',
+                expected: ['array', 'change', 'element']
+            };
+        }
+        return {
+            prompt: 'Explain the main behavior of this JavaScript snippet in one or two sentences.',
+            expected: ['value', 'output', 'change']
+        };
+    }
+
+    if (lang === 'ts') {
+        if (/\bany\b|\bas\b|\bunknown\b/.test(lower)) {
+            return {
+                prompt: 'Explain why TypeScript is happy or unhappy with these types.',
+                expected: ['type', 'narrow', 'interface']
+            };
+        }
+        if (/\binterface\b|\btype\b/.test(lower)) {
+            return {
+                prompt: 'Explain what shape this type describes and why that helps.',
+                expected: ['shape', 'type', 'property']
+            };
+        }
+        if (/\bunion\b|\bnarrow\b|\bguard\b/.test(lower)) {
+            return {
+                prompt: 'Explain how the code narrows a union before using it.',
+                expected: ['narrow', 'union', 'guard']
+            };
+        }
+        return {
+            prompt: 'Explain what TypeScript is checking here that JavaScript would not.',
+            expected: ['type', 'compile', 'check']
+        };
+    }
+
+    if (lang === 'py') {
+        if (/^\s*def\s+\w+/m.test(code || '')) {
+            return {
+                prompt: 'Explain what this function takes in and what it returns.',
+                expected: ['function', 'return', 'parameter']
+            };
+        }
+        if (/\b(list|dict|set|tuple)\b/.test(lower)) {
+            return {
+                prompt: 'Explain how the Python collection changes during execution.',
+                expected: ['list', 'dict', 'set', 'tuple']
+            };
+        }
+        if (/\bif\b|\belif\b|\bmatch\b/.test(lower)) {
+            return {
+                prompt: 'Explain which branch runs and why.',
+                expected: ['branch', 'condition', 'if']
+            };
+        }
+        if (/^\s*except\s*:/m.test(code || '') || /\braise\b/.test(lower)) {
+            return {
+                prompt: 'Explain what error path this code is handling.',
+                expected: ['error', 'exception', 'except']
+            };
+        }
+        return {
+            prompt: 'Explain the main behavior of this Python snippet in one or two sentences.',
+            expected: ['value', 'output', 'change']
+        };
+    }
+
+    return {
+        prompt: 'Explain what this code does.',
+        expected: ['code', 'output']
+    };
+}
+
+function tutorialScoreTeachBack(answer, expected) {
+    var text = (answer || '').toLowerCase();
+    var hits = 0;
+    for (var i = 0; i < expected.length; i++) {
+        if (text.indexOf(expected[i].toLowerCase()) !== -1) hits++;
+    }
+    if (!text.trim()) return 0;
+    if (hits >= Math.min(2, expected.length)) return 3;
+    if (hits >= 1) return 2;
+    if (text.length > 30) return 1;
+    return 0;
+}
+
+function tutorialTeachBackFeedback(score, prompt) {
+    if (score >= 3) {
+        return 'Nice. You used the key idea: ' + tutorialEscapeHtml(prompt) + '.';
+    }
+    if (score === 2) {
+        return 'Close. Your explanation has part of the idea, but it is missing one important concept.';
+    }
+    if (score === 1) {
+        return 'A start, but too vague. Try naming the data, branch, or return value you saw.';
+    }
+    return 'Type a short explanation that mentions what changes, what gets checked, or what gets printed.';
+}
+
+function tutorialAddTeachBackPanel(expEl, step, code) {
+    var spec = tutorialGetTeachBackPrompt(step, code);
+    if (!spec) return;
+
+    var panel = document.createElement('div');
+    panel.className = 'tutorial-teachback';
+    panel.innerHTML = ''
+        + '<div class="tutorial-teachback-top">'
+        + '<div class="tutorial-teachback-kicker">Teach back</div>'
+        + '<div class="tutorial-teachback-prompt">' + tutorialEscapeHtml(spec.prompt) + '</div>'
+        + '</div>';
+
+    var textarea = document.createElement('textarea');
+    textarea.className = 'tutorial-teachback-input';
+    textarea.rows = 3;
+    textarea.placeholder = 'Write 1-2 sentences...';
+    panel.appendChild(textarea);
+
+    var result = document.createElement('div');
+    result.className = 'tutorial-teachback-result';
+    panel.appendChild(result);
+
+    var actions = document.createElement('div');
+    actions.className = 'tutorial-teachback-actions';
+
+    var checkBtn = document.createElement('button');
+    checkBtn.type = 'button';
+    checkBtn.className = 'tutorial-teachback-btn primary';
+    checkBtn.textContent = 'Check understanding';
+    checkBtn.onclick = function () {
+        var score = tutorialScoreTeachBack(textarea.value, spec.expected);
+        result.className = 'tutorial-teachback-result ' + (score >= 2 ? 'pass' : 'fail');
+        result.textContent = tutorialTeachBackFeedback(score, spec.prompt);
+        if (score >= 2 && typeof showScorePopup === 'function') showScorePopup('+3 XP', 'game-xp-popup');
+        if (score >= 2 && !tutorialManager.isStepCompleted(tutorialManager.getCurrentStepIndex())) {
+            tutorialShowFeedback('<strong>\uD83E\uDDE0 Understanding check passed.</strong> ' + tutorialEscapeHtml(spec.prompt), 'success');
+        } else if (score < 2) {
+            tutorialShowFeedback('<strong>\uD83D\uDCA1 Teach back:</strong> ' + tutorialTeachBackFeedback(score, spec.prompt), 'error');
+        }
+    };
+    actions.appendChild(checkBtn);
+
+    var hintBtn = document.createElement('button');
+    hintBtn.type = 'button';
+    hintBtn.className = 'tutorial-teachback-btn';
+    hintBtn.textContent = 'Show concept hint';
+    hintBtn.onclick = function () {
+        result.className = 'tutorial-teachback-result pass';
+        result.textContent = tutorialTeachBackFeedback(2, spec.prompt);
+    };
+    actions.appendChild(hintBtn);
+
+    panel.appendChild(actions);
+    expEl.appendChild(panel);
+}
+
+function tutorialRenderBlueprintCard(lang, completed, total, step) {
+    var bp = tutorialGetBlueprint(lang);
+    if (!bp) return '';
+    var pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    var focus = bp.focus.map(function (x) { return '<span class="tutorial-blueprint-pill">' + tutorialEscapeHtml(x) + '</span>'; }).join('');
+    var pitfalls = bp.pitfalls.map(function (x) { return '<li>' + tutorialEscapeHtml(x) + '</li>'; }).join('');
+    var current = step ? tutorialEscapeHtml(step.topic) : '';
+    var startIdx = tutorialGetRecommendedStepIndex(lang);
+    var actionLabel = tutorialGetPrimaryActionLabel(lang, completed);
+    return ''
+        + '<div class="tutorial-blueprint-card">'
+        + '<div class="tutorial-blueprint-top">'
+        + '<div>'
+        + '<div class="tutorial-blueprint-kicker">' + tutorialEscapeHtml(bp.title) + '</div>'
+        + '<div class="tutorial-blueprint-overview">' + tutorialEscapeHtml(bp.overview) + '</div>'
+        + '</div>'
+        + '<div class="tutorial-blueprint-progress">' + pct + '%</div>'
+        + '</div>'
+        + '<div class="tutorial-blueprint-section"><strong>Focus</strong><div class="tutorial-blueprint-pills">' + focus + '</div></div>'
+        + '<div class="tutorial-blueprint-section"><strong>Common pitfalls</strong><ul class="tutorial-blueprint-list">' + pitfalls + '</ul></div>'
+        + '<div class="tutorial-blueprint-actions">'
+        + '<button type="button" class="tutorial-blueprint-btn" onclick="goToTutorialStep(' + startIdx + ')">' + tutorialEscapeHtml(actionLabel) + '</button>'
+        + '</div>'
+        + (current ? '<div class="tutorial-blueprint-current">Continue from <strong>' + current + '</strong></div>' : '')
+        + '</div>';
+}
+
 function tutorialAnnotateLine(line, message, severity) {
     if (typeof updateAnnotations === 'function') {
         updateAnnotations([{ line: line, message: message || '', severity: severity || 'info' }]);
@@ -350,6 +612,92 @@ function tutorialCodePreview(code) {
     return firstLine.length > 74 ? firstLine.slice(0, 71) + '...' : firstLine;
 }
 
+function tutorialGetLanguageTaskHints(step, code, lowerTopic, lowerCode, hasLoop, hasFunction, hasConditional, hasVariable, hasConsole, hasClass, hasArray, hasStringOp, hasAsync, hasReturn, hasParam) {
+    var lang = tutorialLang;
+    var joined = (lowerTopic + ' ' + lowerCode).trim();
+
+    if (lang === 'py') {
+        if (/\bindent|syntax|control flow|if-elif-else|for & range|while statement|match statement/.test(lowerTopic)) {
+            return {
+                task2Hint: 'Watch indentation carefully. In Python, blocks are defined by whitespace.',
+                task3Text: 'Change the indentation or condition and rerun.',
+                task3Hint: 'Move one indented line, or tweak the if/elif/loop condition, then rerun and compare.'
+            };
+        }
+        if (/\blist|tuple|dict|set|slicing|deque|collections\b/.test(joined) || hasArray) {
+            return {
+                task2Hint: 'Python collections are easy to mutate. Try a small change and watch the printed value.',
+                task3Text: 'Mutate the collection or try a slice.',
+                task3Hint: 'Append, pop, slice, or change a dict key and rerun.'
+            };
+        }
+        if (/\bfunction|lambda|return|default parameters\b/.test(joined) || hasFunction || hasReturn || hasParam) {
+            return {
+                task2Hint: 'Python functions return values directly. Change one argument or the returned result.',
+                task3Text: 'Change the return value or a parameter default.',
+                task3Hint: 'Edit the function body, then rerun to see how the output changes.'
+            };
+        }
+        if (/\bexception|try|except|raise\b/.test(joined)) {
+            return {
+                task2Hint: 'Python surfaces errors clearly. Try changing the failing branch or exception type.',
+                task3Text: 'Raise or catch a different exception.',
+                task3Hint: 'Change the exception path, then observe how the handler reacts.'
+            };
+        }
+        return {
+            task2Hint: 'Python is dynamic. Edit a value, rerun, and inspect the printed result.',
+            task3Text: 'Change a value, name, or condition.',
+            task3Hint: 'Try a new number, string, or boolean and see what prints.'
+        };
+    }
+
+    if (lang === 'go') {
+        if (/\berror\b|go run vs go build|gopath|module\b/.test(joined)) {
+            return {
+                task2Hint: 'Go is explicit: check the output carefully and pay attention to errors.',
+                task3Text: 'Change the error path or handle a nil case.',
+                task3Hint: 'Try returning a different error or add an if err != nil check.'
+            };
+        }
+        if (/\bslice|map|range|zero values|short declaration|primitive types\b/.test(joined) || hasArray || hasVariable) {
+            return {
+                task2Hint: 'Go favors concrete types. Try changing a value and see how the typed output changes.',
+                task3Text: 'Change a collection element or a typed value.',
+                task3Hint: 'Use append, make, range, or a different literal and rerun.'
+            };
+        }
+        if (/\bstruct|pointer|receiver|method|embedding\b/.test(joined) || hasClass) {
+            return {
+                task2Hint: 'Go uses structs and methods instead of classes. Try mutating a field or receiver.',
+                task3Text: 'Change the receiver or mutate a struct field.',
+                task3Hint: 'Try pointer vs value receiver behavior, then rerun.'
+            };
+        }
+        if (/\bgoroutine|channel|concurrency|select\b/.test(joined) || /\bgo\s+func\b|\bgo\s+\w+|\bchan\b/.test(joined)) {
+            return {
+                task2Hint: 'Go concurrency is explicit. Observe the order of output when goroutines or channels are involved.',
+                task3Text: 'Add a send/receive or change the goroutine timing.',
+                task3Hint: 'Try a channel operation or adjust the code that runs concurrently.'
+            };
+        }
+        if (hasFunction || hasReturn || hasConditional) {
+            return {
+                task2Hint: 'Go prefers explicit returns and types. Make a small change and rerun to see the result.',
+                task3Text: 'Change the return value or branch condition.',
+                task3Hint: 'Edit one typed value or comparison, then rerun.'
+            };
+        }
+        return {
+            task2Hint: 'Go is compile-first. Make a small change and rerun to see the result or any compiler feedback.',
+            task3Text: 'Change a typed value or the output call.',
+            task3Hint: 'Try a new literal, a different fmt.Println call, or a small branch change.'
+        };
+    }
+
+    return null;
+}
+
 function getTutorialStepTask(step, item) {
     var topic = step.topic;
     var code = (item && item.code) || '';
@@ -390,6 +738,12 @@ function getTutorialStepTask(step, item) {
     var hasReturn = /\breturn\b/.test(code);
     var hasParam = /function\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code) || /def\s+\w+\s*\([^)]*\w+[^)]*\)/.test(code);
     var hasEvent = /\b(addEventListener|onclick|onSubmit|onChange|\.on\()/.test(code);
+    var langHints = tutorialGetLanguageTaskHints(step, code, lowerTopic, lowerCode, hasLoop, hasFunction, hasConditional, hasVariable, hasConsole, hasClass, hasArray, hasStringOp, hasAsync, hasReturn, hasParam);
+    if (langHints) {
+        task2Hint = langHints.task2Hint || task2Hint;
+        task3Text = langHints.task3Text || task3Text;
+        task3Hint = langHints.task3Hint || task3Hint;
+    }
     if (hasEvent) {
         task3Text = 'Change the event handler to do something different.';
         task3Hint = 'Look for the event listener and modify what happens when the event fires.';
@@ -722,7 +1076,7 @@ function generateTutorialSteps(lang) {
     var data = courseData[lang];
     if (!data) return [];
     var steps = [];
-    var phases = Object.keys(data);
+    var phases = tutorialOrderPhases(lang, Object.keys(data));
     for (var p = 0; p < phases.length; p++) {
         var phase = phases[p];
         var topics = Object.keys(data[phase]);
@@ -954,6 +1308,15 @@ class TutorialManager {
 
         var step = this.getCurrentStep();
         if (!step) return;
+        var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[this.lang]) || this.lang;
+        var langTip = '';
+        if (this.lang === 'py') {
+            langTip = 'Python tip: watch indentation, mutate one value, and rerun to see the change in output.';
+        } else if (this.lang === 'go') {
+            langTip = 'Go tip: change one typed value or error path, then rerun to see compiler/runtime feedback.';
+        } else {
+            langTip = 'Try changing one value, name, message, or branch condition and rerun.';
+        }
 
         var panel = document.createElement('div');
         panel.id = 'tutorial-stuck-panel';
@@ -963,8 +1326,8 @@ class TutorialManager {
             + '<button onclick="this.parentElement.parentElement.remove()">\u2715</button>'
             + '</div>'
             + '<div class="tutorial-stuck-body">'
-            + '<div class="tutorial-stuck-tip"><strong>Working on:</strong> ' + tutorialEscapeHtml(step.topic) + '</div>'
-            + '<div class="tutorial-stuck-tip"><strong>Try this:</strong> Run the code once, then change one value, name, message, or branch condition and run again.</div>'
+            + '<div class="tutorial-stuck-tip"><strong>Working on:</strong> ' + tutorialEscapeHtml(step.topic) + ' (' + tutorialEscapeHtml(langName) + ')</div>'
+            + '<div class="tutorial-stuck-tip"><strong>Try this:</strong> ' + tutorialEscapeHtml(langTip) + '</div>'
             + '<div class="tutorial-stuck-actions">'
             + '<button onclick="tutorialDismissStuckPanel(); openCheatsheet()">Open Cheatsheet</button>'
             + '<button onclick="tutorialDismissStuckPanel(); tutorialAskDevin()">Ask Devin</button>'
@@ -1138,7 +1501,9 @@ function showTutorialTopicBrowser() {
             + '</div>';
     }
 
-    var phases = Object.keys(data);
+    var introNote = tutorialRenderBlueprintCard(tutorialLang, completed, total, step);
+
+    var phases = tutorialOrderPhases(tutorialLang, Object.keys(data));
     var browserHtml = '';
     for (var p = 0; p < phases.length; p++) {
         var phase = phases[p];
@@ -1189,9 +1554,10 @@ function showTutorialTopicBrowser() {
         + '<div class="tutorial-browser">'
         + '<div class="tutorial-browser-header">'
         + '<h2>' + tutorialEscapeHtml(langName) + '</h2>'
-        + '<p>Pick any topic to start learning. No prerequisites needed \u2014 explore freely!</p>'
+        + '<p>' + tutorialEscapeHtml((tutorialGetBlueprint(tutorialLang) && tutorialGetBlueprint(tutorialLang).overview) || 'Pick any topic to start learning. No prerequisites needed — explore freely!') + '</p>'
         + '</div>'
         + resumeHtml
+        + introNote
         + browserHtml
         + '</div>';
 
@@ -1361,10 +1727,17 @@ function renderTutorialSidebar() {
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
     var html = langBar ? langBar.outerHTML : '';
     html += '<div class="tutorial-sidebar-summary">'
-        + '<span>' + tutorialEscapeHtml(langName) + ' path</span>'
+        + '<span>' + tutorialEscapeHtml(langName) + ' track</span>'
         + '<strong>' + completedCount + '/' + total + '</strong>'
-        + '</div>'
-        + '<div class="tutorial-path-toggle" onclick="tutorialToggleLearningPath()">\uD83D\uDCDA Learning Path <span class="tutorial-path-arrow">\u25BC</span></div>'
+        + '</div>';
+    var bp = tutorialGetBlueprint(tutorialLang);
+    if (bp) {
+        html += '<div class="tutorial-sidebar-note">'
+            + '<div class="tutorial-sidebar-note-title">Focus</div>'
+            + '<div class="tutorial-sidebar-note-body">' + tutorialEscapeHtml(bp.focus.join(', ')) + '</div>'
+            + '</div>';
+    }
+    html += '<div class="tutorial-path-toggle" onclick="tutorialToggleLearningPath()">\uD83D\uDCDA Learning Path <span class="tutorial-path-arrow">\u25BC</span></div>'
         + '<div class="tutorial-path-content" id="tutorial-path-content"></div>';
 
     var currentChapter = '';
@@ -1550,6 +1923,7 @@ function loadTutorialStep(idx) {
     expEl.appendChild(expWrapper);
 
     tutorialAddInlineExercise(expEl, step, item.code || '');
+    tutorialAddTeachBackPanel(expEl, step, item.code || '');
 
     var relatedEl = buildRelatedTopics(step, idx);
     if (relatedEl) expEl.appendChild(relatedEl);
@@ -1594,42 +1968,145 @@ function tutorialAddInlineExercise(expEl, step, code) {
     if (lines.length < 2) return;
 
     var exercises = [];
+    var fallbackExercises = [];
     var lowerCode = code.toLowerCase();
+    var lowerTopic = (step.topic || '').toLowerCase();
+
+    if (tutorialLang === 'js') {
+        if (/\bconsole\.log\b/.test(code) || /\bdom\b|\bevent\b|\baddEventListener\b/.test(lowerTopic)) {
+            exercises.push({
+                task: 'Change the output or event handler so the code behaves differently.',
+                hint: 'Edit the logged message or the callback body, then run again.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\bfunction\b/.test(code) || /=>/.test(code)) {
+            exercises.push({
+                task: 'Convert the function style or change what it returns.',
+                hint: 'Try converting a function expression to an arrow function or change the return value.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\b==\b/.test(code) || /\b===\b/.test(code)) {
+            exercises.push({
+                task: 'Compare two values with strict equality and predict the result.',
+                hint: 'Try switching between == and === and inspect the output.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\b(map|filter|reduce|forEach|slice|push|pop)\b/.test(code)) {
+            exercises.push({
+                task: 'Change one array operation and see what comes out.',
+                hint: 'Swap in a different array method or change the input array.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+    } else if (tutorialLang === 'ts') {
+        if (/\bany\b/.test(code) || /\s+as\s+/.test(code)) {
+            exercises.push({
+                task: 'Replace a loose type with a safer TypeScript type.',
+                hint: 'Try `unknown`, a union, or a narrower interface instead of `any` or `as`.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\binterface\b|\btype\b/.test(code)) {
+            exercises.push({
+                task: 'Add one property to the type and update the code to match it.',
+                hint: 'Change the interface/type and update any object literals that use it.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\bUnion Types|typeof Type Guards|instanceof Type Guards|narrow|unknown\b/i.test(lowerTopic) || /\|/.test(code)) {
+            exercises.push({
+                task: 'Narrow the type before using a value.',
+                hint: 'Add a type guard or switch branch before accessing the value.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\b<\w+>|\bPartial\b|\bPick\b|\bRecord\b/.test(code)) {
+            exercises.push({
+                task: 'Change the generic or utility type usage and observe the compiler shape.',
+                hint: 'Adjust the type argument and update the call site if needed.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+    } else if (tutorialLang === 'py') {
+        if (/^\s*def\s+\w+/m.test(code)) {
+            exercises.push({
+                task: 'Change the function default, return value, or one parameter.',
+                hint: 'Edit the function signature or body, then rerun.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\b(list|dict|set|tuple)\b/.test(lowerCode) || /\[|\{/.test(code)) {
+            exercises.push({
+                task: 'Mutate the collection in a small way and predict the result.',
+                hint: 'Append, pop, add a key, or change a slice to see the new output.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\bif\b|\belif\b|\bmatch\b/.test(code)) {
+            exercises.push({
+                task: 'Change one branch condition or indentation level.',
+                hint: 'Move one line or alter the condition, then rerun.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/^\s*except\s*:/m.test(code) || /\braise\b/.test(code)) {
+            exercises.push({
+                task: 'Catch or raise a more specific exception.',
+                hint: 'Replace a bare except or tweak the exception type.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+        if (/\bfor\b/.test(code) && /\b(range|enumerate|zip|comprehension)\b/.test(lowerTopic)) {
+            exercises.push({
+                task: 'Try a comprehension or change the iterator details.',
+                hint: 'Turn one loop into a comprehension or change the range.',
+                check: function (val) { return val.length > 0; }
+            });
+        }
+    }
 
     if (/\b(console\.log|print)\b/.test(code)) {
-        exercises.push({
+        fallbackExercises.push({
             task: 'Change the message being printed to say something else.',
             hint: 'Find the text inside quotes and change it.',
             check: function (val) { return val.length > 0; }
         });
     }
     if (/\b(let|var|const)\s+\w+\s*=/.test(code)) {
-        exercises.push({
+        fallbackExercises.push({
             task: 'Change the variable value and predict what will happen.',
             hint: 'Modify the number or string on the right side of the = sign.',
             check: function (val) { return val.length > 0; }
         });
     }
     if (/\b(for|while)\b/.test(code)) {
-        exercises.push({
+        fallbackExercises.push({
             task: 'Change how many times the loop runs.',
             hint: 'Modify the condition or counter in the loop header.',
             check: function (val) { return val.length > 0; }
         });
     }
     if (/\b(if|else|switch)\b/.test(code)) {
-        exercises.push({
+        fallbackExercises.push({
             task: 'Change the condition in the if-statement and see how output changes.',
             hint: 'Flip a comparison (>, <, ===) to change the behavior.',
             check: function (val) { return val.length > 0; }
         });
     }
     if (/\b(function|def|func|fn)\b/.test(code)) {
-        exercises.push({
+        fallbackExercises.push({
             task: 'Call the function with different arguments.',
             hint: 'Change the values passed to the function call.',
             check: function (val) { return val.length > 0; }
         });
+    }
+
+    if (exercises.length === 0) exercises = fallbackExercises;
+    else if (fallbackExercises.length > 0 && exercises.length < 2) {
+        exercises = exercises.concat(fallbackExercises);
     }
 
     if (exercises.length === 0) return;
@@ -2085,6 +2562,13 @@ function tutorialTriggerCheckpoint() {
     if (!code.trim()) return;
 
     var types = ['spotbug', 'scramble', 'fillblank', 'predict'];
+    if (tutorialLang === 'ts') {
+        types = ['fillblank', 'spotbug', 'predict', 'scramble'];
+    } else if (tutorialLang === 'py') {
+        types = ['fillblank', 'predict', 'spotbug', 'scramble'];
+    } else if (tutorialLang === 'js') {
+        types = ['spotbug', 'predict', 'scramble', 'fillblank'];
+    }
     var type = types[_tutorialCheckpointIdx % types.length];
     _tutorialCheckpointIdx++;
     tutorialShowCheckpoint(type, step, code);
