@@ -8,6 +8,9 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  resolve: {
+    conditions: ['browser'],
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{ts,js}'],
