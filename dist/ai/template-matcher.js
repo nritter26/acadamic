@@ -1,78 +1,6 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-let _modelPromise = null;
-let _pipeline = null;
-const MODEL_ID = process.env.TINY_LLM_MODEL || 'Xenova/gte-small';
-const CACHE_DIR = process.env.TINY_LLM_CACHE_DIR || undefined;
-async function getPipeline() {
-    if (!_pipeline) {
-        try {
-            const { pipeline } = await Promise.resolve().then(() => __importStar(require('@xenova/transformers')));
-            _pipeline = pipeline;
-        }
-        catch (e) {
-            console.error('[template-matcher] Failed to import @xenova/transformers:', e.message);
-            throw e;
-        }
-    }
-    return _pipeline;
-}
-async function loadModel() {
-    if (!_modelPromise) {
-        _modelPromise = (async () => {
-            console.log(`[template-matcher] Loading model: ${MODEL_ID} (this may take a moment on first run)...`);
-            const pipe = await getPipeline();
-            const model = await pipe('feature-extraction', MODEL_ID, {
-                cache_dir: CACHE_DIR,
-            });
-            console.log(`[template-matcher] Model loaded: ${MODEL_ID}`);
-            return model;
-        })();
-    }
-    return _modelPromise;
-}
 async function generateResponse(messages) {
-    const model = await loadModel();
     const lastMsg = messages[messages.length - 1]?.content || '';
-    const context = messages.slice(0, -1).map(m => m.content).join('\n').slice(-500);
-    const input = context ? `Context: ${context}\nQuestion: ${lastMsg}` : lastMsg;
-    const result = await model(input, {
-        pooling: 'mean',
-        normalize: true,
-    });
-    const embedding = Array.from(result.data);
     const isQuestionLike = /\b(what|how|why|when|where|which|can|could|would|should|explain|tell|describe|show|help|difference|example|mean|define)\b/i.test(lastMsg);
     const isLongEnough = lastMsg.split(/\s+/).length > 3;
     if (!isQuestionLike && !isLongEnough) {
@@ -130,25 +58,7 @@ async function getTinyLLMResponse(messages, onStream) {
         return null;
     }
 }
-async function isModelLoaded() {
-    if (!_modelPromise)
-        return false;
-    try {
-        await _modelPromise;
-        return true;
-    }
-    catch {
-        return false;
-    }
-}
-function disposeTinyLLM() {
-    _modelPromise = null;
-    _pipeline = null;
-    console.log('[template-matcher] Disposed model reference');
-}
 module.exports = {
     getTinyLLMResponse,
-    isModelLoaded,
-    disposeTinyLLM,
 };
 //# sourceMappingURL=template-matcher.js.map

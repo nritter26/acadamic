@@ -39,22 +39,13 @@ const analyzer_1 = require("./analyzer");
 const embeddings_1 = require("../ai/embeddings");
 const learner = __importStar(require("../ai/learner"));
 const conv = __importStar(require("./conversation"));
-const langConfig_1 = require("../public/langConfig");
 const middleware_1 = require("../middleware");
 const strategies_1 = require("./strategies");
+const utils_1 = require("./strategies/utils");
+const langConfig_1 = require("../public/langConfig");
 const query_expander_1 = require("../ai/query-expander");
-function detectLanguage(query) {
-    const words = query.toLowerCase().split(/\s+/);
-    for (const word of words) {
-        for (const [code, name] of Object.entries(langConfig_1.LANG_NAMES)) {
-            if (word === name || word === code)
-                return code;
-        }
-        if (word === 'sql')
-            return 'pg';
-    }
-    return null;
-}
+const config_1 = require("../ai/config");
+const tutor_keywords_1 = require("../ai/tutor-keywords");
 function extractSubject(text) {
     if (!text)
         return '';
@@ -72,34 +63,52 @@ function resolveFollowUp(q, history) {
     const lastBot = [...history].reverse().find(m => m.role === 'bot');
     if (!lastBot || !lastBot.text)
         return q;
+    const topics = (0, tutor_keywords_1.matchTopic)(q);
     const subject = extractSubject(lastBot.text);
-    return subject ? `${subject} ${q}` : q;
+    const subjectLower = subject.toLowerCase();
+    if (topics.length > 0 && !topics.some(t => subjectLower.startsWith(t)))
+        return q;
+    const lang = (0, utils_1.detectLanguage)(lastBot.text);
+    let result = subject ? `${subject} ${q}` : q;
+    if (lang) {
+        const rawName = langConfig_1.LANG_NAMES[lang] || lang;
+        const alreadyMentions = trimmed.includes(lang) || trimmed.includes(rawName);
+        if (!alreadyMentions) {
+            const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+            result = `in ${displayName}, ${result.toLowerCase()}`;
+        }
+    }
+    return result;
 }
 async function buildLLMMessages(message, lang, topic, phase, code, output, hasError, history, learnerId) {
     const messages = [];
     const context = [];
+    let learnerLevel = 'beginner';
     if (learnerId && lang) {
         try {
             const mastery = await learner.getConceptMastery(learnerId, lang);
             if (mastery?.topics?.length > 0) {
                 const avgMastery = mastery.overall;
                 const weakTopics = mastery.topics.filter(t => t.completed && t.mastery < 60).map(t => t.topic);
-                let level = 'beginner';
-                if (avgMastery > 70)
-                    level = 'intermediate';
                 if (avgMastery > 85)
-                    level = 'expert';
-                context.push(`[Learner Profile] Current level: ${level}. Overall mastery: ${avgMastery}%. Weak areas: ${weakTopics.join(', ') || 'none'}.`);
+                    learnerLevel = 'advanced';
+                else if (avgMastery > 70)
+                    learnerLevel = 'intermediate';
+                else
+                    learnerLevel = 'beginner';
+                context.push(`[Learner Profile] Current level: ${learnerLevel}. Overall mastery: ${avgMastery}%. Weak areas: ${weakTopics.join(', ') || 'none'}.`);
             }
         }
         catch (e) {
             middleware_1.logger.debug({ error: String(e) }, 'Learner profile failed');
         }
     }
+    messages.push({ role: 'system', content: (0, config_1.getSystemPrompt)(learnerLevel) });
     if (topic) {
         const topicCtx = (0, embeddings_1.getTopicContext)(topic, lang);
         if (topicCtx)
             context.push(topicCtx);
+        context.push(`The user is asking specifically about the topic "${topic}". Focus your response on this topic.`);
     }
     if (code) {
         const analysis = (0, analyzer_1.analyzeUserCode)(code, lang || 'js');
@@ -113,26 +122,24 @@ async function buildLLMMessages(message, lang, topic, phase, code, output, hasEr
     if (hasError && output) {
         context.push(`The code produced this output/error:\n\`\`\`\n${output.replace(/<[^>]*>/g, '').trim()}\n\`\`\``);
     }
-    if (!topic) {
-        try {
-            const expanded = (0, query_expander_1.expandQuery)(message);
-            const queryStr = expanded.join(' ');
-            const { results, mode } = await (0, embeddings_1.searchWithSources)(queryStr, lang, 3);
-            if (results.length > 0) {
-                const sourceLines = results.map((r, i) => `[${i + 1}] ${r.lang.toUpperCase()} / ${r.phase} / ${r.topic} (score: ${(r.score * 100).toFixed(0)}%)`);
-                let ragCtx = `\n**Relevant curriculum content (${mode} search):**\n${sourceLines.join('\n')}\n\n`;
-                for (const r of results) {
-                    if (r.exp)
-                        ragCtx += `[${r.topic}] ${r.exp.slice(0, 400)}\n`;
-                    if (r.code)
-                        ragCtx += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
-                }
-                context.push(ragCtx);
+    try {
+        const expanded = (0, query_expander_1.expandQuery)(message + (topic ? ' ' + topic : ''));
+        const queryStr = expanded.join(' ');
+        const { results, mode } = await (0, embeddings_1.searchWithSources)(queryStr, lang, 3);
+        if (results.length > 0) {
+            const sourceLines = results.map((r, i) => `[${i + 1}] ${r.lang.toUpperCase()} / ${r.phase} / ${r.topic} (score: ${(r.score * 100).toFixed(0)}%)`);
+            let ragCtx = `\n**Relevant curriculum content (${mode} search):**\n${sourceLines.join('\n')}\n\n`;
+            for (const r of results) {
+                if (r.exp)
+                    ragCtx += `[${r.topic}] ${r.exp.slice(0, 400)}\n`;
+                if (r.code)
+                    ragCtx += `\`\`\`\n${r.code.slice(0, 200)}\n\`\`\`\n`;
             }
+            context.push(ragCtx);
         }
-        catch (e) {
-            middleware_1.logger.debug({ err: e }, 'RAG search failed, skipping');
-        }
+    }
+    catch (e) {
+        middleware_1.logger.debug({ err: e }, 'RAG search failed, skipping');
     }
     if (context.length > 0) {
         messages.push({ role: 'system', content: context.join('\n\n') });
@@ -168,7 +175,12 @@ async function handleTutorMessage(message, options, sseSend, sseDone) {
         };
         const handled = await (0, strategies_1.executeStrategies)(ctx, sseSend, sseDone);
         if (!handled) {
-            sseSend("Sorry, I couldn't process your request. Please try again.");
+            const fallback = "Sorry, I couldn't process your request. Please try asking in a different way or mention a specific topic.";
+            try {
+                await conv.addMessage(lid, 'assistant', fallback);
+            }
+            catch { }
+            sseSend(fallback);
             sseDone();
         }
     }
@@ -176,17 +188,5 @@ async function handleTutorMessage(message, options, sseSend, sseDone) {
         sseSend("Sorry, I encountered an error processing your request. Please try again.");
         sseDone();
     }
-}
-async function streamReply(sseSend, sseDone, text, lid) {
-    if (lid) {
-        try {
-            await conv.addMessage(lid, 'assistant', text);
-        }
-        catch (err) {
-            middleware_1.logger.warn({ err }, 'tutor: failed to add streamed message');
-        }
-    }
-    sseSend(text);
-    sseDone();
 }
 //# sourceMappingURL=tutor.js.map

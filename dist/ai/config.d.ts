@@ -12,6 +12,7 @@ export interface AppConfig {
     systemPrompt: string;
 }
 declare const config: AppConfig;
+export declare function getSystemPrompt(level: 'beginner' | 'intermediate' | 'advanced'): string;
 export declare function isHybrid(): boolean;
 export declare function isKeyword(): boolean;
 export declare function getActiveAIProvider(): string;

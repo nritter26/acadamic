@@ -1502,6 +1502,12 @@ function showTutorialTopicBrowser() {
     }
 
     var introNote = tutorialRenderBlueprintCard(tutorialLang, completed, total, step);
+    var heroStats = ''
+        + '<div class="tutorial-browser-stats">'
+        + '<span class="tutorial-browser-stat"><strong>' + completed + '</strong><small>completed</small></span>'
+        + '<span class="tutorial-browser-stat"><strong>' + total + '</strong><small>lessons</small></span>'
+        + '<span class="tutorial-browser-stat"><strong>' + tutorialEscapeHtml((step && step.phase) || 'Start') + '</strong><small>current focus</small></span>'
+        + '</div>';
 
     var phases = tutorialOrderPhases(tutorialLang, Object.keys(data));
     var browserHtml = '';
@@ -1552,9 +1558,13 @@ function showTutorialTopicBrowser() {
 
     expEl.innerHTML = ''
         + '<div class="tutorial-browser">'
+        + '<div class="tutorial-browser-hero">'
+        + '<div class="tutorial-browser-kicker">Guided lab</div>'
         + '<div class="tutorial-browser-header">'
         + '<h2>' + tutorialEscapeHtml(langName) + '</h2>'
         + '<p>' + tutorialEscapeHtml((tutorialGetBlueprint(tutorialLang) && tutorialGetBlueprint(tutorialLang).overview) || 'Pick any topic to start learning. No prerequisites needed — explore freely!') + '</p>'
+        + '</div>'
+        + heroStats
         + '</div>'
         + resumeHtml
         + introNote
@@ -1737,6 +1747,13 @@ function renderTutorialSidebar() {
             + '<div class="tutorial-sidebar-note-body">' + tutorialEscapeHtml(bp.focus.join(', ')) + '</div>'
             + '</div>';
     }
+    var currentStep = steps[currentIdx];
+    if (currentStep) {
+        html += '<div class="tutorial-sidebar-note tutorial-sidebar-note-current">'
+            + '<div class="tutorial-sidebar-note-title">Current lesson</div>'
+            + '<div class="tutorial-sidebar-note-body">' + tutorialEscapeHtml(currentStep.phase) + ' · ' + tutorialEscapeHtml(currentStep.topic) + '</div>'
+            + '</div>';
+    }
     html += '<div class="tutorial-path-toggle" onclick="tutorialToggleLearningPath()">\uD83D\uDCDA Learning Path <span class="tutorial-path-arrow">\u25BC</span></div>'
         + '<div class="tutorial-path-content" id="tutorial-path-content"></div>';
 
@@ -1822,15 +1839,21 @@ function loadTutorialStep(idx) {
 
     var langName = (typeof LANG_NAMES !== 'undefined' && LANG_NAMES[tutorialLang]) || tutorialLang;
     var totalSteps = tutorialManager.getTotalSteps();
+    var completedCount = tutorialManager.getCompletedCount();
 
     var coach = document.createElement('div');
     coach.className = 'tutorial-coach-card';
     coach.innerHTML = ''
         + '<div class="tutorial-coach-top">'
-        + '<div><div class="tutorial-coach-kicker">Step ' + (idx + 1) + ' of ' + totalSteps + '</div>'
+        + '<div class="tutorial-coach-copy"><div class="tutorial-coach-kicker">Learn by doing</div>'
         + '<h4>' + tutorialEscapeHtml(step.topic) + '</h4>'
-        + '<p>' + tutorialEscapeHtml(step.phase) + ' \u00B7 ' + tutorialEscapeHtml(langName) + '</p></div>'
-        + '<button type="button" onclick="tutorialAskDevin()">Ask Devin</button>'
+        + '<p>' + tutorialEscapeHtml(step.phase) + ' \u00B7 ' + tutorialEscapeHtml(langName) + '</p>'
+        + '<div class="tutorial-coach-meta">'
+        + '<span class="tutorial-coach-pill">Step ' + (idx + 1) + ' of ' + totalSteps + '</span>'
+        + '<span class="tutorial-coach-pill">' + completedCount + ' done</span>'
+        + '<span class="tutorial-coach-pill">' + tutorialEscapeHtml(step.phase) + '</span>'
+        + '</div></div>'
+        + '<button type="button" class="tutorial-coach-main-btn" onclick="tutorialAskDevin()">Ask Devin</button>'
         + '</div>'
         + '<div class="tutorial-coach-actions">'
         + '<button type="button" class="tutorial-interact-btn run" id="tutorial-run-btn" onclick="runCode()">\u25B6 Run</button>'
@@ -1846,7 +1869,7 @@ function loadTutorialStep(idx) {
     var taskBox = document.createElement('div');
     taskBox.className = 'tutorial-task-box';
     taskBox.id = 'tutorial-task-box';
-    taskBox.innerHTML = '<div class="tutorial-task-header">Your task</div><div class="tutorial-task-body" id="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>'
+    taskBox.innerHTML = '<div class="tutorial-task-header"><span>Your task</span><span class="tutorial-task-header-hint">Do one thing at a time</span></div><div class="tutorial-task-body" id="tutorial-task-body">' + getTutorialStepTask(step, item) + '</div>'
         + '<div class="tutorial-hint-bar" id="tutorial-hint-bar"></div>';
 
     var explanationContent = expEl.innerHTML;

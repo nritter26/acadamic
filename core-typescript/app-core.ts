@@ -22,16 +22,16 @@ declare let challengeLang: string;
 declare let challengeIdx: number;
 declare const cheatsheets: Record<string, any>;
 
-let currentLang: string = 'js';
-let currentPhase: string = '';
-let currentTopic: string = '';
+var currentLang: string = 'js';
+var currentPhase: string = '';
+var currentTopic: string = '';
 let currentLevel: string = 'all';
 let currentCompletionFilter: string = 'all';
 let currentEngineFilter: string = 'all';
 let currentMobilePlatform: string = 'all';
 let collapsedPhases: Set<string> = new Set();
 
-const DEVIN_MAINTENANCE: boolean = true;
+const DEVIN_MAINTENANCE: boolean = false;
 
 const LANG_KEYWORDS: Record<string, string[]> = {
     js: ['let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'typeof', 'class', 'extends', 'import', 'export', 'default', 'from', 'async', 'await', 'yield', 'null', 'undefined', 'true', 'false', 'console.log', 'console.error', 'Array', 'Object', 'Promise', 'Map', 'Set', 'Number', 'String', 'Boolean', 'Symbol', 'Date', 'RegExp', 'JSON', 'Math', 'parseInt', 'parseFloat', 'setTimeout', 'setInterval', 'addEventListener', 'querySelector', 'document', 'window'],

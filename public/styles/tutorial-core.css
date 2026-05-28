@@ -18,29 +18,33 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 10px;
-    padding: 8px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.92));
+    border-radius: 14px;
+    border: 1px solid rgba(249,115,22,0.16);
+    box-shadow: 0 10px 24px rgba(2,6,23,0.2);
 }
 .tutorial-mode #tutorial-nav {
     display: flex;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
 }
 .tutorial-progress-bar-track {
-    height: 6px;
+    height: 8px;
     background: #1e293b;
-    border-radius: 3px;
+    border-radius: 999px;
     overflow: hidden;
 }
 .tutorial-progress-bar-fill {
     height: 100%;
     background: var(--accent);
-    border-radius: 3px;
+    border-radius: 999px;
     transition: width 0.4s ease;
 }
 .tutorial-progress-text {
-    font-size: 9px;
+    font-size: 10px;
     color: #64748b;
     font-weight: 700;
     display: flex;
@@ -48,26 +52,84 @@
     gap: 8px;
 }
 .tutorial-progress-topic {
-    font-size: 10px;
-    color: #94a3b8;
+    font-size: 11px;
+    color: #e2e8f0;
     font-weight: 800;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.tutorial-browser-hero {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(2,6,23,0.96));
+    border: 1px solid rgba(249,115,22,0.2);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(2,6,23,0.28);
+}
+.tutorial-browser-kicker {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #fdba74;
+}
+.tutorial-browser-header h2 {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 0;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+.tutorial-browser-header p {
+    font-size: 13px;
+    color: #cbd5e1;
+    margin: 6px 0 0 0;
+    line-height: 1.6;
+    max-width: 68ch;
+}
+.tutorial-browser-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.tutorial-browser-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(148,163,184,0.12);
+    border-radius: 12px;
+}
+.tutorial-browser-stat strong {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+.tutorial-browser-stat small {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #64748b;
+    font-weight: 800;
 }
 .tutorial-sidebar-summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 8px 9px;
-    margin-bottom: 8px;
-    background: rgba(15,23,42,0.82);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.9));
     border: 1px solid rgba(249,115,22,0.18);
-    border-radius: 8px;
+    border-radius: 12px;
 }
 .tutorial-sidebar-summary span {
-    color: #94a3b8;
+    color: #cbd5e1;
     font-size: 10px;
     font-weight: 800;
     overflow: hidden;
@@ -76,15 +138,15 @@
 }
 .tutorial-sidebar-summary strong {
     color: var(--accent);
-    font-size: 10px;
+    font-size: 11px;
     flex-shrink: 0;
 }
 .tutorial-sidebar-note {
-    padding: 8px 9px;
+    padding: 10px 12px;
     margin-bottom: 8px;
     background: linear-gradient(180deg, rgba(30,41,59,0.92), rgba(15,23,42,0.82));
     border: 1px solid rgba(34,197,94,0.16);
-    border-radius: 8px;
+    border-radius: 12px;
 }
 .tutorial-sidebar-note-title {
     font-size: 9px;
@@ -95,17 +157,25 @@
     margin-bottom: 4px;
 }
 .tutorial-sidebar-note-body {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.55;
     color: #cbd5e1;
 }
+.tutorial-sidebar-note-current {
+    border-color: rgba(249,115,22,0.22);
+    background: linear-gradient(180deg, rgba(249,115,22,0.12), rgba(15,23,42,0.88));
+}
 .tutorial-blueprint-card {
-    margin: 10px 0 12px;
-    padding: 12px 14px;
-    background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.95));
-    border: 1px solid rgba(249,115,22,0.22);
-    border-radius: 12px;
-    box-shadow: 0 10px 24px rgba(2,6,23,0.24);
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0 14px;
+    padding: 14px 16px;
+    background:
+        linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.95)),
+        radial-gradient(circle at top right, rgba(249,115,22,0.14), transparent 38%);
+    border: 1px solid rgba(249,115,22,0.24);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(2,6,23,0.26);
 }
 .tutorial-blueprint-top {
     display: flex;
@@ -123,17 +193,17 @@
     margin-bottom: 4px;
 }
 .tutorial-blueprint-overview {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.5;
     color: #e2e8f0;
     max-width: 62ch;
 }
 .tutorial-blueprint-progress {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 900;
     color: #000;
     background: var(--accent);
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 999px;
     flex-shrink: 0;
 }
@@ -317,27 +387,13 @@
 }
 .tutorial-browser {
     padding: 20px;
-    max-width: 700px;
-}
-
-.tutorial-browser-header h2 {
-    font-size: 22px;
-    font-weight: 800;
-    margin: 0 0 4px 0;
-    color: #fff;
-}
-
-.tutorial-browser-header p {
-    font-size: 12px;
-    color: #94a3b8;
-    margin: 0 0 16px 0;
-    line-height: 1.5;
+    max-width: 760px;
 }
 
 .tutorial-resume-banner {
     background: rgba(249,115,22,0.12);
     border: 1px solid rgba(249,115,22,0.3);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 12px 16px;
     margin-bottom: 16px;
     cursor: pointer;
@@ -351,16 +407,16 @@
 }
 
 .tutorial-browser-phase {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .tutorial-browser-phase-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 12px;
     background: rgba(255,255,255,0.04);
-    border-radius: 6px;
+    border-radius: 10px;
     margin-bottom: 6px;
 }
 
@@ -381,15 +437,15 @@
 .tutorial-browser-topics {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
     padding: 0 12px;
 }
 
 .tutorial-browser-topic {
     background: rgba(255,255,255,0.04);
     border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 999px;
+    padding: 7px 12px;
     font-size: 11px;
     color: #cbd5e1;
     cursor: pointer;
@@ -416,7 +472,7 @@
     padding: 14px;
     background: rgba(255,255,255,0.03);
     border: 1px solid #1e293b;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 .tutorial-related-topics-header {

@@ -238,7 +238,8 @@ async function askLLM(messages, onStream, options) {
     if (provider === 'keyword') {
         const { runKeywordTutor } = require('./tutor-keywords');
         const lastMsg = messages[messages.length - 1]?.content || '';
-        return runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError) || null;
+        const result = runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError);
+        return result ? result.response : null;
     }
     return null;
 }

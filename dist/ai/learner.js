@@ -21,9 +21,12 @@ const LEARNER_DIR = path_1.default.join(__dirname, '..', 'data', 'learners');
 const FALLBACK_DIR = path_1.default.join(os_1.default.tmpdir(), 'koded-learners');
 let activeLearnerDir = LEARNER_DIR;
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
+const STALE_TOPIC_DAYS = parseInt(process.env.STALE_TOPIC_DAYS || '90', 10);
+const MAX_TOPICS_PER_LANG = 500;
 const DEFAULT_LEARNER = {
     id: '',
     topics: {},
+    archivedTopics: {},
     phases: {},
     quizzes: { total: 0, correct: 0 },
     challenges: { total: 0, solved: 0 },
@@ -33,9 +36,9 @@ const DEFAULT_LEARNER = {
     masteryByConcept: {},
     reviewQueue: [],
     aiInteractions: 0,
-    schemaVersion: 2,
+    schemaVersion: 3,
 };
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 function getLearnerPath(learnerId) {
     const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
     return path_1.default.join(activeLearnerDir, `${safe}.json`);
@@ -89,7 +92,40 @@ function migrateLearner(data) {
         }
         data.topics = migrated;
     }
+    if (!data.archivedTopics) {
+        data.archivedTopics = {};
+    }
     return { ...DEFAULT_LEARNER, ...data, schemaVersion: SCHEMA_VERSION };
+}
+function pruneStaleTopics(learner) {
+    const now = Date.now();
+    const staleCutoff = now - STALE_TOPIC_DAYS * 24 * 60 * 60 * 1000;
+    if (!learner.archivedTopics)
+        learner.archivedTopics = {};
+    const active = {};
+    for (const [key, topic] of Object.entries(learner.topics)) {
+        if (topic.completedAt && new Date(topic.completedAt).getTime() < staleCutoff && topic.reviews >= 3) {
+            learner.archivedTopics[key] = topic;
+        }
+        else {
+            active[key] = topic;
+        }
+    }
+    learner.topics = active;
+    const topicCount = Object.keys(learner.topics).length;
+    if (topicCount > MAX_TOPICS_PER_LANG) {
+        const sorted = Object.entries(learner.topics).sort((a, b) => {
+            const aCompleted = a[1].completedAt || '';
+            const bCompleted = b[1].completedAt || '';
+            return aCompleted.localeCompare(bCompleted);
+        });
+        const toArchive = sorted.slice(0, topicCount - MAX_TOPICS_PER_LANG);
+        for (const [key, topic] of toArchive) {
+            learner.archivedTopics[key] = topic;
+            delete learner.topics[key];
+        }
+    }
+    return learner;
 }
 async function getLearner(learnerId) {
     try {
@@ -101,9 +137,10 @@ async function getLearner(learnerId) {
             return { ...DEFAULT_LEARNER, id: learnerId };
         }
         if (data.schemaVersion !== SCHEMA_VERSION) {
-            return migrateLearner(data);
+            const migrated = migrateLearner(data);
+            return pruneStaleTopics(migrated);
         }
-        return data;
+        return pruneStaleTopics(data);
     }
     catch (e) {
         if (e.code === 'ENOENT') {

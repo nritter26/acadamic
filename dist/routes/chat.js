@@ -11,7 +11,10 @@ router.post('/', (0, middleware_1.validate)(types_1.ChatSchema), async (req, res
     res.setHeader('Connection', 'keep-alive');
     const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
     let aborted = false;
-    req.on('close', () => { aborted = true; });
+    const onClose = () => { aborted = true; };
+    const onFinish = () => { req.off('close', onClose); };
+    req.on('close', onClose);
+    res.on('finish', onFinish);
     if (!message) {
         res.write(`data: ${JSON.stringify({ content: "Ask me something about programming!" })}\n\n`);
         res.write('data: [DONE]\n\n');

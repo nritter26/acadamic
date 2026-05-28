@@ -10,6 +10,7 @@ export declare function getCurrContext(message: string, topic?: string): {
     type: string;
     topic?: string | null;
 };
+export declare function matchTopic(message: string): string[];
 export declare function runKeywordTutor(message: string, lang?: string, topic?: string, code?: string, hasError?: boolean): KeywordResult | null;
 export {};
 //# sourceMappingURL=tutor-keywords.d.ts.map

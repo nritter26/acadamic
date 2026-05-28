@@ -18,26 +18,27 @@ interface DockerRunnerConfig {
   compileCmd?: string;
   runCmd: string;
   needsCompile: boolean;
+  memoryLimit?: string;
 }
 
 const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   py:  { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
   js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
   ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
-  // go removed from DOCKER_RUNNERS — uses local runner with higher ulimit for Go's parallel compilation
-  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true },
+  // go stays on the local runner — its compile path benefits from the larger host-side memory limit
+  cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false, memoryLimit: '768m' },
+  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true, memoryLimit: '512m' },
   c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
   cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
-  // zig removed from DOCKER_RUNNERS — std.debug.print goes to stderr, local runner handles it properly
-  swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false },
-  // kt removed from DOCKER_RUNNERS — kotlinc on JVM times out with 256m memory limit
-  // cs removed from DOCKER_RUNNERS — dotnet restore OOMs with 256m limit
+  zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog.zig', needsCompile: false, memoryLimit: '512m' },
+  swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false, memoryLimit: '512m' },
+  kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true, memoryLimit: '768m' },
   wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
   asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
   bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
   php:  { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
-  scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false },
-  java: { image: 'kodex-java', ext: '.java', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true },
+  scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false, memoryLimit: '512m' },
+  java: { image: 'kodex-java', ext: '.java', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m' },
   rb:   { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
   sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
@@ -102,7 +103,7 @@ async function ensureLangPool(lang: string): Promise<void> {
 
     try {
       const { stdout } = await execAsync(
-        `docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory 256m --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`,
+        `docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`,
         { timeout: 30000 }
       );
       const containerId = stdout.trim();
@@ -255,7 +256,7 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
 
   try {
     const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-    const cmd = `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+    const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
 
     logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
 
@@ -348,8 +349,8 @@ WORKDIR /code
     'Dockerfile.cs': `
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
-USER code
 ENV PATH="$PATH:/home/code/.dotnet/tools"
+USER code
 RUN dotnet tool install -g dotnet-script
 WORKDIR /code
 `.trim(),
@@ -389,7 +390,7 @@ WORKDIR /code
     'Dockerfile.scala': `
 FROM eclipse-temurin:22-jdk
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \
-    curl -sL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz && \
+    curl -fsSL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz && \
     tar -xzf /tmp/scala3.tar.gz -C /opt && rm /tmp/scala3.tar.gz && \
     ln -s /opt/scala3-3.3.3/bin/scalac /usr/local/bin/scalac && \
     ln -s /opt/scala3-3.3.3/bin/scala /usr/local/bin/scala && \

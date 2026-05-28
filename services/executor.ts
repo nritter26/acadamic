@@ -297,6 +297,13 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
     ...process.env,
     PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`,
   } as NodeJS.ProcessEnv;
+  if (lang === 'zig') {
+    const zigCacheDir = path.join(tmpDir, '.zig-cache');
+    env.HOME = tmpDir;
+    env.XDG_CACHE_HOME = path.join(tmpDir, '.cache');
+    env.ZIG_GLOBAL_CACHE_DIR = zigCacheDir;
+    env.ZIG_LOCAL_CACHE_DIR = zigCacheDir;
+  }
   if (!process.env.DOTNET_ROOT) {
     env.DOTNET_ROOT = path.join(os.homedir(), '.local/dotnet');
   }

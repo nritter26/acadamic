@@ -185,6 +185,29 @@ function getCodeLine(code, line) {
     }
     return '';
 }
+// ── Java Home Resolution ──
+let javaBin = null;
+function detectJavaBin() {
+    if (javaBin)
+        return javaBin;
+    try {
+        const javacPath = (0, child_process_1.execSync)('readlink -f $(which javac)', { timeout: 5000, stdio: 'pipe' }).toString().trim();
+        const jdkHome = path_1.default.dirname(path_1.default.dirname(javacPath));
+        const candidate = path_1.default.join(jdkHome, 'bin', 'java');
+        if (fs_1.default.existsSync(candidate)) {
+            javaBin = candidate;
+            return javaBin;
+        }
+    }
+    catch { /* fall through */ }
+    javaBin = 'java';
+    return javaBin;
+}
+function resolveJavaCmd(workDir) {
+    const java = detectJavaBin();
+    const javac = 'javac';
+    return `${javac} "${path_1.default.join(workDir, 'Main.java')}" && ${java} -cp "${workDir}" Main`;
+}
 // ── Runners config ──
 const RUNNERS = {
     py: { cmd: 'python3 -u "%f"', ext: '.py' },
@@ -196,7 +219,14 @@ const RUNNERS = {
     cs: { cmd: 'dotnet script "%f"', ext: '.csx' },
     kt: { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
     swift: { cmd: 'swift "%f"', ext: '.swift' },
+    wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
+    asm: { cmd: 'nasm -f elf64 "%f" -o _prog.o && ld -o _prog _prog.o && ./_prog', ext: '.asm' },
     zig: { cmd: 'zig run "%f"', ext: '.zig' },
+    bash: { cmd: 'bash "%f"', ext: '.sh' },
+    php: { cmd: 'php "%f"', ext: '.php' },
+    scala: { cmd: 'scala "%f"', ext: '.scala' },
+    java: { cmd: 'javac "Main.java" && java -cp . Main', ext: '.java', src: 'Main' },
+    rb: { cmd: 'ruby "%f"', ext: '.rb' },
 };
 // ── Execute ──
 async function executeCode(lang, code, stdin) {
@@ -212,17 +242,50 @@ async function executeCode(lang, code, stdin) {
         }
         try {
             let output = '';
+            const formatArg = (a) => typeof a === 'object' ? JSON.stringify(a) : String(a);
+            const consoleCounts = {};
+            const consoleTimers = {};
             const sandbox = {
                 console: {
-                    log: (...args) => {
-                        output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    log: (...args) => { output += args.map(formatArg).join(' ') + '\n'; },
+                    info: (...args) => { output += args.map(formatArg).join(' ') + '\n'; },
+                    debug: (...args) => { output += args.map(formatArg).join(' ') + '\n'; },
+                    warn: (...args) => { output += 'WARN: ' + args.map(formatArg).join(' ') + '\n'; },
+                    error: (...args) => { output += 'ERROR: ' + args.map(formatArg).join(' ') + '\n'; },
+                    assert: (condition, ...args) => { if (!condition)
+                        output += 'Assertion failed: ' + args.map(formatArg).join(' ') + '\n'; },
+                    trace: () => { output += 'console.trace()\n'; },
+                    dir: (obj) => { output += JSON.stringify(obj, null, 2) + '\n'; },
+                    table: (data) => {
+                        if (Array.isArray(data)) {
+                            const rows = data.map((item, i) => `${i}: ${JSON.stringify(item)}`);
+                            output += rows.join('\n') + '\n';
+                        }
+                        else {
+                            output += JSON.stringify(data, null, 2) + '\n';
+                        }
                     },
-                    error: (...args) => {
-                        output += 'ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    count: (label = 'default') => {
+                        consoleCounts[label] = (consoleCounts[label] || 0) + 1;
+                        output += `${label}: ${consoleCounts[label]}\n`;
                     },
-                    warn: (...args) => {
-                        output += 'WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+                    countReset: (label = 'default') => { delete consoleCounts[label]; },
+                    time: (label = 'default') => { consoleTimers[label] = Date.now(); },
+                    timeEnd: (label = 'default') => {
+                        const start = consoleTimers[label];
+                        if (start !== undefined) {
+                            output += `${label}: ${Date.now() - start}ms\n`;
+                            delete consoleTimers[label];
+                        }
                     },
+                    timeLog: (label = 'default') => {
+                        const start = consoleTimers[label];
+                        if (start !== undefined)
+                            output += `${label}: ${Date.now() - start}ms\n`;
+                    },
+                    group: () => { },
+                    groupEnd: () => { },
+                    clear: () => { output = ''; },
                 },
             };
             vm_1.default.runInNewContext(code, sandbox, { timeout: 5000 });
@@ -253,15 +316,24 @@ async function executeCode(lang, code, stdin) {
         return { output: `// ${lang.toUpperCase()} execution not available on this server`, error: true };
     }
     const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'exec-'));
-    const tmpFile = path_1.default.join(tmpDir, 'code' + runner.ext);
+    const srcName = runner.src || 'code';
+    const tmpFile = path_1.default.join(tmpDir, srcName + runner.ext);
     fs_1.default.writeFileSync(tmpFile, code);
-    const cmd = runner.cmd.replace('%f', tmpFile);
+    let cmd = runner.cmd.replace('%f', tmpFile);
     const env = {
         ...process.env,
         PATH: `${process.env.PATH}:${path_1.default.join(os_1.default.homedir(), '.local/bin')}:${path_1.default.join(os_1.default.homedir(), '.cargo/bin')}`,
-        DOTNET_ROOT: path_1.default.join(os_1.default.homedir(), '.local/dotnet'),
     };
-    const sandboxedCmd = `ulimit -v 262144 -t 30 2>/dev/null; ${cmd}`;
+    if (!process.env.DOTNET_ROOT) {
+        env.DOTNET_ROOT = path_1.default.join(os_1.default.homedir(), '.local/dotnet');
+    }
+    if (lang === 'java') {
+        cmd = resolveJavaCmd(tmpDir);
+    }
+    const compiledLangs = new Set(['rs', 'c', 'cpp', 'scala', 'java', 'kt', 'zig', 'swift', 'asm']);
+    const goLimit = 786432;
+    const memLimit = lang === 'go' ? goLimit : compiledLangs.has(lang) ? 524288 : 262144;
+    const sandboxedCmd = `ulimit -v ${memLimit} -t 30 2>/dev/null; ${cmd}`;
     const execOpts = { timeout: 30000, cwd: tmpDir, env };
     try {
         const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true }, stdin);

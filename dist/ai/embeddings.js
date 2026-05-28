@@ -19,13 +19,14 @@ let curriculumDocs = [];
 let tfidfIndex = null;
 let embedCache = null;
 let initPromise = null;
+const LANG_CODE_WHITELIST = new Set(['js', 'ts', 'py', 'go', 'rs', 'c', 'kt', 'cs', 'sw', 'rb', 'sh', 'sql']);
 function tokenize(text) {
     return (text || '')
         .toLowerCase()
         .replace(/<[^>]*>/g, ' ')
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
-        .filter(w => w.length > 2 && w.length < 50);
+        .filter(w => (w.length > 2 || LANG_CODE_WHITELIST.has(w)) && w.length < 50);
 }
 async function buildCurriculumDocs() {
     curriculumDocs = [];
