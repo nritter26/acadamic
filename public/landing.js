@@ -1,17 +1,88 @@
 (function () {
     'use strict';
 
+    var CARDS = [
+        { mode: 'js', icon: '&lt;/&gt;', title: 'JavaScript', desc: 'Core lessons and topic explorer' },
+        { mode: 'dblab', icon: '<span style="color:#2DD4BF">&#x2B41;</span>', title: 'DB Lab', desc: 'Design tables and draw relations' },
+        { mode: 'git', icon: '<span style="color:#f1502f">&#x2318;</span>', title: 'Git Grounds', desc: 'Visualize branch and merge flow' },
+        { mode: 'challenge', icon: '<span style="color:#a855f7">&#x270E;</span>', title: 'Code Lab', desc: 'Fix bugs and solve challenges' },
+        { mode: 'quiz', icon: '<span style="color:#f59e0b">&#x2605;</span>', title: 'Quiz', desc: 'Practice questions by language' },
+        { mode: 'compiler', icon: '<span style="color:#a5f3fc">&#x25B6;</span>', title: 'Compiler', desc: 'Run pipelines across languages' },
+    ];
+
+    function createLandingOverlay() {
+        if (document.querySelector('.landing-overlay')) return;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'landing-overlay';
+
+        var cardsHtml = '';
+        for (var i = 0; i < CARDS.length; i++) {
+            var c = CARDS[i];
+            cardsHtml += '<button class="landing-quick-card" data-mode="' + c.mode + '">' +
+                '<span class="landing-card-icon">' + c.icon + '</span>' +
+                '<span class="landing-card-title">' + c.title + '</span>' +
+                '<span class="landing-card-desc">' + c.desc + '</span>' +
+                '</button>';
+        }
+
+        overlay.innerHTML =
+            '<div class="landing-container">' +
+                '<div class="landing-logo">' +
+                    '<span class="landing-logo-bracket">&lt;</span>' +
+                    '<span class="landing-logo-text">Kodex\'s Lab</span>' +
+                    '<span class="landing-logo-bracket">/&gt;</span>' +
+                    '<span class="landing-logo-cursor">|</span>' +
+                '</div>' +
+                '<div class="landing-tagline">Interactive Programming Textbook</div>' +
+                '<div class="landing-stats">' +
+                    '<div class="landing-stat"><span class="landing-stat-num">50+</span><span class="landing-stat-label">Languages</span></div>' +
+                    '<div class="landing-stat"><span class="landing-stat-num">2,100+</span><span class="landing-stat-label">Challenges</span></div>' +
+                    '<div class="landing-stat"><span class="landing-stat-num">3,500+</span><span class="landing-stat-label">Topics</span></div>' +
+                    '<div class="landing-stat"><span class="landing-stat-num">16</span><span class="landing-stat-label">Mini-Games</span></div>' +
+                    '<div class="landing-stat"><span class="landing-stat-num">Live</span><span class="landing-stat-label">Execution</span></div>' +
+                    '<div class="landing-stat"><span class="landing-stat-num">AI</span><span class="landing-stat-label">Tutor</span></div>' +
+                '</div>' +
+                '<div class="landing-quick-grid">' + cardsHtml + '</div>' +
+                '<button class="landing-cta" id="landingCta">Launch Lab</button>' +
+                '<div class="landing-footer">Just code <span class="cyber-dash">&mdash;</span> don\'t overthink</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(function () {
+            overlay.classList.add('landing-ready');
+        });
+
+        var qCards = overlay.querySelectorAll('.landing-quick-card');
+        for (var j = 0; j < qCards.length; j++) {
+            qCards[j].addEventListener('click', function () {
+                var mode = this.getAttribute('data-mode');
+                if (mode && window.setMode) window.setMode(mode);
+                dismissOverlay();
+            });
+        }
+
+        document.getElementById('landingCta').addEventListener('click', dismissOverlay);
+    }
+
+    function dismissOverlay() {
+        var overlay = document.querySelector('.landing-overlay');
+        if (!overlay || overlay.classList.contains('landing-exit')) return;
+        overlay.classList.add('landing-exit');
+        var appEl = document.getElementById('app');
+        if (appEl) {
+            appEl.classList.remove('hide-workspace');
+            appEl.classList.add('workspace-open');
+        }
+        setTimeout(function () {
+            if (overlay.parentNode) overlay.remove();
+        }, 400);
+    }
+
     function showLandingState() {
-        const appEl = document.getElementById('app');
-        const headerTitle = document.getElementById('header-title');
-        const topicList = document.getElementById('topic-list');
-        const explanation = document.getElementById('explanation');
-        const editor = document.getElementById('editor');
-        const output = document.getElementById('output');
-        const levelBar = document.getElementById('level-bar');
-        const engineBar = document.getElementById('engine-bar');
-        const platformBar = document.getElementById('platform-bar');
-        const tutorialProgress = document.getElementById('tutorial-progress');
+        var appEl = document.getElementById('app');
+        var headerTitle = document.getElementById('header-title');
 
         if (appEl) {
             appEl.className = 'js-mode';
@@ -19,77 +90,28 @@
             appEl.classList.remove('workspace-open');
         }
         if (headerTitle) headerTitle.textContent = 'WELCOME';
-        document.querySelectorAll('.selector button').forEach(b => b.classList.remove('active'));
 
-        if (topicList) {
-            topicList.innerHTML = `
-                <div class="phase-header" style="cursor:default; pointer-events:none;">
-                    <span class="phase-toggle">▶</span>
-                    <span class="phase-label-text">Start Here</span>
-                </div>
-                <div class="item-btn active-topic" style="cursor:default; transform:none; border-left:3px solid var(--accent);">
-                    Pick a language on the left to load its lessons, exercises, and tools.
-                </div>
-                <div class="item-btn" style="cursor:default; transform:none;">
-                    DB Lab, Git Grounds, Quiz, and Code Lab all open from the top tabs.
-                </div>
-            `;
-        }
-        if (explanation) {
-            explanation.innerHTML = `
-                <div class="landing-panel">
-                    <div class="landing-hero">
-                        <div class="landing-badge">Start here</div>
-                        <h2>Welcome to Kodex's Lab</h2>
-                        <p>
-                            Pick a language from the left rail or jump straight into a tool from the cards below.
-                            The editor, explanation pane, and output console will follow your choice.
-                        </p>
-                    </div>
-                    <div class="landing-quick-grid">
-                        <button class="landing-quick-card" onclick="setMode('js')">
-                            <span class="landing-card-icon">&lt;/&gt;</span>
-                            <span class="landing-card-title">JavaScript</span>
-                            <span class="landing-card-desc">Core lessons and topic explorer</span>
-                        </button>
-                        <button class="landing-quick-card" onclick="setMode('dblab')">
-                            <span class="landing-card-icon">⛁</span>
-                            <span class="landing-card-title">DB Lab</span>
-                            <span class="landing-card-desc">Design tables and draw relations</span>
-                        </button>
-                        <button class="landing-quick-card" onclick="setMode('git')">
-                            <span class="landing-card-icon">⌘</span>
-                            <span class="landing-card-title">Git Grounds</span>
-                            <span class="landing-card-desc">Visualize branch and merge flow</span>
-                        </button>
-                        <button class="landing-quick-card" onclick="setMode('challenge')">
-                            <span class="landing-card-icon">✎</span>
-                            <span class="landing-card-title">Code Lab</span>
-                            <span class="landing-card-desc">Fix bugs and solve challenges</span>
-                        </button>
-                        <button class="landing-quick-card" onclick="setMode('quiz')">
-                            <span class="landing-card-icon">★</span>
-                            <span class="landing-card-title">Quiz</span>
-                            <span class="landing-card-desc">Practice questions by language</span>
-                        </button>
-                        <button class="landing-quick-card" onclick="setMode('compiler')">
-                            <span class="landing-card-icon">▶</span>
-                            <span class="landing-card-title">Compiler</span>
-                            <span class="landing-card-desc">Run pipelines across languages</span>
-                        </button>
-                    </div>
-                    <div class="landing-tip">
-                        Tip: use the top tabs for broader tools, or the left rail to switch languages quickly.
-                    </div>
-                </div>
-            `;
-        }
+        document.querySelectorAll('.selector button').forEach(function (b) { b.classList.remove('active'); });
+
+        var topicList = document.getElementById('topic-list');
+        var explanation = document.getElementById('explanation');
+        var editor = document.getElementById('editor');
+        var output = document.getElementById('output');
+        var levelBar = document.getElementById('level-bar');
+        var engineBar = document.getElementById('engine-bar');
+        var platformBar = document.getElementById('platform-bar');
+        var tutorialProgress = document.getElementById('tutorial-progress');
+
+        if (topicList) topicList.innerHTML = '<div style="color:#475569;font-size:11px;padding:20px;text-align:center;">Select a language to begin</div>';
+        if (explanation) explanation.innerHTML = '<div style="color:#475569;font-size:11px;padding:30px 10px;text-align:center;">Pick a language from the left rail or jump into a tool from the landing page.</div>';
         if (editor) editor.value = '// Select a language or mode to begin';
         if (output) output.innerText = '// Welcome to Kodex\'s Lab';
         if (levelBar) levelBar.style.display = 'none';
         if (engineBar) engineBar.style.display = 'none';
         if (platformBar) platformBar.style.display = 'none';
         if (tutorialProgress) tutorialProgress.style.display = 'none';
+
+        createLandingOverlay();
     }
 
     window.showLandingState = showLandingState;

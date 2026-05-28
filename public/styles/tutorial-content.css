@@ -15,11 +15,14 @@
 
 .tutorial-task-box {
     margin-top: 16px;
-    padding: 14px;
-    background: rgba(249,115,22,0.08);
-    border: 1px solid rgba(249,115,22,0.25);
-    border-radius: 8px;
-    border-left: 3px solid var(--accent);
+    padding: 16px;
+    background:
+        linear-gradient(180deg, rgba(249,115,22,0.1), rgba(15,23,42,0.9)),
+        rgba(15,23,42,0.88);
+    border: 1px solid rgba(249,115,22,0.24);
+    border-radius: 16px;
+    border-left: 4px solid var(--accent);
+    box-shadow: 0 14px 28px rgba(2,6,23,0.18);
 }
 .tutorial-task-header {
     font-size: 10px;
@@ -37,6 +40,12 @@
     flex-direction: column;
     gap: 0;
 }
+.tutorial-task-header-hint {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
 .tutorial-task-item {
     display: flex;
     align-items: center;
@@ -45,9 +54,9 @@
     text-align: left;
     background: rgba(15,23,42,0.6);
     border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
     cursor: pointer;
     font-family: inherit;
     font-size: 11px;
@@ -122,11 +131,11 @@
     gap: 8px;
     width: 100%;
     background: none;
-    border: 1px solid #1e293b;
-    border-radius: 6px;
-    padding: 10px 12px;
+    border: 1px solid rgba(148,163,184,0.16);
+    border-radius: 12px;
+    padding: 12px 14px;
     margin-bottom: 8px;
-    color: #94a3b8;
+    color: #cbd5e1;
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
@@ -135,9 +144,9 @@
     text-align: left;
 }
 .tutorial-exp-toggle:hover {
-    background: rgba(255,255,255,0.03);
-    border-color: #334155;
-    color: #cbd5e1;
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(249,115,22,0.22);
+    color: #fff;
 }
 .tutorial-exp-toggle .tutorial-exp-arrow {
     margin-left: auto;
@@ -216,10 +225,13 @@
 }
 .tutorial-coach-card {
     margin-bottom: 14px;
-    padding: 14px;
-    background: linear-gradient(135deg, rgba(249,115,22,0.13), rgba(14,165,233,0.07));
-    border: 1px solid rgba(249,115,22,0.28);
-    border-radius: 8px;
+    padding: 16px;
+    background:
+        linear-gradient(135deg, rgba(249,115,22,0.14), rgba(14,165,233,0.08)),
+        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(2,6,23,0.95));
+    border: 1px solid rgba(249,115,22,0.25);
+    border-radius: 18px;
+    box-shadow: 0 16px 34px rgba(2,6,23,0.26);
 }
 .tutorial-coach-top {
     display: flex;
@@ -227,26 +239,65 @@
     justify-content: space-between;
     gap: 12px;
 }
+.tutorial-coach-copy {
+    min-width: 0;
+}
 .tutorial-coach-kicker {
-    color: var(--accent);
+    color: #fdba74;
     font-size: 9px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.7px;
-    margin-bottom: 4px;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
 }
 .tutorial-coach-card h4 {
     margin: 0;
     color: #fff;
-    font-size: 16px;
-    line-height: 1.25;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
 }
 .tutorial-coach-card p {
-    margin: 4px 0 0;
-    color: #94a3b8;
-    font-size: 11px;
+    margin: 6px 0 0;
+    color: #cbd5e1;
+    font-size: 12px;
 }
-.tutorial-coach-card button {
+.tutorial-coach-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.tutorial-coach-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.16);
+    background: rgba(15,23,42,0.72);
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.tutorial-coach-main-btn {
+    background: var(--accent);
+    color: #111827;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 10px 20px rgba(249,115,22,0.2);
+}
+.tutorial-coach-main-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+.tutorial-coach-card button:not(.tutorial-coach-main-btn) {
     background: #0f172a;
     color: #e2e8f0;
     border: 1px solid #334155;
@@ -258,29 +309,25 @@
     transition: all 0.2s;
     white-space: nowrap;
 }
-.tutorial-coach-card button:hover {
+.tutorial-coach-card button:not(.tutorial-coach-main-btn):hover {
     border-color: var(--accent);
     color: #fff;
     background: rgba(15,23,42,0.78);
 }
-.tutorial-coach-top > button {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #111827;
-}
 .tutorial-coach-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin-top: 14px;
 }
 .tutorial-coach-actions button {
-    flex: 1 1 100px;
+    width: 100%;
 }
 #tutorial-nav {
     display: none;
-    margin-top: 8px;
-    padding: 0;
+    margin-top: 12px;
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
 }
 .tutorial-nav-inner {
     display: flex;
@@ -289,11 +336,11 @@
     flex-wrap: wrap;
 }
 .tutorial-nav-btn {
-    background: #1e293b;
-    color: #94a3b8;
-    border: 1px solid #334155;
-    padding: 8px 14px;
-    border-radius: 6px;
+    background: rgba(15,23,42,0.82);
+    color: #cbd5e1;
+    border: 1px solid rgba(148,163,184,0.14);
+    padding: 9px 14px;
+    border-radius: 999px;
     cursor: pointer;
     font-size: 10px;
     font-weight: 800;
@@ -301,9 +348,9 @@
     white-space: nowrap;
 }
 .tutorial-nav-btn:hover:not(:disabled) {
-    background: #334155;
+    background: rgba(249,115,22,0.1);
     color: #fff;
-    border-color: rgba(255,255,255,0.1);
+    border-color: rgba(249,115,22,0.22);
 }
 .tutorial-nav-btn:disabled {
     opacity: 0.35;
@@ -327,20 +374,20 @@
     flex: 1;
     text-align: center;
     font-size: 10px;
-    color: #64748b;
-    font-weight: 700;
+    color: #94a3b8;
+    font-weight: 800;
     min-width: 120px;
 }
 .tutorial-step-name-nav {
     display: block;
-    color: #94a3b8;
+    color: #e2e8f0;
     font-weight: 400;
     font-size: 11px;
     margin-top: 2px;
 }
 .tutorial-run-status {
     display: block;
-    color: #64748b;
+    color: #7dd3fc;
     font-weight: 700;
     font-size: 10px;
     margin-top: 4px;
@@ -555,37 +602,40 @@
 
 /* ── Tutorial Interactive Elements ── */
 .tutorial-interact-btn {
-    background: #0f172a;
-    color: #cbd5e1;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 6px 8px;
+    background: rgba(15,23,42,0.8);
+    color: #dbe4f0;
+    border: 1px solid rgba(148,163,184,0.14);
+    border-radius: 999px;
+    padding: 8px 10px;
     font-size: 9px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
     font-family: inherit;
+    letter-spacing: 0.2px;
 }
 .tutorial-interact-btn:hover {
-    border-color: var(--accent);
+    border-color: rgba(249,115,22,0.3);
     color: #fff;
     background: rgba(249,115,22,0.1);
+    transform: translateY(-1px);
 }
 .tutorial-interact-btn.run {
     background: var(--accent);
     color: #000;
     border-color: var(--accent);
+    box-shadow: 0 8px 18px rgba(249,115,22,0.22);
 }
 .tutorial-interact-btn.run:hover {
     filter: brightness(1.1);
 }
 .tutorial-hint-bar {
     margin-top: 10px;
-    padding: 6px 10px;
+    padding: 10px 12px;
     background: rgba(14,165,233,0.08);
     border: 1px solid rgba(14,165,233,0.2);
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 10px;
     color: #7dd3fc;
     display: none;
@@ -595,8 +645,8 @@
 }
 .tutorial-feedback {
     margin-top: 8px;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
     font-size: 10px;
     line-height: 1.6;
     animation: fadeIn 0.2s ease;

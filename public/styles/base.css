@@ -632,3 +632,125 @@ textarea:focus { border-color: var(--accent); }
     padding: 24px 20px; display: flex; flex-direction: column;
     align-items: center; gap: 16px; overflow-y: auto;
 }
+
+/* ── Full-Screen Landing Overlay ── */
+.landing-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.landing-overlay.landing-ready { opacity: 1; }
+.landing-overlay.landing-exit {
+    opacity: 0; transform: scale(0.98);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.landing-container {
+    display: flex; flex-direction: column; align-items: center;
+    max-width: 720px; width: 100%; padding: 40px 20px;
+    text-align: center;
+}
+
+/* Logo */
+.landing-logo {
+    font-size: 42px; font-weight: 900; margin-bottom: 8px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.landing-ready .landing-logo { opacity: 1; transform: translateY(0); transition-delay: 0s; }
+.landing-logo-bracket { color: var(--accent); }
+.landing-logo-text { color: #fff; letter-spacing: -1px; }
+.landing-logo-cursor {
+    display: inline-block; color: var(--accent); margin-left: 2px;
+    animation: landingBlink 1s step-end infinite;
+    font-weight: 300;
+}
+@keyframes landingBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Tagline */
+.landing-tagline {
+    font-size: 14px; color: #64748b; letter-spacing: 4px;
+    text-transform: uppercase; font-weight: 300; margin-bottom: 32px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: 0.12s;
+}
+.landing-ready .landing-tagline { opacity: 1; transform: translateY(0); transition-delay: 0.12s; }
+
+/* Stats */
+.landing-stats {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 28px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: 0.24s;
+}
+.landing-ready .landing-stats { opacity: 1; transform: translateY(0); transition-delay: 0.24s; }
+.landing-stat {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.landing-stat-num {
+    font-size: 28px; font-weight: 900; color: var(--accent); line-height: 1;
+    text-shadow: 0 0 20px rgba(247,223,30,0.3);
+}
+.landing-stat-label {
+    font-size: 9px; color: #64748b; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* Cards */
+.landing-overlay .landing-quick-grid {
+    width: 100%;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: 0.36s;
+}
+.landing-ready .landing-quick-grid { opacity: 1; transform: translateY(0); transition-delay: 0.36s; }
+.landing-overlay .landing-quick-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--accent);
+}
+
+/* CTA */
+.landing-cta {
+    margin-top: 24px;
+    background: var(--accent); color: #000; border: none;
+    padding: 14px 48px; border-radius: 12px; font-size: 14px;
+    font-weight: 900; cursor: pointer; letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.2s ease;
+    transition-delay: 0.48s;
+    animation: landingCtaPulse 2.5s ease-in-out infinite;
+}
+.landing-ready .landing-cta { opacity: 1; transform: translateY(0); transition-delay: 0.48s; }
+.landing-cta:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 30px var(--accent), 0 0 60px rgba(247,223,30,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+@keyframes landingCtaPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(247,223,30,0.2); }
+    50% { box-shadow: 0 0 20px 4px rgba(247,223,30,0.08); }
+}
+
+/* Footer */
+.landing-footer {
+    margin-top: 20px; font-size: 11px; color: #475569;
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 300;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: 0.6s;
+}
+.landing-ready .landing-footer { opacity: 1; transform: translateY(0); transition-delay: 0.6s; }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .landing-logo { font-size: 28px; }
+    .landing-stats { gap: 16px; }
+    .landing-stat-num { font-size: 22px; }
+    .landing-cta { padding: 12px 36px; font-size: 12px; }
+    .landing-container { padding: 20px 16px; }
+}
