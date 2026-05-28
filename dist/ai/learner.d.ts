@@ -15,6 +15,7 @@ interface LearnerPhase {
 interface Learner {
     id: string;
     topics: Record<string, LearnerTopic>;
+    archivedTopics: Record<string, LearnerTopic>;
     phases: Record<string, LearnerPhase>;
     quizzes: {
         total: number;

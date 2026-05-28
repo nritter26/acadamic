@@ -174,10 +174,12 @@ function checkKeywordPatterns(code, lang) {
         return issues;
     const lines = code.split('\n');
     for (const { pattern, message, severity } of patterns) {
-        const match = code.match(pattern);
-        if (match && match.index !== undefined) {
-            const lineIdx = findLineIndex(lines, match.index);
-            issues.push({ line: lineIdx + 1, message, severity, category: 'style' });
+        const matches = code.matchAll(new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g'));
+        for (const match of matches) {
+            if (match.index !== undefined) {
+                const lineIdx = findLineIndex(lines, match.index);
+                issues.push({ line: lineIdx + 1, message, severity, category: 'style' });
+            }
         }
     }
     return issues;

@@ -10,7 +10,8 @@ const path = require('path');
 const express = require('express');
 
 function serveSvelte() {
-  const distPath = path.join(__dirname, 'svelte-app', 'dist');
+  // __dirname is svelte-app/ since this file lives there
+  const distPath = path.join(__dirname, 'dist');
   console.log(`[svelte] Serving Svelte app from ${distPath}`);
   return express.static(distPath);
 }

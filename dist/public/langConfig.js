@@ -1,20 +1,18 @@
 "use strict";
-const LANG_NAMES = {
-    js: 'javascript', ts: 'typescript', py: 'python', go: 'go', java: 'java',
-    rs: 'rust', c: 'c', cpp: 'c++', cs: 'c#', kt: 'kotlin',
-    swift: 'swift', scala: 'scala', rb: 'ruby', zig: 'zig', dk: 'docker', pg: 'postgresql',
-    mongodb: 'mongodb', git: 'git', gamedev: 'gamedev',
-    mysql: 'mysql', sqlite: 'sqlite', firebase: 'firebase',
-    aws: 'aws', azure: 'azure', gcp: 'gcp', cloud: 'cloud',
-    react: 'react', vue: 'vue', angular: 'angular', node: 'nodejs',
-    express: 'express', next: 'nextjs', svelte: 'svelte', tailwind: 'tailwindcss',
-    redis: 'redis', nuxt: 'nuxt', sveltekit: 'sveltekit', remix: 'remix',
-    vite: 'vite', webpack: 'webpack', graphql: 'graphql', prisma: 'prisma',
-    rnative: 'reactnative', flutter: 'flutter', cypress: 'cypress',
-    playwright: 'playwright', k8s: 'kubernetes', terraform: 'terraform',
-    godot: 'godot', unity: 'unity', unreal: 'unreal',
-    mobile: 'mobile game development',
-};
+// LANG_NAMES extracted to content/app-data.json (browser) or content/app-data.json (Node)
+// Fallback for Node.js server-side usage where LANG_NAMES isn't a global
+if (typeof LANG_NAMES === 'undefined') {
+    try {
+        var fs = require('fs');
+        var path = require('path');
+        var appDataPath = path.join(__dirname, '..', 'content', 'app-data.json');
+        var appData = JSON.parse(fs.readFileSync(appDataPath, 'utf-8'));
+        var LANG_NAMES = appData.LANG_NAMES || {};
+    }
+    catch (e) {
+        var LANG_NAMES = {};
+    }
+}
 const NAME_TO_LANG = {};
 for (const [code, name] of Object.entries(LANG_NAMES)) {
     NAME_TO_LANG[name] = code;

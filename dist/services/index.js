@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.swaggerUIHandler = exports.openapiHandler = exports.trackRequest = exports.metricsHandler = exports.generateDockerfiles = exports.getSupportedDockerLangs = exports.isDockerAvailable = exports.dockerExecute = exports.broadcastToProject = exports.getWSStats = exports.setupWebSocket = exports.isValidProxyUrl = exports.proxyRequest = exports.getRateLimitInfo = exports.rateLimit = exports.getOllamaStatus = exports.detectOllama = exports.buildLLMMessages = exports.handleTutorMessage = exports.analyzeUserCode = exports.analyzeCode = exports.executeCode = exports.getCompilerList = exports.getCompileHint = exports.checkCompilers = exports.pruneOldConversations = exports.clearConversation = exports.getHistory = exports.addMessage = void 0;
+exports.swaggerUIHandler = exports.openapiHandler = exports.trackRequest = exports.metricsHandler = exports.shutdownWarmPool = exports.initWarmPool = exports.generateDockerfiles = exports.getSupportedDockerLangs = exports.isDockerAvailable = exports.dockerExecute = exports.broadcastToProject = exports.getWSStats = exports.setupWebSocket = exports.isValidProxyUrl = exports.proxyRequest = exports.getRateLimitInfo = exports.rateLimit = exports.getOllamaStatus = exports.detectOllama = exports.buildLLMMessages = exports.handleTutorMessage = exports.analyzeUserCode = exports.analyzeCode = exports.executeCode = exports.getCompilerList = exports.getCompileHint = exports.checkCompilers = exports.pruneOldConversations = exports.clearConversation = exports.getHistory = exports.addMessage = void 0;
 var conversation_1 = require("./conversation");
 Object.defineProperty(exports, "addMessage", { enumerable: true, get: function () { return conversation_1.addMessage; } });
 Object.defineProperty(exports, "getHistory", { enumerable: true, get: function () { return conversation_1.getHistory; } });
@@ -36,6 +36,8 @@ Object.defineProperty(exports, "dockerExecute", { enumerable: true, get: functio
 Object.defineProperty(exports, "isDockerAvailable", { enumerable: true, get: function () { return docker_executor_1.isDockerAvailable; } });
 Object.defineProperty(exports, "getSupportedDockerLangs", { enumerable: true, get: function () { return docker_executor_1.getSupportedDockerLangs; } });
 Object.defineProperty(exports, "generateDockerfiles", { enumerable: true, get: function () { return docker_executor_1.generateDockerfiles; } });
+Object.defineProperty(exports, "initWarmPool", { enumerable: true, get: function () { return docker_executor_1.initWarmPool; } });
+Object.defineProperty(exports, "shutdownWarmPool", { enumerable: true, get: function () { return docker_executor_1.shutdownWarmPool; } });
 var metrics_1 = require("./metrics");
 Object.defineProperty(exports, "metricsHandler", { enumerable: true, get: function () { return metrics_1.metricsHandler; } });
 Object.defineProperty(exports, "trackRequest", { enumerable: true, get: function () { return metrics_1.trackRequest; } });

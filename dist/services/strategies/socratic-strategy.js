@@ -35,11 +35,22 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SocraticStrategy = void 0;
 const conv = __importStar(require("../conversation"));
+const tutor_keywords_1 = require("../../ai/tutor-keywords");
 class SocraticStrategy {
     name = 'socratic';
     priority = 4;
-    async canHandle(_ctx) {
-        return true;
+    async canHandle(ctx) {
+        if (ctx.topic)
+            return true;
+        const matchedTopics = (0, tutor_keywords_1.matchTopic)(ctx.message || ctx.q);
+        if (matchedTopics.length > 0)
+            return false;
+        const words = ctx.q.split(/\s+/);
+        if (words.length <= 3)
+            return true;
+        if (/help|confused|stuck|lost|where do I|how do I|what should/i.test(ctx.q))
+            return true;
+        return false;
     }
     async handle(ctx, sseSend, sseDone) {
         if (ctx.topic) {

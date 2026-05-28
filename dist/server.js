@@ -71,6 +71,9 @@ app.use((req, res, next) => {
 // ── Core Middleware ──
 app.use(express_1.default.json({ limit: '100kb' }));
 app.use((0, cookie_parser_1.default)());
+// Serve Svelte SPA build (takes precedence over legacy static files)
+app.use(express_1.default.static(path_1.default.join(__dirname, 'svelte-app', 'dist')));
+// Legacy static files (project root)
 app.use(express_1.default.static(__dirname));
 app.use(middleware_1.requestLogger);
 // Track request metrics
@@ -92,10 +95,11 @@ middleware_2.logger.info({ db: dbStatus }, 'Database initialized');
 // ── AI Provider Config ──
 const AI_PROVIDER = process.env.AI_PROVIDER || 'hybrid';
 if (AI_PROVIDER !== 'keyword' && AI_PROVIDER !== 'hybrid') {
-    const REQUIRED_FOR_AI = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'LOCAL_LLM_ENDPOINT'];
-    const missingKeys = REQUIRED_FOR_AI.filter(key => !process.env[key]);
-    if (missingKeys.length > 0) {
-        middleware_2.logger.warn({ missingKeys }, `AI_PROVIDER="${AI_PROVIDER}" but missing keys — falling back to keyword`);
+    const REQUIRED_FOR_AI = { OPENAI_API_KEY: 'openai', ANTHROPIC_API_KEY: 'anthropic', LOCAL_LLM_ENDPOINT: 'local' };
+    const keyForProvider = AI_PROVIDER === 'openai' ? 'OPENAI_API_KEY' : AI_PROVIDER === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'LOCAL_LLM_ENDPOINT';
+    if (!process.env[keyForProvider]) {
+        middleware_2.logger.error({ AI_PROVIDER }, `AI_PROVIDER="${AI_PROVIDER}" requires ${keyForProvider} but it's not set. Set the env var or use AI_PROVIDER=keyword`);
+        process.exit(1);
     }
 }
 if (!process.env.AI_SYSTEM_PROMPT) {
@@ -115,6 +119,13 @@ app.get('/api/metrics', services_1.metricsHandler);
 // ── OpenAPI documentation ──
 app.get('/api/openapi.json', services_1.openapiHandler);
 app.get('/api/docs', services_1.swaggerUIHandler);
+// ── SPA fallback: serve index.html for non-API, non-static routes ──
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.includes('.')) {
+        return next();
+    }
+    res.sendFile(path_1.default.join(__dirname, 'svelte-app', 'dist', 'index.html'));
+});
 // ── Error Handling ──
 app.use(middleware_1.notFound);
 app.use(middleware_1.errorHandler);
@@ -123,11 +134,22 @@ const server = http_1.default.createServer(app);
 // ── Setup WebSocket ──
 (0, services_1.setupWebSocket)(server);
 // ── Schedule periodic cleanup ──
-setInterval(services_1.pruneOldConversations, 3_600_000);
+const cleanupInterval = setInterval(services_1.pruneOldConversations, 3_600_000);
+// ── Graceful shutdown ──
+function shutdown() {
+    middleware_2.logger.info('Shutting down...');
+    clearInterval(cleanupInterval);
+    (0, services_1.shutdownWarmPool)().catch(() => { });
+    server.close(() => process.exit(0));
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 // ── Start ──
 server.listen(PORT, () => {
     middleware_2.logger.info(`Kodex's Lab running at http://localhost:${PORT}`);
     middleware_2.logger.info(`WebSocket ready at ws://localhost:${PORT}/ws`);
 });
+// ── Initialize Warm Container Pool (after listen so server is ready) ──
+(0, services_1.initWarmPool)().catch(err => middleware_2.logger.warn({ err: err.message }, 'Warm pool init deferred to first request'));
 exports.default = app;
 //# sourceMappingURL=server.js.map
