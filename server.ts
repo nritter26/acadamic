@@ -38,13 +38,7 @@ app.use((req, res, next) => {
 // ── Core Middleware ──
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
-
-// Serve Svelte SPA build (takes precedence over legacy static files)
-app.use(express.static(path.join(__dirname, 'svelte-app', 'dist')));
-
-// Legacy static files (project root)
 app.use(express.static(__dirname));
-
 app.use(requestLogger);
 
 // Track request metrics
@@ -98,14 +92,6 @@ app.get('/api/metrics', metricsHandler);
 // ── OpenAPI documentation ──
 app.get('/api/openapi.json', openapiHandler);
 app.get('/api/docs', swaggerUIHandler);
-
-// ── SPA fallback: serve index.html for non-API, non-static routes ──
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/') || req.path.includes('.')) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, 'svelte-app', 'dist', 'index.html'));
-});
 
 // ── Error Handling ──
 app.use(notFound);
