@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { api } from '../api';
 
 interface WorkspaceState {
@@ -34,9 +34,8 @@ export function setStdin(input: string) {
 export async function executeCode(lang: string) {
   workspaceStore.update((s) => ({ ...s, isRunning: true, error: null, output: '' }));
   try {
-    let current: WorkspaceState;
-    const unsub = workspaceStore.subscribe((v) => { current = v; })();
-    const result = await api.execute({ lang, code: current!.code, stdin: current!.stdin });
+    const { code, stdin } = get(workspaceStore);
+    const result = await api.execute({ lang, code, stdin });
     workspaceStore.update((s) => ({
       ...s,
       output: result.output,
