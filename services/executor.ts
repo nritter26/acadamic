@@ -190,7 +190,7 @@ const RUNNERS: Record<string, RunnerConfig> = {
   rs:  { cmd: 'rustc -o _prog "%f" && ./_prog', ext: '.rs' },
   c:   { cmd: 'gcc -Wall -o _prog "%f" && ./_prog', ext: '.c' },
   cpp: { cmd: 'g++ -std=c++20 -Wall -o _prog "%f" && ./_prog', ext: '.cpp' },
-  cs:  { cmd: 'dotnet script "%f"', ext: '.csx' },
+  cs:  { cmd: 'cd "$(dirname "%f")" && dotnet new console --force --no-restore >/dev/null 2>&1 && dotnet restore 2>/dev/null && rm -rf bin && mv "%f" Program.cs && dotnet run --no-restore', ext: '.cs' },
   kt:  { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
   swift: { cmd: 'swift "%f"', ext: '.swift' },
   wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
@@ -201,6 +201,8 @@ const RUNNERS: Record<string, RunnerConfig> = {
   scala: { cmd: 'scala "%f"', ext: '.scala' },
   java: { cmd: 'javac "Main.java" && java -cp . Main', ext: '.java', src: 'Main' },
   rb: { cmd: 'ruby "%f"', ext: '.rb' },
+  html: { cmd: 'cat "%f"', ext: '.html' },
+  css: { cmd: 'cat "%f"', ext: '.css' },
 };
 
 // ── Execute ──
@@ -292,7 +294,7 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
   const tmpFile = path.join(tmpDir, srcName + runner.ext);
   fs.writeFileSync(tmpFile, code);
 
-  let cmd = runner.cmd.replace('%f', tmpFile);
+  let cmd = runner.cmd.replaceAll('%f', tmpFile);
   const env = {
     ...process.env,
     PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`,
@@ -311,14 +313,16 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
     cmd = resolveJavaCmd(tmpDir);
   }
 
-  const compiledLangs = new Set(['rs', 'c', 'cpp', 'scala', 'java', 'kt', 'zig', 'swift', 'asm']);
+  const compiledLangs = new Set(['rs', 'c', 'cpp', 'scala', 'java', 'kt', 'zig', 'swift', 'asm', 'cs']);
   const goLimit = 786432;
   const memLimit = lang === 'go' ? goLimit : compiledLangs.has(lang) ? 524288 : 262144;
-  const sandboxedCmd = `ulimit -v ${memLimit} -t 30 2>/dev/null; ${cmd}`;
+  const sandboxedCmd = lang === 'cs'
+    ? `ulimit -t 60 2>/dev/null; ${cmd}`
+    : `ulimit -v ${memLimit} -t 30 2>/dev/null; ${cmd}`;
   const execOpts = { timeout: 30000, cwd: tmpDir, env };
 
   try {
-    const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true } as unknown as ExecOptions & { shell?: boolean }, stdin);
+    const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024 } as unknown as ExecOptions & { shell?: boolean }, stdin);
 
     fs.rm(tmpDir, { recursive: true, force: true }, () => {});
     const stdoutClean = (result.stdout || '').trimEnd();

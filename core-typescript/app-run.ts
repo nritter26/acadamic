@@ -297,6 +297,10 @@ function runCode() {
         out.innerText = processGitCommand(code);
         return;
     }
+    if (currentLang === 'styling') {
+        processStylingCommand(code);
+        return;
+    }
     setRunLoading(true);
     out.innerText = "// Running...";
 

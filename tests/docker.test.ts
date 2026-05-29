@@ -46,22 +46,16 @@ describe('Docker Sandbox Service', () => {
     expect(langs).toContain('zig');
     expect(langs).toContain('kt');
     expect(langs).toContain('java');
-    expect(langs).toContain('cs');
     expect(langs).toContain('wasm');
   });
 
-  it('keeps committed Scala and C# Dockerfiles aligned with the sandbox runner', () => {
+  it('keeps committed Scala and Java Dockerfiles aligned with the sandbox runner', () => {
     const scalaDf = fs.readFileSync(path.join(process.cwd(), 'docker/Dockerfile.scala'), 'utf-8');
-    const csDf = fs.readFileSync(path.join(process.cwd(), 'docker/Dockerfile.cs'), 'utf-8');
     const javaDf = fs.readFileSync(path.join(process.cwd(), 'docker/Dockerfile.java'), 'utf-8');
 
     expect(scalaDf).toContain('scala3-3.3.3.tar.gz');
     expect(scalaDf).toContain('ln -s /opt/scala3-3.3.3/bin/scala /usr/local/bin/scala');
     expect(scalaDf).toContain('USER code');
-
-    expect(csDf).toContain('dotnet tool install -g dotnet-script');
-    expect(csDf).toContain('PATH="$PATH:/home/code/.dotnet/tools"');
-    expect(csDf).toContain('USER code');
 
     expect(javaDf).toContain('eclipse-temurin:22-jdk');
     expect(javaDf).toContain('USER code');

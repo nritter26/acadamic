@@ -228,6 +228,8 @@ async function handleExecute(event, body) {
     wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
     asm: { cmd: `nasm -f elf64 "%f" -o ${prog}.o && ld -o ${prog} ${prog}.o && ./${prog}`, ext: '.asm' },
     zig: { cmd: 'zig run "%f"', ext: '.zig' },
+    html: { cmd: 'cat "%f"', ext: '.html' },
+    css: { cmd: 'cat "%f"', ext: '.css' },
   };
 
   const runner = runners[lang];
@@ -240,7 +242,7 @@ async function handleExecute(event, body) {
   const tmpFile = path.join(tmpDir, srcName + runner.ext);
   fs.writeFileSync(tmpFile, code);
 
-  let cmd = runner.cmd.replace('%f', tmpFile);
+  let cmd = runner.cmd.replaceAll('%f', tmpFile);
   if (lang === 'java') {
     const javacmd = javaHome !== 'java' ? javaHome : 'java';
     cmd = `javac "${tmpFile}" && ${javacmd} -cp "${tmpDir}" Main`;
