@@ -70,7 +70,9 @@
     mobile: "Mobile",
     android: "Android",
     ios: "iOS",
-    scala: "Scala"
+    scala: "Scala",
+    html: "HTML",
+    css: "CSS"
   };
   const NAME_TO_LANG = {};
   for (const [k, v] of Object.entries(LANG_NAMES)) {

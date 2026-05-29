@@ -15,10 +15,12 @@ const execAsync = (cmd: string, opts: { timeout?: number } = {}): Promise<{ stdo
 interface DockerRunnerConfig {
   image: string;
   ext: string;
+  src?: string;
   compileCmd?: string;
   runCmd: string;
   needsCompile: boolean;
   memoryLimit?: string;
+  poolSize?: number;
 }
 
 const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
@@ -26,19 +28,18 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
   ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
   // go stays on the local runner — its compile path benefits from the larger host-side memory limit
-  cs:  { image: 'kodex-cs', ext: '.csx', runCmd: 'dotnet script /code/prog.csx', needsCompile: false, memoryLimit: '768m' },
-  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true, memoryLimit: '512m' },
+  rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true, memoryLimit: '512m', poolSize: 2 },
   c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
   cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
   zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog.zig', needsCompile: false, memoryLimit: '512m' },
   swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false, memoryLimit: '512m' },
-  kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true, memoryLimit: '768m' },
+  kt:  { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
   wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
   asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
   bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
   php:  { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
   scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false, memoryLimit: '512m' },
-  java: { image: 'kodex-java', ext: '.java', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m' },
+  java: { image: 'kodex-java', ext: '.java', src: 'Main', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
   rb:   { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
   sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
@@ -90,14 +91,16 @@ async function ensureLangPool(lang: string): Promise<void> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) return;
 
+  const langPoolSize = config.poolSize || POOL_SIZE;
+
   await Promise.allSettled(
-    Array.from({ length: POOL_SIZE }, (_, i) =>
+    Array.from({ length: langPoolSize }, (_, i) =>
       execAsync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { timeout: 5000 }).catch(() => {})
     )
   );
 
   const entries: WarmPoolEntry[] = [];
-  for (let i = 0; i < POOL_SIZE; i++) {
+  for (let i = 0; i < langPoolSize; i++) {
     const workspaceDir = path.join(WARM_POOL_BASE, `${lang}-${i}`);
     fs.mkdirSync(workspaceDir, { recursive: true });
 
@@ -150,7 +153,8 @@ async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: 
     return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: true };
   }
 
-  const progFile = path.join(entry.workspaceDir, 'prog' + config.ext);
+  const srcName = config.src || 'prog';
+  const progFile = path.join(entry.workspaceDir, srcName + config.ext);
   fs.writeFileSync(progFile, code);
 
   try {
@@ -251,7 +255,8 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-exec-'));
-  const tmpFile = path.join(tmpDir, 'prog' + config.ext);
+  const srcName = config.src || 'prog';
+  const tmpFile = path.join(tmpDir, srcName + config.ext);
   fs.writeFileSync(tmpFile, code);
 
   try {
@@ -349,9 +354,8 @@ WORKDIR /code
     'Dockerfile.cs': `
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
-ENV PATH="$PATH:/home/code/.dotnet/tools"
 USER code
-RUN dotnet tool install -g dotnet-script
+RUN mkdir -p /home/code/proj && cd /home/code/proj && dotnet new console --force --no-restore 2>/dev/null && dotnet restore 2>/dev/null && rm -rf bin
 WORKDIR /code
 `.trim(),
     'Dockerfile.wasm': `
@@ -397,6 +401,7 @@ RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists
     if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
+RUN echo '@main def main() = println(42)' > /tmp/warmup.scala && scala /tmp/warmup.scala && rm -rf /tmp/warmup.scala /tmp/.scala-build
 `.trim(),
     'Dockerfile.rb': `
 FROM ruby:3.2-slim

@@ -43,8 +43,8 @@ function renderQuiz() {
     const list = document.getElementById('topic-list');
     
     let html = '<div class="quiz-lang-bar">';
-    for (const l of ['asm','bash','backend','c','cpp','cs','git','go','java','js','kt','php','pg','py','rb','rs','scala','swift','ts','wasm','zig']) {
-        const names = { asm:'ASM', bash:'Bash', backend:'Backend', c:'C', cpp:'C++', cs:'C#', git:'Git', go:'Go', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', pg:'SQL', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', wasm:'Wasm', zig:'Zig' };
+    for (const l of ['asm','bash','backend','c','cpp','cs','css','git','go','html','java','js','kt','php','pg','py','rb','rs','scala','swift','ts','wasm','zig']) {
+        const names = { asm:'ASM', bash:'Bash', backend:'Backend', c:'C', cpp:'C++', cs:'C#', css:'CSS', git:'Git', go:'Go', html:'HTML', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', pg:'SQL', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', wasm:'Wasm', zig:'Zig' };
         const active = l === quizLang ? 'active' : '';
         html += '<button class="quiz-lang-btn ' + active + '" onclick="switchQuizLang(\'' + l + '\')">' + names[l] + '</button>';
     }
@@ -376,8 +376,8 @@ function renderChallengeList() {
     const totalAll = challenges.length;
 
     let html = `<div class="challenge-lang-bar">`;
-    for (const l of ['backend','bash','c','cpp','cs','go','java','js','kt','php','py','rb','rs','scala','swift','ts','zig']) {
-        const names = { backend:'Backend', bash:'Bash', c:'C', cpp:'C++', cs:'C#', go:'Go', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', zig:'Zig' };
+    for (const l of ['backend','bash','c','cpp','cs','css','go','html','java','js','kt','php','py','rb','rs','scala','swift','ts','zig']) {
+        const names = { backend:'Backend', bash:'Bash', c:'C', cpp:'C++', cs:'C#', css:'CSS', go:'Go', html:'HTML', java:'Java', js:'JavaScript', kt:'Kotlin', php:'PHP', py:'Python', rb:'Ruby', rs:'Rust', scala:'Scala', swift:'Swift', ts:'TypeScript', zig:'Zig' };
         const active = l === challengeLang ? 'active' : '';
         const solved = Object.keys(progress).filter(k => k.startsWith(l + '_')).length;
         const total = (challengeData[l] || []).length;

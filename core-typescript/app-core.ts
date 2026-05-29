@@ -54,6 +54,8 @@ const LANG_KEYWORDS: Record<string, string[]> = {
     php: ['echo', 'print', 'printf', 'var_dump', 'print_r', 'die', 'exit', 'return', 'include', 'include_once', 'require', 'require_once', 'if', 'else', 'elseif', 'endif', 'for', 'endforeach', 'while', 'endwhile', 'foreach', 'foreach', 'do', 'switch', 'endswitch', 'case', 'break', 'continue', 'match', 'default', 'function', 'fn', 'use', 'return', 'class', 'interface', 'trait', 'enum', 'abstract', 'final', 'extends', 'implements', 'new', 'clone', 'self', 'parent', 'static', 'public', 'private', 'protected', 'readonly', 'const', 'var', 'global', 'declare', 'strict_types', 'namespace', 'use', 'as', 'instanceof', 'throw', 'try', 'catch', 'finally', 'null', 'true', 'false', 'array', 'list', 'isset', 'unset', 'empty', 'count', 'implode', 'explode', 'array_map', 'array_filter', 'array_reduce', 'array_merge', 'array_keys', 'array_values', 'in_array', 'strlen', 'strpos', 'substr', 'str_replace', 'preg_match', 'preg_replace', 'htmlspecialchars', 'json_encode', 'json_decode', 'file_get_contents', 'file_put_contents', 'fopen', 'fclose', 'fgets', 'fwrite', 'mkdir', 'rmdir', 'unlink', 'copy', 'rename', 'move_uploaded_file', 'session_start', 'session_destroy', 'setcookie', 'filter_var', 'filter_input', 'header', 'mail', 'date', 'time', 'strtotime', 'define', 'defined'],
     rb: ['def', 'end', 'if', 'else', 'elsif', 'unless', 'case', 'when', 'while', 'until', 'for', 'in', 'do', 'begin', 'rescue', 'ensure', 'raise', 'throw', 'catch', 'return', 'yield', 'class', 'module', 'include', 'extend', 'prepend', 'attr_reader', 'attr_writer', 'attr_accessor', 'private', 'protected', 'public', 'self', 'super', 'true', 'false', 'nil', 'puts', 'print', 'gets', 'chomp', 'require', 'load', 'new', 'initialize', 'each', 'map', 'select', 'reject', 'reduce', 'inject', 'filter', 'times', 'upto', 'downto', 'step', 'lambda', 'proc', 'Proc', 'block_given?', 'defined?', 'alias', 'undef', 'BEGIN', 'END', '__FILE__', '__LINE__', 'Array', 'Hash', 'String', 'Integer', 'Float', 'Symbol', 'Range', 'Enumerable', 'Comparable', 'Object', 'Kernel', 'BasicObject', 'Numeric'],
     scala: ['def', 'val', 'var', 'lazy', 'if', 'else', 'match', 'case', 'for', 'yield', 'while', 'do', 'return', 'class', 'object', 'trait', 'extends', 'with', 'sealed', 'abstract', 'case', 'implicit', 'implicitly', 'override', 'private', 'protected', 'public', 'final', 'import', 'package', 'type', 'new', 'this', 'super', 'null', 'true', 'false', 'Unit', 'Int', 'Double', 'Float', 'Long', 'Boolean', 'Char', 'Short', 'Byte', 'String', 'Any', 'AnyVal', 'AnyRef', 'Nothing', 'Nil', 'None', 'Some', 'Option', 'Either', 'Try', 'Future', 'Promise', 'List', 'Map', 'Set', 'Seq', 'Array', 'Vector', 'Range', 'Tuple', 'println', 'print', 'printf', 'readLine', 'Map', 'flatMap', 'filter', 'foreach', 'fold', 'foldLeft', 'foldRight', 'reduce', 'collect', 'partition', 'groupBy', 'sortBy', 'sortWith', 'sorted', 'zip', 'mkString'],
+    html: ['html', 'head', 'body', 'title', 'meta', 'link', 'style', 'script', 'header', 'nav', 'main', 'section', 'article', 'aside', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'a', 'href', 'img', 'src', 'alt', 'div', 'span', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'form', 'input', 'button', 'select', 'option', 'textarea', 'label', 'fieldset', 'legend', 'audio', 'video', 'source', 'iframe', 'canvas', 'svg', 'figure', 'figcaption', 'details', 'summary', 'mark', 'time', 'progress', 'meter', 'data', 'datalist', 'output', 'blockquote', 'q', 'cite', 'em', 'strong', 'code', 'pre', 'kbd', 'samp', 'var', 'abbr', 'address', 'del', 'ins', 's', 'u', 'small', 'sub', 'sup', 'b', 'i', 'DOCTYPE'],
+    css: ['color', 'background', 'background-color', 'background-image', 'background-size', 'background-position', 'font', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-align', 'text-decoration', 'text-transform', 'line-height', 'letter-spacing', 'word-spacing', 'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'border', 'border-width', 'border-style', 'border-color', 'border-radius', 'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height', 'display', 'flex', 'grid', 'position', 'static', 'relative', 'absolute', 'fixed', 'sticky', 'top', 'right', 'bottom', 'left', 'z-index', 'overflow', 'float', 'clear', 'opacity', 'visibility', 'box-shadow', 'text-shadow', 'transform', 'transition', 'animation', '@keyframes', 'media', 'flex-direction', 'justify-content', 'align-items', 'flex-wrap', 'gap', 'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row', 'grid-area', 'order', 'flex-grow', 'flex-shrink', 'cursor', 'list-style', 'outline', 'box-sizing', 'white-space', 'vertical-align', 'table-layout', 'border-collapse', 'empty-cells', 'content', 'counter', 'calc', 'var', 'inherit', 'initial', 'unset', '!important'],
 };
 
 // LANG_NAMES defined here for browser use (langConfig.js loaded separately for Node.js exports)
@@ -259,6 +261,51 @@ function setEngineFilter(engine: string): void {
             renderTopicList(engine);
             updateAISuggestions();
             loadLangIntro(engine);
+        }
+    }
+}
+
+function renderHtmlcssBar(): void {
+    const bar = document.getElementById('engine-bar') as HTMLElement;
+    const langs = [
+        { id: 'all', label: 'HTML/CSS' },
+        { id: 'html', label: 'HTML' },
+        { id: 'css', label: 'CSS' },
+    ];
+    let html = '';
+    for (const l of langs) {
+        const active = l.id === currentEngineFilter ? ' active' : '';
+        html += `<button class="engine-btn${active}" onclick="setHtmlcssFilter('${l.id}')">${l.label}</button>`;
+    }
+    bar.innerHTML = html;
+    bar.style.display = 'flex';
+}
+
+function setHtmlcssFilter(filter: string): void {
+    currentEngineFilter = filter;
+    renderHtmlcssBar();
+    const searchInput = document.getElementById('topic-search') as HTMLInputElement | null;
+    if (searchInput) searchInput.value = '';
+
+    if (filter === 'all') {
+        currentLang = 'htmlcss';
+        document.getElementById('app').className = 'htmlcss-mode';
+        renderTopicList('htmlcss');
+        updateAISuggestions();
+        loadLangIntro('htmlcss');
+    } else {
+        currentLang = filter;
+        document.getElementById('app').className = filter + '-mode';
+        if (!courseData[filter]) {
+            loadLangData(filter, function () {
+                renderTopicList(filter);
+                updateAISuggestions();
+                loadLangIntro(filter);
+            });
+        } else {
+            renderTopicList(filter);
+            updateAISuggestions();
+            loadLangIntro(filter);
         }
     }
 }

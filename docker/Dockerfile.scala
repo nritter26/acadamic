@@ -9,3 +9,4 @@ RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists
 
 USER code
 WORKDIR /code
+RUN echo '@main def main() = println(42)' > /tmp/warmup.scala && scala /tmp/warmup.scala && rm /tmp/warmup.scala

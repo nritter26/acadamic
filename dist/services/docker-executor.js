@@ -26,20 +26,19 @@ const DOCKER_RUNNERS = {
     py: { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
     js: { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
     ts: { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
-    // go removed from DOCKER_RUNNERS — uses local runner with higher ulimit for Go's parallel compilation
-    rs: { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true },
+    // go stays on the local runner — its compile path benefits from the larger host-side memory limit
+    rs: { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true, memoryLimit: '512m', poolSize: 2 },
     c: { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
     cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
-    // zig removed from DOCKER_RUNNERS — std.debug.print goes to stderr, local runner handles it properly
-    swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false },
-    // kt removed from DOCKER_RUNNERS — kotlinc on JVM times out with 256m memory limit
-    // cs removed from DOCKER_RUNNERS — dotnet restore OOMs with 256m limit
+    zig: { image: 'kodex-zig', ext: '.zig', runCmd: 'zig run /code/prog.zig', needsCompile: false, memoryLimit: '512m' },
+    swift: { image: 'kodex-swift', ext: '.swift', runCmd: 'swift /code/prog.swift', needsCompile: false, memoryLimit: '512m' },
+    kt: { image: 'kodex-kt', ext: '.kt', compileCmd: 'kotlinc -include-runtime -d /code/out.jar /code/prog.kt && java -jar /code/out.jar', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
     wasm: { image: 'kodex-wasm', ext: '.wat', runCmd: 'wasmtime /code/prog.wat', needsCompile: false },
     asm: { image: 'kodex-asm', ext: '.asm', compileCmd: 'nasm -f elf64 /code/prog.asm -o /code/prog.o && ld -o /code/prog /code/prog.o && /code/prog', runCmd: '', needsCompile: true },
     bash: { image: 'kodex-bash', ext: '.sh', runCmd: 'bash /code/prog.sh', needsCompile: false },
     php: { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
-    scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false },
-    java: { image: 'kodex-java', ext: '.java', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true },
+    scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false, memoryLimit: '512m' },
+    java: { image: 'kodex-java', ext: '.java', src: 'Main', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
     rb: { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
     sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
@@ -71,13 +70,14 @@ async function ensureLangPool(lang) {
     const config = DOCKER_RUNNERS[lang];
     if (!config)
         return;
-    await Promise.allSettled(Array.from({ length: POOL_SIZE }, (_, i) => execAsync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { timeout: 5000 }).catch(() => { })));
+    const langPoolSize = config.poolSize || POOL_SIZE;
+    await Promise.allSettled(Array.from({ length: langPoolSize }, (_, i) => execAsync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { timeout: 5000 }).catch(() => { })));
     const entries = [];
-    for (let i = 0; i < POOL_SIZE; i++) {
+    for (let i = 0; i < langPoolSize; i++) {
         const workspaceDir = path_1.default.join(WARM_POOL_BASE, `${lang}-${i}`);
         fs_1.default.mkdirSync(workspaceDir, { recursive: true });
         try {
-            const { stdout } = await execAsync(`docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory 256m --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`, { timeout: 30000 });
+            const { stdout } = await execAsync(`docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`, { timeout: 30000 });
             const containerId = stdout.trim();
             entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
         }
@@ -120,7 +120,8 @@ async function executeOnWarmContainer(entry, lang, code, stdin) {
         releasePoolContainer(entry);
         return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: true };
     }
-    const progFile = path_1.default.join(entry.workspaceDir, 'prog' + config.ext);
+    const srcName = config.src || 'prog';
+    const progFile = path_1.default.join(entry.workspaceDir, srcName + config.ext);
     fs_1.default.writeFileSync(progFile, code);
     try {
         const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
@@ -215,11 +216,12 @@ async function dockerExecute(lang, code, stdin) {
         return { output: `Docker image ${config.image} not found`, error: true, dockerAvailable: false };
     }
     const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'docker-exec-'));
-    const tmpFile = path_1.default.join(tmpDir, 'prog' + config.ext);
+    const srcName = config.src || 'prog';
+    const tmpFile = path_1.default.join(tmpDir, srcName + config.ext);
     fs_1.default.writeFileSync(tmpFile, code);
     try {
         const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-        const cmd = `docker run --rm -i --network none --memory 256m --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+        const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
         middleware_1.logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
         const stdout = (0, child_process_1.execSync)(cmd, {
             timeout: 30000,
@@ -310,8 +312,7 @@ WORKDIR /code
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 RUN if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
-ENV PATH="$PATH:/home/code/.dotnet/tools"
-RUN dotnet tool install -g dotnet-script
+RUN mkdir -p /home/code/proj && cd /home/code/proj && dotnet new console --force --no-restore 2>/dev/null && dotnet restore 2>/dev/null && rm -rf bin
 WORKDIR /code
 `.trim(),
         'Dockerfile.wasm': `
@@ -350,13 +351,14 @@ WORKDIR /code
         'Dockerfile.scala': `
 FROM eclipse-temurin:22-jdk
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/* && \
-    curl -sL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz && \
+    curl -fsSL "https://github.com/lampepfl/dotty/releases/download/3.3.3/scala3-3.3.3.tar.gz" -o /tmp/scala3.tar.gz && \
     tar -xzf /tmp/scala3.tar.gz -C /opt && rm /tmp/scala3.tar.gz && \
     ln -s /opt/scala3-3.3.3/bin/scalac /usr/local/bin/scalac && \
     ln -s /opt/scala3-3.3.3/bin/scala /usr/local/bin/scala && \
     if id -u 1000 >/dev/null 2>&1; then userdel "$(id -un 1000)"; fi && useradd -m -u 1000 code
 USER code
 WORKDIR /code
+RUN echo '@main def main() = println(42)' > /tmp/warmup.scala && scala /tmp/warmup.scala && rm -rf /tmp/warmup.scala /tmp/.scala-build
 `.trim(),
         'Dockerfile.rb': `
 FROM ruby:3.2-slim

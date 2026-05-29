@@ -216,7 +216,7 @@ const RUNNERS = {
     rs: { cmd: 'rustc -o _prog "%f" && ./_prog', ext: '.rs' },
     c: { cmd: 'gcc -Wall -o _prog "%f" && ./_prog', ext: '.c' },
     cpp: { cmd: 'g++ -std=c++20 -Wall -o _prog "%f" && ./_prog', ext: '.cpp' },
-    cs: { cmd: 'dotnet script "%f"', ext: '.csx' },
+    cs: { cmd: 'cd "$(dirname "%f")" && dotnet new console --force --no-restore >/dev/null 2>&1 && dotnet restore 2>/dev/null && rm -rf bin && mv "%f" Program.cs && dotnet run --no-restore', ext: '.cs' },
     kt: { cmd: 'kotlinc -include-runtime -d _prog.jar "%f" && java -jar _prog.jar', ext: '.kt' },
     swift: { cmd: 'swift "%f"', ext: '.swift' },
     wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
@@ -227,6 +227,8 @@ const RUNNERS = {
     scala: { cmd: 'scala "%f"', ext: '.scala' },
     java: { cmd: 'javac "Main.java" && java -cp . Main', ext: '.java', src: 'Main' },
     rb: { cmd: 'ruby "%f"', ext: '.rb' },
+    html: { cmd: 'cat "%f"', ext: '.html' },
+    css: { cmd: 'cat "%f"', ext: '.css' },
 };
 // ── Execute ──
 async function executeCode(lang, code, stdin) {
@@ -319,24 +321,33 @@ async function executeCode(lang, code, stdin) {
     const srcName = runner.src || 'code';
     const tmpFile = path_1.default.join(tmpDir, srcName + runner.ext);
     fs_1.default.writeFileSync(tmpFile, code);
-    let cmd = runner.cmd.replace('%f', tmpFile);
+    let cmd = runner.cmd.replaceAll('%f', tmpFile);
     const env = {
         ...process.env,
         PATH: `${process.env.PATH}:${path_1.default.join(os_1.default.homedir(), '.local/bin')}:${path_1.default.join(os_1.default.homedir(), '.cargo/bin')}`,
     };
+    if (lang === 'zig') {
+        const zigCacheDir = path_1.default.join(tmpDir, '.zig-cache');
+        env.HOME = tmpDir;
+        env.XDG_CACHE_HOME = path_1.default.join(tmpDir, '.cache');
+        env.ZIG_GLOBAL_CACHE_DIR = zigCacheDir;
+        env.ZIG_LOCAL_CACHE_DIR = zigCacheDir;
+    }
     if (!process.env.DOTNET_ROOT) {
         env.DOTNET_ROOT = path_1.default.join(os_1.default.homedir(), '.local/dotnet');
     }
     if (lang === 'java') {
         cmd = resolveJavaCmd(tmpDir);
     }
-    const compiledLangs = new Set(['rs', 'c', 'cpp', 'scala', 'java', 'kt', 'zig', 'swift', 'asm']);
+    const compiledLangs = new Set(['rs', 'c', 'cpp', 'scala', 'java', 'kt', 'zig', 'swift', 'asm', 'cs']);
     const goLimit = 786432;
     const memLimit = lang === 'go' ? goLimit : compiledLangs.has(lang) ? 524288 : 262144;
-    const sandboxedCmd = `ulimit -v ${memLimit} -t 30 2>/dev/null; ${cmd}`;
+    const sandboxedCmd = lang === 'cs'
+        ? `ulimit -t 60 2>/dev/null; ${cmd}`
+        : `ulimit -v ${memLimit} -t 30 2>/dev/null; ${cmd}`;
     const execOpts = { timeout: 30000, cwd: tmpDir, env };
     try {
-        const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024, shell: true }, stdin);
+        const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024 }, stdin);
         fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
         const stdoutClean = (result.stdout || '').trimEnd();
         const stderrClean = (result.stderr || '').trimEnd();
