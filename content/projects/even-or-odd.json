@@ -1,0 +1,105 @@
+{
+  "id": "even-or-odd",
+  "title": "Even or Odd",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 15,
+  "concepts": ["functions", "conditionals", "modulo", "arrays", "edge-cases"],
+  "description": "Learn to determine if numbers are even or odd using the modulo operator, handle edge cases, and work with arrays of numbers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Check if a number is even",
+      "description": "Write an `isEven` function that returns `true` if a number is even and `false` otherwise. Use the modulo operator (`%`).",
+      "hints": [
+        "A number is even if number % 2 === 0",
+        "The function should return a boolean: true or false"
+      ],
+      "codeTemplate": {
+        "javascript": "function isEven(number) {\n  \n}\n\nconsole.log(isEven(4));\nconsole.log(isEven(7));\n",
+        "typescript": "function isEven(number: number): boolean {\n  \n}\n\nconsole.log(isEven(4));\nconsole.log(isEven(7));\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "The isEven function correctly identifies even and odd numbers!",
+        "failureMessage": "isEven(4) should return true, isEven(7) should return false."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Return 'even' or 'odd' as a string",
+      "description": "Create an `evenOrOdd` function that returns the string `\"even\"` or `\"odd\"` instead of a boolean.",
+      "hints": [
+        "Use an if/else statement to return different strings",
+        "if (number % 2 === 0) return \"even\""
+      ],
+      "codeTemplate": {
+        "javascript": "function evenOrOdd(number) {\n  \n}\n\nconsole.log(evenOrOdd(4));\nconsole.log(evenOrOdd(7));\n",
+        "typescript": "function evenOrOdd(number: number): string {\n  \n}\n\nconsole.log(evenOrOdd(4));\nconsole.log(evenOrOdd(7));\n"
+      },
+      "verification": {
+        "test": "output.includes('even') && output.includes('odd')",
+        "successMessage": "Now your function returns helpful strings!",
+        "failureMessage": "evenOrOdd(4) should return 'even', evenOrOdd(7) should return 'odd'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases",
+      "description": "Extend `evenOrOdd` to handle edge cases: zero (even), negative numbers, and decimals (not integers).",
+      "hints": [
+        "Zero is even: 0 % 2 === 0",
+        "Negative numbers work with % too: -3 % 2 === -1, check if === 0 or !== 0",
+        "Use Number.isInteger() to check if a number has decimals",
+        "Return \"not an integer\" for decimal numbers"
+      ],
+      "codeTemplate": {
+        "javascript": "function evenOrOdd(number) {\n  if (!Number.isInteger(number)) {\n    return \"not an integer\";\n  }\n  \n}\n\nconsole.log(evenOrOdd(0));\nconsole.log(evenOrOdd(-3));\nconsole.log(evenOrOdd(2.5));\n",
+        "typescript": "function evenOrOdd(number: number): string {\n  if (!Number.isInteger(number)) {\n    return \"not an integer\";\n  }\n  \n}\n\nconsole.log(evenOrOdd(0));\nconsole.log(evenOrOdd(-3));\nconsole.log(evenOrOdd(2.5));\n"
+      },
+      "verification": {
+        "test": "output.includes('even') && output.includes('odd') && output.includes('not an integer')",
+        "successMessage": "Your function handles all edge cases!",
+        "failureMessage": "Make sure 0 returns 'even', -3 returns 'odd', and 2.5 returns 'not an integer'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filter an array",
+      "description": "Use the `isEven` function with JavaScript's `.filter()` method to get only even numbers from an array.",
+      "hints": [
+        "Arrays have a .filter() method that takes a function",
+        "Pass isEven as the callback: numbers.filter(isEven)",
+        "The result is a new array with only even numbers"
+      ],
+      "codeTemplate": {
+        "javascript": "function isEven(number) {\n  return number % 2 === 0;\n}\n\nconst numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst evens = ; // Use filter with isEven\nconsole.log(evens);\n",
+        "typescript": "function isEven(number: number): boolean {\n  return number % 2 === 0;\n}\n\nconst numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst evens: number[] = ; // Use filter with isEven\nconsole.log(evens);\n"
+      },
+      "verification": {
+        "test": "output.includes('2') && output.includes('4') && output.includes('10')",
+        "successMessage": "Filtering with a callback function is a powerful pattern!",
+        "failureMessage": "Use numbers.filter(isEven) to get [2, 4, 6, 8, 10]."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Count evens and odds",
+      "description": "Write a `countEvensOdds` function that takes an array and returns an object with counts of even and odd numbers.",
+      "hints": [
+        "Loop through the array and check each number",
+        "Keep two counters: one for evens, one for odds",
+        "Return an object like { evens: 3, odds: 4 }"
+      ],
+      "codeTemplate": {
+        "javascript": "function countEvensOdds(numbers) {\n  let evenCount = 0;\n  let oddCount = 0;\n  \n  // Loop through numbers and count\n  \n  return { evens: evenCount, odds: oddCount };\n}\n\nconsole.log(countEvensOdds([1, 2, 3, 4, 5, 6]));\n",
+        "typescript": "function countEvensOdds(numbers: number[]): { evens: number; odds: number } {\n  let evenCount = 0;\n  let oddCount = 0;\n  \n  // Loop through numbers and count\n  \n  return { evens: evenCount, odds: oddCount };\n}\n\nconsole.log(countEvensOdds([1, 2, 3, 4, 5, 6]));\n"
+      },
+      "verification": {
+        "test": "output.includes('evens: 3') && output.includes('odds: 3')",
+        "successMessage": "You built a counting function that works with real data!",
+        "failureMessage": "For [1,2,3,4,5,6], there should be 3 evens and 3 odds."
+      }
+    }
+  ]
+}

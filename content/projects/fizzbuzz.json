@@ -1,0 +1,104 @@
+{
+  "id": "fizzbuzz",
+  "title": "FizzBuzz",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 15,
+  "concepts": ["loops", "conditionals", "modulo", "functions", "refactoring"],
+  "description": "Solve the classic FizzBuzz problem — print numbers 1-20 with Fizz for multiples of 3, Buzz for multiples of 5, and FizzBuzz for both.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print numbers 1 to 20",
+      "description": "Use a `for` loop to print the numbers 1 through 20 to the console, each on its own line.",
+      "hints": [
+        "A for loop: for (let i = 1; i <= 20; i++)",
+        "Use console.log(i) inside the loop"
+      ],
+      "codeTemplate": {
+        "javascript": "// Print numbers 1 through 20\n",
+        "typescript": "// Print numbers 1 through 20\n"
+      },
+      "verification": {
+        "test": "output.includes('1') && output.includes('20') && output.includes('10')",
+        "successMessage": "The loop prints 1 through 20!",
+        "failureMessage": "Make sure you print each number from 1 to 20."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fizz for multiples of 3",
+      "description": "Inside the loop, print `\"Fizz\"` instead of the number when the number is divisible by 3.",
+      "hints": [
+        "Use if (i % 3 === 0) to check divisibility by 3",
+        "Print \"Fizz\" for multiples of 3, otherwise print the number"
+      ],
+      "codeTemplate": {
+        "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+      },
+      "verification": {
+        "test": "output.includes('Fizz') && output.includes('1') && !output.includes('3')",
+        "successMessage": "Fizz appears for multiples of 3!",
+        "failureMessage": "Multiples of 3 should show 'Fizz' instead of the number."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Buzz for multiples of 5",
+      "description": "Print `\"Buzz\"` instead of the number when the number is divisible by 5.",
+      "hints": [
+        "Use else if (i % 5 === 0) to check multiples of 5",
+        "Check divisibility by 3 FIRST, then by 5",
+        "Numbers that are multiples of both 3 and 5 will still show Fizz"
+      ],
+      "codeTemplate": {
+        "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+      },
+      "verification": {
+        "test": "output.includes('Buzz') && output.includes('Fizz') && !output.includes('5')",
+        "successMessage": "Now multiples of 5 show Buzz!",
+        "failureMessage": "Multiples of 5 should show 'Buzz' instead of the number."
+      }
+    },
+    {
+      "id": 4,
+      "title": "FizzBuzz for both",
+      "description": "Print `\"FizzBuzz\"` when a number is divisible by both 3 and 5. The FizzBuzz check must come first!",
+      "hints": [
+        "Check i % 3 === 0 && i % 5 === 0 as the FIRST condition",
+        "If both, print \"FizzBuzz\", not the number",
+        "15 is the first number divisible by both 3 and 5 in this range"
+      ],
+      "codeTemplate": {
+        "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0 && i % 5 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0 && i % 5 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+      },
+      "verification": {
+        "test": "output.includes('FizzBuzz') && !output.includes('15') && !output.includes('3') && !output.includes('5')",
+        "successMessage": "FizzBuzz appears for numbers divisible by both 3 and 5!",
+        "failureMessage": "Make sure FizzBuzz appears and numbers like 15 don't."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Refactor as a function",
+      "description": "Refactor the logic into a `fizzbuzz(n)` function that returns the result for a single number, then call it from a loop.",
+      "hints": [
+        "The function should return \"FizzBuzz\", \"Fizz\", \"Buzz\", or the number as a string",
+        "Use the function inside the loop: console.log(fizzbuzz(i))",
+        "The function makes the code reusable and testable"
+      ],
+      "codeTemplate": {
+        "javascript": "function fizzbuzz(n) {\n  \n}\n\nfor (let i = 1; i <= 20; i++) {\n  console.log(fizzbuzz(i));\n}\n",
+        "typescript": "function fizzbuzz(n: number): string {\n  \n}\n\nfor (let i = 1; i <= 20; i++) {\n  console.log(fizzbuzz(i));\n}\n"
+      },
+      "verification": {
+        "test": "output.includes('FizzBuzz') && output.includes('Fizz') && output.includes('Buzz') && !output.includes('15')",
+        "successMessage": "The refactored function produces the same output! Reusable code is clean code.",
+        "failureMessage": "Make sure fizzbuzz(15) returns 'FizzBuzz' and the loop output is correct."
+      }
+    }
+  ]
+}
