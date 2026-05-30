@@ -1,0 +1,91 @@
+{
+  "id": "tab-accordion",
+  "title": "Tab/Accordion UI",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["event handling", "state management", "DOM manipulation"],
+  "description": "Build tab and accordion UI components with active state tracking and content display.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Tab data structure",
+      "description": "Create an array of tab objects with `id`, `title`, and `content` properties.",
+      "hints": ["Each tab needs a unique id", "Title is the label shown to users", "Content is the body text displayed when tab is active"],
+      "codeTemplate": {
+        "javascript": "<div id=\"tab-app\"></div>\n<script>\n  const tabs = [\n    // Your code here - at least 3 tabs\n  ];\n  console.log(JSON.stringify(tabs));\n</script>\n",
+        "typescript": "<div id=\"tab-app\"></div>\n<script>\n  interface Tab {\n    id: string;\n    title: string;\n    content: string;\n  }\n  const tabs: Tab[] = [\n    // Your code here - at least 3 tabs\n  ];\n  console.log(JSON.stringify(tabs));\n</script>\n",
+        "python": "tabs = [\n    # Your code here - at least 3 tabs\n]\nimport json\nprint(json.dumps(tabs))\n"
+      },
+      "verification": {
+        "test": "output.includes('id') && output.includes('title') && output.includes('content')",
+        "successMessage": "Tab data created!",
+        "failureMessage": "Include id, title, and content for at least 3 tabs."
+      }
+    },
+    {
+      "id": 2,
+      "title": "renderTabs function",
+      "description": "Write `renderTabs(tabs)` that returns a string of HTML for tab buttons. Each button has a `data-tab-id` attribute.",
+      "hints": ["Map each tab to a <button> element string", "Add data-tab-id attribute", "Join the array into a single string"],
+      "codeTemplate": {
+        "javascript": "<div id=\"tab-app\"></div>\n<script>\n  const tabs = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  function renderTabs(tabs) {\n    // Your code here\n  }\n  console.log(renderTabs(tabs));\n</script>\n",
+        "typescript": "<div id=\"tab-app\"></div>\n<script>\n  interface Tab {\n    id: string;\n    title: string;\n    content: string;\n  }\n  const tabs: Tab[] = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  function renderTabs(tabs: Tab[]): string {\n    // Your code here\n  }\n  console.log(renderTabs(tabs));\n</script>\n",
+        "python": "tabs = [\n    {'id': 'tab1', 'title': 'HTML', 'content': 'HTML content'},\n    {'id': 'tab2', 'title': 'CSS', 'content': 'CSS content'},\n    {'id': 'tab3', 'title': 'JS', 'content': 'JS content'}\n]\n\ndef render_tabs(tabs):\n    # Your code here\n\nprint(render_tabs(tabs))\n"
+      },
+      "verification": {
+        "test": "output.includes('data-tab-id')",
+        "successMessage": "Tabs rendered with data attributes!",
+        "failureMessage": "Each button must have a data-tab-id attribute."
+      }
+    },
+    {
+      "id": 3,
+      "title": "selectTab function",
+      "description": "Write `selectTab(tabId)` that updates the active tab. Log `'Active: [title]'` for the selected tab.",
+      "hints": ["Set a global activeTabId variable", "Find the tab object by id", "Log the active tab title"],
+      "codeTemplate": {
+        "javascript": "<div id=\"tab-app\"></div>\n<script>\n  const tabs = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let activeTabId = null;\n  function selectTab(tabId) {\n    // Your code here\n  }\n  selectTab('tab2');\n</script>\n",
+        "typescript": "<div id=\"tab-app\"></div>\n<script>\n  interface Tab {\n    id: string;\n    title: string;\n    content: string;\n  }\n  const tabs: Tab[] = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let activeTabId: string | null = null;\n  function selectTab(tabId: string): void {\n    // Your code here\n  }\n  selectTab('tab2');\n</script>\n",
+        "python": "tabs = [\n    {'id': 'tab1', 'title': 'HTML', 'content': 'HTML content'},\n    {'id': 'tab2', 'title': 'CSS', 'content': 'CSS content'},\n    {'id': 'tab3', 'title': 'JS', 'content': 'JS content'}\n]\nactive_tab_id = None\n\ndef select_tab(tab_id):\n    # Your code here\n\nselect_tab('tab2')\n"
+      },
+      "verification": {
+        "test": "output.includes('Active: CSS')",
+        "successMessage": "Tab selection works!",
+        "failureMessage": "Log 'Active: [title]' when a tab is selected."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Accordion toggle",
+      "description": "Extend the UI to support accordion mode. Write `toggleAccordion(tabId)` that expands or collapses a section. Log `'Expanded: [title]'` or `'Collapsed: [title]'`.",
+      "hints": ["Track which sections are open in a Set or array", "If tabId is already open, close it; otherwise open it", "Log the action taken"],
+      "codeTemplate": {
+        "javascript": "<div id=\"tab-app\"></div>\n<script>\n  const tabs = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let openSections = [];\n  function toggleAccordion(tabId) {\n    // Your code here\n  }\n  toggleAccordion('tab1');\n  toggleAccordion('tab1');\n</script>\n",
+        "typescript": "<div id=\"tab-app\"></div>\n<script>\n  interface Tab {\n    id: string;\n    title: string;\n    content: string;\n  }\n  const tabs: Tab[] = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let openSections: string[] = [];\n  function toggleAccordion(tabId: string): void {\n    // Your code here\n  }\n  toggleAccordion('tab1');\n  toggleAccordion('tab1');\n</script>\n",
+        "python": "tabs = [\n    {'id': 'tab1', 'title': 'HTML', 'content': 'HTML content'},\n    {'id': 'tab2', 'title': 'CSS', 'content': 'CSS content'},\n    {'id': 'tab3', 'title': 'JS', 'content': 'JS content'}\n]\nopen_sections = []\n\ndef toggle_accordion(tab_id):\n    # Your code here\n\ntoggle_accordion('tab1')\ntoggle_accordion('tab1')\n"
+      },
+      "verification": {
+        "test": "output.includes('Expanded: HTML') && output.includes('Collapsed: HTML')",
+        "successMessage": "Accordion toggle works!",
+        "failureMessage": "Log 'Expanded' on first call and 'Collapsed' on second call."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Active state tracking",
+      "description": "Write `getActiveState()` that returns an object showing which tab is active and which accordion sections are open.",
+      "hints": ["Return { activeTab: activeTabId, openSections: openSections }", "Ensure all previous steps' functions are integrated", "Test with multiple tabs active"],
+      "codeTemplate": {
+        "javascript": "<div id=\"tab-app\"></div>\n<script>\n  const tabs = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let activeTabId = 'tab1';\n  let openSections = ['tab2'];\n  function getActiveState() {\n    // Your code here\n  }\n  console.log(JSON.stringify(getActiveState()));\n</script>\n",
+        "typescript": "<div id=\"tab-app\"></div>\n<script>\n  interface TabState {\n    activeTab: string | null;\n    openSections: string[];\n  }\n  const tabs = [\n    { id: 'tab1', title: 'HTML', content: 'HTML content' },\n    { id: 'tab2', title: 'CSS', content: 'CSS content' },\n    { id: 'tab3', title: 'JS', content: 'JS content' }\n  ];\n  let activeTabId: string | null = 'tab1';\n  let openSections: string[] = ['tab2'];\n  function getActiveState(): TabState {\n    // Your code here\n  }\n  console.log(JSON.stringify(getActiveState()));\n</script>\n",
+        "python": "tabs = [\n    {'id': 'tab1', 'title': 'HTML', 'content': 'HTML content'},\n    {'id': 'tab2', 'title': 'CSS', 'content': 'CSS content'},\n    {'id': 'tab3', 'title': 'JS', 'content': 'JS content'}\n]\nactive_tab_id = 'tab1'\nopen_sections = ['tab2']\n\ndef get_active_state():\n    # Your code here\n\nimport json\nprint(json.dumps(get_active_state()))\n"
+      },
+      "verification": {
+        "test": "output.includes('activeTab') && output.includes('openSections')",
+        "successMessage": "Active state tracking works!",
+        "failureMessage": "Return an object with activeTab and openSections."
+      }
+    }
+  ]
+}

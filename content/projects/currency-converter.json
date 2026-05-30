@@ -1,0 +1,91 @@
+{
+  "id": "currency-converter",
+  "title": "Currency Converter",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["data structures", "conversion", "formatting", "history"],
+  "description": "Build a currency converter with exchange rates, multi-currency support, formatting, and conversion history.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Exchange rate data",
+      "description": "Create a rates object with currency codes as keys and exchange rates (relative to USD) as values. Include at least 5 currencies.",
+      "hints": ["Use EUR, GBP, JPY, CAD, AUD as currency codes", "Rates are numbers like EUR: 0.85", "USD should be 1"],
+      "codeTemplate": {
+        "javascript": "const rates = {\n  // Your code here\n};\nconsole.log(JSON.stringify(rates));\n",
+        "typescript": "const rates: Record<string, number> = {\n  // Your code here\n};\nconsole.log(JSON.stringify(rates));\n",
+        "python": "rates = {\n    # Your code here\n}\nimport json\nprint(json.dumps(rates))\n"
+      },
+      "verification": {
+        "test": "output.includes('USD') && Object.keys(JSON.parse(output)).length >= 5",
+        "successMessage": "Exchange rates set up!",
+        "failureMessage": "Include at least 5 currencies with USD as base."
+      }
+    },
+    {
+      "id": 2,
+      "title": "convert function",
+      "description": "Write `convert(amount, from, to, rates)` that converts an amount from one currency to another using the rates object.",
+      "hints": ["Convert to USD first (amount / rates[from])", "Then convert from USD to target (usdAmount * rates[to])", "Round to 2 decimal places"],
+      "codeTemplate": {
+        "javascript": "const rates = { USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110.0, CAD: 1.25 };\nfunction convert(amount, from, to, rates) {\n  // Your code here\n}\nconsole.log(convert(100, 'USD', 'EUR', rates));\nconsole.log(convert(100, 'EUR', 'USD', rates));\n",
+        "typescript": "const rates: Record<string, number> = { USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110.0, CAD: 1.25 };\nfunction convert(amount: number, from: string, to: string, rates: Record<string, number>): number {\n  // Your code here\n}\nconsole.log(convert(100, 'USD', 'EUR', rates));\nconsole.log(convert(100, 'EUR', 'USD', rates));\n",
+        "python": "rates = {'USD': 1, 'EUR': 0.85, 'GBP': 0.73, 'JPY': 110.0, 'CAD': 1.25}\n\ndef convert(amount, from_currency, to_currency, rates):\n    # Your code here\n\nprint(convert(100, 'USD', 'EUR', rates))\nprint(convert(100, 'EUR', 'USD', rates))\n"
+      },
+      "verification": {
+        "test": "output.includes('85') && output.includes('117.65') || output.includes('117.64')",
+        "successMessage": "Conversion works correctly!",
+        "failureMessage": "Convert through USD base and round to 2 decimals."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Format currency",
+      "description": "Write `formatCurrency(amount, code)` that returns a formatted string like `'$100.00'` for USD or `'€85.00'` for EUR.",
+      "hints": ["Use a symbols map: { USD: '$', EUR: '€', GBP: '£', JPY: '¥' }", "Format number to 2 decimal places with .toFixed(2)", "Place symbol before or after as appropriate"],
+      "codeTemplate": {
+        "javascript": "function formatCurrency(amount, code) {\n  // Your code here\n}\nconsole.log(formatCurrency(100, 'USD'));\nconsole.log(formatCurrency(85, 'EUR'));\n",
+        "typescript": "function formatCurrency(amount: number, code: string): string {\n  // Your code here\n}\nconsole.log(formatCurrency(100, 'USD'));\nconsole.log(formatCurrency(85, 'EUR'));\n",
+        "python": "def format_currency(amount, code):\n    # Your code here\n\nprint(format_currency(100, 'USD'))\nprint(format_currency(85, 'EUR'))\n"
+      },
+      "verification": {
+        "test": "output.includes('$100.00') && output.includes('€85.00') || output.includes('$100.00')",
+        "successMessage": "Currency formatted correctly!",
+        "failureMessage": "Use currency symbols and 2 decimal places."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multi-currency conversion",
+      "description": "Write `convertMultiple(amount, from, targets, rates)` that converts an amount to multiple target currencies and returns an object with currency codes as keys.",
+      "hints": ["Iterate over targets array", "Call convert for each target", "Return { code: convertedValue } object"],
+      "codeTemplate": {
+        "javascript": "const rates = { USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110.0, CAD: 1.25 };\nfunction convertMultiple(amount, from, targets, rates) {\n  // Your code here\n}\nconsole.log(JSON.stringify(convertMultiple(100, 'USD', ['EUR', 'GBP', 'JPY'], rates)));\n",
+        "typescript": "const rates: Record<string, number> = { USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110.0, CAD: 1.25 };\nfunction convertMultiple(amount: number, from: string, targets: string[], rates: Record<string, number>): Record<string, number> {\n  // Your code here\n}\nconsole.log(JSON.stringify(convertMultiple(100, 'USD', ['EUR', 'GBP', 'JPY'], rates)));\n",
+        "python": "rates = {'USD': 1, 'EUR': 0.85, 'GBP': 0.73, 'JPY': 110.0, 'CAD': 1.25}\n\ndef convert_multiple(amount, from_currency, targets, rates):\n    # Your code here\n\nimport json\nprint(json.dumps(convert_multiple(100, 'USD', ['EUR', 'GBP', 'JPY'], rates)))\n"
+      },
+      "verification": {
+        "test": "output.includes('EUR') && output.includes('GBP') && output.includes('JPY')",
+        "successMessage": "Multi-currency conversion works!",
+        "failureMessage": "Return an object with all target currency conversions."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Conversion history",
+      "description": "Write `logConversion(from, to, amount, result)` that stores each conversion in a history array and `getHistory()` returns the array. Each entry includes a `timestamp`.",
+      "hints": ["Push { from, to, amount, result, timestamp } to history", "Timestamp can be new Date().toISOString()", "getHistory returns the history array"],
+      "codeTemplate": {
+        "javascript": "let history = [];\nfunction logConversion(from, to, amount, result) {\n  // Your code here\n}\nfunction getHistory() {\n  // Your code here\n}\nlogConversion('USD', 'EUR', 100, 85);\nlogConversion('EUR', 'GBP', 50, 42.94);\nconsole.log(JSON.stringify(getHistory()));\n",
+        "typescript": "interface ConversionEntry {\n  from: string;\n  to: string;\n  amount: number;\n  result: number;\n  timestamp: string;\n}\nlet history: ConversionEntry[] = [];\nfunction logConversion(from: string, to: string, amount: number, result: number): void {\n  // Your code here\n}\nfunction getHistory(): ConversionEntry[] {\n  // Your code here\n}\nlogConversion('USD', 'EUR', 100, 85);\nlogConversion('EUR', 'GBP', 50, 42.94);\nconsole.log(JSON.stringify(getHistory()));\n",
+        "python": "from datetime import datetime\n\nhistory = []\n\ndef log_conversion(from_currency, to_currency, amount, result):\n    # Your code here\n\ndef get_history():\n    # Your code here\n\nlog_conversion('USD', 'EUR', 100, 85)\nlog_conversion('EUR', 'GBP', 50, 42.94)\nimport json\nprint(json.dumps(get_history()))\n"
+      },
+      "verification": {
+        "test": "output.includes('from') && output.includes('to') && output.includes('timestamp')",
+        "successMessage": "Conversion history works!",
+        "failureMessage": "Each history entry should include from, to, amount, result, and timestamp."
+      }
+    }
+  ]
+}

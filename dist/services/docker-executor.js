@@ -39,6 +39,7 @@ const DOCKER_RUNNERS = {
     php: { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
     scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false, memoryLimit: '512m' },
     java: { image: 'kodex-java', ext: '.java', src: 'Main', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
+    lua: { image: 'kodex-lua', ext: '.lua', runCmd: 'lua /code/prog.lua', needsCompile: false },
     rb: { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
     sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
@@ -359,6 +360,12 @@ RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists
 USER code
 WORKDIR /code
 RUN echo '@main def main() = println(42)' > /tmp/warmup.scala && scala /tmp/warmup.scala && rm -rf /tmp/warmup.scala /tmp/.scala-build
+`.trim(),
+        'Dockerfile.lua': `
+FROM alpine:latest
+RUN apk add --no-cache lua5.4 && adduser -D -u 1000 code
+USER code
+WORKDIR /code
 `.trim(),
         'Dockerfile.rb': `
 FROM ruby:3.2-slim

@@ -196,6 +196,7 @@ const RUNNERS: Record<string, RunnerConfig> = {
   wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
   asm: { cmd: 'nasm -f elf64 "%f" -o _prog.o && ld -o _prog _prog.o && ./_prog', ext: '.asm' },
   zig: { cmd: 'zig run "%f"', ext: '.zig' },
+  lua: { cmd: 'lua "%f"', ext: '.lua' },
   bash: { cmd: 'bash "%f"', ext: '.sh' },
   php:  { cmd: 'php "%f"', ext: '.php' },
   scala: { cmd: 'scala "%f"', ext: '.scala' },

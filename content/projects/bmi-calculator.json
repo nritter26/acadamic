@@ -1,0 +1,111 @@
+{
+  "id": "bmi-calculator",
+  "title": "BMI Calculator",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["functions", "arithmetic", "conditionals", "objects", "methods"],
+  "description": "Calculate BMI, determine weight categories, and support both metric and imperial units.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Calculate BMI",
+      "description": "Write a `calcBMI` function that takes weight (kg) and height (m) and returns the BMI using `weight / (height * height)`.",
+      "hints": [
+        "BMI = weight / (height * height)",
+        "Weight is in kilograms, height in meters"
+      ],
+      "codeTemplate": {
+        "javascript": "function calcBMI(weight, height) {\n  \n}\n\nconsole.log(calcBMI(70, 1.75));\n",
+        "typescript": "function calcBMI(weight: number, height: number): number {\n  \n}\n\nconsole.log(calcBMI(70, 1.75));\n",
+        "python": "def calcBMI(weight, height):\n  \n\nprint(calcBMI(70, 1.75))\n"
+      },
+      "verification": {
+        "test": "output.includes('22.86') || output.includes('22.85')",
+        "successMessage": "BMI for 70kg at 1.75m is about 22.86!",
+        "failureMessage": "calcBMI(70, 1.75) should return approximately 22.86."
+      }
+    },
+    {
+      "id": 2,
+      "title": "BMI category",
+      "description": "Write a `getCategory` function that returns the weight category: underweight (<18.5), normal (18.5-24.9), overweight (25-29.9), or obese (>=30).",
+      "hints": [
+        "Use if/else if/else for the ranges",
+        "BMI < 18.5 is 'underweight'",
+        "BMI 18.5-24.9 is 'normal'",
+        "BMI 25-29.9 is 'overweight'",
+        "BMI >= 30 is 'obese'"
+      ],
+      "codeTemplate": {
+        "javascript": "function getCategory(bmi) {\n  \n}\n\nconsole.log(getCategory(17));\nconsole.log(getCategory(22));\nconsole.log(getCategory(27));\nconsole.log(getCategory(32));\n",
+        "typescript": "function getCategory(bmi: number): string {\n  \n}\n\nconsole.log(getCategory(17));\nconsole.log(getCategory(22));\nconsole.log(getCategory(27));\nconsole.log(getCategory(32));\n",
+        "python": "def getCategory(bmi):\n  \n\nprint(getCategory(17))\nprint(getCategory(22))\nprint(getCategory(27))\nprint(getCategory(32))\n"
+      },
+      "verification": {
+        "test": "output.includes('underweight') && output.includes('normal') && output.includes('overweight') && output.includes('obese')",
+        "successMessage": "All four categories are correctly identified!",
+        "failureMessage": "17→underweight, 22→normal, 27→overweight, 32→obese."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Metric BMI calculator",
+      "description": "Write a `bmiMetric` function that combines calcBMI and getCategory to return a full result string.",
+      "hints": [
+        "Call calcBMI to get the numeric value",
+        "Call getCategory to get the category",
+        "Return a formatted string like 'BMI: 22.9 (normal)'"
+      ],
+      "codeTemplate": {
+        "javascript": "function calcBMI(weight, height) {\n  return weight / (height * height);\n}\n\nfunction getCategory(bmi) {\n  if (bmi < 18.5) return \"underweight\";\n  if (bmi < 25) return \"normal\";\n  if (bmi < 30) return \"overweight\";\n  return \"obese\";\n}\n\nfunction bmiMetric(weight, height) {\n  \n}\n\nconsole.log(bmiMetric(70, 1.75));\n",
+        "typescript": "function calcBMI(weight: number, height: number): number {\n  return weight / (height * height);\n}\n\nfunction getCategory(bmi: number): string {\n  if (bmi < 18.5) return \"underweight\";\n  if (bmi < 25) return \"normal\";\n  if (bmi < 30) return \"overweight\";\n  return \"obese\";\n}\n\nfunction bmiMetric(weight: number, height: number): string {\n  \n}\n\nconsole.log(bmiMetric(70, 1.75));\n",
+        "python": "def calcBMI(weight, height):\n  return weight / (height * height)\n\ndef getCategory(bmi):\n  if bmi < 18.5:\n    return \"underweight\"\n  if bmi < 25:\n    return \"normal\"\n  if bmi < 30:\n    return \"overweight\"\n  return \"obese\"\n\ndef bmiMetric(weight, height):\n  \n\nprint(bmiMetric(70, 1.75))\n"
+      },
+      "verification": {
+        "test": "output.includes('BMI:') && output.includes('normal') || output.includes('22.9') || output.includes('22.8')",
+        "successMessage": "Metric BMI result with category displayed!",
+        "failureMessage": "The result should include 'BMI:' and the category."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Imperial BMI conversion",
+      "description": "Write a `bmiImperial` function that accepts weight (lbs) and height (inches) and converts to metric internally. Use `weight * 703 / (height * height)`.",
+      "hints": [
+        "The imperial formula is (weight * 703) / (height * height)",
+        "Use the same getCategory function for the result"
+      ],
+      "codeTemplate": {
+        "javascript": "function getCategory(bmi) {\n  if (bmi < 18.5) return \"underweight\";\n  if (bmi < 25) return \"normal\";\n  if (bmi < 30) return \"overweight\";\n  return \"obese\";\n}\n\nfunction bmiImperial(weightLbs, heightInches) {\n  \n}\n\nconsole.log(bmiImperial(154, 69));\n",
+        "typescript": "function getCategory(bmi: number): string {\n  if (bmi < 18.5) return \"underweight\";\n  if (bmi < 25) return \"normal\";\n  if (bmi < 30) return \"overweight\";\n  return \"obese\";\n}\n\nfunction bmiImperial(weightLbs: number, heightInches: number): string {\n  \n}\n\nconsole.log(bmiImperial(154, 69));\n",
+        "python": "def getCategory(bmi):\n  if bmi < 18.5:\n    return \"underweight\"\n  if bmi < 25:\n    return \"normal\"\n  if bmi < 30:\n    return \"overweight\"\n  return \"obese\"\n\ndef bmiImperial(weightLbs, heightInches):\n  \n\nprint(bmiImperial(154, 69))\n"
+      },
+      "verification": {
+        "test": "output.includes('BMI:') && (output.includes('underweight') || output.includes('normal') || output.includes('overweight') || output.includes('obese'))",
+        "successMessage": "Imperial BMI calculated with conversion!",
+        "failureMessage": "Use the formula (weight * 703) / (height * height) and include the category."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Person object with BMI",
+      "description": "Create a `Person` object (or class) with weight, height, and a `bmi` method that calculates and returns the result.",
+      "hints": [
+        "Store name, weight, height as properties",
+        "Add a bmi() method that computes and returns the BMI",
+        "Add a describe() method that prints a full report"
+      ],
+      "codeTemplate": {
+        "javascript": "function createPerson(name, weight, height) {\n  return {\n    name: name,\n    weight: weight,\n    height: height,\n    bmi: function() {\n      \n    },\n    describe: function() {\n      \n    }\n  };\n}\n\nconst person = createPerson(\"Alice\", 70, 1.75);\nconsole.log(person.describe());\n",
+        "typescript": "interface Person {\n  name: string;\n  weight: number;\n  height: number;\n  bmi(): number;\n  describe(): string;\n}\n\nfunction createPerson(name: string, weight: number, height: number): Person {\n  return {\n    name,\n    weight,\n    height,\n    bmi(): number {\n      \n    },\n    describe(): string {\n      \n    }\n  };\n}\n\nconst person = createPerson(\"Alice\", 70, 1.75);\nconsole.log(person.describe());\n",
+        "python": "class Person:\n  def __init__(self, name, weight, height):\n    self.name = name\n    self.weight = weight\n    self.height = height\n  \n  def bmi(self):\n    \n  \n  def describe(self):\n    \n\nperson = Person(\"Alice\", 70, 1.75)\nprint(person.describe())\n"
+      },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('BMI')",
+        "successMessage": "The Person object calculates BMI and returns a full report!",
+        "failureMessage": "describe() should include the person's name and their BMI result."
+      }
+    }
+  ]
+}

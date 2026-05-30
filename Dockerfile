@@ -68,6 +68,10 @@ RUN curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v2
     | tar -C /opt -xJ \
     && ln -s /opt/wasmtime-*/wasmtime /usr/local/bin/wasmtime
 
+# ── Lua 5.4 ──
+RUN apt-get update && apt-get install -y --no-install-recommends lua5.4 \
+    && rm -rf /var/lib/apt/lists/*
+
 # ── tsx globally ──
 RUN npm install -g tsx
 

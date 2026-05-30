@@ -15,7 +15,7 @@ const path_1 = __importDefault(require("path"));
 const LANG_NAMES_AI = {
     js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
     c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
-    swift: 'Swift', ts: 'TypeScript', zig: 'Zig',
+    swift: 'Swift', ts: 'TypeScript', lua: 'Lua', zig: 'Zig',
     scala: 'Scala',
 };
 const GREETINGS = [

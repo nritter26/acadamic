@@ -57,7 +57,7 @@
   const LANG_NAMES: Record<string, string> = {
     js: 'JavaScript', ts: 'TypeScript', py: 'Python', go: 'Go',
     rs: 'Rust', zig: 'Zig', c: 'C', cpp: 'C++', cs: 'C#',
-    kt: 'Kotlin', swift: 'Swift', java: 'Java', rb: 'Ruby',
+    kt: 'Kotlin', lua: 'Lua', swift: 'Swift', java: 'Java', rb: 'Ruby',
     php: 'PHP', sqlite: 'SQLite', pg: 'PostgreSQL', mysql: 'MySQL',
     mongodb: 'MongoDB', firebase: 'Firebase', dk: 'Docker',
     git: 'Git', aws: 'AWS', azure: 'Azure', gcp: 'GCP',

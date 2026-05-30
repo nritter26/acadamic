@@ -6,14 +6,16 @@ An interactive multi-language programming textbook, code playground, and compile
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-topic curriculum** | 64 content files covering 18 programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), and compiler design — 3,571+ indexed topics across 797 phases |
+| **Multi-topic curriculum** | 69+ content files covering 20+ programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), HTML/CSS, and compiler design — 4,000+ indexed topics across 800+ phases |
 | **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Scala, Swift, Zig, Bash, PHP, WebAssembly, Assembly via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. Docker sandbox also available for isolated execution. |
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
 | **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 64 content files. Optional LLM backends: OpenAI, Anthropic, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (18+ languages, 3 difficulty levels each). |
-| **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift, Scala, Bash, PHP, Ruby, C, C++, C#, Kotlin, Zig — each with test expressions and solution code. |
+| **Code challenges** | 2,100+ bug-fixing and implementation challenges across JavaScript, Python, Go, TypeScript, Rust, Swift, Scala, Bash, PHP, Ruby, C, C++, C#, Kotlin, Zig, Lua — each with test expressions and solution code. |
+| **Projects tab** | 54 hands-on projects across beginner to advanced levels (hello-world, calculator, todo-list, weather-dashboard, chat app, chess validator, etc.) with step-by-step instructions, built-in code editor, preview pane, and progress tracking. |
+| **Styling Grounds** | Interactive CSS visualizer with 8 scenarios (box model, flexbox, CSS grid, positioning, borders/shadows, typography, colors/gradients, transforms). Edit CSS live and see results instantly. |
 | **Code analysis** | Static analysis with language-specific keyword pattern checks (JS, TS, Python, Go, Rust, SQL, Scala), balanced delimiter detection, structural analysis, and optional LLM-powered deep review with 1-10 scoring. |
 | **AI exercises** | On-demand generated practice exercises per topic/level — fix-bug, fill-blank, write-function, predict-output, refactor, implement, optimize, debug, design, analyze, extend. LLM-generated with static fallback. |
 | **Learner profile** | Per-user progress tracking with SM-2 spaced-repetition review scheduling (1/3/7/14/30 day intervals), concept mastery metrics, error/attempt tracking, and personalized next-topic recommendations. |
@@ -24,7 +26,7 @@ An interactive multi-language programming textbook, code playground, and compile
 | **Mobile mode** | Android and iOS development curriculum with platform toggle filter. 98 topics across 16 phases (8 Android, 8 iOS) covering Kotlin, Jetpack Compose, Swift, SwiftUI, UIKit, architecture patterns, testing, distribution, and more. |
 | **CI/CD mode** | Full CI/CD curriculum with 10 phases and ~30 topics covering CI/CD fundamentals, version control, CI tools (GitHub Actions, Jenkins, CircleCI, Azure DevOps), GitLab CI/CD (dedicated 4-topic phase), deployment strategies, IaC, containers, GitOps, security (SAST/DAST/SBOM), and monitoring. |
 | **REST API client** | Built-in Thunderclient-style workspace with HTTP method selection, URL input, headers/body/auth tabs (Bearer/Basic), and response display with status, headers, and formatted JSON. |
-| **Git visualizer** | Interactive Git learning mode with visualized branching, commits, merges, and common workflows. |
+| **Git visualizer** | Interactive Git learning mode with visualized branching, commits, merges, rebases, cherry-picks, squash, freeplay sandbox, and an interactive command terminal. |
 | **Tech Stack mode** | Explore full technology stacks (backend, frontend, database, DevOps) for different application types. |
 | **Roadmap view** | SVG-based visual learning roadmap for topic progression. |
 | **Code editor file integration** | Load `.js`/`.py`/etc. files from disk via `<input type="file">` and FileReader. |
@@ -33,7 +35,7 @@ An interactive multi-language programming textbook, code playground, and compile
 ## Supported Topics
 
 ### Programming Languages (curriculum + code execution)
-JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Scala, Swift, Bash, PHP, Ruby, WebAssembly, Assembly — each with full topic trees and live server-side execution.
+JavaScript, TypeScript, Python, Go, Rust, Zig, C, C++, C#, Kotlin, Scala, Swift, Bash, PHP, Ruby, Lua, Java, WebAssembly, Assembly, HTML, CSS — each with full topic trees and live server-side execution (HTML/CSS rendered client-side).
 
 ### Databases
 PostgreSQL, MySQL, SQLite, MongoDB, Firebase — with curriculum; SQLite/PG/MySQL with live SQL execution.
@@ -84,6 +86,9 @@ Complete compiler curriculum: tokenization, AST, parsing, code generation, optim
 | PHP | `php` | `ulimit -v 262144 -t 30` |
 | WebAssembly | `wasmtime` | `ulimit -v 262144 -t 30` |
 | Assembly | `nasm` + `gcc` | `ulimit -v 262144 -t 30` |
+| Lua | `lua` | `ulimit -v 262144 -t 30` |
+| Java | `javac` + `java` | `ulimit -v 262144 -t 30` |
+| Ruby | `ruby` | `ulimit -v 262144 -t 30` |
 | SQLite / PostgreSQL / MySQL | Built-in database engine | Concurrency-guarded |
 
 All execution is limited to 256MB virtual memory, 30s CPU time, and a maximum of 4 concurrent processes. Docker sandbox images are also available for each language (see Docker section).
@@ -116,7 +121,7 @@ docker compose up
 
 Open http://localhost:3001
 
-This builds a single image with all 16 language runtimes pre-installed (Node.js, Python, Go, Rust, .NET, Kotlin, Scala, Swift, Zig, Wasmtime, PHP, C/C++, Bash).
+This builds a single image with all 19 language runtimes pre-installed (Node.js, Python, Go, Rust, .NET, Kotlin, Scala, Swift, Zig, Wasmtime, PHP, C/C++, Bash, Lua, Java, Ruby).
 
 ### Node.js Backend
 
@@ -190,6 +195,9 @@ Recent frontend splits:
 - [`public/landing.js`](./public/landing.js) handles the welcome screen.
 - [`public/mobile-helpers.js`](./public/mobile-helpers.js) handles the mobile/tech stack intro handoff.
 - [`public/lang-intro.js`](./public/lang-intro.js) owns language intro content rendering.
+- [`public/projects.js`](./public/projects.js) powers the Projects tab with 54 hands-on projects.
+- [`public/styling-visualize.js`](./public/styling-visualize.js) powers the interactive CSS visualizer.
+- [`public/git-visualize.js`](./public/git-visualize.js) powers the interactive Git graph and terminal.
 
 ## API Endpoints
 
@@ -208,7 +216,7 @@ Recent frontend splits:
 ### Code Execution
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/execute` | Execute code `{lang, code, stdin?}` — supports py, go, ts, rs, c, cpp, cs, kt, swift, wasm, asm, zig, bash, php, scala, sqlite, pg, mysql |
+| POST | `/api/execute` | Execute code `{lang, code, stdin?}` — supports py, go, ts, rs, c, cpp, cs, kt, swift, wasm, asm, zig, bash, php, scala, lua, java, rb, sqlite, pg, mysql |
 | POST | `/api/proxy` | Proxy HTTP requests with SSRF protection (blocks private IPs, metadata endpoints) |
 
 ### Analysis
@@ -409,10 +417,16 @@ Each sandbox image is tagged `kodex-<lang>` (e.g., `kodex-py`, `kodex-scala`) an
 | `kodex-php` | PHP | php:8.3-cli |
 | `kodex-wasm` | WebAssembly | rust:1.83 (wasmtime) |
 | `kodex-asm` | Assembly | gcc:13-bookworm (nasm) |
+| `kodex-lua` | Lua | alpine:latest (lua5.4) |
+| `kodex-java` | Java | eclipse-temurin:22-jdk |
+| `kodex-rb` | Ruby | ruby:3.3 |
+| `kodex-sqlite` | SQLite | nixos:latest |
+| `kodex-pg` | PostgreSQL | postgres:16 |
+| `kodex-mysql` | MySQL | mysql:8.0 |
 
 ## Course Data Format
 
-Course files in `content/` are 64 JSON files with topics organized by phase:
+Course files in `content/` are 69+ JSON files with topics organized by phase:
 
 ```json
 {
@@ -429,7 +443,7 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 
 ## UI Features
 
-- **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, GameDev, Mobile, Tech Stack, Quiz, Gaming — each with distinct accent colors and hover effects
+- **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, DB Lab, Projects, GameDev, Gaming, Git Grounds, Mobile, Quiz, Learn Code, Tech Stack, Styling Grounds — each with distinct accent colors and hover effects
 - **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
 - **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
 - **Roadmap view** — SVG-based visual learning roadmap for topic progression

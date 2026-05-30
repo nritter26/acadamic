@@ -133,6 +133,14 @@
     code: "# Hello from Ruby\nputs \"Hello, Ruby!\"\n\n# Everything is an object\n5.times { puts \"Ruby!\" }\n\n# Methods and blocks\ndef greet(name)\n  \"Hello, #{name}!\"\nend\n\nputs greet(\"World\")\n\n# Arrays and each\n[1, 2, 3].each { |n| puts n }"
   };
 
+  intro.lua = {
+    name: "Lua",
+    what: "Lua is a lightweight, high-level, dynamically typed scripting language designed for embedded use in applications. It combines simple procedural syntax with powerful data description constructs (tables), making it ideal for configuration, scripting, and extending other programs.",
+    usedFor: "Game development (World of Warcraft, Roblox, Angry Birds), embedded systems, configuration scripting, network appliances, and as an embeddable extension language for C/C++ applications. Lua is known for its speed, small footprint, and easy integration with C.",
+    creator: "Roberto Ierusalimschy, Luiz Henrique de Figueiredo, and Waldemar Celes at Pontifical Catholic University of Rio de Janeiro (PUC-Rio). First released in 1993. Lua 5.4 is the current version.",
+    code: "-- Hello World\nprint('Hello, Lua!')\n\n-- Function\nfunction greet(name)\n    return \"Hello, \" .. name .. \"!\"\nend\n\nprint(greet('World'))\n\n-- Table (Lua's main data structure)\nlocal fruits = {\"apple\", \"banana\", \"cherry\"}\nfor i, fruit in ipairs(fruits) do\n    print(i .. \": \" .. fruit)\nend"
+  };
+
   intro.scala = {
     name: "Scala",
     what: "Scala (scalable language) is a statically-typed, general-purpose programming language that combines object-oriented and functional programming paradigms. It runs on the JVM and can seamlessly interoperate with Java code. Scala's concise syntax and powerful type system make it ideal for building robust, high-performance applications.",

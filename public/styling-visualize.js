@@ -92,7 +92,7 @@ function initStylingVisualize() {
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
     renderScenarioList();
-    loadScenario('box-model');
+    stylingLoadScenario('box-model');
 }
 
 function renderScenarioList() {
@@ -101,12 +101,12 @@ function renderScenarioList() {
     for (const id of SCENARIO_ORDER) {
         const s = STYLING_SCENARIOS[id];
         const active = stylingCurrentScenario === id ? ' active-topic' : '';
-        html += '<button class="item-btn' + active + '" id="btn-' + id + '" onclick="loadScenario(\'' + id + '\')">\n          <span class="topic-name">' + s.icon + ' ' + s.name + '</span>\n        </button>';
+        html += '<button class="item-btn' + active + '" id="btn-' + id + '" onclick="stylingLoadScenario(\'' + id + '\')">\n          <span class="topic-name">' + s.icon + ' ' + s.name + '</span>\n        </button>';
     }
     list.innerHTML = html;
 }
 
-function loadScenario(id) {
+function stylingLoadScenario(id) {
     const s = STYLING_SCENARIOS[id];
     if (!s) return;
     stylingCurrentScenario = id;
