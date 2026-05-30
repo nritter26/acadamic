@@ -1,0 +1,106 @@
+{
+  "id": "quiz-app",
+  "title": "Quiz App",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 30,
+  "concepts": ["arrays", "objects", "functions", "scoring", "conditionals"],
+  "description": "Build a quiz application that presents questions, checks answers, tracks your score, and shows a final results screen.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the question data structure",
+      "description": "Define an array of question objects. Each question has a `question` string, a `choices` array, and a `correctAnswer` string. Log the data to verify structure.",
+      "hints": [
+        "Each question: { question: '...', choices: ['A', 'B', 'C', 'D'], correctAnswer: 'B' }",
+        "Create at least 3 questions on different topics",
+        "Use JSON.stringify to log the full structure"
+      ],
+      "codeTemplate": {
+        "javascript": "const questions = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"Which planet is known as the Red Planet?\",\n    choices: [\"Venus\", \"Jupiter\", \"Mars\", \"Saturn\"],\n    correctAnswer: \"Mars\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nconsole.log(JSON.stringify(questions[0]));\n",
+        "typescript": "interface Question {\n  question: string;\n  choices: string[];\n  correctAnswer: string;\n}\n\nconst questions: Question[] = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"Which planet is known as the Red Planet?\",\n    choices: [\"Venus\", \"Jupiter\", \"Mars\", \"Saturn\"],\n    correctAnswer: \"Mars\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nconsole.log(JSON.stringify(questions[0]));\n"
+      },
+      "verification": {
+        "test": "output.includes('capital of France') && output.includes('Paris')",
+        "successMessage": "Question data structure is set up with questions, choices, and correct answers!",
+        "failureMessage": "Make sure each question object has question, choices, and correctAnswer fields."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Render a question",
+      "description": "Write a `renderQuestion` function that takes an index and logs the question with numbered choices, like: `\"Q1: What is the capital of France?\"` then `\"1. London  2. Paris  3. Berlin  4. Madrid\"`.",
+      "hints": [
+        "Use the index to label the question: 'Q' + (index + 1)",
+        "Map choices to numbered strings: '1. London'",
+        "Join them with spaces or newlines for display"
+      ],
+      "codeTemplate": {
+        "javascript": "const questions = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  }\n];\n\nfunction renderQuestion(index) {\n  \n}\n\nrenderQuestion(0);\n",
+        "typescript": "interface Question {\n  question: string;\n  choices: string[];\n  correctAnswer: string;\n}\n\nconst questions: Question[] = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  }\n];\n\nfunction renderQuestion(index: number): void {\n  \n}\n\nrenderQuestion(0);\n"
+      },
+      "verification": {
+        "test": "output.includes('Q1') && output.includes('London') && output.includes('Paris') && output.includes('Berlin') && output.includes('Madrid')",
+        "successMessage": "Questions render with numbered choices for the user to read!",
+        "failureMessage": "renderQuestion should log the question with a 'Q1' prefix and all 4 numbered choices."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Check the selected answer",
+      "description": "Write a `checkAnswer` function that takes a question index and a selected answer. Log `\"Correct!\"` or `\"Incorrect!\"` based on whether it matches the correct answer.",
+      "hints": [
+        "Access the question: questions[index]",
+        "Compare selected === questions[index].correctAnswer",
+        "Log either 'Correct!' or 'Incorrect!' and return a boolean"
+      ],
+      "codeTemplate": {
+        "javascript": "const questions = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nfunction checkAnswer(index, selected) {\n  \n}\n\nconsole.log(checkAnswer(0, \"Paris\"));\nconsole.log(checkAnswer(0, \"London\"));\n",
+        "typescript": "interface Question {\n  question: string;\n  choices: string[];\n  correctAnswer: string;\n}\n\nconst questions: Question[] = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nfunction checkAnswer(index: number, selected: string): boolean {\n  \n}\n\nconsole.log(checkAnswer(0, \"Paris\"));\nconsole.log(checkAnswer(0, \"London\"));\n"
+      },
+      "verification": {
+        "test": "output.includes('Correct') && output.includes('Incorrect')",
+        "successMessage": "Answers are checked correctly — right and wrong answers are detected!",
+        "failureMessage": "checkAnswer(0, 'Paris') should log 'Correct!' and return true. checkAnswer(0, 'London') should log 'Incorrect!' and return false."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Track the score",
+      "description": "Create a `score` variable and an `answerQuestion` function that checks the answer, increments the score if correct, and logs the current score.",
+      "hints": [
+        "Initialize let score = 0 outside the function",
+        "Call checkAnswer logic inside answerQuestion",
+        "If correct, increment score by 1 and log 'Score: ' + score"
+      ],
+      "codeTemplate": {
+        "javascript": "const questions = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nlet score = 0;\n\nfunction answerQuestion(index, selected) {\n  \n}\n\nanswerQuestion(0, \"Paris\");\nanswerQuestion(1, \"3\");\nconsole.log(\"Final score:\", score);\n",
+        "typescript": "interface Question {\n  question: string;\n  choices: string[];\n  correctAnswer: string;\n}\n\nconst questions: Question[] = [\n  {\n    question: \"What is the capital of France?\",\n    choices: [\"London\", \"Paris\", \"Berlin\", \"Madrid\"],\n    correctAnswer: \"Paris\"\n  },\n  {\n    question: \"What is 2 + 2?\",\n    choices: [\"3\", \"4\", \"5\", \"6\"],\n    correctAnswer: \"4\"\n  }\n];\n\nlet score: number = 0;\n\nfunction answerQuestion(index: number, selected: string): void {\n  \n}\n\nanswerQuestion(0, \"Paris\");\nanswerQuestion(1, \"3\");\nconsole.log(\"Final score:\", score);\n"
+      },
+      "verification": {
+        "test": "output.includes('Correct') && output.includes('Incorrect') && output.includes('Final score:') && output.includes('1')",
+        "successMessage": "Score tracking works — correct answers add points!",
+        "failureMessage": "answerQuestion(0, 'Paris') should log 'Correct!' and set score to 1. answerQuestion(1, '3') should log 'Incorrect!'"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Show the results screen",
+      "description": "Write a `showResults` function that calculates the percentage and logs a summary: `\"You scored X out of Y (Z%)\"` with a pass/fail message.",
+      "hints": [
+        "Calculate percentage: Math.round((score / questions.length) * 100)",
+        "Display: 'You scored ' + score + ' out of ' + questions.length + ' (' + percent + '%)'",
+        "If percentage >= 70, log 'Passed!', otherwise 'Try again!'"
+      ],
+      "codeTemplate": {
+        "javascript": "const questions = [\n  { question: \"Q1\", choices: [\"A\", \"B\"], correctAnswer: \"A\" },\n  { question: \"Q2\", choices: [\"A\", \"B\"], correctAnswer: \"A\" },\n  { question: \"Q3\", choices: [\"A\", \"B\"], correctAnswer: \"B\" }\n];\n\nlet score = 2;\n\nfunction showResults() {\n  \n}\n\nshowResults();\n",
+        "typescript": "interface Question {\n  question: string;\n  choices: string[];\n  correctAnswer: string;\n}\n\nconst questions: Question[] = [\n  { question: \"Q1\", choices: [\"A\", \"B\"], correctAnswer: \"A\" },\n  { question: \"Q2\", choices: [\"A\", \"B\"], correctAnswer: \"A\" },\n  { question: \"Q3\", choices: [\"A\", \"B\"], correctAnswer: \"B\" }\n];\n\nlet score: number = 2;\n\nfunction showResults(): void {\n  \n}\n\nshowResults();\n"
+      },
+      "verification": {
+        "test": "output.includes('2') && output.includes('3') && output.includes('67') && (output.includes('Try again') || output.includes('Passed'))",
+        "successMessage": "Results screen shows the final score with percentage and feedback!",
+        "failureMessage": "showResults should display '2 out of 3 (67%)' with 'Try again!' message for a score below 70%."
+      }
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "id": "ecommerce-filter",
+  "title": "E-commerce Product Filter",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 65,
+  "concepts": ["arrays", "filtering", "sorting", "search", "combinatorial-logic"],
+  "description": "Build a product filter system for an e-commerce store. You'll render products, filter by category, search by name, sort by price, and combine filters together.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Product list render",
+      "description": "Create a `products` array with at least 5 products. Each product has `id`, `name`, `category`, and `price`. Create a `renderProducts` function that returns a formatted string of all products.",
+      "hints": [
+        "Each product: { id: 1, name: '...', category: '...', price: 9.99 }",
+        "Use .map() to format each product as a string",
+        "Format: 'name - $price (category)'"
+      ],
+      "codeTemplate": {
+        "javascript": "const products = [\n  // Create at least 5 products with id, name, category, price\n];\n\nfunction renderProducts(productList) {\n  // Return formatted string of all products, one per line\n}\n\nconsole.log(renderProducts(products));\n",
+        "typescript": "interface Product {\n  id: number;\n  name: string;\n  category: string;\n  price: number;\n}\n\nconst products: Product[] = [\n  // Create at least 5 products with id, name, category, price\n];\n\nfunction renderProducts(productList: Product[]): string {\n  // Return formatted string of all products, one per line\n}\n\nconsole.log(renderProducts(products));\n"
+      },
+      "verification": {
+        "test": "output.includes('$') && products.length >= 5 && output.includes(products[0].name)",
+        "successMessage": "Products render with name, price, and category!",
+        "failureMessage": "Make sure you have at least 5 products and each is formatted as 'name - $price (category)'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Category filter",
+      "description": "Create a `filterByCategory` function that takes a category string and returns only products in that category.",
+      "hints": [
+        "Use .filter() on the products array",
+        "Compare product.category to the given category string",
+        "Return the filtered array"
+      ],
+      "codeTemplate": {
+        "javascript": "const products = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction filterByCategory(category) {\n  // Return only products matching the category\n}\n\nconsole.log(JSON.stringify(filterByCategory('clothing')));\n",
+        "typescript": "interface Product {\n  id: number;\n  name: string;\n  category: string;\n  price: number;\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction filterByCategory(category: string): Product[] {\n  // Return only products matching the category\n}\n\nconsole.log(JSON.stringify(filterByCategory('clothing')));\n"
+      },
+      "verification": {
+        "test": "output.includes('Shirt') && output.includes('Jeans') && !output.includes('Laptop')",
+        "successMessage": "Category filter returns only matching products!",
+        "failureMessage": "Make sure filterByCategory('clothing') returns only clothing products."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Search by name",
+      "description": "Create a `searchByName` function that takes a search query string and returns products whose name contains the query (case-insensitive).",
+      "hints": [
+        "Convert both the product name and the query to lowercase for case-insensitive search",
+        "Use .includes() to check if the name contains the query",
+        "Return the filtered array"
+      ],
+      "codeTemplate": {
+        "javascript": "const products = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Smartphone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction searchByName(query) {\n  // Return products whose name contains the query (case-insensitive)\n}\n\nconsole.log(JSON.stringify(searchByName('phone')));\nconsole.log(JSON.stringify(searchByName('lap')));\n",
+        "typescript": "interface Product {\n  id: number;\n  name: string;\n  category: string;\n  price: number;\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Smartphone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction searchByName(query: string): Product[] {\n  // Return products whose name contains the query (case-insensitive)\n}\n\nconsole.log(JSON.stringify(searchByName('phone')));\nconsole.log(JSON.stringify(searchByName('lap')));\n"
+      },
+      "verification": {
+        "test": "output.includes('Smartphone') && output.includes('Laptop') && !output.includes('Shirt')",
+        "successMessage": "Search finds products by name, case-insensitive!",
+        "failureMessage": "Make sure searchByName('phone') returns Smartphone and searchByName('lap') returns Laptop."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sort by price",
+      "description": "Create `sortByPriceAsc` and `sortByPriceDesc` functions that sort products by price in ascending and descending order.",
+      "hints": [
+        "Use .sort() with a compare function",
+        "For ascending: a.price - b.price",
+        "For descending: b.price - a.price",
+        "Create a copy of the array with .slice() before sorting to avoid mutation"
+      ],
+      "codeTemplate": {
+        "javascript": "const products = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction sortByPriceAsc(productList) {\n  // Sort products by price low to high\n}\n\nfunction sortByPriceDesc(productList) {\n  // Sort products by price high to low\n}\n\nconsole.log(JSON.stringify(sortByPriceAsc(products)));\nconsole.log(JSON.stringify(sortByPriceDesc(products)));\n",
+        "typescript": "interface Product {\n  id: number;\n  name: string;\n  category: string;\n  price: number;\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 }\n];\n\nfunction sortByPriceAsc(productList: Product[]): Product[] {\n  // Sort products by price low to high\n}\n\nfunction sortByPriceDesc(productList: Product[]): Product[] {\n  // Sort products by price high to low\n}\n\nconsole.log(JSON.stringify(sortByPriceAsc(products)));\nconsole.log(JSON.stringify(sortByPriceDesc(products)));\n"
+      },
+      "verification": {
+        "test": "output.includes('Laptop') && output.includes('Phone') && output.includes('Shirt') && output.includes('Jeans') && output.includes('Tablet')",
+        "successMessage": "Sorting works! Ascending shows cheapest first, descending shows most expensive first.",
+        "failureMessage": "Make sure ascending sort has lowest price first and descending has highest price first."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Combined filters",
+      "description": "Create a `filterProducts` function that accepts a `filters` object with `category`, `search`, and `sort` properties and applies all filters in order.",
+      "hints": [
+        "Start with the full products array",
+        "Apply category filter if filters.category is provided",
+        "Apply search filter if filters.search is provided",
+        "Apply sort if filters.sort is provided ('asc' or 'desc')",
+        "Chain the operations: filter -> filter -> sort"
+      ],
+      "codeTemplate": {
+        "javascript": "const products = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 },\n  { id: 6, name: 'Hat', category: 'clothing', price: 19 }\n];\n\nfunction filterByCategory(productList, category) {\n  return productList.filter(p => p.category === category);\n}\n\nfunction searchByName(productList, query) {\n  return productList.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));\n}\n\nfunction sortByPriceAsc(productList) {\n  return [...productList].sort((a, b) => a.price - b.price);\n}\n\nfunction sortByPriceDesc(productList) {\n  return [...productList].sort((a, b) => b.price - a.price);\n}\n\nfunction filterProducts(filters) {\n  // Apply all filters in combination\n}\n\n// Test: clothing category, sorted by price ascending\nconsole.log(JSON.stringify(filterProducts({ category: 'clothing', sort: 'asc' })));\n// Test: search 'phone', sorted by price descending\nconsole.log(JSON.stringify(filterProducts({ search: 'phone', sort: 'desc' })));\n",
+        "typescript": "interface Product {\n  id: number;\n  name: string;\n  category: string;\n  price: number;\n}\n\ninterface Filters {\n  category?: string;\n  search?: string;\n  sort?: 'asc' | 'desc';\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Laptop', category: 'electronics', price: 999 },\n  { id: 2, name: 'Shirt', category: 'clothing', price: 29 },\n  { id: 3, name: 'Phone', category: 'electronics', price: 699 },\n  { id: 4, name: 'Jeans', category: 'clothing', price: 59 },\n  { id: 5, name: 'Tablet', category: 'electronics', price: 399 },\n  { id: 6, name: 'Hat', category: 'clothing', price: 19 }\n];\n\nfunction filterByCategory(productList: Product[], category: string): Product[] {\n  return productList.filter(p => p.category === category);\n}\n\nfunction searchByName(productList: Product[], query: string): Product[] {\n  return productList.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));\n}\n\nfunction sortByPriceAsc(productList: Product[]): Product[] {\n  return [...productList].sort((a, b) => a.price - b.price);\n}\n\nfunction sortByPriceDesc(productList: Product[]): Product[] {\n  return [...productList].sort((a, b) => b.price - a.price);\n}\n\nfunction filterProducts(filters: Filters): Product[] {\n  // Apply all filters in combination\n}\n\n// Test: clothing category, sorted by price ascending\nconsole.log(JSON.stringify(filterProducts({ category: 'clothing', sort: 'asc' })));\n// Test: search 'phone', sorted by price descending\nconsole.log(JSON.stringify(filterProducts({ search: 'phone', sort: 'desc' })));\n"
+      },
+      "verification": {
+        "test": "output.includes('Hat') && output.includes('Jeans') && output.includes('Shirt') && output.includes('Phone') && output.includes('699')",
+        "successMessage": "Your e-commerce filter is complete! Category, search, and sort all work together.",
+        "failureMessage": "Make sure combined filters apply all specified filters correctly."
+      }
+    }
+  ]
+}
