@@ -22,6 +22,7 @@ const COMPILERS = {
     asm: ['nasm', '--version'],
     zig: ['zig', 'version'],
     ts: ['tsx', '--version'],
+    lua: ['lua', '--version'],
     bash: ['bash', '--version'],
     php: ['php', '--version'],
     scala: ['scalac', '-version'],

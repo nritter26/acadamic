@@ -2,10 +2,20 @@
   "id": "memory-card",
   "title": "Memory Card Game",
   "difficulty": "intermediate",
-  "languages": ["javascript", "typescript"],
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
   "estimatedMinutes": 35,
-  "concepts": ["arrays", "objects", "shuffling", "game logic", "state tracking"],
-  "description": "Build a memory card matching game — create a shuffled grid of cards, flip them, match pairs, and track your moves until you win.",
+  "concepts": [
+    "arrays",
+    "objects",
+    "shuffling",
+    "game logic",
+    "state tracking"
+  ],
+  "description": "Build a memory card matching game \u2014 create a shuffled grid of cards, flip them, match pairs, and track your moves until you win.",
   "steps": [
     {
       "id": 1,
@@ -18,8 +28,9 @@
         "Log the shuffled symbols to see the grid layout"
       ],
       "codeTemplate": {
-        "javascript": "const symbols = [\"A\", \"B\", \"C\", \"D\"];\nlet cards = [];\n\nfor (let i = 0; i < symbols.length; i++) {\n  cards.push({ id: i * 2, symbol: symbols[i], isFlipped: false, isMatched: false });\n  cards.push({ id: i * 2 + 1, symbol: symbols[i], isFlipped: false, isMatched: false });\n}\n\nfunction shuffle(array) {\n  \n}\n\nshuffle(cards);\nconsole.log(cards.map(c => c.symbol));\n",
-        "typescript": "interface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst symbols: string[] = [\"A\", \"B\", \"C\", \"D\"];\nlet cards: Card[] = [];\n\nfor (let i = 0; i < symbols.length; i++) {\n  cards.push({ id: i * 2, symbol: symbols[i], isFlipped: false, isMatched: false });\n  cards.push({ id: i * 2 + 1, symbol: symbols[i], isFlipped: false, isMatched: false });\n}\n\nfunction shuffle(array: Card[]): void {\n  \n}\n\nshuffle(cards);\nconsole.log(cards.map(c => c.symbol));\n"
+        "javascript": "<div id=\"card-grid\"></div>\n<script>\nconst symbols = [\"A\", \"B\", \"C\", \"D\"];\nlet cards = [];\n\nfor (let i = 0; i < symbols.length; i++) {\n  cards.push({ id: i * 2, symbol: symbols[i], isFlipped: false, isMatched: false });\n  cards.push({ id: i * 2 + 1, symbol: symbols[i], isFlipped: false, isMatched: false });\n}\n\nfunction shuffle(array) {\n  \n}\n\nshuffle(cards);\nconsole.log(cards.map(c => c.symbol));\n</script>\n",
+        "typescript": "<div id=\"card-grid\"></div>\n<script>\ninterface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst symbols: string[] = [\"A\", \"B\", \"C\", \"D\"];\nlet cards: Card[] = [];\n\nfor (let i = 0; i < symbols.length; i++) {\n  cards.push({ id: i * 2, symbol: symbols[i], isFlipped: false, isMatched: false });\n  cards.push({ id: i * 2 + 1, symbol: symbols[i], isFlipped: false, isMatched: false });\n}\n\nfunction shuffle(array: Card[]): void {\n  \n}\n\nshuffle(cards);\nconsole.log(cards.map(c => c.symbol));\n</script>\n",
+        "python": "import random\n\nsymbols = [\"A\", \"B\", \"C\", \"D\"]\ncards = []\n\nfor i in range(len(symbols)):\n  cards.append({\"id\": i * 2, \"symbol\": symbols[i], \"isFlipped\": False, \"isMatched\": False})\n  cards.append({\"id\": i * 2 + 1, \"symbol\": symbols[i], \"isFlipped\": False, \"isMatched\": False})\n\ndef shuffle(array):\n  \n\nshuffle(cards)\nprint([c[\"symbol\"] for c in cards])\n"
       },
       "verification": {
         "test": "output.length > 0 && output.includes('A') && output.includes('C')",
@@ -37,8 +48,9 @@
         "Set card.isFlipped = true, then log the card's symbol and state"
       ],
       "codeTemplate": {
-        "javascript": "const cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction flipCard(id) {\n  \n}\n\nflipCard(0);\nconsole.log(cards[0]);\n",
-        "typescript": "interface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction flipCard(id: number): void {\n  \n}\n\nflipCard(0);\nconsole.log(cards[0]);\n"
+        "javascript": "<div id=\"card-grid\"></div>\n<script>\nconst cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction flipCard(id) {\n  \n}\n\nflipCard(0);\nconsole.log(cards[0]);\n</script>\n",
+        "typescript": "<div id=\"card-grid\"></div>\n<script>\ninterface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction flipCard(id: number): void {\n  \n}\n\nflipCard(0);\nconsole.log(cards[0]);\n</script>\n",
+        "python": "cards = [\n  {\"id\": 0, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 1, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 2, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 3, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": False}\n]\n\ndef flipCard(id):\n  \n\nflipCard(0)\nprint(cards[0])\n"
       },
       "verification": {
         "test": "output.includes('isFlipped:') && output.includes('true')",
@@ -57,12 +69,13 @@
         "If not matched, flip them back (isFlipped = false) and log 'No match'"
       ],
       "codeTemplate": {
-        "javascript": "const cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction checkMatch(id1, id2) {\n  \n}\n\nconsole.log(checkMatch(0, 2));\nconsole.log(checkMatch(0, 1));\n",
-        "typescript": "interface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction checkMatch(id1: number, id2: number): string {\n  \n}\n\nconsole.log(checkMatch(0, 2));\nconsole.log(checkMatch(0, 1));\n"
+        "javascript": "<div id=\"card-grid\"></div>\n<script>\nconst cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction checkMatch(id1, id2) {\n  \n}\n\nconsole.log(checkMatch(0, 2));\nconsole.log(checkMatch(0, 1));\n</script>\n",
+        "typescript": "<div id=\"card-grid\"></div>\n<script>\ninterface Card {\n  id: number;\n  symbol: string;\n  isFlipped: boolean;\n  isMatched: boolean;\n}\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: false },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: false },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: false }\n];\n\nfunction checkMatch(id1: number, id2: number): string {\n  \n}\n\nconsole.log(checkMatch(0, 2));\nconsole.log(checkMatch(0, 1));\n</script>\n",
+        "python": "cards = [\n  {\"id\": 0, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 1, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 2, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": False},\n  {\"id\": 3, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": False}\n]\n\ndef checkMatch(id1, id2):\n  \n\nprint(checkMatch(0, 2))\nprint(checkMatch(0, 1))\n"
       },
       "verification": {
         "test": "output.includes('Match!') && output.includes('No match')",
-        "successMessage": "Matching logic works — pairs are detected and non-matches are rejected!",
+        "successMessage": "Matching logic works \u2014 pairs are detected and non-matches are rejected!",
         "failureMessage": "checkMatch(0, 2) should find both have symbol 'A' and return 'Match!'. checkMatch(0, 1) should return 'No match'."
       }
     },
@@ -77,8 +90,9 @@
         "Log: 'Move #' + moves + ', Elapsed: ' + elapsed + 's'"
       ],
       "codeTemplate": {
-        "javascript": "let moves = 0;\nconst startTime = Date.now();\n\nfunction makeMove() {\n  \n}\n\nmakeMove();\nmakeMove();\nmakeMove();\n",
-        "typescript": "let moves: number = 0;\nconst startTime: number = Date.now();\n\nfunction makeMove(): void {\n  \n}\n\nmakeMove();\nmakeMove();\nmakeMove();\n"
+        "javascript": "<div id=\"card-grid\"><p id=\"stats\">Moves: 0 | Time: 0s</p></div>\n<script>\nlet moves = 0;\nconst startTime = Date.now();\n\nfunction makeMove() {\n  \n}\n\nmakeMove();\nmakeMove();\nmakeMove();\n</script>\n",
+        "typescript": "<div id=\"card-grid\"><p id=\"stats\">Moves: 0 | Time: 0s</p></div>\n<script>\nlet moves: number = 0;\nconst startTime: number = Date.now();\n\nfunction makeMove(): void {\n  \n}\n\nmakeMove();\nmakeMove();\nmakeMove();\n</script>\n",
+        "python": "import time\n\nmoves = 0\nstartTime = time.time()\n\ndef makeMove():\n  \n\nmakeMove()\nmakeMove()\nmakeMove()\n"
       },
       "verification": {
         "test": "output.includes('Move') && output.includes('3')",
@@ -96,8 +110,9 @@
         "Return true if the game is won, false otherwise"
       ],
       "codeTemplate": {
-        "javascript": "let moves = 0;\n\nconst cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: true },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: true }\n];\n\nfunction checkWin() {\n  \n}\n\nconsole.log(checkWin());\n",
-        "typescript": "let moves: number = 0;\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: true },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: true }\n];\n\nfunction checkWin(): boolean {\n  \n}\n\nconsole.log(checkWin());\n"
+        "javascript": "<div id=\"card-grid\"><p id=\"stats\">Moves: 0 | Time: 0s</p></div>\n<script>\nlet moves = 0;\n\nconst cards = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: true },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: true }\n];\n\nfunction checkWin() {\n  \n}\n\nconsole.log(checkWin());\n</script>\n",
+        "typescript": "<div id=\"card-grid\"><p id=\"stats\">Moves: 0 | Time: 0s</p></div>\n<script>\nlet moves: number = 0;\n\nconst cards: Card[] = [\n  { id: 0, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 1, symbol: \"B\", isFlipped: false, isMatched: true },\n  { id: 2, symbol: \"A\", isFlipped: false, isMatched: true },\n  { id: 3, symbol: \"B\", isFlipped: false, isMatched: true }\n];\n\nfunction checkWin(): boolean {\n  \n}\n\nconsole.log(checkWin());\n</script>\n",
+        "python": "moves = 0\n\ncards = [\n  {\"id\": 0, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": True},\n  {\"id\": 1, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": True},\n  {\"id\": 2, \"symbol\": \"A\", \"isFlipped\": False, \"isMatched\": True},\n  {\"id\": 3, \"symbol\": \"B\", \"isFlipped\": False, \"isMatched\": True}\n]\n\ndef checkWin():\n  \n\nprint(checkWin())\n"
       },
       "verification": {
         "test": "output.includes('true') && output.includes('You won')",

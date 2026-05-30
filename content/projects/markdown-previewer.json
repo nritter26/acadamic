@@ -2,7 +2,7 @@
   "id": "markdown-previewer",
   "title": "Markdown Previewer",
   "difficulty": "advanced",
-  "languages": ["javascript", "typescript"],
+  "languages": ["javascript", "typescript", "python"],
   "estimatedMinutes": 65,
   "concepts": ["string-manipulation", "regex", "parsing", "html-rendering"],
   "description": "Build a markdown previewer that converts markdown text to HTML. You'll parse bold, italic, headers, and links, then build a live preview display.",
@@ -18,7 +18,8 @@
       ],
       "codeTemplate": {
         "javascript": "function getMarkdownInput(text) {\n  return text;\n}\n\nfunction renderOutput(text) {\n  // Wrap text in <p> tags\n}\n\nconst md = getMarkdownInput('Hello **world**');\nconsole.log(renderOutput(md));\n",
-        "typescript": "function getMarkdownInput(text: string): string {\n  return text;\n}\n\nfunction renderOutput(text: string): string {\n  // Wrap text in <p> tags\n}\n\nconst md = getMarkdownInput('Hello **world**');\nconsole.log(renderOutput(md));\n"
+        "typescript": "function getMarkdownInput(text: string): string {\n  return text;\n}\n\nfunction renderOutput(text: string): string {\n  // Wrap text in <p> tags\n}\n\nconst md = getMarkdownInput('Hello **world**');\nconsole.log(renderOutput(md));\n",
+        "python": "def getMarkdownInput(text):\n  return text\n\ndef renderOutput(text):\n  # Wrap text in <p> tags\n  pass\n\nmd = getMarkdownInput('Hello **world**')\nprint(renderOutput(md))\n"
       },
       "verification": {
         "test": "output.includes('<p>') && output.includes('</p>')",
@@ -38,7 +39,8 @@
       ],
       "codeTemplate": {
         "javascript": "function parseBold(text) {\n  // Replace **text** with <strong>text</strong>\n}\n\nfunction parseItalic(text) {\n  // Replace *text* with <em>text</em>\n}\n\nfunction parseInline(text) {\n  return parseItalic(parseBold(text));\n}\n\nconsole.log(parseInline('This is **bold** and *italic*'));\n",
-        "typescript": "function parseBold(text: string): string {\n  // Replace **text** with <strong>text</strong>\n}\n\nfunction parseItalic(text: string): string {\n  // Replace *text* with <em>text</em>\n}\n\nfunction parseInline(text: string): string {\n  return parseItalic(parseBold(text));\n}\n\nconsole.log(parseInline('This is **bold** and *italic*'));\n"
+        "typescript": "function parseBold(text: string): string {\n  // Replace **text** with <strong>text</strong>\n}\n\nfunction parseItalic(text: string): string {\n  // Replace *text* with <em>text</em>\n}\n\nfunction parseInline(text: string): string {\n  return parseItalic(parseBold(text));\n}\n\nconsole.log(parseInline('This is **bold** and *italic*'));\n",
+        "python": "import re\n\ndef parseBold(text):\n  # Replace **text** with <strong>text</strong>\n  pass\n\ndef parseItalic(text):\n  # Replace *text* with <em>text</em>\n  pass\n\ndef parseInline(text):\n  return parseItalic(parseBold(text))\n\nprint(parseInline('This is **bold** and *italic*'))\n"
       },
       "verification": {
         "test": "output.includes('<strong>bold</strong>') && output.includes('<em>italic</em>')",
@@ -57,7 +59,8 @@
       ],
       "codeTemplate": {
         "javascript": "function parseHeaders(text) {\n  // Convert # headers to <h1>-<h6> tags\n}\n\nconsole.log(parseHeaders('# Main Title\\n## Section\\n### Subsection'));\n",
-        "typescript": "function parseHeaders(text: string): string {\n  // Convert # headers to <h1>-<h6> tags\n}\n\nconsole.log(parseHeaders('# Main Title\\n## Section\\n### Subsection'));\n"
+        "typescript": "function parseHeaders(text: string): string {\n  // Convert # headers to <h1>-<h6> tags\n}\n\nconsole.log(parseHeaders('# Main Title\\n## Section\\n### Subsection'));\n",
+        "python": "import re\n\ndef parseHeaders(text):\n  # Convert # headers to <h1>-<h6> tags\n  pass\n\nprint(parseHeaders('# Main Title\\n## Section\\n### Subsection'))\n"
       },
       "verification": {
         "test": "output.includes('<h1>Main Title</h1>') && output.includes('<h2>Section</h2>') && output.includes('<h3>Subsection</h3>')",
@@ -76,7 +79,8 @@
       ],
       "codeTemplate": {
         "javascript": "function parseLinks(text) {\n  // Convert [text](url) to <a href=\"url\">text</a>\n}\n\nconsole.log(parseLinks('Visit [Google](https://google.com) today!'));\n",
-        "typescript": "function parseLinks(text: string): string {\n  // Convert [text](url) to <a href=\"url\">text</a>\n}\n\nconsole.log(parseLinks('Visit [Google](https://google.com) today!'));\n"
+        "typescript": "function parseLinks(text: string): string {\n  // Convert [text](url) to <a href=\"url\">text</a>\n}\n\nconsole.log(parseLinks('Visit [Google](https://google.com) today!'));\n",
+        "python": "import re\n\ndef parseLinks(text):\n  # Convert [text](url) to <a href=\"url\">text</a>\n  pass\n\nprint(parseLinks('Visit [Google](https://google.com) today!'))\n"
       },
       "verification": {
         "test": "output.includes('<a href=\"https://google.com\">Google</a>')",
@@ -96,7 +100,8 @@
       ],
       "codeTemplate": {
         "javascript": "function parseBold(text) {\n  return text.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');\n}\n\nfunction parseItalic(text) {\n  return text.replace(/\\*(.+?)\\*/g, '<em>$1</em>');\n}\n\nfunction parseLinks(text) {\n  return text.replace(/\\[(.+?)\\]\\((.+?)\\)/g, '<a href=\"$2\">$1</a>');\n}\n\nfunction parseInline(text) {\n  return parseLinks(parseItalic(parseBold(text)));\n}\n\nfunction parseHeaders(text) {\n  return text.replace(/^(#{1,6})\\s(.+)$/gm, (_, hashes, content) => {\n    const level = hashes.length;\n    return `<h${level}>${content}</h${level}>`;\n  });\n}\n\nfunction markdownToHtml(markdown) {\n  // Split into lines, process each line, combine result\n}\n\nconsole.log(markdownToHtml('# Hello\\nThis is **bold** and *italic*\\nVisit [here](https://example.com)'));\n",
-        "typescript": "function parseBold(text: string): string {\n  return text.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');\n}\n\nfunction parseItalic(text: string): string {\n  return text.replace(/\\*(.+?)\\*/g, '<em>$1</em>');\n}\n\nfunction parseLinks(text: string): string {\n  return text.replace(/\\[(.+?)\\]\\((.+?)\\)/g, '<a href=\"$2\">$1</a>');\n}\n\nfunction parseInline(text: string): string {\n  return parseLinks(parseItalic(parseBold(text)));\n}\n\nfunction parseHeaders(text: string): string {\n  return text.replace(/^(#{1,6})\\s(.+)$/gm, (_, hashes: string, content: string) => {\n    const level = hashes.length;\n    return `<h${level}>${content}</h${level}>`;\n  });\n}\n\nfunction markdownToHtml(markdown: string): string {\n  // Split into lines, process each line, combine result\n}\n\nconsole.log(markdownToHtml('# Hello\\nThis is **bold** and *italic*\\nVisit [here](https://example.com)'));\n"
+        "typescript": "function parseBold(text: string): string {\n  return text.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');\n}\n\nfunction parseItalic(text: string): string {\n  return text.replace(/\\*(.+?)\\*/g, '<em>$1</em>');\n}\n\nfunction parseLinks(text: string): string {\n  return text.replace(/\\[(.+?)\\]\\((.+?)\\)/g, '<a href=\"$2\">$1</a>');\n}\n\nfunction parseInline(text: string): string {\n  return parseLinks(parseItalic(parseBold(text)));\n}\n\nfunction parseHeaders(text: string): string {\n  return text.replace(/^(#{1,6})\\s(.+)$/gm, (_, hashes: string, content: string) => {\n    const level = hashes.length;\n    return `<h${level}>${content}</h${level}>`;\n  });\n}\n\nfunction markdownToHtml(markdown: string): string {\n  // Split into lines, process each line, combine result\n}\n\nconsole.log(markdownToHtml('# Hello\\nThis is **bold** and *italic*\\nVisit [here](https://example.com)'));\n",
+        "python": "import re\n\ndef parseBold(text):\n  return re.sub(r'\\*\\*(.+?)\\*\\*', r'<strong>\\1</strong>', text)\n\ndef parseItalic(text):\n  return re.sub(r'\\*(.+?)\\*', r'<em>\\1</em>', text)\n\ndef parseLinks(text):\n  return re.sub(r'\\[(.+?)\\]\\((.+?)\\)', r'<a href=\"\\2\">\\1</a>', text)\n\ndef parseInline(text):\n  return parseLinks(parseItalic(parseBold(text)))\n\ndef parseHeaders(text):\n  return re.sub(r'^(#{1,6})\\s(.+)$', lambda m: f'<h{len(m.group(1))}>{m.group(2)}</h{len(m.group(1))}>', text, flags=re.MULTILINE)\n\ndef markdownToHtml(markdown):\n  # Split into lines, process each line, combine result\n  pass\n\nprint(markdownToHtml('# Hello\\nThis is **bold** and *italic*\\nVisit [here](https://example.com)'))\n"
       },
       "verification": {
         "test": "output.includes('<h1>Hello</h1>') && output.includes('<strong>bold</strong>') && output.includes('<em>italic</em>') && output.includes('<a href=\"https://example.com\">here</a>')",

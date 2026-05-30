@@ -61,9 +61,24 @@ function switchWorkspaceTab(tab) {
 
 async function loadAllProjects() {
   const ids = [
+    // Beginner (25)
     'hello-world','simple-calculator','even-or-odd','fizzbuzz','password-strength',
+    'temperature-converter','tip-calculator','rock-paper-scissors','number-guessing','palindrome-checker',
+    'vowel-counter','multiplication-table','bmi-calculator','factorial','string-reverser',
+    'leap-year-checker','max-of-three','simple-interest','dice-roller','unit-converter',
+    'word-counter','sum-of-natural','positive-negative','area-calculator','grade-calculator',
+    // Intermediate (25)
     'todo-list','memory-card','quiz-app','weather-dashboard','expense-tracker',
-    'real-time-chat','markdown-previewer','kanban-board','typing-speed-test','ecommerce-filter'
+    'countdown-timer','image-carousel','tab-accordion','form-validator','modal-dialog',
+    'color-picker','stopwatch','pomodoro-timer','recipe-finder','movie-search',
+    'github-profile','notes-app','flashcard-app','currency-converter','random-color-generator',
+    'progress-steps','character-counter','password-generator','age-calculator','loan-calculator',
+    // Advanced (25)
+    'real-time-chat','markdown-previewer','kanban-board','typing-speed-test','ecommerce-filter',
+    'music-player','calendar-app','paint-app','habit-tracker','budget-app',
+    'news-aggregator','tic-tac-toe','snake-game','sort-visualizer','poll-app',
+    'code-snippet-manager','bookmark-manager','text-editor','url-shortener','chart-renderer',
+    'maze-generator','chess-validator','sudoku-solver','data-table','recipe-finder-app'
   ];
   const loaded = [];
   for (const id of ids) {
@@ -107,7 +122,7 @@ function renderSidebar() {
       html += '<div class="project-item' + active + '" onclick="selectProject(\'' + p.id + '\')">' +
         '<div class="project-item-header"><span class="project-item-status">' + status + '</span><span class="project-item-title">' + esc(p.title) + '</span></div>' +
         '<div class="project-item-desc">' + esc((p.description || '').substring(0, 60)) + '...</div>' +
-        '<div class="project-item-meta"><span class="project-item-lang">' + (projectsState.language === 'javascript' ? 'JS' : 'TS') + '</span><span>' + done + '/' + total + ' steps</span></div>' +
+        '<div class="project-item-meta"><span class="project-item-lang">' + (projectsState.language === 'javascript' ? 'JS' : projectsState.language === 'typescript' ? 'TS' : 'PY') + '</span><span>' + done + '/' + total + ' steps</span></div>' +
         '<div class="project-item-bar"><div class="project-item-bar-fill" style="width:' + pct + '%"></div></div></div>';
     });
   });
@@ -115,7 +130,8 @@ function renderSidebar() {
   html += '<div class="projects-lang-toggle">' +
     '<span class="projects-lang-label">Language:</span>' +
     '<button class="projects-lang-btn' + (projectsState.language === 'javascript' ? ' active' : '') + '" onclick="setProjectLang(\'javascript\')">JS</button>' +
-    '<button class="projects-lang-btn' + (projectsState.language === 'typescript' ? ' active' : '') + '" onclick="setProjectLang(\'typescript\')">TS</button></div>';
+    '<button class="projects-lang-btn' + (projectsState.language === 'typescript' ? ' active' : '') + '" onclick="setProjectLang(\'typescript\')">TS</button>' +
+    '<button class="projects-lang-btn' + (projectsState.language === 'python' ? ' active' : '') + '" onclick="setProjectLang(\'python\')">PY</button></div>';
 
   topicList.innerHTML = html;
 }
@@ -149,7 +165,7 @@ function renderWelcome() {
     '<div class="projects-welcome-features">' +
     '<div class="projects-feature-card"><div class="projects-feature-icon">📘</div><div class="projects-feature-title">Guided Steps</div><div class="projects-feature-desc">Follow clear instructions</div></div>' +
     '<div class="projects-feature-card"><div class="projects-feature-icon">✅</div><div class="projects-feature-title">Verify Your Code</div><div class="projects-feature-desc">Check your work at each step</div></div>' +
-    '<div class="projects-feature-card"><div class="projects-feature-icon">🔄</div><div class="projects-feature-title">JS or TypeScript</div><div class="projects-feature-desc">Toggle between languages</div></div>' +
+    '<div class="projects-feature-card"><div class="projects-feature-icon">🔄</div><div class="projects-feature-title">JS, TS, or Python</div><div class="projects-feature-desc">Toggle between languages</div></div>' +
     '</div>' +
     '<div class="projects-welcome-stats">' + projectsState.projects.length + ' projects available</div></div>';
   const ws = document.getElementById('projectsWorkspace');
@@ -270,27 +286,68 @@ function showAnswer() {
   }
 }
 
-function runProjectCode() {
+function wrapForIframe(code) {
+  const hasHTML = /<script|<html|<body|<div|<h[1-6]|<p|<ul|<ol|<li|<table|<form|<input|<button|<a\b|<img|<select|<textarea/i.test(code);
+  const safe = code.replace(/<\/script>/gi, '<\\/script>');
+  const instr =
+    'window._output="";window._error=null;' +
+    'console.log=function(){' +
+    'window._output+=Array.from(arguments).map(function(a){' +
+    'return typeof a==="object"?JSON.stringify(a):String(a)' +
+    '}).join(" ")+"\\n";};' +
+    'window.onerror=function(m,u,l){window._error=m+" (line "+l+")";return true;};';
+  if (hasHTML) {
+    return '<!DOCTYPE html><html><body><script>' + instr + '<\/script>' + safe + '\n</body></html>';
+  }
+  return '<!DOCTYPE html><html><body><script>' + instr + safe + '\n<\/script></body></html>';
+}
+
+function execJSInIframe(code) {
+  return new Promise(function (resolve) {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    iframe.srcdoc = wrapForIframe(code);
+    iframe.onload = function () {
+      var output = iframe.contentWindow._output || '';
+      var error = iframe.contentWindow._error;
+      document.body.removeChild(iframe);
+      resolve({ output: output, error: error });
+    };
+  });
+}
+
+async function runProjectCode() {
   const editor = document.getElementById('projectsEditor');
   const code = editor?.value || '';
-  let output = '';
-  const originalLog = console.log;
-  console.log = function () {
-    const args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a));
-    output += args.join(' ') + '\n';
-  };
-  try {
-    new Function(code)();
-  } catch (err) {
-    output += '❌ Error: ' + err.message;
-  }
-  console.log = originalLog;
+  if (!code.trim()) return;
   const preview = document.getElementById('projectsPreview');
-  if (preview) preview.textContent = output || '(no output)';
+  if (projectsState.language === 'python') {
+    try {
+      const res = await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: 'py', code })
+      });
+      const data = await res.json();
+      if (preview) preview.textContent = data.output || '(no output)';
+      if (data.error) preview.textContent += '\n(execution error)';
+    } catch (err) {
+      if (preview) preview.textContent = '❌ Error: ' + err.message;
+    }
+  } else {
+    preview.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    preview.appendChild(iframe);
+    iframe.srcdoc = wrapForIframe(code);
+  }
   switchWorkspaceTab('preview');
 }
 
-function verifyStep() {
+async function verifyStep() {
   const p = projectsState.currentProject;
   const step = p?.steps[projectsState.currentStep];
   if (!step?.verification) {
@@ -307,16 +364,53 @@ function verifyStep() {
   const resultEl = document.getElementById('projectsVerifyResult');
   if (!resultEl) return;
   let output = '';
-  const originalLog = console.log;
-  console.log = function () {
-    const args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a));
-    output += args.join(' ') + '\n';
-  };
+  if (projectsState.language === 'python') {
+    try {
+      const res = await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: 'py', code })
+      });
+      const data = await res.json();
+      output = data.output || '';
+      const preview = document.getElementById('projectsPreview');
+      if (preview) preview.textContent = output || '(no output)';
+      if (data.error) { output += '\n(execution error)'; }
+    } catch (err) {
+      const preview = document.getElementById('projectsPreview');
+      if (preview) preview.textContent = '❌ Error: ' + err.message;
+      resultEl.innerText = '❌ Error: ' + err.message;
+      resultEl.style.color = '#ef4444';
+      return;
+    }
+  } else {
+    try {
+      const result = await execJSInIframe(code);
+      output = result.output;
+      const preview = document.getElementById('projectsPreview');
+      if (preview) {
+        preview.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+        iframe.srcdoc = wrapForIframe(code);
+      }
+      if (result.error) {
+        resultEl.innerText = '❌ Error: ' + result.error;
+        resultEl.style.color = '#ef4444';
+        return;
+      }
+    } catch (err) {
+      const preview = document.getElementById('projectsPreview');
+      if (preview) preview.textContent = '❌ Error: ' + err.message;
+      resultEl.innerText = '❌ Error: ' + err.message;
+      resultEl.style.color = '#ef4444';
+      return;
+    }
+  }
   try {
-    new Function(code)();
-    console.log = originalLog;
-    const preview = document.getElementById('projectsPreview');
-    if (preview) preview.textContent = output || '(no output)';
     const testFn = new Function('output', 'window', 'document', 'return (' + step.verification.test + ');');
     const passed = testFn(output, window, document);
     if (passed) {
@@ -329,10 +423,7 @@ function verifyStep() {
       resultEl.style.color = '#ef4444';
     }
   } catch (err) {
-    console.log = originalLog;
-    const preview = document.getElementById('projectsPreview');
-    if (preview) preview.textContent = '❌ Error: ' + err.message;
-    resultEl.innerText = '❌ Error: ' + err.message;
+    resultEl.innerText = '❌ Error in test: ' + err.message;
     resultEl.style.color = '#ef4444';
   }
 }

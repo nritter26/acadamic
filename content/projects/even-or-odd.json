@@ -2,7 +2,7 @@
   "id": "even-or-odd",
   "title": "Even or Odd",
   "difficulty": "beginner",
-  "languages": ["javascript", "typescript"],
+  "languages": ["javascript", "typescript", "python"],
   "estimatedMinutes": 15,
   "concepts": ["functions", "conditionals", "modulo", "arrays", "edge-cases"],
   "description": "Learn to determine if numbers are even or odd using the modulo operator, handle edge cases, and work with arrays of numbers.",
@@ -17,7 +17,8 @@
       ],
       "codeTemplate": {
         "javascript": "function isEven(number) {\n  \n}\n\nconsole.log(isEven(4));\nconsole.log(isEven(7));\n",
-        "typescript": "function isEven(number: number): boolean {\n  \n}\n\nconsole.log(isEven(4));\nconsole.log(isEven(7));\n"
+        "typescript": "function isEven(number: number): boolean {\n  \n}\n\nconsole.log(isEven(4));\nconsole.log(isEven(7));\n",
+        "python": "def isEven(number):\n  \n\nprint(isEven(4))\nprint(isEven(7))\n"
       },
       "verification": {
         "test": "output.includes('true') && output.includes('false')",
@@ -35,7 +36,8 @@
       ],
       "codeTemplate": {
         "javascript": "function evenOrOdd(number) {\n  \n}\n\nconsole.log(evenOrOdd(4));\nconsole.log(evenOrOdd(7));\n",
-        "typescript": "function evenOrOdd(number: number): string {\n  \n}\n\nconsole.log(evenOrOdd(4));\nconsole.log(evenOrOdd(7));\n"
+        "typescript": "function evenOrOdd(number: number): string {\n  \n}\n\nconsole.log(evenOrOdd(4));\nconsole.log(evenOrOdd(7));\n",
+        "python": "def evenOrOdd(number):\n  \n\nprint(evenOrOdd(4))\nprint(evenOrOdd(7))\n"
       },
       "verification": {
         "test": "output.includes('even') && output.includes('odd')",
@@ -55,7 +57,8 @@
       ],
       "codeTemplate": {
         "javascript": "function evenOrOdd(number) {\n  if (!Number.isInteger(number)) {\n    return \"not an integer\";\n  }\n  \n}\n\nconsole.log(evenOrOdd(0));\nconsole.log(evenOrOdd(-3));\nconsole.log(evenOrOdd(2.5));\n",
-        "typescript": "function evenOrOdd(number: number): string {\n  if (!Number.isInteger(number)) {\n    return \"not an integer\";\n  }\n  \n}\n\nconsole.log(evenOrOdd(0));\nconsole.log(evenOrOdd(-3));\nconsole.log(evenOrOdd(2.5));\n"
+        "typescript": "function evenOrOdd(number: number): string {\n  if (!Number.isInteger(number)) {\n    return \"not an integer\";\n  }\n  \n}\n\nconsole.log(evenOrOdd(0));\nconsole.log(evenOrOdd(-3));\nconsole.log(evenOrOdd(2.5));\n",
+        "python": "def evenOrOdd(number):\n  if not isinstance(number, int):\n    return \"not an integer\"\n  \n\nprint(evenOrOdd(0))\nprint(evenOrOdd(-3))\nprint(evenOrOdd(2.5))\n"
       },
       "verification": {
         "test": "output.includes('even') && output.includes('odd') && output.includes('not an integer')",
@@ -74,7 +77,8 @@
       ],
       "codeTemplate": {
         "javascript": "function isEven(number) {\n  return number % 2 === 0;\n}\n\nconst numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst evens = ; // Use filter with isEven\nconsole.log(evens);\n",
-        "typescript": "function isEven(number: number): boolean {\n  return number % 2 === 0;\n}\n\nconst numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst evens: number[] = ; // Use filter with isEven\nconsole.log(evens);\n"
+        "typescript": "function isEven(number: number): boolean {\n  return number % 2 === 0;\n}\n\nconst numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst evens: number[] = ; // Use filter with isEven\nconsole.log(evens);\n",
+        "python": "def isEven(number):\n  return number % 2 == 0\n\nnumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nevens =  # Use list comprehension with isEven\nprint(evens)\n"
       },
       "verification": {
         "test": "output.includes('2') && output.includes('4') && output.includes('10')",
@@ -93,7 +97,8 @@
       ],
       "codeTemplate": {
         "javascript": "function countEvensOdds(numbers) {\n  let evenCount = 0;\n  let oddCount = 0;\n  \n  // Loop through numbers and count\n  \n  return { evens: evenCount, odds: oddCount };\n}\n\nconsole.log(countEvensOdds([1, 2, 3, 4, 5, 6]));\n",
-        "typescript": "function countEvensOdds(numbers: number[]): { evens: number; odds: number } {\n  let evenCount = 0;\n  let oddCount = 0;\n  \n  // Loop through numbers and count\n  \n  return { evens: evenCount, odds: oddCount };\n}\n\nconsole.log(countEvensOdds([1, 2, 3, 4, 5, 6]));\n"
+        "typescript": "function countEvensOdds(numbers: number[]): { evens: number; odds: number } {\n  let evenCount = 0;\n  let oddCount = 0;\n  \n  // Loop through numbers and count\n  \n  return { evens: evenCount, odds: oddCount };\n}\n\nconsole.log(countEvensOdds([1, 2, 3, 4, 5, 6]));\n",
+        "python": "def countEvensOdds(numbers):\n  evenCount = 0\n  oddCount = 0\n  \n  # Loop through numbers and count\n  \n  return {\"evens\": evenCount, \"odds\": oddCount}\n\nprint(countEvensOdds([1, 2, 3, 4, 5, 6]))\n"
       },
       "verification": {
         "test": "output.includes('evens: 3') && output.includes('odds: 3')",

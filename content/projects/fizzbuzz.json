@@ -2,7 +2,7 @@
   "id": "fizzbuzz",
   "title": "FizzBuzz",
   "difficulty": "beginner",
-  "languages": ["javascript", "typescript"],
+  "languages": ["javascript", "typescript", "python"],
   "estimatedMinutes": 15,
   "concepts": ["loops", "conditionals", "modulo", "functions", "refactoring"],
   "description": "Solve the classic FizzBuzz problem — print numbers 1-20 with Fizz for multiples of 3, Buzz for multiples of 5, and FizzBuzz for both.",
@@ -17,7 +17,8 @@
       ],
       "codeTemplate": {
         "javascript": "// Print numbers 1 through 20\n",
-        "typescript": "// Print numbers 1 through 20\n"
+        "typescript": "// Print numbers 1 through 20\n",
+        "python": "# Print numbers 1 through 20\n"
       },
       "verification": {
         "test": "output.includes('1') && output.includes('20') && output.includes('10')",
@@ -35,7 +36,8 @@
       ],
       "codeTemplate": {
         "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i);\n  }\n}\n",
-        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "python": "for i in range(1, 21):\n  if i % 3 == 0:\n    print(\"Fizz\")\n  else:\n    print(i)\n"
       },
       "verification": {
         "test": "output.includes('Fizz') && output.includes('1') && !output.includes('3')",
@@ -54,7 +56,8 @@
       ],
       "codeTemplate": {
         "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
-        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "python": "for i in range(1, 21):\n  if i % 3 == 0:\n    print(\"Fizz\")\n  elif i % 5 == 0:\n    print(\"Buzz\")\n  else:\n    print(i)\n"
       },
       "verification": {
         "test": "output.includes('Buzz') && output.includes('Fizz') && !output.includes('5')",
@@ -73,7 +76,8 @@
       ],
       "codeTemplate": {
         "javascript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0 && i % 5 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
-        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0 && i % 5 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n"
+        "typescript": "for (let i = 1; i <= 20; i++) {\n  if (i % 3 === 0 && i % 5 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else if (i % 5 === 0) {\n    console.log(\"Buzz\");\n  } else {\n    console.log(i);\n  }\n}\n",
+        "python": "for i in range(1, 21):\n  if i % 3 == 0 and i % 5 == 0:\n    print(\"FizzBuzz\")\n  elif i % 3 == 0:\n    print(\"Fizz\")\n  elif i % 5 == 0:\n    print(\"Buzz\")\n  else:\n    print(i)\n"
       },
       "verification": {
         "test": "output.includes('FizzBuzz') && !output.includes('15') && !output.includes('3') && !output.includes('5')",
@@ -92,7 +96,8 @@
       ],
       "codeTemplate": {
         "javascript": "function fizzbuzz(n) {\n  \n}\n\nfor (let i = 1; i <= 20; i++) {\n  console.log(fizzbuzz(i));\n}\n",
-        "typescript": "function fizzbuzz(n: number): string {\n  \n}\n\nfor (let i = 1; i <= 20; i++) {\n  console.log(fizzbuzz(i));\n}\n"
+        "typescript": "function fizzbuzz(n: number): string {\n  \n}\n\nfor (let i = 1; i <= 20; i++) {\n  console.log(fizzbuzz(i));\n}\n",
+        "python": "def fizzbuzz(n):\n  \n\nfor i in range(1, 21):\n  print(fizzbuzz(i))\n"
       },
       "verification": {
         "test": "output.includes('FizzBuzz') && output.includes('Fizz') && output.includes('Buzz') && !output.includes('15')",

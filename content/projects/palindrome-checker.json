@@ -1,0 +1,109 @@
+{
+  "id": "palindrome-checker",
+  "title": "Palindrome Checker",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["strings", "arrays", "loops", "functions", "regex"],
+  "description": "Check if a string is a palindrome — reading the same forwards and backwards.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reverse a string",
+      "description": "Write a `reverseString` function that reverses a string using `.split()`, `.reverse()`, and `.join()`.",
+      "hints": [
+        "String -> Array: str.split('')",
+        "Reverse the array: arr.reverse()",
+        "Back to string: arr.join('')"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseString(str) {\n  \n}\n\nconsole.log(reverseString(\"hello\"));\n",
+        "typescript": "function reverseString(str: string): string {\n  \n}\n\nconsole.log(reverseString(\"hello\"));\n",
+        "python": "def reverseString(str):\n  \n\nprint(reverseString(\"hello\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('olleh')",
+        "successMessage": "\"hello\" reversed is \"olleh\"!",
+        "failureMessage": "reverseString('hello') should return 'olleh'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Check if palindrome",
+      "description": "Write an `isPalindrome` function that returns `true` if a string is the same forwards and backwards.",
+      "hints": [
+        "Compare the original string to its reversed version",
+        "Return true if they are equal, false otherwise"
+      ],
+      "codeTemplate": {
+        "javascript": "function isPalindrome(str) {\n  \n}\n\nconsole.log(isPalindrome(\"racecar\"));\nconsole.log(isPalindrome(\"hello\"));\n",
+        "typescript": "function isPalindrome(str: string): boolean {\n  \n}\n\nconsole.log(isPalindrome(\"racecar\"));\nconsole.log(isPalindrome(\"hello\"));\n",
+        "python": "def isPalindrome(str):\n  \n\nprint(isPalindrome(\"racecar\"))\nprint(isPalindrome(\"hello\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "racecar is a palindrome, hello is not!",
+        "failureMessage": "isPalindrome('racecar') should be true, isPalindrome('hello') should be false."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Case-insensitive check",
+      "description": "Make `isPalindrome` case-insensitive using `.toLowerCase()` so `\"RaceCar\"` is recognized as a palindrome.",
+      "hints": [
+        "Convert the string to lowercase before reversing and comparing",
+        "str.toLowerCase() for JS, str.lower() for Python"
+      ],
+      "codeTemplate": {
+        "javascript": "function isPalindrome(str) {\n  \n}\n\nconsole.log(isPalindrome(\"RaceCar\"));\nconsole.log(isPalindrome(\"Hello\"));\n",
+        "typescript": "function isPalindrome(str: string): boolean {\n  \n}\n\nconsole.log(isPalindrome(\"RaceCar\"));\nconsole.log(isPalindrome(\"Hello\"));\n",
+        "python": "def isPalindrome(str):\n  \n\nprint(isPalindrome(\"RaceCar\"))\nprint(isPalindrome(\"Hello\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Case no longer matters! \"RaceCar\" is a palindrome.",
+        "failureMessage": "isPalindrome('RaceCar') should be true, isPalindrome('Hello') should be false."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Ignore spaces and punctuation",
+      "description": "Update `isPalindrome` to ignore spaces and punctuation using a regular expression.",
+      "hints": [
+        "Use .replace(/[^a-zA-Z0-9]/g, '') to remove non-alphanumeric characters",
+        "Then convert to lowercase and check",
+        "\"A man, a plan, a canal: Panama\" should return true"
+      ],
+      "codeTemplate": {
+        "javascript": "function isPalindrome(str) {\n  \n}\n\nconsole.log(isPalindrome(\"A man, a plan, a canal: Panama\"));\nconsole.log(isPalindrome(\"race a car\"));\n",
+        "typescript": "function isPalindrome(str: string): boolean {\n  \n}\n\nconsole.log(isPalindrome(\"A man, a plan, a canal: Panama\"));\nconsole.log(isPalindrome(\"race a car\"));\n",
+        "python": "import re\n\ndef isPalindrome(str):\n  \n\nprint(isPalindrome(\"A man, a plan, a canal: Panama\"))\nprint(isPalindrome(\"race a car\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "\"A man, a plan, a canal: Panama\" is a palindrome!",
+        "failureMessage": "The famous phrase is a palindrome. 'race a car' is not."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test multiple words",
+      "description": "Write a function that takes an array of strings and returns which ones are palindromes.",
+      "hints": [
+        "Create an array of test words",
+        "Loop through and check each one with isPalindrome",
+        "Print each word with 'yes' or 'no'"
+      ],
+      "codeTemplate": {
+        "javascript": "function isPalindrome(str) {\n  const cleaned = str.toLowerCase().replace(/[^a-z0-9]/g, '');\n  return cleaned === cleaned.split('').reverse().join('');\n}\n\nfunction testPalindromes(words) {\n  \n}\n\nconst words = [\"RaceCar\", \"hello\", \"A man, a plan, a canal: Panama\"];\ntestPalindromes(words);\n",
+        "typescript": "function isPalindrome(str: string): boolean {\n  const cleaned = str.toLowerCase().replace(/[^a-z0-9]/g, '');\n  return cleaned === cleaned.split('').reverse().join('');\n}\n\nfunction testPalindromes(words: string[]): void {\n  \n}\n\nconst words: string[] = [\"RaceCar\", \"hello\", \"A man, a plan, a canal: Panama\"];\ntestPalindromes(words);\n",
+        "python": "import re\n\ndef isPalindrome(str):\n  cleaned = re.sub(r'[^a-z0-9]', '', str.lower())\n  return cleaned == cleaned[::-1]\n\ndef testPalindromes(words):\n  \n\nwords = [\"RaceCar\", \"hello\", \"A man, a plan, a canal: Panama\"]\ntestPalindromes(words)\n"
+      },
+      "verification": {
+        "test": "output.includes('yes') && output.includes('no')",
+        "successMessage": "All words tested — palindromes marked yes, others no!",
+        "failureMessage": "RaceCar and the Panama phrase should show 'yes', hello should show 'no'."
+      }
+    }
+  ]
+}

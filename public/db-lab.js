@@ -192,9 +192,27 @@ function highlightTable(name) {
 
 // ── Workspace ──
 
+function renderDbLabToolbar() {
+    var html = '<div class="dblab-scenario-bar" style="margin-bottom:6px;">';
+    html += '<select id="dblabEngineSelect" onchange="switchDbLabEngine(this.value)" style="background:#1e293b;color:#f1f5f9;border:1px solid #334155;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;outline:none;cursor:pointer;">';
+    for (var i = 0; i < DB_LAB_ENGINES.length; i++) {
+        var e = DB_LAB_ENGINES[i];
+        var sel = e.id === dbLabEngine ? ' selected' : '';
+        html += '<option value="' + e.id + '"' + sel + '>' + e.label + '</option>';
+    }
+    html += '</select>';
+    for (var key in DB_LAB_SCENARIOS) {
+        var sc = DB_LAB_SCENARIOS[key];
+        html += '<button class="dblab-scenario-btn" onclick="loadDbLabScenario(\'' + key + '\')" title="' + sc.desc + '">' + sc.name + '</button>';
+    }
+    html += '</div>';
+    return html;
+}
+
 function renderWorkspace() {
     var exp = document.getElementById('explanation');
     exp.innerHTML = ''
+        + renderDbLabToolbar()
         + '<div class="dblab-viz-area" id="dblabVizArea">'
         + '<div class="dblab-viz-canvas" id="dblabVizCanvas"></div>'
         + '<svg class="dblab-fk-overlay" id="dblabFkOverlay"></svg>'

@@ -2,7 +2,7 @@
   "id": "simple-calculator",
   "title": "Simple Calculator",
   "difficulty": "beginner",
-  "languages": ["javascript", "typescript"],
+  "languages": ["javascript", "typescript", "python"],
   "estimatedMinutes": 15,
   "concepts": ["functions", "arithmetic", "conditionals", "operators"],
   "description": "Build arithmetic functions step by step — from basic addition to exponentiation with the ** operator.",
@@ -18,7 +18,8 @@
       ],
       "codeTemplate": {
         "javascript": "function add(a, b) {\n  \n}\n\nconsole.log(add(2, 3));\n",
-        "typescript": "function add(a: number, b: number): number {\n  \n}\n\nconsole.log(add(2, 3));\n"
+        "typescript": "function add(a: number, b: number): number {\n  \n}\n\nconsole.log(add(2, 3));\n",
+        "python": "def add(a, b):\n  \n\nprint(add(2, 3))\n"
       },
       "verification": {
         "test": "output.includes('5')",
@@ -36,7 +37,8 @@
       ],
       "codeTemplate": {
         "javascript": "function add(a, b) {\n  return a + b;\n}\n\nfunction subtract(a, b) {\n  \n}\n\nfunction multiply(a, b) {\n  \n}\n\nconsole.log(add(10, 5));\nconsole.log(subtract(10, 5));\nconsole.log(multiply(10, 5));\n",
-        "typescript": "function add(a: number, b: number): number {\n  return a + b;\n}\n\nfunction subtract(a: number, b: number): number {\n  \n}\n\nfunction multiply(a: number, b: number): number {\n  \n}\n\nconsole.log(add(10, 5));\nconsole.log(subtract(10, 5));\nconsole.log(multiply(10, 5));\n"
+        "typescript": "function add(a: number, b: number): number {\n  return a + b;\n}\n\nfunction subtract(a: number, b: number): number {\n  \n}\n\nfunction multiply(a: number, b: number): number {\n  \n}\n\nconsole.log(add(10, 5));\nconsole.log(subtract(10, 5));\nconsole.log(multiply(10, 5));\n",
+        "python": "def add(a, b):\n  return a + b\n\ndef subtract(a, b):\n  \n\ndef multiply(a, b):\n  \n\nprint(add(10, 5))\nprint(subtract(10, 5))\nprint(multiply(10, 5))\n"
       },
       "verification": {
         "test": "output.includes('15') && output.includes('5') && output.includes('50')",
@@ -55,7 +57,8 @@
       ],
       "codeTemplate": {
         "javascript": "function divide(a, b) {\n  \n}\n\nconsole.log(divide(10, 2));\nconsole.log(divide(10, 0));\n",
-        "typescript": "function divide(a: number, b: number): number | string {\n  \n}\n\nconsole.log(divide(10, 2));\nconsole.log(divide(10, 0));\n"
+        "typescript": "function divide(a: number, b: number): number | string {\n  \n}\n\nconsole.log(divide(10, 2));\nconsole.log(divide(10, 0));\n",
+        "python": "def divide(a, b):\n  \n\nprint(divide(10, 2))\nprint(divide(10, 0))\n"
       },
       "verification": {
         "test": "output.includes('5') && output.includes('Cannot divide by zero')",
@@ -74,7 +77,8 @@
       ],
       "codeTemplate": {
         "javascript": "function add(a, b) { return a + b; }\nfunction subtract(a, b) { return a - b; }\nfunction multiply(a, b) { return a * b; }\nfunction divide(a, b) {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\n\nfunction calculate(operator, a, b) {\n  \n}\n\nconsole.log(calculate('+', 5, 3));\nconsole.log(calculate('*', 4, 3));\nconsole.log(calculate('/', 10, 0));\n",
-        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  \n}\n\nconsole.log(calculate('+', 5, 3));\nconsole.log(calculate('*', 4, 3));\nconsole.log(calculate('/', 10, 0));\n"
+        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  \n}\n\nconsole.log(calculate('+', 5, 3));\nconsole.log(calculate('*', 4, 3));\nconsole.log(calculate('/', 10, 0));\n",
+        "python": "def add(a, b): return a + b\ndef subtract(a, b): return a - b\ndef multiply(a, b): return a * b\ndef divide(a, b):\n  if b == 0:\n    return \"Cannot divide by zero\"\n  return a / b\n\ndef calculate(operator, a, b):\n  \n\nprint(calculate('+', 5, 3))\nprint(calculate('*', 4, 3))\nprint(calculate('/', 10, 0))\n"
       },
       "verification": {
         "test": "output.includes('8') && output.includes('12') && output.includes('Cannot divide by zero')",
@@ -93,7 +97,8 @@
       ],
       "codeTemplate": {
         "javascript": "function add(a, b) { return a + b; }\nfunction subtract(a, b) { return a - b; }\nfunction multiply(a, b) { return a * b; }\nfunction divide(a, b) {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\nfunction power(a, b) {\n  \n}\n\nfunction calculate(operator, a, b) {\n  switch (operator) {\n    case '+': return add(a, b);\n    case '-': return subtract(a, b);\n    case '*': return multiply(a, b);\n    case '/': return divide(a, b);\n    case '^': return power(a, b);\n    default: return \"Unknown operator\";\n  }\n}\n\nconsole.log(calculate('^', 2, 3));\nconsole.log(calculate('^', 5, 2));\n",
-        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\nfunction power(a: number, b: number): number {\n  \n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  switch (operator) {\n    case '+': return add(a, b);\n    case '-': return subtract(a, b);\n    case '*': return multiply(a, b);\n    case '/': return divide(a, b);\n    case '^': return power(a, b);\n    default: return \"Unknown operator\";\n  }\n}\n\nconsole.log(calculate('^', 2, 3));\nconsole.log(calculate('^', 5, 2));\n"
+        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\nfunction power(a: number, b: number): number {\n  \n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  switch (operator) {\n    case '+': return add(a, b);\n    case '-': return subtract(a, b);\n    case '*': return multiply(a, b);\n    case '/': return divide(a, b);\n    case '^': return power(a, b);\n    default: return \"Unknown operator\";\n  }\n}\n\nconsole.log(calculate('^', 2, 3));\nconsole.log(calculate('^', 5, 2));\n",
+        "python": "def add(a, b): return a + b\ndef subtract(a, b): return a - b\ndef multiply(a, b): return a * b\ndef divide(a, b):\n  if b == 0:\n    return \"Cannot divide by zero\"\n  return a / b\ndef power(a, b):\n  \n\ndef calculate(operator, a, b):\n  if operator == '+': return add(a, b)\n  elif operator == '-': return subtract(a, b)\n  elif operator == '*': return multiply(a, b)\n  elif operator == '/': return divide(a, b)\n  elif operator == '^': return power(a, b)\n  else: return \"Unknown operator\"\n\nprint(calculate('^', 2, 3))\nprint(calculate('^', 5, 2))\n"
       },
       "verification": {
         "test": "output.includes('8') && output.includes('25')",

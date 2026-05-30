@@ -1,0 +1,162 @@
+{
+  "id": "tic-tac-toe",
+  "title": "Tic-Tac-Toe Game",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "2D arrays",
+    "game logic",
+    "win condition detection",
+    "turn management",
+    "state management"
+  ],
+  "description": "Build a tic-tac-toe game with a 3x3 board, move validation, win/draw detection, turn alternation, and game reset.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the board as a 3x3 2D array",
+      "description": "Define a `board` as a 3x3 2D array where each cell is `null` (empty). Create a helper to initialize the board and log it.",
+      "hints": [
+        "Use nested arrays: [[null, null, null], [null, null, null], [null, null, null]]",
+        "Each cell starts as null (empty), 'X' after player 1, 'O' after player 2",
+        "Log the board using JSON.stringify"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nfunction initBoard() {\n  \n}\n\ninitBoard();\nconsole.log(JSON.stringify(board));\ndocument.getElementById('game').textContent = \"Board ready: 3x3\";\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nfunction initBoard(): void {\n  \n}\n\ninitBoard();\nconsole.log(JSON.stringify(board));\ndocument.getElementById('game').textContent = \"Board ready: 3x3\";\n</script>\n",
+        "python": "board = [\n  [None, None, None],\n  [None, None, None],\n  [None, None, None]\n]\n\ndef initBoard():\n  \n\ninitBoard()\nimport json\nprint(json.dumps(board))\n"
+      },
+      "verification": {
+        "test": "output.includes('null') && output.includes('Board ready')",
+        "successMessage": "Tic-tac-toe board initialized as a 3x3 grid!",
+        "failureMessage": "initBoard should reset the board to a 3x3 array with all cells set to null."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the makeMove function",
+      "description": "Write a `makeMove` function that takes `row`, `col`, and `player` ('X' or 'O'). Place the player's mark if the cell is empty, or log an error if occupied.",
+      "hints": [
+        "Check if board[row][col] is null (empty)",
+        "If empty: board[row][col] = player and return true",
+        "If occupied: console.log('Cell occupied!') and return false"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nfunction makeMove(row, col, player) {\n  \n}\n\nconsole.log(\"Move result:\", makeMove(0, 0, \"X\"));\nconsole.log(\"Move result:\", makeMove(0, 0, \"O\"));\nconsole.log(JSON.stringify(board));\ndocument.getElementById('game').textContent = \"Board: \" + JSON.stringify(board);\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nfunction makeMove(row: number, col: number, player: string): boolean {\n  \n}\n\nconsole.log(\"Move result:\", makeMove(0, 0, \"X\"));\nconsole.log(\"Move result:\", makeMove(0, 0, \"O\"));\nconsole.log(JSON.stringify(board));\ndocument.getElementById('game').textContent = \"Board: \" + JSON.stringify(board);\n</script>\n",
+        "python": "board = [\n  [None, None, None],\n  [None, None, None],\n  [None, None, None]\n]\n\ndef makeMove(row, col, player):\n  \n\nprint(\"Move result:\", makeMove(0, 0, \"X\"))\nprint(\"Move result:\", makeMove(0, 0, \"O\"))\nimport json\nprint(json.dumps(board))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false') && output.includes('occupied')",
+        "successMessage": "makeMove correctly places marks and rejects occupied cells!",
+        "failureMessage": "makeMove(0, 0, 'X') should return true, makeMove(0, 0, 'O') should log 'Cell occupied!' and return false."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Check for a win condition",
+      "description": "Write a `checkWin` function that checks all rows, columns, and diagonals for three matching marks. Return the winning player or null. Log the result.",
+      "hints": [
+        "Check rows: board[0][0] === player && board[0][1] === player && board[0][2] === player, etc.",
+        "Check columns: board[0][0] === player && board[1][0] === player && board[2][0] === player, etc.",
+        "Check diagonals: [0][0],[1][1],[2][2] and [0][2],[1][1],[2][0]",
+        "Return the player mark if all three match (and not null)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [\"X\", \"X\", \"X\"],\n  [\"O\", null, \"O\"],\n  [null, null, null]\n];\n\nfunction checkWin() {\n  \n}\n\nconsole.log(\"Winner:\", checkWin());\ndocument.getElementById('game').textContent = \"Winner: \" + checkWin();\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [\"X\", \"X\", \"X\"],\n  [\"O\", null, \"O\"],\n  [null, null, null]\n];\n\nfunction checkWin(): string | null {\n  \n}\n\nconsole.log(\"Winner:\", checkWin());\ndocument.getElementById('game').textContent = \"Winner: \" + checkWin();\n</script>\n",
+        "python": "board = [\n  [\"X\", \"X\", \"X\"],\n  [\"O\", None, \"O\"],\n  [None, None, None]\n]\n\ndef checkWin():\n  \n\nprint(\"Winner:\", checkWin())\n"
+      },
+      "verification": {
+        "test": "output.includes('X') && output.includes('Winner:')",
+        "successMessage": "Win detection correctly identifies three-in-a-row!",
+        "failureMessage": "checkWin should detect that X wins with the top row all being 'X'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Check for a draw",
+      "description": "Write a `checkDraw` function that returns `true` if the board is full and no one has won. Log whether the game is a draw.",
+      "hints": [
+        "First check if there's a winner - if so, not a draw",
+        "Then check if all cells are filled (no null values)",
+        "Use .every() on flattened board or a nested loop"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [\"X\", \"O\", \"X\"],\n  [\"X\", \"O\", \"O\"],\n  [\"O\", \"X\", \"X\"]\n];\n\nfunction checkWin() {\n  return null;\n}\n\nfunction checkDraw() {\n  \n}\n\nconsole.log(\"Is draw:\", checkDraw());\ndocument.getElementById('game').textContent = \"Is draw: \" + checkDraw();\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [\"X\", \"O\", \"X\"],\n  [\"X\", \"O\", \"O\"],\n  [\"O\", \"X\", \"X\"]\n];\n\nfunction checkWin(): string | null {\n  return null;\n}\n\nfunction checkDraw(): boolean {\n  \n}\n\nconsole.log(\"Is draw:\", checkDraw());\ndocument.getElementById('game').textContent = \"Is draw: \" + checkDraw();\n</script>\n",
+        "python": "board = [\n  [\"X\", \"O\", \"X\"],\n  [\"X\", \"O\", \"O\"],\n  [\"O\", \"X\", \"X\"]\n]\n\ndef checkWin():\n  return None\n\ndef checkDraw():\n  \n\nprint(\"Is draw:\", checkDraw())\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('Is draw:')",
+        "successMessage": "Draw detection correctly identifies a full board with no winner!",
+        "failureMessage": "checkDraw should return true when the board is full and checkWin returns null."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Alternate player turns",
+      "description": "Create a `currentPlayer` variable that starts at `'X'`. After each successful move, switch to the other player. Log the current player before and after moves.",
+      "hints": [
+        "Initialize let currentPlayer = 'X'",
+        "After a successful makeMove, toggle: currentPlayer = currentPlayer === 'X' ? 'O' : 'X'",
+        "Log 'Turn: ' + currentPlayer before each move"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nlet currentPlayer = \"X\";\n\nfunction makeMove(row, col) {\n  \n}\n\nconsole.log(\"Turn:\", currentPlayer);\nmakeMove(0, 0);\nconsole.log(\"Turn:\", currentPlayer);\nmakeMove(0, 1);\nconsole.log(\"Turn:\", currentPlayer);\ndocument.getElementById('game').textContent = \"Turn: \" + currentPlayer;\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [null, null, null],\n  [null, null, null],\n  [null, null, null]\n];\n\nlet currentPlayer: string = \"X\";\n\nfunction makeMove(row: number, col: number): boolean {\n  \n}\n\nconsole.log(\"Turn:\", currentPlayer);\nmakeMove(0, 0);\nconsole.log(\"Turn:\", currentPlayer);\nmakeMove(0, 1);\nconsole.log(\"Turn:\", currentPlayer);\ndocument.getElementById('game').textContent = \"Turn: \" + currentPlayer;\n</script>\n",
+        "python": "board = [\n  [None, None, None],\n  [None, None, None],\n  [None, None, None]\n]\n\ncurrentPlayer = \"X\"\n\ndef makeMove(row, col):\n  \n\nprint(\"Turn:\", currentPlayer)\nmakeMove(0, 0)\nprint(\"Turn:\", currentPlayer)\nmakeMove(0, 1)\nprint(\"Turn:\", currentPlayer)\n"
+      },
+      "verification": {
+        "test": "output.includes('X') && output.includes('O') && output.includes('X')",
+        "successMessage": "Players alternate turns correctly after each move!",
+        "failureMessage": "Turn should be X, then after makeMove(0,0) it becomes O, then after makeMove(0,1) it becomes X again."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Display the game status",
+      "description": "Write a `getGameStatus` function that returns a string: `\"Player X's turn\"`, `\"Player X wins!\"`, or `\"Draw!\"` based on the current game state.",
+      "hints": [
+        "If checkWin() returns a player, return 'Player ' + winner + ' wins!'",
+        "Else if checkDraw() returns true, return 'Draw!'",
+        "Otherwise return 'Player ' + currentPlayer + \"'s turn\""
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [\"X\", \"O\", null],\n  [null, \"X\", null],\n  [\"O\", null, null]\n];\n\nlet currentPlayer = \"O\";\n\nfunction checkWin() {\n  return null;\n}\n\nfunction checkDraw() {\n  return false;\n}\n\nfunction getGameStatus() {\n  \n}\n\nconsole.log(getGameStatus());\nboard[2][1] = \"X\";\nconsole.log(\"After move:\", getGameStatus());\ndocument.getElementById('game').textContent = getGameStatus();\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [\"X\", \"O\", null],\n  [null, \"X\", null],\n  [\"O\", null, null]\n];\n\nlet currentPlayer: string = \"O\";\n\nfunction checkWin(): string | null {\n  return null;\n}\n\nfunction checkDraw(): boolean {\n  return false;\n}\n\nfunction getGameStatus(): string {\n  \n}\n\nconsole.log(getGameStatus());\nboard[2][1] = \"X\";\nconsole.log(\"After move:\", getGameStatus());\ndocument.getElementById('game').textContent = getGameStatus();\n</script>\n",
+        "python": "board = [\n  [\"X\", \"O\", None],\n  [None, \"X\", None],\n  [\"O\", None, None]\n]\n\ncurrentPlayer = \"O\"\n\ndef checkWin():\n  return None\n\ndef checkDraw():\n  return False\n\ndef getGameStatus():\n  \n\nprint(getGameStatus())\nboard[2][1] = \"X\"\nprint(\"After move:\", getGameStatus())\n"
+      },
+      "verification": {
+        "test": "output.includes(\"O's turn\") && output.includes('After move:')",
+        "successMessage": "Game status displays whose turn it is or the outcome!",
+        "failureMessage": "getGameStatus should return \"Player O's turn\" initially. After setting a win, it should return the winner."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Implement the reset game function",
+      "description": "Write a `resetGame` function that clears the board back to all `null` values and resets `currentPlayer` to `'X'`. Log the reset confirmation.",
+      "hints": [
+        "Set each cell back to null using nested loops or initBoard()",
+        "Reset currentPlayer = 'X'",
+        "Log: 'Game reset!' and show the empty board"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"game\"></div>\n<script>\nlet board = [\n  [\"X\", \"O\", \"X\"],\n  [\"O\", \"X\", \"O\"],\n  [\"X\", \"O\", \"X\"]\n];\n\nlet currentPlayer = \"O\";\n\nfunction resetGame() {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(board));\nresetGame();\nconsole.log(\"After:\", JSON.stringify(board));\nconsole.log(\"Current player:\", currentPlayer);\ndocument.getElementById('game').textContent = \"Game reset! Board: \" + JSON.stringify(board);\n</script>\n",
+        "typescript": "<div id=\"game\"></div>\n<script>\ntype Cell = string | null;\ntype Board = Cell[][];\n\nlet board: Board = [\n  [\"X\", \"O\", \"X\"],\n  [\"O\", \"X\", \"O\"],\n  [\"X\", \"O\", \"X\"]\n];\n\nlet currentPlayer: string = \"O\";\n\nfunction resetGame(): void {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(board));\nresetGame();\nconsole.log(\"After:\", JSON.stringify(board));\nconsole.log(\"Current player:\", currentPlayer);\ndocument.getElementById('game').textContent = \"Game reset! Board: \" + JSON.stringify(board);\n</script>\n",
+        "python": "board = [\n  [\"X\", \"O\", \"X\"],\n  [\"O\", \"X\", \"O\"],\n  [\"X\", \"O\", \"X\"]\n]\n\ncurrentPlayer = \"O\"\n\ndef resetGame():\n  \n\nimport json\nprint(\"Before:\", json.dumps(board))\nresetGame()\nprint(\"After:\", json.dumps(board))\nprint(\"Current player:\", currentPlayer)\n"
+      },
+      "verification": {
+        "test": "output.includes('null') && output.includes('X') && output.includes('Current player:')",
+        "successMessage": "Game resets to initial state with empty board and X's turn!",
+        "failureMessage": "resetGame should clear all cells to null and set currentPlayer back to 'X'."
+      }
+    }
+  ]
+}

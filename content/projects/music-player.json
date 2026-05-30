@@ -1,0 +1,160 @@
+{
+  "id": "music-player",
+  "title": "Music Player Interface",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "objects",
+    "arrays",
+    "state management",
+    "shuffle algorithms"
+  ],
+  "description": "Build a music player with playlist management, playback controls, progress tracking, and shuffle functionality.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the song data structure",
+      "description": "Define a song object with `title`, `artist`, `duration` (in seconds), and `url` fields. Create a sample song and log its details.",
+      "hints": [
+        "A song object: { title: 'Song Title', artist: 'Artist Name', duration: 210, url: 'https://...' }",
+        "Duration should be in seconds (e.g., 3:30 = 210 seconds)",
+        "Use JSON.stringify to log the song object"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst song = {\n  title: \"Bohemian Rhapsody\",\n  artist: \"Queen\",\n  duration: 354,\n  url: \"https://example.com/bohemian.mp3\"\n};\n\nconsole.log(JSON.stringify(song));\ndocument.getElementById('player').textContent = song.title + \" - \" + song.artist;\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst song: Song = {\n  title: \"Bohemian Rhapsody\",\n  artist: \"Queen\",\n  duration: 354,\n  url: \"https://example.com/bohemian.mp3\"\n};\n\nconsole.log(JSON.stringify(song));\ndocument.getElementById('player').textContent = song.title + \" - \" + song.artist;\n</script>\n",
+        "python": "import json\n\nsong = {\n  \"title\": \"Bohemian Rhapsody\",\n  \"artist\": \"Queen\",\n  \"duration\": 354,\n  \"url\": \"https://example.com/bohemian.mp3\"\n}\n\nprint(json.dumps(song))\n"
+      },
+      "verification": {
+        "test": "output.includes('Bohemian') && output.includes('Queen') && output.includes('354')",
+        "successMessage": "Song data structure is ready with all required fields!",
+        "failureMessage": "Make sure the song object has title, artist, duration, and url fields with the example data."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create the playlist and current song tracker",
+      "description": "Define a `playlist` array containing multiple songs and a `currentSongIndex` variable to track which song is playing. Log the current song.",
+      "hints": [
+        "Create a playlist array with 3-4 songs using the song structure",
+        "Set currentSongIndex = 0 to start at the first song",
+        "Access the current song: playlist[currentSongIndex]"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst playlist = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" },\n  { title: \"Stairway to Heaven\", artist: \"Led Zeppelin\", duration: 482, url: \"song2.mp3\" },\n  { title: \"Hotel California\", artist: \"Eagles\", duration: 391, url: \"song3.mp3\" }\n];\n\nlet currentSongIndex = 0;\n\nconsole.log(\"Now playing:\", playlist[currentSongIndex].title);\ndocument.getElementById('player').textContent = \"Now playing: \" + playlist[currentSongIndex].title;\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst playlist: Song[] = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" },\n  { title: \"Stairway to Heaven\", artist: \"Led Zeppelin\", duration: 482, url: \"song2.mp3\" },\n  { title: \"Hotel California\", artist: \"Eagles\", duration: 391, url: \"song3.mp3\" }\n];\n\nlet currentSongIndex: number = 0;\n\nconsole.log(\"Now playing:\", playlist[currentSongIndex].title);\ndocument.getElementById('player').textContent = \"Now playing: \" + playlist[currentSongIndex].title;\n</script>\n",
+        "python": "playlist = [\n  {\"title\": \"Bohemian Rhapsody\", \"artist\": \"Queen\", \"duration\": 354, \"url\": \"song1.mp3\"},\n  {\"title\": \"Stairway to Heaven\", \"artist\": \"Led Zeppelin\", \"duration\": 482, \"url\": \"song2.mp3\"},\n  {\"title\": \"Hotel California\", \"artist\": \"Eagles\", \"duration\": 391, \"url\": \"song3.mp3\"}\n]\n\ncurrentSongIndex = 0\n\nprint(\"Now playing:\", playlist[currentSongIndex][\"title\"])\n"
+      },
+      "verification": {
+        "test": "output.includes('Now playing:') && output.includes('Bohemian')",
+        "successMessage": "Playlist and current song tracker are set up!",
+        "failureMessage": "Create a playlist array with at least 3 songs and a currentSongIndex pointing to the first song."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement play and pause functions",
+      "description": "Write `playSong` and `pauseSong` functions. `playSong` sets a `isPlaying` flag to `true` and logs the current song. `pauseSong` sets it to `false` and logs a pause message.",
+      "hints": [
+        "Create a let isPlaying = false variable outside the functions",
+        "playSong: set isPlaying = true, log 'Playing: <title>'",
+        "pauseSong: set isPlaying = false, log 'Paused: <title>'"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst playlist = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" },\n  { title: \"Stairway to Heaven\", artist: \"Led Zeppelin\", duration: 482, url: \"song2.mp3\" }\n];\n\nlet currentSongIndex = 0;\nlet isPlaying = false;\n\nfunction playSong() {\n  \n}\n\nfunction pauseSong() {\n  \n}\n\nplaySong();\npauseSong();\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst playlist: Song[] = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" },\n  { title: \"Stairway to Heaven\", artist: \"Led Zeppelin\", duration: 482, url: \"song2.mp3\" }\n];\n\nlet currentSongIndex: number = 0;\nlet isPlaying: boolean = false;\n\nfunction playSong(): void {\n  \n}\n\nfunction pauseSong(): void {\n  \n}\n\nplaySong();\npauseSong();\n</script>\n",
+        "python": "playlist = [\n  {\"title\": \"Bohemian Rhapsody\", \"artist\": \"Queen\", \"duration\": 354, \"url\": \"song1.mp3\"},\n  {\"title\": \"Stairway to Heaven\", \"artist\": \"Led Zeppelin\", \"duration\": 482, \"url\": \"song2.mp3\"}\n]\n\ncurrentSongIndex = 0\nisPlaying = False\n\ndef playSong():\n  \n\ndef pauseSong():\n  \n\nplaySong()\npauseSong()\n"
+      },
+      "verification": {
+        "test": "output.includes('Playing:') && output.includes('Paused:') && output.includes('Bohemian')",
+        "successMessage": "Play and pause functions work correctly!",
+        "failureMessage": "playSong should log 'Playing: <title>' and set isPlaying to true. pauseSong should log 'Paused: <title>' and set isPlaying to false."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement next and previous track functions",
+      "description": "Write `nextTrack` and `prevTrack` functions that change `currentSongIndex` by 1, wrapping around at the ends of the playlist. Log the new current song.",
+      "hints": [
+        "nextTrack: currentSongIndex = (currentSongIndex + 1) % playlist.length",
+        "prevTrack: currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length",
+        "Log the new track: 'Now playing: <title>'"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst playlist = [\n  { title: \"Song A\", artist: \"Artist1\", duration: 200, url: \"a.mp3\" },\n  { title: \"Song B\", artist: \"Artist2\", duration: 180, url: \"b.mp3\" },\n  { title: \"Song C\", artist: \"Artist3\", duration: 220, url: \"c.mp3\" }\n];\n\nlet currentSongIndex = 0;\n\nfunction nextTrack() {\n  \n}\n\nfunction prevTrack() {\n  \n}\n\nnextTrack();\nconsole.log(\"Current index:\", currentSongIndex);\nnextTrack();\nconsole.log(\"Current index:\", currentSongIndex);\nprevTrack();\nconsole.log(\"Current index:\", currentSongIndex);\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst playlist: Song[] = [\n  { title: \"Song A\", artist: \"Artist1\", duration: 200, url: \"a.mp3\" },\n  { title: \"Song B\", artist: \"Artist2\", duration: 180, url: \"b.mp3\" },\n  { title: \"Song C\", artist: \"Artist3\", duration: 220, url: \"c.mp3\" }\n];\n\nlet currentSongIndex: number = 0;\n\nfunction nextTrack(): void {\n  \n}\n\nfunction prevTrack(): void {\n  \n}\n\nnextTrack();\nconsole.log(\"Current index:\", currentSongIndex);\nnextTrack();\nconsole.log(\"Current index:\", currentSongIndex);\nprevTrack();\nconsole.log(\"Current index:\", currentSongIndex);\n</script>\n",
+        "python": "playlist = [\n  {\"title\": \"Song A\", \"artist\": \"Artist1\", \"duration\": 200, \"url\": \"a.mp3\"},\n  {\"title\": \"Song B\", \"artist\": \"Artist2\", \"duration\": 180, \"url\": \"b.mp3\"},\n  {\"title\": \"Song C\", \"artist\": \"Artist3\", \"duration\": 220, \"url\": \"c.mp3\"}\n]\n\ncurrentSongIndex = 0\n\ndef nextTrack():\n  \n\ndef prevTrack():\n  \n\nnextTrack()\nprint(\"Current index:\", currentSongIndex)\nnextTrack()\nprint(\"Current index:\", currentSongIndex)\nprevTrack()\nprint(\"Current index:\", currentSongIndex)\n"
+      },
+      "verification": {
+        "test": "output.includes('Current index: 1') && output.includes('Current index: 2') && output.includes('Current index: 1')",
+        "successMessage": "Next and previous track navigation works with wrap-around!",
+        "failureMessage": "nextTrack should increment the index (wrapping to 0 at the end). prevTrack should decrement (wrapping to the last index)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Track progress with elapsed and total time",
+      "description": "Create an `elapsedTime` variable and a `seekTo` function that updates it. Write a `getProgress` function that returns a formatted string like `\"1:30 / 3:54\"`.",
+      "hints": [
+        "Format seconds as mm:ss: Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0')",
+        "getProgress: format elapsed + ' / ' + format current song duration",
+        "Keep elapsedTime between 0 and the song's duration"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst playlist = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" }\n];\n\nlet currentSongIndex = 0;\nlet elapsedTime = 0;\n\nfunction seekTo(seconds) {\n  \n}\n\nfunction getProgress() {\n  \n}\n\nseekTo(90);\nconsole.log(getProgress());\nseekTo(354);\nconsole.log(getProgress());\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst playlist: Song[] = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" }\n];\n\nlet currentSongIndex: number = 0;\nlet elapsedTime: number = 0;\n\nfunction seekTo(seconds: number): void {\n  \n}\n\nfunction getProgress(): string {\n  \n}\n\nseekTo(90);\nconsole.log(getProgress());\nseekTo(354);\nconsole.log(getProgress());\n</script>\n",
+        "python": "playlist = [\n  {\"title\": \"Bohemian Rhapsody\", \"artist\": \"Queen\", \"duration\": 354, \"url\": \"song1.mp3\"}\n]\n\ncurrentSongIndex = 0\nelapsedTime = 0\n\ndef seekTo(seconds):\n  \n\ndef getProgress():\n  \n\nseekTo(90)\nprint(getProgress())\nseekTo(354)\nprint(getProgress())\n"
+      },
+      "verification": {
+        "test": "output.includes('1:30 / 5:54') && output.includes('5:54 / 5:54')",
+        "successMessage": "Progress tracking shows elapsed time against total duration!",
+        "failureMessage": "seekTo(90) should set elapsed to 90 and getProgress should return '1:30 / 5:54'. Seek to max duration should cap at 354."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement shuffle using Fisher-Yates algorithm",
+      "description": "Write a `shufflePlaylist` function that randomly reorders the playlist using the Fisher-Yates (Knuth) shuffle algorithm. Log the reordered titles.",
+      "hints": [
+        "Loop from the last index down to 1",
+        "Pick a random index j between 0 and i: Math.floor(Math.random() * (i + 1))",
+        "Swap playlist[i] with playlist[j]"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nlet playlist = [\n  { title: \"Song A\", artist: \"A1\", duration: 200, url: \"a.mp3\" },\n  { title: \"Song B\", artist: \"A2\", duration: 180, url: \"b.mp3\" },\n  { title: \"Song C\", artist: \"A3\", duration: 220, url: \"c.mp3\" },\n  { title: \"Song D\", artist: \"A4\", duration: 190, url: \"d.mp3\" }\n];\n\nfunction shufflePlaylist() {\n  \n}\n\nconsole.log(\"Before:\", playlist.map(s => s.title).join(\", \"));\nshufflePlaylist();\nconsole.log(\"After:\", playlist.map(s => s.title).join(\", \"));\ndocument.getElementById('player').innerHTML = \"<p>Shuffled: \" + playlist.map(s => s.title).join(\", \") + \"</p>\";\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nlet playlist: Song[] = [\n  { title: \"Song A\", artist: \"A1\", duration: 200, url: \"a.mp3\" },\n  { title: \"Song B\", artist: \"A2\", duration: 180, url: \"b.mp3\" },\n  { title: \"Song C\", artist: \"A3\", duration: 220, url: \"c.mp3\" },\n  { title: \"Song D\", artist: \"A4\", duration: 190, url: \"d.mp3\" }\n];\n\nfunction shufflePlaylist(): void {\n  \n}\n\nconsole.log(\"Before:\", playlist.map(s => s.title).join(\", \"));\nshufflePlaylist();\nconsole.log(\"After:\", playlist.map(s => s.title).join(\", \"));\ndocument.getElementById('player').innerHTML = \"<p>Shuffled: \" + playlist.map(s => s.title).join(\", \") + \"</p>\";\n</script>\n",
+        "python": "import random\n\nplaylist = [\n  {\"title\": \"Song A\", \"artist\": \"A1\", \"duration\": 200, \"url\": \"a.mp3\"},\n  {\"title\": \"Song B\", \"artist\": \"A2\", \"duration\": 180, \"url\": \"b.mp3\"},\n  {\"title\": \"Song C\", \"artist\": \"A3\", \"duration\": 220, \"url\": \"c.mp3\"},\n  {\"title\": \"Song D\", \"artist\": \"A4\", \"duration\": 190, \"url\": \"d.mp3\"}\n]\n\ndef shufflePlaylist():\n  \n\ntitles = [s[\"title\"] for s in playlist]\nprint(\"Before:\", \", \".join(titles))\nshufflePlaylist()\ntitles = [s[\"title\"] for s in playlist]\nprint(\"After:\", \", \".join(titles))\n"
+      },
+      "verification": {
+        "test": "output.includes('Before:') && output.includes('After:') && output.includes('Song')",
+        "successMessage": "Fisher-Yates shuffle reorders the playlist randomly!",
+        "failureMessage": "shufflePlaylist should iterate backwards through the array and swap each element with a randomly chosen earlier element."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build the now-playing display string",
+      "description": "Write a `getNowPlaying` function that returns a formatted display string with title, artist, progress, and play/pause status. Example: `\"[PLAYING] Bohemian Rhapsody - Queen (1:30 / 5:54)\"`.",
+      "hints": [
+        "Include the play/pause status as [PLAYING] or [PAUSED]",
+        "Format: '[STATUS] title - artist (progress)'",
+        "Reuse your getProgress helper for the time display"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"player\"></div>\n<script>\nconst playlist = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" }\n];\n\nlet currentSongIndex = 0;\nlet elapsedTime = 150;\nlet isPlaying = true;\n\nfunction formatTime(seconds) {\n  let m = Math.floor(seconds / 60);\n  let s = seconds % 60;\n  return m + \":\" + String(s).padStart(2, \"0\");\n}\n\nfunction getNowPlaying() {\n  \n}\n\nconsole.log(getNowPlaying());\nisPlaying = false;\nconsole.log(getNowPlaying());\ndocument.getElementById('player').innerHTML = \"<p>\" + getNowPlaying() + \"</p>\";\n</script>\n",
+        "typescript": "<div id=\"player\"></div>\n<script>\ninterface Song {\n  title: string;\n  artist: string;\n  duration: number;\n  url: string;\n}\n\nconst playlist: Song[] = [\n  { title: \"Bohemian Rhapsody\", artist: \"Queen\", duration: 354, url: \"song1.mp3\" }\n];\n\nlet currentSongIndex: number = 0;\nlet elapsedTime: number = 150;\nlet isPlaying: boolean = true;\n\nfunction formatTime(seconds: number): string {\n  let m = Math.floor(seconds / 60);\n  let s = seconds % 60;\n  return m + \":\" + String(s).padStart(2, \"0\");\n}\n\nfunction getNowPlaying(): string {\n  \n}\n\nconsole.log(getNowPlaying());\nisPlaying = false;\nconsole.log(getNowPlaying());\ndocument.getElementById('player').innerHTML = \"<p>\" + getNowPlaying() + \"</p>\";\n</script>\n",
+        "python": "playlist = [\n  {\"title\": \"Bohemian Rhapsody\", \"artist\": \"Queen\", \"duration\": 354, \"url\": \"song1.mp3\"}\n]\n\ncurrentSongIndex = 0\nelapsedTime = 150\nisPlaying = True\n\ndef formatTime(seconds):\n  m = seconds // 60\n  s = seconds % 60\n  return f\"{m}:{str(s).zfill(2)}\"\n\ndef getNowPlaying():\n  \n\nprint(getNowPlaying())\nisPlaying = False\nprint(getNowPlaying())\n"
+      },
+      "verification": {
+        "test": "output.includes('PLAYING') && output.includes('PAUSED') && output.includes('Bohemian') && output.includes('Queen')",
+        "successMessage": "Now playing display is complete with status, song info, and progress!",
+        "failureMessage": "getNowPlaying should format as '[PLAYING] title - artist (elapsed / total)' when playing and '[PAUSED]' when paused."
+      }
+    }
+  ]
+}

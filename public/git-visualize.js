@@ -44,7 +44,6 @@ function initGitVisualize() {
     document.getElementById('compiler-output').style.display = 'none';
     document.getElementById('compiler-buttons').style.display = 'none';
     BRANCH_COLOR_MAP.main = '#f1502f';
-    addVisualizeButton();
     if (!courseData['git']) {
         loadLangData('git', function () {
             renderGitTopics();
@@ -54,42 +53,6 @@ function initGitVisualize() {
     }
     renderGitTopics();
     loadScenario('branch');
-}
-
-function addVisualizeButton() {
-    const target = document.querySelector('.col:first-child label, #topic-list');
-    if (!target) return;
-    let label = document.querySelector('.col:first-child label');
-    if (!label) return;
-    if (!document.getElementById('viz-btn')) {
-        const visualizeBtn = document.createElement('button');
-        visualizeBtn.id = 'viz-btn';
-        visualizeBtn.className = 'roadmap-btn';
-        visualizeBtn.textContent = 'Visualize';
-        visualizeBtn.title = 'Open interactive git graph';
-        visualizeBtn.style.cssText = 'margin-left:4px;';
-        visualizeBtn.onclick = function () {
-            const exp = document.getElementById('explanation');
-            if (exp && exp.querySelector('svg')) return;
-            if (gitState) {
-                document.getElementById('explanation').innerHTML = '';
-                renderGitGraph();
-            } else {
-                loadScenario(currentScenario || 'branch');
-            }
-        };
-        label.appendChild(visualizeBtn);
-    }
-    if (!document.getElementById('tutorial-btn')) {
-        const tutBtn = document.createElement('button');
-        tutBtn.id = 'tutorial-btn';
-        tutBtn.className = 'roadmap-btn';
-        tutBtn.textContent = 'Tutorial';
-        tutBtn.title = 'Start guided tutorial';
-        tutBtn.style.cssText = 'margin-left:4px;';
-        tutBtn.onclick = function () { startTutorial(currentScenario); };
-        label.appendChild(tutBtn);
-    }
 }
 
 function renderGitTopics() {

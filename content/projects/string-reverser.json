@@ -1,0 +1,111 @@
+{
+  "id": "string-reverser",
+  "title": "String Reverser",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["strings", "loops", "arrays", "functions", "palindromes"],
+  "description": "Reverse strings using different techniques, reverse words in sentences, and build a palindrome checker.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reverse with built-in methods",
+      "description": "Write a `reverseString` function that uses `.split()`, `.reverse()`, and `.join()` to reverse a string.",
+      "hints": [
+        "str.split('') converts string to array of characters",
+        "arr.reverse() reverses the array",
+        "arr.join('') converts array back to string"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseString(str) {\n  \n}\n\nconsole.log(reverseString(\"hello\"));\nconsole.log(reverseString(\"world\"));\n",
+        "typescript": "function reverseString(str: string): string {\n  \n}\n\nconsole.log(reverseString(\"hello\"));\nconsole.log(reverseString(\"world\"));\n",
+        "python": "def reverseString(str):\n  \n\nprint(reverseString(\"hello\"))\nprint(reverseString(\"world\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('olleh') && output.includes('dlrow')",
+        "successMessage": "Both strings reversed correctly!",
+        "failureMessage": "reverseString('hello') should be 'olleh', reverseString('world') should be 'dlrow'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Reverse with a loop",
+      "description": "Write a `reverseStringLoop` function that reverses a string using a `for` loop (no built-in reverse).",
+      "hints": [
+        "Loop through the string from back to front",
+        "Build a new string by adding each character",
+        "Or loop forward and prepend each character"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseStringLoop(str) {\n  let reversed = \"\";\n  \n  return reversed;\n}\n\nconsole.log(reverseStringLoop(\"hello\"));\nconsole.log(reverseStringLoop(\"abc\"));\n",
+        "typescript": "function reverseStringLoop(str: string): string {\n  let reversed = \"\";\n  \n  return reversed;\n}\n\nconsole.log(reverseStringLoop(\"hello\"));\nconsole.log(reverseStringLoop(\"abc\"));\n",
+        "python": "def reverseStringLoop(str):\n  reversed = \"\"\n  \n  return reversed\n\nprint(reverseStringLoop(\"hello\"))\nprint(reverseStringLoop(\"abc\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('olleh') && output.includes('cba')",
+        "successMessage": "Manual loop reversal works too!",
+        "failureMessage": "reverseStringLoop('hello') should be 'olleh', reverseStringLoop('abc') should be 'cba'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Reverse word order",
+      "description": "Write a `reverseWords` function that reverses the order of words in a sentence (but keeps each word intact).",
+      "hints": [
+        "Split the sentence into words: str.split(' ')",
+        "Reverse the array of words",
+        "Join them back: arr.join(' ')"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseWords(sentence) {\n  \n}\n\nconsole.log(reverseWords(\"hello world\"));\nconsole.log(reverseWords(\"the quick brown fox\"));\n",
+        "typescript": "function reverseWords(sentence: string): string {\n  \n}\n\nconsole.log(reverseWords(\"hello world\"));\nconsole.log(reverseWords(\"the quick brown fox\"));\n",
+        "python": "def reverseWords(sentence):\n  \n\nprint(reverseWords(\"hello world\"))\nprint(reverseWords(\"the quick brown fox\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('world hello') && output.includes('fox brown quick the')",
+        "successMessage": "Words reversed in order!",
+        "failureMessage": "reverseWords('hello world') should be 'world hello'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Reverse each word",
+      "description": "Write a `reverseEachWord` function that reverses the characters in each word while keeping the word order the same.",
+      "hints": [
+        "Split the sentence into words",
+        "Reverse each word individually using your reverseString function",
+        "Join the reversed words back with spaces"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseString(str) {\n  return str.split('').reverse().join('');\n}\n\nfunction reverseEachWord(sentence) {\n  \n}\n\nconsole.log(reverseEachWord(\"hello world\"));\n",
+        "typescript": "function reverseString(str: string): string {\n  return str.split('').reverse().join('');\n}\n\nfunction reverseEachWord(sentence: string): string {\n  \n}\n\nconsole.log(reverseEachWord(\"hello world\"));\n",
+        "python": "def reverseString(str):\n  return str[::-1]\n\ndef reverseEachWord(sentence):\n  \n\nprint(reverseEachWord(\"hello world\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('olleh dlrow')",
+        "successMessage": "Each word reversed in place!",
+        "failureMessage": "reverseEachWord('hello world') should be 'olleh dlrow'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Palindrome using reversal",
+      "description": "Write an `isPalindrome` function that uses string reversal to check if a string is a palindrome (case-insensitive).",
+      "hints": [
+        "Use reverseString to get the reversed version",
+        "Convert both to lowercase before comparing",
+        "Also strip spaces and punctuation for robustness"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseString(str) {\n  return str.split('').reverse().join('');\n}\n\nfunction isPalindrome(str) {\n  \n}\n\nconsole.log(isPalindrome(\"racecar\"));\nconsole.log(isPalindrome(\"RaceCar\"));\nconsole.log(isPalindrome(\"hello\"));\n",
+        "typescript": "function reverseString(str: string): string {\n  return str.split('').reverse().join('');\n}\n\nfunction isPalindrome(str: string): boolean {\n  \n}\n\nconsole.log(isPalindrome(\"racecar\"));\nconsole.log(isPalindrome(\"RaceCar\"));\nconsole.log(isPalindrome(\"hello\"));\n",
+        "python": "def reverseString(str):\n  return str[::-1]\n\ndef isPalindrome(str):\n  \n\nprint(isPalindrome(\"racecar\"))\nprint(isPalindrome(\"RaceCar\"))\nprint(isPalindrome(\"hello\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Palindrome checker using reversal — case-insensitive!",
+        "failureMessage": "racecar and RaceCar should be true, hello should be false."
+      }
+    }
+  ]
+}

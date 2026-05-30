@@ -1,0 +1,91 @@
+{
+  "id": "pomodoro-timer",
+  "title": "Pomodoro Timer",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["timer", "state machine", "session management", "productivity"],
+  "description": "Build a Pomodoro timer with work/break sessions, session counting, and history logging.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Session configuration",
+      "description": "Create a config object with `workDuration` (25 min), `breakDuration` (5 min), and `longBreakDuration` (15 min) in seconds.",
+      "hints": ["Store durations in seconds (25 * 60 = 1500)", "Include a longBreakInterval (after 4 sessions)", "Use descriptive property names"],
+      "codeTemplate": {
+        "javascript": "<div id=\"pomodoro-app\"></div>\n<script>\n  const config = {\n    // Your code here\n  };\n  console.log(JSON.stringify(config));\n</script>\n",
+        "typescript": "<div id=\"pomodoro-app\"></div>\n<script>\n  interface PomodoroConfig {\n    workDuration: number;\n    breakDuration: number;\n    longBreakDuration: number;\n    longBreakInterval: number;\n  }\n  const config: PomodoroConfig = {\n    // Your code here\n  };\n  console.log(JSON.stringify(config));\n</script>\n",
+        "python": "config = {\n    # Your code here\n}\nimport json\nprint(json.dumps(config))\n"
+      },
+      "verification": {
+        "test": "output.includes('workDuration') && output.includes('breakDuration')",
+        "successMessage": "Configuration set up correctly!",
+        "failureMessage": "Include workDuration, breakDuration, longBreakDuration, and longBreakInterval."
+      }
+    },
+    {
+      "id": 2,
+      "title": "startSession function",
+      "description": "Write `startSession(type)` that starts a timer for the given session type (`'work'`, `'break'`, or `'longBreak'`). Log `'Starting [type] session for [duration] seconds'`.",
+      "hints": ["Look up the duration from config based on type", "Use setInterval to count down each second", "Store the remaining time and interval ID"],
+      "codeTemplate": {
+        "javascript": "<div id=\"pomodoro-app\"></div>\n<script>\n  const config = { workDuration: 1500, breakDuration: 300, longBreakDuration: 900, longBreakInterval: 4 };\n  let remaining = 0;\n  function startSession(type) {\n    // Your code here\n  }\n  startSession('work');\n</script>\n",
+        "typescript": "<div id=\"pomodoro-app\"></div>\n<script>\n  const config = { workDuration: 1500, breakDuration: 300, longBreakDuration: 900, longBreakInterval: 4 };\n  let remaining: number = 0;\n  function startSession(type: string): void {\n    // Your code here\n  }\n  startSession('work');\n</script>\n",
+        "python": "import time\n\nconfig = {'workDuration': 1500, 'breakDuration': 300, 'longBreakDuration': 900, 'longBreakInterval': 4}\nremaining = 0\n\ndef start_session(session_type):\n    # Your code here\n\nstart_session('work')\n"
+      },
+      "verification": {
+        "test": "output.includes('work') && output.includes('1500')",
+        "successMessage": "Session started!",
+        "failureMessage": "Log 'Starting [type] session for [duration] seconds'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "completeSession function",
+      "description": "Write `completeSession()` that marks the current session as complete, logs `'Session complete!'`, and automatically starts the next session type.",
+      "hints": ["Clear the current interval", "Increment the session counter", "Determine next type: work -> break, break -> work", "Auto-start the next session"],
+      "codeTemplate": {
+        "javascript": "<div id=\"pomodoro-app\"></div>\n<script>\n  let sessionCount = 0;\n  let currentType = 'work';\n  function completeSession() {\n    // Your code here\n  }\n  completeSession();\n</script>\n",
+        "typescript": "<div id=\"pomodoro-app\"></div>\n<script>\n  let sessionCount: number = 0;\n  let currentType: string = 'work';\n  function completeSession(): void {\n    // Your code here\n  }\n  completeSession();\n</script>\n",
+        "python": "session_count = 0\ncurrent_type = 'work'\n\ndef complete_session():\n    # Your code here\n\ncomplete_session()\n"
+      },
+      "verification": {
+        "test": "output.includes('Session complete')",
+        "successMessage": "Session completion works!",
+        "failureMessage": "Log 'Session complete!' when a session finishes."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Session count tracker",
+      "description": "Write `getSessionStats()` that returns an object with `completedSessions`, `currentType`, and `isRunning` status.",
+      "hints": ["Track completedSessions as a counter", "isRunning should reflect whether a timer is active", "Return formatted object"],
+      "codeTemplate": {
+        "javascript": "<div id=\"pomodoro-app\"></div>\n<script>\n  let completedSessions = 3;\n  let currentType = 'break';\n  let isRunning = false;\n  function getSessionStats() {\n    // Your code here\n  }\n  console.log(JSON.stringify(getSessionStats()));\n</script>\n",
+        "typescript": "<div id=\"pomodoro-app\"></div>\n<script>\n  interface SessionStats {\n    completedSessions: number;\n    currentType: string;\n    isRunning: boolean;\n  }\n  let completedSessions: number = 3;\n  let currentType: string = 'break';\n  let isRunning: boolean = false;\n  function getSessionStats(): SessionStats {\n    // Your code here\n  }\n  console.log(JSON.stringify(getSessionStats()));\n</script>\n",
+        "python": "completed_sessions = 3\ncurrent_type = 'break'\nis_running = False\n\ndef get_session_stats():\n    # Your code here\n\nimport json\nprint(json.dumps(get_session_stats()))\n"
+      },
+      "verification": {
+        "test": "output.includes('completedSessions') && output.includes('currentType') && output.includes('isRunning')",
+        "successMessage": "Session stats tracking works!",
+        "failureMessage": "Return an object with completedSessions, currentType, and isRunning."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Session history log",
+      "description": "Write `logSession(type, duration)` that records a session entry in a history array. Each entry includes `type`, `duration`, `completedAt` (ISO date string).",
+      "hints": ["Maintain a sessionHistory array", "new Date().toISOString() for timestamp", "Push { type, duration, completedAt } to the array"],
+      "codeTemplate": {
+        "javascript": "<div id=\"pomodoro-app\"></div>\n<script>\n  let sessionHistory = [];\n  function logSession(type, duration) {\n    // Your code here\n  }\n  logSession('work', 1500);\n  logSession('break', 300);\n  console.log(JSON.stringify(sessionHistory));\n</script>\n",
+        "typescript": "<div id=\"pomodoro-app\"></div>\n<script>\n  interface SessionLog {\n    type: string;\n    duration: number;\n    completedAt: string;\n  }\n  let sessionHistory: SessionLog[] = [];\n  function logSession(type: string, duration: number): void {\n    // Your code here\n  }\n  logSession('work', 1500);\n  logSession('break', 300);\n  console.log(JSON.stringify(sessionHistory));\n</script>\n",
+        "python": "from datetime import datetime\n\nsession_history = []\n\ndef log_session(session_type, duration):\n    # Your code here\n\nlog_session('work', 1500)\nlog_session('break', 300)\nimport json\nprint(json.dumps(session_history))\n"
+      },
+      "verification": {
+        "test": "output.includes('work') && output.includes('completedAt')",
+        "successMessage": "Session history logging works!",
+        "failureMessage": "Push { type, duration, completedAt } to the history array."
+      }
+    }
+  ]
+}

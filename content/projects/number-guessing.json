@@ -1,0 +1,109 @@
+{
+  "id": "number-guessing",
+  "title": "Number Guessing Game",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["random", "loops", "conditionals", "functions", "scoring"],
+  "description": "A classic number guessing game where the player guesses a random number and gets hints.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Generate a random number",
+      "description": "Write a `generateRandom` function that returns a random integer between 1 and 100 using `Math.random()`.",
+      "hints": [
+        "Math.random() returns 0 to 0.999...",
+        "Multiply by 100, use Math.floor(), then add 1",
+        "Math.floor(Math.random() * 100) + 1"
+      ],
+      "codeTemplate": {
+        "javascript": "function generateRandom() {\n  \n}\n\nconsole.log(generateRandom());\n",
+        "typescript": "function generateRandom(): number {\n  \n}\n\nconsole.log(generateRandom());\n",
+        "python": "import random\n\ndef generateRandom():\n  \n\nprint(generateRandom())\n"
+      },
+      "verification": {
+        "test": "Number(output.trim()) >= 1 && Number(output.trim()) <= 100",
+        "successMessage": "Random number between 1 and 100 generated!",
+        "failureMessage": "Generate a random integer between 1 and 100 (inclusive)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Check the guess",
+      "description": "Write a `checkGuess` function that takes a guess and the target, returning `\"Too high\"`, `\"Too low\"`, or `\"Correct!\"`.",
+      "hints": [
+        "Compare guess to target using if/else",
+        "If guess > target return 'Too high', etc."
+      ],
+      "codeTemplate": {
+        "javascript": "function checkGuess(guess, target) {\n  \n}\n\nconst target = 50;\nconsole.log(checkGuess(75, target));\nconsole.log(checkGuess(25, target));\nconsole.log(checkGuess(50, target));\n",
+        "typescript": "function checkGuess(guess: number, target: number): string {\n  \n}\n\nconst target: number = 50;\nconsole.log(checkGuess(75, target));\nconsole.log(checkGuess(25, target));\nconsole.log(checkGuess(50, target));\n",
+        "python": "def checkGuess(guess, target):\n  \n\ntarget = 50\nprint(checkGuess(75, target))\nprint(checkGuess(25, target))\nprint(checkGuess(50, target))\n"
+      },
+      "verification": {
+        "test": "output.includes('Too high') && output.includes('Too low') && output.includes('Correct')",
+        "successMessage": "All three hints work correctly!",
+        "failureMessage": "75 should be 'Too high', 25 should be 'Too low', 50 should be 'Correct!'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Track attempts",
+      "description": "Modify the logic to count how many attempts the player makes before guessing correctly.",
+      "hints": [
+        "Use a counter variable that increments with each guess",
+        "Return or print the attempt count along with the result"
+      ],
+      "codeTemplate": {
+        "javascript": "let attempts = 0;\n\nfunction checkGuess(guess, target) {\n  attempts++;\n  if (guess === target) return \"Correct! in \" + attempts + \" attempts\";\n  return guess > target ? \"Too high\" : \"Too low\";\n}\n\nconst target = 42;\nconsole.log(checkGuess(50, target));\nconsole.log(checkGuess(30, target));\nconsole.log(checkGuess(42, target));\nconsole.log(\"Total attempts: \" + attempts);\n",
+        "typescript": "let attempts: number = 0;\n\nfunction checkGuess(guess: number, target: number): string {\n  attempts++;\n  if (guess === target) return \"Correct! in \" + attempts + \" attempts\";\n  return guess > target ? \"Too high\" : \"Too low\";\n}\n\nconst target: number = 42;\nconsole.log(checkGuess(50, target));\nconsole.log(checkGuess(30, target));\nconsole.log(checkGuess(42, target));\nconsole.log(\"Total attempts: \" + attempts);\n",
+        "python": "attempts = 0\n\ndef checkGuess(guess, target):\n  global attempts\n  attempts += 1\n  if guess == target:\n    return f\"Correct! in {attempts} attempts\"\n  return \"Too high\" if guess > target else \"Too low\"\n\ntarget = 42\nprint(checkGuess(50, target))\nprint(checkGuess(30, target))\nprint(checkGuess(42, target))\nprint(f\"Total attempts: {attempts}\")\n"
+      },
+      "verification": {
+        "test": "output.includes('Correct!') && output.includes('3 attempts')",
+        "successMessage": "Attempts are tracked correctly!",
+        "failureMessage": "Make sure the correct guess shows the number of attempts."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Play the game with a loop",
+      "description": "Write a `playGame` function that loops until the player guesses correctly, using hardcoded guesses to simulate gameplay.",
+      "hints": [
+        "Start with a target number and an array of guesses",
+        "Loop through the guesses array and call checkGuess for each",
+        "Stop the loop when the correct answer is found"
+      ],
+      "codeTemplate": {
+        "javascript": "function checkGuess(guess, target) {\n  if (guess === target) return \"Correct!\";\n  return guess > target ? \"Too high\" : \"Too low\";\n}\n\nfunction playGame(target, guesses) {\n  \n}\n\nplayGame(42, [50, 30, 42]);\n",
+        "typescript": "function checkGuess(guess: number, target: number): string {\n  if (guess === target) return \"Correct!\";\n  return guess > target ? \"Too high\" : \"Too low\";\n}\n\nfunction playGame(target: number, guesses: number[]): void {\n  \n}\n\nplayGame(42, [50, 30, 42]);\n",
+        "python": "def checkGuess(guess, target):\n  if guess == target:\n    return \"Correct!\"\n  return \"Too high\" if guess > target else \"Too low\"\n\ndef playGame(target, guesses):\n  \n\nplayGame(42, [50, 30, 42])\n"
+      },
+      "verification": {
+        "test": "output.includes('Too high') && output.includes('Too low') && output.includes('Correct!')",
+        "successMessage": "The game loop processes all guesses with hints!",
+        "failureMessage": "50 should give 'Too high', 30 'Too low', 42 'Correct!'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Score based on attempts",
+      "description": "Calculate a score based on how few attempts were needed. Fewer attempts = higher score.",
+      "hints": [
+        "Score = 100 - (attempts - 1) * 10, minimum 10",
+        "Or use a formula you like",
+        "Return the score along with the success message"
+      ],
+      "codeTemplate": {
+        "javascript": "function calculateScore(attempts) {\n  \n}\n\nfunction playGame(target, guesses) {\n  let attempts = 0;\n  for (let g of guesses) {\n    attempts++;\n    if (g === target) {\n      const score = calculateScore(attempts);\n      console.log(\"Correct! Score: \" + score);\n      return;\n    }\n    console.log(g > target ? \"Too high\" : \"Too low\");\n  }\n}\n\nplayGame(42, [50, 30, 42]);\n",
+        "typescript": "function calculateScore(attempts: number): number {\n  \n}\n\nfunction playGame(target: number, guesses: number[]): void {\n  let attempts = 0;\n  for (let g of guesses) {\n    attempts++;\n    if (g === target) {\n      const score = calculateScore(attempts);\n      console.log(\"Correct! Score: \" + score);\n      return;\n    }\n    console.log(g > target ? \"Too high\" : \"Too low\");\n  }\n}\n\nplayGame(42, [50, 30, 42]);\n",
+        "python": "def calculateScore(attempts):\n  \n\ndef playGame(target, guesses):\n  attempts = 0\n  for g in guesses:\n    attempts += 1\n    if g == target:\n      score = calculateScore(attempts)\n      print(f\"Correct! Score: {score}\")\n      return\n    print(\"Too high\" if g > target else \"Too low\")\n\nplayGame(42, [50, 30, 42])\n"
+      },
+      "verification": {
+        "test": "output.includes('Score:')",
+        "successMessage": "Score is calculated based on attempts!",
+        "failureMessage": "Make sure the score is displayed when the correct guess is made."
+      }
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "id": "grade-calculator",
+  "title": "Grade Calculator",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["functions", "conditionals", "arrays", "averages", "objects"],
+  "description": "Calculate letter grades, grade points, GPA, class averages, and grade distribution reports.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Letter grade",
+      "description": "Write a `letterGrade` function that returns the letter grade: A (90+), B (80-89), C (70-79), D (60-69), F (<60).",
+      "hints": [
+        "Use if/else if/else for each range",
+        "90+ is A, 80-89 is B, 70-79 is C, 60-69 is D, below 60 is F"
+      ],
+      "codeTemplate": {
+        "javascript": "function letterGrade(score) {\n  \n}\n\nconsole.log(letterGrade(95));\nconsole.log(letterGrade(83));\nconsole.log(letterGrade(50));\n",
+        "typescript": "function letterGrade(score: number): string {\n  \n}\n\nconsole.log(letterGrade(95));\nconsole.log(letterGrade(83));\nconsole.log(letterGrade(50));\n",
+        "python": "def letterGrade(score):\n  \n\nprint(letterGrade(95))\nprint(letterGrade(83))\nprint(letterGrade(50))\n"
+      },
+      "verification": {
+        "test": "output.includes('A') && output.includes('B') && output.includes('F')",
+        "successMessage": "95 = A, 83 = B, 50 = F!",
+        "failureMessage": "letterGrade(95) = 'A', letterGrade(83) = 'B', letterGrade(50) = 'F'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Grade point value",
+      "description": "Write a `gradePoint` function that returns the GPA points: A=4, B=3, C=2, D=1, F=0.",
+      "hints": [
+        "Map each letter grade to its point value",
+        "Use a switch statement or if/else"
+      ],
+      "codeTemplate": {
+        "javascript": "function gradePoint(grade) {\n  \n}\n\nconsole.log(gradePoint(\"A\"));\nconsole.log(gradePoint(\"C\"));\nconsole.log(gradePoint(\"F\"));\n",
+        "typescript": "function gradePoint(grade: string): number {\n  \n}\n\nconsole.log(gradePoint(\"A\"));\nconsole.log(gradePoint(\"C\"));\nconsole.log(gradePoint(\"F\"));\n",
+        "python": "def gradePoint(grade):\n  \n\nprint(gradePoint(\"A\"))\nprint(gradePoint(\"C\"))\nprint(gradePoint(\"F\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('4') && output.includes('2') && output.includes('0')",
+        "successMessage": "A = 4 points, C = 2 points, F = 0 points!",
+        "failureMessage": "gradePoint('A') = 4, gradePoint('C') = 2, gradePoint('F') = 0."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Calculate GPA",
+      "description": "Write a `calculateGPA` function that takes an array of letter grades and returns the GPA (average of grade points).",
+      "hints": [
+        "Map each grade to its point value using gradePoint",
+        "Sum all the points",
+        "Divide by the number of grades to get the average"
+      ],
+      "codeTemplate": {
+        "javascript": "function gradePoint(grade) {\n  const points = { A: 4, B: 3, C: 2, D: 1, F: 0 };\n  return points[grade];\n}\n\nfunction calculateGPA(grades) {\n  \n}\n\nconsole.log(calculateGPA([\"A\", \"B\", \"C\"]));\n",
+        "typescript": "function gradePoint(grade: string): number {\n  const points: { [key: string]: number } = { A: 4, B: 3, C: 2, D: 1, F: 0 };\n  return points[grade];\n}\n\nfunction calculateGPA(grades: string[]): number {\n  \n}\n\nconsole.log(calculateGPA([\"A\", \"B\", \"C\"]));\n",
+        "python": "def gradePoint(grade):\n  points = {\"A\": 4, \"B\": 3, \"C\": 2, \"D\": 1, \"F\": 0}\n  return points[grade]\n\ndef calculateGPA(grades):\n  \n\nprint(calculateGPA([\"A\", \"B\", \"C\"]))\n"
+      },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "GPA for A, B, C is (4+3+2)/3 = 3.0!",
+        "failureMessage": "calculateGPA(['A', 'B', 'C']) should be 3.0."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Class average",
+      "description": "Write a `classAverage` function that takes an array of numeric scores and returns the average score.",
+      "hints": [
+        "Sum all the scores",
+        "Divide by the number of scores",
+        "Return the numeric average"
+      ],
+      "codeTemplate": {
+        "javascript": "function classAverage(scores) {\n  \n}\n\nconsole.log(classAverage([85, 90, 75, 60, 95]));\n",
+        "typescript": "function classAverage(scores: number[]): number {\n  \n}\n\nconsole.log(classAverage([85, 90, 75, 60, 95]));\n",
+        "python": "def classAverage(scores):\n  \n\nprint(classAverage([85, 90, 75, 60, 95]))\n"
+      },
+      "verification": {
+        "test": "output.includes('81')",
+        "successMessage": "Class average is (85+90+75+60+95)/5 = 81!",
+        "failureMessage": "classAverage([85, 90, 75, 60, 95]) should be 81."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Grade distribution report",
+      "description": "Write a `gradeDistribution` function that takes an array of scores and returns an object with counts of each letter grade.",
+      "hints": [
+        "Loop through each score",
+        "Use letterGrade to convert each score",
+        "Count how many of each grade in an object"
+      ],
+      "codeTemplate": {
+        "javascript": "function letterGrade(score) {\n  if (score >= 90) return \"A\";\n  if (score >= 80) return \"B\";\n  if (score >= 70) return \"C\";\n  if (score >= 60) return \"D\";\n  return \"F\";\n}\n\nfunction gradeDistribution(scores) {\n  \n}\n\nconst scores = [95, 83, 72, 58, 91, 67, 85, 43, 78, 90];\nconsole.log(gradeDistribution(scores));\n",
+        "typescript": "function letterGrade(score: number): string {\n  if (score >= 90) return \"A\";\n  if (score >= 80) return \"B\";\n  if (score >= 70) return \"C\";\n  if (score >= 60) return \"D\";\n  return \"F\";\n}\n\nfunction gradeDistribution(scores: number[]): { [key: string]: number } {\n  \n}\n\nconst scores: number[] = [95, 83, 72, 58, 91, 67, 85, 43, 78, 90];\nconsole.log(gradeDistribution(scores));\n",
+        "python": "def letterGrade(score):\n  if score >= 90:\n    return \"A\"\n  if score >= 80:\n    return \"B\"\n  if score >= 70:\n    return \"C\"\n  if score >= 60:\n    return \"D\"\n  return \"F\"\n\ndef gradeDistribution(scores):\n  \n\nscores = [95, 83, 72, 58, 91, 67, 85, 43, 78, 90]\nprint(gradeDistribution(scores))\n"
+      },
+      "verification": {
+        "test": "output.includes('A') && output.includes('B') && output.includes('C') && output.includes('D') && output.includes('F')",
+        "successMessage": "Grade distribution: A:3, B:3, C:2, D:1, F:1!",
+        "failureMessage": "The distribution should show counts for all five letter grades."
+      }
+    }
+  ]
+}
