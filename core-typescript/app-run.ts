@@ -204,6 +204,7 @@ function getLogicalPreview(code, lang) {
         wasm: ['print('],
         asm: ['print('],
         scala: ['println(', 'print('],
+        lua: ['print('],
     };
 
     const output = [];
@@ -363,6 +364,7 @@ function runCode() {
             pg: 'psql -f query.sql', mysql: 'mysql < query.sql',
             dk: 'docker build -t myapp . && docker run myapp',
             mongodb: 'mongosh < script.js', gamedev: 'Run in your game engine IDE',
+            lua: 'lua prog.lua',
             git: 'Run git commands in terminal'
         };
         if (window.location.protocol === 'file:') {

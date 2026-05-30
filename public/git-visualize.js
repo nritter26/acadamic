@@ -20,6 +20,12 @@ function shortHash(id) {
     return id ? id.substring(0, 4) : '????';
 }
 
+function gitTopicId(phase, topic) {
+    const phaseKey = phase.replace(/\s/g, '').replace(/[&,]/g, '');
+    const topicKey = topic.replace(/\s/g, '').replace(/[&,]/g, '');
+    return `btn-git-${phaseKey}-${topicKey}`;
+}
+
 function genId() {
     gitCommitIdCounter++;
     return gitCommitIdCounter.toString(16).padStart(6, '0') + '000'.substring(0, 3);
@@ -99,7 +105,8 @@ function renderGitTopics() {
         html += `<div class="phase-header ${isCollapsed ? 'collapsed' : ''}" data-phase="${phaseKey}" onclick="togglePhase('${phaseKey}','${phase.replace(/'/g, "\\'")}')"><span class="phase-toggle">${isCollapsed ? '▶' : '▼'}</span><span class="phase-label-text">${phase}</span><span class="phase-count">${topics.length}</span></div>`;
         html += `<div class="${isCollapsed ? 'phase-collapsed' : ''}">`;
         for (const topic of topics) {
-            html += `<button class="item-btn topic-btn-enter" data-phase="${phaseKey}" onclick="loadGitTopic('${phase.replace(/'/g, "\\'")}','${topic.replace(/'/g, "\\'")}')"><span class="topic-name">${topic}</span></button>`;
+            const btnId = gitTopicId(phase, topic);
+            html += `<button class="item-btn topic-btn-enter" id="${btnId}" data-phase="${phaseKey}" data-topic="${topic.replace(/"/g, '&quot;')}" onclick="loadGitTopic('${phase.replace(/'/g, "\\'")}','${topic.replace(/'/g, "\\'")}')"><span class="topic-name">${topic}</span></button>`;
         }
         html += `</div>`;
     }
@@ -111,8 +118,9 @@ function loadGitTopic(phase, topic) {
     if (!langData || !langData[phase] || !langData[phase][topic]) return;
     const item = langData[phase][topic];
     document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active-topic'));
-    const btnId = 'btn-' + topic.replace(/\s/g, '').replace(/[&,]/g, '');
-    const btn = document.getElementById(btnId);
+    const btnId = gitTopicId(phase, topic);
+    const phaseKey = phase.replace(/\s/g, '');
+    const btn = document.getElementById(btnId) || document.querySelector('.item-btn[data-phase="' + phaseKey.replace(/"/g, '\\"') + '"][data-topic="' + topic.replace(/"/g, '\\"') + '"]');
     if (btn) { btn.classList.add('active-topic'); btn.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
     const container = document.getElementById('explanation');
     const backBtn = `<button onclick="showGitGraph()" style="background:var(--accent);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;margin-bottom:8px;">← Back to Graph</button>`;
@@ -864,4 +872,3 @@ function closeTutorial() {
     const panel = document.getElementById('gitvizTutorial');
     if (panel) panel.remove();
 }
-

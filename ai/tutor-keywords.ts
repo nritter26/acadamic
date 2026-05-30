@@ -4,7 +4,7 @@ import path from 'path';
 const LANG_NAMES_AI: Record<string, string> = {
   js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
   c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
-  swift: 'Swift', ts: 'TypeScript', zig: 'Zig',
+  swift: 'Swift', ts: 'TypeScript', lua: 'Lua', zig: 'Zig',
   scala: 'Scala',
 };
 

@@ -117,6 +117,7 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
     if (lang === 'git') { document.getElementById('level-bar').style.display = 'none'; initGitVisualize(); updateAISuggestions(); return; }
     if (lang === 'styling') { document.getElementById('level-bar').style.display = 'none'; initStylingVisualize(); updateAISuggestions(); return; }
     if (lang === 'dblab') { document.getElementById('level-bar').style.display = 'none'; initDbLab(); updateAISuggestions(); return; }
+    if (lang === 'projects') { document.getElementById('level-bar').style.display = 'none'; initProjects(); updateAISuggestions(); return; }
     if (lang === 'schema') { document.getElementById('level-bar').style.display = 'none'; initSchemaTutorial(); return; }
     if (lang === 'api') { initAPI(); updateAISuggestions(); 
         const apiBtn = document.getElementById('api-toggle-btn');

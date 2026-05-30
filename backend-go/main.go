@@ -138,6 +138,9 @@ func main() {
 		case "zig":
 			ext = ".zig"
 			cmdStr = fmt.Sprintf("zig run \"%s\"", "%f")
+		case "lua":
+			ext = ".lua"
+			cmdStr = fmt.Sprintf("lua \"%s\"", "%f")
 		case "swift":
 			ext = ".swift"
 			cmdStr = fmt.Sprintf("swift \"%s\"", "%f")

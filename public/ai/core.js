@@ -17,6 +17,7 @@
     cpp: "C++",
     cs: "C#",
     kt: "Kotlin",
+    lua: "Lua",
     swift: "Swift",
     java: "Java",
     rb: "Ruby",
