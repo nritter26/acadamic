@@ -1,6 +1,6 @@
 # Kodex's Lab: Full Mastery Edition
 
-An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn 50+ programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, projects, an AI tutor, SQL database lab, visual schema designer, REST API client, CI/CD curriculum, game development curriculum, mobile development curriculum, interactive CSS visualizer, Git visualizer, and 16 mini-games.
+An interactive multi-language programming textbook, code playground, and compiler pipeline explorer. Learn programming languages, frameworks, databases, cloud platforms, and DevOps tools with built-in code execution, quizzes, challenges, an AI tutor, SQL database lab, visual schema designer, REST API client, CI/CD curriculum, game development curriculum, mobile development curriculum, and 16 mini-games.
 
 ## Features
 
@@ -63,7 +63,7 @@ Cypress, Playwright — curriculum.
 - **Android**: Kotlin & Java, App Components, UI Toolkit (Jetpack Compose + Views), Architecture (MVVM, Hilt, Clean Architecture), Data & Networking (Retrofit, Room, Firebase), Async & Concurrency (Coroutines, Flow), Testing & Debug, Distribution (50 topics across 8 phases)
 - **iOS**: Swift & Objective-C, Xcode & Architecture, UIKit & SwiftUI, App Components & Navigation, Data & Networking (URLSession, CoreData, SwiftData), Concurrency & Memory (GCD, async/await, Actors), Testing & Debug, Distribution (48 topics across 8 phases)
 
-### Compiler Design
+### Compiler Design (Experimental Stage)
 Complete compiler curriculum: tokenization, AST, parsing, code generation, optimization — with hands-on pipeline explorer.
 
 ### Code Execution Runtimes
@@ -446,8 +446,6 @@ Each file has multiple phases, each phase has multiple topics. Topics can option
 - **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, DB Lab, Projects, GameDev, Gaming, Git Grounds, Mobile, Quiz, Learn Code, Tech Stack, Styling Grounds — each with distinct accent colors and hover effects
 - **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
 - **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
-- **Cyberpunk-themed header** — Animated "Just code — don't overthink" motto with glow/flicker CSS effects
-- **Devin mascot** — Animated SVG backpack robot with talking animation (triggered by Tab in AI input)
 - **Roadmap view** — SVG-based visual learning roadmap for topic progression
 - **Language-specific theming** — Dynamic accent colors per language via CSS custom properties
 - **Skeleton loading** — Placeholder UI while curriculum content lazy-loads
