@@ -70,6 +70,11 @@ setMode = function(lang) {
     if (stuckPanel) stuckPanel.remove();
     if (typeof tutorialManager !== 'undefined' && tutorialManager) tutorialManager.clearStuckTimer();
 
+    const engineBar = document.getElementById('engine-bar');
+    const platformBar = document.getElementById('platform-bar');
+    if (engineBar) engineBar.style.display = 'none';
+    if (platformBar) platformBar.style.display = 'none';
+
     document.querySelectorAll('.header-extra-tabs .game-nav-btn').forEach(b => b.classList.remove('active'));
 
     roadmapRendered = false;
@@ -249,22 +254,15 @@ const runBtn = document.querySelector('.run-btn[onclick="runCode()"]');
 
     if (levelBar) renderLevelBar();
 
-    const engineBar = document.getElementById('engine-bar');
     if (lang === 'gamedev') {
         if (engineBar) renderEngineBar();
     } else if (lang === 'htmlcss') {
         if (engineBar) renderHtmlcssBar();
-    } else if (engineBar) {
-        engineBar.style.display = 'none';
     }
 
     if (lang === 'mobile') {
         currentMobilePlatform = 'android';
-        const platformBar = document.getElementById('platform-bar');
         if (platformBar) renderPlatformBar();
-    } else {
-        const platformBar = document.getElementById('platform-bar');
-        if (platformBar) platformBar.style.display = 'none';
     }
 
     // Build topic list with collapsible phases, counts, badges
