@@ -1,0 +1,123 @@
+{
+  "id": "state-management",
+  "title": "State Management (Redux-like)",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 60,
+  "concepts": ["state management", "reducers", "middleware", "selectors", "immutability", "devtools"],
+  "description": "Build a Redux-like state management library with reducers, middleware, selectors, and time-travel debugging.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create Store class",
+      "description": "Build a Store class with `getState()`, `dispatch(action)`, and `subscribe(listener)`. The store is initialized with a reducer and initial state. Dispatching an action runs the reducer and notifies all listeners. Print the initial state to console.",
+      "hints": ["Store holds currentState, reducer function, and a Set of listeners", "dispatch() calls reducer(currentState, action) and replaces state immutably", "subscribe() returns an unsubscribe function that removes the listener from the Set"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('initialState') || output.includes('initial state')",
+        "successMessage": "Store initializes and prints the initial state correctly",
+        "failureMessage": "Store did not create or display initial state properly"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement reducers and actions",
+      "description": "Create pure reducer functions that handle typed actions with a switch statement or equivalent pattern. Actions have a `type` field and optional payload. Implement a counter reducer with INCREMENT, DECREMENT, and RESET actions. Print each state transition.",
+      "hints": ["Reducer is a pure function: (state, action) => state", "Always return a new object, never mutate state directly", "Use a switch on action.type with a default case that returns state unchanged"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('1') && output.includes('0')",
+        "successMessage": "Reducer handles actions and state transitions correctly",
+        "failureMessage": "Reducer did not produce expected state after dispatching actions"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Add middleware chain",
+      "description": "Implement `applyMiddleware(...middlewares)` that wraps dispatch with a chain of middleware functions. Each middleware has the signature `(store) => (next) => (action)`. Create logging middleware and async middleware. Print the middleware execution order.",
+      "hints": ["applyMiddleware composes middlewares: middleware1(middleware2(store.dispatch))", "Logging middleware prints action type, prev state, next state", "Async middleware checks if action is a function, calls it with dispatch if so"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Middleware') && output.includes('log')",
+        "successMessage": "Middleware chain executes in the correct order",
+        "failureMessage": "Middleware did not execute or order was incorrect"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement selectors with memoization",
+      "description": "Create `createSelector(...inputSelectors, resultFn)` that computes derived data and caches results. The selector only recomputes when its input selectors return new values. Print both cached and recomputed results to demonstrate memoization.",
+      "hints": ["Store previous arguments and previous result; compare with === (reference check)", "createSelector returns a function that checks if inputs changed before recomputing", "Use .length of selectors to determine how many arguments to compare"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('cached') && output.includes('recomputed')",
+        "successMessage": "Memoized selector caches results and recomputes only when inputs change",
+        "failureMessage": "Selector did not cache or recompute correctly"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add combineReducers",
+      "description": "Build `combineReducers(reducers)` that takes an object of slice reducers and returns a single reducer. Each slice reducer manages its own portion of the state tree. Dispatch an action and verify only the relevant slice updates. Print the full state tree.",
+      "hints": ["combineReducers returns a function that iterates over each slice reducer", "Each call is reducer(state[key], action) and builds a new state object", "Throw an error if a reducer returns undefined as a safety check"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('todos') && output.includes('user')",
+        "successMessage": "combineReducers correctly splits state into slices",
+        "failureMessage": "Combined reducers did not produce the expected state tree"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement time-travel debugging",
+      "description": "Save the history of dispatched actions and corresponding states. Implement `undo()` and `redo()` methods that move through history. The current state is the state at the current history pointer. Print the state at each step as the user moves forward and backward.",
+      "hints": ["Store a past array and a future array instead of a flat history", "On dispatch, push current state to past, clear future, compute new state", "undo() pops from past, pushes current to future; redo() reverses this"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('undo') && output.includes('redo')",
+        "successMessage": "Time-travel debugging correctly jumps between past and future states",
+        "failureMessage": "Undo/redo did not restore the expected previous state"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build a devtools logger",
+      "description": "Build a devtools logger that formats each action with the previous state, action type, payload, and next state in a readable colored or structured log. Group related log entries and support collapse. Print a sample formatted log entry.",
+      "hints": ["Format %c styled console output with CSS strings for colors", "Log action type as a styled group header, then prev state, then next state", "Use console.groupCollapsed() to group and collapse related entries"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('action') && output.includes('prev') && output.includes('next')",
+        "successMessage": "Devtools logger formats action, prev state, and next state correctly",
+        "failureMessage": "Logger did not produce a properly formatted devtools entry"
+      }
+    }
+  ]
+}

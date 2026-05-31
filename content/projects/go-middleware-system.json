@@ -1,0 +1,91 @@
+{
+  "id": "go-middleware-system",
+  "title": "Go: Middleware Pipeline",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 60,
+  "concepts": ["go", "middleware", "http.Handler", "context", "pipeline"],
+  "description": "Build a composable middleware pipeline in Go inspired by the http.Handler pattern with context propagation and async execution.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Middleware type and Handler",
+      "description": "Define a `Handler` function type that takes and returns a `string` request. Define a `Middleware` type as a function that takes and returns a `Handler`. Implement an `Identity` middleware that passes through unchanged. Test by chaining: `Identity(Identity(upper))` and print the result.",
+      "hints": [
+        "Use `type Handler func(string) string` and `type Middleware func(Handler) Handler`",
+        "Identity middleware: `func(h Handler) Handler { return func(s string) string { return h(s) } }`",
+        "This is the decorator pattern — each middleware wraps the previous handler"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('HELLO') || output.length > 0",
+        "successMessage": "Middleware type and identity pass-through work correctly!",
+        "failureMessage": "Print the result of applying middleware to a handler that uppercases input."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Chain execution with context",
+      "description": "Implement a `Chain` function that composes multiple middlewares into a single handler. Write a `Logger` middleware that prints \"[LOG] request\" before calling the next handler, and a `Timer` middleware that prints the duration using `time.Since`. Print the final result of the chained execution.",
+      "hints": [
+        "Chain reduces middlewares: `Chain(h, m1, m2, m3)` applies m1(m2(m3(h)))",
+        "Logger middleware prints before and after calling the wrapped handler",
+        "Timer middleware uses `defer` to measure and print execution duration"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('LOG') && output.includes('duration')",
+        "successMessage": "Middleware chain correctly composes Logger and Timer middlewares!",
+        "failureMessage": "Print '[LOG] request' and the duration from the Timer middleware."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Async middleware with goroutines",
+      "description": "Create an `Async` middleware that launches the handler in a goroutine and uses a `sync.WaitGroup` to track completion. Implement a `FanOut` middleware that runs the handler multiple times concurrently. Print \"Async done\" for each completion and collect all results.",
+      "hints": [
+        "Async middleware: `go func() { h(req) }()` with a WaitGroup to signal completion",
+        "FanOut takes a count parameter and spawns that many goroutines",
+        "Use a `[]string` with a mutex to collect results from multiple goroutines"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Async done') && output.length > 20",
+        "successMessage": "Async middleware correctly executes handlers concurrently in goroutines!",
+        "failureMessage": "Print 'Async done' each time a goroutine completes."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Error recovery middleware",
+      "description": "Implement a `Recovery` middleware that catches panics from downstream handlers using `defer` and `recover()`. The middleware should print \"Panic recovered: <error>\" and return a default response instead of crashing. Test by including a handler that panics.",
+      "hints": [
+        "Use `defer func() { if r := recover(); r != nil { ... } }()` at the start of the middleware",
+        "On panic, print the recovered error and return a fallback string like \"Internal Error\"",
+        "This pattern is identical to Go HTTP middleware panic recovery"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Panic recovered') && output.includes('Internal Error')",
+        "successMessage": "Recovery middleware catches panics and returns a graceful fallback response!",
+        "failureMessage": "Print 'Panic recovered: <error>' and return a fallback response string."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Composable router with middleware",
+      "description": "Build a `Router` struct with method-based routing (GET, POST) and per-route middleware. Support global middleware applied to all routes and route-specific middleware. Register a few routes with different middleware stacks, execute them, and print each handler's response. Use `map[string]http.Handler` internally.",
+      "hints": [
+        "Router holds `routes map[string]Handler` keyed by \"METHOD:path\" and `global []Middleware`",
+        "`Handle(method, path, handler, middlewares...)` stores the composed handler",
+        "`Serve(method, path, request)` executes the matching handler and prints the response"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('GET') && output.includes('POST') && output.length > 30",
+        "successMessage": "Composable router correctly applies global and per-route middleware!",
+        "failureMessage": "Print the handler responses for both GET and POST routes."
+      }
+    }
+  ]
+}

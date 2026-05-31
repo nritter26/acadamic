@@ -1,4 +1,4 @@
-export const TOPIC_KEYWORDS_CLIENT: Record<string, string[]> = {
+const TOPIC_KEYWORDS_CLIENT: Record<string, string[]> = {
     variable: ['variable', 'variables', 'declare', 'declaration', 'let', 'const', 'var', 'assignment', 'mutable', 'immutable', 'scope'],
     function: ['function', 'functions', 'func', 'method', 'methods', 'def', 'fn', 'return', 'lambda', 'arrow', 'callback', 'callbacks'],
     string: ['string', 'strings', 'str', 'template literal', 'template literals', 'concatenation', 'char', 'text', 'substring'],
@@ -25,7 +25,7 @@ export const TOPIC_KEYWORDS_CLIENT: Record<string, string[]> = {
     module: ['module', 'modules', 'import', 'export', 'require', 'package', 'packages', 'namespace', 'crate', 'npm'],
 };
 
-export function detectTopicInQuery(q: string): string | null {
+function detectTopicInQuery(q: string): string | null {
     const lower = q.toLowerCase().trim();
     const words = lower.split(/\s+/);
     for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_CLIENT)) {

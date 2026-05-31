@@ -1,22 +1,10 @@
-export let aiCodeId = 0;
+let aiCodeId = 0;
 
-export let streamAbortController: AbortController | null = null;
-export let streamingMsgEl: HTMLElement | null = null;
-export let streamingFullText = '';
+let streamAbortController: AbortController | null = null;
+let streamingMsgEl: HTMLElement | null = null;
+let streamingFullText = '';
 
-export function setStreamAbortController(s: AbortController | null): void {
-    streamAbortController = s;
-}
-
-export function setStreamingMsgEl(el: HTMLElement | null): void {
-    streamingMsgEl = el;
-}
-
-export function setStreamingFullText(t: string): void {
-    streamingFullText = t;
-}
-
-export function highlightAICode(code: string, lang?: string): string {
+function highlightAICode(code: string, lang?: string): string {
     const kw: Record<string, string[]> = {
         js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
         ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
@@ -56,26 +44,44 @@ export function highlightAICode(code: string, lang?: string): string {
     }).join('\n');
 }
 
-export function escapeAIHtml(text: string): string {
+function escapeAIHtml(text: string): string {
     return String(text)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 }
 
-export function escapeAIAttr(text: string): string {
+function escapeAIAttr(text: string): string {
     return escapeAIHtml(text)
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
 
-export function safeAIHref(url: string): string {
+function safeAIHref(url: string): string {
     const decoded = String(url).replace(/&amp;/g, '&').trim();
     if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
     return '';
 }
 
-export function formatAIText(text: string): string {
+function inlineFormat(text: string, codeBlocks: { lang: string; code: string; safeCode: string; highlighted: string }[]): string {
+    let t = escapeAIHtml(text);
+    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;" class="notranslate">$1</code>');
+    t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
+    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match: string, label: string, url: string) => {
+        const href = safeAIHref(url);
+        if (!href) return label;
+        return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">${label}</a>`;
+    });
+    t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_match: string, idx: string) => {
+        const cb = codeBlocks[parseInt(idx)];
+        if (cb) return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
+        return '';
+    });
+    return t;
+}
+
+function formatAIText(text: string): string {
     if (!text) return '';
     const codeBlocks: { lang: string; code: string; safeCode: string; highlighted: string }[] = [];
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (_match: string, lang: string, code: string) => {
@@ -167,35 +173,17 @@ export function formatAIText(text: string): string {
     return result;
 }
 
-function inlineFormat(text: string, codeBlocks: { lang: string; code: string; safeCode: string; highlighted: string }[]): string {
-    let t = escapeAIHtml(text);
-    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;" class="notranslate">$1</code>');
-    t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
-    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match: string, label: string, url: string) => {
-        const href = safeAIHref(url);
-        if (!href) return label;
-        return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">${label}</a>`;
-    });
-    t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_match: string, idx: string) => {
-        const cb = codeBlocks[parseInt(idx)];
-        if (cb) return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
-        return '';
-    });
-    return t;
-}
-
-export function autoGrowAIInput(el: HTMLTextAreaElement): void {
+function autoGrowAIInput(el: HTMLTextAreaElement): void {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
-export function removeTypingIndicator(): void {
+function removeTypingIndicator(): void {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
 }
 
-export function stopAIStream(): void {
+function stopAIStream(): void {
     if (streamAbortController) {
         streamAbortController.abort();
         streamAbortController = null;
