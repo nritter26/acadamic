@@ -1,6 +1,7 @@
 import config from './config';
 import { runKeywordTutor } from './tutor-keywords';
 import { getTinyLLMResponse } from './template-matcher';
+import { llmCache } from './cache';
 
 interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -304,8 +305,22 @@ export async function askLLM(
 ): Promise<string | null> {
   const { provider } = config;
 
+  const cached = llmCache.get(messages, options?.lang, options?.topic);
+  if (cached !== null) {
+    if (onStream) {
+      const words = cached.split(/(\s+)/);
+      for (const word of words) {
+        onStream(word);
+        await new Promise(r => setTimeout(r, 10));
+      }
+    }
+    return cached;
+  }
+
+  let response: string | null = null;
+
   if (provider === 'hybrid') {
-    return runHybridLLM(
+    response = await runHybridLLM(
       messages,
       onStream,
       options?.lang,
@@ -313,24 +328,24 @@ export async function askLLM(
       options?.code,
       options?.hasError,
     );
-  }
-
-  if (provider === 'openai' && config.openai.apiKey) {
-    return callProvider(PROVIDERS.openai, messages, onStream);
-  }
-  if (provider === 'anthropic' && config.anthropic.apiKey) {
-    return callProvider(PROVIDERS.anthropic, messages, onStream);
-  }
-  if (provider === 'local') {
-    return callProvider(PROVIDERS.local, messages, onStream);
-  }
-  if (provider === 'keyword') {
+  } else if (provider === 'openai' && config.openai.apiKey) {
+    response = await callProvider(PROVIDERS.openai, messages, onStream);
+  } else if (provider === 'anthropic' && config.anthropic.apiKey) {
+    response = await callProvider(PROVIDERS.anthropic, messages, onStream);
+  } else if (provider === 'local') {
+    response = await callProvider(PROVIDERS.local, messages, onStream);
+  } else if (provider === 'keyword') {
     const { runKeywordTutor } = require('./tutor-keywords');
     const lastMsg = messages[messages.length - 1]?.content || '';
     const result = runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError);
-    return result ? result.response : null;
+    response = result ? result.response : null;
   }
-  return null;
+
+  if (response !== null) {
+    llmCache.set(messages, response, options?.lang, options?.topic);
+  }
+
+  return response;
 }
 
 
