@@ -124,7 +124,7 @@ export async function buildLLMMessages(
       context.push(ragCtx);
     }
   } catch (e: unknown) {
-    logger.debug({ err: e }, 'RAG search failed, skipping');
+    logger.warn({ err: e }, 'RAG search failed');
   }
 
   if (context.length > 0) {
