@@ -17,7 +17,7 @@ interface Conversation {
 
 const cache = new Map<string, Conversation>();
 const MAX_CACHE_SIZE = 100;
-const TTL_MS = 24 * 60 * 60 * 1000;
+const TTL_MS = 60 * 60 * 1000;
 const addLocks = new Map<string, Promise<void>>();
 
 function getPath(learnerId: string): string {
