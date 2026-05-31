@@ -1,0 +1,91 @@
+{
+  "id": "go-channels",
+  "title": "Go: Channels Basics",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "concurrency", "channels"],
+  "description": "Learn to create, send on, and receive from Go channels for goroutine communication.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a channel",
+      "description": "Use `make(chan int)` to create an unbuffered channel of integers. Print the channel's type and value using `fmt.Printf(\"%T, %v\\n\", ch, ch)`.",
+      "hints": [
+        "Use `ch := make(chan int)`",
+        "An unbuffered channel blocks on send until someone receives",
+        "Printing a channel shows its pointer address"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('chan int')",
+        "successMessage": "Channel created and its type is displayed!",
+        "failureMessage": "Make sure to print the type with %T."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Send and receive",
+      "description": "In a goroutine send the value 42 on a channel. In main receive it and print \"Received: 42\".",
+      "hints": [
+        "Send with `ch <- 42` inside a goroutine",
+        "Receive with `val := <-ch` in main",
+        "Unbuffered channels synchronize — the goroutine won't send until main is ready to receive"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Received: 42')",
+        "successMessage": "Send and receive worked as a synchronous hand-off!",
+        "failureMessage": "Make sure you send from a goroutine and receive in main."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Blocking nature",
+      "description": "Demonstrate blocking by having main try to send on an unbuffered channel without a receiver. Print \"Before send\" before the send and note the deadlock. Then fix by using a goroutine receiver.",
+      "hints": [
+        "An unbuffered channel send blocks until another goroutine receives",
+        "Without a receiver, the program deadlocks — Go detects this at runtime",
+        "Wrap the receive in a goroutine: `go func() { ... }()`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Before send') && (output.includes('fatal error') || output.includes('Received'))",
+        "successMessage": "You demonstrated unbuffered channel blocking behavior!",
+        "failureMessage": "Print 'Before send' before the send operation."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Channel direction",
+      "description": "Write a function `producer(ch chan<- int)` that sends values 1, 2, 3 on the channel. In main, receive and print them using `consumer(ch <-chan int)`.",
+      "hints": [
+        "Use `chan<-` for send-only and `<-chan` for receive-only parameters",
+        "Directional channels prevent misuse at compile time",
+        "Close the channel in the producer when done"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3')",
+        "successMessage": "Channel directions enforce safe goroutine communication!",
+        "failureMessage": "Make sure you implement both producer and consumer functions."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Close a channel",
+      "description": "Open a channel, send two values (\"hello\" and \"world\") from a goroutine, then close it. In main, use `val, ok := <-ch` to detect when the channel is closed and print \"channel closed\".",
+      "hints": [
+        "Close with `close(ch)` from the sender side",
+        "The receive returns `ok = false` when the channel is closed and empty",
+        "Only the sender should close a channel, never the receiver"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('channel closed')",
+        "successMessage": "You correctly detected a closed channel using the ok idiom!",
+        "failureMessage": "Remember to use `val, ok := <-ch` to check if the channel is closed."
+      }
+    }
+  ]
+}

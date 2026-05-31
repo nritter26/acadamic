@@ -1,0 +1,141 @@
+{
+  "id": "circuit-breaker",
+  "title": "Circuit Breaker",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "circuit breaker pattern",
+    "failure detection",
+    "half-open probing",
+    "bulkhead",
+    "graceful degradation"
+  ],
+  "description": "Build a circuit breaker with CLOSED/OPEN/HALF_OPEN states, failure counting, probe requests, and bulkhead isolation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement circuit breaker states",
+      "description": "Create a `CircuitBreaker` class with three states: `CLOSED` (normal operation), `OPEN` (failing, requests blocked), and `HALF_OPEN` (testing recovery). Define state transitions: CLOSED to OPEN on failure threshold, OPEN to HALF_OPEN after timeout, HALF_OPEN to CLOSED on success or OPEN on failure. Print each state change with a timestamp.",
+      "hints": [
+        "Use an enum or constants for states: const STATES = { CLOSED: 'CLOSED', OPEN: 'OPEN', HALF_OPEN: 'HALF_OPEN' }",
+        "Track currentState, failureCount, and lastFailureTime as instance properties",
+        "Print 'State changed: CLOSED -> OPEN at <timestamp>' on each transition"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('CLOSED') && output.includes('OPEN') && output.includes('HALF_OPEN') && output.includes('state changed')",
+        "successMessage": "Circuit breaker correctly transitions through all three states!",
+        "failureMessage": "Print each state transition with format 'State changed: <from> -> <to> at <timestamp>'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add failure counting",
+      "description": "Implement failure tracking within a rolling time window. On each `recordFailure()` call, add the current timestamp to a failure log. The circuit opens (transitions to OPEN) when the number of failures in the last `windowMs` milliseconds exceeds `failureThreshold`. Print the failure count and the current failure window with each recorded failure.",
+      "hints": [
+        "Store failure timestamps in an array and filter out ones older than windowMs",
+        "After filtering, check if failuresInWindow.length >= failureThreshold",
+        "Print 'Failures in window: <count>/<threshold>' after recording each failure"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('failures') && output.includes('window') && output.includes('threshold') && output.length > 30",
+        "successMessage": "Failure counting correctly tracks failures in a rolling window and opens the circuit!",
+        "failureMessage": "Print failure count and threshold after each recorded failure, e.g. 'Failures: 3/5 in window'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement half-open probe",
+      "description": "After the circuit opens, start a `cooldownTimeout` (e.g. 5 seconds). Once it elapses, transition to HALF_OPEN and allow a single probe request through. If the probe succeeds, close the circuit. If it fails, reopen the circuit and restart the timeout. Print probe attempts and results including the probe response data.",
+      "hints": [
+        "Use setTimeout or track lastFailureTime and compare to now for cooldown check",
+        "In HALF_OPEN state, allow exactly one request; any concurrent requests should be rejected",
+        "Track probeResponse: { success, latency, timestamp } and print probe results"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('probe') && (output.includes('success') || output.includes('fail')) && output.includes('half-open')",
+        "successMessage": "Half-open probes correctly test the service and transition based on probe results!",
+        "failureMessage": "Print probe results: 'Probe sent: <status>, response time: <ms>ms, circuit -> <new state>'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add success threshold for recovery",
+      "description": "Require N consecutive successful probe requests to fully close the circuit. Add a `successThreshold` config option. In HALF_OPEN state, track a streak of successes. If a request fails before the streak is met, reset the counter and reopen the circuit. Print recovery progress showing consecutive successes out of the threshold.",
+      "hints": [
+        "Track halfOpenSuccessCount and reset it on any failure in HALF_OPEN state",
+        "Only close when halfOpenSuccessCount >= successThreshold",
+        "Print 'Recovery: <count>/<threshold> consecutive successes' after each successful probe"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('recovery') && output.includes('consecutive') && output.includes('success') && output.length > 30",
+        "successMessage": "Success threshold requires multiple consecutive successes before fully recovering!",
+        "failureMessage": "Print recovery progress: 'Recovery: 2/3 consecutive successes' after each successful probe attempt."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement bulkhead isolation",
+      "description": "Create a `Bulkhead` class that groups circuit breakers by service/dependency. Each bulkhead has its own config, failure threshold, and state. Implement `registerService(serviceName, config)` that creates a circuit breaker per service and `call(serviceName, fn)` that routes through the correct breaker. Print the state of each bulkhead separately.",
+      "hints": [
+        "Store circuit breakers in a Map keyed by service name",
+        "Each bulkhead operates independently — one failing service doesn't affect others",
+        "Print 'Bulkhead [service]: state=<state>, failures=<count>' for each service"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('bulkhead') && output.includes('payment') && output.includes('inventory') && output.length > 40",
+        "successMessage": "Bulkhead isolation keeps circuit breakers per service independent of each other!",
+        "failureMessage": "Print the state of each bulkhead separately, e.g. 'Bulkhead [payment]: state=CLOSED, failures=0'."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Add events and metrics",
+      "description": "Extend the circuit breaker to emit events for state changes, failures, successes, and probe attempts. Add a `getMetrics()` method that returns: totalCalls, totalFailures, totalSuccesses, currentState, uptime (time since last open), and failureRate. Simulate a series of calls and print a comprehensive health report.",
+      "hints": [
+        "Use an event emitter pattern: onStateChange(callback), onFailure(callback), etc.",
+        "getMetrics() should calculate failureRate as totalFailures / totalCalls * 100",
+        "Print the health report as formatted output with all metric fields"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('metrics') && output.includes('failure rate') && output.includes('health') && output.length > 50",
+        "successMessage": "Circuit breaker emits events and provides comprehensive health metrics!",
+        "failureMessage": "Print a circuit health report showing totalCalls, totalFailures, failureRate, currentState, and uptime."
+      }
+    }
+  ]
+}

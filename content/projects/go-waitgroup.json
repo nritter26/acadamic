@@ -1,0 +1,91 @@
+{
+  "id": "go-waitgroup",
+  "title": "Go: WaitGroup",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "concurrency", "WaitGroup"],
+  "description": "Use sync.WaitGroup to wait for multiple goroutines to finish their work.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Add/Done/Wait basics",
+      "description": "Launch a goroutine that prints \"Task completed\". Use `sync.WaitGroup` to wait for it to finish before main exits.",
+      "hints": [
+        "Call `wg.Add(1)` before launching the goroutine",
+        "Call `wg.Done()` inside the goroutine (use defer)",
+        "Call `wg.Wait()` in main to block until Done is called"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Task completed')",
+        "successMessage": "WaitGroup correctly waited for the goroutine!",
+        "failureMessage": "Make sure you call Add, Done, and Wait in the right places."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple goroutines",
+      "description": "Launch 5 goroutines using a WaitGroup. Each prints \"Worker X done\" (where X is 1-5). Main waits for all before printing \"All workers finished\".",
+      "hints": [
+        "Call `wg.Add(5)` before the loop, or add inside the loop",
+        "Pass the WaitGroup pointer to the goroutine if wrapping in a function",
+        "The output order is non-deterministic"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('All workers finished') && output.includes('Worker 1')",
+        "successMessage": "All 5 workers completed before main exited!",
+        "failureMessage": "Use a loop to launch 5 goroutines with the WaitGroup."
+      }
+    },
+    {
+      "id": 3,
+      "title": "WaitGroup with work function",
+      "description": "Create a `worker(id int, wg *sync.WaitGroup)` function that prints \"Worker X processing\" and calls Done. Launch 3 workers and wait for all.",
+      "hints": [
+        "The worker function must receive `wg *sync.WaitGroup` as a parameter",
+        "Call `defer wg.Done()` at the start of the worker",
+        "Always pass WaitGroup by pointer, never copy it"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Worker 1 processing') && output.includes('Worker 3 processing')",
+        "successMessage": "Workers with WaitGroup parameter pattern works!",
+        "failureMessage": "Your worker function must accept and call Done on the WaitGroup."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add inside a loop",
+      "description": "Process a slice of 5 URLs (use fake strings). For each URL, call `wg.Add(1)` then launch a goroutine that fetches (simulate with sleep) and prints \"Fetched: <url>\".",
+      "hints": [
+        "Call wg.Add(1) inside the loop, before each goroutine",
+        "Be careful with closure capture — pass the url as a parameter",
+        "Use `time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))` to simulate work"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Fetched:')",
+        "successMessage": "All URLs processed with concurrent fetches!",
+        "failureMessage": "Make sure wg.Add is called before each goroutine launch."
+      }
+    },
+    {
+      "id": 5,
+      "title": "WaitGroup reuse",
+      "description": "Use a single WaitGroup for two batches of work. First batch: 3 goroutines printing \"Batch 1\". Wait, then second batch: 2 goroutines printing \"Batch 2\". Print \"All done\" at the end.",
+      "hints": [
+        "After first `wg.Wait()`, call `wg.Add(2)` for the second batch",
+        "WaitGroup counters can be reused — just Add again after Wait returns",
+        "This is useful for staggered work dispatches"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Batch 1') && output.includes('Batch 2') && output.includes('All done')",
+        "successMessage": "WaitGroup reused across batches successfully!",
+        "failureMessage": "Add to the WaitGroup again after the first Wait completes."
+      }
+    }
+  ]
+}

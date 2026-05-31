@@ -1,0 +1,131 @@
+{
+  "id": "middleware-system",
+  "title": "Middleware Pipeline",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 60,
+  "concepts": ["middleware", "pipeline pattern", "async/await", "error handling", "context passing"],
+  "description": "Build an Express/Koa-style middleware pipeline with async support, error handling, and context.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create Middleware Data Structure",
+      "description": "Define a middleware function signature: `(ctx, next) => void` where `ctx` is a plain object and `next` is a function. Create an array of 3 sample middleware functions that print their name (e.g., `'Middleware: logger'`). Print the registered pipeline array.",
+      "hints": [
+        "Each middleware receives context and calls next() to pass control",
+        "Use `console.log` inside each middleware for identification",
+        "Store middlewares in an array — order determines execution sequence"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Middleware:')",
+        "successMessage": "Middleware data structure and signatures are correctly defined",
+        "failureMessage": "No middleware names were printed"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement Basic Pipeline Execution",
+      "description": "Build a `compose` function that takes an array of middleware and returns a function. When called with `ctx`, it runs each middleware in sequence by passing `next` that invokes the next middleware in the chain. Print `'Executing: name'` before each middleware runs.",
+      "hints": [
+        "Use recursion or a loop that chains next functions together",
+        "The last middleware's next should be a no-op that returns undefined",
+        "Middleware must call next() for the chain to continue"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Executing: logger') && output.includes('Executing: auth')",
+        "successMessage": "Pipeline executes all middlewares in the correct order",
+        "failureMessage": "Pipeline did not execute all middlewares"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Add Async Middleware Support",
+      "description": "Make the pipeline support async middleware functions. Modify the `compose` function to handle promises: each `next()` call should `await` the result. Create an async middleware that does `await delay(10)` (simulated with `setTimeout` wrapped in a Promise) and prints `'Async: done'`.",
+      "hints": [
+        "Wrap setTimeout in a Promise to create a delay helper",
+        "Make compose return a promise chain using reduce or recursion with async/await",
+        "If a middleware returns a promise, await it before calling the next"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Async: done')",
+        "successMessage": "Async middleware executes correctly with await-based pipeline",
+        "failureMessage": "Async middleware did not complete execution"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement Error Handling Middleware",
+      "description": "Add error handling to the pipeline. When a middleware throws or rejects, the pipeline should skip remaining normal middlewares and jump to the nearest error handler middleware. Error handlers have signature `(err, ctx, next)`. Print `'Error caught: message'` when an error handler is invoked.",
+      "hints": [
+        "Detect error handlers by checking the function's parameter count (length === 3)",
+        "Wrap each middleware call in try/catch and pass the error to the next error handler",
+        "If no error handler exists, let the error propagate out of compose"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Error caught:')",
+        "successMessage": "Error middleware correctly catches and handles errors",
+        "failureMessage": "Error was not caught by the error handling middleware"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add Context Object with State",
+      "description": "Enrich the `ctx` object with `req` and `res` properties. Each middleware can mutate `ctx` (e.g., add `ctx.user`, `ctx.body`). Build a middleware that sets `ctx.user = {id: 1, role: 'admin'}` and another that sets `ctx.body = 'Hello'`. After running the pipeline, print the final `ctx` state as JSON.",
+      "hints": [
+        "Initialize ctx with `{req: {method, url}, res: {statusCode: 200}}`",
+        "Middleware mutates ctx by assigning properties like ctx.user",
+        "Print `JSON.stringify(ctx, null, 2)` after pipeline completes"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('user') && output.includes('admin') && output.includes('Hello')",
+        "successMessage": "Context state is correctly mutated and printed",
+        "failureMessage": "Context mutations were not reflected in final state"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Build Composable Route Handler",
+      "description": "Create a `Router` class with `get(path, ...middlewares)` and `post(path, ...middlewares)` methods. The router stores route-specific middleware chains keyed by method+path. Add a `match(method, path)` method that returns the composed middleware chain for a given route. Print `'Route matched: GET /users'` on match.",
+      "hints": [
+        "Store routes as `{method, path, middlewares[]}` in an array",
+        "Use simple string comparison for path matching initially",
+        "The match method should return a composed function using your existing compose"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Route matched:')",
+        "successMessage": "Router correctly matches and composes route-specific middleware chains",
+        "failureMessage": "Router did not match the expected route"
+      }
+    }
+  ]
+}

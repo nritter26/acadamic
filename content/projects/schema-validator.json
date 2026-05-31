@@ -1,0 +1,151 @@
+{
+  "id": "schema-validator",
+  "title": "Schema Validator",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 80,
+  "concepts": ["runtime validation", "composable schemas", "type checking", "error messages", "schema inference"],
+  "description": "Build a runtime validation library with composable schemas, custom error messages, and nested validation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement String and Number Validators",
+      "description": "Create `string()` and `number()` schema factories. Each returns an object with a `parse(input)` method that returns `{success, data, error}`. `string()` validates typeof === 'string'. `number()` validates typeof === 'number'. Print `'Valid: value'` on success and `'Error: message'` on failure.",
+      "hints": [
+        "Return a schema object with a `parse` method that checks the type",
+        "Use `{success: true, data: input}` for valid and `{success: false, error: '...'}` for invalid",
+        "Include the input value in the error message for clarity"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Valid: hello') && output.includes('Error:')",
+        "successMessage": "String and number validators correctly validate type",
+        "failureMessage": "Base validators did not produce expected output"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add Object Schema with Property Validation",
+      "description": "Create an `object(schema)` factory that takes a shape definition like `{name: string(), age: number()}`. The `parse` method validates each property against its schema. Return detailed errors per property. Print the validated object on success or the first error on failure.",
+      "hints": [
+        "Iterate over the shape keys and call each schema's parse method",
+        "Collect errors in an object keyed by property path",
+        "A valid parse should return the original input object as data"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30')",
+        "successMessage": "Object schema validates all properties correctly",
+        "failureMessage": "Object schema did not validate properties"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement Array and Nested Validation",
+      "description": "Create an `array(itemSchema)` factory that validates each element of an array against `itemSchema`. Support nested objects: `object({items: array(object({id: number()}))})`. Print nested validation results with a tree-like indentation of valid/invalid paths.",
+      "hints": [
+        "Use a helper function that tracks the current path as an array of keys",
+        "For arrays, validate every element and collect element-level errors",
+        "Format the output to show path chains like `items[0].id`"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('items') && output.includes('[0]')",
+        "successMessage": "Array and nested validation works with path tracking",
+        "failureMessage": "Nested validation did not produce path-aware output"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add Optional and Default Values",
+      "description": "Add `.optional()` modifier that allows `undefined` values and `.default(value)` modifier that substitutes a default when the value is `undefined`. Chain these after any schema: `string().optional()`, `number().default(0)`. Print the final parsed value with defaults applied.",
+      "hints": [
+        "Wrap the existing parse to check for undefined before delegating",
+        "Store modifiers as properties on the schema object",
+        "Apply default before running the type check"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('default') || output.includes('0')",
+        "successMessage": "Optional and default modifiers work correctly",
+        "failureMessage": "Optional or default values were not applied"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Build Custom Validators",
+      "description": "Add a `.refine(fn, message)` method to schemas that runs a custom validation function after type checks. The refine function receives the parsed value and returns `true/false`. On failure, use `message` as the error. Print custom error messages from refinements.",
+      "hints": [
+        "Wrap the existing parse pipeline — run type check first, then refine",
+        "Store refinements in an array on the schema (multiple refinements allowed)",
+        "The error message from refine should include both the custom message and the value"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('must be positive')",
+        "successMessage": "Custom refinement validators produce custom error messages",
+        "failureMessage": "Refinement validation did not produce the expected error"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement Union and Intersection Types",
+      "description": "Create `or(schemaA, schemaB)` (union) that passes if either schema passes, trying A first. Create `and(schemaA, schemaB)` (intersection) that passes only if both pass, merging the results. Print which schema branch matched for unions and merged errors for intersections.",
+      "hints": [
+        "For `or`, try schemaA first; if it fails, try schemaB; if both fail, combine errors",
+        "For `and`, run both schemas and collect all errors if either fails",
+        "Unions should report which branch succeeded: 'Matched: branch A'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Matched:') || output.includes('branch')",
+        "successMessage": "Union and intersection combinators work correctly",
+        "failureMessage": "Schema combinators did not produce the expected output"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Add Formatted Error Messages",
+      "description": "Improve error reporting to produce a full error tree. When validation fails, show the path (e.g., `users[1].address.zip`), the expected type, the received value, and any refinement errors. Print the complete error tree as a formatted multi-line string.",
+      "hints": [
+        "Collect path segments in an array and join them with dots and brackets",
+        "Include both expected and actual types in error leaves",
+        "Use recursion to build a nested error object before printing"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('path') && output.includes('expected') && output.includes('received')",
+        "successMessage": "Formatted error tree shows path, expected, and received values",
+        "failureMessage": "Error tree output is missing key fields"
+      }
+    }
+  ]
+}

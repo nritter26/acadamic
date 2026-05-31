@@ -1,0 +1,71 @@
+{
+  "id": "go-strings",
+  "title": "Go: String Manipulation",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "strings", "strconv", "fmt.Sprintf", "string-package"],
+  "description": "Manipulate strings — measure length, concatenate, use the strings package, convert with strconv, and format with fmt.Sprintf.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "String Length and Indexing",
+      "description": "Declare `s := \"Hello\"`, print its length with `len(s)` and the first character with indexing `s[0]`.",
+      "hints": ["`len(s)` gives the byte length (5).", "`s[0]` gives the byte value (72 for 'H').", "Print both: `fmt.Println(len(s), s[0])`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('72')",
+        "successMessage": "String length and indexing work!",
+        "failureMessage": "Print length (5) and first byte (72) of 'Hello'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "String Concatenation",
+      "description": "Create `firstName := \"John\"` and `lastName := \"Doe\"`. Concatenate them with a space and print the full name.",
+      "hints": ["Use `+` to concatenate: `firstName + \" \" + lastName`", "Assign to variable: `fullName := firstName + \" \" + lastName`", "Print the result."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('John Doe')",
+        "successMessage": "Concatenation works!",
+        "failureMessage": "Concatenate 'John' and 'Doe' with a space and print 'John Doe'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "strings Package",
+      "description": "Use the `strings` package to check if `\"Golang is fun\"` contains `\"fun\"` (`strings.Contains`), convert to uppercase (`ToUpper`), and split on space.",
+      "hints": ["`strings.Contains(s, \"fun\")` returns true.", "`strings.ToUpper(s)` returns `\"GOLANG IS FUN\"`.", "`strings.Split(s, \" \")` returns a slice."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('GOLANG')",
+        "successMessage": "strings package works!",
+        "failureMessage": "Use Contains, ToUpper from strings package and print results."
+      }
+    },
+    {
+      "id": 4,
+      "title": "strconv Conversion",
+      "description": "Use `strconv.Atoi` to convert `\"123\"` to int and `strconv.Itoa` to convert `456` to string. Print both results.",
+      "hints": ["`n, _ := strconv.Atoi(\"123\")` converts string to int.", "`s := strconv.Itoa(456)` converts int to string.", "Or just `strconv.Itoa(456)` — print the results."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('123') && output.includes('456')",
+        "successMessage": "strconv works!",
+        "failureMessage": "Convert '123' to int and 456 to string, print both."
+      }
+    },
+    {
+      "id": 5,
+      "title": "fmt.Sprintf Formatting",
+      "description": "Use `fmt.Sprintf` to format `name := \"Go\"` and `year := 2009` into `\"Go was created in 2009\"` and print it.",
+      "hints": ["`result := fmt.Sprintf(\"%s was created in %d\", name, year)`", "`%s` for strings, `%d` for integers.", "Print the formatted result."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Go was created in 2009')",
+        "successMessage": "fmt.Sprintf works!",
+        "failureMessage": "Format 'Go was created in 2009' using fmt.Sprintf and print it."
+      }
+    }
+  ]
+}

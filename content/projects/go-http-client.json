@@ -1,0 +1,91 @@
+{
+  "id": "go-http-client",
+  "title": "Go: HTTP Client",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "HTTP", "net/http", "client"],
+  "description": "Make HTTP requests from Go using the net/http client — GET, POST, timeouts, and custom headers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "HTTP GET request",
+      "description": "Use `http.Get(\"https://httpbin.org/get\")` to make a GET request. Print the status code using `resp.StatusCode` and `resp.Status`. Close the response body.",
+      "hints": [
+        "`http.Get(url)` returns `(*http.Response, error)`",
+        "Always close `resp.Body` with `defer resp.Body.Close()`",
+        "Print `resp.StatusCode` for the numeric code (e.g., 200)"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('200') || output.includes('OK')",
+        "successMessage": "GET request succeeded!",
+        "failureMessage": "Remember to close the response body with defer."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Read response body",
+      "description": "Make a GET request to `https://httpbin.org/anything`. Read the entire response body using `io.ReadAll(resp.Body)` and print it as a string.",
+      "hints": [
+        "`io.ReadAll(reader)` returns `([]byte, error)`",
+        "Convert to string: `fmt.Println(string(body))`",
+        "The response body is a stream — read it before closing"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('\"method\": \"GET\"') || output.includes('method')",
+        "successMessage": "Response body read successfully!",
+        "failureMessage": "Use io.ReadAll to read the full body."
+      }
+    },
+    {
+      "id": 3,
+      "title": "HTTP POST with JSON",
+      "description": "Send a POST request to `https://httpbin.org/post` with a JSON body `{\"name\":\"Go\"}`. Set `Content-Type` to `application/json`. Print the status code and response body.",
+      "hints": [
+        "Use `http.Post(url, contentType, body)`",
+        "Create the body with `strings.NewReader(jsonStr)`",
+        "Set Content-Type as the second argument to Post"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('201') || output.includes('200') || output.includes('name')",
+        "successMessage": "POST with JSON body sent successfully!",
+        "failureMessage": "The body argument needs an io.Reader — use strings.NewReader."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Client with timeout",
+      "description": "Create a custom `http.Client` with a 5-second timeout. Use it to make a GET to `https://httpbin.org/delay/2` (which takes 2 seconds). Print the status code.",
+      "hints": [
+        "Create: `client := &http.Client{Timeout: 5 * time.Second}`",
+        "Use `client.Get(url)` instead of `http.Get(url)`",
+        "A 5s timeout handles the 2s delay successfully"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('200') || output.includes('OK')",
+        "successMessage": "Custom client with timeout works!",
+        "failureMessage": "Set the Timeout field on the http.Client struct."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Custom headers",
+      "description": "Create a GET request to `https://httpbin.org/headers` with a custom header `X-Custom: GoRules`. Use `http.NewRequest` and set the header with `req.Header.Set()`. Execute with a default client and print the response body.",
+      "hints": [
+        "Create request: `req, _ := http.NewRequest(\"GET\", url, nil)`",
+        "Set header: `req.Header.Set(\"X-Custom\", \"GoRules\")`",
+        "Execute: `resp, err := http.DefaultClient.Do(req)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('GoRules') || output.includes('X-Custom')",
+        "successMessage": "Custom header sent and echoed back!",
+        "failureMessage": "Use http.NewRequest to create a request with custom headers."
+      }
+    }
+  ]
+}

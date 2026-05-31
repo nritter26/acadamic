@@ -1,106 +1,17 @@
 // @ts-nocheck
 
-let conversationHistory = [];
-const MAX_HISTORY = 50;
-const CHAT_STORAGE_KEY = 'dogeslab_chat';
+import { conversationHistory, MAX_HISTORY, CHAT_STORAGE_KEY, saveChatHistory, loadChatHistory, addToHistory, clearHistory } from './chat-history';
+import { TOPIC_KEYWORDS_CLIENT, detectTopicInQuery } from './topic-detector';
+import { aiCodeId, streamAbortController, streamingMsgEl, streamingFullText, setStreamAbortController, setStreamingMsgEl, setStreamingFullText, highlightAICode, escapeAIHtml, escapeAIAttr, safeAIHref, formatAIText, autoGrowAIInput, removeTypingIndicator, stopAIStream } from './chat-ui';
+import { suggestionSets, getDynamicSuggestions, updateAISuggestions } from './suggestions';
 
 let lastCodeRun = '';
 let lastCodeOutput = '';
 let convSubject = '';
 let convLang = '';
 
-const TOPIC_KEYWORDS_CLIENT = {
-    variable: ['variable', 'variables', 'declare', 'declaration', 'let', 'const', 'var', 'assignment', 'mutable', 'immutable', 'scope'],
-    function: ['function', 'functions', 'func', 'method', 'methods', 'def', 'fn', 'return', 'lambda', 'arrow', 'callback', 'callbacks'],
-    string: ['string', 'strings', 'str', 'template literal', 'template literals', 'concatenation', 'char', 'text', 'substring'],
-    number: ['number', 'numbers', 'int', 'float', 'integer', 'numeric', 'arithmetic', 'math', 'random'],
-    boolean: ['boolean', 'booleans', 'bool', 'true', 'false', 'truthy', 'falsy', 'logical', 'comparison', 'condition', 'conditional'],
-    array: ['array', 'arrays', 'list', 'lists', 'vector', 'slice', 'splice', 'push', 'pop', 'map', 'filter', 'reduce', 'foreach', 'forEach'],
-    object: ['object', 'objects', 'dictionary', 'map', 'hash', 'property', 'key value', 'json', 'record', 'struct', 'prototype'],
-    class: ['class', 'classes', 'constructor', 'extend', 'extends', 'inherit', 'inheritance', 'prototype', 'oop'],
-    promise: ['promise', 'promises', 'async', 'await', 'then', 'catch', 'future', 'defer', 'callback', 'callbacks'],
-    loop: ['loop', 'loops', 'for loop', 'while loop', 'iterate', 'iteration', 'foreach'],
-    type: ['type', 'types', 'interface', 'interfaces', 'generic', 'generics', 'enum', 'typedef', 'type annotation', 'static typing', 'typeof'],
-    null: ['null', 'undefined', 'nil', 'none', 'option', 'maybe', 'optional'],
-    error_handling: ['error handling', 'try catch', 'throw', 'throws', 'except', 'exception', 'exceptions', 'panic', 'result', 'unwrap'],
-    io: ['input', 'output', 'file', 'files', 'console', 'print', 'log', 'read', 'write', 'stdin', 'stdout'],
-    comment: ['comment', 'comments', 'docstring', 'documentation', 'jsdoc'],
-    operator: ['operator', 'operators', 'arithmetic', 'comparison', 'assignment', 'bitwise'],
-    recursion: ['recursion', 'recursive', 'stack overflow', 'base case', 'tail call'],
-    closure: ['closure', 'closures', 'lexical scope', 'scope chain', 'capture', 'inner function'],
-    generics: ['generic', 'generics', 'template', 'templates', 'type parameter', 'type parameters', 'trait bound'],
-    pointer: ['pointer', 'pointers', 'reference', 'references', 'memory address', 'dereference', 'borrow', 'borrowing'],
-    pattern_match: ['pattern matching', 'match', 'switch', 'destructure', 'destructuring', 'deconstruct'],
-    concurrency: ['concurrency', 'concurrent', 'parallel', 'parallelism', 'thread', 'threads', 'goroutine', 'goroutines', 'channel', 'channels'],
-    testing: ['testing', 'test', 'tests', 'assert', 'assertion', 'unit test', 'unit tests', 'mock', 'mocks', 'tdd'],
-    module: ['module', 'modules', 'import', 'export', 'require', 'package', 'packages', 'namespace', 'crate', 'npm'],
-};
-
-function detectTopicInQuery(q) {
-    const lower = q.toLowerCase().trim();
-    const words = lower.split(/\s+/);
-
-    // Direct single-word or two-word topic query — "variables", "closures", "error handling"
-    for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_CLIENT)) {
-        const phrase = words.join(' ');
-        if (keywords.some(kw => kw === phrase || kw === lower || (kw.includes(' ') && phrase.includes(kw)))) {
-            return topic;
-        }
-        if (words.length <= 4 && keywords.some(kw => words.includes(kw))) {
-            return topic;
-        }
-    }
-
-    // Phrase with topic indicator: "what is X", "explain X", "tell me about X", "what about X"
-    const hasIndicator = /^(what|how|why|explain|define|tell|describe|show)\b/i.test(lower) || /\b(what about|tell me about|how about|explain|difference between)\b/i.test(lower);
-    if (hasIndicator) {
-        for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS_CLIENT)) {
-            if (keywords.some(kw => kw.length > 2 && lower.includes(kw))) {
-                return topic;
-            }
-        }
-    }
-
-    return null;
-}
-
-function saveChatHistory() {
-    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
-}
-
-function loadChatHistory() {
-    try {
-        const saved = localStorage.getItem(CHAT_STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) {
-                conversationHistory = parsed.slice(-20);
-                const el = document.getElementById('aiMessages');
-                if (el) {
-                    el.innerHTML = '';
-                    for (const msg of conversationHistory) {
-                        addAIMessage(msg.text, msg.role, true);
-                    }
-                }
-            }
-        }
-    } catch {}
-}
-
-function clearChatHistory() {
-    conversationHistory = [];
-    try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
-    if (DEVIN_MAINTENANCE) {
-        showMaintenanceMessage();
-        return;
-    }
-    const el = document.getElementById('aiMessages');
-    if (el) {
-        el.innerHTML = `<div class="ai-msg bot"><div class="label">Devin</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
-    }
-    updateAISuggestions();
-    setTimeout(triggerGTranslate, 50);
-}
+let aiFeedbackId = 0;
+let isBackendReachable = true;
 
 function toggleAI() {
     const panel = document.getElementById('aiPanel');
@@ -192,197 +103,18 @@ function dismissReviewReminder() {
     if (el) el.innerHTML = '';
 }
 
-let aiCodeId = 0;
-function highlightAICode(code, lang) {
-    const kw = {
-        js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
-        ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
-        py: ['def','return','if','elif','else','for','while','in','not','and','or','is','None','True','False','class','import','from','as','try','except','finally','raise','with','async','await','yield','lambda','pass','break','continue','global','nonlocal','self','super'],
-        go: ['func','return','if','else','for','range','switch','case','break','continue','go','defer','select','chan','map','struct','interface','type','package','import','var','const','nil','true','false','make','new','append','len','cap'],
-        rs: ['fn','let','mut','if','else','for','while','loop','match','return','pub','struct','enum','impl','trait','use','mod','as','in','ref','self','super','Some','None','Ok','Err','true','false','let','const','static','unsafe','async','await','move','where'],
-        cs: ['public','private','protected','internal','static','void','int','string','bool','float','double','var','class','struct','enum','interface','namespace','using','return','if','else','for','foreach','while','do','switch','case','break','continue','new','this','base','virtual','override','abstract','sealed','readonly','const','async','await','try','catch','finally','throw','get','set','value'],
-        swift: ['func','var','let','if','else','for','in','while','switch','case','break','continue','return','class','struct','enum','protocol','extension','import','guard','defer','throw','throws','rethrows','catch','async','await','actor','nonisolated','mutating','self','super','nil','true','false'],
-    }[lang] || ['const','let','var','function','return','if','else','for','while','class','import','export','true','false','null','undefined','new','this','try','catch'];
-    const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const lines = escaped.split('\n');
-    return lines.map(line => {
-        const tokens = [];
-        let i = 0;
-        while (i < line.length) {
-            const rest = line.slice(i);
-            const sCm = rest.match(/^\/\/.*/);
-            if (sCm) { tokens.push('<span class="syn-comment">' + sCm[0] + '</span>'); i += sCm[0].length; continue; }
-            const bCm = rest.match(/^\/\*[\s\S]*?\*\//);
-            if (bCm) { tokens.push('<span class="syn-comment">' + bCm[0] + '</span>'); i += bCm[0].length; continue; }
-            const str = rest.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
-            if (str) { tokens.push('<span class="syn-string">' + str[1] + '</span>'); i += str[1].length; continue; }
-            const num = rest.match(/^\b(\d+\.?\d*|0x[0-9a-fA-F]+)\b/);
-            if (num) { tokens.push('<span class="syn-number">' + num[1] + '</span>'); i += num[1].length; continue; }
-            const word = rest.match(/^([a-zA-Z_$][\w$]*)/);
-            if (word) {
-                if (kw.includes(word[1])) tokens.push('<span class="syn-keyword">' + word[1] + '</span>');
-                else tokens.push(word[1]);
-                i += word[1].length;
-                continue;
-            }
-            tokens.push(line[i]);
-            i++;
-        }
-        return tokens.join('');
-    }).join('\n');
-}
-
-function escapeAIHtml(text) {
-    return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-
-function escapeAIAttr(text) {
-    return escapeAIHtml(text)
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-function safeAIHref(url) {
-    const decoded = String(url).replace(/&amp;/g, '&').trim();
-    if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
-    return '';
-}
-
-function formatAIText(text) {
-    if (!text) return '';
-    // 1. Extract and protect code blocks
-    const codeBlocks = [];
-    const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (match, lang, code) => {
-        const idx = codeBlocks.length;
-        const safeCode = escapeAIAttr(code);
-        const highlighted = highlightAICode(code, lang);
-        codeBlocks.push({ lang, code, safeCode, highlighted });
-        return `\x00CODEBLOCK${idx}\x00`;
-    });
-    // 2. Process block-level markdown (headings, horizontal rules, blockquotes, lists)
-    const lines = noCode.split('\n');
-    let result = '';
-    let inList = false;
-    let listStack = []; // tracks list types at each nesting level
-    let listLevel = 0;
-    for (let li = 0; li < lines.length; li++) {
-        let line = lines[li];
-        const trimmed = line.trim();
-        const indent = line.length - line.trimStart().length;
-        const listMatch = trimmed.match(/^(\s*[-*+]\s)(.*)$/);
-        const orderedMatch = trimmed.match(/^(\s*\d+\.\s)(.*)$/);
-        // check if line is a code block placeholder
-        const cbPlaceholder = line.match(/^\x00CODEBLOCK(\d+)\x00$/);
-        if (cbPlaceholder) {
-            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-            const cb = codeBlocks[parseInt(cbPlaceholder[1])];
-            result += `<div class="ai-code-wrapper"><pre class="ai-code-block notranslate"><code class="notranslate">${cb.highlighted}</code></pre><button class="ai-run-code notranslate" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
-            continue;
-        }
-        // heading
-        const hMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
-        if (hMatch) {
-            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-            const level = hMatch[1].length;
-            result += `<h${level} style="font-size:${14 - level}px;color:#f1f5f9;margin:8px 0 4px;font-weight:800;">${inlineFormat(hMatch[2], codeBlocks, false)}</h${level}>`;
-            continue;
-        }
-        // horizontal rule
-        if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
-            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-            result += '<hr style="border:none;border-top:1px solid #334155;margin:10px 0;">';
-            continue;
-        }
-        // blockquote
-        if (trimmed.startsWith('> ')) {
-            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-            const content = inlineFormat(trimmed.replace(/^>\s?/, ''), codeBlocks, false);
-            result += `<blockquote style="border-left:3px solid var(--accent);margin:6px 0;padding:4px 10px;color:#94a3b8;font-size:11px;">${content}</blockquote>`;
-            continue;
-        }
-        // list item
-        const isListItem = listMatch || orderedMatch;
-        if (isListItem) {
-            const prefix = listMatch ? listMatch[1] : orderedMatch[1];
-            const content = listMatch ? listMatch[2] : orderedMatch[2];
-            const tag = listMatch ? 'ul' : 'ol';
-            if (!inList) { result += `<${tag} style="margin:4px 0;padding-left:20px;">`; inList = true; listStack = [tag]; }
-            const formatted = inlineFormat(content, codeBlocks, true);
-            result += `<li style="font-size:11px;color:#cbd5e1;margin:2px 0;">${formatted}</li>`;
-            // peek ahead for nested content
-            continue;
-        }
-        // empty line in list resets
-        if (inList && trimmed === '') {
-            result += '</li></ul>'.repeat(listStack.length);
-            inList = false;
-            listStack = [];
-            continue;
-        }
-        // table
-        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-            if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-            // check if next line is a separator row
-            const nextLine = lines[li + 1];
-            const isSep = nextLine && /^\|[\s:-]+\|/.test(nextLine.trim());
-            if (isSep) {
-                // find all headers
-                const headers = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
-                const hHtml = headers.map(h => `<th style="padding:4px 8px;text-align:left;color:#f1f5f9;font-size:10px;font-weight:800;border-bottom:2px solid #334155;">${inlineFormat(h, codeBlocks, false)}</th>`).join('');
-                result += `<table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:10px;"><thead><tr>${hHtml}</tr></thead><tbody>`;
-                li++; // skip separator
-                // read body rows
-                while (li + 1 < lines.length) {
-                    const rowLine = lines[li + 1].trim();
-                    if (!rowLine.startsWith('|') || !rowLine.endsWith('|')) break;
-                    li++;
-                    const cells = rowLine.split('|').filter(c => c.trim()).map(c => c.trim());
-                    const rHtml = cells.map(c => `<td style="padding:4px 8px;color:#94a3b8;font-size:10px;border-bottom:1px solid #1e293b;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
-                    result += `<tr>${rHtml}</tr>`;
-                }
-                result += '</tbody></table>';
-                continue;
-            }
-            // single row table (not preceded by separator)
-            const cells = trimmed.split('|').filter(c => c.trim()).map(c => c.trim());
-            const rHtml = cells.map(c => `<td style="padding:3px 6px;font-size:10px;">${inlineFormat(c, codeBlocks, false)}</td>`).join('');
-            result += `<table style="width:100%;border-collapse:collapse;margin:4px 0;"><tr>${rHtml}</tr></table>`;
-            continue;
-        }
-        // default paragraph
-        if (inList) { result += '</li></ul>'.repeat(listStack.length); inList = false; listStack = []; }
-        if (trimmed !== '') {
-            result += `<p style="margin:4px 0;">${inlineFormat(trimmed, codeBlocks, false)}</p>`;
-        }
+function clearChatHistory() {
+    clearHistory();
+    if (DEVIN_MAINTENANCE) {
+        showMaintenanceMessage();
+        return;
     }
-    if (inList) { result += '</li></ul>'.repeat(listStack.length); }
-    return result;
-}
-
-function inlineFormat(text, codeBlocks) {
-    let t = escapeAIHtml(text);
-    // inline code
-    t = t.replace(/\`([^`]+)\`/g, '<code style="background:#1e293b;color:#a5f3fc;padding:1px 4px;border-radius:3px;font-size:10px;" class="notranslate">$1</code>');
-    // bold
-    t = t.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#a5f3fc;">$1</strong>');
-    // italic
-    t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em style="color:#cbd5e1;">$1</em>');
-    // links
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
-        const href = safeAIHref(url);
-        if (!href) return label;
-        return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">${label}</a>`;
-    });
-    // inline code block placeholders (shouldn't be here but just in case)
-    t = t.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
-        const cb = codeBlocks[parseInt(idx)];
-        if (cb) return `<div class="ai-code-wrapper"><pre class="ai-code-block"><code>${cb.highlighted}</code></pre><button class="ai-run-code" id="ai-code-${++aiCodeId}" data-code="${cb.safeCode}">Run</button></div>`;
-        return '';
-    });
-    return t;
+    const el = document.getElementById('aiMessages');
+    if (el) {
+        el.innerHTML = `<div class="ai-msg bot"><div class="label">Devin</div>Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.</div>`;
+    }
+    updateAISuggestions(currentLang, currentTopic, streamingFullText);
+    setTimeout(triggerGTranslate, 50);
 }
 
 document.addEventListener('click', function(e) {
@@ -391,8 +123,6 @@ document.addEventListener('click', function(e) {
         runCodeFromAI(btn.dataset.code);
     }
 });
-
-let aiFeedbackId = 0;
 
 function addAIMessage(text, role, skipSave) {
     const el = document.getElementById('aiMessages');
@@ -447,7 +177,7 @@ function addAIMessage(text, role, skipSave) {
         if (conversationHistory.length > MAX_HISTORY) {
             conversationHistory.shift();
         }
-        saveChatHistory();
+        saveChatHistory(conversationHistory);
     }
     setTimeout(triggerGTranslate, 50);
 }
@@ -466,36 +196,6 @@ function rateAIResponse(btn, dir, fid) {
         buttons[1].classList.toggle('voted-down', dir === -1);
         buttons[0].classList.toggle('voted-down', false);
         buttons[1].classList.toggle('voted', false);
-    }
-}
-
-function removeTypingIndicator() {
-    const typing = document.getElementById('aiTyping');
-    if (typing) typing.remove();
-}
-
-// ── Streaming Bot Message ──
-let streamingMsgEl = null;
-let streamingFullText = '';
-let streamAbortController = null;
-let isBackendReachable = true;
-
-function stopAIStream() {
-    if (streamAbortController) {
-        streamAbortController.abort();
-        streamAbortController = null;
-    }
-    document.getElementById('aiStopBtn').style.display = 'none';
-    if (streamingMsgEl) {
-        const content = streamingMsgEl.querySelector('.streaming-content');
-        if (content) {
-            const existing = content.innerHTML;
-            content.innerHTML = existing + '<span class="streaming-cancelled"> [cancelled]</span>';
-        }
-        const cursor = streamingMsgEl.querySelector('.streaming-cursor');
-        if (cursor) cursor.remove();
-        streamingMsgEl.classList.remove('streaming');
-        streamingMsgEl = null;
     }
 }
 
@@ -605,9 +305,9 @@ function finalizeStreamingBotMessage(text) {
     streamingFullText = text;
     conversationHistory.push({ role: 'bot', text });
     if (conversationHistory.length > MAX_HISTORY) conversationHistory.shift();
-    saveChatHistory();
+    saveChatHistory(conversationHistory);
     streamingMsgEl = null;
-    updateAISuggestions();
+    updateAISuggestions(currentLang, currentTopic, streamingFullText);
 }
 
 function runCodeFromAI(code) {
@@ -1065,11 +765,6 @@ function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
 }
 
-function autoGrowAIInput(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
 function sendAI() {
     if (DEVIN_MAINTENANCE) return;
     const input = document.getElementById('aiInput');
@@ -1367,45 +1062,6 @@ function generateExercise() {
         reply += `</div>`;
         addAIMessage(reply, 'bot');
     });
-}
-
-function updateAISuggestions() {
-    const el = document.getElementById('aiSuggestions');
-    const dynamic = getDynamicSuggestions();
-
-    if (streamingFullText) {
-        const text = streamingFullText.toLowerCase();
-        const followUps = [];
-        if (text.includes('variable') || text.includes('declare')) followUps.push('Show me a variable example');
-        if (text.includes('function') || text.includes('method')) followUps.push('Give me a function exercise');
-        if (text.includes('loop') || text.includes('for ') || text.includes('while')) followUps.push('Show me a loop example');
-        if (text.includes('class') || text.includes('object')) followUps.push('Practice: build a class');
-        if (text.includes('array') || text.includes('list')) followUps.push('Practice with arrays');
-        if (text.includes('error') || text.includes('debug')) followUps.push('How do I debug this?', 'Common mistakes');
-        if (followUps.length > 0) {
-            followUps.push('Tell me more', 'Give me an example');
-            const buttons = followUps.slice(0, 4).map(s =>
-                `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`
-            );
-            if (currentTopic && currentLang && currentLang !== 'compiler' && currentLang !== 'challenge') {
-                buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
-            }
-            el.innerHTML = buttons.join('');
-            return;
-        }
-    }
-
-    const suggestions = dynamic || suggestionSets[currentLang] || suggestionSets.js;
-    const hasAI = currentLang && currentLang !== 'compiler' && currentLang !== 'challenge' && currentLang !== 'quiz';
-    const buttons = suggestions.map(s => `<button onclick="askAI('${s.replace(/'/g, "\\'")}')">${s}</button>`);
-    if (hasAI) {
-        const hasExercise = currentTopic && !suggestions.some(s => s.toLowerCase().includes('exercise'));
-        if (hasExercise) buttons.push(`<button onclick="generateExercise()" style="background:#0ea5e9;color:#000;">✨ Exercise</button>`);
-        if (currentTopic) buttons.push(`<button onclick="generateQuiz()" style="background:#f59e0b;color:#000;">📝 Quiz</button>`);
-        buttons.push(`<button onclick="showLearningPath()" style="background:#8b5cf6;color:#000;">📚 Path</button>`);
-    }
-    buttons.push(`<button class="ai-dismiss-btn" onclick="document.getElementById('aiSuggestions').innerHTML=''" title="Dismiss suggestions">✕</button>`);
-    el.innerHTML = buttons.join('');
 }
 
 const oopPhases = {

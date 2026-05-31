@@ -1,0 +1,123 @@
+{
+  "id": "query-builder",
+  "title": "SQL Query Builder",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 60,
+  "concepts": ["query building", "method chaining", "SQL injection prevention", "joins", "subqueries", "aggregation"],
+  "description": "Build a SQL query builder with method chaining, parameterized queries, joins, subqueries, and aggregation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create base Query class",
+      "description": "Build a Query class that supports method chaining: `.select('name', 'age').from('users').where('age > 18')`. Each method returns `this` for chaining. Implement a `.build()` method that generates the SQL string. Print the generated SQL to console.",
+      "hints": ["Store clauses in arrays or strings that reset method builds the final SQL", ".where() should handle multiple conditions joined with AND", ".build() concatenates clauses: SELECT ... FROM ... WHERE ..."],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('SELECT') && output.includes('FROM') && output.includes('WHERE')",
+        "successMessage": "Query class generates valid SELECT-FROM-WHERE SQL",
+        "failureMessage": "Generated SQL is missing expected clauses"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add parameterized queries",
+      "description": "Implement parameterized values using numbered placeholders (`$1`, `$2`) for user-supplied values. The `.where()` method should accept both string conditions and `{ column: value }` objects. `.build()` returns `{ sql: string, params: array }`. Print both SQL and params.",
+      "hints": ["Track a parameter counter that increments with each bound value", "Replace values with $N placeholders and push actual values to a params array", "For object-style where({ id: 5, status: 'active' }) generate column = $1 AND column2 = $2"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('$1') && output.includes('params')",
+        "successMessage": "Parameterized queries generate correct placeholders and params array",
+        "failureMessage": "Parameter placeholders or params array is missing or incorrect"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement JOIN support",
+      "description": "Add `.innerJoin(table, condition)`, `.leftJoin(table, condition)`, and `.rightJoin(table, condition)` methods. Each accepts a table name and an ON condition string. Support chaining multiple joins. Print the SQL with JOIN clauses.",
+      "hints": ["Each join type adds a clause like 'INNER JOIN table ON condition'", "Store joins in an array and append them between FROM and WHERE in build()", "ON conditions can also be parameterized for safety"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('JOIN') && output.includes('ON')",
+        "successMessage": "JOIN clauses are generated with correct syntax",
+        "failureMessage": "JOIN SQL is missing the ON condition or wrong join type"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add aggregation and grouping",
+      "description": "Implement `.groupBy('column')`, `.having('condition')`, and aggregate methods `.count()`, `.sum('col')`, `.avg('col')`. Aggregates should replace selected columns. Print the SQL with GROUP BY and HAVING clauses.",
+      "hints": ["groupBy stores columns and appends GROUP BY col1, col2 in build()", "having stores a condition string that goes after GROUP BY", "Aggregate functions wrap columns: COUNT(*), SUM(col), AVG(col)"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('GROUP BY') && (output.includes('COUNT') || output.includes('SUM'))",
+        "successMessage": "Aggregation and grouping SQL is generated correctly",
+        "failureMessage": "GROUP BY or aggregate functions missing from generated SQL"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement subqueries",
+      "description": "Allow a Query instance to be used as a subquery inside WHERE clauses (`.where('id IN', subQuery)`) and FROM clauses (`.from(subQuery, 'alias')`). The subquery should be wrapped in parentheses and merged into the parent query's params. Print the nested SQL.",
+      "hints": ["Detect if a value is a Query instance and call build() on it", "Wrap subquery SQL in parentheses and merge its params array", "For FROM subquery, append an alias: FROM (SELECT ...) AS alias"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('SELECT') && output.includes('(') && output.includes(')')",
+        "successMessage": "Subqueries are correctly nested in parentheses",
+        "failureMessage": "Subquery is not wrapped in parentheses or params are not merged"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Add ORDER BY, LIMIT, OFFSET",
+      "description": "Implement `.orderBy('column', 'ASC'|'DESC')`, `.limit(n)`, and `.offset(n)` methods. Ordering accepts multiple columns. LIMIT and OFFSET use parameterized values. Print the complete SQL with pagination clauses.",
+      "hints": ["orderBy stores column + direction pairs, appended as ORDER BY col1 ASC, col2 DESC", "limit and offset are appended after ORDER BY", "Use $N parameters for limit and offset values"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('ORDER BY') && output.includes('LIMIT')",
+        "successMessage": "ORDER BY, LIMIT, and OFFSET clauses are generated correctly",
+        "failureMessage": "Sorting or pagination clauses missing from generated SQL"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build an Insert/Update/Delete builder",
+      "description": "Add `.insert(table, data)`, `.update(table, data)`, and `.delete(table)` static methods that return Query instances. `.insert()` generates INSERT INTO table (cols) VALUES ($1, $2). `.update()` generates UPDATE table SET col = $1. `.delete()` generates DELETE FROM table. Support `.returning('id')`. Print the final SQL.",
+      "hints": ["insert() extracts keys for column list and values for $N placeholders", "update() generates SET col1 = $1, col2 = $2 from the data object", "returning('col') appends RETURNING col to INSERT, UPDATE, or DELETE"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('INSERT') && output.includes('UPDATE') && output.includes('DELETE')",
+        "successMessage": "Insert, Update, and Delete builders generate correct SQL",
+        "failureMessage": "One or more mutation query builders failed to generate valid SQL"
+      }
+    }
+  ]
+}

@@ -18,6 +18,19 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
   req.on('close', onClose);
   res.on('finish', onFinish);
 
+  const TIMEOUT_MS = 30000;
+  const timeoutHandle = setTimeout(() => {
+    if (!aborted) {
+      aborted = true;
+      res.write(`data: ${JSON.stringify({ content: "\n\n[TIMEOUT] The AI tutor took too long to respond. Please try again." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }, TIMEOUT_MS);
+
+  res.on('finish', () => clearTimeout(timeoutHandle));
+  req.on('close', () => clearTimeout(timeoutHandle));
+
   if (!message) {
     res.write(`data: ${JSON.stringify({ content: "Ask me something about programming!" })}\n\n`);
     res.write('data: [DONE]\n\n');
@@ -30,6 +43,7 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
     res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
   };
   const sseDone = () => {
+    clearTimeout(timeoutHandle);
     if (aborted) return;
     res.write('data: [DONE]\n\n');
     res.end();
