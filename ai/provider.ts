@@ -261,11 +261,40 @@ export async function runHybridLLM(
 
   try {
     const llmResponse = await getTinyLLMResponse(messages, onStream);
-    return llmResponse;
+    if (llmResponse) return llmResponse;
   } catch (e) {
     console.error('[hybrid] Tiny LLM fallback failed:', e);
-    return null;
   }
+
+  try {
+    console.log('[hybrid] Trying local LLM...');
+    const localResult = await callProvider(PROVIDERS.local, messages, onStream);
+    if (localResult) return localResult;
+  } catch (e) {
+    console.warn('[hybrid] Local LLM failed:', e);
+  }
+
+  if (config.openai.apiKey) {
+    try {
+      console.log('[hybrid] Trying OpenAI...');
+      const openaiResult = await callProvider(PROVIDERS.openai, messages, onStream);
+      if (openaiResult) return openaiResult;
+    } catch (e) {
+      console.warn('[hybrid] OpenAI failed:', e);
+    }
+  }
+
+  if (config.anthropic.apiKey) {
+    try {
+      console.log('[hybrid] Trying Anthropic...');
+      const anthropicResult = await callProvider(PROVIDERS.anthropic, messages, onStream);
+      if (anthropicResult) return anthropicResult;
+    } catch (e) {
+      console.warn('[hybrid] Anthropic failed:', e);
+    }
+  }
+
+  return null;
 }
 
 export async function askLLM(
