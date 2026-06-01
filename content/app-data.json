@@ -63472,6 +63472,102 @@
     "bug": "#!/bin/bash\nexec 3>output.txt\necho \"Hello\" >&3\nexec 3>&-\ncat output.txt",
     "solution": "#!/bin/bash\nexec 3>output.txt\necho \"Hello\" >&3\nexec 3>&-\ncat output.txt",
     "test": "true"
+   },
+   {
+    "title": "Fix Parameter Expansion",
+    "level": "intermediate",
+    "desc": "The script fails when the variable is unset. Use parameter expansion to provide a default value.",
+    "bug": "#!/bin/bash\necho \"Hello, $name\"",
+    "solution": "#!/bin/bash\necho \"Hello, ${name:-World}\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Substring Extraction",
+    "level": "intermediate",
+    "desc": "Extract the file extension using parameter expansion instead of external commands.",
+    "bug": "#!/bin/bash\nfilename=\"report.pdf\"\next=$(echo \"$filename\" | rev | cut -d. -f1 | rev)\necho \"Extension: $ext\"",
+    "solution": "#!/bin/bash\nfilename=\"report.pdf\"\next=\"${filename##*.}\"\necho \"Extension: $ext\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Temp File Race Condition",
+    "level": "expert",
+    "desc": "The script uses a predictable temp file path, creating a security risk.",
+    "bug": "#!/bin/bash\ntmpfile=\"/tmp/myapp.tmp\"\necho \"data\" > \"$tmpfile\"",
+    "solution": "#!/bin/bash\ntmpfile=$(mktemp)\ntrap 'rm -f \"$tmpfile\"' EXIT\necho \"data\" > \"$tmpfile\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Injection Vulnerability",
+    "level": "expert",
+    "desc": "This script is vulnerable to command injection via eval.",
+    "bug": "#!/bin/bash\nread -p \"Enter filename: \" file\neval \"ls -la $file\"",
+    "solution": "#!/bin/bash\nread -p \"Enter filename: \" file\nls -la \"$file\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Subshell Variable Loss",
+    "level": "expert",
+    "desc": "The variable set inside the pipeline is lost after it completes.",
+    "bug": "#!/bin/bash\ncount=0\necho -e \"a\\nb\\nc\" | while read line; do\n  ((count++))\ndone\necho $count",
+    "solution": "#!/bin/bash\ncount=0\nwhile read line; do\n  ((count++))\ndone < <(echo -e \"a\\nb\\nc\")\necho $count",
+    "test": "true"
+   },
+   {
+    "title": "Fix Strict Mode Omission",
+    "level": "intermediate",
+    "desc": "The script continues running after a failed command. Add strict error handling.",
+    "bug": "#!/bin/bash\ncd /nonexistent\necho \"Still running...\"",
+    "solution": "#!/bin/bash\nset -euo pipefail\ncd /nonexistent || exit 1\necho \"Still running...\"",
+    "test": "true"
+   },
+   {
+    "title": "Implement Portability Fix",
+    "level": "intermediate",
+    "desc": "This script uses bashisms that won't work in POSIX sh (/bin/sh on Debian).",
+    "bug": "#!/bin/sh\nif [[ \"$1\" == \"start\" ]]; then\n  echo \"Starting...\"\nfi",
+    "solution": "#!/bin/sh\nif [ \"$1\" = \"start\" ]; then\n  echo \"Starting...\"\nfi",
+    "test": "true"
+   },
+   {
+    "title": "Fix Unquoted Variable",
+    "level": "beginner",
+    "desc": "The variable can undergo word splitting if it contains spaces.",
+    "bug": "#!/bin/bash\nname=\"Alice Smith\"\nif [ -n $name ]; then\n  echo \"has name\"\nfi",
+    "solution": "#!/bin/bash\nname=\"Alice Smith\"\nif [ -n \"$name\" ]; then\n  echo \"has name\"\nfi",
+    "test": "true"
+   },
+   {
+    "title": "Fix Parallel Job Limit",
+    "level": "expert",
+    "desc": "The script spawns unlimited background jobs, potentially overloading the system.",
+    "bug": "#!/bin/bash\nfor url in \"${urls[@]}\"; do\n  curl -O \"$url\" &\ndone\nwait",
+    "solution": "#!/bin/bash\nmax_jobs=4\nfor url in \"${urls[@]}\"; do\n  curl -O \"$url\" &\n  while [[ $(jobs -r | wc -l) -ge $max_jobs ]]; do\n    sleep 1\n  done\ndone\nwait",
+    "test": "true"
+   },
+   {
+    "title": "Fix Named Pipe Deadlock",
+    "level": "expert",
+    "desc": "Reading from a named pipe blocks forever because the writer runs after the reader.",
+    "bug": "#!/bin/bash\nmkfifo pipe\nread line < pipe\necho \"Hello\" > pipe\nrm pipe",
+    "solution": "#!/bin/bash\nmkfifo pipe\n(echo \"Hello\") &\nread line < pipe\nrm pipe\necho \"Got: $line\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Unset Password Variable",
+    "level": "intermediate",
+    "desc": "The script fails when no password is provided. Add a secure read with timeout.",
+    "bug": "#!/bin/bash\npassword=$1\necho \"Connecting with password\"",
+    "solution": "#!/bin/bash\nread -s -p \"Password: \" password\necho\necho \"Connecting with password\"",
+    "test": "true"
+   },
+   {
+    "title": "Fix Unnecessary External Commands",
+    "level": "intermediate",
+    "desc": "Replace external commands with bash built-ins for better performance.",
+    "bug": "#!/bin/bash\ntext=\"Hello World\"\nlen=$(echo -n \"$text\" | wc -c)\nupper=$(echo \"$text\" | tr 'a-z' 'A-Z')\necho \"Length: $len, Uppercase: $upper\"",
+    "solution": "#!/bin/bash\ntext=\"Hello World\"\nlen=${#text}\nupper=${text^^}\necho \"Length: $len, Uppercase: $upper\"",
+    "test": "true"
    }
   ],
   "rb": [
@@ -66500,11 +66596,11 @@
   "zig": "Zig",
   "c": "C",
   "cpp": "C++",
-   "cs": "C#",
-   "kt": "Kotlin",
-   "lua": "Lua",
-   "swift": "Swift",
-   "java": "Java",
+  "cs": "C#",
+  "kt": "Kotlin",
+  "lua": "Lua",
+  "swift": "Swift",
+  "java": "Java",
   "rb": "Ruby",
   "php": "PHP",
   "sqlite": "SQLite",
