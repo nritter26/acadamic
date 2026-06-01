@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import TopicList from '$lib/components/curriculum/TopicList.svelte';
 
   let curr = $derived(getCurriculumState());
   let lang = $derived($page.params.lang);
@@ -14,7 +15,7 @@
 
 <div class="curriculum-layout">
   <div class="col col-curriculum">
-    <p style="color:#64748b">Topics for {lang}</p>
+    <TopicList />
   </div>
   <div class="col col-theory">
     <p style="color:#64748b">Theory</p>
