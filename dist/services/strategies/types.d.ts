@@ -1,3 +1,9 @@
+export interface ProviderConfig {
+    provider?: string;
+    model?: string;
+    apiKey?: string;
+    endpoint?: string;
+}
 export interface TutorContext {
     message: string;
     q: string;
@@ -14,6 +20,7 @@ export interface TutorContext {
     }[];
     learnerId?: string;
     lid: string;
+    providerConfig?: ProviderConfig;
 }
 export interface TutorStrategy {
     name: string;

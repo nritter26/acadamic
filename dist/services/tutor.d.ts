@@ -17,6 +17,12 @@ export declare function handleTutorMessage(message: string, options: {
     hasError?: boolean;
     history?: HistoryEntry[];
     learnerId?: string;
+    providerConfig?: {
+        provider?: string;
+        model?: string;
+        apiKey?: string;
+        endpoint?: string;
+    };
 }, sseSend: (chunk: string) => void, sseDone: () => void): Promise<void>;
 export {};
 //# sourceMappingURL=tutor.d.ts.map

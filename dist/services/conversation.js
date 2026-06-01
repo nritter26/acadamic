@@ -12,7 +12,7 @@ const path_1 = __importDefault(require("path"));
 const CONV_DIR = path_1.default.join(__dirname, '..', 'data', 'conversations');
 const cache = new Map();
 const MAX_CACHE_SIZE = 100;
-const TTL_MS = 24 * 60 * 60 * 1000;
+const TTL_MS = 60 * 60 * 1000;
 const addLocks = new Map();
 function getPath(learnerId) {
     const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');

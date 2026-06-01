@@ -1,0 +1,66 @@
+<svg xmlns="http://w3.org" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Definition of reusable server blade profile -->
+  <defs>
+    <!-- Server Blade Template -->
+    <g id="server-blade">
+      <!-- Top face -->
+      <path d="M 256 0 L 396 73 L 256 146 L 116 73 Z" fill="#4d88ff" />
+      <path d="M 256 22 L 354 73 L 256 124 L 158 73 Z" fill="#205ec9" />
+      <!-- Left side face -->
+      <path d="M 116 73 L 256 146 L 256 214 L 116 141 Z" fill="#3b72de" />
+      <!-- Right side face -->
+      <path d="M 256 146 L 396 73 L 396 141 L 256 214 Z" fill="#2962cc" />
+      <!-- Left side vents -->
+      <path d="M 175 125 L 181 128 L 181 144 L 175 141 Z" fill="#a3c2ff" />
+      <path d="M 187 131 L 193 134 L 193 150 L 187 147 Z" fill="#a3c2ff" />
+      <path d="M 199 137 L 205 140 L 205 156 L 199 153 Z" fill="#a3c2ff" />
+      <!-- Right side indicator lights -->
+      <circle cx="345" cy="115" r="5" fill="#ff4d4d" />
+      <circle cx="359" cy="108" r="5" fill="#ffcc00" />
+      <circle cx="373" cy="101" r="5" fill="#33cc66" />
+    </g>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="100%" height="100%" fill="none" />
+
+  <!-- Circuit Trace Lines (Floor Grid) -->
+  <g stroke="#5c6b80" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Top Left Cluster -->
+    <path d="M 110 220 L 70 200 L 40 215 L 12 201" />
+    <path d="M 90 240 L 45 218 L 24 229" />
+    <path d="M 105 265 L 60 243 L 42 252 L 24 243" />
+    <!-- Bottom Left Cluster -->
+    <path d="M 135 365 L 90 343 L 65 356 L 35 341 L 12 353" />
+    <path d="M 150 390 L 105 368 L 85 378 L 55 363 L 24 378" />
+    <path d="M 170 415 L 125 393 L 105 403 L 80 391 L 54 404" />
+    <path d="M 190 435 L 150 415 L 132 424 L 110 413 L 84 426" />
+    <!-- Top Right Cluster -->
+    <path d="M 402 220 L 442 200 L 472 215 L 500 201" />
+    <path d="M 422 240 L 467 218 L 488 229" />
+    <path d="M 407 265 L 452 243 L 470 252 L 488 243" />
+    <!-- Bottom Right Cluster -->
+    <path d="M 377 365 L 422 343 L 447 356 L 477 341 L 500 353" />
+    <path d="M 362 390 L 407 368 L 427 378 L 457 363 L 488 378" />
+    <path d="M 342 415 L 387 393 L 407 403 L 432 391 L 458 404" />
+    <path d="M 322 435 L 362 415 L 380 424 L 402 413 L 428 426" />
+  </g>
+
+  <!-- Glowing Base Ring Platform -->
+  <g>
+    <path d="M 256 345 L 396 418 L 256 491 L 116 418 Z" fill="none" stroke="#66ccff" stroke-width="6" stroke-linejoin="round" />
+    <path d="M 256 350 L 390 420 L 256 485 L 122 420 Z" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8" stroke-linejoin="round" />
+  </g>
+
+  <!-- Server Stack Layers -->
+  <!-- Layer 3 (Bottom) -->
+  <use href="#server-blade" x="0" y="235" />
+  
+  <!-- Layer 2 (Middle) -->
+  <use href="#server-blade" x="0" y="145" />
+  
+  <!-- Layer 1 (Top) -->
+  <use href="#server-blade" x="0" y="55" />
+
+</svg>
+

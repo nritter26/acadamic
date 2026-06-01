@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Koded: Interactive Programming Textbook",
   "main": "server.ts",
-"scripts": {
-"build:ai": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser && esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser",
-"build:ai:watch": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser --watch & esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser --watch",
+  "type": "module",
+  "scripts": {
+    "build:ai": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser && esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser",
+    "build:ai:watch": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser --watch & esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser --watch",
     "build:browser": "rm -rf browser-build && tsc -p tsconfig.browser.json",
     "build:browser:watch": "tsc -p tsconfig.browser.json --watch",
     "start": "npm run build:ai && npm run build:browser && tsx server.ts",
@@ -14,9 +15,16 @@
     "build:watch": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:svelte": "vite dev",
+    "build:svelte": "vite build",
+    "preview:svelte": "vite preview",
+    "test:svelte": "vitest run"
   },
   "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@testing-library/svelte": "^5.3.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.0",
     "@types/cookie-parser": "^1.4.10",
@@ -26,7 +34,9 @@
     "@types/supertest": "^7.2.0",
     "@types/ws": "^8.18.1",
     "esbuild": "^0.28.0",
+    "jsdom": "^29.1.1",
     "supertest": "^7.2.2",
+    "svelte": "^5.56.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.6"

@@ -41,7 +41,7 @@ const conv = __importStar(require("../conversation"));
 const tutor_1 = require("../tutor");
 class LLMStrategy {
     name = 'llm';
-    priority = 10;
+    priority = 7;
     async canHandle() {
         return (0, config_1.getActiveAIProvider)() !== 'keyword';
     }
@@ -53,7 +53,7 @@ class LLMStrategy {
             gotChunk = true;
             fullResponse += chunk;
             sseSend(chunk);
-        }, { lang: ctx.lang, topic: ctx.topic, code: ctx.code, hasError: ctx.hasError });
+        }, { lang: ctx.lang, topic: ctx.topic, code: ctx.code, hasError: ctx.hasError, providerConfig: ctx.providerConfig });
         if (gotChunk) {
             if (ctx.topic && ctx.lang)
                 await learner.trackAttempt(ctx.lid, ctx.lang, ctx.topic);

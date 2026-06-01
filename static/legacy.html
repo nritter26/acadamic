@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kodex's Lab: Full Mastery Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/style.css">
+    <script>
+    function googleTranslateElementInit2() {
+        new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element2');
+    }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2"></script>
+</head>
+<body id="app" class="js-mode">
+<header>
+    <div class="header-left">
+        <div style="font-weight:900; font-size:22px; display:flex; align-items:center; gap:8px;">KODEX'S <span style="color:var(--accent)" id="header-title">PY</span><button id="kodex-btn" onclick="toggleKodexModal()" class="kodex-nav-btn" title="About Kodex's Lab"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" width="22" height="22"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg></button><button id="lang-btn" onclick="toggleLangMenu()" class="kodex-nav-btn" title="Change language" style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:0.5px;margin-left:4px;">EN</button></div>
+        <div class="header-extra-tabs">
+    <button id="nav-backend" onclick="setMode('backend')" class="game-nav-btn" style="color:#6366F1;border-color:#6366F1;">Backend</button>
+    <button id="nav-cicd" onclick="setMode('cicd')" class="game-nav-btn" style="color:#e24329;border-color:#e24329;">CI/CD</button>
+    <button id="nav-challenge" onclick="setMode('challenge')" class="game-nav-btn" style="color:#a855f7;border-color:#a855f7;">Code Lab</button>
+            <button id="nav-compiler" onclick="setMode('compiler')" class="game-nav-btn" style="color:#a5f3fc;border-color:#a5f3fc;">Compiler</button>
+            <button id="nav-dblab" onclick="setMode('dblab')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">DB Lab</button>
+<button id="nav-projects" onclick="setMode('projects')" class="game-nav-btn" style="color:#06b6d4;border-color:#06b6d4;">Projects</button>
+            <button id="nav-gamedev" onclick="setMode('gamedev')" class="game-nav-btn" style="color:#10b981;border-color:#10b981;">GameDev</button>
+            <button id="nav-game" onclick="toggleGameModal()" class="game-nav-btn">Gaming</button>
+            <button id="nav-git" onclick="setMode('git')" class="game-nav-btn" style="color:#f1502f;border-color:#f1502f;">Git Grounds</button>
+            <button id="nav-mobile" onclick="setMode('mobile')" class="game-nav-btn" style="color:#ec4899;border-color:#ec4899;">Mobile</button>
+            <button id="nav-quiz" onclick="setMode('quiz')" class="game-nav-btn" style="color:#f59e0b;border-color:#f59e0b;">Quiz</button>
+            <button id="nav-tutorial" onclick="setMode('tutorial')" class="game-nav-btn" style="color:#f97316;border-color:#f97316;">Learn Code</button>
+            <button id="nav-techstack" onclick="setMode('techstack')" class="game-nav-btn" style="color:#2DD4BF;border-color:#2DD4BF;">Tech Stack</button>
+            <button id="nav-styling" onclick="setMode('styling')" class="game-nav-btn" style="color:#a855f7;border-color:#a855f7;">Styling Grounds</button>
+        </div>
+    </div>
+    <div class="cyber-motto" id="cyberMotto"><span class="cyber-line"></span><span class="cyber-text">Just code <span class="cyber-dash">&mdash;</span> don't overthink</span><span class="cyber-line"></span></div>
+    <button id="hamburger-btn" class="hamburger-btn" onclick="toggleNav()" aria-label="Toggle navigation menu">☰</button>
+</header>
+<div class="workspace">
+    <div class="selector" id="nav-menu" role="tablist" aria-label="Programming languages">
+        <button id="nav-asm" onclick="setMode('asm')" role="tab" aria-label="Assembly">ASM</button>
+        <button id="nav-htmlcss" onclick="setMode('htmlcss')" role="tab" aria-label="HTML CSS">HTML/CSS</button>
+        <button id="nav-bash" onclick="setMode('bash')" role="tab" aria-label="Bash">Bash</button>
+        <button id="nav-c" onclick="setMode('c')" role="tab" aria-label="C language">C</button>
+        <button id="nav-cs" onclick="setMode('cs')" role="tab" aria-label="C sharp">C#</button>
+        <button id="nav-cpp" onclick="setMode('cpp')" role="tab" aria-label="C plus plus">C++</button>
+        <button id="nav-db" onclick="setMode('db')" role="tab" aria-label="Database">Database</button>
+        <button id="nav-go" onclick="setMode('go')" role="tab" aria-label="Go">Go</button>
+        <button id="nav-java" onclick="setMode('java')" role="tab" aria-label="Java">Java</button>
+        <button id="nav-js" onclick="setMode('js')" role="tab" aria-label="JavaScript">JavaScript</button>
+        <button id="nav-kt" onclick="setMode('kt')" role="tab" aria-label="Kotlin">Kotlin</button>
+        <button id="nav-lua" onclick="setMode('lua')" role="tab" aria-label="Lua">Lua</button>
+        <button id="nav-php" onclick="setMode('php')" role="tab" aria-label="PHP">PHP</button>
+        <button id="nav-py" onclick="setMode('py')" role="tab" aria-label="Python">Python</button>
+        <button id="nav-rb" onclick="setMode('rb')" role="tab" aria-label="Ruby">Ruby</button>
+        <button id="nav-rs" onclick="setMode('rs')" role="tab" aria-label="Rust">Rust</button>
+        <button id="nav-scala" onclick="setMode('scala')" role="tab" aria-label="Scala">Scala</button>
+        <button id="nav-swift" onclick="setMode('swift')" role="tab" aria-label="Swift">Swift</button>
+        <button id="nav-ts" onclick="setMode('ts')" role="tab" aria-label="TypeScript">TypeScript</button>
+        <button id="nav-wasm" onclick="setMode('wasm')" role="tab" aria-label="WebAssembly">Wasm</button>
+        <button id="nav-zig" onclick="setMode('zig')" role="tab" aria-label="Zig">Zig</button>
+    </div>
+    <div class="resize-handle" id="sidebar-resize-handle"></div>
+    <main>
+    <div class="col col-enter"><label>Curriculum <button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;" onclick="collapseAllPhases()" title="Collapse all phases">▲</button><button class="level-btn" style="float:right;padding:2px 6px;font-size:8px;margin-right:4px;" onclick="expandAllPhases()" title="Expand all phases">▼</button></label><div style="display:flex;gap:4px;margin-bottom:8px;"><button id="roadmap-btn" class="roadmap-btn" onclick="toggleRoadmapView()" title="View JavaScript Roadmap">Roadmap</button><input id="topic-search" type="text" placeholder="Search topics..." aria-label="Search topics" oninput="debounceFilterTopics(this.value)" style="flex:1;"></div><div id="level-bar"></div><div id="engine-bar"></div><div id="platform-bar"></div><div id="tutorial-progress"></div><div id="topic-list" class="scroll"></div></div>
+    <div class="col col-enter"><label>Theory <button id="ws-toggle-btn" class="ws-toggle-btn" onclick="toggleWorkspace()" title="Toggle workspace">Editor ▸</button><button id="api-toggle-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Toggle API client" style="display:none">API ▸</button></label><div id="explanation" class="scroll"><div class="loading-placeholder">Select a topic to begin learning</div></div></div>
+    <div class="col col-enter"><label>Workspace <button id="api-back-btn" class="ws-toggle-btn api-toggle-btn" onclick="toggleAPIClient()" title="Back to Backend" style="display:none">API ▾</button></label><div class="api-client notranslate" id="apiClient">
+    <div class="api-toolbar">
+        <select id="apiMethod" class="api-method-select">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+            <option value="HEAD">HEAD</option>
+            <option value="OPTIONS">OPTIONS</option>
+        </select>
+        <input id="apiUrl" type="text" class="api-url-input" placeholder="https://api.example.com/endpoint" value="https://jsonplaceholder.typicode.com/todos/1">
+        <button class="api-send-btn" onclick="sendAPIRequest()">Send</button>
+    </div>
+    <div class="api-tabs">
+        <button class="api-tab active" onclick="apiSwitchTab('headers')" id="apiTabHeaders">Headers</button>
+        <button class="api-tab" onclick="apiSwitchTab('body')" id="apiTabBody">Body</button>
+        <button class="api-tab" onclick="apiSwitchTab('auth')" id="apiTabAuth">Auth</button>
+    </div>
+    <div class="api-tab-content" id="apiContentHeaders">
+        <div class="api-hint">Add headers as key-value pairs</div>
+        <div id="apiHeadersList"></div>
+        <button class="api-add-btn" onclick="apiAddHeader()">+ Add Header</button>
+    </div>
+    <div class="api-tab-content" id="apiContentBody" style="display:none;flex:1;">
+        <div class="api-body-type-bar">
+            <select id="apiBodyType" onchange="apiUpdateBodyType()">
+                <option value="json">JSON</option>
+                <option value="text">Text</option>
+                <option value="form">Form URL-encoded</option>
+            </select>
+        </div>
+        <textarea id="apiBody" class="api-body-input notranslate" spellcheck="false" placeholder='{"key": "value"}'></textarea>
+    </div>
+    <div class="api-tab-content" id="apiContentAuth" style="display:none;">
+        <div class="api-auth-type-bar">
+            <select id="apiAuthType" onchange="apiUpdateAuth()">
+                <option value="none">No Auth</option>
+                <option value="bearer">Bearer Token</option>
+                <option value="basic">Basic Auth</option>
+            </select>
+        </div>
+        <div id="apiAuthFields">
+            <input id="apiAuthToken" type="text" class="api-auth-input" placeholder="Enter your token..." style="display:none;">
+            <div id="apiAuthBasic" style="display:none;flex-direction:column;gap:6px;">
+                <input id="apiAuthUser" type="text" class="api-auth-input" placeholder="Username">
+                <input id="apiAuthPass" type="password" class="api-auth-input" placeholder="Password">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="schema-designer notranslate" id="schemaDesigner">
+    <div class="schema-tabs">
+        <button id="schemaTabDesign" class="schema-tab active" onclick="schemaSwitchTab('design')">Design</button>
+        <button id="schemaTabErd" class="schema-tab" onclick="schemaSwitchTab('erd')">ERD</button>
+    </div>
+    <div class="schema-toolbar" id="schemaDesignTabBtn">
+        <button class="primary" onclick="schemaAddTable()">+ Table</button>
+        <button onclick="schemaAutoLayout()" title="Auto-arrange tables">Auto Layout</button>
+        <button onclick="setMode('schema')" title="Open the schema designer tutorial" style="background:#8b5cf6;color:#fff;">Tutorial</button>
+        <button onclick="schemaUndo()" title="Undo (Ctrl+Z)">↩</button>
+        <button onclick="schemaRedo()" title="Redo (Ctrl+Y)">↪</button>
+        <span class="schema-separator"></span>
+        <button onclick="schemaOpenImport()">Import SQL</button>
+        <button onclick="schemaExportJSON()">Export JSON</button>
+        <label class="schema-file-btn">Import JSON<input type="file" id="schemaJSONInput" accept=".json" onchange="schemaImportJSON()" style="display:none"></label>
+        <span class="schema-separator"></span>
+        <span class="schema-dialect-group">
+            Dialect:
+            <select id="schemaDialectBtn" onchange="schemaSetDialect(this.value)" class="schema-dialect-select">
+                <option value="postgresql">PostgreSQL</option>
+                <option value="mysql">MySQL</option>
+                <option value="sqlite">SQLite</option>
+            </select>
+        </span>
+        <span class="schema-separator"></span>
+        <button onclick="schemaSaveVersion()">Save Version</button>
+        <button class="danger" onclick="schemaClearAll()">Clear All</button>
+    </div>
+    <div class="schema-canvas" id="schemaCanvas"></div>
+    <div class="erd-canvas" id="erdCanvas"></div>
+    <div class="schema-sql-footer">
+        <div class="schema-sql-header">
+            <span class="schema-sql-title">SQL Preview (auto-generated)</span>
+            <div class="schema-sql-actions">
+                <button class="schema-copy-btn" onclick="schemaCopySQL()" title="Copy SQL">Copy</button>
+                <button onclick="schemaDownloadSQL()" title="Download SQL file">Download</button>
+                <button onclick="schemaGenerateSQL()" title="Regenerate SQL">Regenerate</button>
+            </div>
+        </div>
+        <div class="schema-sql-output" id="schemaSQLOutput">-- Schema will auto-generate as you design</div>
+    </div>
+    <div class="schema-version-bar" id="schemaVersionBar">
+        <span class="schema-version-label">Versions:</span>
+        <div class="schema-version-list" id="schemaVersionList"></div>
+    </div>
+</div>
+<div class="schema-import-overlay" id="schemaImportOverlay">
+    <div class="schema-import-modal">
+        <h3>Import SQL</h3>
+        <textarea id="schemaImportText" class="schema-import-textarea notranslate" placeholder="Paste CREATE TABLE statements here...&#10;&#10;CREATE TABLE users (&#10;    id SERIAL PRIMARY KEY,&#10;    name VARCHAR(255) NOT NULL,&#10;    email VARCHAR(255) UNIQUE&#10);"></textarea>
+        <div class="schema-import-actions">
+            <button class="primary" onclick="schemaImportSQL()">Import</button>
+            <button onclick="schemaCloseImport()">Cancel</button>
+        </div>
+    </div>
+</div>
+<div id="schemaTutorialPage" style="display:none;"></div>
+<textarea id="editor" class="notranslate" spellcheck="false" aria-label="Code editor">for n in range(5):
+    if n == 2: continue
+    if n == 4: break
+    print(n)</textarea><div class="workspace-actions"><button id="auto-syntax-btn" class="run-btn" onclick="toggleAutoSyntax()" title="Toggle real-time syntax checking">🔍 Auto</button><button class="run-btn" onclick="runCode()" title="Run the code (Ctrl+Enter)">Run ▶</button><button id="cheatsheet-btn" class="run-btn" onclick="loadCheatsheet()" title="Open cheatsheet for this topic">Cheatsheet</button><button id="schema-btn" class="run-btn schema-btn" onclick="toggleSchemaDesigner()" title="Database schema designer">Schema</button><button id="check-code-btn" class="run-btn" onclick="checkCode()" title="Run static code analysis on current code">Check Code</button><button id="explain-ai-btn" class="run-btn" onclick="explainCode()" title="Get AI explanation of current code">Explain</button><button id="review-ai-btn" class="run-btn" onclick="reviewCode()" title="Get AI review of current code">Review</button><button id="exercise-ai-btn" class="run-btn" onclick="generateExercise()" title="Generate an AI exercise">Exercise</button><button id="quiz-ai-btn" class="run-btn" onclick="generateQuiz()" title="Generate a quiz">Quiz</button><button id="copy-btn" class="run-btn" onclick="copyCode()" title="Copy code to clipboard">Copy</button></div><div id="tutorial-nav"></div><div id="compiler-buttons" style="display:none;gap:8px;margin-top:10px;"><button class="cp-btn" onclick="compilerRunPipeline(0)">Tokens ▶</button><button class="cp-btn" onclick="compilerRunPipeline(1)">AST ▶</button><button class="cp-btn" onclick="compilerRunPipeline(2)">Stats ▶</button><button class="cp-btn cp-btn-all" onclick="compilerRunPipeline(-1)">Full Pipeline ▶</button></div></div>
+    <div class="col col-enter"><label>Console <button id="benchmark-btn" style="float:right;background:#1e293b;border:none;color:#94a3b8;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:800;" onclick="runBenchmark()">Benchmark</button></label><div id="output" class="notranslate scroll" role="status" aria-live="polite">// Logical Preview Mode for PY</div><div id="apiResponse" class="notranslate scroll" style="display:none;">
+    <div class="api-res-topbar">
+        <span class="api-res-status" id="apiResStatus">—</span>
+        <span class="api-res-meta" id="apiResMeta"></span>
+        <button class="api-res-copy" onclick="apiCopyResponse()">Copy</button>
+    </div>
+    <div class="api-res-headers" id="apiResHeaders" style="display:none;">
+        <div class="api-res-headers-toggle" onclick="apiToggleHeaders()">▼ Response Headers</div>
+        <pre id="apiResHeadersContent" class="api-res-pre" style="display:none;"></pre>
+    </div>
+    <pre id="apiResBody" class="api-res-body">Send a request to see the response</pre>
+</div><div id="compiler-output" class="notranslate scroll" style="display:none;"><div class="cp-pipeline-tabs"><button class="cp-tab active" data-stage="0">Source</button><button class="cp-tab" data-stage="1">Tokens</button><button class="cp-tab" data-stage="2">AST</button><button class="cp-tab" data-stage="3">Stats</button></div><div id="cp-pipeline-content" class="cp-pipeline-content notranslate"><div class="cp-placeholder">Click any pipeline stage button (Source ▶, Tokens ▶, AST ▶, Stats ▶, Full Pipeline ▶) to analyze your code.</div></div></div></div>
+</main>
+</div>
+<script src="public/courseData.js"></script>
+<script src="public/app-data.js"></script>
+<script src="public/lang-intro.js"></script>
+<script src="public/game.js"></script>
+    <script src="public/db.js"></script>
+    <script src="public/schema.js"></script>
+    <script src="public/schema-tutorial.js"></script>
+<script src="public/git-visualize.js"></script>
+    <script src="public/db-lab.js"></script>
+<script src="public/projects.js"></script>
+    <script src="public/styling-visualize.js"></script>
+<script src="public/techstack.js"></script>
+<script src="public/compiler-core.js"></script>
+<script src="public/ai/responses-data.js"></script>
+<script src="public/ai/responses.js"></script>
+<script src="public/ai/core.js"></script>
+<script src="public/app-data-globals.js"></script>
+<script src="public/bootstrap.js"></script>
+<script src="public/mobile-helpers.js"></script>
+<script src="public/landing.js"></script>
+<script src="browser-build/core-typescript/app-core.js"></script>
+<script src="browser-build/core-typescript/app-run.js"></script>
+<script src="browser-build/core-typescript/chat-history.js"></script>
+<script src="browser-build/core-typescript/chat-ui.js"></script>
+<script src="browser-build/core-typescript/topic-detector.js"></script>
+<script src="browser-build/core-typescript/suggestions.js"></script>
+<script src="browser-build/core-typescript/ai-settings.js"></script>
+<script src="browser-build/core-typescript/app-ai.js"></script>
+<script src="browser-build/core-typescript/app-quiz-challenge.js"></script>
+<script src="browser-build/core-typescript/app-editor.js"></script>
+<script src="browser-build/core-typescript/app-layout.js"></script>
+<script src="public/api-client.js"></script>
+<script>
+var gtCurrentLang = 'en';
+
+function toggleKodexModal() {
+    document.getElementById('kodexOverlay').classList.toggle('open');
+}
+function toggleLangMenu() {
+    document.getElementById('langPopup').classList.toggle('open');
+}
+function setUILang(code) {
+    document.getElementById('langPopup').classList.remove('open');
+    if (code === 'en') {
+        doGTranslate('en|en');
+    } else {
+        doGTranslate('en|' + code);
+    }
+}
+
+function doGTranslate(lang_pair) {
+    if (lang_pair.value) lang_pair = lang_pair.value;
+    if (lang_pair === '') return;
+    var lang = lang_pair.split('|')[1];
+    if (lang === gtCurrentLang) return;
+    gtCurrentLang = lang;
+    document.getElementById('lang-btn').textContent = lang.toUpperCase();
+    var teCombo = document.querySelector('.goog-te-combo');
+    if (teCombo) {
+        document.cookie = 'googtrans=/en/' + lang;
+        teCombo.value = lang;
+        teCombo.dispatchEvent(new Event('change'));
+    }
+}
+</script>
+
+<button class="ai-toggle" id="aiToggle" onclick="toggleAI()" style="font-size:9px">Devin</button>
+<div class="cheatsheet-overlay" id="cheatsheetOverlay" onclick="if(event.target===this) toggleCheatsheet()">
+    <div class="cheatsheet-paper">
+        <div class="cheatsheet-header">
+            <span id="cheatsheetTitle">Cheatsheet</span>
+            <button onclick="toggleCheatsheet()">✕</button>
+        </div>
+        <div class="cheatsheet-body" id="cheatsheetBody"></div>
+    </div>
+</div>
+<div class="kodex-overlay" id="kodexOverlay" onclick="if(event.target===this) toggleKodexModal()">
+    <div class="kodex-paper">
+        <div class="kodex-paper-header">
+            <span><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--accent)" width="16" height="16" style="vertical-align:middle;margin-right:4px;"><path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/><rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/><path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/><path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/><path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/><path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/></svg> Kodex's Lab</span>
+            <button onclick="toggleKodexModal()">✕</button>
+        </div>
+        <div class="kodex-paper-body">
+            <pre class="kodex-ascii" aria-label="Kodex ASCII art">              ▄              ▄
+             ▐█▌            ▐█▌
+             ▐█▌            ▐█▌
+              █▌    ▄▄▄▄    ▐█
+             ▐██   ██████   ██▌
+           ▄███▌  ██▄▄▄▄██  ▐███▄
+          ▐████   ████████   ████▌
+          █████▌  ▀██████▀  ▐█████
+         ███████▄  ▀████▀  ▄██████
+        ▐██████████▄▄▄▄▄▄█████████▌
+        ███████████████████████████
+        ███████████████████████████
+        ▐████████▀      ▀████████▌
+         ███████   ▄▄▄▄   ███████
+         ▐██████  ██████  ██████▌
+          ███████ ██████ ███████
+           ████████████████████
+           ▐██████████████████▌
+            ██████████████████
+             ▀██████████████▀
+              ▄█████▄▄▄█████▄
+             ▐███████████████▌
+             █████████████████
+             █████████████████
+             ██████▀    ▀██████
+            ▐█████      ██████▌
+            █████▌      ▐██████
+           ██████        ███████
+          ▐█████▌        ▐██████▌
+          ██████          ███████
+          ██████          ███████</pre>
+            <div class="kodex-desc">
+                <h2>Welcome to Kodex's Lab!</h2>
+                <p>An interactive multi-language programming textbook and code playground. Learn 15+ programming languages with built-in code execution, quizzes, challenges, an AI assistant, and a PostgreSQL schema designer.</p>
+                <div class="kodex-features">
+                    <span>📚 15+ Languages</span>
+                    <span>⚡ Live Code Execution</span>
+                    <span>🤖 Devin</span>
+                    <span>🧪 Code Challenges</span>
+                    <span>📊 Schema Designer</span>
+                    <span>🏆 Quiz Mode</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="game-overlay" id="gameOverlay" onclick="if(event.target===this) toggleGameModal()">
+    <div class="game-paper">
+        <div class="game-paper-header">
+            <span>⌨ GAMING</span>
+            <button onclick="toggleGameModal()">✕</button>
+        </div>
+        <div class="game-paper-body" id="gamePaperBody"></div>
+    </div>
+</div>
+<div class="roadmap-overlay" id="roadmapOverlay" onclick="if(event.target===this) toggleRoadmapView()">
+    <div class="roadmap-paper">
+        <div class="roadmap-header">
+            <span id="roadmapTitle">Roadmap</span>
+            <button onclick="toggleRoadmapView()">✕</button>
+        </div>
+        <div class="roadmap-body" id="roadmapBody"></div>
+    </div>
+</div>
+<div class="lang-popup-overlay" id="langPopup" onclick="if(event.target===this) toggleLangMenu()">
+    <div class="lang-popup-paper">
+        <div class="lang-popup-header">
+            <span>Select Language</span>
+            <button onclick="toggleLangMenu()">✕</button>
+        </div>
+        <div class="lang-popup-body">
+            <a href="#" onclick="doGTranslate('en|en');return false;" class="gtranslate-option" data-gt-lang="en">🇬🇧 English</a>
+            <a href="#" onclick="doGTranslate('en|th');return false;" class="gtranslate-option" data-gt-lang="th">🇹🇭 Thai</a>
+            <a href="#" onclick="doGTranslate('en|de');return false;" class="gtranslate-option" data-gt-lang="de">🇩🇪 German</a>
+            <a href="#" onclick="doGTranslate('en|es');return false;" class="gtranslate-option" data-gt-lang="es">🇪🇸 Spanish</a>
+            <div id="google_translate_element2" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+<div class="ai-panel" id="aiPanel" role="complementary" aria-label="Devin">
+    <div class="ai-header">
+        <span>Devin</span>
+        <span id="aiContext" class="ai-context" style="font-size:9px;font-weight:600;color:#64748b;text-transform:none;letter-spacing:0;flex:0;margin:0 4px;"></span>
+<span id="tutorStatus" style="font-size:8px;color:#64748b;margin-left:auto;padding:0 6px;white-space:nowrap;"></span>
+        <div><button onclick="toggleAISettings()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Provider settings" id="aiSettingsToggle">⚙</button><button onclick="clearChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Clear chat history">Clear</button><button onclick="exportChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Export chat as markdown">Export</button><button onclick="toggleAI()">✕</button></div>
+    </div>
+    <div id="aiSettingsPanel" style="display:none;border-bottom:1px solid #334155;padding:8px 10px;background:#0a0f1e;"></div>
+    <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg bot">
+            <div class="label">Devin</div>
+            Hi! I'm your coding assistant. Ask me anything about programming, or pick a suggestion below.
+        </div>
+    </div>
+    <div class="ai-suggestions" id="aiSuggestions"></div>
+    <div class="ai-input-row">
+        <textarea id="aiInput" placeholder="Ask a question... (Ctrl+K)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}" oninput="autoGrowAIInput(this)"></textarea>
+        <button id="aiStopBtn" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:900;cursor:pointer;font-size:12px;" onclick="stopAIStream()" title="Stop generating">■</button>
+        <button onclick="sendAI()">Send</button>
+    </div>
+    <div id="aiOfflineBadge" style="padding:4px 10px;font-size:9px;color:#94a3b8;background:#1e293b;border-top:1px solid #334155;text-align:center;">⟳ Checking server...</div>
+    <div id="aiStatusLine" style="display:none;"></div>
+</div>
+<div class="tutorial-overlay" id="tutorial-quiz-overlay" onclick="if(event.target===this)return">
+  <div class="tutorial-quiz-paper" onclick="event.stopPropagation()">
+    <div class="tutorial-quiz-body" id="tutorial-quiz-body"></div>
+  </div>
+</div>
+
+<div class="tutorial-overlay" id="tutorial-resume-overlay" onclick="if(event.target===this)closeResumePrompt()">
+  <div class="tutorial-resume-paper" onclick="event.stopPropagation()">
+    <div class="tutorial-resume-body">
+      <div class="tutorial-resume-icon">👋</div>
+      <h2>Welcome Back!</h2>
+      <p>You're partway through the JavaScript Tutorial.</p>
+      <div class="tutorial-resume-stats" id="tutorial-resume-stats"></div>
+      <div class="tutorial-resume-name" id="tutorial-resume-name"></div>
+      <div class="tutorial-resume-actions">
+        <button class="tutorial-resume-btn primary" onclick="startTutorial()">Continue Lesson</button>
+        <button class="tutorial-resume-btn" onclick="tutorialManager.reset(); startTutorial();">Start Over</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeResumePrompt() {
+  document.getElementById('tutorial-resume-overlay')?.classList.remove('open');
+  startTutorial();
+}
+</script>
+
+<script src="public/tutorial.js"></script>
+<script>
+</script>
+</body></html>

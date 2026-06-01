@@ -66,6 +66,10 @@ export declare const ChatSchema: z.ZodObject<{
         text: z.ZodString;
     }, z.core.$strip>>>;
     learnerId: z.ZodOptional<z.ZodString>;
+    provider: z.ZodOptional<z.ZodString>;
+    model: z.ZodOptional<z.ZodString>;
+    apiKey: z.ZodOptional<z.ZodString>;
+    endpoint: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export type ChatInput = z.infer<typeof ChatSchema>;
 export declare const ExplainSchema: z.ZodObject<{
