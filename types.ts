@@ -66,6 +66,10 @@ export const ChatSchema = z.object({
   hasError: z.boolean().optional(),
   history: z.array(z.object({ role: z.string(), text: z.string() })).optional(),
   learnerId: z.string().optional(),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  apiKey: z.string().optional(),
+  endpoint: z.string().optional(),
 });
 export type ChatInput = z.infer<typeof ChatSchema>;
 

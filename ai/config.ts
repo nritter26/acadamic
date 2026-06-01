@@ -6,9 +6,10 @@ export interface ProviderConfig {
 }
 
 export interface AppConfig {
-  provider: 'keyword' | 'openai' | 'anthropic' | 'local' | 'hybrid';
+  provider: 'keyword' | 'openai' | 'anthropic' | 'gemini' | 'local' | 'hybrid';
   openai: ProviderConfig;
   anthropic: ProviderConfig;
+  gemini: ProviderConfig;
   local: ProviderConfig;
   systemPrompt: string;
 }
@@ -25,6 +26,12 @@ const config: AppConfig = {
     apiKey: process.env.ANTHROPIC_API_KEY || '',
     model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
     endpoint: process.env.ANTHROPIC_ENDPOINT || 'https://api.anthropic.com/v1',
+    maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1024'),
+  },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    endpoint: process.env.GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta',
     maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1024'),
   },
   local: {

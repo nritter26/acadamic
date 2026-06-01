@@ -10,7 +10,7 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  const { message, lang, topic, phase, code, output, hasError, history, learnerId } = req.body;
+  const { message, lang, topic, phase, code, output, hasError, history, learnerId, provider, model, apiKey, endpoint } = req.body;
 
   let aborted = false;
   const onClose = () => { aborted = true; };
@@ -49,8 +49,12 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
     res.end();
   };
 
+  const providerConfig = (provider || model || apiKey || endpoint)
+    ? { provider, model, apiKey, endpoint }
+    : undefined;
+
   try {
-    await handleTutorMessage(message, { lang, topic, phase, code, output, hasError, history, learnerId }, sseSend, sseDone);
+    await handleTutorMessage(message, { lang, topic, phase, code, output, hasError, history, learnerId, providerConfig }, sseSend, sseDone);
   } catch (e) {
     if (!aborted) {
       res.write(`data: ${JSON.stringify({ content: 'Error: ' + (e as Error).message })}\n\n`);

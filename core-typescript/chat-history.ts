@@ -1,35 +1,40 @@
-const CHAT_STORAGE_KEY = 'dogeslab_chat';
-const MAX_HISTORY = 50;
-let conversationHistory: { role: string; text: string }[] = [];
+// @ts-nocheck
 
-function saveChatHistory(): void {
+var CHAT_STORAGE_KEY = 'dogeslab_chat';
+var MAX_HISTORY = 50;
+var conversationHistory = [];
+
+function saveChatHistory() {
     try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
 }
 
-function loadChatHistory(): void {
+function loadChatHistory() {
     try {
         const saved = localStorage.getItem(CHAT_STORAGE_KEY);
         if (saved) {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
                 conversationHistory = parsed.slice(-20);
-                const el = document.getElementById('aiMessages');
-                if (el) {
-                    el.innerHTML = '';
-                    for (const msg of conversationHistory) {
-                        addAIMessage(msg.text, msg.role, true);
-                    }
-                }
+                return conversationHistory;
             }
         }
     } catch {}
+    return [];
 }
 
-function getHistory(): { role: string; text: string }[] {
+function getHistory() {
     return conversationHistory;
 }
 
-function clearHistory(): void {
+function addToHistory(role, text) {
+    conversationHistory.push({ role, text });
+    if (conversationHistory.length > MAX_HISTORY) {
+        conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+    }
+    saveChatHistory();
+}
+
+function clearHistory() {
     conversationHistory = [];
     try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
 }
