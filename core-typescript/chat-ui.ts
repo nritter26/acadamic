@@ -1,10 +1,12 @@
-export let aiCodeId = 0;
+// @ts-nocheck
 
-export let streamAbortController: AbortController | null = null;
-export let streamingMsgEl: HTMLElement | null = null;
-export let streamingFullText = '';
+var aiCodeId = 0;
 
-export function highlightAICode(code: string, lang?: string): string {
+var streamAbortController = null;
+var streamingMsgEl = null;
+var streamingFullText = '';
+
+function highlightAICode(code, lang) {
     const kw: Record<string, string[]> = {
         js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
         ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
@@ -44,20 +46,20 @@ export function highlightAICode(code: string, lang?: string): string {
     }).join('\n');
 }
 
-export function escapeAIHtml(text: string): string {
+function escapeAIHtml(text) {
     return String(text)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 }
 
-export function escapeAIAttr(text: string): string {
+function escapeAIAttr(text) {
     return escapeAIHtml(text)
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
 
-export function safeAIHref(url: string): string {
+function safeAIHref(url) {
     const decoded = String(url).replace(/&amp;/g, '&').trim();
     if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
     return '';
@@ -81,7 +83,7 @@ function inlineFormat(text: string, codeBlocks: { lang: string; code: string; sa
     return t;
 }
 
-export function formatAIText(text: string): string {
+function formatAIText(text) {
     if (!text) return '';
     const codeBlocks: { lang: string; code: string; safeCode: string; highlighted: string }[] = [];
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (_match: string, lang: string, code: string) => {
@@ -173,17 +175,17 @@ export function formatAIText(text: string): string {
     return result;
 }
 
-export function autoGrowAIInput(el: HTMLTextAreaElement): void {
+function autoGrowAIInput(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
-export function removeTypingIndicator(): void {
+function removeTypingIndicator() {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
 }
 
-export function stopAIStream(): void {
+function stopAIStream() {
     if (streamAbortController) {
         streamAbortController.abort();
         streamAbortController = null;

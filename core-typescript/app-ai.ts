@@ -1,10 +1,5 @@
 // @ts-nocheck
 
-import { conversationHistory, MAX_HISTORY, CHAT_STORAGE_KEY, saveChatHistory, loadChatHistory, addToHistory, clearHistory } from './chat-history';
-import { TOPIC_KEYWORDS_CLIENT, detectTopicInQuery } from './topic-detector';
-import { aiCodeId, streamAbortController, streamingMsgEl, streamingFullText, setStreamAbortController, setStreamingMsgEl, setStreamingFullText, highlightAICode, escapeAIHtml, escapeAIAttr, safeAIHref, formatAIText, autoGrowAIInput, removeTypingIndicator, stopAIStream } from './chat-ui';
-import { suggestionSets, getDynamicSuggestions, updateAISuggestions } from './suggestions';
-
 let lastCodeRun = '';
 let lastCodeOutput = '';
 let convSubject = '';
@@ -23,7 +18,12 @@ function toggleAI() {
             showMaintenanceMessage();
             return;
         }
-        const history = loadChatHistory();
+        const history =         loadChatHistory();
+        const cfg = loadConfig();
+        const statusEl = document.getElementById('tutorStatus');
+        if (statusEl) {
+            statusEl.textContent = cfg.provider === 'hybrid' ? 'hybrid' : cfg.provider + (cfg.model ? '/' + cfg.model : '');
+        }
         if (history.length > 0) {
             const el = document.getElementById('aiMessages');
             if (el) {
@@ -49,6 +49,16 @@ function toggleAI() {
     }
     if (wasOpen) setTimeout(() => document.getElementById('editor').focus(), 50);
     setTimeout(triggerGTranslate, 50);
+}
+
+function toggleAISettings() {
+    const panel = document.getElementById('aiSettingsPanel');
+    if (!panel) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : '';
+    if (!isOpen) {
+        renderSettings(panel);
+    }
 }
 
 function showMaintenanceMessage() {
@@ -229,7 +239,9 @@ function setOfflineBadge(online) {
     if (online) {
         badge.style.display = '';
         badge.style.color = '#4ade80';
-        badge.textContent = '✅ Local AI Active · 🔍 Code check ready';
+        const cfg = loadConfig();
+        const label = cfg.provider === 'hybrid' ? 'Hybrid' : cfg.provider === 'local' ? cfg.model || 'Ollama' : cfg.provider;
+        badge.textContent = '✅ ' + label + ' · 🔍 Code check ready';
     } else {
         badge.style.display = '';
         badge.style.color = '#fbbf24';
@@ -593,6 +605,18 @@ function getErrorTutorTip(topic, output) {
     return "I noticed your code has an error. That's okay — debugging is how we learn!\n\n**Quick check:**\n1. Look at the error message — what line does it point to?\n2. Compare your code with the example in the curriculum\n3. Simplify: comment things out until it works, then add back one piece at a time\n\n**Can you tell me:** what did you expect to happen, and what actually happened?";
 }
 
+function getProviderRequestBody() {
+    try {
+        const cfg = loadConfig();
+        const body: Record<string, string> = {};
+        if (cfg.provider && cfg.provider !== 'hybrid') body.provider = cfg.provider;
+        if (cfg.model) body.model = cfg.model;
+        if (cfg.apiKey) body.apiKey = cfg.apiKey;
+        if (cfg.endpoint) body.endpoint = cfg.endpoint;
+        return body;
+    } catch { return {}; }
+}
+
 async function askAI(q) {
     streamingFullText = '';
     const enrichedQ = resolveFollowUp(q);
@@ -705,7 +729,8 @@ async function askAI(q) {
                 output: outputText,
                 hasError: hasError,
                 history: conversationHistory.slice(-8),
-                learnerId: LEARNER_ID
+                learnerId: LEARNER_ID,
+                ...getProviderRequestBody()
             })
         });
 

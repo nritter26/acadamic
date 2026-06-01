@@ -1,7 +1,6 @@
-import { conversationHistory } from './chat-history';
-import { streamingFullText } from './chat-ui';
+// @ts-nocheck
 
-export const suggestionSets: Record<string, string[]> = {
+var suggestionSets = {
     js: ["Explain closures with an example", "How does async/await work?", "Common array methods guide", "What is 'this' keyword?", "Practice: write a function"],
     ts: ["Types vs interfaces explained", "What are generics?", "Utility types guide", "Enum best practices", "Practice: type a function"],
     py: ["List comprehensions explained", "How do decorators work?", "Why __init__?", "args and kwargs guide", "Practice: write a class"],
@@ -27,7 +26,7 @@ export const suggestionSets: Record<string, string[]> = {
     node: ["What is Node.js?", "Express basics", "File system guide", "Practice: build a server"],
 };
 
-export function getDynamicSuggestions(
+function getDynamicSuggestions(
     outputText: string,
     _conversationHistory: { role: string; text: string }[],
     currentTopic: string,
@@ -125,7 +124,7 @@ export function getDynamicSuggestions(
     return null;
 }
 
-export function updateAISuggestions(
+function updateAISuggestions(
     currentLang: string,
     currentTopic: string,
     _streamingFullText: string,

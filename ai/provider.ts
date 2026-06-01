@@ -3,18 +3,18 @@ import { runKeywordTutor } from './tutor-keywords';
 import { getTinyLLMResponse } from './template-matcher';
 import { llmCache } from './cache';
 
-interface LLMMessage {
+export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
 type StreamCallback = (chunk: string) => void;
 
-interface ProviderConfig {
+export interface ProviderOverride {
+  provider?: string;
+  model?: string;
   apiKey?: string;
-  model: string;
   endpoint?: string;
-  maxTokens: number;
 }
 
 interface ProviderHandler {
@@ -22,6 +22,7 @@ interface ProviderHandler {
   buildHeaders(): Record<string, string>;
   endpoint: string;
   path: string;
+  nonStreamPath?: string;
   parser(line: string): string | null;
   responseParser(data: Record<string, unknown>): string | null;
   stripSystem?: boolean;
@@ -86,7 +87,50 @@ function anthropicParser(data: string): string | null {
   }
 }
 
+function geminiParser(data: string): string | null {
+  try {
+    const parsed = JSON.parse(data);
+    return parsed.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch {
+    return null;
+  }
+}
+
 const PROVIDERS: Record<string, ProviderHandler> = {
+  gemini: {
+    endpoint: config.gemini.endpoint || 'https://generativelanguage.googleapis.com/v1beta',
+    path: '/models/:model:streamGenerateContent?alt=sse',
+    nonStreamPath: '/models/:model:generateContent',
+    buildBody(messages, stream) {
+      const systemMsgs = messages.filter(m => m.role === 'system');
+      const chatMsgs = messages.filter(m => m.role !== 'system');
+      const body: Record<string, unknown> = {
+        contents: chatMsgs.map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        })),
+      };
+      if (systemMsgs.length > 0) {
+        body.systemInstruction = { parts: [{ text: systemMsgs.map(s => s.content).join('\n') }] };
+      }
+      return body;
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey,
+      };
+    },
+    parser: geminiParser,
+    responseParser(data) {
+      const d = data as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+      return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    },
+    stripSystem: false,
+    get apiKey() { return config.gemini.apiKey; },
+    get model() { return config.gemini.model; },
+    get maxTokens() { return config.gemini.maxTokens; },
+  },
   openai: {
     endpoint: config.openai.endpoint || 'https://api.openai.com/v1',
     path: '/chat/completions',
@@ -198,14 +242,30 @@ async function fetchWithRetry(
   return null;
 }
 
+function overrideProvider(
+  base: ProviderHandler,
+  overrides: { model?: string; apiKey?: string; endpoint?: string },
+): ProviderHandler {
+  return {
+    ...base,
+    endpoint: overrides.endpoint || base.endpoint,
+    model: overrides.model || base.model,
+    apiKey: overrides.apiKey || base.apiKey,
+  };
+}
+
 async function callProvider(
   provider: ProviderHandler,
   messages: LLMMessage[],
   onStream?: StreamCallback,
+  overrides?: { model?: string; apiKey?: string; endpoint?: string },
 ): Promise<string | null> {
-  const url = `${provider.endpoint}${provider.path}`;
-  const body = provider.buildBody(messages, !!onStream);
-  const headers = provider.buildHeaders();
+  const p = overrides ? overrideProvider(provider, overrides) : provider;
+  const resolvedPath = (onStream ? p.path : (p.nonStreamPath || p.path))
+    .replace(':model', p.model);
+  const url = `${p.endpoint}${resolvedPath}`;
+  const body = p.buildBody(messages, !!onStream);
+  const headers = p.buildHeaders();
 
   if (onStream) {
     const response = await fetchWithRetry(url, {
@@ -301,11 +361,13 @@ export async function runHybridLLM(
 export async function askLLM(
   messages: LLMMessage[],
   onStream?: StreamCallback,
-  options?: { lang?: string; topic?: string; code?: string; hasError?: boolean },
+  options?: { lang?: string; topic?: string; code?: string; hasError?: boolean; providerConfig?: ProviderOverride },
 ): Promise<string | null> {
-  const { provider } = config;
+  const provider = options?.providerConfig?.provider || config.provider;
+  const overrides = options?.providerConfig ? { model: options.providerConfig.model, apiKey: options.providerConfig.apiKey, endpoint: options.providerConfig.endpoint } : undefined;
 
-  const cached = llmCache.get(messages, options?.lang, options?.topic);
+  const cacheKey = options?.providerConfig ? `${options.providerConfig.provider}|${options.providerConfig.model || ''}|${messages[messages.length - 1]?.content || ''}|${options?.lang || ''}|${options?.topic || ''}` : undefined;
+  const cached = cacheKey ? llmCache.get(messages, options?.lang, options?.topic) : llmCache.get(messages, options?.lang, options?.topic);
   if (cached !== null) {
     if (onStream) {
       const words = cached.split(/(\s+)/);
@@ -328,12 +390,14 @@ export async function askLLM(
       options?.code,
       options?.hasError,
     );
-  } else if (provider === 'openai' && config.openai.apiKey) {
-    response = await callProvider(PROVIDERS.openai, messages, onStream);
-  } else if (provider === 'anthropic' && config.anthropic.apiKey) {
-    response = await callProvider(PROVIDERS.anthropic, messages, onStream);
+  } else if (provider === 'openai') {
+    response = await callProvider(PROVIDERS.openai, messages, onStream, overrides);
+  } else if (provider === 'anthropic') {
+    response = await callProvider(PROVIDERS.anthropic, messages, onStream, overrides);
+  } else if (provider === 'gemini') {
+    response = await callProvider(PROVIDERS.gemini, messages, onStream, overrides);
   } else if (provider === 'local') {
-    response = await callProvider(PROVIDERS.local, messages, onStream);
+    response = await callProvider(PROVIDERS.local, messages, onStream, overrides);
   } else if (provider === 'keyword') {
     const { runKeywordTutor } = require('./tutor-keywords');
     const lastMsg = messages[messages.length - 1]?.content || '';

@@ -215,6 +215,11 @@
 <script src="public/landing.js"></script>
 <script src="browser-build/core-typescript/app-core.js"></script>
 <script src="browser-build/core-typescript/app-run.js"></script>
+<script src="browser-build/core-typescript/chat-history.js"></script>
+<script src="browser-build/core-typescript/chat-ui.js"></script>
+<script src="browser-build/core-typescript/topic-detector.js"></script>
+<script src="browser-build/core-typescript/suggestions.js"></script>
+<script src="browser-build/core-typescript/ai-settings.js"></script>
 <script src="browser-build/core-typescript/app-ai.js"></script>
 <script src="browser-build/core-typescript/app-quiz-challenge.js"></script>
 <script src="browser-build/core-typescript/app-editor.js"></script>
@@ -355,8 +360,9 @@ function doGTranslate(lang_pair) {
         <span>Devin</span>
         <span id="aiContext" class="ai-context" style="font-size:9px;font-weight:600;color:#64748b;text-transform:none;letter-spacing:0;flex:0;margin:0 4px;"></span>
 <span id="tutorStatus" style="font-size:8px;color:#64748b;margin-left:auto;padding:0 6px;white-space:nowrap;"></span>
-        <div><button onclick="clearChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Clear chat history">Clear</button><button onclick="exportChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Export chat as markdown">Export</button><button onclick="toggleAI()">✕</button></div>
+        <div><button onclick="toggleAISettings()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Provider settings" id="aiSettingsToggle">⚙</button><button onclick="clearChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Clear chat history">Clear</button><button onclick="exportChatHistory()" style="background:transparent;border:none;color:#64748b;cursor:pointer;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:4px;" title="Export chat as markdown">Export</button><button onclick="toggleAI()">✕</button></div>
     </div>
+    <div id="aiSettingsPanel" style="display:none;border-bottom:1px solid #334155;padding:8px 10px;background:#0a0f1e;"></div>
     <div class="ai-messages" id="aiMessages">
         <div class="ai-msg bot">
             <div class="label">Devin</div>

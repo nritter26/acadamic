@@ -4,6 +4,7 @@ const projectsState = {
   stepStates: [],
   language: 'javascript',
   filter: 'all',
+  langFilter: 'all',
   projects: [],
   progress: {},
   stepUserCode: {},
@@ -136,7 +137,18 @@ function renderSidebar() {
   });
   html += '</div>';
 
-  const filtered = projectsState.projects.filter(p => projectsState.filter === 'all' || p.difficulty === projectsState.filter);
+  html += '<div class="projects-filter-bar" style="margin-bottom:4px">' +
+    '<button class="projects-filter-btn' + (projectsState.langFilter === 'all' ? ' active' : '') + '" onclick="setLangFilter(\'all\')">All</button>' +
+    '<button class="projects-filter-btn' + (projectsState.langFilter === 'javascript' ? ' active' : '') + '" onclick="setLangFilter(\'javascript\')">JS</button>' +
+    '<button class="projects-filter-btn' + (projectsState.langFilter === 'typescript' ? ' active' : '') + '" onclick="setLangFilter(\'typescript\')">TS</button>' +
+    '<button class="projects-filter-btn' + (projectsState.langFilter === 'python' ? ' active' : '') + '" onclick="setLangFilter(\'python\')">PY</button>' +
+    '<button class="projects-filter-btn' + (projectsState.langFilter === 'go' ? ' active' : '') + '" onclick="setLangFilter(\'go\')">GO</button></div>';
+
+  const filtered = projectsState.projects.filter(p => {
+    if (projectsState.filter !== 'all' && p.difficulty !== projectsState.filter) return false;
+    if (projectsState.langFilter !== 'all' && (!p.languages || !p.languages.includes(projectsState.langFilter))) return false;
+    return true;
+  });
   const grouped = { beginner: [], intermediate: [], advanced: [], expert: [] };
   filtered.forEach(p => { if (grouped[p.difficulty]) grouped[p.difficulty].push(p); });
 
@@ -170,6 +182,11 @@ function renderSidebar() {
 
 function setFilter(filter) {
   projectsState.filter = filter;
+  renderSidebar();
+}
+
+function setLangFilter(lang) {
+  projectsState.langFilter = lang;
   renderSidebar();
 }
 

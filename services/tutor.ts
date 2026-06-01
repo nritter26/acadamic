@@ -153,11 +153,12 @@ export async function handleTutorMessage(
     hasError?: boolean;
     history?: HistoryEntry[];
     learnerId?: string;
+    providerConfig?: { provider?: string; model?: string; apiKey?: string; endpoint?: string };
   },
   sseSend: (chunk: string) => void,
   sseDone: () => void,
 ): Promise<void> {
-  const { lang, topic, phase, code, output, hasError, history, learnerId } = options;
+  const { lang, topic, phase, code, output, hasError, history, learnerId, providerConfig } = options;
   const q = resolveFollowUp(message, history).toLowerCase().trim();
 
   const lid = learnerId || 'default';
@@ -172,6 +173,7 @@ export async function handleTutorMessage(
     const ctx: TutorContext = {
       message, q, lang, topic, phase, code, output,
       hasError, history, learnerId, lid,
+      providerConfig,
     };
     const handled = await executeStrategies(ctx, sseSend, sseDone);
     if (!handled) {

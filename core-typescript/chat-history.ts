@@ -1,12 +1,14 @@
-export const CHAT_STORAGE_KEY = 'dogeslab_chat';
-export const MAX_HISTORY = 50;
-export let conversationHistory: { role: string; text: string }[] = [];
+// @ts-nocheck
 
-function saveChatHistory(): void {
+var CHAT_STORAGE_KEY = 'dogeslab_chat';
+var MAX_HISTORY = 50;
+var conversationHistory = [];
+
+function saveChatHistory() {
     try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(conversationHistory.slice(-20))); } catch {}
 }
 
-export function loadChatHistory(): { role: string; text: string }[] {
+function loadChatHistory() {
     try {
         const saved = localStorage.getItem(CHAT_STORAGE_KEY);
         if (saved) {
@@ -20,11 +22,11 @@ export function loadChatHistory(): { role: string; text: string }[] {
     return [];
 }
 
-export function getHistory(): { role: string; text: string }[] {
+function getHistory() {
     return conversationHistory;
 }
 
-export function addToHistory(role: string, text: string): void {
+function addToHistory(role, text) {
     conversationHistory.push({ role, text });
     if (conversationHistory.length > MAX_HISTORY) {
         conversationHistory = conversationHistory.slice(-MAX_HISTORY);
@@ -32,7 +34,7 @@ export function addToHistory(role: string, text: string): void {
     saveChatHistory();
 }
 
-export function clearHistory(): void {
+function clearHistory() {
     conversationHistory = [];
     try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
 }

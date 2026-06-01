@@ -35,7 +35,7 @@ export class LLMStrategy implements TutorStrategy {
       gotChunk = true;
       fullResponse += chunk;
       sseSend(chunk);
-    }, { lang: ctx.lang, topic: ctx.topic, code: ctx.code, hasError: ctx.hasError });
+    }, { lang: ctx.lang, topic: ctx.topic, code: ctx.code, hasError: ctx.hasError, providerConfig: ctx.providerConfig });
     if (gotChunk) {
       if (ctx.topic && ctx.lang) await learner.trackAttempt(ctx.lid, ctx.lang, ctx.topic);
       try { await conv.addMessage(ctx.lid, 'assistant', fullResponse); } catch {}

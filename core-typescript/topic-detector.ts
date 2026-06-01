@@ -1,4 +1,6 @@
-const TOPIC_KEYWORDS_CLIENT: Record<string, string[]> = {
+// @ts-nocheck
+
+var TOPIC_KEYWORDS_CLIENT = {
     variable: ['variable', 'variables', 'declare', 'declaration', 'let', 'const', 'var', 'assignment', 'mutable', 'immutable', 'scope'],
     function: ['function', 'functions', 'func', 'method', 'methods', 'def', 'fn', 'return', 'lambda', 'arrow', 'callback', 'callbacks'],
     string: ['string', 'strings', 'str', 'template literal', 'template literals', 'concatenation', 'char', 'text', 'substring'],
