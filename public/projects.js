@@ -5,6 +5,7 @@ const projectsState = {
   language: 'javascript',
   filter: 'all',
   langFilter: 'all',
+  frameworkFilter: 'all',
   projects: [],
   progress: {},
   stepUserCode: {},
@@ -110,7 +111,10 @@ async function loadAllProjects() {
     'go-cache-layer','go-middleware-system','go-schema-validator','go-dependency-injection','go-task-queue',
     'go-observable-stream','go-state-management','go-query-builder','go-immutable-collections','go-template-engine',
     'go-testing-framework','go-diff-engine','go-markdown-parser','go-semver-system','go-crdt-counter',
-    'go-distributed-lock','go-circuit-breaker','go-feature-flags','go-task-orchestrator','go-api-gateway'
+    'go-distributed-lock','go-circuit-breaker','go-feature-flags','go-task-orchestrator','go-api-gateway',
+    // Framework: React + Vue (6)
+    'react-counter','react-todo','react-api-fetcher',
+    'vue-counter','vue-todo','vue-api-fetcher'
   ];
   const loaded = [];
   for (const id of ids) {
@@ -144,9 +148,18 @@ function renderSidebar() {
     '<button class="projects-filter-btn' + (projectsState.langFilter === 'python' ? ' active' : '') + '" onclick="setLangFilter(\'python\')">PY</button>' +
     '<button class="projects-filter-btn' + (projectsState.langFilter === 'go' ? ' active' : '') + '" onclick="setLangFilter(\'go\')">GO</button></div>';
 
+  var hasFrameworkProjects = projectsState.projects.some(function(p) { return p.framework; });
+  if (hasFrameworkProjects) {
+    html += '<div class="projects-filter-bar" style="margin-bottom:4px">' +
+      '<button class="projects-filter-btn' + (projectsState.frameworkFilter === 'all' ? ' active' : '') + '" onclick="setFrameworkFilter(\'all\')">All</button>' +
+      '<button class="projects-filter-btn' + (projectsState.frameworkFilter === 'react' ? ' active' : '') + '" onclick="setFrameworkFilter(\'react\')">React</button>' +
+      '<button class="projects-filter-btn' + (projectsState.frameworkFilter === 'vue' ? ' active' : '') + '" onclick="setFrameworkFilter(\'vue\')">Vue</button></div>';
+  }
+
   const filtered = projectsState.projects.filter(p => {
     if (projectsState.filter !== 'all' && p.difficulty !== projectsState.filter) return false;
     if (projectsState.langFilter !== 'all' && (!p.languages || !p.languages.includes(projectsState.langFilter))) return false;
+    if (projectsState.frameworkFilter !== 'all' && p.framework !== projectsState.frameworkFilter) return false;
     return true;
   });
   const grouped = { beginner: [], intermediate: [], advanced: [], expert: [] };
@@ -187,6 +200,11 @@ function setFilter(filter) {
 
 function setLangFilter(lang) {
   projectsState.langFilter = lang;
+  renderSidebar();
+}
+
+function setFrameworkFilter(fw) {
+  projectsState.frameworkFilter = fw;
   renderSidebar();
 }
 
@@ -461,10 +479,20 @@ function showProjectAnswer() {
   }
 }
 
-function wrapForIframe(code) {
-  const hasHTML = /<script|<html|<body|<div|<h[1-6]|<p|<ul|<ol|<li|<table|<form|<input|<button|<a\b|<img|<select|<textarea/i.test(code);
-  const safe = code.replace(/<\/script>/gi, '<\\/script>');
-  const instr =
+function wrapForIframe(code, framework) {
+  var head = '';
+  if (framework === 'react') {
+    head =
+      '<script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>' +
+      '<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>' +
+      '<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>';
+  } else if (framework === 'vue') {
+    head =
+      '<script src="https://unpkg.com/vue@3/dist/vue.global.js"><\/script>';
+  }
+  var hasHTML = /<script|<html|<body|<div|<h[1-6]|<p|<ul|<ol|<li|<table|<form|<input|<button|<a\b|<img|<select|<textarea/i.test(code);
+  var safe = code.replace(/<\/script>/gi, '<\\/script>');
+  var instr =
     'window._output="";window._error=null;' +
     'console.log=function(){' +
     'window._output+=Array.from(arguments).map(function(a){' +
@@ -472,9 +500,10 @@ function wrapForIframe(code) {
     '}).join(" ")+"\\n";};' +
     'window.onerror=function(m,u,l){window._error=m+" (line "+l+")";return true;};';
   if (hasHTML) {
-    return '<!DOCTYPE html><html><body><script>' + instr + '<\/script>' + safe + '\n</body></html>';
+    return '<!DOCTYPE html><html>' + head + '<body><script>' + instr + '<\/script>' + safe + '\n</body></html>';
   }
-  return '<!DOCTYPE html><html><body><script>' + instr + safe + '\n<\/script></body></html>';
+  var scriptTag = framework === 'react' ? 'script type="text/babel"' : 'script';
+  return '<!DOCTYPE html><html>' + head + '<body><' + scriptTag + '>' + instr + safe + '\n<\/' + scriptTag + '></body></html>';
 }
 
 function execJSInIframe(code) {
@@ -482,7 +511,8 @@ function execJSInIframe(code) {
     var iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     document.body.appendChild(iframe);
-    iframe.srcdoc = wrapForIframe(code);
+    var fw = projectsState.currentProject && (projectsState.currentProject.framework || null);
+    iframe.srcdoc = wrapForIframe(code, fw);
     iframe.onload = function () {
       var output = iframe.contentWindow._output || '';
       var error = iframe.contentWindow._error;
@@ -535,7 +565,7 @@ async function runProjectCode() {
     iframe.style.height = '100%';
     iframe.style.border = 'none';
     preview.appendChild(iframe);
-    iframe.srcdoc = wrapForIframe(code);
+    iframe.srcdoc = wrapForIframe(code, projectsState.currentProject && projectsState.currentProject.framework || null);
     setInlineOutput('▶ Code rendered in preview tab');
   }
   switchWorkspaceTab('preview');
@@ -588,7 +618,7 @@ async function verifyStep() {
         iframe.style.height = '100%';
         iframe.style.border = 'none';
         preview.appendChild(iframe);
-        iframe.srcdoc = wrapForIframe(code);
+        iframe.srcdoc = wrapForIframe(code, projectsState.currentProject && projectsState.currentProject.framework || null);
       }
       if (result.error) {
         resultEl.innerText = '❌ Error: ' + result.error;
