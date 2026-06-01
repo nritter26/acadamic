@@ -1,0 +1,80 @@
+{
+  "id": "vue-counter",
+  "title": "Vue Counter",
+  "framework": "vue",
+  "languages": ["javascript"],
+  "difficulty": "beginner",
+  "concepts": ["vue", "components", "reactivity", "events"],
+  "estimatedMinutes": 15,
+  "description": "Build an interactive counter with Vue 3 using Options API",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a Vue App",
+      "description": "Use <code>Vue.createApp()</code> to create a Vue app with a <code>data</code> function that returns <code>{ count: 0 }</code>. Mount it to <code>#root</code>. In the template, display the count in an <code>&lt;h1&gt;</code> and the count in a <code>&lt;p&gt;</code> tag.",
+      "hints": [
+        "Use <code>Vue.createApp({ data() { return { count: 0 } } }).mount('#root');</code>",
+        "Template is a property: <code>{ data() { return { count: 0 } }, template: '...' }</code>",
+        "Display count with <code>{{ count }}</code> in the template"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      count: 0\n    };\n  },\n  template: `\n    <div>\n      <h1>Counter</h1>\n      <p>Count: {{ count }}</p>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "output.includes('Count: 0')",
+        "successMessage": "Vue app renders with the counter!",
+        "failureMessage": "Make sure your template shows 'Count: 0'"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add Methods",
+      "description": "Add a <code>methods</code> section with <code>increment()</code> and <code>decrement()</code> functions that modify the count. Add two buttons in the template that call these methods on click.",
+      "hints": [
+        "Methods go in <code>{ data() { ... }, methods: { increment() { this.count++ }, decrement() { this.count-- } } }</code>",
+        "Buttons: <code>&lt;button @click=\"increment\"&gt;+&lt;/button&gt;</code>"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      count: 0\n    };\n  },\n  methods: {\n    increment() {\n      this.count++;\n    },\n    decrement() {\n      this.count--;\n    }\n  },\n  template: `\n    <div>\n      <h1>Counter</h1>\n      <p>Count: {{ count }}</p>\n      <button @click=\"increment\">+</button>\n      <button @click=\"decrement\">-</button>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "output.includes('Count: 0')",
+        "successMessage": "Buttons render and methods are defined!",
+        "failureMessage": "Add increment and decrement methods with + and - buttons"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Computed Property",
+      "description": "Add a <code>computed</code> property <code>isEven</code> that returns true if count is even. Display 'Even' or 'Odd' next to the count.",
+      "hints": [
+        "Computed goes in <code>{ data() { ... }, computed: { isEven() { return this.count % 2 === 0 } } }</code>",
+        "Display: <code>{{ isEven ? 'Even' : 'Odd' }}</code>"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      count: 0\n    };\n  },\n  computed: {\n    isEven() {\n      return this.count % 2 === 0;\n    }\n  },\n  methods: {\n    increment() { this.count++; },\n    decrement() { this.count--; }\n  },\n  template: `\n    <div>\n      <h1>Counter</h1>\n      <p>Count: {{ count }} ({{ isEven ? 'Even' : 'Odd' }})</p>\n      <button @click=\"increment\">+</button>\n      <button @click=\"decrement\">-</button>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "output.includes('Even')",
+        "successMessage": "Computed property shows Even or Odd correctly!",
+        "failureMessage": "Add a computed property isEven and display it"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Watch the Count",
+      "description": "Add a <code>watch</code> section that watches <code>count</code>. When count changes, log the new value to the console with <code>console.log('Count changed to', newValue)</code>.",
+      "hints": [
+        "Watch syntax: <code>watch: { count(newVal) { console.log('Count changed to', newVal); } }</code>"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      count: 0\n    };\n  },\n  computed: {\n    isEven() {\n      return this.count % 2 === 0;\n    }\n  },\n  watch: {\n    count(newVal) {\n      console.log('Count changed to', newVal);\n    }\n  },\n  methods: {\n    increment() { this.count++; },\n    decrement() { this.count--; }\n  },\n  template: `\n    <div>\n      <h1>Counter</h1>\n      <p>Count: {{ count }} ({{ isEven ? 'Even' : 'Odd' }})</p>\n      <button @click=\"increment\">+</button>\n      <button @click=\"decrement\">-</button>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "true",
+        "successMessage": "Watcher logs count changes — great job!",
+        "failureMessage": "Add a watch for count that logs changes"
+      }
+    }
+  ]
+}
