@@ -23,7 +23,16 @@ function toggleAI() {
             showMaintenanceMessage();
             return;
         }
-        loadChatHistory();
+        const history = loadChatHistory();
+        if (history.length > 0) {
+            const el = document.getElementById('aiMessages');
+            if (el) {
+                el.innerHTML = '';
+                for (const msg of history) {
+                    addAIMessage(msg.text, msg.role, true);
+                }
+            }
+        }
         setTimeout(() => document.getElementById('aiInput').focus(), 100);
         updateAIContext();
         // Proactive due review reminder

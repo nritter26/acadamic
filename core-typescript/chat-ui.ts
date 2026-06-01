@@ -1,10 +1,10 @@
-let aiCodeId = 0;
+export let aiCodeId = 0;
 
-let streamAbortController: AbortController | null = null;
-let streamingMsgEl: HTMLElement | null = null;
-let streamingFullText = '';
+export let streamAbortController: AbortController | null = null;
+export let streamingMsgEl: HTMLElement | null = null;
+export let streamingFullText = '';
 
-function highlightAICode(code: string, lang?: string): string {
+export function highlightAICode(code: string, lang?: string): string {
     const kw: Record<string, string[]> = {
         js: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','NaN','delete','void'],
         ts: ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','this','class','extends','implements','interface','type','enum','import','export','default','from','async','await','yield','try','catch','finally','throw','typeof','instanceof','in','of','true','false','null','undefined','readonly','public','private','protected','static','abstract'],
@@ -44,20 +44,20 @@ function highlightAICode(code: string, lang?: string): string {
     }).join('\n');
 }
 
-function escapeAIHtml(text: string): string {
+export function escapeAIHtml(text: string): string {
     return String(text)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 }
 
-function escapeAIAttr(text: string): string {
+export function escapeAIAttr(text: string): string {
     return escapeAIHtml(text)
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
 
-function safeAIHref(url: string): string {
+export function safeAIHref(url: string): string {
     const decoded = String(url).replace(/&amp;/g, '&').trim();
     if (/^(https?:|mailto:|#)/i.test(decoded)) return escapeAIAttr(decoded);
     return '';
@@ -81,7 +81,7 @@ function inlineFormat(text: string, codeBlocks: { lang: string; code: string; sa
     return t;
 }
 
-function formatAIText(text: string): string {
+export function formatAIText(text: string): string {
     if (!text) return '';
     const codeBlocks: { lang: string; code: string; safeCode: string; highlighted: string }[] = [];
     const noCode = text.replace(/\`\`\`(\w*)\n?([\s\S]*?)\`\`\`/g, (_match: string, lang: string, code: string) => {
@@ -173,17 +173,17 @@ function formatAIText(text: string): string {
     return result;
 }
 
-function autoGrowAIInput(el: HTMLTextAreaElement): void {
+export function autoGrowAIInput(el: HTMLTextAreaElement): void {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
-function removeTypingIndicator(): void {
+export function removeTypingIndicator(): void {
     const typing = document.getElementById('aiTyping');
     if (typing) typing.remove();
 }
 
-function stopAIStream(): void {
+export function stopAIStream(): void {
     if (streamAbortController) {
         streamAbortController.abort();
         streamAbortController = null;
