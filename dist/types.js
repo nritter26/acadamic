@@ -27,6 +27,10 @@ exports.ChatSchema = zod_1.z.object({
     hasError: zod_1.z.boolean().optional(),
     history: zod_1.z.array(zod_1.z.object({ role: zod_1.z.string(), text: zod_1.z.string() })).optional(),
     learnerId: zod_1.z.string().optional(),
+    provider: zod_1.z.string().optional(),
+    model: zod_1.z.string().optional(),
+    apiKey: zod_1.z.string().optional(),
+    endpoint: zod_1.z.string().optional(),
 });
 exports.ExplainSchema = zod_1.z.object({
     code: zod_1.z.string().min(1),

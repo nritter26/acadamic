@@ -5,9 +5,10 @@ export interface ProviderConfig {
     maxTokens: number;
 }
 export interface AppConfig {
-    provider: 'keyword' | 'openai' | 'anthropic' | 'local' | 'hybrid';
+    provider: 'keyword' | 'openai' | 'anthropic' | 'gemini' | 'local' | 'hybrid';
     openai: ProviderConfig;
     anthropic: ProviderConfig;
+    gemini: ProviderConfig;
     local: ProviderConfig;
     systemPrompt: string;
 }

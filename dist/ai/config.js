@@ -18,6 +18,12 @@ const config = {
         endpoint: process.env.ANTHROPIC_ENDPOINT || 'https://api.anthropic.com/v1',
         maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1024'),
     },
+    gemini: {
+        apiKey: process.env.GEMINI_API_KEY || '',
+        model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+        endpoint: process.env.GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta',
+        maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1024'),
+    },
     local: {
         endpoint: process.env.LOCAL_LLM_ENDPOINT || 'http://localhost:11434/v1',
         model: process.env.LOCAL_LLM_MODEL || 'llama3.2',

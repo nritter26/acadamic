@@ -21,10 +21,9 @@
 </script>
 
 <aside class="sidebar" class:open={app.sidebarOpen}>
-  <nav class="selector" role="tablist">
+  <nav class="selector" aria-label="Language selector">
     {#each LANGUAGES as lang}
       <button
-        role="tab"
         class:active={curr.lang === lang}
         onclick={() => selectLang(lang)}
         aria-label={LANG_NAMES[lang] || lang}

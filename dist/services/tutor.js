@@ -139,7 +139,7 @@ async function buildLLMMessages(message, lang, topic, phase, code, output, hasEr
         }
     }
     catch (e) {
-        middleware_1.logger.debug({ err: e }, 'RAG search failed, skipping');
+        middleware_1.logger.warn({ err: e }, 'RAG search failed');
     }
     if (context.length > 0) {
         messages.push({ role: 'system', content: context.join('\n\n') });
@@ -153,7 +153,7 @@ async function buildLLMMessages(message, lang, topic, phase, code, output, hasEr
     return messages;
 }
 async function handleTutorMessage(message, options, sseSend, sseDone) {
-    const { lang, topic, phase, code, output, hasError, history, learnerId } = options;
+    const { lang, topic, phase, code, output, hasError, history, learnerId, providerConfig } = options;
     const q = resolveFollowUp(message, history).toLowerCase().trim();
     const lid = learnerId || 'default';
     try {
@@ -172,6 +172,7 @@ async function handleTutorMessage(message, options, sseSend, sseDone) {
         const ctx = {
             message, q, lang, topic, phase, code, output,
             hasError, history, learnerId, lid,
+            providerConfig,
         };
         const handled = await (0, strategies_1.executeStrategies)(ctx, sseSend, sseDone);
         if (!handled) {

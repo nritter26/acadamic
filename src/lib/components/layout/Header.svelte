@@ -20,6 +20,7 @@
     { id: 'tutorial', label: 'Learn Code', color: '#f97316' },
     { id: 'techstack', label: 'Tech Stack', color: '#2DD4BF' },
     { id: 'styling', label: 'Styling Grounds', color: '#a855f7' },
+    { id: 'legacy', label: 'Full Web App', color: '#22c55e' },
   ];
 
   function handleMode(mode) {

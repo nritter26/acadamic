@@ -1,4 +1,24 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getTinyLLMResponse = getTinyLLMResponse;
+const topicPatterns = [
+    { word: /variable/i, topic: 'variables' },
+    { word: /function|method/i, topic: 'functions' },
+    { word: /class|object/i, topic: 'classes and objects' },
+    { word: /array|list/i, topic: 'arrays and lists' },
+    { word: /string|text/i, topic: 'strings' },
+    { word: /loop|iterate/i, topic: 'loops and iteration' },
+    { word: /promise|async|await/i, topic: 'asynchronous programming' },
+    { word: /error|exception/i, topic: 'error handling' },
+    { word: /type/i, topic: 'types and type systems' },
+    { word: /pointer|ref/i, topic: 'pointers and references' },
+    { word: /pattern.*match|switch/i, topic: 'pattern matching' },
+    { word: /generic|template/i, topic: 'generics and templates' },
+    { word: /concurr|thread|parallel/i, topic: 'concurrency' },
+    { word: /test|assert/i, topic: 'testing' },
+    { word: /import|module/i, topic: 'modules and imports' },
+    { word: /syntax/i, topic: 'syntax' },
+];
 async function generateResponse(messages) {
     const lastMsg = messages[messages.length - 1]?.content || '';
     const isQuestionLike = /\b(what|how|why|when|where|which|can|could|would|should|explain|tell|describe|show|help|difference|example|mean|define)\b/i.test(lastMsg);
@@ -10,24 +30,6 @@ async function generateResponse(messages) {
         };
     }
     const detectedTopics = [];
-    const topicPatterns = [
-        { word: /variable/i, topic: 'variables' },
-        { word: /function|method/i, topic: 'functions' },
-        { word: /class|object/i, topic: 'classes and objects' },
-        { word: /array|list/i, topic: 'arrays and lists' },
-        { word: /string|text/i, topic: 'strings' },
-        { word: /loop|iterate/i, topic: 'loops and iteration' },
-        { word: /promise|async|await/i, topic: 'asynchronous programming' },
-        { word: /error|exception/i, topic: 'error handling' },
-        { word: /type/i, topic: 'types and type systems' },
-        { word: /pointer|ref/i, topic: 'pointers and references' },
-        { word: /pattern.*match|switch/i, topic: 'pattern matching' },
-        { word: /generic|template/i, topic: 'generics and templates' },
-        { word: /concurr|thread|parallel/i, topic: 'concurrency' },
-        { word: /test|assert/i, topic: 'testing' },
-        { word: /import|module/i, topic: 'modules and imports' },
-        { word: /syntax/i, topic: 'syntax' },
-    ];
     for (const p of topicPatterns) {
         if (p.word.test(lastMsg))
             detectedTopics.push(p.topic);
@@ -58,7 +60,4 @@ async function getTinyLLMResponse(messages, onStream) {
         return null;
     }
 }
-module.exports = {
-    getTinyLLMResponse,
-};
 //# sourceMappingURL=template-matcher.js.map
