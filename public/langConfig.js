@@ -23,6 +23,9 @@ for (const code of Object.keys(LANG_NAMES)) {
 }
 
 // Export for server-side use and Node.js environments
+export { LANG_NAMES, NAME_TO_LANG, LANG_TOPICS };
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { LANG_NAMES, NAME_TO_LANG, LANG_TOPICS };
 }
+

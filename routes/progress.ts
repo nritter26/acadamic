@@ -1,9 +1,14 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { AppError } from '../middleware';
 import { validate } from '../middleware';
 import { ProgressSchema } from '../types';
+
+// Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -23,6 +28,7 @@ router.get('/', (req: Request, res: Response) => {
     res.json({});
   }
 });
+
 
 router.post('/', validate(ProgressSchema), (req: Request, res: Response) => {
   try {
