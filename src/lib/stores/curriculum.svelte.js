@@ -7,6 +7,7 @@ let _engineFilter = $state('all');
 let _collapsedPhases = $state(new Set());
 let _topicData = $state(null);
 let _curriculumLoading = $state(false);
+let _loadVersion = 0;
 
 export function getCurriculumState() {
   return {
@@ -34,6 +35,8 @@ export function getCurriculumState() {
 
     async loadLangData(lang) {
       if (_topicData && _topicData[lang]) return;
+      _loadVersion++;
+      const version = _loadVersion;
       _curriculumLoading = true;
       if (typeof courseData !== 'undefined' && courseData[lang]) {
         _topicData = courseData;
@@ -44,13 +47,14 @@ export function getCurriculumState() {
       try {
         const r = await fetch(`/content/${filename}.json`);
         const data = await r.json();
+        if (version !== _loadVersion) return;
         const cd = _topicData || {};
         cd[lang] = data;
         _topicData = cd;
       } catch (e) {
         console.error('Failed to load curriculum for', lang, e);
       }
-      _curriculumLoading = false;
+      if (version === _loadVersion) _curriculumLoading = false;
     },
   };
 }

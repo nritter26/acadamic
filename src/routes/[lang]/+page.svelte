@@ -29,7 +29,7 @@
 
 <style>
   .curriculum-layout { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; flex: 1; overflow: hidden; gap: 1px; background: #1e293b; }
-  .col { overflow-y: auto; background: #0f172a; }
+  .col { overflow-y: auto; background: #0f172a; padding: 12px; }
   .col-curriculum { border-right: 1px solid #1e293b; }
   .col-theory { border-right: 1px solid #1e293b; }
 </style>

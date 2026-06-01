@@ -10,8 +10,8 @@
   }
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
 {#if open}
+  <svelte:window onkeydown={handleKeydown} />
   <div class="modal-overlay" onclick={handleBackdrop} role="presentation">
     <div class="modal-paper" onclick={(e) => e.stopPropagation()}>
       <button class="modal-close" onclick={onclose}>✕</button>
