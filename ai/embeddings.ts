@@ -1,8 +1,11 @@
-import fsp from 'fs/promises';
-import fs from 'fs';
 import path from 'path';
-import config from './config';
+import { fileURLToPath } from 'url'; // 1. Add this import
 
+// 2. Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Your original line will now work perfectly:
 const CONTENT_DIR = path.join(__dirname, '..', 'content');
 const CACHE_FILE = path.join(__dirname, '..', 'data', 'embeddings-cache.json');
 

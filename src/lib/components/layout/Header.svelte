@@ -1,9 +1,12 @@
 <script>
   import { getAppState } from '$lib/stores/app.svelte.js';
   import { LANG_NAMES } from '$lib/lib/constants.js';
+  import { goto } from '$app/navigation';
 
   let { onmodechange = () => {} } = $props();
   let app = $derived(getAppState());
+
+  const STANDALONE_TABS = new Set(['tutorial', 'game', 'git', 'legacy']);
 
   const EXTRA_TABS = [
     { id: 'backend', label: 'Backend', color: '#6366F1' },
@@ -24,8 +27,20 @@
   ];
 
   function handleMode(mode) {
-    app.mode = mode;
-    onmodechange(mode);
+    if (STANDALONE_TABS.has(mode)) {
+      goto('/' + mode);
+    } else {
+      app.mode = mode;
+      onmodechange(mode);
+    }
+  }
+
+  function toggleKodex() {
+    window.dispatchEvent(new CustomEvent('toggle-kodex'));
+  }
+
+  function toggleLang() {
+    window.dispatchEvent(new CustomEvent('toggle-lang'));
   }
 </script>
 
@@ -33,6 +48,19 @@
   <div class="header-left">
     <div class="header-title">
       KODEX'S <span class="accent" id="header-title">{LANG_NAMES[app.mode]?.toUpperCase() || app.mode.toUpperCase()}</span>
+      <button class="kodex-nav-btn" onclick={toggleKodex} title="About Kodex's Lab">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" width="22" height="22">
+          <path d="M8 10 C8 7 10 5 14 5 L26 5 C30 5 32 7 32 10 L32 30 C32 33 30 35 26 35 L14 35 C10 35 8 33 8 30Z" stroke-width="2.5"/>
+          <rect x="10" y="18" width="20" height="13" rx="2" stroke-width="2"/>
+          <path d="M10 18 L20 14 L30 18" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M10 22 C10 22 16 25 20 25 C24 25 30 22 30 22" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="17" y="22" width="6" height="4" rx="1" stroke-width="1.5"/>
+          <path d="M14 5 L12 1" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M26 5 L28 1" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="kodex-nav-btn lang-btn" onclick={toggleLang} title="Change language">EN</button>
     </div>
     <div class="header-extra-tabs">
       {#each EXTRA_TABS as tab}
@@ -56,6 +84,8 @@
   .header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
   .header-title { font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 8px; color: #e2e8f0; }
   .accent { color: var(--accent, #6366f1); }
+  .kodex-nav-btn { background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; }
+  .lang-btn { font-size: 11px; font-weight: 800; color: var(--accent, #6366f1); letter-spacing: 0.5px; margin-left: 4px; }
   .header-extra-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
   .game-nav-btn { padding: 4px 10px; font-size: 11px; font-weight: 700; background: transparent; border: 1px solid; border-radius: 4px; cursor: pointer; }
   .cyber-motto { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 11px; }

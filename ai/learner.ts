@@ -2,6 +2,11 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import { fileURLToPath } from 'url';
+
+// Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const LEARNER_DIR = path.join(__dirname, '..', 'data', 'learners');
 const FALLBACK_DIR = path.join(os.tmpdir(), 'koded-learners');
@@ -21,6 +26,7 @@ interface LearnerTopic {
   errors: number;
   phase?: string;
 }
+
 
 interface LearnerPhase {
   completed: number;

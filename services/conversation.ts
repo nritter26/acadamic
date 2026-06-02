@@ -1,5 +1,10 @@
 import fsp from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const CONV_DIR = path.join(__dirname, '..', 'data', 'conversations');
 
@@ -119,3 +124,4 @@ export async function pruneOldConversations(): Promise<void> {
     }
   } catch {}
 }
+

@@ -1,9 +1,14 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
 import { validate, requireAuth } from '../middleware';
 import { AppError } from '../middleware';
+
+// Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 const CONTENT_DIR = path.join(__dirname, '..', 'content');

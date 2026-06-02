@@ -33,6 +33,20 @@ export function getCurriculumState() {
       _collapsedPhases = next;
     },
 
+    collapseAllPhases() {
+      if (!_topicData?.[_lang]) return;
+      const keys = Object.keys(_topicData[_lang]);
+      _collapsedPhases = new Set(keys);
+    },
+
+    expandAllPhases() {
+      _collapsedPhases = new Set();
+    },
+
+    getPhaseNames() {
+      return _topicData?.[_lang] ? Object.keys(_topicData[_lang]) : [];
+    },
+
     async loadLangData(lang) {
       if (_topicData && _topicData[lang]) return;
       _loadVersion++;

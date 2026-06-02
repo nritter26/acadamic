@@ -6,12 +6,17 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 import http from 'http';
+import { fileURLToPath } from 'url'; // 1. Import fileURLToPath
 
 import { requestLogger, errorHandler, notFound, optionalAuth } from './middleware';
 import { rateLimit, detectOllama, setupWebSocket, getWSStats, metricsHandler, trackRequest, openapiHandler, swaggerUIHandler, pruneOldConversations, initWarmPool, shutdownWarmPool } from './services';
 import { logger } from './middleware';
 import * as database from './sql/database';
 import apiRoutes from './routes';
+
+// 2. Recreate __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', 1);
@@ -126,3 +131,4 @@ server.listen(PORT, () => {
 initWarmPool().catch(err => logger.warn({ err: (err as Error).message }, 'Warm pool init deferred to first request'));
 
 export default app;
+
