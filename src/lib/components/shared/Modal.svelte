@@ -1,4 +1,5 @@
 <script>
+  import { fade } from 'svelte/transition';
   let { open = false, onclose = () => {} } = $props();
 
   function handleBackdrop(e) {
@@ -10,10 +11,10 @@
   }
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
 {#if open}
-  <svelte:window onkeydown={handleKeydown} />
-  <div class="modal-overlay" onclick={handleBackdrop} role="presentation">
-    <div class="modal-paper" onclick={(e) => e.stopPropagation()}>
+  <div class="modal-overlay" onclick={handleBackdrop} role="presentation" transition:fade={{ duration: 150 }}>
+    <div class="modal-paper" onclick={(e) => e.stopPropagation()} transition:fade={{ duration: 100 }}>
       <button class="modal-close" onclick={onclose}>✕</button>
       <slot />
     </div>

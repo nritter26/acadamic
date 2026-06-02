@@ -1,12 +1,19 @@
 <script>
   import GitGraph from '$lib/components/canvas/GitGraph.svelte';
+  import { onMount } from 'svelte';
+  import { getAppState } from '$lib/stores/app.svelte.js';
+
+  let app = $derived(getAppState());
+
+  onMount(() => {
+    app.workspaceOpen = false;
+  });
 </script>
 
 <div class="git-route">
-  <h2>Git Grounds</h2>
   <GitGraph />
 </div>
 
 <style>
-  .git-route { height: 100%; padding: 24px; box-sizing: border-box; background: #0f172a; color: #e2e8f0; }
+  .git-route { height: 100%; display: flex; flex-direction: column; background: #0f172a; color: #e2e8f0; }
 </style>

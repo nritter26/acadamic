@@ -1,10 +1,12 @@
 <script>
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
   import { getEditorState } from '$lib/stores/editor.svelte.js';
+  import { getAppState } from '$lib/stores/app.svelte.js';
   import { formatInlineCode } from '$lib/lib/syntax.js';
 
   let curr = $derived(getCurriculumState());
   let editor = $derived(getEditorState());
+  let app = $derived(getAppState());
   let data = $derived(curr.topicData?.[curr.lang]);
   let item = $derived(data?.[curr.phase]?.[curr.topic]);
   let explanation = $derived(Array.isArray(item) ? item[0] : item?.exp);
@@ -16,6 +18,14 @@
   });
 </script>
 
+<div class="explanation-header">
+  <label>Theory</label>
+  <div class="theory-actions">
+    <button class="ws-toggle-btn" onclick={() => app.toggleWorkspace()} title="Toggle workspace">
+      Editor {app.workspaceOpen ? '▾' : '▸'}
+    </button>
+  </div>
+</div>
 <div class="explanation">
   {#if item}
     <h3 class="topic-title">{curr.topic}</h3>
@@ -27,6 +37,10 @@
 </div>
 
 <style>
+  .explanation-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #94a3b8; border-bottom: 1px solid #1e293b; }
+  .theory-actions { display: flex; gap: 4px; }
+  .ws-toggle-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 2px 8px; font-size: 10px; border-radius: 3px; cursor: pointer; }
+  .ws-toggle-btn:hover { color: #e2e8f0; }
   .explanation { padding: 16px; height: 100%; overflow-y: auto; box-sizing: border-box; }
   .topic-title { margin: 0 0 4px; color: #e2e8f0; font-size: 16px; }
   .topic-metadata { color: #94a3b8; font-size: 11px; margin: 0 0 12px; }
