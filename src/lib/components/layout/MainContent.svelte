@@ -90,6 +90,22 @@
     stylingCss = s.defaultCss;
   }
 
+  let compilerCurriculum = $derived(appData?.courseData__compiler || null);
+  let compilerTopicData = $derived.by(() => {
+    if (!compilerCurriculum || !curr.phase || !curr.topic) return null;
+    return compilerCurriculum[curr.phase]?.[curr.topic] || null;
+  });
+
+  function loadCompilerTopic(phase, topic) {
+    curr.phase = phase;
+    curr.topic = topic;
+    const data = compilerCurriculum?.[phase]?.[topic];
+    if (data?.code) {
+      editor.code = data.code;
+      compilerRunPipeline(-1);
+    }
+  }
+
   let prevMode = $state(null);
 
   $effect(() => {
@@ -308,6 +324,25 @@
             <div class="ts-loading">Loading topics...</div>
           {/if}
         </div>
+      {:else if isCompilerMode}
+        <div class="cp-curriculum">
+          <div class="cp-cur-header">Compiler Pipeline</div>
+          {#if compilerCurriculum}
+            {#each Object.entries(compilerCurriculum) as [phase, topics]}
+              <div class="cp-cur-phase">
+                <div class="ts-phase-label">{phase}</div>
+                <div class="ts-topics">
+                  {#each Object.keys(topics) as topic}
+                    <button class="ts-topic-btn" class:active={curr.topic === topic}
+                            onclick={() => loadCompilerTopic(phase, topic)}>{topic}</button>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          {:else}
+            <div class="cp-cur-loading">Loading curriculum...</div>
+          {/if}
+        </div>
       {:else if hasCurriculum}
         <TopicList />
       {/if}
@@ -340,6 +375,16 @@
             <div class="styling-viz-content">{@html sc.svg}</div>
             <div class="styling-viz-desc">{sc.desc}</div>
           </div>
+        {/if}
+      {:else if isCompilerMode}
+        {#if compilerTopicData}
+          <div class="cp-theory">
+            <div class="cp-theory-header">{curr.topic}</div>
+            <div class="cp-theory-phase">{curr.phase}</div>
+            <div class="cp-theory-body">{@html compilerTopicData.exp}</div>
+          </div>
+        {:else}
+          <div class="explanation-placeholder">Select a topic to begin learning about compilers</div>
         {/if}
       {:else if hasCurriculum}
         {#if curr.topic}
