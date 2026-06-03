@@ -1,3 +1,19 @@
+import { TUTORIAL_COURSES as _TUTORIAL_COURSES } from '$lib/lib/tutorial-content.js';
+
+export { _TUTORIAL_COURSES as TUTORIAL_COURSES };
+
+export function createTutorialCourseState() {
+  return {
+    currentCourse: null,
+    currentPhase: null,
+    currentTopic: 0,
+    completedTopics: [],
+    completedPhases: [],
+    quizScores: {},
+    lastActivity: null,
+  };
+}
+
 export function createTutorialState() {
   return {
     currentLesson: null,
@@ -41,4 +57,33 @@ export const DEFAULT_TUTORIAL_LESSONS = [
 
 export function getLessonById(id, lessons = DEFAULT_TUTORIAL_LESSONS) {
   return lessons.find(lesson => lesson.id === id) || lessons[0];
+}
+
+export function getCourseById(id, courses = _TUTORIAL_COURSES) {
+  return courses.find(c => c.id === id) || null;
+}
+
+export function getPhaseById(course, phaseId) {
+  if (!course?.phases) return null;
+  return course.phases.find(p => p.id === phaseId) || null;
+}
+
+export function getTopicIndex(course, phaseId, topicName) {
+  const phase = getPhaseById(course, phaseId);
+  if (!phase) return -1;
+  return phase.topics.indexOf(topicName);
+}
+
+export function getTotalProgress(course, completedTopics) {
+  if (!course?.phases) return 0;
+  const total = course.phases.reduce((sum, p) => sum + p.topics.length, 0);
+  if (total === 0) return 0;
+  return Math.round((completedTopics.length / total) * 100);
+}
+
+export function getPhaseProgress(course, phaseId, completedTopics) {
+  const phase = getPhaseById(course, phaseId);
+  if (!phase) return 0;
+  const done = phase.topics.filter(t => completedTopics.includes(t)).length;
+  return Math.round((done / phase.topics.length) * 100);
 }
