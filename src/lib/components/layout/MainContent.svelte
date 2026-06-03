@@ -47,6 +47,8 @@
   let selectedProject = $state(null);
   let projectDiffFilter = $state('all');
   let projectLangFilter = $state('all');
+  let projectFrameworkFilter = $state('all');
+  let projectLanguage = $state('javascript');
 
   let appData = $state(null);
   let techStackProvider = $state('react');
@@ -141,13 +143,41 @@
     }
   });
 
+  let hasFrameworkProjects = $derived(projects.some(p => p.framework));
+  let projectProgress = $derived.by(() => {
+    try {
+      const learnerId = localStorage.getItem('koded_learnerId') || 'default';
+      return JSON.parse(localStorage.getItem('projects_progress_' + learnerId) || '{}');
+    } catch { return {}; }
+  });
+
   let filteredProjects = $derived(
     projects.filter(p => {
       if (projectDiffFilter !== 'all' && p.difficulty !== projectDiffFilter) return false;
       if (projectLangFilter !== 'all' && (!p.languages || !p.languages.includes(projectLangFilter))) return false;
+      if (projectFrameworkFilter !== 'all' && p.framework !== projectFrameworkFilter) return false;
       return true;
     })
   );
+
+  let frameworkFilters = $derived.by(() => {
+    const fws = new Set();
+    projects.forEach(p => { if (p.framework) fws.add(p.framework); });
+    return ['all', ...fws];
+  });
+  const FW_LABELS = { all: 'All', react: 'React', vue: 'Vue' };
+
+  function handleProjectSelect(p) {
+    selectedProject = p;
+    const projLang = p.languages?.[0] || 'javascript';
+    if (projLang !== projectLanguage) {
+      projectLanguage = projLang;
+    }
+  }
+
+  function handleProjectLangChange(lang) {
+    projectLanguage = lang;
+  }
 
   async function compilerRunPipeline(stage) {
     const labels = ['tokens', 'ast', 'stats'];
@@ -204,11 +234,32 @@
                 <button class="pfilter-btn" class:active={projectLangFilter === f} onclick={() => projectLangFilter = f}>{LANG_LABELS[f]}</button>
               {/each}
             </div>
+            {#if hasFrameworkProjects}
+              <div class="pfilter-row">
+                {#each frameworkFilters as f}
+                  <button class="pfilter-btn" class:active={projectFrameworkFilter === f} onclick={() => projectFrameworkFilter = f}>{FW_LABELS[f] || f}</button>
+                {/each}
+              </div>
+            {/if}
           </div>
-          <ProjectList projects={filteredProjects} selectedId={selectedProject?.id} language={'all'} onselect={(p) => selectedProject = p} />
+          <ProjectList
+            projects={filteredProjects}
+            selectedId={selectedProject?.id}
+            language={projectLanguage}
+            progress={projectProgress}
+            onselect={handleProjectSelect}
+            onlanguagechange={handleProjectLangChange}
+          />
         </aside>
         <main class="projects-main">
-          <ProjectDetail project={selectedProject} totalProjects={projects.length} />
+          <ProjectDetail
+            project={selectedProject}
+            language={projectLanguage}
+            projects={projects}
+            totalProjects={projects.length}
+            onselect={handleProjectSelect}
+            onlanguagechange={handleProjectLangChange}
+          />
         </main>
       </div>
     {/if}

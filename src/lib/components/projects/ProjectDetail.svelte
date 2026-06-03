@@ -1,7 +1,9 @@
 <script>
   import { getEditorState } from '$lib/stores/editor.svelte.js';
+  import { getAIState } from '$lib/stores/ai.svelte.js';
+  import { apiStream } from '$lib/lib/api.js';
 
-  let { project = null, language = 'javascript', totalProjects = 0 } = $props();
+  let { project = null, language = 'javascript', projects = [], totalProjects = 0, onselect = () => {}, onlanguagechange = () => {} } = $props();
   let editor = $derived(getEditorState());
 
   let stepStates = $state([]);
@@ -20,7 +22,11 @@
   let progressPct = $derived(totalSteps > 0 ? Math.round(completedCount / totalSteps * 100) : 0);
   let isComplete = $derived(totalSteps > 0 && completedCount === totalSteps);
 
-  const STORAGE_KEY = 'kodex_project_progress';
+  function getLearnerId() {
+    if (typeof localStorage === 'undefined') return 'default';
+    return localStorage.getItem('koded_learnerId') || 'default';
+  }
+  function storageKey() { return 'projects_progress_' + getLearnerId(); }
 
   $effect(() => {
     if (project) loadProject();
@@ -263,7 +269,8 @@
   function saveProgress() {
     if (!project) return;
     saveCurrentCode();
-    const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const key = storageKey();
+    const all = JSON.parse(localStorage.getItem(key) || '{}');
     all[project.id] = {
       completedSteps: stepStates.map((s, i) => s === 'completed' ? i : -1).filter(i => i >= 0),
       skippedSteps: stepStates.map((s, i) => s === 'skipped' ? i : -1).filter(i => i >= 0),
@@ -273,16 +280,50 @@
       stepOutput,
       stepHintIndex,
     };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(all)); }
+    try { localStorage.setItem(key, JSON.stringify(all)); }
     catch (e) { console.warn('Progress not saved', e); }
   }
 
   function loadProgress(projectId) {
     try {
-      const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const key = storageKey();
+      const all = JSON.parse(localStorage.getItem(key) || '{}');
       return all[projectId] || null;
     } catch { return null; }
   }
+
+  async function askDevin() {
+    const step = activeStep;
+    const code = editor.code || '';
+    const prompt = 'I\'m working on the project "' + (project?.title || '') + '", step "' + (step?.title || '') + '". ' +
+      'The task: ' + (step?.description || '') + '. ' +
+      (code.trim() ? '\n\nMy current code:\n' + code : '');
+    const ai = getAIState();
+    ai.togglePanel();
+    await new Promise(r => setTimeout(r, 300));
+    ai.addMessage(prompt, 'user');
+    ai.addMessage('', 'bot');
+    ai.setStreaming(true);
+    let streamed = '';
+    await apiStream('/api/chat', {
+      message: prompt,
+      lang: language,
+      topic: project?.id || '',
+      phase: 'project',
+    }, (chunk) => {
+      streamed += chunk;
+      ai.updateLastMessage(streamed);
+    }, () => {
+      ai.setStreaming(false);
+    }, (error) => {
+      ai.updateLastMessage('Error: ' + error);
+      ai.setStreaming(false);
+    });
+  }
+
+  let suggestedNext = $derived(
+    projects.filter(p => p.difficulty === project?.difficulty && p.id !== project?.id).slice(0, 3)
+  );
 
   let displayedHints = $derived.by(() => {
     const hints = activeStep?.hints || [];
@@ -321,6 +362,14 @@
           <p>You built: <strong>{project.title}</strong></p>
           {#if project.concepts?.length}
             <p>Concepts covered: {project.concepts.join(', ')}</p>
+          {/if}
+          {#if suggestedNext.length > 0}
+            <div class="complete-next">
+              <p>Try next:</p>
+              {#each suggestedNext as np}
+                <button class="proj-btn" onclick={() => onselect(np)}>{np.title}</button>
+              {/each}
+            </div>
           {/if}
           <div class="complete-actions">
             <button class="proj-btn" onclick={() => { stepIndex = 0; loadProject(); }}>Review Again</button>
@@ -367,6 +416,10 @@
             {/if}
           </div>
 
+          <div class="ai-area">
+            <button class="ai-btn" onclick={askDevin}>Ask Devin</button>
+            <span class="ai-hint">Stuck? Get AI help with this step</span>
+          </div>
           <div class="ai-area">
             <button class="ai-btn" onclick={showAnswer}>Show Answer</button>
           </div>
@@ -444,13 +497,17 @@
   .skip-link { background: transparent; border: none; color: #64748b; font-size: 10px; cursor: pointer; margin: 0 auto; }
   .skip-link:hover { color: #94a3b8; }
 
-  .ai-area { }
+  .ai-area { display: flex; align-items: center; gap: 6px; }
   .ai-btn { background: transparent; border: 1px solid #334155; color: #a78bfa; padding: 4px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
   .ai-btn:hover { border-color: #a78bfa; }
+  .ai-hint { font-size: 10px; color: #64748b; }
 
   .complete-view { text-align: center; padding: 24px 0; }
   .complete-view h2 { font-size: 20px; color: #22c55e; margin: 0 0 8px; }
   .complete-view p { color: #94a3b8; font-size: 13px; }
+  .complete-next { margin: 12px 0; }
+  .complete-next p { font-size: 11px; color: #64748b; margin-bottom: 6px; }
+  .complete-next .proj-btn { margin: 2px 4px; }
   .complete-actions { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
   .proj-btn { padding: 6px 14px; font-size: 11px; font-weight: 700; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; cursor: pointer; }
   .proj-btn:hover { background: #334155; }
