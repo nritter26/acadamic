@@ -1,5 +1,4 @@
 import { TUTORIAL_COURSES as _TUTORIAL_COURSES } from '$lib/lib/tutorial-content.js';
-
 export { _TUTORIAL_COURSES as TUTORIAL_COURSES };
 
 export function createTutorialCourseState() {
