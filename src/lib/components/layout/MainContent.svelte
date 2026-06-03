@@ -213,6 +213,10 @@
       </div>
     {/if}
   </div>
+{:else if isChallengeMode}
+  <ChallengeView />
+{:else if isQuizMode}
+  <QuizView />
 {:else}
   <div class="curriculum-layout" class:tool-mode={usesCustomWorkspace}>
     <div class="col col-curriculum">
