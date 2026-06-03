@@ -9,6 +9,17 @@
     { id: 'unity', label: 'Unity' },
     { id: 'unreal', label: 'Unreal' },
   ];
+
+  function selectEngine(id) {
+    curr.engineFilter = id;
+    curr.phase = '';
+    curr.topic = '';
+    if (id === 'all') {
+      curr.loadLangData('gamedev');
+    } else {
+      curr.loadLangData(id);
+    }
+  }
 </script>
 
 <div class="engine-filters">
@@ -16,7 +27,7 @@
     <button
       class="engine-btn"
       class:active={curr.engineFilter === e.id}
-      onclick={() => curr.engineFilter = e.id}
+      onclick={() => selectEngine(e.id)}
     >{e.label}</button>
   {/each}
 </div>
