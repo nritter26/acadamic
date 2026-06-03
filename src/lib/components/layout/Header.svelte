@@ -2,11 +2,13 @@
   import { getAppState } from '$lib/stores/app.svelte.js';
   import { LANG_NAMES } from '$lib/lib/constants.js';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
 
   let { onmodechange = () => {} } = $props();
   let app = $derived(getAppState());
 
   const STANDALONE_TABS = new Set(['tutorial', 'game', 'git', 'legacy']);
+  const STANDALONE_ROUTES = new Set(['tutorial', 'game', 'git', 'legacy']);
 
   const EXTRA_TABS = [
     { id: 'backend', label: 'Backend', color: '#6366F1' },
@@ -30,6 +32,10 @@
     if (STANDALONE_TABS.has(mode)) {
       goto('/' + mode);
     } else {
+      const routeId = $page.route.id || '';
+      if (STANDALONE_ROUTES.has(routeId.replace('/', ''))) {
+        goto('/', { replaceState: true });
+      }
       app.mode = mode;
       onmodechange(mode);
     }

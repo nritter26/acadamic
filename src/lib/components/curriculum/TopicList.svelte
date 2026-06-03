@@ -11,7 +11,8 @@
   let prog = $derived(getProgressState());
   let searchQuery = $state('');
 
-  let data = $derived(curr.topicData?.[curr.lang] || {});
+  let dataKey = $derived(curr.lang === 'gamedev' && curr.engineFilter !== 'all' ? curr.engineFilter : curr.lang);
+  let data = $derived(curr.topicData?.[dataKey] || {});
 
   let filteredPhases = $derived.by(() => {
     return Object.entries(data).map(([phaseName, topics]) => {

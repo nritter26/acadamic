@@ -1,5 +1,5 @@
 <script>
   import MiniGameCard from './MiniGameCard.svelte';
-  const game = { id: 'code-golf', title: 'Code Golf', description: 'Solve tasks with fewer characters.' };
+  let { game } = $props();
 </script>
 <MiniGameCard {game} />

@@ -55,14 +55,14 @@ export function getGameState() {
     earnXP(amount) {
       _xp += amount;
       const newLvl = Math.floor(_xp / 100) + 1;
-      if (newLvl > _level) {
+      const leveledUp = newLvl > _level;
+      if (leveledUp) {
         _level = newLvl;
         confetti(60);
         playSound('levelup');
-        return true;
       }
       lsSet(KEYS.xp, { xp: _xp, lvl: _level });
-      return false;
+      return leveledUp;
     },
 
     toggleSound() {

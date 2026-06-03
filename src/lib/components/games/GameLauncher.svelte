@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import { getGameState, showToast, ACHIEVEMENT_DEFS } from '$lib/stores/game.svelte.js';
   import { GAME_CATALOG } from '$lib/lib/games.js';
   import APIArcade from './APIArcade.svelte';
@@ -24,6 +25,12 @@
   let view = $state('hub');
   let selectedGame = $state(null);
   let soundToggleKey = $state(0);
+
+  onMount(() => {
+    function handler(e) { launchGame(e.detail.gameId); }
+    window.addEventListener('launch-game', handler);
+    return () => window.removeEventListener('launch-game', handler);
+  });
 
   const components = {
     'api-arcade': APIArcade, 'binary-hex-blitz': BinaryHexBlitz,

@@ -7,7 +7,8 @@
   let curr = $derived(getCurriculumState());
   let editor = $derived(getEditorState());
   let app = $derived(getAppState());
-  let data = $derived(curr.topicData?.[curr.lang]);
+  let dataKey = $derived(curr.lang === 'gamedev' && curr.engineFilter !== 'all' ? curr.engineFilter : curr.lang);
+  let data = $derived(curr.topicData?.[dataKey]);
   let item = $derived(data?.[curr.phase]?.[curr.topic]);
   let explanation = $derived(Array.isArray(item) ? item[0] : item?.exp);
   let code = $derived(Array.isArray(item) ? item[1] : item?.code);

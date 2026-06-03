@@ -1,11 +1,58 @@
 <script>
   import { getExecutionState } from '$lib/stores/execution.svelte.js';
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import { getEditorState } from '$lib/stores/editor.svelte.js';
+  import { runPipeline, highlightCode, renderTokens, renderAST, renderStats } from '$lib/lib/compiler.js';
 
   let exec = $derived(getExecutionState());
   let curr = $derived(getCurriculumState());
+  let editor = $derived(getEditorState());
 
   let activeTab = $state('output');
+  let appData = $state(null);
+
+  async function loadAppData() {
+    if (appData) return;
+    try {
+      const r = await fetch('/content/app-data.json');
+      appData = await r.json();
+    } catch (e) { console.error('Failed to load app data', e); }
+  }
+
+  async function compilerRunPipeline(stage) {
+    const labels = ['tokens', 'ast', 'stats'];
+    const label = stage === -1 ? 'full' : labels[stage] || 'source';
+    exec.running = true;
+    exec.compilerStage = label;
+    exec.compilerOutput = 'Processing...';
+    try {
+      const code = editor.code || '';
+      const lang = 'js';
+      const configs = { LANG_CONFIG: appData?.LANG_CONFIG, TOKEN_TYPES: appData?.TOKEN_TYPES, TOKEN_COLORS: appData?.TOKEN_COLORS };
+      if (label === 'source') {
+        exec.compilerOutput = `<div class="cp-stage-result cp-source">${highlightCode(code, lang, configs)}</div>`;
+      } else {
+        const result = runPipeline(code, lang, configs);
+        if (label === 'tokens') {
+          exec.compilerOutput = renderTokens(result.tokens, configs.TOKEN_COLORS);
+        } else if (label === 'ast') {
+          exec.compilerOutput = `<div class="cp-stage-result">${renderAST(result.ast, 0)}</div>`;
+        } else if (label === 'stats') {
+          exec.compilerOutput = renderStats(result.stats);
+        } else if (label === 'full') {
+          exec.compilerOutput = `<div class="cp-full">
+            <div class="cp-stage"><h4 class="cp-stage-title">Source Code</h4>${highlightCode(code, lang, configs)}</div>
+            <div class="cp-stage"><h4 class="cp-stage-title">Tokens</h4>${renderTokens(result.tokens, configs.TOKEN_COLORS)}</div>
+            <div class="cp-stage"><h4 class="cp-stage-title">AST</h4>${renderAST(result.ast, 0)}</div>
+            <div class="cp-stage"><h4 class="cp-stage-title">Stats</h4>${renderStats(result.stats)}</div>
+          </div>`;
+        }
+      }
+    } catch (e) {
+      exec.compilerOutput = 'Error: ' + e.message;
+    }
+    exec.running = false;
+  }
 
   async function handleBenchmark() {
     exec.running = true;
@@ -32,6 +79,14 @@
       navigator.clipboard?.writeText(exec.apiResponse);
     }
   }
+
+  const STAGE_MAP = { source: -2, tokens: 0, ast: 1, stats: 2 };
+
+  function handleCompilerStageClick(stage) {
+    const label = stage.toLowerCase();
+    loadAppData();
+    compilerRunPipeline(STAGE_MAP[label]);
+  }
 </script>
 
 <div class="console">
@@ -45,7 +100,7 @@
   <div class="console-tabs">
     <button class="console-tab" class:active={activeTab === 'output'} onclick={() => activeTab = 'output'}>Output</button>
     <button class="console-tab" class:active={activeTab === 'api'} onclick={() => activeTab = 'api'}>API Response</button>
-    <button class="console-tab" class:active={activeTab === 'compiler'} onclick={() => activeTab = 'compiler'}>Compiler</button>
+    <button class="console-tab" class:active={activeTab === 'compiler'} onclick={() => { activeTab = 'compiler'; loadAppData(); compilerRunPipeline(-1); }}>Compiler</button>
   </div>
   {#if activeTab === 'output'}
     <pre class="console-output" class:has-error={exec.error}>{exec.error ? exec.error : exec.output || '// Run code to see output'}</pre>
@@ -68,7 +123,7 @@
   {:else if activeTab === 'compiler'}
     <div class="compiler-tabs">
       {#each ['Source', 'Tokens', 'AST', 'Stats'] as stage}
-        <button class="cp-tab" class:active={exec.compilerStage === stage.toLowerCase()} onclick={() => exec.compilerStage = stage.toLowerCase()}>{stage}</button>
+        <button class="cp-tab" class:active={exec.compilerStage === stage.toLowerCase()} onclick={() => handleCompilerStageClick(stage)} disabled={exec.running}>{stage}</button>
       {/each}
     </div>
     <div class="console-output compiler-html">{@html exec.compilerOutput || '<span class="cp-empty">Click a pipeline stage button to analyze your code.</span>'}</div>

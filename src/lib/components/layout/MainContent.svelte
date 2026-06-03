@@ -47,6 +47,8 @@
   let selectedProject = $state(null);
   let projectDiffFilter = $state('all');
   let projectLangFilter = $state('all');
+  let projectFrameworkFilter = $state('all');
+  let projectLanguage = $state('javascript');
 
   let appData = $state(null);
   let techStackProvider = $state('react');
@@ -86,6 +88,22 @@
     if (!s) return;
     stylingScenario = id;
     stylingCss = s.defaultCss;
+  }
+
+  let compilerCurriculum = $derived(appData?.courseData__compiler || null);
+  let compilerTopicData = $derived.by(() => {
+    if (!compilerCurriculum || !curr.phase || !curr.topic) return null;
+    return compilerCurriculum[curr.phase]?.[curr.topic] || null;
+  });
+
+  function loadCompilerTopic(phase, topic) {
+    curr.phase = phase;
+    curr.topic = topic;
+    const data = compilerCurriculum?.[phase]?.[topic];
+    if (data?.code) {
+      editor.code = data.code;
+      compilerRunPipeline(-1);
+    }
   }
 
   let prevMode = $state(null);
@@ -141,13 +159,41 @@
     }
   });
 
+  let hasFrameworkProjects = $derived(projects.some(p => p.framework));
+  let projectProgress = $derived.by(() => {
+    try {
+      const learnerId = localStorage.getItem('koded_learnerId') || 'default';
+      return JSON.parse(localStorage.getItem('projects_progress_' + learnerId) || '{}');
+    } catch { return {}; }
+  });
+
   let filteredProjects = $derived(
     projects.filter(p => {
       if (projectDiffFilter !== 'all' && p.difficulty !== projectDiffFilter) return false;
       if (projectLangFilter !== 'all' && (!p.languages || !p.languages.includes(projectLangFilter))) return false;
+      if (projectFrameworkFilter !== 'all' && p.framework !== projectFrameworkFilter) return false;
       return true;
     })
   );
+
+  let frameworkFilters = $derived.by(() => {
+    const fws = new Set();
+    projects.forEach(p => { if (p.framework) fws.add(p.framework); });
+    return ['all', ...fws];
+  });
+  const FW_LABELS = { all: 'All', react: 'React', vue: 'Vue' };
+
+  function handleProjectSelect(p) {
+    selectedProject = p;
+    const projLang = p.languages?.[0] || 'javascript';
+    if (projLang !== projectLanguage) {
+      projectLanguage = projLang;
+    }
+  }
+
+  function handleProjectLangChange(lang) {
+    projectLanguage = lang;
+  }
 
   async function compilerRunPipeline(stage) {
     const labels = ['tokens', 'ast', 'stats'];
@@ -204,15 +250,40 @@
                 <button class="pfilter-btn" class:active={projectLangFilter === f} onclick={() => projectLangFilter = f}>{LANG_LABELS[f]}</button>
               {/each}
             </div>
+            {#if hasFrameworkProjects}
+              <div class="pfilter-row">
+                {#each frameworkFilters as f}
+                  <button class="pfilter-btn" class:active={projectFrameworkFilter === f} onclick={() => projectFrameworkFilter = f}>{FW_LABELS[f] || f}</button>
+                {/each}
+              </div>
+            {/if}
           </div>
-          <ProjectList projects={filteredProjects} selectedId={selectedProject?.id} language={'all'} onselect={(p) => selectedProject = p} />
+          <ProjectList
+            projects={filteredProjects}
+            selectedId={selectedProject?.id}
+            language={projectLanguage}
+            progress={projectProgress}
+            onselect={handleProjectSelect}
+            onlanguagechange={handleProjectLangChange}
+          />
         </aside>
         <main class="projects-main">
-          <ProjectDetail project={selectedProject} totalProjects={projects.length} />
+          <ProjectDetail
+            project={selectedProject}
+            language={projectLanguage}
+            projects={projects}
+            totalProjects={projects.length}
+            onselect={handleProjectSelect}
+            onlanguagechange={handleProjectLangChange}
+          />
         </main>
       </div>
     {/if}
   </div>
+{:else if isChallengeMode}
+  <ChallengeView />
+{:else if isQuizMode}
+  <QuizView />
 {:else}
   <div class="curriculum-layout" class:tool-mode={usesCustomWorkspace}>
     <div class="col col-curriculum">
@@ -253,6 +324,25 @@
             <div class="ts-loading">Loading topics...</div>
           {/if}
         </div>
+      {:else if isCompilerMode}
+        <div class="cp-curriculum">
+          <div class="cp-cur-header">Compiler Pipeline</div>
+          {#if compilerCurriculum}
+            {#each Object.entries(compilerCurriculum) as [phase, topics]}
+              <div class="cp-cur-phase">
+                <div class="ts-phase-label">{phase}</div>
+                <div class="ts-topics">
+                  {#each Object.keys(topics) as topic}
+                    <button class="ts-topic-btn" class:active={curr.topic === topic}
+                            onclick={() => loadCompilerTopic(phase, topic)}>{topic}</button>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          {:else}
+            <div class="cp-cur-loading">Loading curriculum...</div>
+          {/if}
+        </div>
       {:else if hasCurriculum}
         <TopicList />
       {/if}
@@ -285,6 +375,16 @@
             <div class="styling-viz-content">{@html sc.svg}</div>
             <div class="styling-viz-desc">{sc.desc}</div>
           </div>
+        {/if}
+      {:else if isCompilerMode}
+        {#if compilerTopicData}
+          <div class="cp-theory">
+            <div class="cp-theory-header">{curr.topic}</div>
+            <div class="cp-theory-phase">{curr.phase}</div>
+            <div class="cp-theory-body">{@html compilerTopicData.exp}</div>
+          </div>
+        {:else}
+          <div class="explanation-placeholder">Select a topic to begin learning about compilers</div>
         {/if}
       {:else if hasCurriculum}
         {#if curr.topic}
@@ -422,6 +522,16 @@
   .cp-btn:hover:not(:disabled) { background: #334155; }
   .cp-btn-all { border-color: #6366f1; color: #c7d2fe; }
   .cp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cp-curriculum { overflow-y: auto; flex: 1; }
+  .cp-cur-header { padding: 6px 8px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #1e293b; }
+  .cp-cur-loading { padding: 12px; color: #64748b; font-size: 10px; font-style: italic; }
+  .cp-theory { padding: 16px; overflow-y: auto; height: 100%; }
+  .cp-theory-header { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 2px; }
+  .cp-theory-phase { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .cp-theory-body { font-size: 13px; line-height: 1.7; color: #cbd5e1; }
+  .cp-theory-body :global(p) { margin: 0 0 12px; }
+  .cp-theory-body :global(code) { background: #1e293b; padding: 1px 5px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #e2e8f0; }
+  .cp-theory-body :global(strong) { color: #e2e8f0; }
   .api-toggle-btn { padding: 6px 12px; font-size: 11px; font-weight: 700; background: #f97316; border: none; border-radius: 4px; color: #fff; cursor: pointer; margin: 8px 12px; }
   .api-toggle-btn:hover { background: #ea580c; }
   .action-btn { padding: 4px 12px; font-size: 11px; font-weight: 700; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; cursor: pointer; white-space: nowrap; margin: 8px 12px; }
