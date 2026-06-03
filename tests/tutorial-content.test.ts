@@ -10,7 +10,9 @@ describe('Tutorial content integrity', () => {
     for (const course of TUTORIAL_COURSES) {
       expect(course.id).toBeTruthy();
       expect(course.title).toBeTruthy();
+      expect(course.summary).toBeTruthy();
       expect(course.lang).toBeTruthy();
+      expect(course.icon).toBeTruthy();
       expect(Array.isArray(course.phases)).toBe(true);
       for (const phase of course.phases) {
         expect(phase.id).toBeTruthy();
