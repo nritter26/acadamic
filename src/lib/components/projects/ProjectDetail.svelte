@@ -352,7 +352,7 @@
       <aside class="guide">
         <div class="guide-header">
         <span class="guide-title">{project.title}</span>
-        <span class="guide-count">{stepIndex + 1} / {total}</span>
+        <span class="guide-count">{stepIndex + 1} / {totalSteps}</span>
       </div>
       <div class="guide-bar"><div class="guide-bar-fill" style="width:{progressPct}%"></div></div>
 
@@ -431,6 +431,7 @@
         <button class="ws-tab" class:active={activeTab === 'code'} onclick={() => activeTab = 'code'}>Code</button>
         <button class="ws-tab" class:active={activeTab === 'preview'} onclick={() => activeTab = 'preview'}>Preview</button>
         <button class="run-btn" onclick={runCode}>Run</button>
+        <button class="showhow-btn" onclick={showAnswer}>Show How</button>
       </div>
       <div class="ws-content">
         {#if activeTab === 'code'}
@@ -517,8 +518,10 @@
   .ws-tab { padding: 6px 14px; font-size: 11px; font-weight: 600; background: transparent; border: none; border-bottom: 2px solid transparent; color: #64748b; cursor: pointer; }
   .ws-tab.active { color: #e2e8f0; border-bottom-color: #6366f1; }
   .ws-tab:hover { color: #cbd5e1; }
-  .run-btn { margin-left: auto; padding: 4px 12px; font-size: 10px; font-weight: 700; background: #059669; border: none; border-radius: 4px; color: #fff; cursor: pointer; margin-right: 8px; align-self: center; }
+  .run-btn { margin-left: auto; padding: 4px 12px; font-size: 10px; font-weight: 700; background: #059669; border: none; border-radius: 4px; color: #fff; cursor: pointer; align-self: center; }
   .run-btn:hover { background: #047857; }
+  .showhow-btn { padding: 4px 10px; font-size: 10px; font-weight: 700; background: transparent; border: 1px solid #475569; border-radius: 4px; color: #cbd5e1; cursor: pointer; margin-right: 8px; align-self: center; }
+  .showhow-btn:hover { border-color: #a78bfa; color: #a78bfa; }
 
   .ws-content { flex: 1; min-height: 0; display: flex; }
   .code-area { flex: 1; display: flex; }

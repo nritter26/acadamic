@@ -1,5 +1,5 @@
 <script>
   import MiniGameCard from './MiniGameCard.svelte';
-  const game = { id: 'logic-ladder', title: 'Logic Ladder', description: 'Step through branching logic puzzles.', mode: 'choice' };
+  let { game } = $props();
 </script>
 <MiniGameCard {game} />

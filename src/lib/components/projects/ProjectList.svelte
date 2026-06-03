@@ -10,7 +10,7 @@
     onlanguagechange = () => {},
   } = $props();
 
-  let grouped = $derived(groupProjectsByDifficulty(projects, { language }));
+  let grouped = $derived(groupProjectsByDifficulty(projects, { language: 'all' }));
   let activeLanguage = $derived(language);
 
   function getLangBadge(langs) {

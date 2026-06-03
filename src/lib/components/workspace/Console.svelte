@@ -100,7 +100,7 @@
   <div class="console-tabs">
     <button class="console-tab" class:active={activeTab === 'output'} onclick={() => activeTab = 'output'}>Output</button>
     <button class="console-tab" class:active={activeTab === 'api'} onclick={() => activeTab = 'api'}>API Response</button>
-    <button class="console-tab" class:active={activeTab === 'compiler'} onclick={() => activeTab = 'compiler'}>Compiler</button>
+    <button class="console-tab" class:active={activeTab === 'compiler'} onclick={() => { activeTab = 'compiler'; loadAppData(); compilerRunPipeline(-1); }}>Compiler</button>
   </div>
   {#if activeTab === 'output'}
     <pre class="console-output" class:has-error={exec.error}>{exec.error ? exec.error : exec.output || '// Run code to see output'}</pre>

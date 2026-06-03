@@ -1,5 +1,5 @@
 <script>
   import MiniGameCard from './MiniGameCard.svelte';
-  const game = { id: 'memory-match', title: 'Memory Match', description: 'Match concepts with definitions.' };
+  let { game } = $props();
 </script>
 <MiniGameCard {game} />

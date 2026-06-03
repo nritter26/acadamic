@@ -1,7 +1,9 @@
 <script>
   import { GAME_CHALLENGES, isCorrectAnswer } from '$lib/lib/games.js';
+  import { getGameState } from '$lib/stores/game.svelte.js';
 
   let { game } = $props();
+  let gameState = $derived(getGameState());
   let score = $state(0);
   let index = $state(0);
   let input = $state('');
@@ -10,6 +12,14 @@
   let challenges = $derived(GAME_CHALLENGES[game.id] || []);
   let challenge = $derived(challenges[index % Math.max(1, challenges.length)] || {});
   let mode = $derived(game.mode || 'choice');
+  let playRecorded = $state(false);
+
+  function recordPlayIfNeeded() {
+    if (!playRecorded) {
+      playRecorded = true;
+      gameState.recordPlay(game.id, score);
+    }
+  }
 
   function resetForNext() {
     input = '';
@@ -22,6 +32,9 @@
     const answer = challenge.answer || challenge.target;
     if (isCorrectAnswer(value, answer)) {
       score += 10;
+      gameState.earnXP(10);
+      gameState.recordAchievementStat(game.id + '_correct', 1);
+      recordPlayIfNeeded();
       feedback = 'Correct';
       setTimeout(resetForNext, 500);
     } else {

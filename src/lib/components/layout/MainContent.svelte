@@ -522,6 +522,16 @@
   .cp-btn:hover:not(:disabled) { background: #334155; }
   .cp-btn-all { border-color: #6366f1; color: #c7d2fe; }
   .cp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cp-curriculum { overflow-y: auto; flex: 1; }
+  .cp-cur-header { padding: 6px 8px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #1e293b; }
+  .cp-cur-loading { padding: 12px; color: #64748b; font-size: 10px; font-style: italic; }
+  .cp-theory { padding: 16px; overflow-y: auto; height: 100%; }
+  .cp-theory-header { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 2px; }
+  .cp-theory-phase { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .cp-theory-body { font-size: 13px; line-height: 1.7; color: #cbd5e1; }
+  .cp-theory-body :global(p) { margin: 0 0 12px; }
+  .cp-theory-body :global(code) { background: #1e293b; padding: 1px 5px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #e2e8f0; }
+  .cp-theory-body :global(strong) { color: #e2e8f0; }
   .api-toggle-btn { padding: 6px 12px; font-size: 11px; font-weight: 700; background: #f97316; border: none; border-radius: 4px; color: #fff; cursor: pointer; margin: 8px 12px; }
   .api-toggle-btn:hover { background: #ea580c; }
   .action-btn { padding: 4px 12px; font-size: 11px; font-weight: 700; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; cursor: pointer; white-space: nowrap; margin: 8px 12px; }
