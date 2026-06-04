@@ -196,7 +196,7 @@ const RUNNERS: Record<string, RunnerConfig> = {
   wasm: { cmd: 'wasmtime "%f"', ext: '.wat' },
   asm: { cmd: 'nasm -f elf64 "%f" -o _prog.o && ld -o _prog _prog.o && ./_prog', ext: '.asm' },
   zig: { cmd: 'zig run "%f"', ext: '.zig' },
-  lua: { cmd: 'lua "%f"', ext: '.lua' },
+  lua: { cmd: 'lua5.4 "%f"', ext: '.lua' },
   bash: { cmd: 'bash "%f"', ext: '.sh' },
   php:  { cmd: 'php "%f"', ext: '.php' },
   scala: { cmd: 'scala "%f"', ext: '.scala' },
@@ -208,7 +208,7 @@ const RUNNERS: Record<string, RunnerConfig> = {
 
 // ── Execute ──
 
-export async function executeCode(lang: string, code: string, stdin?: string): Promise<ExecResult> {
+export async function executeCode(lang: string, code: string, stdin?: string, onChunk?: (chunk: string) => void): Promise<ExecResult> {
   if (!code) return { output: 'No code provided', error: true };
 
   // JavaScript sandbox
@@ -278,7 +278,7 @@ export async function executeCode(lang: string, code: string, stdin?: string): P
   // Try Docker sandbox first if available
   if (isDockerAvailable() && getSupportedDockerLangs().includes(lang)) {
     logger.debug({ lang }, 'Executing via Docker sandbox');
-    const dockerResult = await dockerExecute(lang, code, stdin);
+    const dockerResult = await dockerExecute(lang, code, stdin, onChunk);
     if (!dockerResult.error || dockerResult.dockerAvailable !== false) {
       return dockerResult;
     }

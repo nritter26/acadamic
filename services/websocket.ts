@@ -125,10 +125,11 @@ async function handleWSMessage(ws: WebSocket, client: WSClient, msg: { type: str
         return;
       }
 
-      // Send chunks as execution progresses
       try {
         send(ws, 'execute:start', { lang });
-        const result = await executeCode(lang, code, stdin);
+        const result = await executeCode(lang, code, stdin, (chunk: string) => {
+          send(ws, 'execute:chunk', { chunk });
+        });
         send(ws, 'execute:result', { output: result.output, error: result.error });
       } catch (err) {
         send(ws, 'execute:error', { message: (err as Error).message });

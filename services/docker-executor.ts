@@ -33,6 +33,7 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   java: { image: 'kodex-java', ext: '.java', src: 'Main', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m' },
   lua:  { image: 'kodex-lua', ext: '.lua', runCmd: 'lua /code/prog.lua', needsCompile: false },
   rb:   { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
+  cs:   { image: 'kodex-cs', ext: '.cs', runCmd: 'cp /code/prog.cs /home/code/proj/Program.cs && cd /home/code/proj && dotnet run --no-restore', needsCompile: false, memoryLimit: '512m', poolSize: 2 },
   sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
 
@@ -81,28 +82,19 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
   const tmpFile = path.join(tmpDir, srcName + config.ext);
   fs.writeFileSync(tmpFile, code);
 
-  try {
-    const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-    const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+  const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+  const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
 
-    logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
+  logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
 
-    const stdout = execSync(cmd, {
-      timeout: 30000,
-      stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
-      input: stdin,
-      maxBuffer: 1024 * 1024,
-    });
+  const { stdout, exitCode } = await spawnWithTimeout('sh', ['-c', cmd], { stdin, timeout: 30000, onChunk });
 
-    return { output: stdout.toString().trim() || '(no output)' };
-  } catch (err: any) {
-    const stderr = err.stderr?.toString().trim() || '';
-    const stdout = err.stdout?.toString().trim() || '';
-    const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
-    return { output, error: true, dockerAvailable: true };
-  } finally {
-    fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+  fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+
+  if (exitCode !== 0) {
+    return { output: stdout.trim() || `Execution failed with exit code ${exitCode}`, error: true, dockerAvailable: true };
   }
+  return { output: stdout.trim() || '(no output)' };
 }
 
 // ── Dockerfile generation ──
