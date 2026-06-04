@@ -1,4 +1,4 @@
-import { execSync, exec } from 'child_process';
+import { execSync, exec, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -11,6 +11,45 @@ const execAsync = (cmd: string, opts: { timeout?: number } = {}): Promise<{ stdo
       else resolve({ stdout: stdout || '', stderr: stderr || '' });
     });
   });
+
+function spawnWithTimeout(
+  cmd: string,
+  args: string[],
+  opts: { stdin?: string; timeout?: number; onChunk?: (chunk: string) => void }
+): Promise<{ stdout: string; exitCode: number | null }> {
+  return new Promise((resolve) => {
+    const child = spawn(cmd, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    let stdout = '';
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM');
+      setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 2000);
+    }, opts.timeout || 30000);
+
+    child.stdout!.on('data', (data: Buffer) => {
+      const chunk = data.toString();
+      stdout += chunk;
+      opts.onChunk?.(chunk);
+    });
+
+    child.on('error', () => {
+      clearTimeout(timer);
+      resolve({ stdout, exitCode: 1 });
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      resolve({ stdout, exitCode: code });
+    });
+
+    if (opts.stdin) {
+      child.stdin!.write(opts.stdin);
+      child.stdin!.end();
+    }
+  });
+}
 
 interface DockerRunnerConfig {
   image: string;
@@ -147,7 +186,13 @@ function releasePoolContainer(entry: WarmPoolEntry): void {
   entry.busy = false;
 }
 
-async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: string, stdin?: string): Promise<DockerExecResult> {
+async function executeOnWarmContainer(
+  entry: WarmPoolEntry,
+  lang: string,
+  code: string,
+  stdin?: string,
+  onChunk?: (chunk: string) => void
+): Promise<DockerExecResult> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) {
     releasePoolContainer(entry);
@@ -158,20 +203,12 @@ async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: 
   const progFile = path.join(entry.workspaceDir, srcName + config.ext);
   fs.writeFileSync(progFile, code);
 
-  try {
-    const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-    const execCmd = `docker exec -i ${entry.containerId} sh -c "${cmd} 2>&1"`;
+  const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+  const execCmd = `docker exec -i ${entry.containerId} sh -c "${cmd} 2>&1"`;
 
-    const stdout = execSync(execCmd, {
-      timeout: 30000,
-      stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
-      input: stdin,
-      maxBuffer: 1024 * 1024,
-    });
+  const { stdout, exitCode } = await spawnWithTimeout('sh', ['-c', execCmd], { stdin, timeout: 30000, onChunk });
 
-    releasePoolContainer(entry);
-    return { output: stdout.toString().trim() || '(no output)' };
-  } catch (err: any) {
+  if (exitCode !== 0) {
     const entries = warmPool.get(lang);
     if (entries) {
       const idx = entries.indexOf(entry);
@@ -181,12 +218,11 @@ async function executeOnWarmContainer(entry: WarmPoolEntry, lang: string, code: 
       execSync(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
     } catch { /* ignore */ }
     ensureLangPool(lang).catch(() => {});
-
-    const stderr = err.stderr?.toString().trim() || '';
-    const stdout = err.stdout?.toString().trim() || '';
-    const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
-    return { output, error: true, dockerAvailable: true };
+    return { output: stdout.trim() || `Execution failed with exit code ${exitCode}`, error: true, dockerAvailable: true };
   }
+
+  releasePoolContainer(entry);
+  return { output: stdout.trim() || '(no output)' };
 }
 
 export async function initWarmPool(): Promise<void> {
@@ -231,7 +267,12 @@ export async function shutdownWarmPool(): Promise<void> {
   try { fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true }); } catch { /* ignore */ }
 }
 
-export async function dockerExecute(lang: string, code: string, stdin?: string): Promise<DockerExecResult> {
+export async function dockerExecute(
+  lang: string,
+  code: string,
+  stdin?: string,
+  onChunk?: (chunk: string) => void
+): Promise<DockerExecResult> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) {
     return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: isDockerAvailable() };
@@ -244,7 +285,7 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
   // Try warm pool first
   const warmPoolEntry = await acquirePoolContainer(lang);
   if (warmPoolEntry) {
-    return executeOnWarmContainer(warmPoolEntry, lang, code, stdin);
+    return executeOnWarmContainer(warmPoolEntry, lang, code, stdin, onChunk);
   }
 
   // Check if the sandbox image exists before attempting to run
@@ -260,28 +301,19 @@ export async function dockerExecute(lang: string, code: string, stdin?: string):
   const tmpFile = path.join(tmpDir, srcName + config.ext);
   fs.writeFileSync(tmpFile, code);
 
-  try {
-    const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-    const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+  const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+  const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
 
-    logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
+  logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
 
-    const stdout = execSync(cmd, {
-      timeout: 30000,
-      stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
-      input: stdin,
-      maxBuffer: 1024 * 1024,
-    });
+  const { stdout, exitCode } = await spawnWithTimeout('sh', ['-c', cmd], { stdin, timeout: 30000, onChunk });
 
-    return { output: stdout.toString().trim() || '(no output)' };
-  } catch (err: any) {
-    const stderr = err.stderr?.toString().trim() || '';
-    const stdout = err.stdout?.toString().trim() || '';
-    const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
-    return { output, error: true, dockerAvailable: true };
-  } finally {
-    fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+  fs.rm(tmpDir, { recursive: true, force: true }, () => {});
+
+  if (exitCode !== 0) {
+    return { output: stdout.trim() || `Execution failed with exit code ${exitCode}`, error: true, dockerAvailable: true };
   }
+  return { output: stdout.trim() || '(no output)' };
 }
 
 // ── Dockerfile generation ──
