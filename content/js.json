@@ -1,17 +1,58 @@
 {
  "Fundamentals": {
-  "What is JavaScript": [
-   "JavaScript is a high-level, interpreted language that runs in browsers and on servers (Node.js). It has good parts (functions as first-class citizens, objects, closures) and bad parts (global variables, type coercion quirks). Crockford's 'The Good Parts' advises avoiding the bad parts by using strict mode, === over ==, and minimizing global scope. A key insight from Eloquent JavaScript: think of JavaScript as a language where functions are values that can be passed around, making it deeply rooted in functional programming patterns alongside its imperative style.",
-   "console.log('Hello JavaScript');  // prints string to browser console\n\n// The good parts: functions are values\nconst greet = function(name) { return 'Hello ' + name; };  // assign anonymous function to variable\nconsole.log(greet('World'));  // invoke function, logs result"
-  ],
+   "What is JavaScript": [
+    "JavaScript is a high-level, interpreted language that runs in browsers and on servers (Node.js). It has good parts (functions as first-class citizens, objects, closures) and bad parts (global variables, type coercion quirks). Crockford's 'The Good Parts' advises avoiding the bad parts by using strict mode, === over ==, and minimizing global scope. A key insight from Eloquent JavaScript: think of JavaScript as a language where functions are values that can be passed around, making it deeply rooted in functional programming patterns alongside its imperative style.",
+    "console.log('Hello JavaScript');  // prints string to browser console\n\n// The good parts: functions are values\nconst greet = function(name) { return 'Hello ' + name; };  // assign anonymous function to variable\nconsole.log(greet('World'));  // invoke function, logs result",
+    [
+     {
+      "type": "mcq",
+      "prompt": "What does console.log do?",
+      "options": [
+       "Reads input from the user",
+       "Prints output to the browser console",
+       "Creates a new variable",
+       "Defines a function"
+      ],
+      "correctIndex": 1,
+      "explanation": "console.log() prints its arguments to the browser's developer console. It's the most common way to debug JavaScript."
+     },
+     {
+      "type": "fill-blank",
+      "prompt": "Complete the function that greets a user by name:",
+      "code": "function greet(name) {\n  ___\n}",
+      "expected": "function greet(name) {\n  return 'Hello ' + name;\n}"
+     }
+    ]
+   ],
   "Syntax & Comments": [
    "JavaScript syntax is C-like with semicolons, blocks, and case-sensitivity. Crockford recommends always using semicolons — automatic semicolon insertion (ASI) can break code when lines start with ( or [. Comments should explain WHY, not WHAT. Eloquent JavaScript emphasizes clean formatting: consistent indentation (2 spaces), meaningful names, and breaking complex expressions into smaller named pieces.",
    "// Single-line comment — explains why, not what\n/* Multi-line comment */\n\n// Avoid relying on ASI — always use semicolons\nconst add = function(a, b) {\n  return a + b;\n}; // semicolon required here\n\n// Without semicolon, this breaks:\nconst x = add(1, 2)\n[1, 2, 3].forEach(console.log); // interpreted as add(...)[...]"
   ],
-  "Strict Mode": [
-   "Use 'use strict' to enable a safer, more predictable subset of JavaScript behavior and avoid common silent errors.",
-   "'use strict';                      // enables strict mode — catches silent errors\nfunction check() {                 // strict mode applies in function scope\n  x = 5; // ReferenceError in strict mode\n}"
-  ],
+   "Strict Mode": [
+    "Use 'use strict' to enable a safer, more predictable subset of JavaScript behavior and avoid common silent errors.",
+    "'use strict';                      // enables strict mode — catches silent errors\nfunction check() {                 // strict mode applies in function scope\n  x = 5; // ReferenceError in strict mode\n}",
+    [
+     {
+      "type": "mcq",
+      "prompt": "What happens when you assign to an undeclared variable in strict mode?",
+      "options": [
+       "The variable is auto-created globally",
+       "A ReferenceError is thrown",
+       "The assignment is silently ignored",
+       "The variable becomes undefined"
+      ],
+      "correctIndex": 1,
+      "explanation": "In strict mode, assigning to an undeclared variable throws a ReferenceError instead of creating a global variable. This prevents accidental globals."
+     },
+     {
+      "type": "fix-bug",
+      "prompt": "Fix this code so it declares the variable properly instead of creating an accidental global:",
+      "code": "function add(a, b) {\n  result = a + b;\n  return result;\n}",
+      "hint": "Add a declaration keyword (let or const) before the variable.",
+      "expected": "function add(a, b) {\n  const result = a + b;\n  return result;\n}"
+     }
+    ]
+   ],
   "Statements & Blocks": [
    "Learn how statement groups and block scope work with braces, and why grouping code carefully helps avoid bugs.",
    "if (true) {           // always true, block executes\n  let count = 1;       // declare block-scoped variable\n  console.log(count);  // logs 1, count is block-scoped\n}"

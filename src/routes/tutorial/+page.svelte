@@ -82,17 +82,17 @@
 />
 
 <style>
-  .tutorial-layout { display: flex; min-height: 100vh; }
-  .tutorial-layout.has-course { display: grid; grid-template-columns: 260px 1fr; }
-  .tutorial-sidebar { background: #0f172a; border-right: 1px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; }
-  .sidebar-header { padding: 16px; border-bottom: 1px solid #1e293b; }
-  .back-btn { background: none; border: none; color: #f97316; cursor: pointer; font-size: 12px; padding: 0; margin-bottom: 8px; }
+  .tutorial-layout { display: flex; flex: 1; width: 100%; min-height: 0; overflow: auto; }
+  .tutorial-layout.has-course { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+  .tutorial-sidebar { background: #0f172a; border-right: 1px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; min-height: 0; }
+  .sidebar-header { padding: 20px; border-bottom: 1px solid #1e293b; }
+  .back-btn { background: none; border: none; color: #f97316; cursor: pointer; font-size: 13px; padding: 0; margin-bottom: 8px; }
   .back-btn:hover { text-decoration: underline; }
-  .sidebar-header h3 { margin: 0; font-size: 14px; color: #e2e8f0; }
-  .tutorial-main { overflow: auto; }
-  .tutorial-hub { flex: 1; overflow: auto; background: linear-gradient(135deg, #111827, #431407); color: #e2e8f0; padding: clamp(24px, 5vw, 56px); }
-  .eyebrow { color: #fb923c; font-size: 12px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }
-  h1 { margin: 8px 0; font-size: clamp(42px, 9vw, 96px); line-height: 0.9; }
-  .tutorial-hub p { max-width: 600px; color: #fed7aa; line-height: 1.6; margin-bottom: 24px; }
-  .hub-courses { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .sidebar-header h3 { margin: 0; font-size: 16px; color: #e2e8f0; }
+  .tutorial-main { display: block; overflow: auto; min-height: 0; }
+  .tutorial-hub { display: flex; flex-direction: column; flex: 1; min-height: 0; background: linear-gradient(135deg, #111827, #431407); color: #e2e8f0; padding: clamp(64px, 10vw, 120px); box-sizing: border-box; max-width: 100%; overflow: auto; }
+  .eyebrow { color: #fb923c; font-size: 16px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }
+  h1 { margin: 16px 0 20px; font-size: clamp(72px, 12vw, 140px); line-height: 0.85; }
+  .tutorial-hub p { color: #fed7aa; font-size: 20px; line-height: 1.6; margin-bottom: 48px; }
+  .hub-courses { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; flex: 1; align-content: start; }
 </style>

@@ -21,7 +21,7 @@
 
   let { children } = $props();
   let app = $derived(getAppState());
-  let ai = $derived(getAIState());
+  let ai = getAIState();
   let editor = $derived(getEditorState());
   let exec = $derived(getExecutionState());
   let curr = $derived(getCurriculumState());
@@ -100,6 +100,6 @@
 <GameModal open={showGame} onclose={() => showGame = false} />
 
 <style>
-  .workspace { display: flex; flex: 1; overflow: hidden; }
-  main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .workspace { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+  main { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 </style>

@@ -16,13 +16,13 @@
 </button>
 
 <style>
-  .course-card { display: block; width: 100%; text-align: left; padding: 16px; border: 1px solid #334155; border-radius: 12px; background: #0f172a; cursor: pointer; transition: border-color 0.15s; }
-  .course-card:hover { border-color: #f97316; }
-  .cc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .cc-icon { width: 28px; height: 28px; object-fit: contain; }
-  .cc-title { margin: 0; font-size: 16px; color: #e2e8f0; }
-  .cc-summary { margin: 0 0 12px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
-  .cc-footer { display: flex; justify-content: space-between; font-size: 10px; color: #64748b; margin-bottom: 8px; }
-  .cc-bar { height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
-  .cc-bar-fill { height: 100%; background: #22c55e; border-radius: 2px; transition: width 0.3s; }
+  .course-card { display: block; width: 100%; text-align: left; padding: 48px; border: 2px solid #334155; border-radius: 28px; background: #0f172a; cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+  .course-card:hover { border-color: #f97316; transform: translateY(-6px); box-shadow: 0 12px 48px rgba(249,115,22,0.15); }
+  .cc-header { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
+  .cc-icon { width: 72px; height: 72px; object-fit: contain; }
+  .cc-title { margin: 0; font-size: 36px; color: #e2e8f0; }
+  .cc-summary { margin: 0 0 28px; font-size: 18px; color: #94a3b8; line-height: 1.7; }
+  .cc-footer { display: flex; justify-content: space-between; font-size: 16px; color: #64748b; margin-bottom: 20px; }
+  .cc-bar { height: 10px; background: #1e293b; border-radius: 5px; overflow: hidden; }
+  .cc-bar-fill { height: 100%; background: #22c55e; border-radius: 5px; transition: width 0.3s; }
 </style>
