@@ -22,6 +22,54 @@ const execAsync = (cmd, opts = {}) => new Promise((resolve, reject) => {
             resolve({ stdout: stdout || '', stderr: stderr || '' });
     });
 });
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+function spawnWithTimeout(cmd, args, opts) {
+    return new Promise((resolve) => {
+        const child = (0, child_process_1.spawn)(cmd, args, {
+            stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        let stdout = '';
+        const timer = setTimeout(() => {
+            child.kill('SIGTERM');
+            setTimeout(() => { try {
+                child.kill('SIGKILL');
+            }
+            catch { } }, 2000);
+        }, opts.timeout || 30000);
+        child.stdout.on('data', (data) => {
+            const chunk = data.toString();
+            stdout += chunk;
+            opts.onChunk?.(chunk);
+        });
+        child.on('error', () => {
+            clearTimeout(timer);
+            resolve({ stdout, exitCode: 1 });
+        });
+        child.on('close', (code) => {
+            clearTimeout(timer);
+            resolve({ stdout, exitCode: code });
+        });
+        if (opts.stdin) {
+            child.stdin.write(opts.stdin);
+            child.stdin.end();
+        }
+    });
+}
+const RUNNER_SCRIPT = `#!/bin/sh
+while true; do
+  if [ -f /code/.run ]; then
+    cmd=$(cat /code/.cmd)
+    if [ -f /code/.stdin ]; then
+      eval "$cmd" < /code/.stdin > /code/.out 2>&1
+    else
+      eval "$cmd" > /code/.out 2>&1
+    fi
+    echo $? > /code/.exit
+    rm -f /code/.run /code/.cmd /code/.stdin
+  fi
+  sleep 0.003
+done
+`;
 const DOCKER_RUNNERS = {
     py: { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
     js: { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
@@ -39,8 +87,9 @@ const DOCKER_RUNNERS = {
     php: { image: 'kodex-php', ext: '.php', runCmd: 'php /code/prog.php', needsCompile: false },
     scala: { image: 'kodex-scala', ext: '.scala', runCmd: 'scala /code/prog.scala', needsCompile: false, memoryLimit: '512m' },
     java: { image: 'kodex-java', ext: '.java', src: 'Main', compileCmd: 'javac /code/Main.java && java -cp /code Main', runCmd: '', needsCompile: true, memoryLimit: '768m', poolSize: 2 },
-    lua: { image: 'kodex-lua', ext: '.lua', runCmd: 'lua /code/prog.lua', needsCompile: false },
+    lua: { image: 'kodex-lua', ext: '.lua', runCmd: 'lua5.4 /code/prog.lua', needsCompile: false },
     rb: { image: 'kodex-rb', ext: '.rb', runCmd: 'ruby /code/prog.rb', needsCompile: false },
+    cs: { image: 'kodex-cs', ext: '.cs', runCmd: 'cp /code/prog.cs /home/code/proj/Program.cs && cd /home/code/proj && dotnet run --no-restore', needsCompile: false, memoryLimit: '512m', poolSize: 2 },
     sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
 let dockerAvailable = null;
@@ -60,7 +109,7 @@ function getSupportedDockerLangs() {
     return Object.keys(DOCKER_RUNNERS);
 }
 let warmPool = new Map();
-const POOL_SIZE = Math.max(1, parseInt(process.env.WARM_POOL_SIZE || '1', 10));
+const POOL_SIZE = Math.max(1, parseInt(process.env.WARM_POOL_SIZE || '3', 10));
 const WARM_POOL_BASE = path_1.default.join(os_1.default.tmpdir(), 'kodex-warm-pool');
 function warmPoolContainerName(lang, idx) {
     return `kodex-warm-${lang}-${idx}`;
@@ -77,9 +126,22 @@ async function ensureLangPool(lang) {
     for (let i = 0; i < langPoolSize; i++) {
         const workspaceDir = path_1.default.join(WARM_POOL_BASE, `${lang}-${i}`);
         fs_1.default.mkdirSync(workspaceDir, { recursive: true });
+        // Write the runner script into the shared volume
+        const runnerPath = path_1.default.join(workspaceDir, '.runner.sh');
+        if (!fs_1.default.existsSync(runnerPath)) {
+            fs_1.default.writeFileSync(runnerPath, RUNNER_SCRIPT);
+            fs_1.default.chmodSync(runnerPath, '755');
+        }
         try {
             const { stdout } = await execAsync(`docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`, { timeout: 30000 });
             const containerId = stdout.trim();
+            // Start the runner process inside the container (bypasses docker exec for code execution)
+            try {
+                await execAsync(`docker exec -d ${warmPoolContainerName(lang, i)} sh /code/.runner.sh`, { timeout: 10000 });
+            }
+            catch {
+                middleware_1.logger.debug({ lang }, 'Runner process failed, falling back to docker exec for this container');
+            }
             entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
         }
         catch {
@@ -109,13 +171,15 @@ function releasePoolContainer(entry) {
     try {
         const files = fs_1.default.readdirSync(entry.workspaceDir);
         for (const file of files) {
+            if (file === '.runner.sh' || file === '.runner.pid')
+                continue;
             fs_1.default.rmSync(path_1.default.join(entry.workspaceDir, file), { recursive: true, force: true });
         }
     }
     catch { /* ignore */ }
     entry.busy = false;
 }
-async function executeOnWarmContainer(entry, lang, code, stdin) {
+async function executeOnWarmContainer(entry, lang, code, stdin, onChunk) {
     const config = DOCKER_RUNNERS[lang];
     if (!config) {
         releasePoolContainer(entry);
@@ -123,36 +187,103 @@ async function executeOnWarmContainer(entry, lang, code, stdin) {
     }
     const srcName = config.src || 'prog';
     const progFile = path_1.default.join(entry.workspaceDir, srcName + config.ext);
+    const cmdPath = path_1.default.join(entry.workspaceDir, '.cmd');
+    const runPath = path_1.default.join(entry.workspaceDir, '.run');
+    const outPath = path_1.default.join(entry.workspaceDir, '.out');
+    const exitPath = path_1.default.join(entry.workspaceDir, '.exit');
+    // Write code file
     fs_1.default.writeFileSync(progFile, code);
+    // Write command to execute
+    const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+    fs_1.default.writeFileSync(cmdPath, cmd);
+    // Write stdin if provided
+    if (stdin) {
+        fs_1.default.writeFileSync(path_1.default.join(entry.workspaceDir, '.stdin'), stdin);
+    }
+    // Clean any stale artifacts from previous run
     try {
-        const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-        const execCmd = `docker exec -i ${entry.containerId} sh -c "${cmd} 2>&1"`;
-        const stdout = (0, child_process_1.execSync)(execCmd, {
-            timeout: 30000,
-            stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
-            input: stdin,
-            maxBuffer: 1024 * 1024,
-        });
-        releasePoolContainer(entry);
-        return { output: stdout.toString().trim() || '(no output)' };
+        fs_1.default.rmSync(outPath, { force: true });
     }
-    catch (err) {
-        const entries = warmPool.get(lang);
-        if (entries) {
-            const idx = entries.indexOf(entry);
-            if (idx >= 0)
-                entries.splice(idx, 1);
-        }
+    catch { }
+    try {
+        fs_1.default.rmSync(exitPath, { force: true });
+    }
+    catch { }
+    // Trigger execution
+    fs_1.default.writeFileSync(runPath, '');
+    // Poll for completion with output streaming
+    let stdout = '';
+    let exitCode = null;
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline) {
         try {
-            (0, child_process_1.execSync)(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
+            if (fs_1.default.existsSync(outPath)) {
+                const content = fs_1.default.readFileSync(outPath, 'utf-8');
+                if (content.length > stdout.length) {
+                    const chunk = content.slice(stdout.length);
+                    stdout = content;
+                    onChunk?.(chunk);
+                }
+            }
         }
-        catch { /* ignore */ }
-        ensureLangPool(lang).catch(() => { });
-        const stderr = err.stderr?.toString().trim() || '';
-        const stdout = err.stdout?.toString().trim() || '';
-        const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
-        return { output, error: true, dockerAvailable: true };
+        catch { }
+        if (fs_1.default.existsSync(exitPath)) {
+            try {
+                exitCode = parseInt(fs_1.default.readFileSync(exitPath, 'utf-8').trim(), 10) || 0;
+            }
+            catch {
+                exitCode = 0;
+            }
+            break;
+        }
+        await sleep(3);
     }
+    // Final output read
+    try {
+        if (fs_1.default.existsSync(outPath)) {
+            const content = fs_1.default.readFileSync(outPath, 'utf-8');
+            if (content.length > stdout.length) {
+                onChunk?.(content.slice(stdout.length));
+            }
+            stdout = content;
+        }
+    }
+    catch { }
+    // Cleanup run artifacts
+    for (const f of [runPath, cmdPath, outPath, exitPath, path_1.default.join(entry.workspaceDir, '.stdin')]) {
+        try {
+            fs_1.default.rmSync(f, { force: true });
+        }
+        catch { }
+    }
+    // Timeout — kill runner, restart it, replace container
+    if (exitCode === null) {
+        try {
+            (0, child_process_1.execSync)(`docker exec ${entry.containerId} sh -c "pkill -f 'while true' 2>/dev/null; pkill -P 1 2>/dev/null"`, { stdio: 'pipe', timeout: 3000 });
+        }
+        catch { }
+        execAsync(`docker exec -d ${entry.containerId} sh /code/.runner.sh`, { timeout: 5000 }).catch(() => { });
+        removeEntryFromPool(entry, lang);
+        return { output: stdout.trim() || 'Execution timed out', error: true, dockerAvailable: true };
+    }
+    releasePoolContainer(entry);
+    if (exitCode !== 0) {
+        return { output: stdout.trim() || `Exit code ${exitCode}`, error: true, dockerAvailable: true };
+    }
+    return { output: stdout.trim() || '(no output)' };
+}
+function removeEntryFromPool(entry, lang) {
+    const entries = warmPool.get(lang);
+    if (entries) {
+        const idx = entries.indexOf(entry);
+        if (idx >= 0)
+            entries.splice(idx, 1);
+    }
+    try {
+        (0, child_process_1.execSync)(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
+    }
+    catch { /* ignore */ }
+    ensureLangPool(lang).catch(() => { });
 }
 async function initWarmPool() {
     if (!isDockerAvailable()) {
@@ -195,7 +326,7 @@ async function shutdownWarmPool() {
     }
     catch { /* ignore */ }
 }
-async function dockerExecute(lang, code, stdin) {
+async function dockerExecute(lang, code, stdin, onChunk) {
     const config = DOCKER_RUNNERS[lang];
     if (!config) {
         return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: isDockerAvailable() };
@@ -206,7 +337,7 @@ async function dockerExecute(lang, code, stdin) {
     // Try warm pool first
     const warmPoolEntry = await acquirePoolContainer(lang);
     if (warmPoolEntry) {
-        return executeOnWarmContainer(warmPoolEntry, lang, code, stdin);
+        return executeOnWarmContainer(warmPoolEntry, lang, code, stdin, onChunk);
     }
     // Check if the sandbox image exists before attempting to run
     try {
@@ -220,27 +351,15 @@ async function dockerExecute(lang, code, stdin) {
     const srcName = config.src || 'prog';
     const tmpFile = path_1.default.join(tmpDir, srcName + config.ext);
     fs_1.default.writeFileSync(tmpFile, code);
-    try {
-        const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-        const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
-        middleware_1.logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
-        const stdout = (0, child_process_1.execSync)(cmd, {
-            timeout: 30000,
-            stdio: stdin ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
-            input: stdin,
-            maxBuffer: 1024 * 1024,
-        });
-        return { output: stdout.toString().trim() || '(no output)' };
+    const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
+    const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+    middleware_1.logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
+    const { stdout, exitCode } = await spawnWithTimeout('sh', ['-c', cmd], { stdin, timeout: 30000, onChunk });
+    fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+    if (exitCode !== 0) {
+        return { output: stdout.trim() || `Execution failed with exit code ${exitCode}`, error: true, dockerAvailable: true };
     }
-    catch (err) {
-        const stderr = err.stderr?.toString().trim() || '';
-        const stdout = err.stdout?.toString().trim() || '';
-        const output = stdout || stderr || `Execution failed: ${(err.message || '').slice(0, 200)}`;
-        return { output, error: true, dockerAvailable: true };
-    }
-    finally {
-        fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
-    }
+    return { output: stdout.trim() || '(no output)' };
 }
 // ── Dockerfile generation ──
 function generateDockerfiles(targetDir) {

@@ -1,5 +1,8 @@
+import fs from 'fs';
+import fsp from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url'; // 1. Add this import
+import { fileURLToPath } from 'url';
+import config from './config';
 
 // 2. Recreate __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);

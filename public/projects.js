@@ -101,9 +101,9 @@ async function loadAllProjects() {
     'go-waitgroup','go-worker-pool','go-file-io','go-json','go-http-server',
     'go-http-client','go-testing','go-benchmarking','go-embedding','go-generics',
     'go-contexts','go-time','go-sorting','go-env-config','go-logging',
-    // Go Advanced (20)
+    // Go Advanced (19)
     'go-reflection','go-plugin-system','go-middleware','go-web-router','go-database-sql',
-    'go-dependency-injection','go-graceful-shutdown','go-rate-limiting','go-tcp-server','go-websocket',
+    'go-graceful-shutdown','go-rate-limiting','go-tcp-server','go-websocket',
     'go-grpc','go-template-html','go-testing-advanced','go-coverage','go-race-detection',
     'go-pprof','go-tracing','go-microservice','go-event-bus','go-command-pattern',
     // Go Expert (25)

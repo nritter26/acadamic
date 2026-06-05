@@ -44,12 +44,10 @@
     ai.setStreaming(true);
 
     let streamed = '';
-    await apiStream('/api/chat', {
-      message,
-      lang: curr.lang,
-      topic: curr.topic,
-      phase: curr.phase,
-    }, (chunk) => {
+    const body = { message, lang: curr.lang, topic: curr.topic, phase: curr.phase };
+    if (ai.provider && ai.provider !== 'hybrid') body.provider = ai.provider;
+    if (ai.model) body.model = ai.model;
+    await apiStream('/api/chat', body, (chunk) => {
       streamed += chunk;
       ai.updateLastMessage(streamed);
       if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;

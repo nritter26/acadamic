@@ -9,10 +9,12 @@ exports.searchWithSources = searchWithSources;
 exports.getContext = getContext;
 exports.getTopicContext = getTopicContext;
 exports.getCurriculumContext = getCurriculumContext;
-const promises_1 = __importDefault(require("fs/promises"));
-const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const config_1 = __importDefault(require("./config"));
+const url_1 = require("url"); // 1. Add this import
+// 2. Recreate __dirname for ES Modules
+const __filename = (0, url_1.fileURLToPath)(import.meta.url);
+const __dirname = path_1.default.dirname(__filename);
+// Your original line will now work perfectly:
 const CONTENT_DIR = path_1.default.join(__dirname, '..', 'content');
 const CACHE_FILE = path_1.default.join(__dirname, '..', 'data', 'embeddings-cache.json');
 let curriculumDocs = [];
@@ -31,14 +33,14 @@ function tokenize(text) {
 async function buildCurriculumDocs() {
     curriculumDocs = [];
     try {
-        if (!fs_1.default.existsSync(CONTENT_DIR)) {
+        if (!fs.existsSync(CONTENT_DIR)) {
             console.error('buildCurriculumDocs: content directory not found');
             return;
         }
-        const files = fs_1.default.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.json'));
+        const files = fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.json'));
         for (const file of files) {
             const lang = file.replace('.json', '');
-            const raw = fs_1.default.readFileSync(path_1.default.join(CONTENT_DIR, file), 'utf-8');
+            const raw = fs.readFileSync(path_1.default.join(CONTENT_DIR, file), 'utf-8');
             const data = JSON.parse(raw);
             for (const [phase, topics] of Object.entries(data)) {
                 for (const [topic, val] of Object.entries(topics)) {
@@ -157,13 +159,13 @@ async function getEmbedding(text) {
     const key = text.toLowerCase().trim().slice(0, 100);
     if (embedCache?.[key])
         return embedCache[key];
-    if (config_1.default.openai.apiKey && config_1.default.provider !== 'keyword') {
+    if (config.openai.apiKey && config.provider !== 'keyword') {
         try {
             const response = await fetch('https://api.openai.com/v1/embeddings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${config_1.default.openai.apiKey}`,
+                    'Authorization': `Bearer ${config.openai.apiKey}`,
                 },
                 body: JSON.stringify({ model: 'text-embedding-3-small', input: text.slice(0, 8191) }),
             });
@@ -217,7 +219,7 @@ async function fetchEmbeddings(inputs) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config_1.default.openai.apiKey}`,
+                'Authorization': `Bearer ${config.openai.apiKey}`,
             },
             body: JSON.stringify({
                 model: 'text-embedding-3-small',
@@ -238,11 +240,11 @@ async function fetchEmbeddings(inputs) {
     }
 }
 async function buildEmbeddingCache() {
-    if (!config_1.default.openai.apiKey || config_1.default.provider === 'keyword')
+    if (!config.openai.apiKey || config.provider === 'keyword')
         return;
     try {
         try {
-            const raw = await promises_1.default.readFile(CACHE_FILE, 'utf-8');
+            const raw = await fsp.readFile(CACHE_FILE, 'utf-8');
             embedCache = JSON.parse(raw);
         }
         catch {
@@ -269,7 +271,7 @@ async function buildEmbeddingCache() {
                 toEmbed[j]._embedding = embedding;
             }
         }
-        await promises_1.default.writeFile(CACHE_FILE, JSON.stringify(embedCache));
+        await fsp.writeFile(CACHE_FILE, JSON.stringify(embedCache));
     }
     catch (e) {
         console.error('buildEmbeddingCache error:', e.message);
@@ -359,7 +361,7 @@ function getCurriculumContext(query, lang) {
 async function init() {
     await buildCurriculumDocs();
     buildTFIDF();
-    if (config_1.default.openai.apiKey) {
+    if (config.openai.apiKey) {
         try {
             await buildEmbeddingCache();
         }

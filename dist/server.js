@@ -43,11 +43,15 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const http_1 = __importDefault(require("http"));
+const url_1 = require("url"); // 1. Import fileURLToPath
 const middleware_1 = require("./middleware");
 const services_1 = require("./services");
 const middleware_2 = require("./middleware");
 const database = __importStar(require("./sql/database"));
 const routes_1 = __importDefault(require("./routes"));
+// 2. Recreate __dirname for ES Modules
+const __filename = (0, url_1.fileURLToPath)(import.meta.url);
+const __dirname = path_1.default.dirname(__filename);
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;

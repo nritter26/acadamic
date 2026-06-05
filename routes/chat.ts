@@ -13,23 +13,18 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
   const { message, lang, topic, phase, code, output, hasError, history, learnerId, provider, model, apiKey, endpoint } = req.body;
 
   let aborted = false;
-  const onClose = () => { aborted = true; };
-  const onFinish = () => { req.off('close', onClose); };
-  req.on('close', onClose);
-  res.on('finish', onFinish);
+  let sseDoneCalled = false;
+  res.on('close', () => { aborted = true; });
 
   const TIMEOUT_MS = 30000;
   const timeoutHandle = setTimeout(() => {
-    if (!aborted) {
-      aborted = true;
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
       res.write(`data: ${JSON.stringify({ content: "\n\n[TIMEOUT] The AI tutor took too long to respond. Please try again." })}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
     }
   }, TIMEOUT_MS);
-
-  res.on('finish', () => clearTimeout(timeoutHandle));
-  req.on('close', () => clearTimeout(timeoutHandle));
 
   if (!message) {
     res.write(`data: ${JSON.stringify({ content: "Ask me something about programming!" })}\n\n`);
@@ -43,8 +38,9 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
     res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
   };
   const sseDone = () => {
+    if (sseDoneCalled) return;
+    sseDoneCalled = true;
     clearTimeout(timeoutHandle);
-    if (aborted) return;
     res.write('data: [DONE]\n\n');
     res.end();
   };
@@ -56,7 +52,9 @@ router.post('/', validate(ChatSchema), async (req: Request, res: Response) => {
   try {
     await handleTutorMessage(message, { lang, topic, phase, code, output, hasError, history, learnerId, providerConfig }, sseSend, sseDone);
   } catch (e) {
-    if (!aborted) {
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      clearTimeout(timeoutHandle);
       res.write(`data: ${JSON.stringify({ content: 'Error: ' + (e as Error).message })}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
