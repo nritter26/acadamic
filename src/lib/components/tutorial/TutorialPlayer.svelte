@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import { TUTORIAL_COURSES, getCourseById, getPhaseById } from '$lib/lib/tutorial.js';
   import { getTutorialState } from '$lib/stores/tutorial.svelte.js';
   import MiniEditor from './MiniEditor.svelte';
@@ -19,9 +20,9 @@
   let runOutput = $state('');
   let showOutput = $state(false);
   let showCelebration = $state(false);
-  let streakChecked = $state(false);
   let xpToast = $state(null);
   let xpToastTimer = $state(null);
+  let loadingTopic = false;
 
   function showXpToast(amount) {
     xpToast = { amount };
@@ -38,7 +39,7 @@
       const res = await fetch('/api/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lang: 'js', code: topicData[1] || '' }),
+        body: JSON.stringify({ lang: currentCourse?.lang || 'js', code: editableCode || '' }),
       });
       const data = await res.json();
       runOutput = data.error || data.output || '(no output)';
@@ -49,19 +50,18 @@
     }
   }
 
+  onMount(() => {
+    checkStreak();
+  });
+
   $effect(() => {
     if (!currentCourse || !currentPhase || !topicName) return;
+    if (loadingTopic) return;
     loadTopicContent();
   });
 
-  $effect(() => {
-    if (!streakChecked) {
-      checkStreak();
-      streakChecked = true;
-    }
-  });
-
   async function loadTopicContent() {
+    loadingTopic = true;
     topicLoading = true;
     try {
       const res = await fetch(`/content/${currentCourse.lang}.json`);
@@ -76,6 +76,7 @@
       topicData = null;
     } finally {
       topicLoading = false;
+      loadingTopic = false;
     }
   }
 
@@ -207,7 +208,7 @@
               <span>Output</span>
               <button class="ca-btn" onclick={() => showOutput = false}>✕</button>
             </div>
-            <pre class="code-output-text" class:is-error={runOutput.startsWith('Error')} class:code-output-empty={!showOutput}>{showOutput ? runOutput : 'Click ▶ Run to execute this code'}</pre>
+            <pre class="code-output-text" class:is-error={String(runOutput ?? '').startsWith('Error')} class:code-output-empty={!showOutput}>{showOutput ? runOutput : 'Click ▶ Run to execute this code'}</pre>
           </div>
         </div>
       </div>
@@ -257,7 +258,6 @@
       onnext={handleNext}
       onrun={handleRun}
       onmark={() => { if (currentCourse && topicName) tutorial.completeTopic(currentCourse.id, topicName); }}
-      onedit={() => editMode = !editMode}
       enabled={!!topicData}
     />
   {:else}
