@@ -1,7 +1,6 @@
 <script>
   let { exercise, oncomplete = () => {} } = $props();
 
-  let _id = $state(0);
   let currentOrder = $state([...exercise.lines]);
   let answered = $state(false);
   let correct = $state(false);
@@ -16,8 +15,6 @@
   }
 
   $effect(() => {
-    const _ = exercise.lines;
-    _id++;
     currentOrder = shuffle(exercise.lines);
     answered = false;
     correct = false;

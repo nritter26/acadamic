@@ -1,0 +1,59 @@
+{
+  "id": "go-type-switch",
+  "title": "Go: Type Switch",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "type switch", "interface", "type assertion", "reflection"],
+  "description": "Use type switches to handle multiple concrete types through an interface value in Go.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic type switch on interface{}",
+      "description": "Write a function `describe(v interface{})` that uses a type switch to print the kind and value. Handle `int`, `string`, `bool`, and `default`. Print using `fmt.Printf(\"%s: %v\\n\", kind, v)`.",
+      "hints": ["Type switch syntax: switch v := x.(type)", "case clauses match concrete types", "default catches anything else"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('int:') || output.includes('string:') || output.includes('bool:')",
+        "successMessage": "Basic type switch works!",
+        "failureMessage": "Print the type kind and value for each case."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Custom interface with type switch",
+      "description": "Define an interface `Shape` with `Area() float64`. Create `Circle` and `Rectangle` structs implementing it. Write `printShape(s Shape)` that type-switches and prints shape-specific fields. Use `fmt.Printf(\"Circle(r=%.1f): Area=%.1f\\n\", c.Radius, c.Area())`.",
+      "hints": ["Type switch works on any interface type", "Access concrete fields inside each case", "Fallthrough is implicit in type switches"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Circle') || output.includes('Rectangle') || output.includes('Area=')",
+        "successMessage": "Shape type switch works!",
+        "failureMessage": "Print circle radius and rectangle dimensions with area."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Type switch with error handling",
+      "description": "Write `process(v interface{}) (string, error)` that type-switches and returns an error for unsupported types. Use `fmt.Errorf` for error creation. Call with `int`, `string`, `[]byte`, and `chan int`. Print results using `fmt.Printf(\"Result: %s, Err: %v\\n\", result, err)`.",
+      "hints": ["Return errors for types your function can't handle", "Use errors.New or fmt.Errorf", "Type switch can return from each case"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Result:') || output.includes('Err:') || output.includes('error')",
+        "successMessage": "Type switch with error handling works!",
+        "failureMessage": "Print both the result and any error for each input."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested type switches and type assertion",
+      "description": "Write a `flatten(v interface{})` function that recursively handles `[]interface{}` slices. Use a type switch to detect slices, then recursively flatten. Print flattened elements using `fmt.Printf(\"Element %d: %v\\n\", i, elem)`.",
+      "hints": ["Detect slices with case []interface{}", "Recursive call inside the slice case", "Track depth to avoid infinite recursion"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Element') && output.includes('flatten')",
+        "successMessage": "Nested type switch with recursion works!",
+        "failureMessage": "Print each flattened element with its index."
+      }
+    }
+  ]
+}

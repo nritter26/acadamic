@@ -99,10 +99,11 @@ async function handleWSMessage(ws, client, msg) {
                 send(ws, 'execute:error', { message: 'lang and code required' });
                 return;
             }
-            // Send chunks as execution progresses
             try {
                 send(ws, 'execute:start', { lang });
-                const result = await (0, executor_1.executeCode)(lang, code, stdin);
+                const result = await (0, executor_1.executeCode)(lang, code, stdin, (chunk) => {
+                    send(ws, 'execute:chunk', { chunk });
+                });
                 send(ws, 'execute:result', { output: result.output, error: result.error });
             }
             catch (err) {

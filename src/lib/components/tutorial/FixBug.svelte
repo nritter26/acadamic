@@ -1,15 +1,12 @@
 <script>
   let { exercise, oncomplete = () => {} } = $props();
 
-  let currentId = $state(0);
   let userCode = $state(exercise.code);
   let answered = $state(false);
   let correct = $state(false);
   let showHint = $state(false);
 
   $effect(() => {
-    const _ = exercise.code;
-    currentId++;
     userCode = exercise.code;
     answered = false;
     correct = false;

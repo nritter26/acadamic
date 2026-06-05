@@ -6,9 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const url_1 = require("url");
 const zod_1 = require("zod");
 const middleware_1 = require("../middleware");
 const middleware_2 = require("../middleware");
+// Recreate __dirname for ES Modules
+const __filename = (0, url_1.fileURLToPath)(import.meta.url);
+const __dirname = path_1.default.dirname(__filename);
 const router = (0, express_1.Router)();
 const CONTENT_DIR = path_1.default.join(__dirname, '..', 'content');
 const UpdateContentSchema = zod_1.z.object({

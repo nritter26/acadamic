@@ -9,6 +9,10 @@ exports.clearConversation = clearConversation;
 exports.pruneOldConversations = pruneOldConversations;
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
+const url_1 = require("url");
+// Recreate __dirname for ES Modules
+const __filename = (0, url_1.fileURLToPath)(import.meta.url);
+const __dirname = path_1.default.dirname(__filename);
 const CONV_DIR = path_1.default.join(__dirname, '..', 'data', 'conversations');
 const cache = new Map();
 const MAX_CACHE_SIZE = 100;

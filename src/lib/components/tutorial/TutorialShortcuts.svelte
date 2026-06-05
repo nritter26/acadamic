@@ -1,5 +1,5 @@
 <script>
-  let { onprev = () => {}, onnext = () => {}, onrun = () => {}, onmark = () => {}, onedit = () => {}, enabled = true } = $props();
+  let { onprev = () => {}, onnext = () => {}, onrun = () => {}, onmark = () => {}, enabled = true } = $props();
 
   let showHelp = $state(false);
 
@@ -11,7 +11,6 @@
     if (e.key === 'ArrowLeft' || e.key === 'k') { e.preventDefault(); onprev(); }
     else if (e.key === 'ArrowRight' || e.key === 'j') { e.preventDefault(); onnext(); }
     else if (e.key === 'm') { e.preventDefault(); onmark(); }
-    else if (e.key === 'e') { e.preventDefault(); onedit(); }
     else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); onrun(); }
   }
 
@@ -35,7 +34,6 @@
           <tr><td><kbd>→</kbd> or <kbd>j</kbd></td><td>Next topic</td></tr>
           <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Run code</td></tr>
           <tr><td><kbd>m</kbd></td><td>Mark complete</td></tr>
-          <tr><td><kbd>e</kbd></td><td>Toggle edit mode</td></tr>
           <tr><td><kbd>?</kbd></td><td>Toggle this help</td></tr>
         </tbody>
       </table>

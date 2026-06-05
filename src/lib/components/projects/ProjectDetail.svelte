@@ -56,7 +56,6 @@
     }
     verifyResult = '';
     verifyResultColor = '';
-    loadStep(stepIndex);
   }
 
   $effect(() => {

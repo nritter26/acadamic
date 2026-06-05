@@ -17,6 +17,10 @@ const fs_1 = __importDefault(require("fs"));
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const os_1 = __importDefault(require("os"));
+const url_1 = require("url");
+// Recreate __dirname for ES Modules
+const __filename = (0, url_1.fileURLToPath)(import.meta.url);
+const __dirname = path_1.default.dirname(__filename);
 const LEARNER_DIR = path_1.default.join(__dirname, '..', 'data', 'learners');
 const FALLBACK_DIR = path_1.default.join(os_1.default.tmpdir(), 'koded-learners');
 let activeLearnerDir = LEARNER_DIR;

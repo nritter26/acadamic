@@ -66,45 +66,6 @@
     exec.running = false;
   }
 
-  async function handleExercise() {
-    exec.running = true;
-    exec.output = '';
-    exec.error = '';
-    try {
-      const r = await fetch('/api/exercise', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lang: curr.lang, topic: curr.topic }),
-      });
-      const data = await r.json();
-      exec.output = data.exercise || data.code || data.output || '(no exercise)';
-    } catch (e) {
-      exec.error = 'Failed: ' + e.message;
-    }
-    exec.running = false;
-  }
-
-  async function handleQuiz() {
-    exec.running = true;
-    exec.output = '';
-    exec.error = '';
-    try {
-      const r = await fetch('/api/quiz/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lang: curr.lang, topic: curr.topic, level: curr.level }),
-      });
-      const data = await r.json();
-      const questions = data.questions || [];
-      exec.output = questions.map((q, i) =>
-        `Q${i + 1}: ${q.prompt}\n${(q.choices || []).map(c => `  - ${c}`).join('\n')}\n`
-      ).join('\n') || JSON.stringify(data, null, 2);
-    } catch (e) {
-      exec.error = 'Failed: ' + e.message;
-    }
-    exec.running = false;
-  }
-
   async function handleCheckCode() {
     exec.running = true;
     exec.output = '';
@@ -141,11 +102,11 @@
   </button>
   <button class="action-btn" onclick={handleCheckCode} disabled={exec.running} title="Static code analysis">Check Code</button>
   <button class="action-btn" onclick={toggleCheatsheet} title="Open cheatsheet">Cheatsheet</button>
-  <button class="action-btn" onclick={toggleSchema} title="Schema designer">Schema</button>
+  {#if curr.lang === 'db'}
+    <button class="action-btn" onclick={toggleSchema} title="Schema designer">Schema</button>
+  {/if}
   <button class="action-btn" onclick={handleExplain} disabled={exec.running} title="AI explanation">Explain</button>
   <button class="action-btn" onclick={handleReview} disabled={exec.running} title="AI review">Review</button>
-  <button class="action-btn" onclick={handleExercise} disabled={exec.running} title="Generate exercise">Exercise</button>
-  <button class="action-btn" onclick={handleQuiz} disabled={exec.running} title="Generate quiz">Quiz</button>
   <button class="action-btn" onclick={handleCopy} title="Copy code">Copy</button>
   <button class="action-btn" onclick={() => exec.clear()}>Clear</button>
 </div>

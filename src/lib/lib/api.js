@@ -55,7 +55,12 @@ export async function apiStream(path, body, onChunk, onDone, onError) {
           onDone?.();
           return;
         }
-        onChunk?.(data);
+        try {
+          const parsed = JSON.parse(data);
+          onChunk?.(parsed.content ?? parsed.text ?? data);
+        } catch {
+          onChunk?.(data);
+        }
       }
     }
 

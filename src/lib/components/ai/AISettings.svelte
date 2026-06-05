@@ -9,7 +9,7 @@
     Provider
     <select bind:value={ai.provider}>
       <option value="hybrid">Hybrid</option>
-      <option value="ollama">Ollama</option>
+      <option value="local">Ollama</option>
       <option value="openai">OpenAI</option>
     </select>
   </label>

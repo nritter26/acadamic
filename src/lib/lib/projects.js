@@ -28,7 +28,7 @@ export const PROJECT_IDS = [
   'go-http-client','go-testing','go-benchmarking','go-embedding','go-generics',
   'go-contexts','go-time','go-sorting','go-env-config','go-logging',
   'go-reflection','go-plugin-system','go-middleware','go-web-router','go-database-sql',
-  'go-dependency-injection','go-graceful-shutdown','go-rate-limiting','go-tcp-server','go-websocket',
+  'go-graceful-shutdown','go-rate-limiting','go-tcp-server','go-websocket',
   'go-grpc','go-template-html','go-testing-advanced','go-coverage','go-race-detection',
   'go-pprof','go-tracing','go-microservice','go-event-bus','go-command-pattern',
   'go-authentication-system','go-rate-limiter','go-state-machine','go-pub-sub-broker','go-data-pipeline',
