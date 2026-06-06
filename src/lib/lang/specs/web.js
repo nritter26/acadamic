@@ -1,0 +1,167 @@
+export const HTML_SPEC = {
+  id: 'html',
+  name: 'HTML',
+  keywords: [
+    'html', 'head', 'body', 'div', 'span', 'p', 'a', 'img', 'input',
+    'form', 'table', 'tr', 'td', 'th', 'ul', 'ol', 'li', 'h1', 'h2',
+    'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer',
+    'nav', 'main', 'aside', 'button', 'label', 'select', 'option',
+    'textarea', 'script', 'style', 'link', 'meta', 'title', '!DOCTYPE',
+  ],
+  operators: ['=', '/', '>', '<', '!=', '=='],
+  types: ['element', 'attribute', 'text', 'comment', 'document'],
+  patterns: [
+    { lines: ['<!DOCTYPE html>', '<html>', '<head>', '  <title>Page Title</title>', '</head>', '<body>', '  <h1>Hello, World!</h1>', '  <p>This is a paragraph.</p>', '</body>', '</html>'], tags: ['basic'] },
+    { lines: ['<form action="/submit" method="POST">', '  <label for="name">Name:</label>', '  <input type="text" id="name" name="name">', '  <button type="submit">Submit</button>', '</form>'], tags: ['form'] },
+    { lines: ['<ul>', '  <li>Item 1</li>', '  <li>Item 2</li>', '  <li>Item 3</li>', '</ul>'], tags: ['list'] },
+    { lines: ['<table>', '  <tr>', '    <th>Name</th>', '    <th>Age</th>', '  </tr>', '  <tr>', '    <td>Alice</td>', '    <td>30</td>', '  </tr>', '</table>'], tags: ['table'] },
+    { lines: ['<a href="https://example.com" target="_blank">', '  Visit Example', '</a>'], tags: ['link'] },
+    { lines: ['<img src="image.jpg" alt="Description" width="500" height="300">'], tags: ['image'] },
+    { lines: ['<div class="container">', '  <header>Site Header</header>', '  <nav>Navigation</nav>', '  <main>Main Content</main>', '  <footer>Footer</footer>', '</div>'], tags: ['layout'] },
+    { lines: ['<input type="text" placeholder="Enter your name" required>'], tags: ['input'] },
+    { lines: ['<select>', '  <option value="1">Option 1</option>', '  <option value="2" selected>Option 2</option>', '</select>'], tags: ['select'] },
+    { lines: ['<meta charset="UTF-8">', '<meta name="viewport" content="width=device-width, initial-scale=1.0">', '<meta name="description" content="Page description">'], tags: ['meta'] },
+  ],
+  bugs: [
+    { wrong: '<p>Hello', right: '<p>Hello</p>', prompt: 'What is missing from this HTML?', choices: ['<p>Hello</p>', '<p>Hello', '<p>Hello<br>'], answer: '<p>Hello</p>' },
+    { wrong: '<img src="photo.jpg">', right: '<img src="photo.jpg" alt="Photo">', prompt: 'What attribute improves accessibility for images?', choices: ['alt', 'src', 'title'], answer: 'alt' },
+  ],
+  concepts: [
+    { term: 'DOM', definition: 'Document Object Model — a programming interface that represents an HTML document as a tree of nodes.' },
+    { term: 'Semantic HTML', definition: 'Using HTML elements that convey meaning about the content (header, nav, article) rather than just presentation.' },
+    { term: 'Accessibility', definition: 'Practices like alt attributes, ARIA roles, and proper heading structure to make content usable by everyone.' },
+  ],
+  syntaxTests: [
+    { valid: '<p>Hello</p>', invalid: '<p>Hello<p>', category: 'tag' },
+    { valid: '<img src="img.jpg" alt="img">', invalid: '<img src="img.jpg">', category: 'attribute' },
+    { valid: '<a href="/">Home</a>', invalid: '<a href="/">Home', category: 'tag' },
+  ],
+};
+
+export const CSS_SPEC = {
+  id: 'css',
+  name: 'CSS',
+  keywords: [
+    'color', 'background-color', 'font-size', 'font-family', 'margin',
+    'padding', 'border', 'border-radius', 'display', 'position',
+    'top', 'left', 'right', 'bottom', 'width', 'height', 'max-width',
+    'min-width', 'flex', 'flex-direction', 'justify-content',
+    'align-items', 'gap', 'grid', 'grid-template-columns',
+    'z-index', 'opacity', 'overflow', 'text-align', 'line-height',
+    'box-shadow', 'transition', 'transform', 'cursor', 'list-style',
+    'text-decoration', 'media', 'import', 'keyframes', 'animation',
+  ],
+  operators: [':', ';', ',', '.', '#', '>', '+', '~', '*', '/', '=', '!important'],
+  types: ['color', 'length', 'percentage', 'string', 'url', 'number', 'function'],
+  patterns: [
+    { lines: ['body {', '  font-family: sans-serif;', '  margin: 0;', '  padding: 20px;', '  background-color: #f0f0f0;', '}'], tags: ['basic'] },
+    { lines: ['.container {', '  display: flex;', '  justify-content: center;', '  align-items: center;', '  height: 100vh;', '}'], tags: ['flexbox'] },
+    { lines: ['.grid {', '  display: grid;', '  grid-template-columns: repeat(3, 1fr);', '  gap: 16px;', '}'], tags: ['grid'] },
+    { lines: ['.card {', '  background: white;', '  border-radius: 8px;', '  box-shadow: 0 2px 4px rgba(0,0,0,0.1);', '  padding: 16px;', '}'], tags: ['card'] },
+    { lines: ['a:hover {', '  color: #ff6600;', '  text-decoration: underline;', '}'], tags: ['pseudo'] },
+    { lines: ['@media (max-width: 768px) {', '  .container {', '    flex-direction: column;', '  }', '}'], tags: ['responsive'] },
+    { lines: ['.button {', '  background: #007bff;', '  color: white;', '  border: none;', '  border-radius: 4px;', '  padding: 10px 20px;', '  cursor: pointer;', '  transition: background 0.3s;', '}'], tags: ['button'] },
+    { lines: ['.nav {', '  display: flex;', '  justify-content: space-between;', '  align-items: center;', '  padding: 0 24px;', '  background: #333;', '  color: white;', '}'], tags: ['nav'] },
+    { lines: ['.header {', '  position: sticky;', '  top: 0;', '  z-index: 100;', '}'], tags: ['position'] },
+    { lines: ['@keyframes fadeIn {', '  from { opacity: 0; }', '  to { opacity: 1; }', '}', '', '.fade-in {', '  animation: fadeIn 0.5s ease-in;', '}'], tags: ['animation'] },
+  ],
+  bugs: [
+    { wrong: 'color: red', right: 'color: red;', prompt: 'What is missing from this CSS declaration?', choices: ['color: red;', 'color: red', 'color = red;'], answer: 'color: red;' },
+    { wrong: '.container { color: red }', right: '.container { color: red; }', prompt: 'Which is the correct CSS rule syntax?', choices: ['.container { color: red; }', '.container { color: red }', '.container { color = red; }'], answer: '.container { color: red; }' },
+  ],
+  concepts: [
+    { term: 'Cascade', definition: 'The algorithm that determines which styles apply to an element based on specificity, source order, and importance.' },
+    { term: 'Flexbox', definition: 'A one-dimensional layout model that distributes space and aligns items within a container.' },
+    { term: 'Box Model', definition: 'The rectangular box wrapping every element, consisting of content, padding, border, and margin areas.' },
+    { term: 'Responsive Design', definition: 'An approach using media queries, flexible grids, and relative units to adapt layouts to different screen sizes.' },
+  ],
+  syntaxTests: [
+    { valid: 'body { margin: 0; }', invalid: 'body { margin: 0 }', category: 'declaration' },
+    { valid: '.class { color: red; }', invalid: '.class { color: red; }', category: 'selector' },
+    { valid: '#id { font-size: 16px; }', invalid: '#id { font-size: 16px; }', category: 'selector' },
+  ],
+};
+
+export const BASH_SPEC = {
+  id: 'bash',
+  name: 'Bash',
+  keywords: [
+    'if', 'then', 'else', 'elif', 'fi', 'for', 'while', 'do', 'done',
+    'in', 'function', 'return', 'local', 'export', 'echo', 'read',
+    'exit', 'source', 'trap', 'case', 'esac', 'select', 'until',
+    'shift', 'continue', 'break', 'exec', 'eval', 'set', 'unset',
+    'readonly', 'declare', 'typeset', 'alias', 'unalias',
+  ],
+  operators: [
+    '$', '|', '>', '<', '>>', '<<', '&', '&&', '||', '!',
+    '=', '==', '!=', '-eq', '-ne', '-lt', '-le', '-gt', '-ge',
+    '-z', '-n', '-f', '-d', '-e', '-x', '-w', '-r',
+  ],
+  types: ['string', 'integer', 'array', 'associative array'],
+  patterns: [
+    { lines: ['#!/bin/bash', 'echo "Hello, World!"'], tags: ['hello'] },
+    { lines: ['for file in *.txt; do', '  echo "Processing $file"', 'done'], tags: ['loop'] },
+    { lines: ['greet() {', '  echo "Hello, $1!"', '}', '', 'greet "World"'], tags: ['function'] },
+    { lines: ['if [ "$1" -gt 10 ]; then', '  echo "Greater than 10"', 'elif [ "$1" -eq 10 ]; then', '  echo "Equal to 10"', 'else', '  echo "Less than 10"', 'fi'], tags: ['conditional'] },
+    { lines: ['while read line; do', '  echo "Line: $line"', 'done < input.txt'], tags: ['while'] },
+    { lines: ['case "$1" in', '  start) echo "Starting..." ;;', '  stop) echo "Stopping..." ;;', '  *) echo "Unknown command" ;;', 'esac'], tags: ['case'] },
+    { lines: ['for i in {1..5}; do', '  echo "Count: $i"', 'done'], tags: ['range'] },
+    { lines: ['if [ -f "$1" ]; then', '  echo "File exists"', 'else', '  echo "File not found"', 'fi'], tags: ['file'] },
+    { lines: ['local name="World"', 'echo "Hello, $name!"'], tags: ['variable'] },
+    { lines: ['ls -la | grep ".txt" | wc -l', 'echo "Found text files"'], tags: ['pipeline'] },
+  ],
+  bugs: [
+    { wrong: 'name = "World"\necho $name', right: 'name="World"\necho $name', prompt: 'What is the correct variable assignment in Bash?', choices: ['name="World"', 'name = "World"', '$name="World"'], answer: 'name="World"' },
+    { wrong: 'if [ $x -gt 5 ]\necho "yes"\nfi', right: 'if [ $x -gt 5 ]; then\necho "yes"\nfi', prompt: 'What keyword is missing from this if statement?', choices: ['if [ $x -gt 5 ]; then\necho "yes"\nfi', 'if [ $x -gt 5 ]\necho "yes"\nfi', 'if ($x -gt 5) then\necho "yes"\nfi'], answer: 'if [ $x -gt 5 ]; then\necho "yes"\nfi' },
+  ],
+  concepts: [
+    { term: 'Exit codes', definition: 'A numeric value returned by every command indicating success (0) or failure (non-zero).' },
+    { term: 'Pipelines', definition: 'Chaining commands with | so the stdout of one command becomes the stdin of the next.' },
+    { term: 'Globbing', definition: 'Pattern matching for filenames using wildcards like *, ?, and [].' },
+    { term: 'Redirection', definition: 'Controlling where input comes from and output goes using <, >, >>, and 2>.' },
+  ],
+  syntaxTests: [
+    { valid: 'name="World"', invalid: 'name = "World"', category: 'assignment' },
+    { valid: 'if [ $x -gt 5 ]; then echo "ok"; fi', invalid: 'if [ $x -gt 5 ] then echo "ok"; fi', category: 'conditional' },
+    { valid: 'for i in {1..5}; do echo $i; done', invalid: 'for i in {1..5} do echo $i; done', category: 'loop' },
+  ],
+};
+
+export const WASM_SPEC = {
+  id: 'wasm',
+  name: 'WebAssembly',
+  keywords: [
+    'module', 'func', 'param', 'result', 'local', 'global', 'memory',
+    'table', 'elem', 'data', 'import', 'export', 'mut', 'i32', 'i64',
+    'f32', 'f64', 'block', 'loop', 'if', 'else', 'end', 'br', 'br_if',
+    'br_table', 'return', 'call', 'call_indirect', 'drop', 'select',
+    'get_local', 'set_local', 'tee_local', 'get_global', 'set_global',
+    'load', 'store', 'const', 'add', 'sub', 'mul', 'div_s', 'div_u',
+    'rem_s', 'rem_u', 'and', 'or', 'xor', 'shl', 'shr_s', 'shr_u',
+    'eqz', 'eq', 'ne', 'lt_s', 'lt_u', 'gt_s', 'gt_u', 'le_s', 'le_u',
+    'ge_s', 'ge_u',
+  ],
+  operators: ['+', '-', '*', '/', '==', '!=', '<', '>', '<=', '>=', '&', '|', '^', '~', '<<', '>>'],
+  types: ['i32', 'i64', 'f32', 'f64', 'mut', 'anyfunc', 'funcref', 'externref'],
+  patterns: [
+    { lines: ['(module', '  (func $add (param $a i32) (param $b i32) (result i32)', '    local.get $a', '    local.get $b', '    i32.add', '  )', '  (export "add" (func $add))', ')'], tags: ['function'] },
+    { lines: ['(module', '  (func (export "main") (result i32)', '    i32.const 42', '    return', '  )', ')'], tags: ['main'] },
+    { lines: ['(module', '  (memory $mem 1)', '  (data (i32.const 0) "hello")', '  (func (export "load") (param $offset i32) (result i32)', '    i32.const 0', '    i32.load', '  )', ')'], tags: ['memory'] },
+    { lines: ['(module', '  (func $factorial (param $n i32) (result i32)', '    (if (result i32)', '      (i32.le_s (local.get $n) (i32.const 1))', '      (then (i32.const 1))', '      (else', '        (i32.mul', '          (local.get $n)', '          (call $factorial (i32.sub (local.get $n) (i32.const 1)))', '        )', '      )', '    )', '  )', ')'], tags: ['recursion'] },
+    { lines: ['(module', '  (import "env" "print" (func $print (param i32)))', '  (func (export "run")', '    i32.const 42', '    call $print', '  )', ')'], tags: ['import'] },
+  ],
+  bugs: [
+    { wrong: '(func $add (param $a i32) (param $b i32) (result i32)\n  local.get $a\n  local.get $b\n  i32.add\n)', right: '(func $add (param $a i32) (param $b i32) (result i32)\n  local.get $a\n  local.get $b\n  i32.add\n)', prompt: 'What is the correct opcode for addition in WASM?', choices: ['i32.add', 'i32_add', 'add_i32'], answer: 'i32.add' },
+    { wrong: '(export "add" $add)', right: '(export "add" (func $add))', prompt: 'Which is the correct export syntax in WASM?', choices: ['(export "add" (func $add))', '(export "add" $add)', '(func $add) (export "add")'], answer: '(export "add" (func $add))' },
+  ],
+  concepts: [
+    { term: 'Stack Machine', definition: 'WASM is a stack-based virtual machine where instructions pop operands from and push results onto a value stack.' },
+    { term: 'Linear Memory', definition: 'A contiguous, resizable byte array accessible via load/store instructions, representing the heap.' },
+    { term: 'S-expression', definition: 'The text format of WASM uses nested parenthesized expressions (s-exprs) to represent the module structure.' },
+  ],
+  syntaxTests: [
+    { valid: '(i32.const 42)', invalid: 'i32.const 42', category: 'instruction' },
+    { valid: '(func (export "f") (result i32) i32.const 1)', invalid: '(func (export "f") (result i32) 1)', category: 'function' },
+    { valid: '(module (func $f (param i32)))', invalid: '(module (func $f param i32))', category: 'module' },
+  ],
+};

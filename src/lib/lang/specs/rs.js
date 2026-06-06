@@ -1,0 +1,50 @@
+export const RS_SPEC = {
+  id: 'rs',
+  name: 'Rust',
+  keywords: [
+    'fn', 'let', 'mut', 'const', 'if', 'else', 'for', 'while', 'loop',
+    'match', 'return', 'struct', 'enum', 'impl', 'trait', 'pub', 'use',
+    'mod', 'crate', 'self', 'super', 'where', 'as', 'in', 'ref', 'move',
+    'async', 'await', 'unsafe', 'dyn', 'type', 'static', 'extern',
+    'macro_rules', 'true', 'false', 'Some', 'None', 'Ok', 'Err',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '==', '!=', '<', '>', '<=', '>=',
+    '&&', '||', '!', '&', '|', '^', '<<', '>>',
+    '=', '+=', '-=', '*=', '..', '..=', '=>', '->', '::',
+  ],
+  types: [
+    'i32', 'i64', 'u32', 'u64', 'f32', 'f64', 'bool', 'char',
+    'String', '&str', 'Vec<T>', 'Option<T>', 'Result<T, E>',
+    'Box<T>', 'HashMap<K,V>',
+  ],
+  patterns: [
+    { lines: ['fn main() {', '    println!("Hello, World!");', '}'], tags: ['main'] },
+    { lines: ['fn add(a: i32, b: i32) -> i32 {', '    a + b', '}'], tags: ['function'] },
+    { lines: ['let numbers = vec![1, 2, 3, 4, 5];', 'let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();', 'println!("{:?}", doubled);'], tags: ['vec'] },
+    { lines: ['let x = 5;', 'match x {', '    1 => println!("one"),', '    2 | 3 => println!("two or three"),', '    4..=10 => println!("four to ten"),', '    _ => println!("something else"),', '}'], tags: ['match'] },
+    { lines: ['struct Point {', '    x: i32,', '    y: i32,', '}', '', 'let p = Point { x: 10, y: 20 };', 'println!("({}, {})", p.x, p.y);'], tags: ['struct'] },
+    { lines: ['fn divide(a: f64, b: f64) -> Result<f64, String> {', '    if b == 0.0 {', '        Err("division by zero".to_string())', '    } else {', '        Ok(a / b)', '    }', '}'], tags: ['function'] },
+    { lines: ['let mut s = String::from("hello");', 's.push_str(", world!");', 'println!("{}", s);'], tags: ['string'] },
+    { lines: ['let numbers = vec![10, 20, 30, 40, 50];', 'for n in &numbers {', '    println!("{}", n);', '}'], tags: ['loop'] },
+    { lines: ['fn factorial(n: u64) -> u64 {', '    match n {', '        0 => 1,', '        _ => n * factorial(n - 1),', '    }', '}'], tags: ['function'] },
+    { lines: ['use std::collections::HashMap;', '', 'let mut scores = HashMap::new();', 'scores.insert("Alice", 95);', 'scores.insert("Bob", 87);'], tags: ['map'] },
+  ],
+  bugs: [
+    { wrong: 'fn add(a: i32, b: i32) -> i32 {\n    return a + b;\n}', right: 'fn add(a: i32, b: i32) -> i32 {\n    a + b\n}', prompt: 'Which is the correct way to return a value in Rust?', choices: ['fn add(a: i32, b: i32) -> i32 {\n    a + b\n}', 'fn add(a: i32, b: i32) -> i32 {\n    return a + b;\n}', 'fn add(a: i32, b: i32) -> i32 {\n    return a + b\n}'], answer: 'fn add(a: i32, b: i32) -> i32 {\n    a + b\n}' },
+    { wrong: 'let x = 5;\nx = 6;', right: 'let mut x = 5;\nx = 6;', prompt: 'What is needed to make a variable mutable in Rust?', choices: ['let mut x = 5;\nx = 6;', 'let x = 5;\nx = 6;', 'mut let x = 5;\nx = 6;'], answer: 'let mut x = 5;\nx = 6;' },
+  ],
+  concepts: [
+    { term: 'Ownership', definition: 'Each value in Rust has a single owner, and when the owner goes out of scope the value is dropped.' },
+    { term: 'Borrowing', definition: 'Accessing a value by reference (&T or &mut T) without taking ownership of it.' },
+    { term: 'Lifetime', definition: 'Annotations ensuring that references are valid for the duration of their use, preventing dangling pointers.' },
+    { term: 'Traits', definition: 'A collection of method signatures that types can implement, similar to interfaces.' },
+    { term: 'Pattern Matching', definition: 'Destructuring and matching values against patterns using the match expression or let destructuring.' },
+  ],
+  syntaxTests: [
+    { valid: 'let x: i32 = 5;', invalid: 'let x: integer = 5;', category: 'type' },
+    { valid: 'fn add(a: i32, b: i32) -> i32 { a + b }', invalid: 'fn add(a i32, b i32) i32 { a + b }', category: 'function' },
+    { valid: 'if x > 0 { println!("ok"); }', invalid: 'if x > 0 println!("ok");', category: 'conditional' },
+    { valid: 'let v = vec![1, 2, 3];', invalid: 'let v = vec(1, 2, 3);', category: 'macro' },
+  ],
+};

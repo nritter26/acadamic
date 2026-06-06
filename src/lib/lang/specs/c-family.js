@@ -1,0 +1,193 @@
+export const C_SPEC = {
+  id: 'c',
+  name: 'C',
+  keywords: [
+    'int', 'char', 'float', 'double', 'void', 'return', 'if', 'else',
+    'for', 'while', 'do', 'switch', 'case', 'break', 'continue',
+    'struct', 'typedef', 'enum', 'union', 'sizeof', 'const', 'static',
+    'extern', 'register', 'volatile', 'unsigned', 'signed', 'short',
+    'long', '#include', '#define',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '++', '--',
+    '==', '!=', '<', '>', '<=', '>=', '&&', '||', '!',
+    '&', '|', '^', '~', '<<', '>>',
+    '=', '+=', '-=', '*=', '/=', '->', '.',
+  ],
+  types: ['int', 'char', 'float', 'double', 'void', 'long', 'short', 'unsigned'],
+  patterns: [
+    { lines: ['#include <stdio.h>', '', 'int main() {', '    printf("Hello, World!\\n");', '    return 0;', '}'], tags: ['main'] },
+    { lines: ['int add(int a, int b) {', '    return a + b;', '}'], tags: ['function'] },
+    { lines: ['for (int i = 0; i < 10; i++) {', '    printf("%d\\n", i);', '}'], tags: ['loop'] },
+    { lines: ['if (x > 0) {', '    printf("positive\\n");', '} else {', '    printf("non-positive\\n");', '}'], tags: ['conditional'] },
+    { lines: ['typedef struct {', '    char name[50];', '    int age;', '} Person;', '', 'Person p = {"Alice", 30};'], tags: ['struct'] },
+    { lines: ['int *ptr = malloc(sizeof(int) * 10);', 'if (ptr != NULL) {', '    ptr[0] = 42;', '    free(ptr);', '}'], tags: ['pointer'] },
+    { lines: ['int arr[] = {1, 2, 3, 4, 5};', 'int sum = 0;', 'for (int i = 0; i < 5; i++) {', '    sum += arr[i];', '}'], tags: ['array'] },
+    { lines: ['int factorial(int n) {', '    if (n <= 1) return 1;', '    return n * factorial(n - 1);', '}'], tags: ['function'] },
+    { lines: ['enum Color { RED, GREEN, BLUE };', 'enum Color c = RED;'], tags: ['enum'] },
+    { lines: ['#define MAX(a, b) ((a) > (b) ? (a) : (b))', 'int max = MAX(10, 20);'], tags: ['macro'] },
+  ],
+  bugs: [
+    { wrong: 'printf("%d", x);', right: 'printf("%d\\n", x);', prompt: 'What is missing from this printf?', choices: ['printf("%d\\n", x);', 'printf("%d", x);', 'printf(x);'], answer: 'printf("%d\\n", x);' },
+    { wrong: 'int x = 5;', right: 'int x = 5;', prompt: 'Which is the correct variable declaration?', choices: ['int x = 5;', 'x int = 5;', 'var x = 5;'], answer: 'int x = 5;' },
+  ],
+  concepts: [
+    { term: 'Pointer', definition: 'A variable that stores the memory address of another variable, declared with *.' },
+    { term: 'malloc', definition: 'A function that dynamically allocates memory on the heap, returning a void pointer.' },
+    { term: 'Stack vs Heap', definition: 'Stack is for local variables with automatic lifetime; heap is for dynamic memory managed manually.' },
+    { term: 'Struct', definition: 'A user-defined composite type that groups related variables of different types.' },
+  ],
+  syntaxTests: [
+    { valid: 'int x = 5;', invalid: 'int x = 5', category: 'statement' },
+    { valid: 'if (x > 0) { return 1; }', invalid: 'if x > 0 { return 1; }', category: 'conditional' },
+    { valid: 'for (int i = 0; i < 10; i++) {}', invalid: 'for (int i = 0; i < 10; i+) {}', category: 'loop' },
+    { valid: 'printf("hello\\n");', invalid: 'printf("hello\\n")', category: 'function' },
+  ],
+};
+
+export const CPP_SPEC = {
+  id: 'cpp',
+  name: 'C++',
+  keywords: [
+    'int', 'char', 'float', 'double', 'void', 'bool', 'return', 'if',
+    'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue',
+    'struct', 'typedef', 'enum', 'union', 'sizeof', 'const', 'static',
+    'extern', 'register', 'volatile', 'unsigned', 'signed', 'short',
+    'long', 'class', 'public', 'private', 'protected', 'virtual',
+    'override', 'template', 'typename', 'namespace', 'using', 'new',
+    'delete', '#include', '#define', 'true', 'false', 'nullptr',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '++', '--',
+    '==', '!=', '<', '>', '<=', '>=', '&&', '||', '!',
+    '&', '|', '^', '~', '<<', '>>',
+    '=', '+=', '-=', '*=', '/=', '->', '.', '::', '<<', '>>',
+  ],
+  types: [
+    'int', 'char', 'float', 'double', 'void', 'long', 'short',
+    'unsigned', 'bool', 'string', 'vector', 'map',
+  ],
+  patterns: [
+    { lines: ['#include <iostream>', '', 'int main() {', '    std::cout << "Hello, World!" << std::endl;', '    return 0;', '}'], tags: ['main'] },
+    { lines: ['int add(int a, int b) {', '    return a + b;', '}'], tags: ['function'] },
+    { lines: ['std::vector<int> nums = {1, 2, 3, 4, 5};', 'for (int n : nums) {', '    std::cout << n << std::endl;', '}'], tags: ['loop'] },
+    { lines: ['class Animal {', 'public:', '    virtual void speak() {', '        std::cout << "..." << std::endl;', '    }', '};', '', 'class Dog : public Animal {', 'public:', '    void speak() override {', '        std::cout << "Woof!" << std::endl;', '    }', '};'], tags: ['class'] },
+    { lines: ['template <typename T>', 'T max(T a, T b) {', '    return (a > b) ? a : b;', '}'], tags: ['template'] },
+    { lines: ['int *p = new int(42);', 'std::cout << *p << std::endl;', 'delete p;'], tags: ['pointer'] },
+    { lines: ['std::map<std::string, int> ages;', 'ages["Alice"] = 30;', 'ages["Bob"] = 25;'], tags: ['map'] },
+    { lines: ['class Rectangle {', 'private:', '    double width, height;', 'public:', '    Rectangle(double w, double h) : width(w), height(h) {}', '    double area() { return width * height; }', '};'], tags: ['class'] },
+    { lines: ['try {', '    throw std::runtime_error("error");', '} catch (const std::exception& e) {', '    std::cout << e.what() << std::endl;', '}'], tags: ['error'] },
+    { lines: ['auto func = [](int x) { return x * 2; };', 'std::cout << func(21) << std::endl;'], tags: ['lambda'] },
+  ],
+  bugs: [
+    { wrong: 'cout << "hello"', right: 'std::cout << "hello" << std::endl;', prompt: 'Which is the correct way to print in C++?', choices: ['std::cout << "hello" << std::endl;', 'cout << "hello";', 'print("hello");'], answer: 'std::cout << "hello" << std::endl;' },
+    { wrong: 'int* p = malloc(sizeof(int));', right: 'int* p = new int;', prompt: 'Which is the correct way to allocate memory in C++?', choices: ['int* p = new int;', 'int* p = malloc(sizeof(int));', 'int p = new int;'], answer: 'int* p = new int;' },
+  ],
+  concepts: [
+    { term: 'RAII', definition: 'Resource Acquisition Is Initialization — tying resource lifetime to object lifetime using constructors and destructors.' },
+    { term: 'Templates', definition: 'A feature for generic programming that allows functions and classes to operate on types as parameters.' },
+    { term: 'STL', definition: 'The Standard Template Library — a collection of generic containers, algorithms, and iterators.' },
+    { term: 'Virtual Functions', definition: 'Member functions declared with virtual that can be overridden in derived classes, enabling polymorphism.' },
+  ],
+  syntaxTests: [
+    { valid: 'int x = 5;', invalid: 'int x = 5', category: 'statement' },
+    { valid: 'std::cout << "hi" << std::endl;', invalid: 'cout << "hi" endl;', category: 'io' },
+    { valid: 'for (int i = 0; i < 10; i++) {}', invalid: 'for (int i = 0; i < 10; i++)', category: 'loop' },
+    { valid: 'int* p = new int;', invalid: 'int* p = new int', category: 'allocation' },
+  ],
+};
+
+export const CS_SPEC = {
+  id: 'cs',
+  name: 'C#',
+  keywords: [
+    'using', 'namespace', 'class', 'struct', 'interface', 'enum',
+    'public', 'private', 'protected', 'internal', 'static', 'void',
+    'int', 'string', 'bool', 'var', 'new', 'return', 'if', 'else',
+    'for', 'foreach', 'while', 'switch', 'break', 'continue',
+    'try', 'catch', 'finally', 'throw', 'async', 'await',
+    'null', 'true', 'false', 'get', 'set', 'value', 'base', 'this',
+    'readonly', 'const', 'virtual', 'override', 'abstract', 'sealed',
+    'partial', 'record', 'init',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '==', '!=', '<', '>', '<=', '>=',
+    '&&', '||', '!', '&', '|', '^', '~', '<<', '>>',
+    '=', '+=', '-=', '*=', '/=', '=>', '?.', '??',
+  ],
+  types: [
+    'int', 'long', 'float', 'double', 'decimal', 'bool', 'char',
+    'string', 'object', 'var', 'List<T>', 'Dictionary<K,V>',
+  ],
+  patterns: [
+    { lines: ['using System;', '', 'class Program {', '    static void Main() {', '        Console.WriteLine("Hello, World!");', '    }', '}'], tags: ['main'] },
+    { lines: ['static int Add(int a, int b) {', '    return a + b;', '}'], tags: ['function'] },
+    { lines: ['var numbers = new List<int> { 1, 2, 3, 4, 5 };', 'var doubled = numbers.Select(n => n * 2);', 'Console.WriteLine(string.Join(", ", doubled));'], tags: ['linq'] },
+    { lines: ['if (x > 0) {', '    Console.WriteLine("positive");', '} else {', '    Console.WriteLine("non-positive");', '}'], tags: ['conditional'] },
+    { lines: ['for (int i = 0; i < 10; i++) {', '    Console.WriteLine(i);', '}'], tags: ['loop'] },
+    { lines: ['public class Person {', '    public string Name { get; set; }', '    public int Age { get; set; }', '    public override string ToString() => $"{Name} ({Age})";', '}'], tags: ['class'] },
+    { lines: ['var dict = new Dictionary<string, int> {', '    {"Alice", 95},', '    {"Bob", 87}', '};', 'Console.WriteLine(dict["Alice"]);'], tags: ['dict'] },
+    { lines: ['try {', '    int x = int.Parse("not a number");', '} catch (FormatException ex) {', '    Console.WriteLine($"Error: {ex.Message}");', '}'], tags: ['error'] },
+    { lines: ['public interface IAnimal {', '    void Speak();', '}', '', 'public class Dog : IAnimal {', '    public void Speak() => Console.WriteLine("Woof!");', '}'], tags: ['interface'] },
+    { lines: ['var numbers = new[] { 1, 2, 3, 4, 5 };', 'foreach (var n in numbers) {', '    Console.WriteLine(n);', '}'], tags: ['loop'] },
+  ],
+  bugs: [
+    { wrong: 'Console.WriteLine("hello")', right: 'Console.WriteLine("hello");', prompt: 'What is missing from this C# statement?', choices: ['Console.WriteLine("hello");', 'Console.WriteLine("hello")', 'Console.Write("hello");'], answer: 'Console.WriteLine("hello");' },
+    { wrong: 'string name = null;\nif (name != null) Console.WriteLine(name.Length);', right: 'string name = null;\nConsole.WriteLine(name?.Length);', prompt: 'Which code safely handles a null reference?', choices: ['string name = null;\nConsole.WriteLine(name?.Length);', 'string name = null;\nif (name != null) Console.WriteLine(name.Length);', 'string name = null;\nConsole.WriteLine(name.Length);'], answer: 'string name = null;\nConsole.WriteLine(name?.Length);' },
+  ],
+  concepts: [
+    { term: 'LINQ', definition: 'Language Integrated Query — a set of methods for querying collections in a declarative, SQL-like manner.' },
+    { term: 'Garbage Collection', definition: 'Automatic memory management where the runtime reclaims objects that are no longer referenced.' },
+    { term: 'Properties', definition: 'Members that provide a flexible mechanism to read, write, or compute the value of a private field using get and set accessors.' },
+    { term: 'Delegates', definition: 'Type-safe function pointers used for event handling and callback patterns.' },
+  ],
+  syntaxTests: [
+    { valid: 'int x = 5;', invalid: 'int 5 = x;', category: 'declaration' },
+    { valid: 'if (x > 0) { Console.WriteLine("ok"); }', invalid: 'if (x > 0) Console.WriteLine("ok")', category: 'conditional' },
+    { valid: 'for (int i = 0; i < 10; i++) {}', invalid: 'for (int i = 0; i < 10; i++)', category: 'loop' },
+    { valid: 'var list = new List<int>();', invalid: 'var list = new List<>();', category: 'generic' },
+  ],
+};
+
+export const ZIG_SPEC = {
+  id: 'zig',
+  name: 'Zig',
+  keywords: [
+    'const', 'var', 'fn', 'return', 'if', 'else', 'for', 'while',
+    'switch', 'break', 'continue', 'defer', 'pub', 'usingnamespace',
+    'comptime', 'struct', 'enum', 'union', 'error', 'true', 'false',
+    'null', 'undefined',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '==', '!=', '<', '>', '<=', '>=',
+    '&&', '||', '!', '&', '|', '^', '<<', '>>',
+    '=', '.', '.?', '...',
+  ],
+  types: ['i32', 'i64', 'u32', 'u64', 'f32', 'f64', 'bool', 'usize', '[]const u8'],
+  patterns: [
+    { lines: ['const std = @import("std");', '', 'pub fn main() void {', '    std.debug.print("Hello, World!\\n", .{});', '}'], tags: ['main'] },
+    { lines: ['fn add(a: i32, b: i32) i32 {', '    return a + b;', '}'], tags: ['function'] },
+    { lines: ['const result = for (items) |item| {', '    if (item > 10) break item;', '} else 0;'], tags: ['loop'] },
+    { lines: ['if (x > 0) {', '    std.debug.print("positive\\n", .{});', '} else {', '    std.debug.print("non-positive\\n", .{});', '}'], tags: ['conditional'] },
+    { lines: ['const Point = struct {', '    x: i32,', '    y: i32,', '};', '', 'const p = Point{ .x = 10, .y = 20 };'], tags: ['struct'] },
+    { lines: ['fn divide(a: f64, b: f64) !f64 {', '    if (b == 0.0) return error.DivisionByZero;', '    return a / b;', '}'], tags: ['function'] },
+    { lines: ['var arr = [_]i32{1, 2, 3, 4, 5};', 'for (arr) |n| {', '    std.debug.print("{}\\n", .{n});', '}'], tags: ['array'] },
+    { lines: ['const Value = union(enum) {', '    int: i32,', '    float: f64,', '    string: []const u8,', '};'], tags: ['union'] },
+    { lines: ['fn max(comptime T: type, a: T, b: T) T {', '    return if (a > b) a else b;', '}'], tags: ['generics'] },
+    { lines: ['const allocator = std.heap.page_allocator;', 'const memory = try allocator.alloc(u8, 1024);', 'defer allocator.free(memory);'], tags: ['memory'] },
+  ],
+  bugs: [
+    { wrong: 'const x: i32 = 5;\nx = 10;', right: 'const x: i32 = 5;\nvar y: i32 = 10;', prompt: 'Which correctly declares a mutable variable in Zig?', choices: ['var y: i32 = 10;', 'const x: i32 = 5;\nx = 10;', 'let y: i32 = 10;'], answer: 'var y: i32 = 10;' },
+    { wrong: 'fn add(a: i32, b: i32) -> i32 {', right: 'fn add(a: i32, b: i32) i32 {', prompt: 'Which is the correct function return type syntax in Zig?', choices: ['fn add(a: i32, b: i32) i32 {', 'fn add(a: i32, b: i32) -> i32 {', 'fn add(a: i32, b: i32): i32 {'], answer: 'fn add(a: i32, b: i32) i32 {' },
+  ],
+  concepts: [
+    { term: 'comptime', definition: 'A keyword for compile-time execution and metaprogramming, enabling generic types and evaluated expressions at compile time.' },
+    { term: 'Allocators', definition: 'Explicit memory allocation strategies passed to functions rather than a global allocator, giving control over memory management.' },
+    { term: 'Error Union', definition: 'A type !T that can hold either a value of type T or an error, using try to propagate errors.' },
+  ],
+  syntaxTests: [
+    { valid: 'const x: i32 = 5;', invalid: 'const int x = 5;', category: 'declaration' },
+    { valid: 'fn add(a: i32, b: i32) i32 { return a + b; }', invalid: 'fn add(a: i32, b: i32) -> i32 { return a + b; }', category: 'function' },
+    { valid: 'if (x > 0) {}', invalid: 'if x > 0 {}', category: 'conditional' },
+  ],
+};
