@@ -29,6 +29,42 @@
    ":name          # symbol literal\n:\"with spaces\"  # quoted symbol\n:\"my_var\"       # symbol with special chars\n\n# Symbols are singletons\nputs \"name\".object_id == \"name\".object_id  # false (different strings)\nputs :name.object_id == :name.object_id      # true (same symbol)\n\n# Common usage\nperson = { name: \"Alice\", age: 30 }\n\n# Conversion\nsym = \"hello\".to_sym   # :hello\nstr = :hello.to_s      # \"hello\"\n\n# Method as symbol\nobjects = [1, \"a\", 2, \"b\"]\nobjects.select(&:to_s)  # shorthand for { |o| o.to_s }"
   ]
  },
+ "Variables & Types": {
+  "Local & Global Variables": [
+   "Ruby variables are dynamically typed. Local variables start with a lowercase letter or _, instance variables with @, class variables with @@, and global variables with $. Understanding scope rules prevents subtle bugs. Local vars are scoped to the current block/method; instance vars belong to an object instance; class vars are shared across the hierarchy; globals are visible everywhere (avoid when possible).",
+   "name = 'Alice'          # local variable\n@count = 0               # instance variable\n@@total = 0              # class variable\n$debug = true            # global variable\n\nputs defined?(name)      # 'local-variable'"
+  ],
+  "Constants": [
+   "Constants in Ruby start with a capital letter. They are not truly immutable — Ruby warns but doesn't prevent reassignment. Use them for values that logically shouldn't change.",
+   "PI = 3.14159\nMAX_USERS = 100\n\n# Ruby warns on reassignment\nPI = 3.14  # warning: already initialized constant PI"
+  ],
+  "Data Types": [
+   "Ruby's core types: Integer, Float, String, Symbol, Array, Hash, true/false (TrueClass/FalseClass), nil (NilClass). Everything is an object — even nil has methods.",
+   "puts 42.class          # Integer\nputs 3.14.class        # Float\nputs 'hello'.class     # String\nputs :symbol.class     # Symbol\nputs true.class        # TrueClass\nputs nil.class         # NilClass\n\nputs 42.to_s           # '42' — Integer#to_s"
+  ],
+  "Type Conversion": [
+   "Ruby provides explicit conversion methods: to_s, to_i, to_f, to_a, to_sym. Implicit conversion is rare — Ruby prefers raising errors to silent coercion.",
+   "age = '25'\nputs age.to_i + 5      # 30\nputs '3.14'.to_f       # 3.14\nputs 42.to_s           # '42'\nputs :hello.to_s       # 'hello'\n\n# No implicit conversion\n# '5' + 3  # TypeError (String + Integer)"
+  ]
+ },
+ "Operators": {
+  "Arithmetic": [
+   "Standard + - * / % ** operators. Integer division truncates toward zero. ** is exponentiation. Ruby also supports shorthand assignment operators (+=, -=, etc.).",
+   "puts 10 / 3   # 3 (integer division)\nputs 10 / 3.0 # 3.333...\nputs 2 ** 10  # 1024\nputs 10 % 3   # 1\n\nx = 5\nx += 3        # 8"
+  ],
+  "Comparison": [
+   "== != < > <= >=. Ruby also has .eql? (type-sensitive comparison) and .equal? (object identity comparison). <=> (spaceship operator) returns -1 if left is less, 0 if equal, 1 if greater.",
+   "puts 5 == 5.0   # true (value equality)\nputs 5.eql?(5.0) # false (type-sensitive)\nputs 5 <=> 10   # -1\nputs 10 <=> 10  # 0\nputs 10 <=> 5   # 1"
+  ],
+  "Logical": [
+   "&& || ! (and or not). and/or/not have lower precedence than &&/||/!. Short-circuit evaluation applies — && stops on first false, || stops on first true. Ruby uses truthiness (everything except nil and false is truthy).",
+   "puts true && false  # false\nputs false || 42    # 42\nputs !true          # false\n\n# Low-precedence versions (use with caution)\nputs true and false  # true (prints true, then evaluates false)\nputs (true and false) # false\n\n# Short-circuit\nname = nil\ndisplay_name = name || \"Guest\"  # \"Guest\""
+  ],
+  "Range": [
+   "Ruby ranges: inclusive (..) and exclusive (...). Used in iteration, slicing arrays, and case conditions. Ranges can be created from any comparable objects.",
+   "range = 1..5\nputs range.to_a    # [1, 2, 3, 4, 5]\n\nexcl = 1...5\nputs excl.to_a    # [1, 2, 3, 4]\n\ncase score\nwhen 90..100 then 'A'\nwhen 80...90 then 'B'\nend\n\n# Range with strings\nputs ('a'..'e').to_a  # [\"a\", \"b\", \"c\", \"d\", \"e\"]"
+  ]
+ },
  "Control Flow": {
   "if/unless/elsif": [
    "Ruby uses if, elsif, else, unless, and ternary (?:). unless is the opposite of if and reads naturally for negative conditions. if/unless can be used as statement modifiers (postfix). All conditionals return a value. Only nil and false are falsy — everything else (including 0, empty strings, empty arrays) is truthy.",
