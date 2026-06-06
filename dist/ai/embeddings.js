@@ -1,22 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.hybridSearch = hybridSearch;
-exports.search = search;
-exports.searchWithSources = searchWithSources;
-exports.getContext = getContext;
-exports.getTopicContext = getTopicContext;
-exports.getCurriculumContext = getCurriculumContext;
-const path_1 = __importDefault(require("path"));
-const url_1 = require("url"); // 1. Add this import
+import fs from 'fs';
+import fsp from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import config from './config';
 // 2. Recreate __dirname for ES Modules
-const __filename = (0, url_1.fileURLToPath)(import.meta.url);
-const __dirname = path_1.default.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Your original line will now work perfectly:
-const CONTENT_DIR = path_1.default.join(__dirname, '..', 'content');
-const CACHE_FILE = path_1.default.join(__dirname, '..', 'data', 'embeddings-cache.json');
+const CONTENT_DIR = path.join(__dirname, '..', 'content');
+const CACHE_FILE = path.join(__dirname, '..', 'data', 'embeddings-cache.json');
 let curriculumDocs = [];
 let tfidfIndex = null;
 let embedCache = null;
@@ -40,7 +32,7 @@ async function buildCurriculumDocs() {
         const files = fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.json'));
         for (const file of files) {
             const lang = file.replace('.json', '');
-            const raw = fs.readFileSync(path_1.default.join(CONTENT_DIR, file), 'utf-8');
+            const raw = fs.readFileSync(path.join(CONTENT_DIR, file), 'utf-8');
             const data = JSON.parse(raw);
             for (const [phase, topics] of Object.entries(data)) {
                 for (const [topic, val] of Object.entries(topics)) {
@@ -291,7 +283,7 @@ function rrfFusion(resultsA, resultsB, k = 60) {
     }
     return [...docMap.values()].sort((a, b) => b.score - a.score);
 }
-async function hybridSearch(query, lang, topN = 5) {
+export async function hybridSearch(query, lang, topN = 5) {
     if (curriculumDocs.length === 0 && !initPromise) {
         initPromise = init();
         await initPromise;
@@ -307,10 +299,10 @@ async function hybridSearch(query, lang, topN = 5) {
         return embResults;
     return rrfFusion(tfidfResults, embResults, 60).slice(0, topN);
 }
-async function search(query, lang, topN = 5) {
+export async function search(query, lang, topN = 5) {
     return hybridSearch(query, lang, topN);
 }
-async function searchWithSources(query, lang, topN = 3) {
+export async function searchWithSources(query, lang, topN = 3) {
     const results = await hybridSearch(query, lang, topN);
     let mode = 'tfidf';
     const embResults = await searchEmbedding(query, lang, 1);
@@ -318,7 +310,7 @@ async function searchWithSources(query, lang, topN = 3) {
         mode = 'hybrid';
     return { results, mode };
 }
-async function getContext(query, lang, topN = 3) {
+export async function getContext(query, lang, topN = 3) {
     const results = await search(query, lang, topN);
     if (results.length === 0)
         return '';
@@ -332,7 +324,7 @@ async function getContext(query, lang, topN = 3) {
     }
     return context;
 }
-function getTopicContext(topic, lang) {
+export function getTopicContext(topic, lang) {
     const results = searchTFIDF(topic, lang, 1);
     if (results.length === 0)
         return '';
@@ -344,7 +336,7 @@ function getTopicContext(topic, lang) {
         context += `\n\nExample code:\n\`\`\`\n${r.code}\n\`\`\``;
     return context;
 }
-function getCurriculumContext(query, lang) {
+export function getCurriculumContext(query, lang) {
     const results = searchTFIDF(query, lang, 3);
     if (results.length === 0)
         return '';

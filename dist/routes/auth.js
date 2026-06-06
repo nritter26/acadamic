@@ -1,20 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
-const path_1 = __importDefault(require("path"));
-const uuid_1 = require("uuid");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+import bcrypt from 'bcryptjs';
+import Database from 'better-sqlite3';
+import path from 'path';
+import { v4 as uuid } from 'uuid';
+import { validate, generateToken, requireAuth } from '../middleware';
+import { RegisterSchema, LoginSchema } from '../types';
+const router = Router();
 let authDb = null;
 function getDb() {
     if (!authDb) {
-        authDb = new better_sqlite3_1.default(path_1.default.join(__dirname, '..', 'data', 'auth.db'));
+        authDb = new Database(path.join(__dirname, '..', 'data', 'auth.db'));
         authDb.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
@@ -27,7 +22,7 @@ function getDb() {
     }
     return authDb;
 }
-router.post('/register', (0, middleware_1.validate)(types_1.RegisterSchema), async (req, res) => {
+router.post('/register', validate(RegisterSchema), async (req, res) => {
     const { email, password, name } = req.body;
     const db = getDb();
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -35,13 +30,13 @@ router.post('/register', (0, middleware_1.validate)(types_1.RegisterSchema), asy
         res.status(409).json({ error: 'Email already registered', code: 'EMAIL_EXISTS' });
         return;
     }
-    const id = (0, uuid_1.v4)();
-    const password_hash = await bcryptjs_1.default.hash(password, 10);
+    const id = uuid();
+    const password_hash = await bcrypt.hash(password, 10);
     db.prepare('INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)').run(id, email, password_hash, name || '');
-    const token = (0, middleware_1.generateToken)({ userId: id, email, name: name || '' });
+    const token = generateToken({ userId: id, email, name: name || '' });
     res.status(201).json({ token, user: { id, email, name: name || '' } });
 });
-router.post('/login', (0, middleware_1.validate)(types_1.LoginSchema), async (req, res) => {
+router.post('/login', validate(LoginSchema), async (req, res) => {
     const { email, password } = req.body;
     const db = getDb();
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
@@ -49,15 +44,15 @@ router.post('/login', (0, middleware_1.validate)(types_1.LoginSchema), async (re
         res.status(401).json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' });
         return;
     }
-    const valid = await bcryptjs_1.default.compare(password, user.password_hash);
+    const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
         res.status(401).json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' });
         return;
     }
-    const token = (0, middleware_1.generateToken)({ userId: user.id, email: user.email, name: user.name });
+    const token = generateToken({ userId: user.id, email: user.email, name: user.name });
     res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
 });
-router.get('/me', middleware_1.requireAuth, (req, res) => {
+router.get('/me', requireAuth, (req, res) => {
     const user = req.user;
     const db = getDb();
     const record = db.prepare('SELECT id, email, name, created_at FROM users WHERE id = ?').get(user.userId);
@@ -67,5 +62,5 @@ router.get('/me', middleware_1.requireAuth, (req, res) => {
     }
     res.json(record);
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=auth.js.map

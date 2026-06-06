@@ -1,11 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppError = void 0;
-exports.errorHandler = errorHandler;
-exports.notFound = notFound;
-const zod_1 = require("zod");
-const logger_1 = require("./logger");
-class AppError extends Error {
+import { ZodError } from 'zod';
+import { logger } from './logger';
+export class AppError extends Error {
     statusCode;
     code;
     constructor(statusCode, message, code) {
@@ -15,8 +10,7 @@ class AppError extends Error {
         this.name = 'AppError';
     }
 }
-exports.AppError = AppError;
-function errorHandler(err, _req, res, _next) {
+export function errorHandler(err, _req, res, _next) {
     if (err instanceof AppError) {
         res.status(err.statusCode).json({
             error: err.message,
@@ -24,7 +18,7 @@ function errorHandler(err, _req, res, _next) {
         });
         return;
     }
-    if (err instanceof zod_1.ZodError) {
+    if (err instanceof ZodError) {
         res.status(400).json({
             error: 'Validation error',
             code: 'VALIDATION_ERROR',
@@ -35,13 +29,13 @@ function errorHandler(err, _req, res, _next) {
         });
         return;
     }
-    logger_1.logger.error({ err }, 'Unhandled error');
+    logger.error({ err }, 'Unhandled error');
     res.status(500).json({
         error: 'Internal server error',
         code: 'INTERNAL_ERROR',
     });
 }
-function notFound(_req, res) {
+export function notFound(_req, res) {
     res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
 }
 //# sourceMappingURL=errorHandler.js.map

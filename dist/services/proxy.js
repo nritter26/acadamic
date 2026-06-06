@@ -1,14 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isValidProxyUrl = isValidProxyUrl;
-exports.proxyRequest = proxyRequest;
-const http_1 = __importDefault(require("http"));
-const https_1 = __importDefault(require("https"));
-const url_1 = require("url");
-const dns_1 = __importDefault(require("dns"));
+import http from 'http';
+import https from 'https';
+import { URL } from 'url';
+import dns from 'dns';
 const FORBIDDEN_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]', '169.254.169.254', 'metadata.google.internal', '100.100.100.200'];
 const FORBIDDEN_PATTERNS = [/^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^127\./, /^0\./];
 function isPrivateIP(ip) {
@@ -18,15 +11,15 @@ function isPrivateIP(ip) {
         return true;
     return false;
 }
-async function isValidProxyUrl(urlStr) {
+export async function isValidProxyUrl(urlStr) {
     try {
-        const parsed = new url_1.URL(urlStr);
+        const parsed = new URL(urlStr);
         if (!['http:', 'https:'].includes(parsed.protocol))
             return false;
         const host = parsed.hostname.toLowerCase();
         if (FORBIDDEN_HOSTS.some(fh => host === fh || host.endsWith('.' + fh)))
             return false;
-        const addresses = await dns_1.default.promises.resolve4(host).catch(() => []);
+        const addresses = await dns.promises.resolve4(host).catch(() => []);
         for (const addr of addresses) {
             if (isPrivateIP(addr))
                 return false;
@@ -37,11 +30,11 @@ async function isValidProxyUrl(urlStr) {
         return false;
     }
 }
-async function proxyRequest(method, url, reqHeaders, body) {
+export async function proxyRequest(method, url, reqHeaders, body) {
     const maxSize = 2 * 1024 * 1024;
     const timeout = 15000;
-    const parsedUrl = new url_1.URL(url);
-    const lib = parsedUrl.protocol === 'https:' ? https_1.default : http_1.default;
+    const parsedUrl = new URL(url);
+    const lib = parsedUrl.protocol === 'https:' ? https : http;
     const start = Date.now();
     const options = {
         hostname: parsedUrl.hostname,

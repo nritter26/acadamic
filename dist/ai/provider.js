@@ -1,15 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.runKeywordTutorFn = runKeywordTutorFn;
-exports.runHybridLLM = runHybridLLM;
-exports.askLLM = askLLM;
-const config_1 = __importDefault(require("./config"));
-const tutor_keywords_1 = require("./tutor-keywords");
-const template_matcher_1 = require("./template-matcher");
-const cache_1 = require("./cache");
+import config from './config';
+import { runKeywordTutor } from './tutor-keywords';
+import { getTinyLLMResponse } from './template-matcher';
+import { llmCache } from './cache';
 async function streamSSEResponse(response, onStream, parser) {
     if (!response.body) {
         throw new Error('Response body is null — streaming not supported');
@@ -73,7 +65,7 @@ function geminiParser(data) {
 }
 const PROVIDERS = {
     gemini: {
-        endpoint: config_1.default.gemini.endpoint || 'https://generativelanguage.googleapis.com/v1beta',
+        endpoint: config.gemini.endpoint || 'https://generativelanguage.googleapis.com/v1beta',
         path: '/models/:model:streamGenerateContent?alt=sse',
         nonStreamPath: '/models/:model:generateContent',
         buildBody(messages, stream) {
@@ -102,17 +94,17 @@ const PROVIDERS = {
             return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
         },
         stripSystem: false,
-        get apiKey() { return config_1.default.gemini.apiKey; },
-        get model() { return config_1.default.gemini.model; },
-        get maxTokens() { return config_1.default.gemini.maxTokens; },
+        get apiKey() { return config.gemini.apiKey; },
+        get model() { return config.gemini.model; },
+        get maxTokens() { return config.gemini.maxTokens; },
     },
     openai: {
-        endpoint: config_1.default.openai.endpoint || 'https://api.openai.com/v1',
+        endpoint: config.openai.endpoint || 'https://api.openai.com/v1',
         path: '/chat/completions',
         buildBody(messages, stream) {
             return {
                 model: this.model,
-                messages: [{ role: 'system', content: config_1.default.systemPrompt }, ...messages],
+                messages: [{ role: 'system', content: config.systemPrompt }, ...messages],
                 max_tokens: this.maxTokens,
                 stream,
             };
@@ -128,9 +120,9 @@ const PROVIDERS = {
             const d = data;
             return d.choices?.[0]?.message?.content || null;
         },
-        get apiKey() { return config_1.default.openai.apiKey; },
-        get model() { return config_1.default.openai.model; },
-        get maxTokens() { return config_1.default.openai.maxTokens; },
+        get apiKey() { return config.openai.apiKey; },
+        get model() { return config.openai.model; },
+        get maxTokens() { return config.openai.maxTokens; },
     },
     anthropic: {
         endpoint: 'https://api.anthropic.com/v1',
@@ -143,7 +135,7 @@ const PROVIDERS = {
             return {
                 model: this.model,
                 max_tokens: this.maxTokens,
-                system: config_1.default.systemPrompt,
+                system: config.systemPrompt,
                 messages: chatMessages,
                 stream,
             };
@@ -161,17 +153,17 @@ const PROVIDERS = {
             return d.content?.[0]?.text || null;
         },
         stripSystem: true,
-        get apiKey() { return config_1.default.anthropic.apiKey; },
-        get model() { return config_1.default.anthropic.model; },
-        get maxTokens() { return config_1.default.anthropic.maxTokens; },
+        get apiKey() { return config.anthropic.apiKey; },
+        get model() { return config.anthropic.model; },
+        get maxTokens() { return config.anthropic.maxTokens; },
     },
     local: {
-        endpoint: config_1.default.local.endpoint || 'http://localhost:11434/v1',
+        endpoint: config.local.endpoint || 'http://localhost:11434/v1',
         path: '/chat/completions',
         buildBody(messages, stream) {
             return {
                 model: this.model,
-                messages: [{ role: 'system', content: config_1.default.systemPrompt }, ...messages],
+                messages: [{ role: 'system', content: config.systemPrompt }, ...messages],
                 max_tokens: this.maxTokens,
                 stream,
             };
@@ -185,8 +177,8 @@ const PROVIDERS = {
             return d.choices?.[0]?.message?.content || null;
         },
         get apiKey() { return ''; },
-        get model() { return config_1.default.local.model; },
-        get maxTokens() { return config_1.default.local.maxTokens; },
+        get model() { return config.local.model; },
+        get maxTokens() { return config.local.maxTokens; },
     },
 };
 async function fetchWithRetry(url, options, retries = 2) {
@@ -250,13 +242,13 @@ async function callProvider(provider, messages, onStream, overrides) {
     const data = await response.json();
     return provider.responseParser(data);
 }
-async function runKeywordTutorFn(message, lang, topic, code, hasError) {
-    const result = (0, tutor_keywords_1.runKeywordTutor)(message, lang, topic, code, hasError);
+export async function runKeywordTutorFn(message, lang, topic, code, hasError) {
+    const result = runKeywordTutor(message, lang, topic, code, hasError);
     return result ? result.response : null;
 }
-async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
+export async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
     const lastMsg = messages[messages.length - 1]?.content || '';
-    const keywordResult = (0, tutor_keywords_1.runKeywordTutor)(lastMsg, lang, topic, code, hasError);
+    const keywordResult = runKeywordTutor(lastMsg, lang, topic, code, hasError);
     if (keywordResult) {
         if (onStream) {
             const words = keywordResult.response.split(/(\s+)/);
@@ -268,7 +260,7 @@ async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
         return keywordResult.response;
     }
     try {
-        const llmResponse = await (0, template_matcher_1.getTinyLLMResponse)(messages, onStream);
+        const llmResponse = await getTinyLLMResponse(messages, onStream);
         if (llmResponse)
             return llmResponse;
     }
@@ -284,7 +276,7 @@ async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
     catch (e) {
         console.warn('[hybrid] Local LLM failed:', e);
     }
-    if (config_1.default.openai.apiKey) {
+    if (config.openai.apiKey) {
         try {
             console.log('[hybrid] Trying OpenAI...');
             const openaiResult = await callProvider(PROVIDERS.openai, messages, onStream);
@@ -295,7 +287,7 @@ async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
             console.warn('[hybrid] OpenAI failed:', e);
         }
     }
-    if (config_1.default.anthropic.apiKey) {
+    if (config.anthropic.apiKey) {
         try {
             console.log('[hybrid] Trying Anthropic...');
             const anthropicResult = await callProvider(PROVIDERS.anthropic, messages, onStream);
@@ -308,11 +300,11 @@ async function runHybridLLM(messages, onStream, lang, topic, code, hasError) {
     }
     return null;
 }
-async function askLLM(messages, onStream, options) {
-    const provider = options?.providerConfig?.provider || config_1.default.provider;
+export async function askLLM(messages, onStream, options) {
+    const provider = options?.providerConfig?.provider || config.provider;
     const overrides = options?.providerConfig ? { model: options.providerConfig.model, apiKey: options.providerConfig.apiKey, endpoint: options.providerConfig.endpoint } : undefined;
     const cacheKey = options?.providerConfig ? `${options.providerConfig.provider}|${options.providerConfig.model || ''}|${messages[messages.length - 1]?.content || ''}|${options?.lang || ''}|${options?.topic || ''}` : undefined;
-    const cached = cacheKey ? cache_1.llmCache.get(messages, options?.lang, options?.topic) : cache_1.llmCache.get(messages, options?.lang, options?.topic);
+    const cached = cacheKey ? llmCache.get(messages, options?.lang, options?.topic) : llmCache.get(messages, options?.lang, options?.topic);
     if (cached !== null) {
         if (onStream) {
             const words = cached.split(/(\s+)/);
@@ -346,7 +338,7 @@ async function askLLM(messages, onStream, options) {
         response = result ? result.response : null;
     }
     if (response !== null) {
-        cache_1.llmCache.set(messages, response, options?.lang, options?.topic);
+        llmCache.set(messages, response, options?.lang, options?.topic);
     }
     return response;
 }

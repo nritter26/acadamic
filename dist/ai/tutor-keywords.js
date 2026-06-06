@@ -1,17 +1,5 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSocratic = getSocratic;
-exports.getGreet = getGreet;
-exports.getThank = getThank;
-exports.detectLangFromMsg = detectLangFromMsg;
-exports.getCurrContext = getCurrContext;
-exports.matchTopic = matchTopic;
-exports.runKeywordTutor = runKeywordTutor;
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
+import fs from 'fs';
+import path from 'path';
 const LANG_NAMES_AI = {
     js: 'JavaScript', py: 'Python', go: 'Go', rs: 'Rust',
     c: 'C', cpp: 'C++', cs: 'C#', kt: 'Kotlin',
@@ -77,10 +65,10 @@ const SOCRATIC_PROMPTS = [
     "Try changing one thing at a time and see what happens. Debugging is experimental!",
     "What similar problems have you solved before? Can you apply the same pattern here?",
 ];
-function getSocratic() {
+export function getSocratic() {
     return SOCRATIC_PROMPTS[Math.floor(Math.random() * SOCRATIC_PROMPTS.length)];
 }
-function getGreet() {
+export function getGreet() {
     const greets = [
         "Hey there! I'm Devin, your coding buddy. What are you working on?",
         "Hello! Ready to learn some code? I'm here to help!",
@@ -89,7 +77,7 @@ function getGreet() {
     ];
     return greets[Math.floor(Math.random() * greets.length)];
 }
-function getThank() {
+export function getThank() {
     const thanks = [
         "You're welcome! Keep up the great work!",
         "Happy to help! That's what I'm here for.",
@@ -98,7 +86,7 @@ function getThank() {
     ];
     return thanks[Math.floor(Math.random() * thanks.length)];
 }
-function detectLangFromMsg(msg) {
+export function detectLangFromMsg(msg) {
     const lower = msg.toLowerCase();
     if (/\b(python|py\b)/.test(lower) && !/\b(py\s+script|pypy)\b/.test(lower))
         return 'py';
@@ -126,7 +114,7 @@ function detectLangFromMsg(msg) {
         return 'c';
     return null;
 }
-function getCurrContext(message, topic) {
+export function getCurrContext(message, topic) {
     const lower = message.toLowerCase();
     const isFollowUp = FOLLOW_UP.some(r => r.test(message));
     if (topic && isFollowUp)
@@ -137,7 +125,7 @@ function getCurrContext(message, topic) {
         return { type: 'topic', topic };
     return { type: 'general' };
 }
-function matchTopic(message) {
+export function matchTopic(message) {
     const lower = message.toLowerCase();
     const matches = [];
     for (const [topic, pattern] of Object.entries(TOPIC_KEYWORDS)) {
@@ -149,10 +137,10 @@ function matchTopic(message) {
 }
 function curriculumSearch(message, lang) {
     try {
-        const contentDir = path_1.default.join(__dirname, '..', 'content');
-        const langFile = path_1.default.join(contentDir, (lang || 'js') + '.json');
-        if (fs_1.default.existsSync(langFile)) {
-            const data = JSON.parse(fs_1.default.readFileSync(langFile, 'utf-8'));
+        const contentDir = path.join(__dirname, '..', 'content');
+        const langFile = path.join(contentDir, (lang || 'js') + '.json');
+        if (fs.existsSync(langFile)) {
+            const data = JSON.parse(fs.readFileSync(langFile, 'utf-8'));
             const topics = matchTopic(message);
             const results = [];
             for (const [phase, phaseData] of Object.entries(data)) {
@@ -302,7 +290,7 @@ function handleTopicHelp(message, lang) {
     }
     return generic;
 }
-function runKeywordTutor(message, lang, topic, code, hasError) {
+export function runKeywordTutor(message, lang, topic, code, hasError) {
     const lower = message.trim().toLowerCase();
     if (GREETINGS.some(r => r.test(message))) {
         return { response: getGreet(), source: 'keyword' };

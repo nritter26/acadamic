@@ -1,19 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
-const path_1 = __importDefault(require("path"));
-const uuid_1 = require("uuid");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+import Database from 'better-sqlite3';
+import path from 'path';
+import { v4 as uuid } from 'uuid';
+import { validate, requireAuth } from '../middleware';
+import { CreateProjectSchema, UpdateProjectSchema } from '../types';
+const router = Router();
 let projectsDb = null;
 function getDb() {
     if (!projectsDb) {
-        projectsDb = new better_sqlite3_1.default(path_1.default.join(__dirname, '..', 'data', 'projects.db'));
+        projectsDb = new Database(path.join(__dirname, '..', 'data', 'projects.db'));
         projectsDb.exec(`
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
@@ -30,7 +25,7 @@ function getDb() {
     return projectsDb;
 }
 // All project routes require auth
-router.use(middleware_1.requireAuth);
+router.use(requireAuth);
 router.get('/', (req, res) => {
     const user = req.user;
     const db = getDb();
@@ -48,15 +43,15 @@ router.get('/:id', (req, res) => {
     project.files = JSON.parse(project.files || '{}');
     res.json(project);
 });
-router.post('/', (0, middleware_1.validate)(types_1.CreateProjectSchema), (req, res) => {
+router.post('/', validate(CreateProjectSchema), (req, res) => {
     const user = req.user;
     const db = getDb();
-    const id = (0, uuid_1.v4)();
+    const id = uuid();
     const { name, language, description } = req.body;
     db.prepare('INSERT INTO projects (id, user_id, name, language, description) VALUES (?, ?, ?, ?, ?)').run(id, user.userId, name, language || 'js', description || '');
     res.status(201).json({ id, name, language: language || 'js', description: description || '' });
 });
-router.put('/:id', (0, middleware_1.validate)(types_1.UpdateProjectSchema), (req, res) => {
+router.put('/:id', validate(UpdateProjectSchema), (req, res) => {
     const user = req.user;
     const db = getDb();
     const existing = db.prepare('SELECT id FROM projects WHERE id = ? AND user_id = ?').get(req.params.id, user.userId);
@@ -101,5 +96,5 @@ router.delete('/:id', (req, res) => {
     }
     res.json({ ok: true });
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=projects.js.map

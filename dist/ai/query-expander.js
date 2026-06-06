@@ -1,40 +1,3 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.expandQuery = expandQuery;
-exports.expandQueryWithLLM = expandQueryWithLLM;
 const SYNONYM_MAP = {
     function: ['function', 'method', 'def', 'func'],
     variable: ['variable', 'var', 'let', 'const', 'declare'],
@@ -95,7 +58,7 @@ function tokenize(text) {
         .split(/\s+/)
         .filter(w => w.length > 1 && !STOP_WORDS.has(w));
 }
-function expandQuery(query) {
+export function expandQuery(query) {
     const tokens = tokenize(query);
     const expansions = new Set();
     for (const t of tokens) {
@@ -115,10 +78,10 @@ function expandQuery(query) {
     }
     return [...expansions];
 }
-async function expandQueryWithLLM(query, lang) {
+export async function expandQueryWithLLM(query, lang) {
     const keywordExpansion = expandQuery(query);
     try {
-        const { askLLM } = await Promise.resolve().then(() => __importStar(require('./provider')));
+        const { askLLM } = await import('./provider');
         let prompt = `Given this programming question, suggest 3-5 search terms to find relevant documentation. Return only terms comma-separated, no explanation.\n\nQuestion: ${query}`;
         if (lang)
             prompt += `\nLanguage: ${lang}`;

@@ -1,26 +1,24 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const services_1 = require("../services");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
-router.post('/', (0, middleware_1.validate)(types_1.ExecuteSchema), async (req, res) => {
+import { Router } from 'express';
+import { executeCode, getCompileHint } from '../services';
+import { validate } from '../middleware';
+import { ExecuteSchema } from '../types';
+const router = Router();
+router.post('/', validate(ExecuteSchema), async (req, res) => {
     try {
         const { lang, code, stdin } = req.body;
         if (lang === 'js') {
-            const result = await (0, services_1.executeCode)(lang, code, stdin);
+            const result = await executeCode(lang, code, stdin);
             res.json(result);
             return;
         }
         if (['sqlite', 'pg', 'mysql'].includes(lang)) {
-            const result = await (0, services_1.executeCode)(lang, code, stdin);
+            const result = await executeCode(lang, code, stdin);
             res.json(result);
             return;
         }
-        const result = await (0, services_1.executeCode)(lang, code, stdin);
+        const result = await executeCode(lang, code, stdin);
         if (result.error) {
-            const hint = (0, services_1.getCompileHint)(lang);
+            const hint = getCompileHint(lang);
             result.output += '\n' + hint;
         }
         res.json(result);
@@ -29,5 +27,5 @@ router.post('/', (0, middleware_1.validate)(types_1.ExecuteSchema), async (req, 
         res.status(500).json({ output: 'Execution error: ' + e.message, error: true });
     }
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=execute.js.map

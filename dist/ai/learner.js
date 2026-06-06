@@ -1,28 +1,13 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLearner = getLearner;
-exports.trackTopicCompletion = trackTopicCompletion;
-exports.trackError = trackError;
-exports.trackAttempt = trackAttempt;
-exports.trackQuiz = trackQuiz;
-exports.trackChallenge = trackChallenge;
-exports.trackAIInteraction = trackAIInteraction;
-exports.getDueReviews = getDueReviews;
-exports.getConceptMastery = getConceptMastery;
-exports.getNextRecommendedTopic = getNextRecommendedTopic;
-const fs_1 = __importDefault(require("fs"));
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
-const os_1 = __importDefault(require("os"));
-const url_1 = require("url");
+import fs from 'fs';
+import fsp from 'fs/promises';
+import path from 'path';
+import os from 'os';
+import { fileURLToPath } from 'url';
 // Recreate __dirname for ES Modules
-const __filename = (0, url_1.fileURLToPath)(import.meta.url);
-const __dirname = path_1.default.dirname(__filename);
-const LEARNER_DIR = path_1.default.join(__dirname, '..', 'data', 'learners');
-const FALLBACK_DIR = path_1.default.join(os_1.default.tmpdir(), 'koded-learners');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const LEARNER_DIR = path.join(__dirname, '..', 'data', 'learners');
+const FALLBACK_DIR = path.join(os.tmpdir(), 'koded-learners');
 let activeLearnerDir = LEARNER_DIR;
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
 const STALE_TOPIC_DAYS = parseInt(process.env.STALE_TOPIC_DAYS || '90', 10);
@@ -45,17 +30,17 @@ const DEFAULT_LEARNER = {
 const SCHEMA_VERSION = 3;
 function getLearnerPath(learnerId) {
     const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    return path_1.default.join(activeLearnerDir, `${safe}.json`);
+    return path.join(activeLearnerDir, `${safe}.json`);
 }
 async function ensureDir() {
     try {
-        await promises_1.default.mkdir(LEARNER_DIR, { recursive: true });
-        await promises_1.default.access(LEARNER_DIR, fs_1.default.constants.W_OK);
+        await fsp.mkdir(LEARNER_DIR, { recursive: true });
+        await fsp.access(LEARNER_DIR, fs.constants.W_OK);
         activeLearnerDir = LEARNER_DIR;
     }
     catch {
         try {
-            await promises_1.default.mkdir(FALLBACK_DIR, { recursive: true });
+            await fsp.mkdir(FALLBACK_DIR, { recursive: true });
             activeLearnerDir = FALLBACK_DIR;
             console.log('[Learner] Using fallback directory:', FALLBACK_DIR);
         }
@@ -131,10 +116,10 @@ function pruneStaleTopics(learner) {
     }
     return learner;
 }
-async function getLearner(learnerId) {
+export async function getLearner(learnerId) {
     try {
         const fp = getLearnerPath(learnerId);
-        const raw = await promises_1.default.readFile(fp, 'utf-8');
+        const raw = await fsp.readFile(fp, 'utf-8');
         const data = JSON.parse(raw);
         if (!validateLearner(data)) {
             console.error(`getLearner: invalid schema for ${learnerId}, resetting`);
@@ -161,8 +146,8 @@ async function doSaveLearner(learner) {
         learner.lastSeen = new Date().toISOString();
         const fp = getLearnerPath(learner.id);
         const tmp = fp + '.tmp';
-        await promises_1.default.writeFile(tmp, JSON.stringify(learner, null, 2));
-        await promises_1.default.rename(tmp, fp);
+        await fsp.writeFile(tmp, JSON.stringify(learner, null, 2));
+        await fsp.rename(tmp, fp);
     }
     catch (e) {
         console.error('saveLearner error:', e.message);
@@ -187,12 +172,12 @@ function flushAll() {
         const learner = entry.learner;
         try {
             const fp = getLearnerPath(learner.id);
-            const dir = path_1.default.dirname(fp);
-            if (!fs_1.default.existsSync(dir))
-                fs_1.default.mkdirSync(dir, { recursive: true });
+            const dir = path.dirname(fp);
+            if (!fs.existsSync(dir))
+                fs.mkdirSync(dir, { recursive: true });
             const tmp = fp + '.tmp';
-            fs_1.default.writeFileSync(tmp, JSON.stringify(learner, null, 2));
-            fs_1.default.renameSync(tmp, fp);
+            fs.writeFileSync(tmp, JSON.stringify(learner, null, 2));
+            fs.renameSync(tmp, fp);
         }
         catch (e) {
             console.error('flushAll error for', id, ':', e.message);
@@ -213,7 +198,7 @@ function updatePhaseMastery(learner, lang, phase) {
         mastery: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
 }
-async function trackTopicCompletion(learnerId, lang, topic, phase) {
+export async function trackTopicCompletion(learnerId, lang, topic, phase) {
     const learner = await getLearner(learnerId);
     const key = topicKey(lang, phase, topic);
     if (!learner.topics[key]) {
@@ -237,7 +222,7 @@ async function trackTopicCompletion(learnerId, lang, topic, phase) {
     await saveLearner(learner);
     return learner;
 }
-async function trackError(learnerId, lang, topic, phase) {
+export async function trackError(learnerId, lang, topic, phase) {
     const learner = await getLearner(learnerId);
     const key = topicKey(lang, phase, topic);
     if (!learner.topics[key]) {
@@ -250,7 +235,7 @@ async function trackError(learnerId, lang, topic, phase) {
     learner.topics[key].attempts += 1;
     await saveLearner(learner);
 }
-async function trackAttempt(learnerId, lang, topic, phase) {
+export async function trackAttempt(learnerId, lang, topic, phase) {
     const learner = await getLearner(learnerId);
     const key = topicKey(lang, phase, topic);
     if (!learner.topics[key]) {
@@ -262,25 +247,25 @@ async function trackAttempt(learnerId, lang, topic, phase) {
     learner.topics[key].attempts += 1;
     await saveLearner(learner);
 }
-async function trackQuiz(learnerId, correct, total) {
+export async function trackQuiz(learnerId, correct, total) {
     const learner = await getLearner(learnerId);
     learner.quizzes.total += total;
     learner.quizzes.correct += correct;
     await saveLearner(learner);
 }
-async function trackChallenge(learnerId, solved) {
+export async function trackChallenge(learnerId, solved) {
     const learner = await getLearner(learnerId);
     learner.challenges.total += 1;
     if (solved)
         learner.challenges.solved += 1;
     await saveLearner(learner);
 }
-async function trackAIInteraction(learnerId) {
+export async function trackAIInteraction(learnerId) {
     const learner = await getLearner(learnerId);
     learner.aiInteractions += 1;
     await saveLearner(learner);
 }
-async function getDueReviews(learnerId) {
+export async function getDueReviews(learnerId) {
     const learner = await getLearner(learnerId);
     const now = new Date();
     return Object.entries(learner.topics)
@@ -288,7 +273,7 @@ async function getDueReviews(learnerId) {
         .map(([k, v]) => ({ key: k, ...v }))
         .sort((a, b) => new Date(a.nextReview).getTime() - new Date(b.nextReview).getTime());
 }
-async function getConceptMastery(learnerId, lang) {
+export async function getConceptMastery(learnerId, lang) {
     const learner = await getLearner(learnerId);
     const topics = Object.entries(learner.topics)
         .filter(([k]) => k.startsWith(`${lang}:`))
@@ -319,7 +304,7 @@ async function getWeakestTopics(learnerId, lang, n = 3) {
         .sort((a, b) => a.mastery - b.mastery)
         .slice(0, n);
 }
-async function getNextRecommendedTopic(learnerId, lang, availablePhases) {
+export async function getNextRecommendedTopic(learnerId, lang, availablePhases) {
     const learner = await getLearner(learnerId);
     const completedTopics = Object.entries(learner.topics)
         .filter(([k, v]) => k.startsWith(`${lang}:`) && v.completedAt)

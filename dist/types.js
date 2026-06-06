@@ -1,93 +1,90 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateProjectSchema = exports.CreateProjectSchema = exports.LoginSchema = exports.RegisterSchema = exports.LearnerTrackSchema = exports.ProxySchema = exports.QuizGenerateSchema = exports.ExerciseSchema = exports.ReviewSchema = exports.ExplainSchema = exports.ChatSchema = exports.AnalyzeSchema = exports.ExecuteSchema = exports.ProgressSchema = void 0;
-const zod_1 = require("zod");
+import { z } from 'zod';
 // ── Zod Validation Schemas ──
-exports.ProgressSchema = zod_1.z.object({
-    lang: zod_1.z.string().min(1),
-    topic: zod_1.z.string().min(1),
-    completed: zod_1.z.boolean().optional(),
+export const ProgressSchema = z.object({
+    lang: z.string().min(1),
+    topic: z.string().min(1),
+    completed: z.boolean().optional(),
 });
-exports.ExecuteSchema = zod_1.z.object({
-    lang: zod_1.z.string().min(1),
-    code: zod_1.z.string().min(1),
-    stdin: zod_1.z.string().optional(),
+export const ExecuteSchema = z.object({
+    lang: z.string().min(1),
+    code: z.string().min(1),
+    stdin: z.string().optional(),
 });
-exports.AnalyzeSchema = zod_1.z.object({
-    code: zod_1.z.string().optional(),
-    lang: zod_1.z.string().optional(),
+export const AnalyzeSchema = z.object({
+    code: z.string().optional(),
+    lang: z.string().optional(),
 });
-exports.ChatSchema = zod_1.z.object({
-    message: zod_1.z.string(),
-    lang: zod_1.z.string().optional(),
-    topic: zod_1.z.string().optional(),
-    phase: zod_1.z.string().optional(),
-    code: zod_1.z.string().optional(),
-    output: zod_1.z.string().optional(),
-    hasError: zod_1.z.boolean().optional(),
-    history: zod_1.z.array(zod_1.z.object({ role: zod_1.z.string(), text: zod_1.z.string() })).optional(),
-    learnerId: zod_1.z.string().optional(),
-    provider: zod_1.z.string().optional(),
-    model: zod_1.z.string().optional(),
-    apiKey: zod_1.z.string().optional(),
-    endpoint: zod_1.z.string().optional(),
+export const ChatSchema = z.object({
+    message: z.string(),
+    lang: z.string().optional(),
+    topic: z.string().optional(),
+    phase: z.string().optional(),
+    code: z.string().optional(),
+    output: z.string().optional(),
+    hasError: z.boolean().optional(),
+    history: z.array(z.object({ role: z.string(), text: z.string() })).optional(),
+    learnerId: z.string().optional(),
+    provider: z.string().optional(),
+    model: z.string().optional(),
+    apiKey: z.string().optional(),
+    endpoint: z.string().optional(),
 });
-exports.ExplainSchema = zod_1.z.object({
-    code: zod_1.z.string().min(1),
-    lang: zod_1.z.string().optional(),
-    topic: zod_1.z.string().optional(),
+export const ExplainSchema = z.object({
+    code: z.string().min(1),
+    lang: z.string().optional(),
+    topic: z.string().optional(),
 });
-exports.ReviewSchema = zod_1.z.object({
-    code: zod_1.z.string().min(1),
-    lang: zod_1.z.string().optional(),
-    topic: zod_1.z.string().optional(),
-    learnerId: zod_1.z.string().optional(),
+export const ReviewSchema = z.object({
+    code: z.string().min(1),
+    lang: z.string().optional(),
+    topic: z.string().optional(),
+    learnerId: z.string().optional(),
 });
-exports.ExerciseSchema = zod_1.z.object({
-    topic: zod_1.z.string().min(1),
-    lang: zod_1.z.string().optional(),
-    level: zod_1.z.union([zod_1.z.literal('beginner'), zod_1.z.literal('intermediate'), zod_1.z.literal('expert')]).optional(),
+export const ExerciseSchema = z.object({
+    topic: z.string().min(1),
+    lang: z.string().optional(),
+    level: z.union([z.literal('beginner'), z.literal('intermediate'), z.literal('expert')]).optional(),
 });
-exports.QuizGenerateSchema = zod_1.z.object({
-    topic: zod_1.z.string().min(1),
-    lang: zod_1.z.string().optional(),
-    count: zod_1.z.number().int().min(1).max(10).optional(),
-    level: zod_1.z.union([zod_1.z.literal('beginner'), zod_1.z.literal('intermediate'), zod_1.z.literal('expert')]).optional(),
+export const QuizGenerateSchema = z.object({
+    topic: z.string().min(1),
+    lang: z.string().optional(),
+    count: z.number().int().min(1).max(10).optional(),
+    level: z.union([z.literal('beginner'), z.literal('intermediate'), z.literal('expert')]).optional(),
 });
-exports.ProxySchema = zod_1.z.object({
-    method: zod_1.z.string().optional(),
-    url: zod_1.z.string().url(),
-    headers: zod_1.z.record(zod_1.z.string(), zod_1.z.string()).optional(),
-    body: zod_1.z.string().optional(),
+export const ProxySchema = z.object({
+    method: z.string().optional(),
+    url: z.string().url(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.string().optional(),
 });
-exports.LearnerTrackSchema = zod_1.z.object({
-    event: zod_1.z.union([zod_1.z.literal('complete-topic'), zod_1.z.literal('error'), zod_1.z.literal('attempt'), zod_1.z.literal('quiz'), zod_1.z.literal('challenge'), zod_1.z.literal('ai-interaction')]),
-    lang: zod_1.z.string().optional(),
-    topic: zod_1.z.string().optional(),
-    phase: zod_1.z.string().optional(),
-    data: zod_1.z.object({ correct: zod_1.z.number().optional(), total: zod_1.z.number().optional(), solved: zod_1.z.boolean().optional() }).optional(),
-    learnerId: zod_1.z.string().optional(),
+export const LearnerTrackSchema = z.object({
+    event: z.union([z.literal('complete-topic'), z.literal('error'), z.literal('attempt'), z.literal('quiz'), z.literal('challenge'), z.literal('ai-interaction')]),
+    lang: z.string().optional(),
+    topic: z.string().optional(),
+    phase: z.string().optional(),
+    data: z.object({ correct: z.number().optional(), total: z.number().optional(), solved: z.boolean().optional() }).optional(),
+    learnerId: z.string().optional(),
 });
 // Auth schemas
-exports.RegisterSchema = zod_1.z.object({
-    email: zod_1.z.string().email(),
-    password: zod_1.z.string().min(6).max(128),
-    name: zod_1.z.string().min(1).max(100).optional(),
+export const RegisterSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(6).max(128),
+    name: z.string().min(1).max(100).optional(),
 });
-exports.LoginSchema = zod_1.z.object({
-    email: zod_1.z.string().email(),
-    password: zod_1.z.string().min(1),
+export const LoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1),
 });
 // Project schemas
-exports.CreateProjectSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1).max(200),
-    language: zod_1.z.string().optional(),
-    description: zod_1.z.string().max(1000).optional(),
+export const CreateProjectSchema = z.object({
+    name: z.string().min(1).max(200),
+    language: z.string().optional(),
+    description: z.string().max(1000).optional(),
 });
-exports.UpdateProjectSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1).max(200).optional(),
-    language: zod_1.z.string().optional(),
-    description: zod_1.z.string().max(1000).optional(),
-    files: zod_1.z.record(zod_1.z.string(), zod_1.z.string()).optional(),
+export const UpdateProjectSchema = z.object({
+    name: z.string().min(1).max(200).optional(),
+    language: z.string().optional(),
+    description: z.string().max(1000).optional(),
+    files: z.record(z.string(), z.string()).optional(),
 });
 //# sourceMappingURL=types.js.map

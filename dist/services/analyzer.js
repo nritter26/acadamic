@@ -1,13 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyzeCode = analyzeCode;
-exports.analyzeUserCode = analyzeUserCode;
 const COMMON_PATTERNS = {
     '==': `You used \`==\` (loose equality). Prefer \`===\` (strict equality) to avoid type coercion bugs.`,
     'var ': `Using \`var\` is outdated. Use \`let\` (mutable) or \`const\` (immutable) for block-scoped variables.`,
     'console.log': '✓ Good use of console.log for debugging! Remember to remove or comment out debug logs in production.',
 };
-function analyzeCode(code, lang) {
+export function analyzeCode(code, lang) {
     if (!code)
         return { hints: [] };
     const hints = [];
@@ -62,7 +58,7 @@ function analyzeCode(code, lang) {
     }
     return { hints };
 }
-function analyzeUserCode(code, lang) {
+export function analyzeUserCode(code, lang) {
     if (!code || !lang)
         return null;
     const hints = [];

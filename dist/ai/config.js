@@ -1,9 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSystemPrompt = getSystemPrompt;
-exports.isHybrid = isHybrid;
-exports.isKeyword = isKeyword;
-exports.getActiveAIProvider = getActiveAIProvider;
 const config = {
     provider: process.env.AI_PROVIDER || 'hybrid',
     openai: {
@@ -45,19 +39,19 @@ const TIERED_PROMPTS = {
     intermediate: "You are tutoring an intermediate programmer. Discuss tradeoffs between approaches. Introduce design patterns. Challenge assumptions. Reference common pitfalls.",
     advanced: "You are tutoring an advanced programmer. Discuss performance implications, architecture patterns, and edge cases. Recommend further reading and advanced techniques.",
 };
-function getSystemPrompt(level) {
+export function getSystemPrompt(level) {
     const base = config.systemPrompt;
     const tiered = TIERED_PROMPTS[level];
     return `${base}\n\n${tiered}`;
 }
-function isHybrid() {
+export function isHybrid() {
     return config.provider === 'hybrid';
 }
-function isKeyword() {
+export function isKeyword() {
     return config.provider === 'keyword';
 }
-function getActiveAIProvider() {
+export function getActiveAIProvider() {
     return config.provider;
 }
-exports.default = config;
+export default config;
 //# sourceMappingURL=config.js.map

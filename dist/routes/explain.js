@@ -1,10 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const provider_1 = require("../ai/provider");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+import { askLLM } from '../ai/provider';
+import { validate } from '../middleware';
+import { ExplainSchema } from '../types';
+const router = Router();
 function analyzeCode(code) {
     const result = { funcs: [], vars: [], calls: [], patterns: [], imports: [], flow: [] };
     const lines = code.split('\n');
@@ -176,7 +174,7 @@ function generateStaticExplain(code, lang, topic) {
     exp += '\n\n**Try this:** Modify values in the editor, then click **Run ▶** to see how the output changes!';
     return exp;
 }
-router.post('/', (0, middleware_1.validate)(types_1.ExplainSchema), async (req, res) => {
+router.post('/', validate(ExplainSchema), async (req, res) => {
     try {
         const { code, lang, topic } = req.body;
         if (!code) {
@@ -193,7 +191,7 @@ router.post('/', (0, middleware_1.validate)(types_1.ExplainSchema), async (req, 
             },
         ];
         if (activeProvider !== 'keyword') {
-            const llmReply = await (0, provider_1.askLLM)(messages, undefined, { lang, topic, code });
+            const llmReply = await askLLM(messages, undefined, { lang, topic, code });
             if (llmReply) {
                 res.json({ explanation: llmReply, source: 'llm' });
                 return;
@@ -206,5 +204,5 @@ router.post('/', (0, middleware_1.validate)(types_1.ExplainSchema), async (req, 
         res.status(500).json({ explanation: 'Error: ' + e.message, source: 'error' });
     }
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=explain.js.map

@@ -1,12 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const provider_1 = require("../ai/provider");
-const embeddings_1 = require("../ai/embeddings");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
-router.post('/generate', (0, middleware_1.validate)(types_1.QuizGenerateSchema), async (req, res) => {
+import { Router } from 'express';
+import { askLLM } from '../ai/provider';
+import { getCurriculumContext } from '../ai/embeddings';
+import { validate } from '../middleware';
+import { QuizGenerateSchema } from '../types';
+const router = Router();
+router.post('/generate', validate(QuizGenerateSchema), async (req, res) => {
     const { topic, lang, count, level } = req.body;
     if (!topic) {
         res.status(400).json({ error: 'No topic provided' });
@@ -15,7 +13,7 @@ router.post('/generate', (0, middleware_1.validate)(types_1.QuizGenerateSchema),
     const quizLang = lang || 'js';
     const quizCount = Math.min(count || 3, 10);
     try {
-        const context = await (0, embeddings_1.getCurriculumContext)(topic, quizLang);
+        const context = await getCurriculumContext(topic, quizLang);
         const prompt = `You are a programming quiz generator. Create ${quizCount} multiple-choice questions about "${topic}" in ${quizLang}.
 
 ${context ? `Context from curriculum:\n${context}\n\n` : ''}
@@ -26,7 +24,7 @@ Format your response as a JSON array of objects, each with:
 - "explanation": brief explanation of why the correct answer is right
 
 Make questions educational and appropriate for ${level || 'beginner'} level. Return ONLY valid JSON.`;
-        const reply = await (0, provider_1.askLLM)([{ role: 'user', content: prompt }]);
+        const reply = await askLLM([{ role: 'user', content: prompt }]);
         if (typeof reply === 'string' && reply) {
             const jsonMatch = reply.match(/\[[\s\S]*\]/);
             if (jsonMatch) {
@@ -55,5 +53,5 @@ Make questions educational and appropriate for ${level || 'beginner'} level. Ret
         res.status(500).json({ error: 'Failed to generate quiz' });
     }
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=quiz.js.map

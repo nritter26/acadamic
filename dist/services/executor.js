@@ -1,50 +1,11 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.executeCode = executeCode;
-const child_process_1 = require("child_process");
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
-const os_1 = __importDefault(require("os"));
-const vm_1 = __importDefault(require("vm"));
-const database = __importStar(require("../sql/database"));
-const docker_executor_1 = require("./docker-executor");
-const middleware_1 = require("../middleware");
+import { exec, execSync, spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import vm from 'vm';
+import * as database from '../sql/database';
+import { dockerExecute, isDockerAvailable, getSupportedDockerLangs } from './docker-executor';
+import { logger } from '../middleware';
 const EXEC_QUEUE = [];
 let EXEC_RUNNING = 0;
 const EXEC_MAX_CONCURRENT = 4;
@@ -53,7 +14,7 @@ function processNextExec() {
         const job = EXEC_QUEUE.shift();
         EXEC_RUNNING++;
         if (job.stdin !== undefined) {
-            const child = (0, child_process_1.spawn)('sh', ['-c', job.cmd], job.opts);
+            const child = spawn('sh', ['-c', job.cmd], job.opts);
             let stdout = '';
             let stderr = '';
             child.stdout.on('data', (d) => stdout += d.toString());
@@ -74,7 +35,7 @@ function processNextExec() {
             }
         }
         else {
-            (0, child_process_1.exec)(job.cmd, job.opts, (err, stdout, stderr) => {
+            exec(job.cmd, job.opts, (err, stdout, stderr) => {
                 EXEC_RUNNING--;
                 if (err)
                     job.reject(err);
@@ -93,7 +54,7 @@ function execQueue(cmd, opts, stdin) {
 }
 function execWithStdin(cmd, opts, stdin) {
     return new Promise((resolve, reject) => {
-        const child = (0, child_process_1.spawn)('sh', ['-c', cmd], opts);
+        const child = spawn('sh', ['-c', cmd], opts);
         let stdout = '';
         let stderr = '';
         child.stdout.on('data', (d) => stdout += d.toString());
@@ -191,10 +152,10 @@ function detectJavaBin() {
     if (javaBin)
         return javaBin;
     try {
-        const javacPath = (0, child_process_1.execSync)('readlink -f $(which javac)', { timeout: 5000, stdio: 'pipe' }).toString().trim();
-        const jdkHome = path_1.default.dirname(path_1.default.dirname(javacPath));
-        const candidate = path_1.default.join(jdkHome, 'bin', 'java');
-        if (fs_1.default.existsSync(candidate)) {
+        const javacPath = execSync('readlink -f $(which javac)', { timeout: 5000, stdio: 'pipe' }).toString().trim();
+        const jdkHome = path.dirname(path.dirname(javacPath));
+        const candidate = path.join(jdkHome, 'bin', 'java');
+        if (fs.existsSync(candidate)) {
             javaBin = candidate;
             return javaBin;
         }
@@ -206,7 +167,7 @@ function detectJavaBin() {
 function resolveJavaCmd(workDir) {
     const java = detectJavaBin();
     const javac = 'javac';
-    return `${javac} "${path_1.default.join(workDir, 'Main.java')}" && ${java} -cp "${workDir}" Main`;
+    return `${javac} "${path.join(workDir, 'Main.java')}" && ${java} -cp "${workDir}" Main`;
 }
 // ── Runners config ──
 const RUNNERS = {
@@ -232,13 +193,13 @@ const RUNNERS = {
     css: { cmd: 'cat "%f"', ext: '.css' },
 };
 // ── Execute ──
-async function executeCode(lang, code, stdin, onChunk) {
+export async function executeCode(lang, code, stdin, onChunk) {
     if (!code)
         return { output: 'No code provided', error: true };
     // JavaScript sandbox
     if (lang === 'js') {
         try {
-            new vm_1.default.Script(code);
+            new vm.Script(code);
         }
         catch (e) {
             return { output: analyzeJSError(code, e), error: true };
@@ -291,7 +252,7 @@ async function executeCode(lang, code, stdin, onChunk) {
                     clear: () => { output = ''; },
                 },
             };
-            vm_1.default.runInNewContext(code, sandbox, { timeout: 5000 });
+            vm.runInNewContext(code, sandbox, { timeout: 5000 });
             return { output: output || '(no output)' };
         }
         catch (e) {
@@ -306,9 +267,9 @@ async function executeCode(lang, code, stdin, onChunk) {
     if (lang === 'mysql')
         return database.executeMySQL(code);
     // Try Docker sandbox first if available
-    if ((0, docker_executor_1.isDockerAvailable)() && (0, docker_executor_1.getSupportedDockerLangs)().includes(lang)) {
-        middleware_1.logger.debug({ lang }, 'Executing via Docker sandbox');
-        const dockerResult = await (0, docker_executor_1.dockerExecute)(lang, code, stdin, onChunk);
+    if (isDockerAvailable() && getSupportedDockerLangs().includes(lang)) {
+        logger.debug({ lang }, 'Executing via Docker sandbox');
+        const dockerResult = await dockerExecute(lang, code, stdin, onChunk);
         if (!dockerResult.error || dockerResult.dockerAvailable !== false) {
             return dockerResult;
         }
@@ -318,24 +279,24 @@ async function executeCode(lang, code, stdin, onChunk) {
     if (!runner) {
         return { output: `// ${lang.toUpperCase()} execution not available on this server`, error: true };
     }
-    const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'exec-'));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'exec-'));
     const srcName = runner.src || 'code';
-    const tmpFile = path_1.default.join(tmpDir, srcName + runner.ext);
-    fs_1.default.writeFileSync(tmpFile, code);
+    const tmpFile = path.join(tmpDir, srcName + runner.ext);
+    fs.writeFileSync(tmpFile, code);
     let cmd = runner.cmd.replaceAll('%f', tmpFile);
     const env = {
         ...process.env,
-        PATH: `${process.env.PATH}:${path_1.default.join(os_1.default.homedir(), '.local/bin')}:${path_1.default.join(os_1.default.homedir(), '.cargo/bin')}`,
+        PATH: `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`,
     };
     if (lang === 'zig') {
-        const zigCacheDir = path_1.default.join(tmpDir, '.zig-cache');
+        const zigCacheDir = path.join(tmpDir, '.zig-cache');
         env.HOME = tmpDir;
-        env.XDG_CACHE_HOME = path_1.default.join(tmpDir, '.cache');
+        env.XDG_CACHE_HOME = path.join(tmpDir, '.cache');
         env.ZIG_GLOBAL_CACHE_DIR = zigCacheDir;
         env.ZIG_LOCAL_CACHE_DIR = zigCacheDir;
     }
     if (!process.env.DOTNET_ROOT) {
-        env.DOTNET_ROOT = path_1.default.join(os_1.default.homedir(), '.local/dotnet');
+        env.DOTNET_ROOT = path.join(os.homedir(), '.local/dotnet');
     }
     if (lang === 'java') {
         cmd = resolveJavaCmd(tmpDir);
@@ -349,7 +310,7 @@ async function executeCode(lang, code, stdin, onChunk) {
     const execOpts = { timeout: 30000, cwd: tmpDir, env };
     try {
         const result = await execQueue(sandboxedCmd, { ...execOpts, maxBuffer: 1024 * 1024 }, stdin);
-        fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+        fs.rm(tmpDir, { recursive: true, force: true }, () => { });
         const stdoutClean = (result.stdout || '').trimEnd();
         const stderrClean = (result.stderr || '').trimEnd();
         let output = stdoutClean;
@@ -359,7 +320,7 @@ async function executeCode(lang, code, stdin, onChunk) {
         return { output: output || '(no output)' };
     }
     catch (err) {
-        fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+        fs.rm(tmpDir, { recursive: true, force: true }, () => { });
         return { output: 'Process failed: ' + err.message.slice(0, 200), error: true };
     }
 }

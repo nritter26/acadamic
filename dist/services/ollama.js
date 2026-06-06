@@ -1,10 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.detectOllama = detectOllama;
-exports.getOllamaStatus = getOllamaStatus;
 let ollamaAvailable = false;
 let ollamaModels = [];
-async function detectOllama() {
+export async function detectOllama() {
     try {
         const response = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) });
         if (response.ok) {
@@ -25,7 +21,7 @@ async function detectOllama() {
         console.log('[Ollama] Not found at http://localhost:11434');
     }
 }
-function getOllamaStatus() {
+export function getOllamaStatus() {
     return { available: ollamaAvailable, models: ollamaModels.map(m => m.name) };
 }
 //# sourceMappingURL=ollama.js.map

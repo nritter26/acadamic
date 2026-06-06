@@ -1,7 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.openapiHandler = openapiHandler;
-exports.swaggerUIHandler = swaggerUIHandler;
 const API_BASE = '/api';
 const spec = {
     openapi: '3.0.3',
@@ -500,10 +496,10 @@ const spec = {
         },
     },
 };
-function openapiHandler(_req, res) {
+export function openapiHandler(_req, res) {
     res.json(spec);
 }
-function swaggerUIHandler(_req, res) {
+export function swaggerUIHandler(_req, res) {
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>

@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTinyLLMResponse = getTinyLLMResponse;
 const topicPatterns = [
     { word: /variable/i, topic: 'variables' },
     { word: /function|method/i, topic: 'functions' },
@@ -43,7 +40,7 @@ async function generateResponse(messages) {
     }
     return { response, source: 'template-matcher' };
 }
-async function getTinyLLMResponse(messages, onStream) {
+export async function getTinyLLMResponse(messages, onStream) {
     try {
         const result = await generateResponse(messages);
         if (onStream) {

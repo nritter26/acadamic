@@ -1,24 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.initAll = initAll;
-exports.getStatus = getStatus;
-exports.executeSQLite = executeSQLite;
-exports.executePG = executePG;
-exports.executeMySQL = executeMySQL;
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
-const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
+import fs from 'fs';
+import path from 'path';
+import Database from 'better-sqlite3';
 let pgPool = null;
 let mysqlPool = null;
 let db = null;
 function initSQLite() {
     try {
-        db = new better_sqlite3_1.default(':memory:');
-        const seedPath = path_1.default.join(__dirname, 'seed.sql');
-        const seedSQL = fs_1.default.readFileSync(seedPath, 'utf-8');
+        db = new Database(':memory:');
+        const seedPath = path.join(__dirname, 'seed.sql');
+        const seedSQL = fs.readFileSync(seedPath, 'utf-8');
         db.exec(seedSQL);
         return { available: true };
     }
@@ -255,4 +245,5 @@ function getStatus() {
         mysql: state.mysql,
     };
 }
+export { initAll, getStatus, executeSQLite, executePG, executeMySQL, };
 //# sourceMappingURL=database.js.map

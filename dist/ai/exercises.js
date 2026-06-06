@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateExercise = generateExercise;
-const provider_1 = require("./provider");
-const embeddings_1 = require("./embeddings");
+import { askLLM } from './provider';
+import { search } from './embeddings';
 const EXERCISE_TEMPLATES = {
     beginner: [
         { type: 'fix-bug', desc: 'Fix the bug in this code' },
@@ -22,8 +19,8 @@ const EXERCISE_TEMPLATES = {
         { type: 'extend', desc: 'Add a feature to this existing code' },
     ],
 };
-async function generateExercise(topic, lang, level = 'beginner') {
-    const searchResults = await (0, embeddings_1.search)(topic, lang, 1);
+export async function generateExercise(topic, lang, level = 'beginner') {
+    const searchResults = await search(topic, lang, 1);
     const context = searchResults.length > 0
         ? `The curriculum covers "${searchResults[0].topic}" with: ${searchResults[0].exp.slice(0, 300)}`
         : '';
@@ -45,7 +42,7 @@ Generate a ${template.type} exercise. Format your response as JSON:
 
 Make the exercise educational and focused on one concept at a time.`;
     try {
-        const reply = await (0, provider_1.askLLM)([{ role: 'user', content: prompt }]);
+        const reply = await askLLM([{ role: 'user', content: prompt }]);
         if (!reply)
             return generateStaticExercise(topic, lang, level);
         try {

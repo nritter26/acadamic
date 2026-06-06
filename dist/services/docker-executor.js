@@ -1,21 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDockerAvailable = isDockerAvailable;
-exports.getSupportedDockerLangs = getSupportedDockerLangs;
-exports.initWarmPool = initWarmPool;
-exports.shutdownWarmPool = shutdownWarmPool;
-exports.dockerExecute = dockerExecute;
-exports.generateDockerfiles = generateDockerfiles;
-const child_process_1 = require("child_process");
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
-const os_1 = __importDefault(require("os"));
-const middleware_1 = require("../middleware");
+import { execSync, exec, spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import { logger } from '../middleware';
 const execAsync = (cmd, opts = {}) => new Promise((resolve, reject) => {
-    (0, child_process_1.exec)(cmd, { maxBuffer: 1024 * 1024, ...opts }, (err, stdout, stderr) => {
+    exec(cmd, { maxBuffer: 1024 * 1024, ...opts }, (err, stdout, stderr) => {
         if (err)
             reject(err);
         else
@@ -25,7 +14,7 @@ const execAsync = (cmd, opts = {}) => new Promise((resolve, reject) => {
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 function spawnWithTimeout(cmd, args, opts) {
     return new Promise((resolve) => {
-        const child = (0, child_process_1.spawn)(cmd, args, {
+        const child = spawn(cmd, args, {
             stdio: ['pipe', 'pipe', 'pipe'],
         });
         let stdout = '';
@@ -93,11 +82,11 @@ const DOCKER_RUNNERS = {
     sqlite: { image: 'kodex-sqlite', ext: '.sql', runCmd: 'sqlite3 /code/prog.sql', needsCompile: false },
 };
 let dockerAvailable = null;
-function isDockerAvailable() {
+export function isDockerAvailable() {
     if (dockerAvailable !== null)
         return dockerAvailable;
     try {
-        (0, child_process_1.execSync)('docker info', { timeout: 5000, stdio: 'pipe' });
+        execSync('docker info', { timeout: 5000, stdio: 'pipe' });
         dockerAvailable = true;
     }
     catch {
@@ -105,12 +94,12 @@ function isDockerAvailable() {
     }
     return dockerAvailable;
 }
-function getSupportedDockerLangs() {
+export function getSupportedDockerLangs() {
     return Object.keys(DOCKER_RUNNERS);
 }
 let warmPool = new Map();
 const POOL_SIZE = Math.max(1, parseInt(process.env.WARM_POOL_SIZE || '3', 10));
-const WARM_POOL_BASE = path_1.default.join(os_1.default.tmpdir(), 'kodex-warm-pool');
+const WARM_POOL_BASE = path.join(os.tmpdir(), 'kodex-warm-pool');
 function warmPoolContainerName(lang, idx) {
     return `kodex-warm-${lang}-${idx}`;
 }
@@ -124,13 +113,13 @@ async function ensureLangPool(lang) {
     await Promise.allSettled(Array.from({ length: langPoolSize }, (_, i) => execAsync(`docker rm -f ${warmPoolContainerName(lang, i)} 2>/dev/null`, { timeout: 5000 }).catch(() => { })));
     const entries = [];
     for (let i = 0; i < langPoolSize; i++) {
-        const workspaceDir = path_1.default.join(WARM_POOL_BASE, `${lang}-${i}`);
-        fs_1.default.mkdirSync(workspaceDir, { recursive: true });
+        const workspaceDir = path.join(WARM_POOL_BASE, `${lang}-${i}`);
+        fs.mkdirSync(workspaceDir, { recursive: true });
         // Write the runner script into the shared volume
-        const runnerPath = path_1.default.join(workspaceDir, '.runner.sh');
-        if (!fs_1.default.existsSync(runnerPath)) {
-            fs_1.default.writeFileSync(runnerPath, RUNNER_SCRIPT);
-            fs_1.default.chmodSync(runnerPath, '755');
+        const runnerPath = path.join(workspaceDir, '.runner.sh');
+        if (!fs.existsSync(runnerPath)) {
+            fs.writeFileSync(runnerPath, RUNNER_SCRIPT);
+            fs.chmodSync(runnerPath, '755');
         }
         try {
             const { stdout } = await execAsync(`docker run -d --name ${warmPoolContainerName(lang, i)} --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${workspaceDir}:/code:rw" ${config.image} sh -c "tail -f /dev/null"`, { timeout: 30000 });
@@ -140,12 +129,12 @@ async function ensureLangPool(lang) {
                 await execAsync(`docker exec -d ${warmPoolContainerName(lang, i)} sh /code/.runner.sh`, { timeout: 10000 });
             }
             catch {
-                middleware_1.logger.debug({ lang }, 'Runner process failed, falling back to docker exec for this container');
+                logger.debug({ lang }, 'Runner process failed, falling back to docker exec for this container');
             }
             entries.push({ containerId, lang, busy: false, workspaceDir, lastUsed: Date.now() });
         }
         catch {
-            middleware_1.logger.debug({ lang }, 'Failed to start warm pool container');
+            logger.debug({ lang }, 'Failed to start warm pool container');
         }
     }
     warmPool.set(lang, entries);
@@ -169,11 +158,11 @@ async function acquirePoolContainer(lang) {
 }
 function releasePoolContainer(entry) {
     try {
-        const files = fs_1.default.readdirSync(entry.workspaceDir);
+        const files = fs.readdirSync(entry.workspaceDir);
         for (const file of files) {
             if (file === '.runner.sh' || file === '.runner.pid')
                 continue;
-            fs_1.default.rmSync(path_1.default.join(entry.workspaceDir, file), { recursive: true, force: true });
+            fs.rmSync(path.join(entry.workspaceDir, file), { recursive: true, force: true });
         }
     }
     catch { /* ignore */ }
@@ -186,39 +175,39 @@ async function executeOnWarmContainer(entry, lang, code, stdin, onChunk) {
         return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: true };
     }
     const srcName = config.src || 'prog';
-    const progFile = path_1.default.join(entry.workspaceDir, srcName + config.ext);
-    const cmdPath = path_1.default.join(entry.workspaceDir, '.cmd');
-    const runPath = path_1.default.join(entry.workspaceDir, '.run');
-    const outPath = path_1.default.join(entry.workspaceDir, '.out');
-    const exitPath = path_1.default.join(entry.workspaceDir, '.exit');
+    const progFile = path.join(entry.workspaceDir, srcName + config.ext);
+    const cmdPath = path.join(entry.workspaceDir, '.cmd');
+    const runPath = path.join(entry.workspaceDir, '.run');
+    const outPath = path.join(entry.workspaceDir, '.out');
+    const exitPath = path.join(entry.workspaceDir, '.exit');
     // Write code file
-    fs_1.default.writeFileSync(progFile, code);
+    fs.writeFileSync(progFile, code);
     // Write command to execute
     const cmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-    fs_1.default.writeFileSync(cmdPath, cmd);
+    fs.writeFileSync(cmdPath, cmd);
     // Write stdin if provided
     if (stdin) {
-        fs_1.default.writeFileSync(path_1.default.join(entry.workspaceDir, '.stdin'), stdin);
+        fs.writeFileSync(path.join(entry.workspaceDir, '.stdin'), stdin);
     }
     // Clean any stale artifacts from previous run
     try {
-        fs_1.default.rmSync(outPath, { force: true });
+        fs.rmSync(outPath, { force: true });
     }
     catch { }
     try {
-        fs_1.default.rmSync(exitPath, { force: true });
+        fs.rmSync(exitPath, { force: true });
     }
     catch { }
     // Trigger execution
-    fs_1.default.writeFileSync(runPath, '');
+    fs.writeFileSync(runPath, '');
     // Poll for completion with output streaming
     let stdout = '';
     let exitCode = null;
     const deadline = Date.now() + 30000;
     while (Date.now() < deadline) {
         try {
-            if (fs_1.default.existsSync(outPath)) {
-                const content = fs_1.default.readFileSync(outPath, 'utf-8');
+            if (fs.existsSync(outPath)) {
+                const content = fs.readFileSync(outPath, 'utf-8');
                 if (content.length > stdout.length) {
                     const chunk = content.slice(stdout.length);
                     stdout = content;
@@ -227,9 +216,9 @@ async function executeOnWarmContainer(entry, lang, code, stdin, onChunk) {
             }
         }
         catch { }
-        if (fs_1.default.existsSync(exitPath)) {
+        if (fs.existsSync(exitPath)) {
             try {
-                exitCode = parseInt(fs_1.default.readFileSync(exitPath, 'utf-8').trim(), 10) || 0;
+                exitCode = parseInt(fs.readFileSync(exitPath, 'utf-8').trim(), 10) || 0;
             }
             catch {
                 exitCode = 0;
@@ -240,8 +229,8 @@ async function executeOnWarmContainer(entry, lang, code, stdin, onChunk) {
     }
     // Final output read
     try {
-        if (fs_1.default.existsSync(outPath)) {
-            const content = fs_1.default.readFileSync(outPath, 'utf-8');
+        if (fs.existsSync(outPath)) {
+            const content = fs.readFileSync(outPath, 'utf-8');
             if (content.length > stdout.length) {
                 onChunk?.(content.slice(stdout.length));
             }
@@ -250,16 +239,16 @@ async function executeOnWarmContainer(entry, lang, code, stdin, onChunk) {
     }
     catch { }
     // Cleanup run artifacts
-    for (const f of [runPath, cmdPath, outPath, exitPath, path_1.default.join(entry.workspaceDir, '.stdin')]) {
+    for (const f of [runPath, cmdPath, outPath, exitPath, path.join(entry.workspaceDir, '.stdin')]) {
         try {
-            fs_1.default.rmSync(f, { force: true });
+            fs.rmSync(f, { force: true });
         }
         catch { }
     }
     // Timeout — kill runner, restart it, replace container
     if (exitCode === null) {
         try {
-            (0, child_process_1.execSync)(`docker exec ${entry.containerId} sh -c "pkill -f 'while true' 2>/dev/null; pkill -P 1 2>/dev/null"`, { stdio: 'pipe', timeout: 3000 });
+            execSync(`docker exec ${entry.containerId} sh -c "pkill -f 'while true' 2>/dev/null; pkill -P 1 2>/dev/null"`, { stdio: 'pipe', timeout: 3000 });
         }
         catch { }
         execAsync(`docker exec -d ${entry.containerId} sh /code/.runner.sh`, { timeout: 5000 }).catch(() => { });
@@ -280,14 +269,14 @@ function removeEntryFromPool(entry, lang) {
             entries.splice(idx, 1);
     }
     try {
-        (0, child_process_1.execSync)(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
+        execSync(`docker rm -f ${entry.containerId} 2>/dev/null`, { stdio: 'pipe' });
     }
     catch { /* ignore */ }
     ensureLangPool(lang).catch(() => { });
 }
-async function initWarmPool() {
+export async function initWarmPool() {
     if (!isDockerAvailable()) {
-        middleware_1.logger.warn('Docker not available, skipping warm pool initialization');
+        logger.warn('Docker not available, skipping warm pool initialization');
         return;
     }
     try {
@@ -299,19 +288,19 @@ async function initWarmPool() {
     }
     catch { /* ignore */ }
     try {
-        fs_1.default.rmSync(WARM_POOL_BASE, { recursive: true, force: true });
+        fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true });
     }
     catch { /* ignore */ }
-    fs_1.default.mkdirSync(WARM_POOL_BASE, { recursive: true });
+    fs.mkdirSync(WARM_POOL_BASE, { recursive: true });
     const langs = Object.keys(DOCKER_RUNNERS);
     const results = await Promise.allSettled(langs.map(lang => ensureLangPool(lang)));
     const failed = results.filter(r => r.status === 'rejected').length;
     if (failed > 0) {
-        middleware_1.logger.warn({ total: langs.length, failed }, 'Some warm pool containers failed to start');
+        logger.warn({ total: langs.length, failed }, 'Some warm pool containers failed to start');
     }
-    middleware_1.logger.info({ langs: langs.length - failed, poolSize: POOL_SIZE }, 'Warm container pool ready');
+    logger.info({ langs: langs.length - failed, poolSize: POOL_SIZE }, 'Warm container pool ready');
 }
-async function shutdownWarmPool() {
+export async function shutdownWarmPool() {
     const tasks = [];
     for (const [, entries] of warmPool) {
         for (const entry of entries) {
@@ -322,11 +311,11 @@ async function shutdownWarmPool() {
     await Promise.allSettled(tasks);
     warmPool.clear();
     try {
-        fs_1.default.rmSync(WARM_POOL_BASE, { recursive: true, force: true });
+        fs.rmSync(WARM_POOL_BASE, { recursive: true, force: true });
     }
     catch { /* ignore */ }
 }
-async function dockerExecute(lang, code, stdin, onChunk) {
+export async function dockerExecute(lang, code, stdin, onChunk) {
     const config = DOCKER_RUNNERS[lang];
     if (!config) {
         return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: isDockerAvailable() };
@@ -341,28 +330,28 @@ async function dockerExecute(lang, code, stdin, onChunk) {
     }
     // Check if the sandbox image exists before attempting to run
     try {
-        (0, child_process_1.execSync)(`docker image inspect ${config.image}`, { timeout: 10000, stdio: 'pipe' });
+        execSync(`docker image inspect ${config.image}`, { timeout: 10000, stdio: 'pipe' });
     }
     catch {
-        middleware_1.logger.debug({ lang, image: config.image }, 'Docker sandbox image not found, falling back to direct runner');
+        logger.debug({ lang, image: config.image }, 'Docker sandbox image not found, falling back to direct runner');
         return { output: `Docker image ${config.image} not found`, error: true, dockerAvailable: false };
     }
-    const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'docker-exec-'));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-exec-'));
     const srcName = config.src || 'prog';
-    const tmpFile = path_1.default.join(tmpDir, srcName + config.ext);
-    fs_1.default.writeFileSync(tmpFile, code);
+    const tmpFile = path.join(tmpDir, srcName + config.ext);
+    fs.writeFileSync(tmpFile, code);
     const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
     const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
-    middleware_1.logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
+    logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
     const { stdout, exitCode } = await spawnWithTimeout('sh', ['-c', cmd], { stdin, timeout: 30000, onChunk });
-    fs_1.default.rm(tmpDir, { recursive: true, force: true }, () => { });
+    fs.rm(tmpDir, { recursive: true, force: true }, () => { });
     if (exitCode !== 0) {
         return { output: stdout.trim() || `Execution failed with exit code ${exitCode}`, error: true, dockerAvailable: true };
     }
     return { output: stdout.trim() || '(no output)' };
 }
 // ── Dockerfile generation ──
-function generateDockerfiles(targetDir) {
+export function generateDockerfiles(targetDir) {
     const dockerfiles = {
         'Dockerfile.py': `
 FROM python:3.12-slim
@@ -499,12 +488,12 @@ USER code
 WORKDIR /code
 `.trim(),
     };
-    if (!fs_1.default.existsSync(targetDir))
-        fs_1.default.mkdirSync(targetDir, { recursive: true });
+    if (!fs.existsSync(targetDir))
+        fs.mkdirSync(targetDir, { recursive: true });
     for (const [filename, content] of Object.entries(dockerfiles)) {
         const lang = filename.replace('Dockerfile.', '');
-        const outPath = path_1.default.join(targetDir, filename);
-        fs_1.default.writeFileSync(outPath, content);
+        const outPath = path.join(targetDir, filename);
+        fs.writeFileSync(outPath, content);
         console.log(`Wrote ${outPath}`);
     }
     // Write build script
@@ -520,9 +509,9 @@ done
 wait
 echo "All images built successfully!"
 `;
-    const buildPath = path_1.default.join(targetDir, 'build-all.sh');
-    fs_1.default.writeFileSync(buildPath, buildScript);
-    fs_1.default.chmodSync(buildPath, '755');
+    const buildPath = path.join(targetDir, 'build-all.sh');
+    fs.writeFileSync(buildPath, buildScript);
+    fs.chmodSync(buildPath, '755');
     console.log(`Wrote ${buildPath} (chmod +x)`);
 }
 //# sourceMappingURL=docker-executor.js.map

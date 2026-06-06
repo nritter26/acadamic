@@ -1,10 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.chunkDocument = chunkDocument;
-exports.chunkAllCurriculum = chunkAllCurriculum;
-exports.formatChunksAsContext = formatChunksAsContext;
 const DEFAULT_CONFIG = { chunkSize: 500, overlap: 50 };
-function chunkDocument(exp, code, lang, phase, topic, config = DEFAULT_CONFIG) {
+export function chunkDocument(exp, code, lang, phase, topic, config = DEFAULT_CONFIG) {
     const fullText = `${topic} ${exp}`;
     if (!fullText)
         return [];
@@ -23,14 +18,14 @@ function chunkDocument(exp, code, lang, phase, topic, config = DEFAULT_CONFIG) {
     }
     return chunks;
 }
-function chunkAllCurriculum(docs, config) {
+export function chunkAllCurriculum(docs, config) {
     const all = [];
     for (const doc of docs) {
         all.push(...chunkDocument(doc.exp, doc.code, doc.lang, doc.phase, doc.topic, config));
     }
     return all;
 }
-function formatChunksAsContext(chunks, maxChars = 2000) {
+export function formatChunksAsContext(chunks, maxChars = 2000) {
     let result = '';
     for (const c of chunks) {
         const header = `[${c.lang.toUpperCase()} - ${c.phase} - ${c.topic} (chunk ${c.chunkIndex})]`;

@@ -1,45 +1,6 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.KeywordMatchStrategy = void 0;
-const responses_data_1 = __importDefault(require("../../ai/responses-data"));
-const conv = __importStar(require("../conversation"));
-const tutor_keywords_1 = require("../../ai/tutor-keywords");
+import aiResponses from '../../ai/responses-data';
+import * as conv from '../conversation';
+import { matchTopic } from '../../ai/tutor-keywords';
 const SINGLE_TOPIC_ALIASES = {
     variable: ['variables', 'var', 'declare', 'declaration', 'let', 'const'],
     function: ['functions', 'func', 'method', 'methods', 'def', 'fn'],
@@ -66,7 +27,7 @@ const SINGLE_TOPIC_ALIASES = {
     null: ['nil', 'none', 'undefined', 'optional', 'maybe'],
     comment: ['comments', 'docstring', 'documentation', 'jsdoc'],
 };
-class KeywordMatchStrategy {
+export class KeywordMatchStrategy {
     name = 'keyword_match';
     priority = 6;
     async canHandle(_ctx) {
@@ -79,7 +40,7 @@ class KeywordMatchStrategy {
         for (const word of words) {
             for (const [topicKey, aliases] of Object.entries(SINGLE_TOPIC_ALIASES)) {
                 if (topicKey === word || aliases.includes(word)) {
-                    for (const entry of responses_data_1.default) {
+                    for (const entry of aiResponses) {
                         if (entry.keywords.some(k => topicKey.includes(k) || k.includes(topicKey))) {
                             let reply = entry.response;
                             const normalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
@@ -107,12 +68,12 @@ class KeywordMatchStrategy {
             ? /diff(?:erence)?\s+between\s+(\w+(?:\s+\w+)?)\s+and\s+(\w+(?:\s+\w+)?)/i
             : /(\w+(?:\s+\w+)?)\s+(?:vs|vs\.|versus)\s+(\w+(?:\s+\w+)?)/i);
         if (diffMatch) {
-            const left = (0, tutor_keywords_1.matchTopic)(diffMatch[1]);
-            const right = (0, tutor_keywords_1.matchTopic)(diffMatch[2]);
+            const left = matchTopic(diffMatch[1]);
+            const right = matchTopic(diffMatch[2]);
             const allTopics = [...new Set([...left, ...right])];
             if (allTopics.length > 0) {
                 for (const topicName of allTopics) {
-                    for (const entry of responses_data_1.default) {
+                    for (const entry of aiResponses) {
                         if (entry.keywords.some(k => topicName.includes(k) || k.includes(topicName))) {
                             let reply = entry.response;
                             reply += `\n\n**Tip:** Try writing a small program that uses each approach and compare the results side by side.`;
@@ -132,9 +93,9 @@ class KeywordMatchStrategy {
         }
         // Step 1b: Regex-based topic matching (uses server-side TOPIC_KEYWORDS patterns)
         // Handles queries like "variable scope", "let vs const", "how to use async await"
-        const matchedTopics = (0, tutor_keywords_1.matchTopic)(ctx.message);
+        const matchedTopics = matchTopic(ctx.message);
         if (matchedTopics.length > 0) {
-            for (const entry of responses_data_1.default) {
+            for (const entry of aiResponses) {
                 if (entry.keywords.some(k => matchedTopics.some(t => t.includes(k) || k.includes(t)))) {
                     let reply = entry.response;
                     const langName = ctx.lang ? ctx.lang.toUpperCase() + ' ' : '';
@@ -153,7 +114,7 @@ class KeywordMatchStrategy {
         }
         // Step 2: Context-aware topic matching (current topic + question)
         if (ctx.topic && /what|how|explain|tell me|\?/.test(ctx.q)) {
-            for (const entry of responses_data_1.default) {
+            for (const entry of aiResponses) {
                 if (entry.keywords.some(k => ctx.topic.toLowerCase().includes(k))) {
                     let reply = entry.response;
                     reply += `\n\n**You're currently studying:** ${ctx.topic} (${ctx.phase || ''})`;
@@ -172,7 +133,7 @@ class KeywordMatchStrategy {
         }
         // Step 3: Standard keyword matching (must match at least 2 keywords to avoid false positives)
         const matchedEntries = [];
-        for (const entry of responses_data_1.default) {
+        for (const entry of aiResponses) {
             const matchCount = entry.keywords.filter(k => ctx.q.includes(k)).length;
             if (matchCount > 0) {
                 matchedEntries.push({ entry, count: matchCount });
@@ -207,5 +168,4 @@ class KeywordMatchStrategy {
         return false;
     }
 }
-exports.KeywordMatchStrategy = KeywordMatchStrategy;
 //# sourceMappingURL=keyword-match-strategy.js.map

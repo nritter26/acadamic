@@ -1,24 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupWebSocket = setupWebSocket;
-exports.broadcastToProject = broadcastToProject;
-exports.getWSStats = getWSStats;
-const ws_1 = require("ws");
-const tutor_1 = require("./tutor");
-const executor_1 = require("./executor");
-const middleware_1 = require("../middleware");
-const middleware_2 = require("../middleware");
+import { WebSocketServer, WebSocket } from 'ws';
+import { handleTutorMessage } from './tutor';
+import { executeCode } from './executor';
+import { verifyToken } from '../middleware';
+import { logger } from '../middleware';
 const clients = new Map();
 function generateId() {
     return Math.random().toString(36).slice(2, 10);
 }
 function send(ws, type, data) {
-    if (ws.readyState === ws_1.WebSocket.OPEN) {
+    if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type, ...data }));
     }
 }
-function setupWebSocket(server) {
-    const wss = new ws_1.WebSocketServer({ server, path: '/ws' });
+export function setupWebSocket(server) {
+    const wss = new WebSocketServer({ server, path: '/ws' });
     wss.on('connection', (ws, req) => {
         const clientId = generateId();
         const url = new URL(req.url || '/', `http://${req.headers.host}`);
@@ -26,13 +21,13 @@ function setupWebSocket(server) {
         let user;
         if (token) {
             try {
-                user = (0, middleware_1.verifyToken)(token);
+                user = verifyToken(token);
             }
             catch { }
         }
         const client = { ws, id: clientId, userId: user?.userId };
         clients.set(clientId, client);
-        middleware_2.logger.info({ clientId, userId: user?.userId }, 'WebSocket connected');
+        logger.info({ clientId, userId: user?.userId }, 'WebSocket connected');
         // Send welcome
         send(ws, 'connected', { clientId, authenticated: !!user });
         ws.on('message', async (raw) => {
@@ -48,20 +43,20 @@ function setupWebSocket(server) {
                 await handleWSMessage(ws, client, msg);
             }
             catch (err) {
-                middleware_2.logger.error({ err, clientId, msgType: msg.type }, 'WS message error');
+                logger.error({ err, clientId, msgType: msg.type }, 'WS message error');
                 send(ws, 'error', { message: 'Internal error processing message' });
             }
         });
         ws.on('close', () => {
             clients.delete(clientId);
-            middleware_2.logger.info({ clientId }, 'WebSocket disconnected');
+            logger.info({ clientId }, 'WebSocket disconnected');
         });
         ws.on('error', (err) => {
-            middleware_2.logger.error({ err, clientId }, 'WebSocket error');
+            logger.error({ err, clientId }, 'WebSocket error');
             clients.delete(clientId);
         });
     });
-    middleware_2.logger.info('WebSocket server ready at /ws');
+    logger.info('WebSocket server ready at /ws');
     return wss;
 }
 async function handleWSMessage(ws, client, msg) {
@@ -81,7 +76,7 @@ async function handleWSMessage(ws, client, msg) {
             const sseDone = () => {
                 send(ws, 'chat:done', {});
             };
-            await (0, tutor_1.handleTutorMessage)(message, {
+            await handleTutorMessage(message, {
                 lang: lang,
                 topic: topic,
                 phase: phase,
@@ -101,7 +96,7 @@ async function handleWSMessage(ws, client, msg) {
             }
             try {
                 send(ws, 'execute:start', { lang });
-                const result = await (0, executor_1.executeCode)(lang, code, stdin, (chunk) => {
+                const result = await executeCode(lang, code, stdin, (chunk) => {
                     send(ws, 'execute:chunk', { chunk });
                 });
                 send(ws, 'execute:result', { output: result.output, error: result.error });
@@ -144,14 +139,14 @@ async function handleWSMessage(ws, client, msg) {
             send(ws, 'error', { message: `Unknown message type: ${msg.type}` });
     }
 }
-function broadcastToProject(projectId, type, data) {
+export function broadcastToProject(projectId, type, data) {
     for (const [, client] of clients) {
         if (client.subscribedProject === projectId) {
             send(client.ws, type, data);
         }
     }
 }
-function getWSStats() {
+export function getWSStats() {
     let connected = 0;
     let authenticated = 0;
     for (const [, client] of clients) {

@@ -1,22 +1,20 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const services_1 = require("../services");
-const middleware_1 = require("../middleware");
-const types_1 = require("../types");
-const router = (0, express_1.Router)();
-router.post('/', (0, middleware_1.validate)(types_1.ProxySchema), async (req, res) => {
+import { Router } from 'express';
+import { proxyRequest, isValidProxyUrl } from '../services';
+import { validate } from '../middleware';
+import { ProxySchema } from '../types';
+const router = Router();
+router.post('/', validate(ProxySchema), async (req, res) => {
     const { method = 'GET', url, headers: reqHeaders = {}, body } = req.body;
     if (!url) {
         res.status(400).json({ error: 'No URL provided' });
         return;
     }
-    if (!(await (0, services_1.isValidProxyUrl)(url))) {
+    if (!(await isValidProxyUrl(url))) {
         res.status(400).json({ error: 'Invalid or forbidden URL' });
         return;
     }
     try {
-        const result = await (0, services_1.proxyRequest)(method, url, reqHeaders, body);
+        const result = await proxyRequest(method, url, reqHeaders, body);
         res.json(result);
     }
     catch (e) {
@@ -32,5 +30,5 @@ router.post('/', (0, middleware_1.validate)(types_1.ProxySchema), async (req, re
         });
     }
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=proxy.js.map

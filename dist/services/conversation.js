@@ -1,29 +1,20 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.addMessage = addMessage;
-exports.getHistory = getHistory;
-exports.clearConversation = clearConversation;
-exports.pruneOldConversations = pruneOldConversations;
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
-const url_1 = require("url");
+import fsp from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 // Recreate __dirname for ES Modules
-const __filename = (0, url_1.fileURLToPath)(import.meta.url);
-const __dirname = path_1.default.dirname(__filename);
-const CONV_DIR = path_1.default.join(__dirname, '..', 'data', 'conversations');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CONV_DIR = path.join(__dirname, '..', 'data', 'conversations');
 const cache = new Map();
 const MAX_CACHE_SIZE = 100;
 const TTL_MS = 60 * 60 * 1000;
 const addLocks = new Map();
 function getPath(learnerId) {
     const safe = learnerId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    return path_1.default.join(CONV_DIR, `${safe}.json`);
+    return path.join(CONV_DIR, `${safe}.json`);
 }
 async function ensureDir() {
-    await promises_1.default.mkdir(CONV_DIR, { recursive: true });
+    await fsp.mkdir(CONV_DIR, { recursive: true });
 }
 async function load(learnerId) {
     const cached = cache.get(learnerId);
@@ -32,7 +23,7 @@ async function load(learnerId) {
     try {
         await ensureDir();
         const fp = getPath(learnerId);
-        const raw = await promises_1.default.readFile(fp, 'utf-8');
+        const raw = await fsp.readFile(fp, 'utf-8');
         const conv = JSON.parse(raw);
         const cutoff = Date.now() - TTL_MS;
         conv.messages = conv.messages.filter(m => m.timestamp > cutoff);
@@ -51,10 +42,10 @@ async function save(conv) {
     conv.updatedAt = Date.now();
     const fp = getPath(conv.learnerId);
     const tmp = fp + '.tmp';
-    await promises_1.default.writeFile(tmp, JSON.stringify(conv));
-    await promises_1.default.rename(tmp, fp);
+    await fsp.writeFile(tmp, JSON.stringify(conv));
+    await fsp.rename(tmp, fp);
 }
-async function addMessage(learnerId, role, content) {
+export async function addMessage(learnerId, role, content) {
     const prev = addLocks.get(learnerId) || Promise.resolve();
     const next = prev.then(async () => {
         const conv = await load(learnerId);
@@ -76,30 +67,30 @@ async function addMessage(learnerId, role, content) {
             cache.delete(key);
     }
 }
-async function getHistory(learnerId, n = 20) {
+export async function getHistory(learnerId, n = 20) {
     const conv = await load(learnerId);
     return conv.messages.slice(-n);
 }
-async function clearConversation(learnerId) {
+export async function clearConversation(learnerId) {
     cache.delete(learnerId);
     try {
-        await promises_1.default.unlink(getPath(learnerId));
+        await fsp.unlink(getPath(learnerId));
     }
     catch { }
 }
-async function pruneOldConversations() {
+export async function pruneOldConversations() {
     try {
         await ensureDir();
-        const files = await promises_1.default.readdir(CONV_DIR);
+        const files = await fsp.readdir(CONV_DIR);
         const cutoff = Date.now() - TTL_MS;
         for (const file of files) {
             if (!file.endsWith('.json'))
                 continue;
-            const fp = path_1.default.join(CONV_DIR, file);
+            const fp = path.join(CONV_DIR, file);
             try {
-                const stat = await promises_1.default.stat(fp);
+                const stat = await fsp.stat(fp);
                 if (stat.mtimeMs < cutoff) {
-                    await promises_1.default.unlink(fp);
+                    await fsp.unlink(fp);
                     const id = file.replace('.json', '');
                     cache.delete(id);
                 }

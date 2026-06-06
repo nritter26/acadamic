@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.llmCache = exports.LLMCache = void 0;
-class LLMCache {
+export class LLMCache {
     cache = new Map();
     maxSize;
     ttlMs;
@@ -39,6 +36,5 @@ class LLMCache {
         this.cache.clear();
     }
 }
-exports.LLMCache = LLMCache;
-exports.llmCache = new LLMCache();
+export const llmCache = new LLMCache();
 //# sourceMappingURL=cache.js.map

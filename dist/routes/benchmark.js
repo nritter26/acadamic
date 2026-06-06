@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+const router = Router();
 router.get('/', (req, res) => {
     const n = parseInt(req.query.n) || 10000;
     const count = n;
@@ -21,5 +19,5 @@ router.get('/', (req, res) => {
         opsPerSec: Math.round(count / (ms / 1000)),
     });
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=benchmark.js.map

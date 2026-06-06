@@ -1,14 +1,6 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkCompilers = checkCompilers;
-exports.getCompileHint = getCompileHint;
-exports.getCompilerList = getCompilerList;
-const child_process_1 = require("child_process");
-const path_1 = __importDefault(require("path"));
-const os_1 = __importDefault(require("os"));
+import { exec } from 'child_process';
+import path from 'path';
+import os from 'os';
 const COMPILERS = {
     py: ['python3', '--version'],
     go: ['go', 'version'],
@@ -30,15 +22,15 @@ const COMPILERS = {
 const compilerCache = new Map();
 let lastCompilerCheck = 0;
 const COMPILER_CACHE_TTL = 30000;
-async function checkCompilers() {
+export async function checkCompilers() {
     const now = Date.now();
     if (now - lastCompilerCheck < COMPILER_CACHE_TTL && compilerCache.size > 0) {
         return Object.fromEntries(compilerCache);
     }
-    const extPath = `${process.env.PATH}:${path_1.default.join(os_1.default.homedir(), '.local/bin')}:${path_1.default.join(os_1.default.homedir(), '.cargo/bin')}`;
+    const extPath = `${process.env.PATH}:${path.join(os.homedir(), '.local/bin')}:${path.join(os.homedir(), '.cargo/bin')}`;
     const checks = Object.entries(COMPILERS).map(([lang, [cmd, flag]]) => {
         return new Promise(resolve => {
-            (0, child_process_1.exec)(`${cmd} ${flag}`, { timeout: 5000, env: { ...process.env, PATH: extPath } }, (err, stdout) => {
+            exec(`${cmd} ${flag}`, { timeout: 5000, env: { ...process.env, PATH: extPath } }, (err, stdout) => {
                 const ok = !err;
                 const version = ok ? (stdout || '').split('\n')[0].trim() : null;
                 compilerCache.set(lang, { available: ok, version });
@@ -50,7 +42,7 @@ async function checkCompilers() {
     lastCompilerCheck = Date.now();
     return Object.fromEntries(results);
 }
-function getCompileHint(lang) {
+export function getCompileHint(lang) {
     const hints = {
         c: '// gcc -Wall -o program program.c && ./program',
         cpp: '// g++ -std=c++20 -Wall -o program program.cpp && ./program',
@@ -79,7 +71,7 @@ function getCompileHint(lang) {
     };
     return hints[lang] || `// Check your ${lang.toUpperCase()} documentation for execution instructions.`;
 }
-function getCompilerList() {
+export function getCompilerList() {
     return COMPILERS;
 }
 //# sourceMappingURL=compiler.js.map

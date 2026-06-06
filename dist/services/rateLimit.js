@@ -1,7 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.rateLimit = rateLimit;
-exports.getRateLimitInfo = getRateLimitInfo;
 const rateLimitStore = new Map();
 const RATE_WINDOW = 60000;
 const RATE_MAX = 30;
@@ -16,7 +12,7 @@ setInterval(() => {
             rateLimitStore.set(ip, valid);
     }
 }, 300000);
-function rateLimit(req, res, next) {
+export function rateLimit(req, res, next) {
     const ip = req.ip || req.connection.remoteAddress || 'unknown';
     const now = Date.now();
     if (!rateLimitStore.has(ip))
@@ -30,7 +26,7 @@ function rateLimit(req, res, next) {
     rateLimitStore.set(ip, timestamps);
     next();
 }
-function getRateLimitInfo() {
+export function getRateLimitInfo() {
     return { window: '60s', max: RATE_MAX };
 }
 //# sourceMappingURL=rateLimit.js.map

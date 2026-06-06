@@ -1,16 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const services_1 = require("../services");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+import { getOllamaStatus } from '../services';
+const router = Router();
 router.get('/models', async (_req, res) => {
     try {
-        const status = await (0, services_1.getOllamaStatus)();
+        const status = await getOllamaStatus();
         res.json({ models: status.models || [] });
     }
     catch {
         res.json({ models: [] });
     }
 });
-exports.default = router;
+export default router;
 //# sourceMappingURL=ollama.js.map

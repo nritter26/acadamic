@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.review = review;
-const provider_1 = require("./provider");
+import { askLLM } from './provider';
 const KEYWORD_ISSUES = {
     js: [
         { pattern: /==(?!\s*=)/, message: 'Use `===` (strict equality) instead of `==` to avoid type coercion.', severity: 'style' },
@@ -208,7 +205,7 @@ Provide your review in this format:
 ## Score
 Overall score out of 10 based on: correctness, style, efficiency, edge cases.`;
     try {
-        const reply = await (0, provider_1.askLLM)([{ role: 'user', content: prompt }]);
+        const reply = await askLLM([{ role: 'user', content: prompt }]);
         return reply;
     }
     catch {
@@ -275,7 +272,7 @@ function calculateScore(issues, lineCount) {
         score = 0;
     return Math.max(1, Math.round(score * 10) / 10);
 }
-async function review(code, lang, topic) {
+export async function review(code, lang, topic) {
     if (!code || !code.trim()) {
         return { review: 'No code to review.', issues: [], score: 0 };
     }
