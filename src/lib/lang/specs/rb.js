@@ -49,7 +49,7 @@ export const RB_SPEC = {
   ],
   syntaxTests: [
     { valid: 'x = 5', invalid: 'int x = 5', category: 'declaration' },
-    { valid: 'def add(a, b)\n  a + b\nend', invalid: 'def add(a, b)\n  return a + b\nend', category: 'method' },
+    { valid: 'def add(a, b)\n  a + b\nend', invalid: 'def add(a, b)\n  a + b\n', category: 'method' },
     { valid: 'if x > 0\n  puts "ok"\nend', invalid: 'if x > 0\n  puts "ok"\nfi', category: 'conditional' },
   ],
 };

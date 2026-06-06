@@ -151,7 +151,7 @@ export const SCALA_SPEC = {
   syntaxTests: [
     { valid: 'val x: Int = 5', invalid: 'int x = 5', category: 'declaration' },
     { valid: 'def add(a: Int, b: Int): Int = a + b', invalid: 'def add(a: Int, b: Int) Int = a + b', category: 'function' },
-    { valid: 'if (x > 0) println("ok")', invalid: 'if (x > 0) { println("ok") }', category: 'conditional' },
+    { valid: 'if (x > 0) println("ok")', invalid: 'if x > 0 println("ok")', category: 'conditional' },
     { valid: 'x match { case 1 => "one" }', invalid: 'x match { case 1 => "one"', category: 'match' },
   ],
 };

@@ -77,8 +77,8 @@ export const CSS_SPEC = {
   ],
   syntaxTests: [
     { valid: 'body { margin: 0; }', invalid: 'body { margin: 0 }', category: 'declaration' },
-    { valid: '.class { color: red; }', invalid: '.class { color: red; }', category: 'selector' },
-    { valid: '#id { font-size: 16px; }', invalid: '#id { font-size: 16px; }', category: 'selector' },
+    { valid: '.class { color: red; }', invalid: '.class { color red; }', category: 'selector' },
+    { valid: '#id { font-size: 16px; }', invalid: '#id font-size: 16px; }', category: 'selector' },
   ],
 };
 
@@ -151,7 +151,7 @@ export const WASM_SPEC = {
     { lines: ['(module', '  (import "env" "print" (func $print (param i32)))', '  (func (export "run")', '    i32.const 42', '    call $print', '  )', ')'], tags: ['import'] },
   ],
   bugs: [
-    { wrong: '(func $add (param $a i32) (param $b i32) (result i32)\n  local.get $a\n  local.get $b\n  i32.add\n)', right: '(func $add (param $a i32) (param $b i32) (result i32)\n  local.get $a\n  local.get $b\n  i32.add\n)', prompt: 'What is the correct opcode for addition in WASM?', choices: ['i32.add', 'i32_add', 'add_i32'], answer: 'i32.add' },
+    { wrong: 'i32_add', right: 'i32.add', prompt: 'What is the correct opcode for addition in WASM?', choices: ['i32.add', 'i32_add', 'add_i32'], answer: 'i32.add' },
     { wrong: '(export "add" $add)', right: '(export "add" (func $add))', prompt: 'Which is the correct export syntax in WASM?', choices: ['(export "add" (func $add))', '(export "add" $add)', '(func $add) (export "add")'], answer: '(export "add" (func $add))' },
   ],
   concepts: [

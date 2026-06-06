@@ -19,7 +19,7 @@ export const ASM_SPEC = {
   ],
   bugs: [
     { wrong: 'mov 5, eax', right: 'mov eax, 5', prompt: 'Which is the correct mov instruction syntax (Intel syntax)?', choices: ['mov eax, 5', 'mov 5, eax', 'eax, mov 5'], answer: 'mov eax, 5' },
-    { wrong: 'mov eax, 5\nadd eax, 3\nret', right: 'mov eax, 5\nadd eax, 3\nret', prompt: 'What instruction stores the result of addition?', choices: ['add eax, 3', 'add 3, eax', 'eax add 3'], answer: 'add eax, 3' },
+    { wrong: 'sub eax, 3', right: 'add eax, 3', prompt: 'What instruction stores the result of addition?', choices: ['add eax, 3', 'sub eax, 3', 'eax add 3'], answer: 'add eax, 3' },
   ],
   concepts: [
     { term: 'Registers', definition: 'Small, fast storage locations within the CPU used for immediate data processing (eax, ebx, ecx, etc.).' },

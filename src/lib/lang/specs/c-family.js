@@ -29,7 +29,7 @@ export const C_SPEC = {
   ],
   bugs: [
     { wrong: 'printf("%d", x);', right: 'printf("%d\\n", x);', prompt: 'What is missing from this printf?', choices: ['printf("%d\\n", x);', 'printf("%d", x);', 'printf(x);'], answer: 'printf("%d\\n", x);' },
-    { wrong: 'int x = 5;', right: 'int x = 5;', prompt: 'Which is the correct variable declaration?', choices: ['int x = 5;', 'x int = 5;', 'var x = 5;'], answer: 'int x = 5;' },
+    { wrong: 'x int = 5;', right: 'int x = 5;', prompt: 'Which is the correct variable declaration?', choices: ['int x = 5;', 'x int = 5;', 'var x = 5;'], answer: 'int x = 5;' },
   ],
   concepts: [
     { term: 'Pointer', definition: 'A variable that stores the memory address of another variable, declared with *.' },
