@@ -37,8 +37,9 @@
   function handleKeydown(e) {
     if (done) return;
     const key = e.key;
-    if (key.length !== 1) return;
-    e.preventDefault();
+    if (key === ' ') { e.preventDefault(); }
+    else if (key.length !== 1) return;
+    else e.preventDefault();
 
     if (!startTime) {
       startTime = Date.now();
@@ -144,7 +145,8 @@
             class:char-correct={i < currentPos && typedChars[i]?.correct}
             class:char-wrong={i < currentPos && !typedChars[i]?.correct}
             class:char-flash={i === wrongFlash}
-          >{ch}</span>
+            class:char-space={ch === ' '}
+          >{ch === ' ' ? '\u00A0' : ch}</span>
         {/each}
       </div>
     </div>
@@ -208,6 +210,7 @@
   .char-correct { color: #10b981; background: rgba(16,185,129,0.15); animation: scale-pop 0.15s ease; }
   .char-wrong { color: #ef4444; background: rgba(239,68,68,0.15); }
   .char-flash { animation: shake 0.2s ease; }
+  .char-space { width: 44px; }
 
   .typing-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .progress-track { flex: 1; height: 6px; background: #1e293b; border-radius: 999px; overflow: hidden; }
