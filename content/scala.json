@@ -25,6 +25,30 @@
    "project/\n ├── build.sbt\n ├── src/\n │   ├── main/scala/\n │   │   └── example/\n │   │       └── Main.scala\n │   └── test/scala/\n │       └── example/\n │           └── MainSpec.scala\n └── project/\n     └── plugins.sbt"
   ]
  },
+ "Variables & Types": {
+  "val/var & Type Inference": [
+   "Scala encourages immutable data with val (immutable reference) vs var (mutable reference). Type inference means you rarely need explicit type annotations. val cannot be reassigned but the object it references can still be mutable. Use val by default, var only when necessary. Type inference works for local variables, method return types (usually), and generic types.",
+   "val name: String = \"Alice\"   // explicit type\nval age = 30                  // inferred: Int\nvar counter = 0               // mutable\ncounter += 1\n\n// val cannot be reassigned\n// name = \"Bob\"  // compilation error\n\n// But object contents can change\nval list = scala.collection.mutable.ListBuffer(1, 2)\nlist += 3  // OK\n\n// Type inference in methods\ndef double(x: Int) = x * 2  // return type Int inferred"
+  ],
+  "Any/AnyRef/Nothing Type Hierarchy": [
+   "Scala's type hierarchy: Any is the supertype of all types. AnyVal (value types: Int, Double, Boolean, etc.) and AnyRef (reference types, equivalent to java.lang.Object). Nothing is the bottom type (subtype of everything). Null is a subtype of all AnyRef types. Nil extends List[Nothing]. Understanding this hierarchy helps with type bounds and variance.",
+   "val intVal: AnyVal = 42\nval strVal: AnyRef = \"hello\"\nval anyVal: Any = true\n\n// Nothing is the return type of throw\ndef fail(msg: String): Nothing = throw new Exception(msg)\n\n// Null can be assigned to AnyRef only\nval nullStr: String = null  // OK\n// val nullInt: Int = null  // compilation error\n\n// Nil is List[Nothing]\nval empty: List[String] = Nil  // OK (covariant)"
+  ]
+ },
+ "Operators": {
+  "Method Notation & Infix": [
+   "In Scala, operators are methods. `a + b` is actually `a.+(b)`. Any method with a single parameter can be used as an infix operator. This enables expressive DSLs. Methods ending with : bind to the right (e.g., `1 :: list` is `list.::(1)`). Operator precedence is determined by the first character.",
+   "val sum = 10 + 5        // 10.+(5)\nval str = \"Hello \" concat \"World\"\n\nclass Box(val value: Int):\n  def add(other: Box): Box = Box(this.value + other.value)\n  def +(other: Box): Box = add(other)\n\nval a = Box(10)\nval b = Box(20)\nval c = a add b    // infix notation\nval d = a + b      // operator notation\n\n// Right-associative (: ending)\nval list = 1 :: 2 :: 3 :: Nil  // Nil.::(3).::(2).::(1)"
+  ],
+  "Unary & Prefix Operators": [
+   "Scala supports unary operators: unary_+, unary_-, unary_!, unary_~. These are methods prefixed with unary_. They work with prefix notation (!x, -x, ~x, +x). The prefix operator corresponds to a method call x.unary_!. Only these four unary operators are supported.",
+   "class Vector2D(val x: Double, val y: Double):\n  def unary_- : Vector2D = Vector2D(-x, -y)\n  def unary_! : Double = math.sqrt(x*x + y*y)\n\nval v = Vector2D(3, 4)\nval neg = -v         // Vector2D(-3, -4)\nval mag = !v         // 5.0\n\n// Built-in unary\nprintln(-42)    // -42\nprintln(!true)  // false"
+  ],
+  "Operator Overloading": [
+   "Scala allows defining custom operators as methods. Method names can include operator characters. Common in numeric/ math libraries and DSLs. Override equality with `def equals`. Define comparison with `def compareTo` and mix in Ordered. Use @targetName (Scala 3) for better Java interop.",
+   "case class Complex(real: Double, imag: Double):\n  def +(that: Complex) = Complex(real + that.real, imag + that.imag)\n  def *(that: Complex) = Complex(real*that.real - imag*that.imag, real*that.imag + imag*that.real)\n  def unary_- = Complex(-real, -imag)\n  def magnitude = math.sqrt(real*real + imag*imag)\n\nval a = Complex(1, 2)\nval b = Complex(3, 4)\nval sum = a + b      // Complex(4, 6)\nval product = a * b  // Complex(-5, 10)"
+  ]
+ },
  "Control Flow": {
   "If Expressions": [
    "`if` is an expression in Scala that returns a value. Ternary-style: `val x = if (cond) a else b`. The else branch is optional but Unit is returned without it.",
@@ -206,10 +230,10 @@
   ]
  },
  "Build & Tooling": {
-   "sbt Basics": [
-    "sbt (Scala Build Tool) uses `build.sbt` for project config. Key tasks: `compile`, `run`, `test`, `console` (REPL). Dependencies are declared in `libraryDependencies`.",
-    "name := \"my-project\"\nversion := \"1.0\"\nscalaVersion := \"3.3.1\"\n\nlibraryDependencies ++= Seq(\n  \"org.scalatest\" %% \"scalatest\" % \"3.2.17\" % Test,\n  \"org.typelevel\" %% \"cats-core\" % \"2.10.0\"\n)\n\n// sbt shell commands:\n// > compile\n// > run\n// > test\n// > console"
-   ],
+  "sbt Basics": [
+   "sbt (Scala Build Tool) uses `build.sbt` for project config. Key tasks: `compile`, `run`, `test`, `console` (REPL). Dependencies are declared in `libraryDependencies`.",
+   "name := \"my-project\"\nversion := \"1.0\"\nscalaVersion := \"3.3.1\"\n\nlibraryDependencies ++= Seq(\n  \"org.scalatest\" %% \"scalatest\" % \"3.2.17\" % Test,\n  \"org.typelevel\" %% \"cats-core\" % \"2.10.0\"\n)\n\n// sbt shell commands:\n// > compile\n// > run\n// > test\n// > console"
+  ],
   "Scala CLI": [
    "Scala CLI is a modern tool for running Scala scripts and projects without sbt. Supports single-file scripts, multiple files, dependencies with `//> using` directives.",
    "//> using scala 3.3.1\n//> using dep org.typelevel::cats-core:2.10.0\n\n@main def hello() = {\n  println(\"Hello from Scala CLI!\")\n  println(s\"Sum: ${1 + 2 + 3}\")\n}"
