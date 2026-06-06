@@ -25,6 +25,34 @@
    "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<p><?= \"Hello from short tag\" ?></p>"
   ]
  },
+ "Variables & Types": {
+  "Variable Declarations Deep Dive": [
+   "PHP variables start with $. They are dynamically typed. Variable names are case-sensitive. Variable variables ($$var) enable dynamic variable names. References (&) create aliases — modifying one affects the other. isset() checks if a variable exists and is not null. empty() checks if a variable is falsy. unset() destroys a variable.",
+   "<?php\n$name = \"Alice\";\n$Name = \"Bob\";  // different variable (case-sensitive)\n\n// Variable variables\n$varName = \"color\";\n$$varName = \"red\";  // $color = \"red\"\necho $color;  // red\n\n// References\n$a = 10;\n$b = &$a;\n$b = 20;\necho $a;  // 20\n\n// isset/empty/unset\n$val = 0;\nvar_dump(isset($val));   // true\nvar_dump(empty($val));   // true (0 is empty)\nunset($val);\nvar_dump(isset($val));   // false"
+  ],
+  "Type Juggling & Coercion": [
+   "PHP automatically converts types based on context (type juggling). String \"5\" + 3 = 8. Loose comparison (==) converts types; strict comparison (===) does not. This can lead to surprising results: \"0\" == false is true, \"0\" === false is false. Use strict comparison to avoid bugs. Casting: (int), (float), (string), (bool), (array).",
+   "<?php\n// Type juggling\necho \"5\" + 3;         // 8 (string to int)\necho \"5\" . 3;         // \"53\" (int to string)\necho 5 + \"3 apples\";  // 8 (PHP 8+, warning in 8.0)\necho 5 + \"apples 3\";  // 5 (no numeric prefix)\n\n// Loose vs strict\nvar_dump(\"0\" == false);   // true (loose)\nvar_dump(\"0\" === false);  // false (strict)\nvar_dump(null == \"\");     // true\nvar_dump(null === \"\");    // false\n\n// Explicit casting\n$int = (int) \"42.5\";     // 42\n$float = (float) \"3.14\";  // 3.14\n$str = (string) 100;      // \"100\"\n$bool = (bool) 1;         // true\n$array = (array) \"hello\"; // [\"hello\"]"
+  ],
+  "Constants: define vs const": [
+   "Constants are defined with define() (runtime, can be used anywhere) or const (compile-time, must be at top level). define() supports case-insensitive constants (third param). Class constants are always const. Magic constants (__FILE__, __DIR__, __LINE__, __CLASS__, __METHOD__, __NAMESPACE__) change based on usage. Constants are automatically global.",
+   "<?php\n// Runtime constant\ndefine(\"SITE_NAME\", \"MyApp\");\ndefine(\"MAX_ITEMS\", 100, true);  // case-insensitive (PHP 7.x)\necho SITE_NAME;  // MyApp\necho max_items;  // 100 (case-insensitive)\n\n// Compile-time constant (top level only)\nconst VERSION = \"1.0.0\";\n\n// Class constant\nclass Config {\n    const DEFAULT_LANG = \"en\";\n}\n\necho Config::DEFAULT_LANG;  // en\n\n// Magic constants\necho __FILE__;     // /path/to/file.php\necho __DIR__;      // /path/to\necho __LINE__;     // current line number\necho __CLASS__;    // class name (inside a class)"
+  ],
+  "null & isset": [
+   "null represents the absence of a value. A variable is null if unset, assigned null, or unset(). isset() returns false if variable is null or unset. is_null() checks if a variable is null. The null coalescing operator (??) returns the left side if not null, else the right side. The nullsafe operator (?->, PHP 8+) safely accesses properties/methods on null.",
+   "<?php\n// null\n$val = null;\nvar_dump($val);  // NULL\nvar_dump(is_null($val));  // true\n\n// isset vs is_null\n$var = null;\nvar_dump(isset($var));   // false\nvar_dump(is_null($var)); // true\n\n$undeclared;\nvar_dump(isset($undeclared));  // false (no warning)\nvar_dump(is_null($undeclared)); // true (with warning)\n\n// Null coalescing (PHP 7+)\n$name = $_GET['name'] ?? 'Guest';\n$nested = $a ?? $b ?? $c ?? 'default';\n\n// Nullsafe operator (PHP 8+)\n$country = $user?->getAddress()?->getCountry();\n// Equivalent to:\n// $country = $user !== null \n//     ? $user->getAddress()?->getCountry() \n//     : null;"
+  ]
+ },
+ "Operators": {
+  "Spaceship Operator (<=>)": [
+   "The spaceship operator (<=>) compares two expressions and returns -1, 0, or 1 when the left is less than, equal to, or greater than the right. Works with strings, numbers, arrays, and objects. Commonly used with usort() for custom sorting. Essential for PHP 7+ comparison logic.",
+   "<?php\necho 1 <=> 2;    // -1 (less)\necho 2 <=> 2;    // 0 (equal)  \necho 3 <=> 2;    // 1 (greater)\n\n// String comparison\necho \"a\" <=> \"b\";  // -1\necho \"b\" <=> \"a\";  // 1\n\n// Array comparison (compares by value, then key)\necho [1, 2] <=> [1, 3];  // -1\necho [1, 2] <=> [1, 2];  // 0\n\n// Sorting with spaceship\n$items = ['cherry', 'apple', 'banana'];\nusort($items, fn($a, $b) => $a <=> $b);\nprint_r($items);  // ['apple', 'banana', 'cherry']"
+  ],
+  "Null Coalescing & Nullsafe (??, ??=, ?->)": [
+   "?? returns the left operand if it exists and is not null, otherwise the right operand. ??= is the null coalescing assignment operator (PHP 7.4). ?-> (nullsafe, PHP 8.0) short-circuits on null. ?? chains for fallback patterns. These operators reduce boilerplate null checking.",
+   "<?php\n// Null coalescing\n$username = $_GET['user'] ?? 'guest';\n$config = $settings['theme'] ?? $defaults['theme'] ?? 'light';\n\n// Null coalescing assignment (PHP 7.4+)\n$data['key'] ??= 'default';\n// Same as: $data['key'] = $data['key'] ?? 'default';\n\n// Nullsafe operator (PHP 8+)\n// Without nullsafe:\n$country = null;\nif ($user !== null) {\n    $address = $user->getAddress();\n    if ($address !== null) {\n        $country = $address->getCountry();\n    }\n}\n\n// With nullsafe:\n$country = $user?->getAddress()?->getCountry();\n\n// Chaining\n$price = $order?->getProduct()?->getPrice() ?? 0;"
+  ]
+ },
  "Control Flow": {
   "if/else/elseif": [
    "Standard conditional execution. elseif (one word) is the recommended form over else if (two words, requires braces). Use switch for many conditions on the same variable. Match (PHP 8+) is a stricter switch without loose comparison.",
