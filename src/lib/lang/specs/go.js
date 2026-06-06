@@ -1,0 +1,45 @@
+export const GO_SPEC = {
+  id: 'go',
+  name: 'Go',
+  keywords: [
+    'package', 'import', 'func', 'return', 'if', 'else', 'for', 'range',
+    'switch', 'case', 'default', 'break', 'continue', 'var', 'const',
+    'type', 'struct', 'interface', 'map', 'chan', 'go', 'defer',
+    'select', 'fallthrough', 'nil', 'true', 'false', 'iota',
+    'len', 'cap', 'make', 'new', 'append', 'close',
+  ],
+  operators: [
+    '+', '-', '*', '/', '%', '&', '|', '^', '<<', '>>',
+    '==', '!=', '<', '>', '<=', '>=', '&&', '||', '!',
+    '=', ':=', '+=', '-=', '*=', '/=',
+    '&', '|', '^', '&^',
+  ],
+  types: ['int', 'int8', 'int16', 'int32', 'int64', 'uint', 'float32', 'float64', 'string', 'bool', 'byte', 'rune', 'slice', 'map'],
+  patterns: [
+    { lines: ['package main', '', 'import "fmt"', '', 'func main() {', '  fmt.Println("Hello, World!")', '}'], tags: ['main'] },
+    { lines: ['func add(a, b int) int {', '  return a + b', '}'], tags: ['function'] },
+    { lines: ['numbers := []int{1, 2, 3, 4, 5}', 'for i, n := range numbers {', '  fmt.Println(i, n)', '}'], tags: ['loop'] },
+    { lines: ['type Person struct {', '  Name string', '  Age  int', '}', '', 'p := Person{Name: "Alice", Age: 30}', 'fmt.Println(p.Name)'], tags: ['struct'] },
+    { lines: ['if x > 0 {', '  fmt.Println("positive")', '} else {', '  fmt.Println("non-positive")', '}'], tags: ['conditional'] },
+    { lines: ['s := make([]int, 0, 5)', 's = append(s, 10, 20, 30)', 'fmt.Println(s)'], tags: ['slice'] },
+    { lines: ['m := map[string]int{', '  "apple": 1,', '  "banana": 2,', '}', 'fmt.Println(m["apple"])'], tags: ['map'] },
+    { lines: ['for i := 0; i < 10; i++ {', '  if i%2 == 0 {', '    continue', '  }', '  fmt.Println(i)', '}'], tags: ['loop'] },
+  ],
+  bugs: [
+    { wrong: 'var x = 5\nx := 10', right: 'x := 5\nx = 10', prompt: 'What is the correct way to reassign a variable in Go?', choices: ['x := 5\nx = 10', 'var x = 5\nx := 10', 'x = 5\nx := 10'], answer: 'x := 5\nx = 10' },
+    { wrong: 'func add(a int, b int) int {\n  return a + b\n}', right: 'func add(a, b int) int {\n  return a + b\n}', prompt: 'Which is the correct Go function signature?', choices: ['func add(a, b int) int', 'func add(a int, b int) int', 'func add(a int, b int) int { return a + b }'], answer: 'func add(a, b int) int' },
+  ],
+  concepts: [
+    { term: 'Goroutine', definition: 'A lightweight thread of execution managed by the Go runtime.' },
+    { term: 'Channel', definition: 'A typed conduit for communication between goroutines (chan T).' },
+    { term: 'Interface', definition: 'A set of method signatures that a type can implement implicitly.' },
+    { term: 'Defer', definition: 'A statement that schedules a function call to run after the surrounding function returns.' },
+    { term: 'Slice', definition: 'A dynamically-sized, flexible view into elements of an array.' },
+  ],
+  syntaxTests: [
+    { valid: 'var x int = 5', invalid: 'int x = 5', category: 'declaration' },
+    { valid: 'x := 5', invalid: 'x := 5\nx := 10', category: 'declaration' },
+    { valid: 'if x > 0 {\n  fmt.Println("ok")\n}', invalid: 'if (x > 0) {\n  fmt.Println("ok")\n}', category: 'conditional' },
+    { valid: 'for i := 0; i < 10; i++ {}', invalid: 'for (i := 0; i < 10; i++) {}', category: 'loop' },
+  ],
+};
