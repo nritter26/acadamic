@@ -7,7 +7,7 @@ export const SWIFT_SPEC = {
     'if', 'else', 'for', 'in', 'while', 'repeat', 'switch', 'case',
     'default', 'break', 'continue', 'return', 'throw', 'throws',
     'rethrows', 'try', 'catch', 'do', 'as', 'as!', 'as?', 'is',
-    'in', '!', '?', 'where', 'associatedtype', 'mutating',
+    'where', 'associatedtype', 'mutating', '!', '?',
     'nonmutating', 'convenience', 'required', 'optional', 'dynamic',
     'final', 'lazy', 'weak', 'unowned', 'open', 'public', 'internal',
     'fileprivate', 'private', 'static', 'class', 'subscript', 'get',
@@ -18,7 +18,7 @@ export const SWIFT_SPEC = {
     '+', '-', '*', '/', '%', '==', '!=', '===', '!==', '<', '>',
     '<=', '>=', '&&', '||', '!', '&', '|', '^', '~', '<<', '>>',
     '=', '+=', '-=', '*=', '/=', '..<', '...', '?', '!', 'as',
-    'as!', 'as?', 'is', '->', '?.', '??.', '&',
+     'as!', 'as?', 'is', '->', '?.', '??', '&',
   ],
   types: [
     'Int', 'UInt', 'Float', 'Double', 'Bool', 'String', 'Character',
@@ -67,7 +67,7 @@ export const LUA_SPEC = {
     '+', '-', '*', '/', '//', '%', '^', '#',
     '==', '~=', '<', '>', '<=', '>=',
     'and', 'or', 'not', '..',
-    '=', '+=', '-=', '*=', '/=', '//=', '^=', '..=',
+    '=', '..',
   ],
   types: ['nil', 'boolean', 'number', 'string', 'function', 'userdata', 'thread', 'table'],
   patterns: [

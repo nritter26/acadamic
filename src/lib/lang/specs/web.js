@@ -8,7 +8,7 @@ export const HTML_SPEC = {
     'nav', 'main', 'aside', 'button', 'label', 'select', 'option',
     'textarea', 'script', 'style', 'link', 'meta', 'title', '!DOCTYPE',
   ],
-  operators: ['=', '/', '>', '<', '!=', '=='],
+  operators: ['=', '/', '>', '<'],
   types: ['element', 'attribute', 'text', 'comment', 'document'],
   patterns: [
     { lines: ['<!DOCTYPE html>', '<html>', '<head>', '  <title>Page Title</title>', '</head>', '<body>', '  <h1>Hello, World!</h1>', '  <p>This is a paragraph.</p>', '</body>', '</html>'], tags: ['basic'] },

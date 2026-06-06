@@ -20,7 +20,7 @@ export const SQL_SPEC = {
   ],
   types: [
     'INTEGER', 'BIGINT', 'SMALLINT', 'DECIMAL', 'NUMERIC',
-    'FLOAT', 'DOUBLE', 'CHAR(n)', 'VARCHAR(n)', 'TEXT',
+    'FLOAT', 'DOUBLE', 'CHAR', 'VARCHAR', 'TEXT',
     'BOOLEAN', 'DATE', 'TIME', 'TIMESTAMP', 'BLOB', 'UUID',
     'JSON', 'JSONB', 'ENUM', 'SERIAL', 'ARRAY',
   ],
@@ -65,8 +65,7 @@ export const PHP_SPEC = {
     'new', '$this', 'parent', 'self', 'instanceof', 'interface',
     'implements', 'abstract', 'final', 'trait', 'use', 'namespace',
     'declare', 'throw', 'try', 'catch', 'finally', 'null', 'true',
-    'false', 'die', 'exit', 'isset', 'unset', 'empty', 'array',
-    'list', 'global', 'var', 'eval', 'clone', 'match', 'enum',
+    'false', 'die', 'exit', 'isset', 'unset', 'empty', 'list', 'global', 'var', 'eval', 'clone', 'match', 'enum',
     'readonly', 'mixed', 'never', 'void', 'int', 'float', 'string',
     'bool', 'iterable', 'callable', 'array', 'object', 'resource',
   ],

@@ -4,7 +4,7 @@ export const JAVA_SPEC = {
   keywords: [
     'public', 'private', 'protected', 'static', 'class', 'interface',
     'enum', 'extends', 'implements', 'abstract', 'final', 'void',
-    'int', 'long', 'double', 'boolean', 'char', 'String', 'new',
+    'int', 'long', 'double', 'boolean', 'char', 'new',
     'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case',
     'break', 'continue', 'try', 'catch', 'finally', 'throw', 'throws',
     'import', 'package', 'null', 'true', 'false', 'this', 'super',
