@@ -18,13 +18,22 @@
   import SyntaxSprint from './SyntaxSprint.svelte';
   import SyntaxSwipe from './SyntaxSwipe.svelte';
   import TypingSpeed from './TypingSpeed.svelte';
-  import MiniGameCard from './MiniGameCard.svelte';
+    import { LANG_NAMES } from '$lib/lang/index.js';
 
   let game = $derived(getGameState());
 
   let view = $state('hub');
   let selectedGame = $state(null);
   let soundToggleKey = $state(0);
+
+  let selectedLang = $state(
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('game_lang') : null) || 'js'
+  );
+
+  function setLang(lang) {
+    selectedLang = lang;
+    if (typeof localStorage !== 'undefined') localStorage.setItem('game_lang', lang);
+  }
 
   onMount(() => {
     function handler(e) { launchGame(e.detail.gameId); }
@@ -43,7 +52,7 @@
     'syntax-swipe': SyntaxSwipe, 'typing-speed': TypingSpeed,
   };
 
-  let SelectedGame = $derived(selectedGame ? components[selectedGame.id] || MiniGameCard : null);
+  let SelectedGame = $derived(selectedGame ? components[selectedGame.id] : null);
 
   function launchGame(id) {
     const g = GAME_CATALOG.find(x => x.id === id);
@@ -81,7 +90,7 @@
       </div>
     </div>
     <div class="game-view-body">
-      <SelectedGame game={selectedGame} />
+      <SelectedGame game={selectedGame} lang={selectedLang} />
     </div>
   </div>
 {:else if view === 'leaderboard'}
@@ -134,6 +143,16 @@
       <span class="hub-xp-label">{game.xp} XP</span>
     </div>
 
+    <div class="lang-bar">
+      {#each Object.entries(LANG_NAMES) as [id, name]}
+        <button
+          class="lang-btn"
+          class:lang-active={selectedLang === id}
+          onclick={() => setLang(id)}
+        >{name}</button>
+      {/each}
+    </div>
+
     {#if !dailyDone}
       <div class="daily-banner" onclick={() => launchGame('code-golf')}>
         <span class="daily-icon"> Daily Challenge available!</span>
@@ -182,6 +201,18 @@
   .hub-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 8px; }
   .hub-title { font-size: 22px; font-weight: 900; color: #e2e8f0; }
   .hub-level { font-size: 12px; font-weight: 700; color: #64748b; background: #1e293b; padding: 2px 10px; border-radius: 999px; }
+
+  .lang-bar {
+    display: flex; gap: 6px; padding: 4px 24px 12px; overflow-x: auto;
+    scrollbar-width: none; flex-wrap: wrap;
+  }
+  .lang-btn {
+    padding: 4px 12px; border-radius: 999px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8; font-size: 11px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  }
+  .lang-btn:hover { border-color: #f59e0b; color: #e2e8f0; }
+  .lang-active { background: #f59e0b; color: #111827; border-color: #f59e0b; }
 
   .hub-xp-bar { margin: 0 24px 12px; position: relative; height: 12px; background: #1e293b; border-radius: 999px; overflow: hidden; }
   .hub-xp-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #f97316); border-radius: 999px; transition: width 0.3s; }

@@ -26,14 +26,14 @@
   ]
  },
  "Variables & Types": {
-   "Variable Declaration": [
-    "Declare variables using var, const, or short declaration (:=). Types can be explicit or inferred. Common mistake: using := outside a function — it only works inside function bodies; package-level declarations require var or const. Best practice: use := for local variables with clear initialization; use var for zero-value declarations (var x int); use const for compile-time constants. Scope and shadowing: inner scopes can redeclare a name from an outer scope — the inner declaration shadows the outer one. Always check that you haven't accidentally shadowed a package-level variable inside a function using :=.",
-    "var name string = \"Doge\"  // explicit type and value\nvar count = 42              // type inferred (int)\nvar score int               // zero value: 0\n\n// Short declaration (function only)\nfunc main() {\n\tmsg := \"Hello\"           // inferred as string\n\tn := 42                  // inferred as int\n\tpi := 3.14              // inferred as float64\n\t\n\t// Multiple variables\n\ta, b := 1, \"two\"\n\t\n\t// Reassignment with := (at least one new variable)\n\tcount, err := doSomething()  // count reassigned, err new\n}\n\n// Shadowing example\nvar x = 10\nfunc shadow() {\n\tx := 5    // shadows package-level x\n\tfmt.Println(x) // 5\n}\nfmt.Println(x) // 10 (package-level unchanged)"
-   ],
-   "Primitive Types": [
-    "Go includes bool, string, int, uint, float32, float64, complex64, and more. Integer types have fixed sizes (int8, int16, int32, int64). Rune is an alias for int32 representing a Unicode code point. Complex numbers (complex64, complex128) are first-class with real+imag syntax. String literals come in two forms: raw (backtick-quoted, no escapes) and interpreted (double-quoted, supports \\n, \\t, etc.). Common mistake: confusing int and int64 — int is platform-dependent (32 or 64 bit); int64 is always 64 bit. Use int unless you need a specific size.",
-    "var active bool = true\nvar score int64 = 1000\nvar ratio float32 = 2.5\nvar c complex128 = 1 + 2i\n\n// Rune — Unicode code point\ntype rune = int32\nvar r rune = '\\u0041' // 'A'\nvar han rune = '世'    // Chinese character\n\n// Raw vs interpreted strings\nraw := `hello\\nworld`   // literal backslash-n\ninterp := \"hello\\nworld\" // actual newline"
-   ],
+  "Variable Declaration": [
+   "Declare variables using var, const, or short declaration (:=). Types can be explicit or inferred. Common mistake: using := outside a function — it only works inside function bodies; package-level declarations require var or const. Best practice: use := for local variables with clear initialization; use var for zero-value declarations (var x int); use const for compile-time constants. Scope and shadowing: inner scopes can redeclare a name from an outer scope — the inner declaration shadows the outer one. Always check that you haven't accidentally shadowed a package-level variable inside a function using :=.",
+   "var name string = \"Doge\"  // explicit type and value\nvar count = 42              // type inferred (int)\nvar score int               // zero value: 0\n\n// Short declaration (function only)\nfunc main() {\n\tmsg := \"Hello\"           // inferred as string\n\tn := 42                  // inferred as int\n\tpi := 3.14              // inferred as float64\n\t\n\t// Multiple variables\n\ta, b := 1, \"two\"\n\t\n\t// Reassignment with := (at least one new variable)\n\tcount, err := doSomething()  // count reassigned, err new\n}\n\n// Shadowing example\nvar x = 10\nfunc shadow() {\n\tx := 5    // shadows package-level x\n\tfmt.Println(x) // 5\n}\nfmt.Println(x) // 10 (package-level unchanged)"
+  ],
+  "Primitive Types": [
+   "Go includes bool, string, int, uint, float32, float64, complex64, and more. Integer types have fixed sizes (int8, int16, int32, int64). Rune is an alias for int32 representing a Unicode code point. Complex numbers (complex64, complex128) are first-class with real+imag syntax. String literals come in two forms: raw (backtick-quoted, no escapes) and interpreted (double-quoted, supports \\n, \\t, etc.). Common mistake: confusing int and int64 — int is platform-dependent (32 or 64 bit); int64 is always 64 bit. Use int unless you need a specific size.",
+   "var active bool = true\nvar score int64 = 1000\nvar ratio float32 = 2.5\nvar c complex128 = 1 + 2i\n\n// Rune — Unicode code point\ntype rune = int32\nvar r rune = '\\u0041' // 'A'\nvar han rune = '世'    // Chinese character\n\n// Raw vs interpreted strings\nraw := `hello\\nworld`   // literal backslash-n\ninterp := \"hello\\nworld\" // actual newline"
+  ],
   "Type Conversion": [
    "Explicitly convert between compatible types using T(value) syntax. Go does NOT do implicit type conversion.",
    "var x int = 42\nvar y float64 = float64(x)\nvar s string = string(rune(65)) // \"A\""
@@ -110,8 +110,8 @@
    "Defer postpones a function call until the surrounding function returns. Deferred calls are executed in LIFO order. Arguments are evaluated immediately.",
    "func main() {\n\tdefer fmt.Println(\"first defer\")\n\tdefer fmt.Println(\"second defer\")\n\tfmt.Println(\"work\")\n}\n// Output: work, second defer, first defer"
   ],
-   "Goto": [
-    "Goto jumps to a labeled statement within the same function. Cannot jump over variable declarations or into blocks. Use sparingly — goto is widely discouraged in idiomatic Go. Prefer structured control flow (for, if/else, switch) over goto. The only acceptable uses are breaking out of deeply nested loops or error cleanup in generated code.",
+  "Goto": [
+   "Goto jumps to a labeled statement within the same function. Cannot jump over variable declarations or into blocks. Use sparingly — goto is widely discouraged in idiomatic Go. Prefer structured control flow (for, if/else, switch) over goto. The only acceptable uses are breaking out of deeply nested loops or error cleanup in generated code.",
    "i := 0\nloop:\nif i < 3 {\n\tfmt.Println(i)\n\ti++\n\tgoto loop\n}"
   ]
  },
@@ -173,8 +173,8 @@
   ]
  },
  "Pointers & References": {
-   "Pointer Basics": [
-    "Pointers hold memory addresses. Use & to get a variable's address and * to dereference (read or write through the pointer). Zero value is nil. Go has automatic memory management with garbage collection — allocated memory is freed when no references remain. Unlike C/C++, you don't manually free memory. The GC runs concurrently with a short STW pause. Escape analysis determines whether values live on the stack or heap: if a pointer escapes the function scope, the value is heap-allocated.",
+  "Pointer Basics": [
+   "Pointers hold memory addresses. Use & to get a variable's address and * to dereference (read or write through the pointer). Zero value is nil. Go has automatic memory management with garbage collection — allocated memory is freed when no references remain. Unlike C/C++, you don't manually free memory. The GC runs concurrently with a short STW pause. Escape analysis determines whether values live on the stack or heap: if a pointer escapes the function scope, the value is heap-allocated.",
    "x := 42\np := &x         // p points to x, type *int\nfmt.Println(*p) // 42 (dereference)\n*p = 100        // changes x to 100\nfmt.Println(x)  // 100"
   ],
   "Pointers to Structs": [
@@ -225,8 +225,8 @@
   ]
  },
  "Interfaces": {
-   "Interface Definition": [
-    "Define interfaces as a set of method signatures. Any type implementing all methods implicitly satisfies the interface. Interfaces are satisfied implicitly. Methods vs functions: a method is a function with a receiver parameter (func (t Type) MethodName()). Methods can only be defined on types within the same package. Functions are standalone (func Name()). Use methods when behavior depends on receiver state; use functions for stateless operations. Prefer methods for types that model domain concepts.",
+  "Interface Definition": [
+   "Define interfaces as a set of method signatures. Any type implementing all methods implicitly satisfies the interface. Interfaces are satisfied implicitly. Methods vs functions: a method is a function with a receiver parameter (func (t Type) MethodName()). Methods can only be defined on types within the same package. Functions are standalone (func Name()). Use methods when behavior depends on receiver state; use functions for stateless operations. Prefer methods for types that model domain concepts.",
    "type Reader interface {\n\tRead([]byte) (int, error)\n}\ntype Writer interface {\n\tWrite([]byte) (int, error)\n}"
   ],
   "Implicit Implementation": [
@@ -259,8 +259,8 @@
    "Errors are values implementing the built-in error interface: Error() string. Functions return nil to indicate success.",
    "type error interface {\n\tError() string\n}\nvar err error = nil\n\nfunc Divide(a, b float64) (float64, error) {\n\tif b == 0 {\n\t\treturn 0, errors.New(\"division by zero\")\n\t}\n\treturn a / b, nil\n}"
   ],
-   "Error Checking": [
-    "Idiomatic Go checks errors immediately. Use guard clauses for early returns. Handle errors once — don't ignore or handle them multiple times. For debugging, use stack traces: when a panic occurs, Go prints the full goroutine stack. Use debug.PrintStack() or runtime/debug.Stack() to capture stacks without panicking. The errors package can also include stack information with libraries like pkg/errors or fmt.Errorf+%w for error chains.",
+  "Error Checking": [
+   "Idiomatic Go checks errors immediately. Use guard clauses for early returns. Handle errors once — don't ignore or handle them multiple times. For debugging, use stack traces: when a panic occurs, Go prints the full goroutine stack. Use debug.PrintStack() or runtime/debug.Stack() to capture stacks without panicking. The errors package can also include stack information with libraries like pkg/errors or fmt.Errorf+%w for error chains.",
    "val, err := doWork()\nif err != nil {\n\tfmt.Println(\"Error:\", err)\n\treturn\n}\nfmt.Println(val)\n\n// Immediate handling is preferred\nf, err := os.Open(file)\nif err != nil {\n\treturn fmt.Errorf(\"open: %w\", err)\n}\ndefer f.Close()"
   ],
   "Custom Error Types": [
@@ -331,10 +331,10 @@
    "Every Go file belongs to a package. Executables use 'package main', libraries use any descriptive name. One directory = one package.",
    "// File: main.go\npackage main\n\n// Library packages\npackage mylib\npackage httpclient"
   ],
-   "Importing Packages": [
-    "Use import for dependencies. Standard library packages have short paths; remote packages use full module paths. go mod tidy manages required versions. Key tooling commands: go doc shows documentation for any package/symbol (go doc fmt.Println), go clean removes built artifacts (go clean -cache), go version prints the Go version. Use go doc for quick reference without leaving the terminal.",
-    "import \"fmt\"\nimport (\n\t\"strings\"\n\t\"github.com/user/pkg\"\n)\n\n// Tooling commands\n// $ go doc fmt.Println\n// $ go clean -cache\n// $ go version"
-   ],
+  "Importing Packages": [
+   "Use import for dependencies. Standard library packages have short paths; remote packages use full module paths. go mod tidy manages required versions. Key tooling commands: go doc shows documentation for any package/symbol (go doc fmt.Println), go clean removes built artifacts (go clean -cache), go version prints the Go version. Use go doc for quick reference without leaving the terminal.",
+   "import \"fmt\"\nimport (\n\t\"strings\"\n\t\"github.com/user/pkg\"\n)\n\n// Tooling commands\n// $ go doc fmt.Println\n// $ go clean -cache\n// $ go version"
+  ],
   "Exported Names": [
    "Capitalized names are exported (public), lowercase are unexported (package-private). Exported names are accessible across packages; unexported only within the same package.",
    "type User struct{}      // Exported\ntype user struct{}      // Unexported\nfunc Public() {}          // Exported\nfunc private() {}         // Unexported\nconst MaxValue = 100      // Exported\nconst minValue = 1        // Unexported"
@@ -414,6 +414,10 @@
   "Benchmarks": [
    "Measure performance with BenchmarkXxx(b *testing.B). b.N is adjusted by the framework for stable timing. Use b.ResetTimer() and b.ReportAllocs() for accurate measurements.",
    "func BenchmarkAdd(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t\tAdd(2, 3)\n\t}\n}\n\nfunc BenchmarkComplex(b *testing.B) {\n\tdata := prepareData()\n\tb.ResetTimer() // exclude setup time\n\tb.ReportAllocs() // report allocation stats\n\tfor i := 0; i < b.N; i++ {\n\t\tprocess(data)\n\t}\n}\n// go test -bench=. -benchmem"
+  ],
+  "Table-Driven Tests & Subtests": [
+   "Table-driven tests use slices of test cases with input/expected pairs. Subtests (t.Run) organize and parallelize cases. t.Run(name, fn) creates sub-tests with independent setup/teardown. Parallel sub-tests with t.Parallel(). Test coverage: go test -cover. Fuzz testing with Go 1.18+ fuzzing.",
+   "func TestDivide(t *testing.T) {\n\ttests := []struct {\n\t\tname string\n\t\ta, b int\n\t\twant int\n\t\terr  bool\n\t}{\n\t\t{\"positive\", 10, 2, 5, false},\n\t\t{\"by zero\", 10, 0, 0, true},\n\t\t{\"negative\", -6, 3, -2, false},\n\t}\n\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\tgot, err := Divide(tt.a, tt.b)\n\t\t\tif (err != nil) != tt.err {\n\t\t\t\tt.Errorf(\"Divide() error = %v, wantErr %v\", err, tt.err)\n\t\t\t}\n\t\t\tif got != tt.want {\n\t\t\t\tt.Errorf(\"Divide() = %d, want %d\", got, tt.want)\n\t\t\t}\n\t\t})\n\t}\n}\n\n// Parallel subtests\nfunc TestParallel(t *testing.T) {\n\tcases := []int{1, 2, 3, 4, 5}\n\tfor _, c := range cases {\n\t\tc := c  // capture (Go <1.22)\n\t\tt.Run(fmt.Sprintf(\"case_%d\", c), func(t *testing.T) {\n\t\t\tt.Parallel()\n\t\t\t// test with c\n\t\t})\n\t}\n}\n\n// Fuzz test\nfunc FuzzDivide(f *testing.F) {\n\tf.Add(10, 2)\n\tf.Fuzz(func(t *testing.T, a, b int) {\n\t\tDivide(a, b)\n\t})\n}"
   ]
  },
  "Standard Library": {
@@ -459,10 +463,10 @@
   ]
  },
  "Modules & Tooling": {
-   "Go Modules": [
-    "Go modules define a project's dependencies and versioning. go.mod declares the module path and requirements. go.sum contains checksums for reproducibility. Cross-compilation is built-in: set GOOS and GOARCH env vars to target different platforms (GOOS=linux GOARCH=amd64 go build). Common targets: linux/amd64, darwin/amd64, darwin/arm64, windows/amd64. Use go tool dist list to see all supported targets. Cross-compilation doesn't require additional toolchains — Go includes all targets in the standard distribution.",
-    "go mod init github.com/user/myapp\ngo get github.com/gorilla/mux@v1.8.0\ngo mod tidy   # cleans go.mod and go.sum\ngo mod vendor # copies deps to vendor/\ngo mod verify # verifies checksums\n\n// Cross-compilation\n// $ GOOS=linux GOARCH=amd64 go build -o app-linux\n// $ GOOS=darwin GOARCH=arm64 go build -o app-macos\n// $ GOOS=windows GOARCH=amd64 go build -o app.exe\n// $ go tool dist list  # list all targets"
-   ],
+  "Go Modules": [
+   "Go modules define a project's dependencies and versioning. go.mod declares the module path and requirements. go.sum contains checksums for reproducibility. Cross-compilation is built-in: set GOOS and GOARCH env vars to target different platforms (GOOS=linux GOARCH=amd64 go build). Common targets: linux/amd64, darwin/amd64, darwin/arm64, windows/amd64. Use go tool dist list to see all supported targets. Cross-compilation doesn't require additional toolchains — Go includes all targets in the standard distribution.",
+   "go mod init github.com/user/myapp\ngo get github.com/gorilla/mux@v1.8.0\ngo mod tidy   # cleans go.mod and go.sum\ngo mod vendor # copies deps to vendor/\ngo mod verify # verifies checksums\n\n// Cross-compilation\n// $ GOOS=linux GOARCH=amd64 go build -o app-linux\n// $ GOOS=darwin GOARCH=arm64 go build -o app-macos\n// $ GOOS=windows GOARCH=amd64 go build -o app.exe\n// $ go tool dist list  # list all targets"
+  ],
   "Workspace Mode": [
    "Go 1.18+ workspace mode (go.work) lets you work on multiple modules simultaneously. Useful for local development across interdependent modules. go work init creates the file.",
    "go.work file:\ngo 1.22\n\nuse (\n\t./myapp\n\t./sharedlib\n\t./tools\n)\n\n# Commands\n$ go work init ./myapp ./sharedlib\n$ go work use ./newmod\n$ go work sync"
@@ -585,59 +589,79 @@
    "Go's built-in profiler: CPU, memory, goroutine, mutex, block profiles. Learning Go: always profile before optimizing. Use net/http/pprof for web apps, runtime/pprof for CLIs. The book's advice: 'measure, don't guess'.",
    "import _ \"net/http/pprof\"\n\n// Web app: add pprof handlers\nhttp.HandleFunc(\"/debug/pprof/\", http.DefaultServeMux.ServeHTTP)\nlog.Fatal(http.ListenAndServe(\":8080\", nil))\n\n// Collect profiles:\n// go tool pprof http://localhost:8080/debug/pprof/profile?seconds=30\n// go tool pprof http://localhost:8080/debug/pprof/heap\n// go tool pprof http://localhost:8080/debug/pprof/goroutine\n\n// CLI profiling (in code)\nf, _ := os.Create(\"cpu.prof\")\npprof.StartCPUProfile(f)\ndefer pprof.StopCPUProfile()\n\n// Memory profile\nf, _ = os.Create(\"mem.prof\")\npprof.WriteHeapProfile(f)\nf.Close()"
   ],
-   "sync/atomic (Go 1.19+ Typed API)": [
-    "Go 1.19+ added typed atomic values: atomic.Int64, atomic.Value, etc. Learning Go recommends them over sync.Mutex for simple counters and flags. The zero value is ready to use, no initialization needed.",
-    "var (\n\tcounter atomic.Int64\n\tloaded  atomic.Bool\n\tconfig  atomic.Pointer[Config]\n)\n\n// Counter\ncounter.Add(1)\nval := counter.Load()\ncounter.Store(42)\n\n// Bool\nloaded.Store(true)\nif loaded.Load() { fmt.Println(\"ready\") }\n\n// Pointer (atomic swap of config)\ncfg := &Config{Port: 8080}\nconfig.Store(cfg)\ncurrent := config.Load()\nfmt.Println(current.Port)\n\n// Swap + CompareAndSwap for lock-free algorithms\nold := config.Swap(&Config{Port: 9090})\nswapped := config.CompareAndSwap(old, &Config{Port: 3000})"
-   ]
-  },
-  "Ecosystem & Frameworks": {
-   "CLI Applications (Cobra)": [
-    "Build powerful CLI applications with Cobra (spf13/cobra), the framework behind kubectl, gh, and hugo. Cobra handles commands, flags, subcommands, and help generation. Commands are structured as a tree with Run functions. Use PersistentFlags for flags shared across subcommands and LocalFlags for command-specific ones. Best practice: organize commands in a cmd/ directory; use Viper (spf13/viper) with Cobra for config file support.",
-    "import \"github.com/spf13/cobra\"\n\nvar rootCmd = &cobra.Command{\n\tUse:   \"app\",\n\tShort: \"My CLI application\",\n\tRun: func(cmd *cobra.Command, args []string) {\n\t\tfmt.Println(\"Hello from CLI\")\n\t},\n}\n\nvar verbose bool\nfunc init() {\n\trootCmd.PersistentFlags().BoolVarP(&verbose, \"verbose\", \"v\", false, \"verbose output\")\n}\n\nfunc main() {\n\trootCmd.Execute()\n}"
-   ],
-   "Web Frameworks (Gin, Echo)": [
-    "While net/http suffices for many cases, frameworks like Gin (gin-gonic/gin) and Echo (labstack/echo) add routing with parameters, middleware chaining, request binding/validation, and grouped routes. Gin uses a radix tree router for high performance. Echo has built-in middleware for CORS, logging, recovery, and CSRF. Common mistake: adding a framework when the standard library would suffice — start with net/http and add a framework only when you need advanced routing or middleware. Best practice: use Gin for REST APIs with JSON; use Echo if you prefer a more minimalist API.",
-    "// Gin example\nimport \"github.com/gin-gonic/gin\"\n\nr := gin.Default()\nr.GET(\"/api/users/:id\", func(c *gin.Context) {\n\tid := c.Param(\"id\")\n\tc.JSON(200, gin.H{\"user_id\": id})\n})\nr.POST(\"/api/users\", func(c *gin.Context) {\n\tvar user User\n\tif err := c.ShouldBindJSON(&user); err != nil {\n\t\tc.JSON(400, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\tc.JSON(201, user)\n})\nr.Run(\":8080\")"
-   ],
-   "gRPC & Protocol Buffers": [
-    "gRPC is a high-performance RPC framework using HTTP/2 and Protocol Buffers for serialization. Define services in .proto files, generate Go code with protoc. Supports four service types: unary, server-streaming, client-streaming, and bidirectional streaming. Common mistake: using gRPC for browser clients without gRPC-Web — browsers don't support HTTP/2 trailers directly. Best practice: use gRPC for internal microservices communication; use REST/JSON for external/public APIs; always set deadlines on gRPC calls to prevent hanging.",
-    "// Define in hello.proto\n// service Greeter {\n//   rpc SayHello (HelloRequest) returns (HelloReply);\n// }\n// message HelloRequest { string name = 1; }\n// message HelloReply { string message = 1; }\n\n// Generate: protoc --go_out=. --go-grpc_out=. hello.proto\n\n// Server\nimport \"google.golang.org/grpc\"\n\nlis, _ := net.Listen(\"tcp\", \":50051\")\ns := grpc.NewServer()\npb.RegisterGreeterServer(s, &server{})\ns.Serve(lis)\n\n// Client\nconn, _ := grpc.Dial(\"localhost:50051\", grpc.WithInsecure())\ndefer conn.Close()\nc := pb.NewGreeterClient(conn)\nresp, _ := c.SayHello(ctx, &pb.HelloRequest{Name: \"World\"})\nfmt.Println(resp.Message)"
-   ],
-   "Logging Libraries (Zap, Zerolog)": [
-    "For high-performance structured logging, Zap (uber-go/zap) and Zerolog (rs/zerolog) offer zero-allocation logging paths. Zap claims to be 10x faster than the standard log package in its SugaredLogger mode and 100x faster in its Logger mode. Zerolog uses a chained API. Both support leveled logging (Debug, Info, Warn, Error), structured fields, and JSON output. Best practice: use slog (standard library, Go 1.21+) for most applications; reach for Zap or Zerolog when profiling shows logging is a bottleneck.",
-    "import \"go.uber.org/zap\"\n\n// Production logger\nlogger, _ := zap.NewProduction()\ndefer logger.Sync()\n\nlogger.Info(\"server starting\",\n\tzap.String(\"host\", \"localhost\"),\n\tzap.Int(\"port\", 8080),\n)\n\n// Sugared logger (fmt-style)\nsugar := logger.Sugar()\nsugar.Infof(\"Listening on %s:%d\", \"localhost\", 8080)\n\n// Zerolog equivalent\n// import \"github.com/rs/zerolog/log\"\n// log.Info().Str(\"host\", \"localhost\").Int(\"port\", 8080).Msg(\"server starting\")"
-   ],
-   "Linters & Code Quality": [
-    "Maintain code quality with automated tools. golangci-lint runs multiple linters in parallel (staticcheck, revive, govet, errcheck, ineffassign, and 30+ more). staticcheck is a curated set of advanced vet checks. govulncheck scans dependencies for known CVEs. Best practice: run golangci-lint in CI for every PR; use golangci-lint run --fix to auto-fix issues; run govulncheck ./... before deploying to catch vulnerable dependencies.",
-    "// Install\n// go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest\n// go install golang.org/x/vuln/cmd/govulncheck@latest\n\n// Run linters\n// $ golangci-lint run ./...\n// $ staticcheck ./...\n// $ go vet ./...\n\n// .golangci.yml configuration\n// linters:\n//   enable:\n//     - errcheck\n//     - gosimple\n//     - govet\n//     - ineffassign\n//     - staticcheck\n//     - unused\n\n// Security check\n// $ govulncheck ./..."
-   ]
-  },
-  "Advanced Go": {
-   "Reflection": [
-    "The reflect package allows inspecting and manipulating types and values at runtime. Use reflect.TypeOf to get type information, reflect.ValueOf to get the value. Common use cases: serialization (encoding/json uses reflection), testing frameworks, and generic utilities. Common mistake: overusing reflection — it's slow, breaks type safety, and makes code hard to understand. Best practice: avoid reflection unless absolutely necessary; prefer type assertions, interfaces, or code generation (go generate) over reflect.",
-    "import \"reflect\"\n\nvar x float64 = 3.14\nt := reflect.TypeOf(x)\nv := reflect.ValueOf(x)\n\nfmt.Println(t)        // float64\nfmt.Println(v.Float()) // 3.14\n\n// Inspect struct tags\ntype Config struct {\n\tPort int `json:\"port\" default:\"8080\"`\n}\n\nfield, _ := reflect.TypeOf(Config{}).FieldByName(\"Port\")\nfmt.Println(field.Tag.Get(\"json\"))    // \"port\"\nfmt.Println(field.Tag.Get(\"default\")) // \"8080\""
-   ],
-   "CGO Basics": [
-    "CGO lets Go call C code directly. Use import \"C\" with special comments (// #include ...) above it. CGO requires a C compiler and adds build complexity. Common use cases: linking with native libraries (SDL, OpenSSL), performance-critical sections, and system calls not exposed by Go. Common mistake: using CGO when a pure Go alternative exists — prefer cgo-free builds (CGO_ENABLED=0) for simpler cross-compilation. Best practice: isolate CGO code behind a pure Go interface; use //go:build cgo build tags for conditional compilation.",
-    "// #include <math.h>\n// #include <stdlib.h>\nimport \"C\"\nimport \"unsafe\"\n\nfunc Sqrt(val float64) float64 {\n\treturn float64(C.sqrt(C.double(val)))\n}\n\nfunc StringLength(s string) C.int {\n\tcs := C.CString(s)\n\tdefer C.free(unsafe.Pointer(cs))\n\treturn C.strlen(cs)\n}\n\n// Build with CGO\n// $ CGO_ENABLED=1 go build\n// $ go build -tags=cgo\n\n// Cross-compile with CGO is HARD\n// $ CGO_ENABLED=0 GOOS=linux go build  # no CGO = easy"
-   ],
-   "Escape Analysis": [
-    "Escape analysis is the compiler's optimization that determines whether a value can be allocated on the stack (fast, no GC overhead) or must be on the heap (GC-managed). A value escapes if its pointer is returned, stored in a global, or passed to a function that stores it. Use go build -gcflags='-m' to see escape analysis decisions. Common mistake: assuming small values stay on the stack — if a pointer escapes, even an int goes to the heap. Best practice: prefer value receivers over pointer receivers for small structs; avoid returning pointers to local variables when possible; use -gcflags='-m' to check your assumptions.",
-    "// Check escape analysis:\n// $ go build -gcflags='-m' main.go\n// $ go build -gcflags='-m -l' main.go  # disable inlining\n\nfunc createUser() *User {\n\tu := User{Name: \"Alice\"}\n\treturn &u // u escapes to heap!\n}\n\nfunc createUserValue() User {\n\tu := User{Name: \"Bob\"}\n\treturn u // u stays on stack (value copy)\n}\n\n// Inline vs escape\nfunc sum(a, b int) int {\n\treturn a + b // inlined, no allocation\n}"
-   ],
-   "unsafe Package": [
-    "The unsafe package provides low-level primitives for bypassing Go's type safety. unsafe.Pointer converts between arbitrary pointer types. uintptr is an integer type for pointer arithmetic. Common use cases: efficient serialization, interacting with C libraries via CGO, and performance-critical hot paths. Common mistake: using unsafe for ordinary code — it breaks the memory safety guarantees that make Go reliable. Best practice: avoid unsafe in application code; if you must use it, keep it confined to a small, well-tested package with a safe public API; never use uintptr after the referenced object is garbage collected.",
-    "import \"unsafe\"\n\n// Size and offset of struct fields\ntype Data struct {\n\tX int64 // 8 bytes\n\tY bool  // 1 byte (+7 padding)\n}\n\nfmt.Println(unsafe.Sizeof(Data{}))     // 16 (with alignment)\nfmt.Println(unsafe.Offsetof(Data{}.Y)) // 8\n\n// Pointer arithmetic (careful!)\nvar arr [3]int32\nbase := unsafe.Pointer(&arr[0])\nsecond := (*int32)(unsafe.Pointer(uintptr(base) + unsafe.Sizeof(arr[0])))\n*second = 42\nfmt.Println(arr[1]) // 42\n\n// Converting between types\nvar f float64 = 3.14\nbits := *(*uint64)(unsafe.Pointer(&f))\nfmt.Printf(\"%016x\\n\", bits) // float64 bits as uint64"
-   ]
-  },
-  "Deployment & DevOps": {
-   "Docker Multi-stage Builds": [
-    "Use multi-stage Docker builds to create minimal Go images. Stage 1: build the binary with golang:alpine. Stage 2: copy the binary to scratch or distroless (no OS, ~5MB image). Key benefits: tiny attack surface, fast deployment, no build tools in production. Common mistake: using ubuntu or full golang images in production — adds 300MB+ of unnecessary weight. Best practice: use scratch for pure Go binaries; use gcr.io/distroless/base if you need libc (CGO); use alpine:3.x if you need a shell and common tools; always set CGO_ENABLED=0 for static linking.",
-    "# Dockerfile\nFROM golang:1.22-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o /app/server .\n\nFROM scratch\nCOPY --from=builder /app/server /server\nEXPOSE 8080\nCMD [\"/server\"]\n\n# Build\n# $ docker build -t myapp .\n# $ docker run -p 8080:8080 myapp\n\n# With distroless\n# FROM gcr.io/distroless/base-debian12\n# COPY --from=builder /app/server /server"
-   ],
-   "Kubernetes Deployment": [
-    "Deploy Go services to Kubernetes with Deployments (replicas, rolling updates) and Services (networking). Use liveness probes to restart unhealthy pods and readiness probes to route traffic only when ready. ConfigMaps and Secrets inject configuration. Common practice: expose metrics via Prometheus on a separate port, use healthz/readyz endpoints for probes, and set resource limits. Best practice: use client-go for in-cluster Go clients; always set context.WithTimeout for database and HTTP calls within pods; use the --restart=Never flag for one-shot jobs.",
-    "# deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: go-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: go-api\n  template:\n    metadata:\n      labels:\n        app: go-api\n    spec:\n      containers:\n      - name: api\n        image: myapp:latest\n        ports:\n        - containerPort: 8080\n        livenessProbe:\n          httpGet: { path: /healthz, port: 8080 }\n        readinessProbe:\n          httpGet: { path: /readyz, port: 8080 }\n        resources:\n          limits: { cpu: 500m, memory: 256Mi }\n          requests: { cpu: 100m, memory: 128Mi }\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: go-api\nspec:\n  selector:\n    app: go-api\n  ports:\n  - port: 80\n    targetPort: 8080\n\n# Deploy\n# $ kubectl apply -f deployment.yaml\n# $ kubectl get pods\n# $ kubectl rollout status deployment/go-api"
-   ]
-  }
+  "sync/atomic (Go 1.19+ Typed API)": [
+   "Go 1.19+ added typed atomic values: atomic.Int64, atomic.Value, etc. Learning Go recommends them over sync.Mutex for simple counters and flags. The zero value is ready to use, no initialization needed.",
+   "var (\n\tcounter atomic.Int64\n\tloaded  atomic.Bool\n\tconfig  atomic.Pointer[Config]\n)\n\n// Counter\ncounter.Add(1)\nval := counter.Load()\ncounter.Store(42)\n\n// Bool\nloaded.Store(true)\nif loaded.Load() { fmt.Println(\"ready\") }\n\n// Pointer (atomic swap of config)\ncfg := &Config{Port: 8080}\nconfig.Store(cfg)\ncurrent := config.Load()\nfmt.Println(current.Port)\n\n// Swap + CompareAndSwap for lock-free algorithms\nold := config.Swap(&Config{Port: 9090})\nswapped := config.CompareAndSwap(old, &Config{Port: 3000})"
+  ]
+ },
+ "Ecosystem & Frameworks": {
+  "CLI Applications (Cobra)": [
+   "Build powerful CLI applications with Cobra (spf13/cobra), the framework behind kubectl, gh, and hugo. Cobra handles commands, flags, subcommands, and help generation. Commands are structured as a tree with Run functions. Use PersistentFlags for flags shared across subcommands and LocalFlags for command-specific ones. Best practice: organize commands in a cmd/ directory; use Viper (spf13/viper) with Cobra for config file support.",
+   "import \"github.com/spf13/cobra\"\n\nvar rootCmd = &cobra.Command{\n\tUse:   \"app\",\n\tShort: \"My CLI application\",\n\tRun: func(cmd *cobra.Command, args []string) {\n\t\tfmt.Println(\"Hello from CLI\")\n\t},\n}\n\nvar verbose bool\nfunc init() {\n\trootCmd.PersistentFlags().BoolVarP(&verbose, \"verbose\", \"v\", false, \"verbose output\")\n}\n\nfunc main() {\n\trootCmd.Execute()\n}"
+  ],
+  "Web Frameworks (Gin, Echo)": [
+   "While net/http suffices for many cases, frameworks like Gin (gin-gonic/gin) and Echo (labstack/echo) add routing with parameters, middleware chaining, request binding/validation, and grouped routes. Gin uses a radix tree router for high performance. Echo has built-in middleware for CORS, logging, recovery, and CSRF. Common mistake: adding a framework when the standard library would suffice — start with net/http and add a framework only when you need advanced routing or middleware. Best practice: use Gin for REST APIs with JSON; use Echo if you prefer a more minimalist API.",
+   "// Gin example\nimport \"github.com/gin-gonic/gin\"\n\nr := gin.Default()\nr.GET(\"/api/users/:id\", func(c *gin.Context) {\n\tid := c.Param(\"id\")\n\tc.JSON(200, gin.H{\"user_id\": id})\n})\nr.POST(\"/api/users\", func(c *gin.Context) {\n\tvar user User\n\tif err := c.ShouldBindJSON(&user); err != nil {\n\t\tc.JSON(400, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\tc.JSON(201, user)\n})\nr.Run(\":8080\")"
+  ],
+  "gRPC & Protocol Buffers": [
+   "gRPC is a high-performance RPC framework using HTTP/2 and Protocol Buffers for serialization. Define services in .proto files, generate Go code with protoc. Supports four service types: unary, server-streaming, client-streaming, and bidirectional streaming. Common mistake: using gRPC for browser clients without gRPC-Web — browsers don't support HTTP/2 trailers directly. Best practice: use gRPC for internal microservices communication; use REST/JSON for external/public APIs; always set deadlines on gRPC calls to prevent hanging.",
+   "// Define in hello.proto\n// service Greeter {\n//   rpc SayHello (HelloRequest) returns (HelloReply);\n// }\n// message HelloRequest { string name = 1; }\n// message HelloReply { string message = 1; }\n\n// Generate: protoc --go_out=. --go-grpc_out=. hello.proto\n\n// Server\nimport \"google.golang.org/grpc\"\n\nlis, _ := net.Listen(\"tcp\", \":50051\")\ns := grpc.NewServer()\npb.RegisterGreeterServer(s, &server{})\ns.Serve(lis)\n\n// Client\nconn, _ := grpc.Dial(\"localhost:50051\", grpc.WithInsecure())\ndefer conn.Close()\nc := pb.NewGreeterClient(conn)\nresp, _ := c.SayHello(ctx, &pb.HelloRequest{Name: \"World\"})\nfmt.Println(resp.Message)"
+  ],
+  "Logging Libraries (Zap, Zerolog)": [
+   "For high-performance structured logging, Zap (uber-go/zap) and Zerolog (rs/zerolog) offer zero-allocation logging paths. Zap claims to be 10x faster than the standard log package in its SugaredLogger mode and 100x faster in its Logger mode. Zerolog uses a chained API. Both support leveled logging (Debug, Info, Warn, Error), structured fields, and JSON output. Best practice: use slog (standard library, Go 1.21+) for most applications; reach for Zap or Zerolog when profiling shows logging is a bottleneck.",
+   "import \"go.uber.org/zap\"\n\n// Production logger\nlogger, _ := zap.NewProduction()\ndefer logger.Sync()\n\nlogger.Info(\"server starting\",\n\tzap.String(\"host\", \"localhost\"),\n\tzap.Int(\"port\", 8080),\n)\n\n// Sugared logger (fmt-style)\nsugar := logger.Sugar()\nsugar.Infof(\"Listening on %s:%d\", \"localhost\", 8080)\n\n// Zerolog equivalent\n// import \"github.com/rs/zerolog/log\"\n// log.Info().Str(\"host\", \"localhost\").Int(\"port\", 8080).Msg(\"server starting\")"
+  ],
+  "Linters & Code Quality": [
+   "Maintain code quality with automated tools. golangci-lint runs multiple linters in parallel (staticcheck, revive, govet, errcheck, ineffassign, and 30+ more). staticcheck is a curated set of advanced vet checks. govulncheck scans dependencies for known CVEs. Best practice: run golangci-lint in CI for every PR; use golangci-lint run --fix to auto-fix issues; run govulncheck ./... before deploying to catch vulnerable dependencies.",
+   "// Install\n// go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest\n// go install golang.org/x/vuln/cmd/govulncheck@latest\n\n// Run linters\n// $ golangci-lint run ./...\n// $ staticcheck ./...\n// $ go vet ./...\n\n// .golangci.yml configuration\n// linters:\n//   enable:\n//     - errcheck\n//     - gosimple\n//     - govet\n//     - ineffassign\n//     - staticcheck\n//     - unused\n\n// Security check\n// $ govulncheck ./..."
+  ]
+ },
+ "Advanced Go": {
+  "Reflection": [
+   "The reflect package allows inspecting and manipulating types and values at runtime. Use reflect.TypeOf to get type information, reflect.ValueOf to get the value. Common use cases: serialization (encoding/json uses reflection), testing frameworks, and generic utilities. Common mistake: overusing reflection — it's slow, breaks type safety, and makes code hard to understand. Best practice: avoid reflection unless absolutely necessary; prefer type assertions, interfaces, or code generation (go generate) over reflect.",
+   "import \"reflect\"\n\nvar x float64 = 3.14\nt := reflect.TypeOf(x)\nv := reflect.ValueOf(x)\n\nfmt.Println(t)        // float64\nfmt.Println(v.Float()) // 3.14\n\n// Inspect struct tags\ntype Config struct {\n\tPort int `json:\"port\" default:\"8080\"`\n}\n\nfield, _ := reflect.TypeOf(Config{}).FieldByName(\"Port\")\nfmt.Println(field.Tag.Get(\"json\"))    // \"port\"\nfmt.Println(field.Tag.Get(\"default\")) // \"8080\""
+  ],
+  "CGO Basics": [
+   "CGO lets Go call C code directly. Use import \"C\" with special comments (// #include ...) above it. CGO requires a C compiler and adds build complexity. Common use cases: linking with native libraries (SDL, OpenSSL), performance-critical sections, and system calls not exposed by Go. Common mistake: using CGO when a pure Go alternative exists — prefer cgo-free builds (CGO_ENABLED=0) for simpler cross-compilation. Best practice: isolate CGO code behind a pure Go interface; use //go:build cgo build tags for conditional compilation.",
+   "// #include <math.h>\n// #include <stdlib.h>\nimport \"C\"\nimport \"unsafe\"\n\nfunc Sqrt(val float64) float64 {\n\treturn float64(C.sqrt(C.double(val)))\n}\n\nfunc StringLength(s string) C.int {\n\tcs := C.CString(s)\n\tdefer C.free(unsafe.Pointer(cs))\n\treturn C.strlen(cs)\n}\n\n// Build with CGO\n// $ CGO_ENABLED=1 go build\n// $ go build -tags=cgo\n\n// Cross-compile with CGO is HARD\n// $ CGO_ENABLED=0 GOOS=linux go build  # no CGO = easy"
+  ],
+  "Escape Analysis": [
+   "Escape analysis is the compiler's optimization that determines whether a value can be allocated on the stack (fast, no GC overhead) or must be on the heap (GC-managed). A value escapes if its pointer is returned, stored in a global, or passed to a function that stores it. Use go build -gcflags='-m' to see escape analysis decisions. Common mistake: assuming small values stay on the stack — if a pointer escapes, even an int goes to the heap. Best practice: prefer value receivers over pointer receivers for small structs; avoid returning pointers to local variables when possible; use -gcflags='-m' to check your assumptions.",
+   "// Check escape analysis:\n// $ go build -gcflags='-m' main.go\n// $ go build -gcflags='-m -l' main.go  # disable inlining\n\nfunc createUser() *User {\n\tu := User{Name: \"Alice\"}\n\treturn &u // u escapes to heap!\n}\n\nfunc createUserValue() User {\n\tu := User{Name: \"Bob\"}\n\treturn u // u stays on stack (value copy)\n}\n\n// Inline vs escape\nfunc sum(a, b int) int {\n\treturn a + b // inlined, no allocation\n}"
+  ],
+  "unsafe Package": [
+   "The unsafe package provides low-level primitives for bypassing Go's type safety. unsafe.Pointer converts between arbitrary pointer types. uintptr is an integer type for pointer arithmetic. Common use cases: efficient serialization, interacting with C libraries via CGO, and performance-critical hot paths. Common mistake: using unsafe for ordinary code — it breaks the memory safety guarantees that make Go reliable. Best practice: avoid unsafe in application code; if you must use it, keep it confined to a small, well-tested package with a safe public API; never use uintptr after the referenced object is garbage collected.",
+   "import \"unsafe\"\n\n// Size and offset of struct fields\ntype Data struct {\n\tX int64 // 8 bytes\n\tY bool  // 1 byte (+7 padding)\n}\n\nfmt.Println(unsafe.Sizeof(Data{}))     // 16 (with alignment)\nfmt.Println(unsafe.Offsetof(Data{}.Y)) // 8\n\n// Pointer arithmetic (careful!)\nvar arr [3]int32\nbase := unsafe.Pointer(&arr[0])\nsecond := (*int32)(unsafe.Pointer(uintptr(base) + unsafe.Sizeof(arr[0])))\n*second = 42\nfmt.Println(arr[1]) // 42\n\n// Converting between types\nvar f float64 = 3.14\nbits := *(*uint64)(unsafe.Pointer(&f))\nfmt.Printf(\"%016x\\n\", bits) // float64 bits as uint64"
+  ]
+ },
+ "Deployment & DevOps": {
+  "Docker Multi-stage Builds": [
+   "Use multi-stage Docker builds to create minimal Go images. Stage 1: build the binary with golang:alpine. Stage 2: copy the binary to scratch or distroless (no OS, ~5MB image). Key benefits: tiny attack surface, fast deployment, no build tools in production. Common mistake: using ubuntu or full golang images in production — adds 300MB+ of unnecessary weight. Best practice: use scratch for pure Go binaries; use gcr.io/distroless/base if you need libc (CGO); use alpine:3.x if you need a shell and common tools; always set CGO_ENABLED=0 for static linking.",
+   "# Dockerfile\nFROM golang:1.22-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o /app/server .\n\nFROM scratch\nCOPY --from=builder /app/server /server\nEXPOSE 8080\nCMD [\"/server\"]\n\n# Build\n# $ docker build -t myapp .\n# $ docker run -p 8080:8080 myapp\n\n# With distroless\n# FROM gcr.io/distroless/base-debian12\n# COPY --from=builder /app/server /server"
+  ],
+  "Kubernetes Deployment": [
+   "Deploy Go services to Kubernetes with Deployments (replicas, rolling updates) and Services (networking). Use liveness probes to restart unhealthy pods and readiness probes to route traffic only when ready. ConfigMaps and Secrets inject configuration. Common practice: expose metrics via Prometheus on a separate port, use healthz/readyz endpoints for probes, and set resource limits. Best practice: use client-go for in-cluster Go clients; always set context.WithTimeout for database and HTTP calls within pods; use the --restart=Never flag for one-shot jobs.",
+   "# deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: go-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: go-api\n  template:\n    metadata:\n      labels:\n        app: go-api\n    spec:\n      containers:\n      - name: api\n        image: myapp:latest\n        ports:\n        - containerPort: 8080\n        livenessProbe:\n          httpGet: { path: /healthz, port: 8080 }\n        readinessProbe:\n          httpGet: { path: /readyz, port: 8080 }\n        resources:\n          limits: { cpu: 500m, memory: 256Mi }\n          requests: { cpu: 100m, memory: 128Mi }\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: go-api\nspec:\n  selector:\n    app: go-api\n  ports:\n  - port: 80\n    targetPort: 8080\n\n# Deploy\n# $ kubectl apply -f deployment.yaml\n# $ kubectl get pods\n# $ kubectl rollout status deployment/go-api"
+  ]
+ },
+ "Context & Cancellation": {
+  "context.WithCancel, WithTimeout": [
+   "context.Context carries deadlines, cancellation signals, and request-scoped values across API boundaries. context.Background() is root; context.TODO() during migration. withCancel creates cancel function. withTimeout/Deadline auto-cancel. Context values are request-scoped (not for optional params). Always pass context as first argument.",
+   "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc operation(ctx context.Context) error {\n\tselect {\n\tcase <-time.After(2 * time.Second):\n\t\treturn nil\n\tcase <-ctx.Done():\n\t\treturn ctx.Err()  // DeadlineExceeded or Canceled\n\t}\n}\n\nfunc main() {\n\tctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)\n\tdefer cancel()\n\n\terr := operation(ctx)\n\tfmt.Println(err)  // context deadline exceeded\n\n\t// Manual cancellation\n\tctx2, cancel2 := context.WithCancel(context.Background())\n\tgo func() {\n\t\ttime.Sleep(100 * time.Millisecond)\n\t\tcancel2()\n\t}()\n\t_ = ctx2\n\n\t// WithValue (request-scoped)\n\tctx3 := context.WithValue(context.Background(), \"request_id\", \"abc\")\n\tif rid := ctx3.Value(\"request_id\"); rid != nil {\n\t\tfmt.Println(rid)\n\t}\n}"
+  ],
+  "Graceful Shutdown with ctx": [
+   "Graceful shutdown allows in-flight requests to complete before exit. Signal.Notify catches OS signals. Server.Shutdown(ctx) in net/http. Application listens for SIGINT/SIGTERM, cancels context, waits for shutdown. Worker pools with context cancellation for clean teardown.",
+   "package main\n\nimport (\n\t\"context\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n\t\"os/signal\"\n\t\"syscall\"\n\t\"time\"\n)\n\nfunc main() {\n\tsrv := &http.Server{Addr: \":8080\"}\n\n\t// Start server in goroutine\n\tgo func() {\n\t\tif err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {\n\t\t\tlog.Fatal(err)\n\t\t}\n\t}()\n\n\t// Wait for interrupt\n\tquit := make(chan os.Signal, 1)\n\tsignal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)\n\t<-quit\n\n\t// Graceful shutdown with timeout\n\tctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)\n\tdefer cancel()\n\tif err := srv.Shutdown(ctx); err != nil {\n\t\tlog.Fatal(\"Server forced to shutdown:\", err)\n\t}\n\tlog.Println(\"Server exited gracefully\")\n}"
+  ]
+ },
+ "Debugging & Profiling": {
+  "pprof & trace": [
+   "Go's built-in profiling: CPU, memory, goroutine, mutex, block. Import net/http/pprof for HTTP endpoint. go tool pprof for analysis. go tool trace for execution tracing. Runtime.ReadMemStats for programmatic memory inspection. GODEBUG env var for runtime debugging.",
+   "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t_ \"net/http/pprof\"  // enable profiling\n\t\"runtime\"\n)\n\nfunc main() {\n\tgo func() {\n\t\tlog.Println(http.ListenAndServe(\"localhost:6060\", nil))\n\t}()\n\n\t// Programmatic memory stats\n\tvar m runtime.MemStats\n\truntime.ReadMemStats(&m)\n\tlog.Printf(\"Alloc: %d MB, TotalAlloc: %d MB\", m.Alloc/1024/1024, m.TotalAlloc/1024/1024)\n\n\t// Profiles available at:\n\t// /debug/pprof/ - index\n\t// /debug/pprof/heap - heap profile\n\t// /debug/pprof/goroutine - goroutine stack\n\t// /debug/pprof/profile?seconds=30 - CPU profile\n\t// /debug/pprof/trace?seconds=5 - execution trace\n\t//\n\t// Analysis:\n\t// go tool pprof http://localhost:6060/debug/pprof/heap\n\t// go tool pprof -http=:8080 ~/pprof/pprof.samples.cpu.001.pb.gz\n\t// go tool trace trace.out\n\n\tselect {}\n}"
+  ],
+  "Delve Debugger": [
+   "Delve is the Go debugger. Install: go install github.com/go-delve/delve/cmd/dlv@latest. Commands: dlv debug (build+debug), dlv test (test debugging), dlv attach (running process). Breakpoints: break, continue, next, step, print, locals, stack, goroutines. Core dumps for post-mortem.",
+   "# Install\n# go install github.com/go-delve/delve/cmd/dlv@latest\n\n# Debug a program\ndlv debug main.go\n\n# Delve commands (interactive):\n# (dlv) break main.go:15        # breakpoint at line 15\n# (dlv) break main.main         # breakpoint at function\n# (dlv) continue                # run to breakpoint\n# (dlv) next                    # step over\n# (dlv) step                    # step into\n# (dlv) print myVar             # print variable\n# (dlv) locals                  # show local variables\n# (dlv) stack                   # show call stack\n# (dlv) goroutines              # list goroutines\n# (dlv) goroutine 1             # switch goroutine\n# (dlv) list                    # show source\n\n# Debug tests\ndlv test ./...\n\n# Attach to running process\n# sudo dlv attach <PID>\n\n# Headless mode (IDE integration)\n# dlv debug --headless --listen=:2345 --api-version=2 main.go"
+  ]
+ }
 }

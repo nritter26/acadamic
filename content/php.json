@@ -1,198 +1,362 @@
 {
- "Getting Started": {
-  "What is PHP": [
-   "PHP (Hypertext Preprocessor) is a widely-used open-source scripting language designed for web development. PHP code is executed on the server, generating HTML that is sent to the client. It can be embedded directly into HTML and works seamlessly with databases.",
-   "<?php\necho \"Hello, PHP!\";\n?>\n\n<!DOCTYPE html>\n<html>\n<body>\n    <h1><?php echo \"Hello from PHP!\"; ?></h1>\n</body>\n</html>"
-  ],
-  "PHP Syntax": [
-   "PHP code is enclosed in <?php ... ?> tags. Statements end with semicolons. PHP can be embedded anywhere in HTML. Variables start with $. Whitespace is ignored. The closing ?> is optional at the end of a file (recommended to omit to prevent accidental output).",
-   "<?php\n// This is a comment\necho \"Hello World\";\n\n$name = \"Alice\";\n$age = 30;\necho \"$name is $age\";\n\n// No closing tag at end of pure PHP files"
-  ],
-  "Variables": [
-   "PHP variables start with $ followed by a letter or underscore. They are dynamically typed and case-sensitive. Variables can be assigned by value or by reference (&). Variable variables ($$var) allow dynamic variable names.",
-   "<?php\n$name = \"Alice\";\n$age = 30;\n$price = 19.99;\n$is_active = true;\n\n// By reference\n$original = 10;\n$ref = &$original;\n$ref = 20;  // changes $original too\n\n// Variable variables\n$varName = \"foo\";\n$$varName = \"bar\";  // $foo = \"bar\"\necho $foo;  // bar"
-  ],
-  "Data Types": [
-   "PHP supports: string, int, float, bool, array, object, null, resource. Use var_dump() to inspect type and value. gettype() returns the type name. Type juggling happens automatically; use strict comparison (===, !==) to avoid surprises.",
-   "<?php\n$s = \"Hello\";          // string\n$i = 42;                // int\n$f = 3.14;              // float\n$b = true;              // bool\n$a = [1, 2, 3];         // array\n$n = null;              // null\n\nvar_dump($s, $i, $f, $b, $a, $n);\n\n// Type juggling\nvar_dump('5' == 5);     // true (loose)\nvar_dump('5' === 5);    // false (strict)"
-  ],
-  "Constants & Magic Constants": [
-   "define() defines runtime constants. const keyword defines compile-time constants (must be in top-level scope). Magic constants like __FILE__, __DIR__, __LINE__, __CLASS__, __METHOD__ change based on where they're used.",
-   "<?php\ndefine('SITE_NAME', 'MyApp');\nconst VERSION = '1.0.0';\n\necho SITE_NAME;\necho VERSION;\n\n// Magic constants\necho __FILE__;     // current file path\necho __DIR__;      // directory of current file\necho __LINE__;     // current line number\necho __CLASS__;    // current class name"
-  ],
-  "PHP Tags & Output": [
-   "Multiple ways to output: echo (language construct), print (returns 1), printf (formatted), var_dump (debug info). Short echo tag <?= is shorthand for <?php echo. Always available in PHP 5.4+.",
-   "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<p><?= \"Hello from short tag\" ?></p>"
-  ]
- },
- "Control Flow": {
-  "if/else/elseif": [
-   "Standard conditional execution. elseif (one word) is the recommended form over else if (two words, requires braces). Use switch for many conditions on the same variable. Match (PHP 8+) is a stricter switch without loose comparison.",
-   "<?php\n$score = 85;\n\nif ($score >= 90) {\n    echo 'A';\n} elseif ($score >= 80) {\n    echo 'B';\n} else {\n    echo 'C';\n}\n\n// Alternative syntax with :\nif ($score >= 80):\n    echo \"Pass\";\nendif;"
-  ],
-  "switch & match": [
-   "switch compares loosely (==). Use break to prevent fall-through; default for no match. match (PHP 8+) compares strictly (===), returns a value, and doesn't require break. match throws UnhandledMatchError on no match.",
-   "<?php\n$status = 404;\n\nswitch ($status) {\n    case 200:\n        echo 'OK';\n        break;\n    case 404:\n        echo 'Not Found';\n        break;\n    default:\n        echo 'Unknown';\n}\n\n// match (PHP 8+)\n$result = match ($status) {\n    200 => 'OK',\n    404 => 'Not Found',\n    500 => 'Server Error',\n    default => 'Unknown',\n};\necho $result;"
-  ],
-  "for & foreach": [
-   "for loops use counter (init; condition; increment). foreach is the preferred way to iterate arrays: foreach($arr as $value) or foreach($arr as $key => $value). Use break to exit, continue to skip iteration.",
-   "<?php\n// for loop\nfor ($i = 0; $i < 5; $i++) {\n    echo \"Count: $i\\n\";\n}\n\n// foreach with array\n$fruits = ['apple', 'banana', 'cherry'];\nforeach ($fruits as $fruit) {\n    echo $fruit;\n}\n\n// foreach with key => value\n$ages = ['Alice' => 30, 'Bob' => 25];\nforeach ($ages as $name => $age) {\n    echo \"$name is $age\";\n}"
-  ],
-  "while & do-while": [
-   "while runs before checking condition (may run 0 times). do-while runs at least once. Use with caution to avoid infinite loops. Common for reading data until exhausted.",
-   "<?php\n$i = 0;\nwhile ($i < 3) {\n    echo \"While: $i\\n\";\n    $i++;\n}\n\n// do-while runs at least once\n$j = 0;\ndo {\n    echo \"Do: $j\\n\";\n    $j++;\n} while ($j < 3);\n\n// Reading file line by line\n$handle = fopen(\"file.txt\", \"r\");\nwhile (($line = fgets($handle)) !== false) {\n    echo $line;\n}\nfclose($handle);"
-  ],
-  "Alternative Syntax": [
-   "PHP provides alternative syntax for control structures using colons and endif/endwhile/endfor/endforeach/endswitch. This is commonly used in templates to mix PHP with HTML cleanly.",
-   "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    <p>Welcome back!</p>\n<?php else: ?>\n    <p>Please log in</p>\n<?php endif; ?>"
-  ]
- },
- "Functions": {
-  "Defining Functions": [
-   "Functions are defined with the function keyword. They can have typed parameters and return types (PHP 7+). Default parameter values are supported. Use return to return a value; functions without return return null.",
-   "<?php\nfunction greet(string $name): string {\n    return \"Hello, $name!\";\n}\n\necho greet('Alice');\n\n// Default parameters\nfunction multiply(int $a, int $b = 2): int {\n    return $a * $b;\n}\n\necho multiply(5);     // 10\necho multiply(5, 3);  // 15"
-  ],
-  "Variable Scope": [
-   "Variables defined outside functions are global — use global keyword to access them inside functions. Static variables persist between calls. Function parameters are local. The $GLOBALS superglobal provides access to all global variables.",
-   "<?php\n$globalVar = 'outside';\n\nfunction test() {\n    global $globalVar;\n    echo $globalVar;\n    \n    static $count = 0;\n    $count++;\n    echo $count;\n}\n\ntest();  // outside, 1\ntest();  // outside, 2\n\n// Via $GLOBALS\nfunction test2() {\n    echo $GLOBALS['globalVar'];\n}"
-  ],
-  "Type Declarations": [
-   "PHP 7+ supports scalar type declarations: int, float, string, bool, void, iterable, mixed (PHP 8+), never (PHP 8.1+). Nullable types use ? prefix (e.g., ?string). Union types (PHP 8+) use | (e.g., int|string). Strict mode enabled with declare(strict_types=1).",
-   "<?php\ndeclare(strict_types=1);\n\nfunction add(int $a, int $b): int {\n    return $a + $b;\n}\n\n// Nullable type\nfunction find(?string $id): ?array {\n    if ($id === null) return null;\n    return ['id' => $id];\n}\n\n// Union type (PHP 8+)\nfunction format(int|string $value): string {\n    return (string) $value;\n}"
-  ],
-  "Anonymous Functions & Closures": [
-   "Anonymous functions (closures) can be assigned to variables or passed as arguments. Use function ($arg) use ($var) { ... } to import variables from the outer scope. Arrow functions (PHP 7.4+) provide shorter syntax with fn($arg) => expr.",
-   "<?php\n// Anonymous function\n$greet = function(string $name): string {\n    return \"Hello, $name!\";\n};\necho $greet('Alice');\n\n// Closure with use\n$prefix = \"User: \";\n$formatName = function(string $name) use ($prefix): string {\n    return $prefix . $name;\n};\n\n// Arrow function (PHP 7.4+)\n$multiply = fn($a, $b) => $a * $b;\necho $multiply(3, 4);  // 12\n\n// As callback\n$numbers = [1, 2, 3, 4];\n$squared = array_map(fn($n) => $n * $n, $numbers);"
-  ],
-  "Variable Functions & Callbacks": [
-   "If a variable name has parentheses appended, PHP looks for a function with that name. call_user_func() and call_user_func_array() call callbacks. Useful for dynamic dispatch and event handling.",
-   "<?php\nfunction hello() { echo \"Hello!\"; }\nfunction bye() { echo \"Bye!\"; }\n\n$func = 'hello';\n$func();  // calls hello()\n\n$func = 'bye';\n$func();  // calls bye()\n\n// With parameters\nfunction add(int $a, int $b): int { return $a + $b; }\ncall_user_func('add', 3, 4);\ncall_user_func_array('add', [3, 4]);"
-  ]
- },
- "Arrays & Data Structures": {
-  "Indexed Arrays": [
-   "PHP arrays are ordered maps. Indexed arrays use numeric keys starting from 0. Create with array() or short syntax []. Access with $arr[index]. Count elements with count(). Manipulate with array_push, array_pop, array_shift, array_unshift.",
-   "<?php\n$fruits = ['apple', 'banana', 'cherry'];\necho $fruits[0];  // apple\n\n$fruits[] = 'date';           // append\narray_push($fruits, 'elderberry');\n$last = array_pop($fruits);\n$first = array_shift($fruits);\narray_unshift($fruits, 'apricot');\n\necho count($fruits);\nprint_r($fruits);"
-  ],
-  "Associative Arrays": [
-   "Associative arrays use string keys. Useful for key-value mappings and structured data. Access with $arr['key'] or $arr[$key]. Check key existence with isset() or array_key_exists(). Merge arrays with array_merge().",
-   "<?php\n$user = [\n    'name' => 'Alice',\n    'age' => 30,\n    'email' => 'alice@example.com'\n];\n\necho $user['name'];\n\n// Check key\nif (isset($user['email'])) {\n    echo \"Email exists\";\n}\n\n// Merge\n$defaults = ['role' => 'user', 'active' => true];\n$user = array_merge($defaults, $user);\n\n// Iterate\nforeach ($user as $key => $value) {\n    echo \"$key: $value\\n\";\n}"
-  ],
-  "Multidimensional Arrays": [
-   "Arrays can contain other arrays for nested data structures. Access with multiple indices ($arr[0]['name']). Useful for representing complex data like tables, matrices, or nested records.",
-   "<?php\n$matrix = [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n];\necho $matrix[1][2];  // 6\n\n$users = [\n    ['name' => 'Alice', 'skills' => ['PHP', 'JS']],\n    ['name' => 'Bob', 'skills' => ['Python', 'Go']]\n];\necho $users[0]['skills'][0];  // PHP"
-  ],
-  "Array Functions": [
-   "PHP has a rich set of array functions: array_map (transform), array_filter (filter), array_reduce (aggregate), array_merge (combine), array_diff (difference), array_intersect (common), array_keys (get keys), array_values (get values), sort functions (sort, rsort, asort, ksort, usort).",
-   "<?php\n$numbers = [1, 2, 3, 4, 5];\n\n// Transform\n$squared = array_map(fn($n) => $n * $n, $numbers);\n\n// Filter\n$even = array_filter($numbers, fn($n) => $n % 2 === 0);\n\n// Reduce\n$sum = array_reduce($numbers, fn($carry, $n) => $carry + $n, 0);\n\n// Sort\n$fruits = ['cherry', 'apple', 'banana'];\nsort($fruits);              // ascending\nrsort($fruits);             // descending\nasort($fruits);             // maintain keys\nksort($fruits);             // sort by keys"
-  ],
-  "SPL Data Structures": [
-   "SPL (Standard PHP Library) provides built-in data structures: SplStack, SplQueue, SplHeap, SplPriorityQueue, SplFixedArray, SplObjectStorage. These are more memory-efficient than plain arrays for specific use cases.",
-   "<?php\n// Stack (LIFO)\n$stack = new SplStack();\n$stack->push('first');\n$stack->push('second');\necho $stack->pop();  // second\n\n// Queue (FIFO)\n$queue = new SplQueue();\n$queue->enqueue('first');\n$queue->enqueue('second');\necho $queue->dequeue();  // first\n\n// Fixed array (better memory)\n$fixed = new SplFixedArray(3);\n$fixed[0] = 'a';\n$fixed[1] = 'b';"
-  ]
- },
- "OOP": {
-  "Classes & Objects": [
-   "Classes define blueprints for objects. new creates instances. $this refers to the current instance. Properties and methods can be public, protected, or private. Constructor __construct() initializes properties. Type declarations work on properties (PHP 7.4+) and promoted properties (PHP 8+).",
-   "<?php\nclass User {\n    public function __construct(\n        private string $name,\n        private int $age\n    ) {}\n    \n    public function greet(): string {\n        return \"Hello, I'm {$this->name}\";\n    }\n    \n    public function getName(): string {\n        return $this->name;\n    }\n}\n\n$user = new User('Alice', 30);\necho $user->greet();\necho $user->getName();"
-  ],
-  "Inheritance": [
-   "extends creates a child class that inherits parent methods and properties. Use parent:: to call parent methods. Override methods by redefining them. final keyword prevents overriding. abstract classes define base functionality with abstract methods.",
-   "<?php\nclass Animal {\n    public function __construct(protected string $name) {}\n    \n    public function speak(): string {\n        return \"$this->name makes a sound\";\n    }\n}\n\nclass Dog extends Animal {\n    public function speak(): string {\n        return \"$this->name barks\";\n    }\n}\n\n$dog = new Dog('Buddy');\necho $dog->speak();\n\n// Abstract class\nabstract class Shape {\n    abstract public function area(): float;\n}\n\nclass Circle extends Shape {\n    public function __construct(private float $radius) {}\n    public function area(): float {\n        return pi() * $this->radius ** 2;\n    }\n}"
-  ],
-  "Interfaces & Traits": [
-   "Interfaces define contracts with method signatures. A class can implement multiple interfaces. Traits enable horizontal code reuse — they're like partial classes. Use traits with the use keyword inside a class.",
-   "<?php\ninterface Logger {\n    public function log(string $message): void;\n}\n\ninterface Notifier {\n    public function send(string $to, string $message): void;\n}\n\ntrait Timestampable {\n    public function getTimestamp(): string {\n        return date('Y-m-d H:i:s');\n    }\n}\n\nclass AppLogger implements Logger, Notifier {\n    use Timestampable;\n    \n    public function log(string $message): void {\n        echo \"[{$this->getTimestamp()}] $message\";\n    }\n    \n    public function send(string $to, string $message): void {\n        mail($to, \"Alert\", $message);\n    }\n}"
-  ],
-  "Namespaces": [
-   "Namespaces organize code and prevent naming conflicts. Declare with namespace at file top. Import with use keyword. Aliases with use ... as .... Fully qualified names start with \\ (global namespace). Follow PSR-4 for autoloading.",
-   "<?php\nnamespace App\\Models;\n\nclass User {\n    // ...\n}\n\n// Another file\nnamespace App\\Controllers;\n\nuse App\\Models\\User;\nuse App\\Helpers\\Format as Fmt;\n\n$user = new User();\nFmt::formatText('hello');"
-  ],
-  "Static Methods & Properties": [
-   "Static members belong to the class, not instances. Accessed with :: (Scope Resolution Operator). self:: refers to the current class, static:: refers to the called class (late static binding). parent:: accesses parent class.",
-   "<?php\nclass Database {\n    private static ?Database $instance = null;\n    \n    public static function getInstance(): self {\n        if (self::$instance === null) {\n            self::$instance = new self();\n        }\n        return self::$instance;\n    }\n    \n    private function __construct() {}\n    \n    public static function connect(): string {\n        return \"Connected\";\n    }\n}\n\n$db = Database::getInstance();\necho Database::connect();"
-  ]
- },
- "File Handling": {
-  "Reading Files": [
-   "file_get_contents() reads entire file as string. file() reads into array by lines. fopen() with fread()/fgets() provides streaming access. feof() checks end-of-file. Always close with fclose(). Use file_exists() and is_readable() to check first.",
-   "<?php\n// Simple read\n$content = file_get_contents('file.txt');\n\n// Read into array\n$lines = file('file.txt');\n\n// Streaming read\n$handle = fopen('file.txt', 'r');\nif ($handle) {\n    while (($line = fgets($handle)) !== false) {\n        echo $line;\n    }\n    fclose($handle);\n}\n\n// Check before reading\nif (file_exists('file.txt') && is_readable('file.txt')) {\n    $content = file_get_contents('file.txt');\n}"
-  ],
-  "Writing Files": [
-   "file_put_contents() writes string to file (replaces). Use FILE_APPEND flag to append. fopen() with w (write), a (append), x (create exclusive) modes. flock() for file locking. fwrite() for streaming writes.",
-   "<?php\n// Simple write\nfile_put_contents('file.txt', 'Hello World');\n\n// Append\nfile_put_contents('file.txt', \"\\nNew line\", FILE_APPEND);\n\n// With stream\n$handle = fopen('file.txt', 'w');\nflock($handle, LOCK_EX);\nfwrite($handle, \"Line 1\\n\");\nfwrite($handle, \"Line 2\\n\");\nflock($handle, LOCK_UN);\nfclose($handle);\n\n// Create only if not exists\nfile_put_contents('new.txt', 'content', LOCK_EX);"
-  ],
-  "File Info & Directories": [
-   "File functions: basename(), dirname(), pathinfo(), filesize(), filemtime(), filetype(). Directory functions: mkdir(), rmdir(), scandir(), glob(). Recursive directory iteration with RecursiveDirectoryIterator.",
-   "<?php\n// File info\n$path = '/path/to/file.txt';\necho basename($path);      // file.txt\necho dirname($path);       // /path/to\necho filesize('file.txt');\necho filemtime('file.txt');\n\n// Directory operations\nmkdir('newdir', 0755, true);  // recursive\n$files = scandir('.');\n$txtFiles = glob('*.txt');\n\n// Recursive directory iterator\n$it = new RecursiveIteratorIterator(\n    new RecursiveDirectoryIterator('.')\n);\nforeach ($it as $file) {\n    if ($file->isFile()) {\n        echo $file->getPathname() . \"\\n\";\n    }\n}"
-  ],
-  "File Uploads": [
-   "Files are uploaded via POST forms with enctype=\"multipart/form-data\". Access via $_FILES superglobal. Use move_uploaded_file() to store. Validate file type, size, and errors. Beware of security: validate extensions, limit size, scan for malware.",
-   "<?php\n// HTML form: <form method=\"POST\" enctype=\"multipart/form-data\">\n// <input type=\"file\" name=\"document\">\n\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    $file = $_FILES['document'];\n    \n    if ($file['error'] === UPLOAD_ERR_OK) {\n        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);\n        $allowed = ['pdf', 'doc', 'txt'];\n        \n        if (in_array($ext, $allowed)) {\n            $dest = 'uploads/' . uniqid() . '.' . $ext;\n            move_uploaded_file($file['tmp_name'], $dest);\n            echo \"Uploaded to $dest\";\n        }\n    }\n}"
-  ]
- },
- "Forms & User Input": {
-  "GET & POST": [
-   "$_GET contains URL query parameters. $_POST contains POST body. $_REQUEST combines both (avoid for security). $_SERVER['REQUEST_METHOD'] tells the HTTP method. Use htmlspecialchars() or htmlentities() to prevent XSS when outputting user data.",
-   "<?php\n// URL: /page.php?name=Alice&age=30\n$name = $_GET['name'] ?? 'Guest';\n$age = $_GET['age'] ?? 'unknown';\n\n// POST form handling\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    $email = $_POST['email'] ?? '';\n    // Always escape output!\n    echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8');\n}\n?>\n<form method=\"POST\">\n    <input type=\"email\" name=\"email\">\n    <button type=\"submit\">Submit</button>\n</form>"
-  ],
-  "Input Validation": [
-   "Validate input: filter_var() with FILTER_VALIDATE_EMAIL, FILTER_VALIDATE_URL, etc. Check string length with strlen(), patterns with preg_match(). Use filter_input() to access and filter in one step. Sanitize with FILTER_SANITIZE_*.",
-   "<?php\n$email = $_POST['email'] ?? '';\n\nif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {\n    echo \"Invalid email\";\n}\n\n$url = 'https://example.com';\nif (filter_var($url, FILTER_VALIDATE_URL)) {\n    echo \"Valid URL\";\n}\n\n// Combined access and filter\n$name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);\n\n// Custom validation\nif (preg_match('/^[a-zA-Z ]+$/', $name)) {\n    echo \"Valid name\";\n}"
-  ],
-  "Sessions": [
-   "Sessions store user data across requests. session_start() begins or resumes a session. Store in $_SESSION array. Cookie with session ID is sent to client. Regenerate session ID after login with session_regenerate_id() to prevent fixation.",
-   "<?php\nsession_start();\n\n// Store\n$_SESSION['user_id'] = 42;\n$_SESSION['role'] = 'admin';\n\n// Retrieve\nif (isset($_SESSION['user_id'])) {\n    echo \"User {$_SESSION['user_id']} logged in\";\n}\n\n// Regenerate after login\nsession_regenerate_id(true);\n\n// Destroy on logout\nsession_destroy();"
-  ],
-  "Cookies": [
-   "setcookie() sends a cookie to the browser. $_COOKIE reads incoming cookies. Set path, domain, secure, httponly, and samesite for security. Cookies are stored client-side and sent with every request to the domain.",
-   "<?php\n// Set cookie (expires in 1 hour)\nsetcookie('theme', 'dark', time() + 3600, '/', '', true, true);\n\n// Cookie with SameSite\nsetcookie('prefs', json_encode(['lang' => 'en']), [\n    'expires' => time() + 86400,\n    'path' => '/',\n    'secure' => true,\n    'httponly' => true,\n    'samesite' => 'Lax'\n]);\n\n// Read cookie\n$theme = $_COOKIE['theme'] ?? 'light';"
-  ]
- },
- "Databases": {
-  "PDO Connection": [
-   "PDO (PHP Data Objects) provides a consistent interface for multiple database types. Connect with DSN string. PDO supports prepared statements, transactions, and error handling. Use try/catch for connection errors.",
-   "<?php\n$dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';\n$user = 'root';\n$pass = '';\n\n$options = [\n    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n    PDO::ATTR_EMULATE_PREPARES => false,\n];\n\ntry {\n    $pdo = new PDO($dsn, $user, $pass, $options);\n    echo \"Connected\";\n} catch (PDOException $e) {\n    echo \"Connection failed: \" . $e->getMessage();\n}"
-  ],
-  "Prepared Statements": [
-   "Prepared statements prevent SQL injection by separating SQL from data. Use named (:name) or positional (?) placeholders. prepare() returns a PDOStatement. execute() binds and runs. Fetch results with fetch(), fetchAll(), or fetchColumn().",
-   "<?php\n$pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');\n\n// Named placeholders\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email AND active = :active');\n$stmt->execute(['email' => 'alice@example.com', 'active' => true]);\n$user = $stmt->fetch();\n\n// Positional placeholders\n$stmt = $pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');\n$stmt->execute(['Bob', 'bob@example.com']);\n$id = $pdo->lastInsertId();\n\n// Fetch all\n$stmt = $pdo->prepare('SELECT * FROM users WHERE age > ?');\n$stmt->execute([18]);\n$users = $stmt->fetchAll();"
-  ],
-  "CRUD Operations": [
-   "Create (INSERT), Read (SELECT), Update (UPDATE), Delete (DELETE). Use transactions for multiple related operations. beginTransaction(), commit(), rollback(). Always use prepared statements for any user-influenced data.",
-   "<?php\n$pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');\n\n// Create\n$stmt = $pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');\n$stmt->execute(['Alice', 'alice@example.com']);\n\n// Read\n$stmt = $pdo->query('SELECT * FROM users');\n$users = $stmt->fetchAll();\n\n// Update\n$stmt = $pdo->prepare('UPDATE users SET name = ? WHERE id = ?');\n$stmt->execute(['Alicia', 1]);\n\n// Delete\n$stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');\n$stmt->execute([1]);\n\n// Transaction\ntry {\n    $pdo->beginTransaction();\n    $pdo->exec('UPDATE accounts SET balance = balance - 100 WHERE id = 1');\n    $pdo->exec('UPDATE accounts SET balance = balance + 100 WHERE id = 2');\n    $pdo->commit();\n} catch (Exception $e) {\n    $pdo->rollBack();\n}"
-  ],
-  "MySQLi": [
-   "MySQLi is a MySQL-only alternative to PDO. Supports both procedural and OOP styles. Use prepared statements with $mysqli->prepare(). Procedural functions (mysqli_connect, mysqli_query) are also available.",
-   "<?php\n// OOP style\n$mysqli = new mysqli('localhost', 'root', '', 'test');\n\nif ($mysqli->connect_error) {\n    die(\"Connection failed: \" . $mysqli->connect_error);\n}\n\n$stmt = $mysqli->prepare('SELECT * FROM users WHERE id = ?');\n$stmt->bind_param('i', $id);\n$id = 1;\n$stmt->execute();\n$result = $stmt->get_result();\n$user = $result->fetch_assoc();\n\n// Procedural style\n$conn = mysqli_connect('localhost', 'root', '', 'test');\n$result = mysqli_query($conn, 'SELECT * FROM users');\nwhile ($row = mysqli_fetch_assoc($result)) {\n    print_r($row);\n}"
-  ]
- },
- "Error Handling": {
-  "Exceptions": [
-   "PHP uses try/catch blocks for exception handling. throw new Exception('message') raises an exception. Multiple catch blocks for different exception types. finally block runs regardless of whether an exception occurred (PHP 5.5+).",
-   "<?php\ntry {\n    $file = file_get_contents('nonexistent.txt');\n    if ($file === false) {\n        throw new Exception('File not found');\n    }\n} catch (Exception $e) {\n    echo 'Caught: ' . $e->getMessage();\n    echo 'File: ' . $e->getFile();\n    echo 'Line: ' . $e->getLine();\n} finally {\n    echo \"This always runs\";\n}\n\n// Multiple catch\n// } catch (PDOException $e) {\n//     echo \"Database error\";\n// } catch (Exception $e) {\n//     echo \"General error\";\n// }"
-  ],
-  "Error Reporting": [
-   "error_reporting() sets which errors are reported. Use E_ALL for development. display_errors controls output. log_errors saves to file. set_error_handler() catches non-exception errors. trigger_error() manually triggers errors.",
-   "<?php\n// Development settings\nerror_reporting(E_ALL);\nini_set('display_errors', '1');\nini_set('log_errors', '1');\nini_set('error_log', '/var/log/php_errors.log');\n\n// Custom error handler\nset_error_handler(function($severity, $message, $file, $line) {\n    throw new ErrorException($message, 0, $severity, $file, $line);\n});\n\n// Trigger error\ntrigger_error('Something happened', E_USER_WARNING);\n\n// Restore\nrestore_error_handler();"
-  ],
-  "Custom Exception Classes": [
-   "Create custom exceptions by extending Exception. Use different exception classes for different error types. Catch specific exceptions before general ones. SPL exceptions (InvalidArgumentException, RuntimeException, LogicException) cover common cases.",
-   "<?php\nclass ValidationException extends Exception {}\nclass DatabaseException extends Exception {}\nclass NotFoundException extends Exception {}\n\nfunction validateEmail(string $email): void {\n    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {\n        throw new ValidationException(\"Invalid email: $email\");\n    }\n}\n\ntry {\n    validateEmail('not-an-email');\n} catch (ValidationException $e) {\n    echo \"Validation error: \" . $e->getMessage();\n} catch (Exception $e) {\n    echo \"Other error: \" . $e->getMessage();\n}"
-  ]
- },
- "Modern PHP & Ecosystem": {
-  "Composer & Autoloading": [
-   "Composer is the dependency manager for PHP. composer.json defines dependencies. composer install/downloads packages into vendor/. PSR-4 autoloading maps namespaces to directories. require 'vendor/autoload.php' loads everything.",
-   "{\n    \"name\": \"myapp/project\",\n    \"require\": {\n        \"php\": \">=8.1\",\n        \"monolog/monolog\": \"^3.0\",\n        \"guzzlehttp/guzzle\": \"^7.0\"\n    },\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"src/\"\n        }\n    }\n}\n\n<?php\nrequire 'vendor/autoload.php';\n\nuse Monolog\\Logger;\nuse Monolog\\Handler\\StreamHandler;\n\n$log = new Logger('app');\n$log->pushHandler(new StreamHandler('app.log', Logger::WARNING));\n$log->warning('This is a warning');"
-  ],
-  "PSR Standards": [
-   "PSR (PHP Standards Recommendations) define coding standards: PSR-1 (basic coding), PSR-4 (autoloading), PSR-7 (HTTP messages), PSR-12 (extended coding style). Following PSR standards ensures interoperability between PHP packages.",
-   "<?php\n// PSR-1: <?php tags, side effects separate\n// PSR-4: Namespace matches directory structure\n// PSR-12: Braces on new line for classes/methods\n\ndeclare(strict_types=1);\n\nnamespace App\\Service;\n\nuse Psr\\Http\\Message\\ResponseInterface;\nuse Psr\\Http\\Message\\ServerRequestInterface;\n\nclass UserService\n{\n    public function handle(ServerRequestInterface $request): ResponseInterface\n    {\n        // PSR-7 compatible\n    }\n}"
-  ],
-  "PHP 8 Features": [
-   "PHP 8 introduced: named arguments, attributes (annotations), constructor property promotion, union types, match expression, nullsafe operator (?->), str_contains(), str_starts_with(), str_ends_with(), readonly properties (8.1), enums (8.1), fibers (8.1).",
-   "<?php\n// Named arguments\nfunction createUser(string $name, int $age, string $role = 'user') {}\ncreateUser(age: 30, name: 'Alice');\n\n// Nullsafe operator\n$country = $user?->getAddress()?->getCountry();\n\n// String functions\nstr_contains('hello world', 'world');  // true\nstr_starts_with('hello', 'he');        // true\n\n// Readonly property (PHP 8.1)\nclass User {\n    public function __construct(\n        public readonly string $name,\n        public readonly int $age\n    ) {}\n}\n\n// Enum (PHP 8.1)\nenum Status: string {\n    case Active = 'active';\n    case Inactive = 'inactive';\n}"
-  ]
- }
+  "Getting Started": {
+    "What is PHP": [
+      "PHP (Hypertext Preprocessor) is a widely-used open-source scripting language designed for web development. PHP code is executed on the server, generating HTML that is sent to the client. It can be embedded directly into HTML and works seamlessly with databases.",
+      "<?php\necho \"Hello, PHP!\";\n?>\n\n<!DOCTYPE html>\n<html>\n<body>\n    <h1><?php echo \"Hello from PHP!\"; ?></h1>\n</body>\n</html>"
+    ],
+    "PHP Syntax": [
+      "PHP code is enclosed in <?php ... ?> tags. Statements end with semicolons. PHP can be embedded anywhere in HTML. Variables start with $. Whitespace is ignored. The closing ?> is optional at the end of a file (recommended to omit to prevent accidental output).",
+      "<?php\n// This is a comment\necho \"Hello World\";\n\n$name = \"Alice\";\n$age = 30;\necho \"$name is $age\";\n\n// No closing tag at end of pure PHP files"
+    ],
+    "Variables": [
+      "PHP variables start with $ followed by a letter or underscore. They are dynamically typed and case-sensitive. Variables can be assigned by value or by reference (&). Variable variables ($$var) allow dynamic variable names.",
+      "<?php\n$name = \"Alice\";\n$age = 30;\n$price = 19.99;\n$is_active = true;\n\n// By reference\n$original = 10;\n$ref = &$original;\n$ref = 20;  // changes $original too\n\n// Variable variables\n$varName = \"foo\";\n$$varName = \"bar\";  // $foo = \"bar\"\necho $foo;  // bar"
+    ],
+    "Data Types": [
+      "PHP supports: string, int, float, bool, array, object, null, resource. Use var_dump() to inspect type and value. gettype() returns the type name. Type juggling happens automatically; use strict comparison (===, !==) to avoid surprises.",
+      "<?php\n$s = \"Hello\";          // string\n$i = 42;                // int\n$f = 3.14;              // float\n$b = true;              // bool\n$a = [1, 2, 3];         // array\n$n = null;              // null\n\nvar_dump($s, $i, $f, $b, $a, $n);\n\n// Type juggling\nvar_dump('5' == 5);     // true (loose)\nvar_dump('5' === 5);    // false (strict)"
+    ],
+    "Constants & Magic Constants": [
+      "define() defines runtime constants. const keyword defines compile-time constants (must be in top-level scope). Magic constants like __FILE__, __DIR__, __LINE__, __CLASS__, __METHOD__ change based on where they're used.",
+      "<?php\ndefine('SITE_NAME', 'MyApp');\nconst VERSION = '1.0.0';\n\necho SITE_NAME;\necho VERSION;\n\n// Magic constants\necho __FILE__;     // current file path\necho __DIR__;      // directory of current file\necho __LINE__;     // current line number\necho __CLASS__;    // current class name"
+    ],
+    "PHP Tags & Output": [
+      "Multiple ways to output: echo (language construct), print (returns 1), printf (formatted), var_dump (debug info). Short echo tag <?= is shorthand for <?php echo. Always available in PHP 5.4+.",
+      "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<p><?= \"Hello from short tag\" ?></p>"
+    ]
+  },
+  "Variables & Types": {
+    "Variable Declarations Deep Dive": [
+      "PHP variables start with $. They are dynamically typed. Variable names are case-sensitive. Variable variables ($$var) enable dynamic variable names. References (&) create aliases — modifying one affects the other. isset() checks if a variable exists and is not null. empty() checks if a variable is falsy. unset() destroys a variable.",
+      "<?php\n$name = \"Alice\";\n$Name = \"Bob\";  // different variable (case-sensitive)\n\n// Variable variables\n$varName = \"color\";\n$$varName = \"red\";  // $color = \"red\"\necho $color;  // red\n\n// References\n$a = 10;\n$b = &$a;\n$b = 20;\necho $a;  // 20\n\n// isset/empty/unset\n$val = 0;\nvar_dump(isset($val));   // true\nvar_dump(empty($val));   // true (0 is empty)\nunset($val);\nvar_dump(isset($val));   // false"
+    ],
+    "Type Juggling & Coercion": [
+      "PHP automatically converts types based on context (type juggling). String \"5\" + 3 = 8. Loose comparison (==) converts types; strict comparison (===) does not. This can lead to surprising results: \"0\" == false is true, \"0\" === false is false. Use strict comparison to avoid bugs. Casting: (int), (float), (string), (bool), (array).",
+      "<?php\n// Type juggling\necho \"5\" + 3;         // 8 (string to int)\necho \"5\" . 3;         // \"53\" (int to string)\necho 5 + \"3 apples\";  // 8 (PHP 8+, warning in 8.0)\necho 5 + \"apples 3\";  // 5 (no numeric prefix)\n\n// Loose vs strict\nvar_dump(\"0\" == false);   // true (loose)\nvar_dump(\"0\" === false);  // false (strict)\nvar_dump(null == \"\");     // true\nvar_dump(null === \"\");    // false\n\n// Explicit casting\n$int = (int) \"42.5\";     // 42\n$float = (float) \"3.14\";  // 3.14\n$str = (string) 100;      // \"100\"\n$bool = (bool) 1;         // true\n$array = (array) \"hello\"; // [\"hello\"]"
+    ],
+    "Constants: define vs const": [
+      "Constants are defined with define() (runtime, can be used anywhere) or const (compile-time, must be at top level). define() supports case-insensitive constants (third param). Class constants are always const. Magic constants (__FILE__, __DIR__, __LINE__, __CLASS__, __METHOD__, __NAMESPACE__) change based on usage. Constants are automatically global.",
+      "<?php\n// Runtime constant\ndefine(\"SITE_NAME\", \"MyApp\");\ndefine(\"MAX_ITEMS\", 100, true);  // case-insensitive (PHP 7.x)\necho SITE_NAME;  // MyApp\necho max_items;  // 100 (case-insensitive)\n\n// Compile-time constant (top level only)\nconst VERSION = \"1.0.0\";\n\n// Class constant\nclass Config {\n    const DEFAULT_LANG = \"en\";\n}\n\necho Config::DEFAULT_LANG;  // en\n\n// Magic constants\necho __FILE__;     // /path/to/file.php\necho __DIR__;      // /path/to\necho __LINE__;     // current line number\necho __CLASS__;    // class name (inside a class)"
+    ],
+    "null & isset": [
+      "null represents the absence of a value. A variable is null if unset, assigned null, or unset(). isset() returns false if variable is null or unset. is_null() checks if a variable is null. The null coalescing operator (??) returns the left side if not null, else the right side. The nullsafe operator (?->, PHP 8+) safely accesses properties/methods on null.",
+      "<?php\n// null\n$val = null;\nvar_dump($val);  // NULL\nvar_dump(is_null($val));  // true\n\n// isset vs is_null\n$var = null;\nvar_dump(isset($var));   // false\nvar_dump(is_null($var)); // true\n\n$undeclared;\nvar_dump(isset($undeclared));  // false (no warning)\nvar_dump(is_null($undeclared)); // true (with warning)\n\n// Null coalescing (PHP 7+)\n$name = $_GET['name'] ?? 'Guest';\n$nested = $a ?? $b ?? $c ?? 'default';\n\n// Nullsafe operator (PHP 8+)\n$country = $user?->getAddress()?->getCountry();\n// Equivalent to:\n// $country = $user !== null \n//     ? $user->getAddress()?->getCountry() \n//     : null;"
+    ]
+  },
+  "Operators": {
+    "Spaceship Operator (<=>)": [
+      "The spaceship operator (<=>) compares two expressions and returns -1, 0, or 1 when the left is less than, equal to, or greater than the right. Works with strings, numbers, arrays, and objects. Commonly used with usort() for custom sorting. Essential for PHP 7+ comparison logic.",
+      "<?php\necho 1 <=> 2;    // -1 (less)\necho 2 <=> 2;    // 0 (equal)  \necho 3 <=> 2;    // 1 (greater)\n\n// String comparison\necho \"a\" <=> \"b\";  // -1\necho \"b\" <=> \"a\";  // 1\n\n// Array comparison (compares by value, then key)\necho [1, 2] <=> [1, 3];  // -1\necho [1, 2] <=> [1, 2];  // 0\n\n// Sorting with spaceship\n$items = ['cherry', 'apple', 'banana'];\nusort($items, fn($a, $b) => $a <=> $b);\nprint_r($items);  // ['apple', 'banana', 'cherry']"
+    ],
+    "Null Coalescing & Nullsafe (??, ??=, ?->)": [
+      "?? returns the left operand if it exists and is not null, otherwise the right operand. ??= is the null coalescing assignment operator (PHP 7.4). ?-> (nullsafe, PHP 8.0) short-circuits on null. ?? chains for fallback patterns. These operators reduce boilerplate null checking.",
+      "<?php\n// Null coalescing\n$username = $_GET['user'] ?? 'guest';\n$config = $settings['theme'] ?? $defaults['theme'] ?? 'light';\n\n// Null coalescing assignment (PHP 7.4+)\n$data['key'] ??= 'default';\n// Same as: $data['key'] = $data['key'] ?? 'default';\n\n// Nullsafe operator (PHP 8+)\n// Without nullsafe:\n$country = null;\nif ($user !== null) {\n    $address = $user->getAddress();\n    if ($address !== null) {\n        $country = $address->getCountry();\n    }\n}\n\n// With nullsafe:\n$country = $user?->getAddress()?->getCountry();\n\n// Chaining\n$price = $order?->getProduct()?->getPrice() ?? 0;"
+    ]
+  },
+  "Control Flow": {
+    "if/else/elseif": [
+      "Standard conditional execution. elseif (one word) is the recommended form over else if (two words, requires braces). Use switch for many conditions on the same variable. Match (PHP 8+) is a stricter switch without loose comparison.",
+      "<?php\n$score = 85;\n\nif ($score >= 90) {\n    echo 'A';\n} elseif ($score >= 80) {\n    echo 'B';\n} else {\n    echo 'C';\n}\n\n// Alternative syntax with :\nif ($score >= 80):\n    echo \"Pass\";\nendif;"
+    ],
+    "switch & match": [
+      "switch compares loosely (==). Use break to prevent fall-through; default for no match. match (PHP 8+) compares strictly (===), returns a value, and doesn't require break. match throws UnhandledMatchError on no match.",
+      "<?php\n$status = 404;\n\nswitch ($status) {\n    case 200:\n        echo 'OK';\n        break;\n    case 404:\n        echo 'Not Found';\n        break;\n    default:\n        echo 'Unknown';\n}\n\n// match (PHP 8+)\n$result = match ($status) {\n    200 => 'OK',\n    404 => 'Not Found',\n    500 => 'Server Error',\n    default => 'Unknown',\n};\necho $result;"
+    ],
+    "for & foreach": [
+      "for loops use counter (init; condition; increment). foreach is the preferred way to iterate arrays: foreach($arr as $value) or foreach($arr as $key => $value). Use break to exit, continue to skip iteration.",
+      "<?php\n// for loop\nfor ($i = 0; $i < 5; $i++) {\n    echo \"Count: $i\\n\";\n}\n\n// foreach with array\n$fruits = ['apple', 'banana', 'cherry'];\nforeach ($fruits as $fruit) {\n    echo $fruit;\n}\n\n// foreach with key => value\n$ages = ['Alice' => 30, 'Bob' => 25];\nforeach ($ages as $name => $age) {\n    echo \"$name is $age\";\n}"
+    ],
+    "while & do-while": [
+      "while runs before checking condition (may run 0 times). do-while runs at least once. Use with caution to avoid infinite loops. Common for reading data until exhausted.",
+      "<?php\n$i = 0;\nwhile ($i < 3) {\n    echo \"While: $i\\n\";\n    $i++;\n}\n\n// do-while runs at least once\n$j = 0;\ndo {\n    echo \"Do: $j\\n\";\n    $j++;\n} while ($j < 3);\n\n// Reading file line by line\n$handle = fopen(\"file.txt\", \"r\");\nwhile (($line = fgets($handle)) !== false) {\n    echo $line;\n}\nfclose($handle);"
+    ],
+    "Alternative Syntax": [
+      "PHP provides alternative syntax for control structures using colons and endif/endwhile/endfor/endforeach/endswitch. This is commonly used in templates to mix PHP with HTML cleanly.",
+      "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    <p>Welcome back!</p>\n<?php else: ?>\n    <p>Please log in</p>\n<?php endif; ?>"
+    ]
+  },
+  "Functions": {
+    "Defining Functions": [
+      "Functions are defined with the function keyword. They can have typed parameters and return types (PHP 7+). Default parameter values are supported. Use return to return a value; functions without return return null.",
+      "<?php\nfunction greet(string $name): string {\n    return \"Hello, $name!\";\n}\n\necho greet('Alice');\n\n// Default parameters\nfunction multiply(int $a, int $b = 2): int {\n    return $a * $b;\n}\n\necho multiply(5);     // 10\necho multiply(5, 3);  // 15"
+    ],
+    "Variable Scope": [
+      "Variables defined outside functions are global — use global keyword to access them inside functions. Static variables persist between calls. Function parameters are local. The $GLOBALS superglobal provides access to all global variables.",
+      "<?php\n$globalVar = 'outside';\n\nfunction test() {\n    global $globalVar;\n    echo $globalVar;\n    \n    static $count = 0;\n    $count++;\n    echo $count;\n}\n\ntest();  // outside, 1\ntest();  // outside, 2\n\n// Via $GLOBALS\nfunction test2() {\n    echo $GLOBALS['globalVar'];\n}"
+    ],
+    "Type Declarations": [
+      "PHP 7+ supports scalar type declarations: int, float, string, bool, void, iterable, mixed (PHP 8+), never (PHP 8.1+). Nullable types use ? prefix (e.g., ?string). Union types (PHP 8+) use | (e.g., int|string). Strict mode enabled with declare(strict_types=1).",
+      "<?php\ndeclare(strict_types=1);\n\nfunction add(int $a, int $b): int {\n    return $a + $b;\n}\n\n// Nullable type\nfunction find(?string $id): ?array {\n    if ($id === null) return null;\n    return ['id' => $id];\n}\n\n// Union type (PHP 8+)\nfunction format(int|string $value): string {\n    return (string) $value;\n}"
+    ],
+    "Anonymous Functions & Closures": [
+      "Anonymous functions (closures) can be assigned to variables or passed as arguments. Use function ($arg) use ($var) { ... } to import variables from the outer scope. Arrow functions (PHP 7.4+) provide shorter syntax with fn($arg) => expr.",
+      "<?php\n// Anonymous function\n$greet = function(string $name): string {\n    return \"Hello, $name!\";\n};\necho $greet('Alice');\n\n// Closure with use\n$prefix = \"User: \";\n$formatName = function(string $name) use ($prefix): string {\n    return $prefix . $name;\n};\n\n// Arrow function (PHP 7.4+)\n$multiply = fn($a, $b) => $a * $b;\necho $multiply(3, 4);  // 12\n\n// As callback\n$numbers = [1, 2, 3, 4];\n$squared = array_map(fn($n) => $n * $n, $numbers);"
+    ],
+    "Variable Functions & Callbacks": [
+      "If a variable name has parentheses appended, PHP looks for a function with that name. call_user_func() and call_user_func_array() call callbacks. Useful for dynamic dispatch and event handling.",
+      "<?php\nfunction hello() { echo \"Hello!\"; }\nfunction bye() { echo \"Bye!\"; }\n\n$func = 'hello';\n$func();  // calls hello()\n\n$func = 'bye';\n$func();  // calls bye()\n\n// With parameters\nfunction add(int $a, int $b): int { return $a + $b; }\ncall_user_func('add', 3, 4);\ncall_user_func_array('add', [3, 4]);"
+    ],
+    "Arrow Functions (fn)": [
+      "Arrow functions (PHP 7.4+) provide a shorter syntax for anonymous functions with fn($arg) => expr. They automatically capture variables from the parent scope by value (no need for \"use\"). They can only contain a single expression (the return value). Useful for short callbacks in array functions.",
+      "<?php\n// Arrow function syntax\n$multiply = fn($a, $b) => $a * $b;\necho $multiply(3, 4);  // 12\n\n// Auto-capture (no \"use\" needed)\n$factor = 10;\n$multiplyBy = fn($n) => $n * $factor;\necho $multiplyBy(5);  // 50\n\n// With array functions\n$numbers = [1, 2, 3, 4, 5];\n$squared = array_map(fn($n) => $n * $n, $numbers);\n$even = array_filter($numbers, fn($n) => $n % 2 === 0);\n\n// Arrow functions can't have multiple statements\n// fn($x) => { $y = $x * 2; return $y; }  // Syntax error"
+    ],
+    "Variadic Parameters & Spread": [
+      "Variadic functions accept a variable number of arguments using ...$args (splat operator). The spread operator also unpacks arrays into function arguments. Type hints work with variadics: `function sum(int ...$nums)`. The ... operator also works for array unpacking (PHP 7.4+).",
+      "<?php\n// Variadic parameter\nfunction sum(int ...$numbers): int {\n    return array_sum($numbers);\n}\necho sum(1, 2, 3, 4, 5);  // 15\n\n// Mixed fixed and variadic\nfunction greet(string $greeting, string ...$names): void {\n    foreach ($names as $name) {\n        echo \"$greeting, $name!\\n\";\n    }\n}\ngreet(\"Hello\", \"Alice\", \"Bob\", \"Charlie\");\n\n// Spread operator — unpack array into arguments\n$args = [1, 2, 3, 4, 5];\necho sum(...$args);  // 15\n\n// Array unpacking (PHP 7.4+)\n$arr1 = [1, 2, 3];\n$arr2 = [0, ...$arr1, 4, 5];\nprint_r($arr2);  // [0, 1, 2, 3, 4, 5]"
+    ],
+    "Named Arguments (PHP 8+)": [
+      "Named arguments (PHP 8.0+) allow passing arguments by parameter name instead of position. This makes code self-documenting and allows skipping default parameters. Order doesn't matter for named args. Can mix positional and named (positional must come first). Named args work with built-in functions too.",
+      "<?php\n// Named arguments\nfunction createUser(string $name, int $age, string $role = 'user', bool $active = true): array {\n    return compact('name', 'age', 'role', 'active');\n}\n\n// Skip defaults with named args\n$user = createUser(\n    name: 'Alice',\n    age: 30,\n    active: false\n);\n// role defaults to 'user'\n\n// With built-in functions\n$html = htmlspecialchars(\n    string: '<script>alert(\"xss\")</script>',\n    double_encode: false,\n    encoding: 'UTF-8'\n);\n\n// Mix positional and named (positional first)\n$user2 = createUser('Bob', age: 25, role: 'admin');"
+    ]
+  },
+  "Arrays & Data Structures": {
+    "Indexed Arrays": [
+      "PHP arrays are ordered maps. Indexed arrays use numeric keys starting from 0. Create with array() or short syntax []. Access with $arr[index]. Count elements with count(). Manipulate with array_push, array_pop, array_shift, array_unshift.",
+      "<?php\n$fruits = ['apple', 'banana', 'cherry'];\necho $fruits[0];  // apple\n\n$fruits[] = 'date';           // append\narray_push($fruits, 'elderberry');\n$last = array_pop($fruits);\n$first = array_shift($fruits);\narray_unshift($fruits, 'apricot');\n\necho count($fruits);\nprint_r($fruits);"
+    ],
+    "Associative Arrays": [
+      "Associative arrays use string keys. Useful for key-value mappings and structured data. Access with $arr['key'] or $arr[$key]. Check key existence with isset() or array_key_exists(). Merge arrays with array_merge().",
+      "<?php\n$user = [\n    'name' => 'Alice',\n    'age' => 30,\n    'email' => 'alice@example.com'\n];\n\necho $user['name'];\n\n// Check key\nif (isset($user['email'])) {\n    echo \"Email exists\";\n}\n\n// Merge\n$defaults = ['role' => 'user', 'active' => true];\n$user = array_merge($defaults, $user);\n\n// Iterate\nforeach ($user as $key => $value) {\n    echo \"$key: $value\\n\";\n}"
+    ],
+    "Multidimensional Arrays": [
+      "Arrays can contain other arrays for nested data structures. Access with multiple indices ($arr[0]['name']). Useful for representing complex data like tables, matrices, or nested records.",
+      "<?php\n$matrix = [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n];\necho $matrix[1][2];  // 6\n\n$users = [\n    ['name' => 'Alice', 'skills' => ['PHP', 'JS']],\n    ['name' => 'Bob', 'skills' => ['Python', 'Go']]\n];\necho $users[0]['skills'][0];  // PHP"
+    ],
+    "Array Functions": [
+      "PHP has a rich set of array functions: array_map (transform), array_filter (filter), array_reduce (aggregate), array_merge (combine), array_diff (difference), array_intersect (common), array_keys (get keys), array_values (get values), sort functions (sort, rsort, asort, ksort, usort).",
+      "<?php\n$numbers = [1, 2, 3, 4, 5];\n\n// Transform\n$squared = array_map(fn($n) => $n * $n, $numbers);\n\n// Filter\n$even = array_filter($numbers, fn($n) => $n % 2 === 0);\n\n// Reduce\n$sum = array_reduce($numbers, fn($carry, $n) => $carry + $n, 0);\n\n// Sort\n$fruits = ['cherry', 'apple', 'banana'];\nsort($fruits);              // ascending\nrsort($fruits);             // descending\nasort($fruits);             // maintain keys\nksort($fruits);             // sort by keys"
+    ],
+    "SPL Data Structures": [
+      "SPL (Standard PHP Library) provides built-in data structures: SplStack, SplQueue, SplHeap, SplPriorityQueue, SplFixedArray, SplObjectStorage. These are more memory-efficient than plain arrays for specific use cases.",
+      "<?php\n// Stack (LIFO)\n$stack = new SplStack();\n$stack->push('first');\n$stack->push('second');\necho $stack->pop();  // second\n\n// Queue (FIFO)\n$queue = new SplQueue();\n$queue->enqueue('first');\n$queue->enqueue('second');\necho $queue->dequeue();  // first\n\n// Fixed array (better memory)\n$fixed = new SplFixedArray(3);\n$fixed[0] = 'a';\n$fixed[1] = 'b';"
+    ],
+    "Array Functions Deep Dive": [
+      "Beyond basic array functions, PHP offers array_column (extract column from nested arrays), array_chunk (split into groups), array_flip (swap keys/values), array_change_key_case, array_count_values, array_unique, array_reverse, array_slice, array_splice, array_rand, array_fill, array_pad. These handle common data transformation needs without loops.",
+      "<?php\n$users = [\n    ['id' => 1, 'name' => 'Alice', 'email' => 'alice@example.com'],\n    ['id' => 2, 'name' => 'Bob', 'email' => 'bob@example.com'],\n];\n\n// Extract column\n$names = array_column($users, 'name');  // ['Alice', 'Bob']\n$emails = array_column($users, 'email', 'id');  // [1 => 'alice@...', 2 => 'bob@...']\n\n// Chunk\n$items = range(1, 10);\n$groups = array_chunk($items, 3);  // [[1,2,3], [4,5,6], [7,8,9], [10]]\n\n// Flip & count\n$fruits = ['apple', 'banana', 'apple', 'cherry', 'banana', 'apple'];\n$counts = array_count_values($fruits);  // ['apple'=>3, 'banana'=>2, 'cherry'=>1]\n$flipped = array_flip($counts);  // [3=>'apple', 2=>'banana', 1=>'cherry']\n\n// Slice & splice\n$nums = [1, 2, 3, 4, 5];\n$slice = array_slice($nums, 1, 3);    // [2, 3, 4] (no modify)\narray_splice($nums, 2, 2, ['a', 'b']);  // modifies: [1, 2, 'a', 'b', 5]"
+    ],
+    "Array Destructuring": [
+      "PHP supports array destructuring with [] or list() syntax (PHP 7.1+). Extract array elements into variables. Works with both indexed and associative arrays. Can swap variables. Nested destructuring for nested arrays. Useful for returning multiple values from functions.",
+      "<?php\n// Indexed array destructuring\n$arr = [1, 2, 3];\n[$a, $b, $c] = $arr;\necho \"$a, $b, $c\";  // 1, 2, 3\n\n// Skip elements\n[$first, , $third] = $arr;\necho \"$first, $third\";  // 1, 3\n\n// Associative destructuring\n$user = ['name' => 'Alice', 'age' => 30];\n['name' => $name, 'age' => $age] = $user;\necho \"$name is $age\";  // Alice is 30\n\n// Variable swapping\n[$x, $y] = [$y, $x];  // swaps x and y\n\n// Nested destructuring\n$data = [1, [2, 3]];\n[$a, [$b, $c]] = $data;\necho \"$a, $b, $c\";  // 1, 2, 3\n\n// In foreach\n$pairs = [[1, 'one'], [2, 'two']];\nforeach ($pairs as [$num, $word]) {\n    echo \"$num = $word\\n\";\n}"
+    ],
+    "Array Comparison & Sorting": [
+      "PHP provides sorting functions: sort (value ascending), rsort (descending), asort (maintain key associations), ksort (by key), usort (custom comparator). Array comparison with == (same key/value pairs) and === (same order/types). array_diff and array_intersect for set operations.",
+      "<?php\n// Sorting\n$fruits = ['cherry', 'apple', 'banana'];\nsort($fruits);            // ['apple', 'banana', 'cherry']\n\n$ages = ['Alice' => 30, 'Bob' => 25, 'Charlie' => 35];\nasort($ages);             // maintains keys: ['Bob'=>25, 'Alice'=>30, 'Charlie'=>35]\nksort($ages);             // sort by key: ['Alice'=>30, 'Bob'=>25, 'Charlie'=>35]\n\n// Custom sort\n$items = ['img2.jpg', 'img10.jpg', 'img1.jpg'];\nusort($items, fn($a, $b) => strnatcmp($a, $b));  // natural order\n\n// Comparison\n$a = ['a' => 1, 'b' => 2];\n$b = ['b' => 2, 'a' => 1];\nvar_dump($a == $b);   // true (same pairs)\nvar_dump($a === $b);  // false (different order)\n\n// Set operations\n$a = [1, 2, 3, 4];\n$b = [3, 4, 5, 6];\nprint_r(array_diff($a, $b));       // [1, 2] (in a but not b)\nprint_r(array_intersect($a, $b));   // [3, 4] (in both)"
+    ]
+  },
+  "OOP": {
+    "Classes & Objects": [
+      "Classes define blueprints for objects. new creates instances. $this refers to the current instance. Properties and methods can be public, protected, or private. Constructor __construct() initializes properties. Type declarations work on properties (PHP 7.4+) and promoted properties (PHP 8+).",
+      "<?php\nclass User {\n    public function __construct(\n        private string $name,\n        private int $age\n    ) {}\n    \n    public function greet(): string {\n        return \"Hello, I'm {$this->name}\";\n    }\n    \n    public function getName(): string {\n        return $this->name;\n    }\n}\n\n$user = new User('Alice', 30);\necho $user->greet();\necho $user->getName();"
+    ],
+    "Inheritance": [
+      "extends creates a child class that inherits parent methods and properties. Use parent:: to call parent methods. Override methods by redefining them. final keyword prevents overriding. abstract classes define base functionality with abstract methods.",
+      "<?php\nclass Animal {\n    public function __construct(protected string $name) {}\n    \n    public function speak(): string {\n        return \"$this->name makes a sound\";\n    }\n}\n\nclass Dog extends Animal {\n    public function speak(): string {\n        return \"$this->name barks\";\n    }\n}\n\n$dog = new Dog('Buddy');\necho $dog->speak();\n\n// Abstract class\nabstract class Shape {\n    abstract public function area(): float;\n}\n\nclass Circle extends Shape {\n    public function __construct(private float $radius) {}\n    public function area(): float {\n        return pi() * $this->radius ** 2;\n    }\n}"
+    ],
+    "Interfaces & Traits": [
+      "Interfaces define contracts with method signatures. A class can implement multiple interfaces. Traits enable horizontal code reuse — they're like partial classes. Use traits with the use keyword inside a class.",
+      "<?php\ninterface Logger {\n    public function log(string $message): void;\n}\n\ninterface Notifier {\n    public function send(string $to, string $message): void;\n}\n\ntrait Timestampable {\n    public function getTimestamp(): string {\n        return date('Y-m-d H:i:s');\n    }\n}\n\nclass AppLogger implements Logger, Notifier {\n    use Timestampable;\n    \n    public function log(string $message): void {\n        echo \"[{$this->getTimestamp()}] $message\";\n    }\n    \n    public function send(string $to, string $message): void {\n        mail($to, \"Alert\", $message);\n    }\n}"
+    ],
+    "Namespaces": [
+      "Namespaces organize code and prevent naming conflicts. Declare with namespace at file top. Import with use keyword. Aliases with use ... as .... Fully qualified names start with \\ (global namespace). Follow PSR-4 for autoloading.",
+      "<?php\nnamespace App\\Models;\n\nclass User {\n    // ...\n}\n\n// Another file\nnamespace App\\Controllers;\n\nuse App\\Models\\User;\nuse App\\Helpers\\Format as Fmt;\n\n$user = new User();\nFmt::formatText('hello');"
+    ],
+    "Static Methods & Properties": [
+      "Static members belong to the class, not instances. Accessed with :: (Scope Resolution Operator). self:: refers to the current class, static:: refers to the called class (late static binding). parent:: accesses parent class.",
+      "<?php\nclass Database {\n    private static ?Database $instance = null;\n    \n    public static function getInstance(): self {\n        if (self::$instance === null) {\n            self::$instance = new self();\n        }\n        return self::$instance;\n    }\n    \n    private function __construct() {}\n    \n    public static function connect(): string {\n        return \"Connected\";\n    }\n}\n\n$db = Database::getInstance();\necho Database::connect();"
+    ],
+    "Magic Methods (__get/__set/__call)": [
+      "PHP magic methods (starting with __) provide hooks into object behavior. __get/__set intercept property access. __call intercepts method calls. __toString controls string conversion. __invoke makes objects callable. __sleep/__wakeup for serialization. These enable elegant patterns like lazy loading and proxies.",
+      "<?php\nclass DynamicProps {\n    private array $data = [];\n\n    // Intercept property get\n    public function __get(string $name): mixed {\n        return $this->data[$name] ?? null;\n    }\n\n    // Intercept property set\n    public function __set(string $name, mixed $value): void {\n        $this->data[$name] = $value;\n    }\n\n    // Intercept method calls\n    public function __call(string $name, array $arguments): mixed {\n        if ($name === 'greet') {\n            return \"Hello, \" . ($arguments[0] ?? 'World') . \"!\";\n        }\n        throw new \\BadMethodCallException(\"Method $name not found\");\n    }\n\n    // Object as string\n    public function __toString(): string {\n        return json_encode($this->data);\n    }\n\n    // Object as function\n    public function __invoke(...$args): string {\n        return \"Called with: \" . implode(', ', $args);\n    }\n}\n\n$obj = new DynamicProps();\n$obj->name = 'Alice';\necho $obj->name;    // Alice (via __get)\necho $obj->greet('Bob');  // Hello, Bob! (via __call)\necho $obj;           // {\"name\":\"Alice\"} (via __toString)\necho $obj('x', 'y'); // Called with: x, y (via __invoke)"
+    ],
+    "Abstract Classes & Interfaces": [
+      "Abstract classes define partial implementations with abstract methods that subclasses must implement. Interfaces define pure contracts. A class can extend one abstract class but implement multiple interfaces. Interfaces can extend other interfaces. PHP 8+ adds named arguments and constructor property promotion support. Use abstract for \"is-a\" with shared state, interfaces for \"can-do\" capabilities.",
+      "<?php\n// Abstract class — shared state + partial implementation\nabstract class Database {\n    protected \\PDO $pdo;\n\n    public function __construct(string $dsn, string $user, string $pass) {\n        $this->pdo = new \\PDO($dsn, $user, $pass);\n    }\n\n    abstract public function find(int $id): ?array;\n    \n    public function findAll(): array {\n        return $this->pdo->query('SELECT * FROM ' . $this->getTable())->fetchAll();\n    }\n\n    abstract protected function getTable(): string;\n}\n\n// Interface — pure contract\ninterface Cacheable {\n    public function getCacheKey(): string;\n    public function getCacheTtl(): int;\n}\n\ninterface Serializable {\n    public function toArray(): array;\n    public static function fromArray(array $data): self;\n}\n\n// Class implementing both\nclass User extends Database implements Cacheable, Serializable {\n    protected function getTable(): string { return 'users'; }\n    \n    public function find(int $id): ?array {\n        $stmt = $this->pdo->prepare(\"SELECT * FROM users WHERE id = ?\");\n        $stmt->execute([$id]);\n        return $stmt->fetch() ?: null;\n    }\n\n    public function getCacheKey(): string { return \"user_{$this->id}\"; }\n    public function getCacheTtl(): int { return 3600; }\n    public function toArray(): array { return get_object_vars($this); }\n    public static function fromArray(array $data): self { /* ... */ }\n}"
+    ],
+    "Anonymous Classes": [
+      "PHP supports anonymous classes (PHP 7+) for one-off objects. They can extend classes, implement interfaces, and use traits. Useful for testing (mocks), simple implementations, and avoiding unnecessary named class files. Anonymous classes can be passed arguments through their constructor.",
+      "<?php\ninterface Logger {\n    public function log(string $msg): void;\n}\n\n// Anonymous class implementing interface\n$logger = new class implements Logger {\n    public function log(string $msg): void {\n        echo date('[Y-m-d H:i:s] ') . $msg . \"\\n\";\n    }\n};\n\n$logger->log('Application started');\n\n// With constructor arguments\n$handler = new class('debug') {\n    private string $level;\n    \n    public function __construct(string $level) {\n        $this->level = $level;\n    }\n\n    public function handle(string $msg): string {\n        return \"[{$this->level}] $msg\";\n    }\n};\n\necho $handler->handle('test');  // [debug] test\n\n// Extending a class\n$special = new class extends \\Exception {\n    public function getCustomMessage(): string {\n        return \"Custom: \" . $this->getMessage();\n    }\n};\n\nthrow $special;"
+    ]
+  },
+  "File Handling": {
+    "Reading Files": [
+      "file_get_contents() reads entire file as string. file() reads into array by lines. fopen() with fread()/fgets() provides streaming access. feof() checks end-of-file. Always close with fclose(). Use file_exists() and is_readable() to check first.",
+      "<?php\n// Simple read\n$content = file_get_contents('file.txt');\n\n// Read into array\n$lines = file('file.txt');\n\n// Streaming read\n$handle = fopen('file.txt', 'r');\nif ($handle) {\n    while (($line = fgets($handle)) !== false) {\n        echo $line;\n    }\n    fclose($handle);\n}\n\n// Check before reading\nif (file_exists('file.txt') && is_readable('file.txt')) {\n    $content = file_get_contents('file.txt');\n}"
+    ],
+    "Writing Files": [
+      "file_put_contents() writes string to file (replaces). Use FILE_APPEND flag to append. fopen() with w (write), a (append), x (create exclusive) modes. flock() for file locking. fwrite() for streaming writes.",
+      "<?php\n// Simple write\nfile_put_contents('file.txt', 'Hello World');\n\n// Append\nfile_put_contents('file.txt', \"\\nNew line\", FILE_APPEND);\n\n// With stream\n$handle = fopen('file.txt', 'w');\nflock($handle, LOCK_EX);\nfwrite($handle, \"Line 1\\n\");\nfwrite($handle, \"Line 2\\n\");\nflock($handle, LOCK_UN);\nfclose($handle);\n\n// Create only if not exists\nfile_put_contents('new.txt', 'content', LOCK_EX);"
+    ],
+    "File Info & Directories": [
+      "File functions: basename(), dirname(), pathinfo(), filesize(), filemtime(), filetype(). Directory functions: mkdir(), rmdir(), scandir(), glob(). Recursive directory iteration with RecursiveDirectoryIterator.",
+      "<?php\n// File info\n$path = '/path/to/file.txt';\necho basename($path);      // file.txt\necho dirname($path);       // /path/to\necho filesize('file.txt');\necho filemtime('file.txt');\n\n// Directory operations\nmkdir('newdir', 0755, true);  // recursive\n$files = scandir('.');\n$txtFiles = glob('*.txt');\n\n// Recursive directory iterator\n$it = new RecursiveIteratorIterator(\n    new RecursiveDirectoryIterator('.')\n);\nforeach ($it as $file) {\n    if ($file->isFile()) {\n        echo $file->getPathname() . \"\\n\";\n    }\n}"
+    ],
+    "File Uploads": [
+      "Files are uploaded via POST forms with enctype=\"multipart/form-data\". Access via $_FILES superglobal. Use move_uploaded_file() to store. Validate file type, size, and errors. Beware of security: validate extensions, limit size, scan for malware.",
+      "<?php\n// HTML form: <form method=\"POST\" enctype=\"multipart/form-data\">\n// <input type=\"file\" name=\"document\">\n\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    $file = $_FILES['document'];\n    \n    if ($file['error'] === UPLOAD_ERR_OK) {\n        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);\n        $allowed = ['pdf', 'doc', 'txt'];\n        \n        if (in_array($ext, $allowed)) {\n            $dest = 'uploads/' . uniqid() . '.' . $ext;\n            move_uploaded_file($file['tmp_name'], $dest);\n            echo \"Uploaded to $dest\";\n        }\n    }\n}"
+    ],
+    "JSON Encoding & Decoding": [
+      "json_encode converts PHP values to JSON. json_decode parses JSON (true flag for associative arrays). JSON_THROW_ON_ERROR (PHP 7.3+) throws JsonException. Flags: JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE.",
+      "<?php\n$data = ['name' => 'Alice', 'age' => 30, 'skills' => ['PHP', 'JS']];\n$json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);\nfile_put_contents('user.json', $json);\n$decoded = json_decode(file_get_contents('user.json'), true, 512, JSON_THROW_ON_ERROR);\necho $decoded['name'];"
+    ],
+    "Stream Context & HTTP": [
+      "Stream context with stream_context_create for HTTP. file_get_contents with context sends HTTP requests. Supports method, headers, timeout, proxy.",
+      "<?php\n$context = stream_context_create(['http' => [\n    'method' => 'GET',\n    'header' => \"User-Agent: PHP\\r\\n\",\n    'timeout' => 5\n]]);\n$response = file_get_contents('https://api.github.com/users/octocat', false, $context);\n$data = json_decode($response, true);"
+    ]
+  },
+  "Strings & Text": {
+    "String Functions": [
+      "PHP 8+ adds str_contains, str_starts_with, str_ends_with. Also: strlen, strpos, substr, str_replace, str_repeat, str_pad, trim, strtolower, strtoupper, ucfirst, ucwords, number_format.",
+      "<?php\n$text = \"Hello, World!\";\nvar_dump(str_contains($text, 'World'));   // true\necho strpos($text, 'o');        // 4\necho substr($text, 7, 5);       // World\necho str_replace('World', 'PHP', $text);  // Hello, PHP!\necho str_pad('PHP', 10, '-');   // PHP-------\necho number_format(1234567.89); // 1,234,568"
+    ],
+    "sprintf & printf": [
+      "sprintf returns formatted string. %s (string), %d (int), %f (float). Width/padding, positional args, named args (PHP 8+).",
+      "<?php\nprintf(\"Hello, %s!\\n\", \"Alice\");  // Hello, Alice!\nprintf(\"Price: $%.2f\\n\", 9.5);    // Price: $9.50\nprintf(\"'%8s'\\n\", 'right');       // '    right'\nprintf(\"'-8s'\\n\", 'left');       // 'left    '\n$fmt = '%2\\$s is %1\\$d years old';\necho sprintf($fmt, 30, 'Alice');  // Alice is 30 years old"
+    ],
+    "Multibyte Strings (mb_*)": [
+      "mb_* functions handle UTF-8 and other multibyte encodings. mb_strlen (character count), mb_substr (character-safe), mb_strpos, mb_strtolower, mb_convert_encoding.",
+      "<?php\n$text = \"Café résumé\";\necho strlen($text);      // 12 (bytes)\necho mb_strlen($text);   // 11 (chars)\necho mb_substr($text, 0, 4);  // Café\necho mb_strtoupper($text);    // CAFÉ RÉSUMÉ\n$utf8 = \"日本語\";\n$sjis = mb_convert_encoding($utf8, 'SJIS', 'UTF-8');"
+    ]
+  },
+  "Forms & User Input": {
+    "GET & POST": [
+      "$_GET contains URL query parameters. $_POST contains POST body. $_REQUEST combines both (avoid for security). $_SERVER['REQUEST_METHOD'] tells the HTTP method. Use htmlspecialchars() or htmlentities() to prevent XSS when outputting user data.",
+      "<?php\n// URL: /page.php?name=Alice&age=30\n$name = $_GET['name'] ?? 'Guest';\n$age = $_GET['age'] ?? 'unknown';\n\n// POST form handling\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    $email = $_POST['email'] ?? '';\n    // Always escape output!\n    echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8');\n}\n?>\n<form method=\"POST\">\n    <input type=\"email\" name=\"email\">\n    <button type=\"submit\">Submit</button>\n</form>"
+    ],
+    "Input Validation": [
+      "Validate input: filter_var() with FILTER_VALIDATE_EMAIL, FILTER_VALIDATE_URL, etc. Check string length with strlen(), patterns with preg_match(). Use filter_input() to access and filter in one step. Sanitize with FILTER_SANITIZE_*.",
+      "<?php\n$email = $_POST['email'] ?? '';\n\nif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {\n    echo \"Invalid email\";\n}\n\n$url = 'https://example.com';\nif (filter_var($url, FILTER_VALIDATE_URL)) {\n    echo \"Valid URL\";\n}\n\n// Combined access and filter\n$name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);\n\n// Custom validation\nif (preg_match('/^[a-zA-Z ]+$/', $name)) {\n    echo \"Valid name\";\n}"
+    ],
+    "Sessions": [
+      "Sessions store user data across requests. session_start() begins or resumes a session. Store in $_SESSION array. Cookie with session ID is sent to client. Regenerate session ID after login with session_regenerate_id() to prevent fixation.",
+      "<?php\nsession_start();\n\n// Store\n$_SESSION['user_id'] = 42;\n$_SESSION['role'] = 'admin';\n\n// Retrieve\nif (isset($_SESSION['user_id'])) {\n    echo \"User {$_SESSION['user_id']} logged in\";\n}\n\n// Regenerate after login\nsession_regenerate_id(true);\n\n// Destroy on logout\nsession_destroy();"
+    ],
+    "Cookies": [
+      "setcookie() sends a cookie to the browser. $_COOKIE reads incoming cookies. Set path, domain, secure, httponly, and samesite for security. Cookies are stored client-side and sent with every request to the domain.",
+      "<?php\n// Set cookie (expires in 1 hour)\nsetcookie('theme', 'dark', time() + 3600, '/', '', true, true);\n\n// Cookie with SameSite\nsetcookie('prefs', json_encode(['lang' => 'en']), [\n    'expires' => time() + 86400,\n    'path' => '/',\n    'secure' => true,\n    'httponly' => true,\n    'samesite' => 'Lax'\n]);\n\n// Read cookie\n$theme = $_COOKIE['theme'] ?? 'light';"
+    ],
+    "Input Sanitization & Security": [
+      "Sanitize input with filter_var and FILTER_SANITIZE_*. Strip HTML with strip_tags. Escape output with htmlspecialchars (ENT_QUOTES | ENT_SUBSTITUTE). Validate file uploads. Never trust user input — validate format, length, and range. Use filter_input to access and sanitize in one step.",
+      "<?php\n// Sanitize\n$email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);\n$name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);\n$url = filter_var($_POST['url'], FILTER_SANITIZE_URL);\n\n// Strip HTML tags\n$clean = strip_tags($_POST['content'], '<p><br><strong>');\n\n// Escape output (prevent XSS)\necho htmlspecialchars($user_input, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');\n\n// Filter with validation\n$age = filter_input(INPUT_POST, 'age', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 150]]);\nif ($age === false) { echo \"Invalid age\"; }\n\n// File validation\n$allowed = ['jpg', 'png', 'pdf'];\n$ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));\nif (in_array($ext, $allowed) && $_FILES['file']['size'] < 5000000) {\n    move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . basename($_FILES['file']['name']));\n}"
+    ],
+    "XSS Prevention & CSP": [
+      "Cross-Site Scripting (XSS) prevention: always escape output with htmlspecialchars. Content-Security-Policy (CSP) header restricts script sources. Use HttpOnly cookies to prevent JS access. Set X-Frame-Options to prevent clickjacking. Use X-Content-Type-Options: nosniff.",
+      "<?php\n// Content-Security-Policy header\nheader(\"Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.example.com; style-src 'self' 'unsafe-inline';\");\n\n// Other security headers\nheader('X-Frame-Options: DENY');\nheader('X-Content-Type-Options: nosniff');\nheader('Referrer-Policy: strict-origin-when-cross-origin');\n\n// HttpOnly cookies\nsetcookie('session', $token, [\n    'expires' => time() + 3600,\n    'path' => '/',\n    'secure' => true,\n    'httponly' => true,\n    'samesite' => 'Strict'\n]);\n\n// HTML escape contexts\n$user_input = \"<script>alert('xss')</script>\";\necho htmlspecialchars($user_input, ENT_QUOTES, 'UTF-8');  // Safe for HTML body\necho \"<input value='\" . htmlspecialchars($user_input, ENT_QUOTES, 'UTF-8') . \"'>\";  // Safe for attributes"
+    ]
+  },
+  "Databases": {
+    "PDO Connection": [
+      "PDO (PHP Data Objects) provides a consistent interface for multiple database types. Connect with DSN string. PDO supports prepared statements, transactions, and error handling. Use try/catch for connection errors.",
+      "<?php\n$dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';\n$user = 'root';\n$pass = '';\n\n$options = [\n    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n    PDO::ATTR_EMULATE_PREPARES => false,\n];\n\ntry {\n    $pdo = new PDO($dsn, $user, $pass, $options);\n    echo \"Connected\";\n} catch (PDOException $e) {\n    echo \"Connection failed: \" . $e->getMessage();\n}"
+    ],
+    "Prepared Statements": [
+      "Prepared statements prevent SQL injection by separating SQL from data. Use named (:name) or positional (?) placeholders. prepare() returns a PDOStatement. execute() binds and runs. Fetch results with fetch(), fetchAll(), or fetchColumn().",
+      "<?php\n$pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');\n\n// Named placeholders\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email AND active = :active');\n$stmt->execute(['email' => 'alice@example.com', 'active' => true]);\n$user = $stmt->fetch();\n\n// Positional placeholders\n$stmt = $pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');\n$stmt->execute(['Bob', 'bob@example.com']);\n$id = $pdo->lastInsertId();\n\n// Fetch all\n$stmt = $pdo->prepare('SELECT * FROM users WHERE age > ?');\n$stmt->execute([18]);\n$users = $stmt->fetchAll();"
+    ],
+    "CRUD Operations": [
+      "Create (INSERT), Read (SELECT), Update (UPDATE), Delete (DELETE). Use transactions for multiple related operations. beginTransaction(), commit(), rollback(). Always use prepared statements for any user-influenced data.",
+      "<?php\n$pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');\n\n// Create\n$stmt = $pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');\n$stmt->execute(['Alice', 'alice@example.com']);\n\n// Read\n$stmt = $pdo->query('SELECT * FROM users');\n$users = $stmt->fetchAll();\n\n// Update\n$stmt = $pdo->prepare('UPDATE users SET name = ? WHERE id = ?');\n$stmt->execute(['Alicia', 1]);\n\n// Delete\n$stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');\n$stmt->execute([1]);\n\n// Transaction\ntry {\n    $pdo->beginTransaction();\n    $pdo->exec('UPDATE accounts SET balance = balance - 100 WHERE id = 1');\n    $pdo->exec('UPDATE accounts SET balance = balance + 100 WHERE id = 2');\n    $pdo->commit();\n} catch (Exception $e) {\n    $pdo->rollBack();\n}"
+    ],
+    "MySQLi": [
+      "MySQLi is a MySQL-only alternative to PDO. Supports both procedural and OOP styles. Use prepared statements with $mysqli->prepare(). Procedural functions (mysqli_connect, mysqli_query) are also available.",
+      "<?php\n// OOP style\n$mysqli = new mysqli('localhost', 'root', '', 'test');\n\nif ($mysqli->connect_error) {\n    die(\"Connection failed: \" . $mysqli->connect_error);\n}\n\n$stmt = $mysqli->prepare('SELECT * FROM users WHERE id = ?');\n$stmt->bind_param('i', $id);\n$id = 1;\n$stmt->execute();\n$result = $stmt->get_result();\n$user = $result->fetch_assoc();\n\n// Procedural style\n$conn = mysqli_connect('localhost', 'root', '', 'test');\n$result = mysqli_query($conn, 'SELECT * FROM users');\nwhile ($row = mysqli_fetch_assoc($result)) {\n    print_r($row);\n}"
+    ],
+    "Transactions & Error Handling": [
+      "PDO transactions group multiple operations. beginTransaction(), commit(), rollback(). Set PDO::ATTR_ERRMODE to PDO::ERRMODE_EXCEPTION for exception-based error handling. Use try/catch around transactions. Savepoints allow partial rollback within transactions.",
+      "<?php\n$pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '', [\n    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n]);\n\ntry {\n    $pdo->beginTransaction();\n\n    $stmt = $pdo->prepare('UPDATE accounts SET balance = balance - ? WHERE id = ?');\n    $stmt->execute([100, 1]);\n\n    $stmt = $pdo->prepare('UPDATE accounts SET balance = balance + ? WHERE id = ?');\n    $stmt->execute([100, 2]);\n\n    $pdo->commit();\n    echo \"Transfer successful\";\n} catch (PDOException $e) {\n    $pdo->rollBack();\n    echo \"Transfer failed: \" . $e->getMessage();\n}"
+    ],
+    "Migrations & Schema Management": [
+      "Database migrations manage schema changes over time. Create numbered migration files (20240101000001_create_users.php). Each has up() and down() methods. Use Phinx or Doctrine Migrations for PHP. Track applied migrations in a migrations table. Always test both up and down migrations.",
+      "<?php\n// Migration file: 20240101000001_create_users.php\n\nfunction up(PDO $pdo): void {\n    $pdo->exec(\"\n        CREATE TABLE users (\n            id INT AUTO_INCREMENT PRIMARY KEY,\n            name VARCHAR(255) NOT NULL,\n            email VARCHAR(255) UNIQUE NOT NULL,\n            password_hash VARCHAR(255) NOT NULL,\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4\n    \");\n    \n    $pdo->exec(\"\n        CREATE TABLE user_roles (\n            user_id INT NOT NULL,\n            role VARCHAR(50) NOT NULL,\n            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,\n            PRIMARY KEY (user_id, role)\n        )\n    \");\n}\n\nfunction down(PDO $pdo): void {\n    $pdo->exec(\"DROP TABLE IF EXISTS user_roles\");\n    $pdo->exec(\"DROP TABLE IF EXISTS users\");\n}"
+    ]
+  },
+  "Testing": {
+    "PHPUnit Setup & Assertions": [
+      "PHPUnit is the standard testing framework. Install via Composer. Test classes extend PHPUnit\\Framework\\TestCase. Test methods must be public and start with test (or use #[Test] attribute in PHPUnit 10+). Common assertions: assertEquals, assertTrue, assertFalse, assertNull, assertCount, assertContains, assertEmpty.",
+      "<?php\n// composer require --dev phpunit/phpunit\n// phpunit.xml configures the test suite\n\nuse PHPUnit\\Framework\\TestCase;\n\nclass CalculatorTest extends TestCase {\n    private Calculator $calc;\n\n    protected function setUp(): void {\n        $this->calc = new Calculator();\n    }\n\n    public function testAdd(): void {\n        $this->assertEquals(5, $this->calc->add(2, 3));\n    }\n\n    public function testDivideByZero(): void {\n        $this->expectException(\\InvalidArgumentException::class);\n        $this->calc->divide(10, 0);\n    }\n\n    #[\\PHPUnit\\Framework\\Attributes\\Test]\n    public function subtract(): void {\n        $this->assertEquals(1, $this->calc->subtract(3, 2));\n    }\n\n    public function testArrayOperations(): void {\n        $this->assertCount(3, [1, 2, 3]);\n        $this->assertContains(2, [1, 2, 3]);\n        $this->assertNotEmpty([1]);\n    }\n}"
+    ],
+    "Data Providers & Test Doubles": [
+      "Data providers supply test data via #[DataProvider] attribute. Return arrays of argument arrays. Test doubles (mocks) isolate code. createMock creates a mock with all methods returning null. getMockBuilder for partial mocks. willReturn, willThrowException for behavior.",
+      "<?php\nuse PHPUnit\\Framework\\TestCase;\n\nclass MathTest extends TestCase {\n    #[DataProvider('additionProvider')]\n    public function testAdd(int $a, int $b, int $expected): void {\n        $result = $a + $b;\n        $this->assertEquals($expected, $result);\n    }\n\n    public static function additionProvider(): array {\n        return [\n            [1, 2, 3],\n            [0, 0, 0],\n            [-1, 1, 0],\n            [100, 200, 300],\n        ];\n    }\n\n    public function testMocking(): void {\n        $mailer = $this->createMock(Mailer::class);\n        $mailer->method('send')\n               ->willReturn(true);\n\n        $service = new UserService($mailer);\n        $result = $service->register('Alice', 'alice@example.com');\n        $this->assertTrue($result);\n    }\n}"
+    ],
+    "Pest Framework": [
+      "Pest is an elegant PHP testing framework built on PHPUnit. Uses describe/it/expect syntax. Higher-order tests with ->each. Arch testing for code structure. Pest automatically discovers tests in tests/ directory. Functions like beforeEach, afterEach for setup.",
+      "<?php\n// tests/CalculatorTest.php\nuse function Pest\\Pest\\test;\n\ntest('adds two numbers', function () {\n    $result = Calculator::add(2, 3);\n    expect($result)->toBe(5);\n});\n\ntest('subtracts numbers', function () {\n    $result = Calculator::subtract(5, 3);\n    expect($result)->toBe(2);\n});\n\n// Grouped tests\ndescribe('Calculator', function () {\n    test('adds positive numbers', fn() => expect(Calculator::add(1, 2))->toBe(3));\n    test('adds negative numbers', fn() => expect(Calculator::add(-1, -2))->toBe(-3));\n    test('handles zero', fn() => expect(Calculator::add(0, 5))->toBe(5));\n});\n\n// Datasets\ntest('numbers are positive')\n    ->with([1, 2, 3, 4, 5])\n    ->expect(fn($number) => $number > 0)->toBeTrue();"
+    ]
+  },
+  "Error Handling": {
+    "Exceptions": [
+      "PHP uses try/catch blocks for exception handling. throw new Exception('message') raises an exception. Multiple catch blocks for different exception types. finally block runs regardless of whether an exception occurred (PHP 5.5+).",
+      "<?php\ntry {\n    $file = file_get_contents('nonexistent.txt');\n    if ($file === false) {\n        throw new Exception('File not found');\n    }\n} catch (Exception $e) {\n    echo 'Caught: ' . $e->getMessage();\n    echo 'File: ' . $e->getFile();\n    echo 'Line: ' . $e->getLine();\n} finally {\n    echo \"This always runs\";\n}\n\n// Multiple catch\n// } catch (PDOException $e) {\n//     echo \"Database error\";\n// } catch (Exception $e) {\n//     echo \"General error\";\n// }"
+    ],
+    "Error Reporting": [
+      "error_reporting() sets which errors are reported. Use E_ALL for development. display_errors controls output. log_errors saves to file. set_error_handler() catches non-exception errors. trigger_error() manually triggers errors.",
+      "<?php\n// Development settings\nerror_reporting(E_ALL);\nini_set('display_errors', '1');\nini_set('log_errors', '1');\nini_set('error_log', '/var/log/php_errors.log');\n\n// Custom error handler\nset_error_handler(function($severity, $message, $file, $line) {\n    throw new ErrorException($message, 0, $severity, $file, $line);\n});\n\n// Trigger error\ntrigger_error('Something happened', E_USER_WARNING);\n\n// Restore\nrestore_error_handler();"
+    ],
+    "Custom Exception Classes": [
+      "Create custom exceptions by extending Exception. Use different exception classes for different error types. Catch specific exceptions before general ones. SPL exceptions (InvalidArgumentException, RuntimeException, LogicException) cover common cases.",
+      "<?php\nclass ValidationException extends Exception {}\nclass DatabaseException extends Exception {}\nclass NotFoundException extends Exception {}\n\nfunction validateEmail(string $email): void {\n    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {\n        throw new ValidationException(\"Invalid email: $email\");\n    }\n}\n\ntry {\n    validateEmail('not-an-email');\n} catch (ValidationException $e) {\n    echo \"Validation error: \" . $e->getMessage();\n} catch (Exception $e) {\n    echo \"Other error: \" . $e->getMessage();\n}"
+    ],
+    "Multiple Catch & finally": [
+      "PHP supports multiple catch blocks for different exception types (PHP 7.1+). catch can specify multiple types with |. The finally block always executes regardless of exception. Order matters — catch most specific exceptions first. Use finally for cleanup (close connections, release locks).",
+      "<?php\nclass NetworkException extends \\RuntimeException {}\nclass TimeoutException extends NetworkException {}\nclass AuthException extends \\RuntimeException {}\n\nfunction fetchData(string $url): string {\n    try {\n        $response = file_get_contents($url);\n        if ($response === false) {\n            throw new NetworkException(\"Failed to fetch $url\");\n        }\n        return $response;\n    } catch (TimeoutException $e) {\n        return \"Request timed out: \" . $e->getMessage();\n    } catch (NetworkException | AuthException $e) {\n        return \"Network/auth error: \" . $e->getMessage();\n    } catch (\\Exception $e) {\n        return \"Unexpected error: \" . $e->getMessage();\n    } finally {\n        echo \"Request completed for: $url\\n\";\n    }\n}"
+    ],
+    "Error Handling Best Practices": [
+      "Set error handler with set_error_handler to convert PHP errors to ErrorException. Use error_log for production logging. Set display_errors=0 in production. Use assert() for dev debugging. Log fatal errors with register_shutdown_function. Always use try/catch around database, file I/O, and API calls.",
+      "<?php\nset_error_handler(function(int $severity, string $message, string $file, int $line): bool {\n    if (!(error_reporting() & $severity)) return false;\n    throw new \\ErrorException($message, 0, $severity, $file, $line);\n});\n\nregister_shutdown_function(function() {\n    $error = error_get_last();\n    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {\n        error_log(\"Fatal: {$error['message']} in {$error['file']}:{$error['line']}\");\n    }\n});\n\nif ($_ENV['APP_ENV'] === 'production') {\n    ini_set('display_errors', '0');\n    ini_set('log_errors', '1');\n}"
+    ]
+  },
+  "Modules & Packages": {
+    "Namespaces & use": [
+      "Namespaces prevent collisions with `namespace App\\Models;`. Import with `use App\\Models\\User;`. Alias with `use App\\Helpers\\Format as Fmt;`. Group imports (PHP 7+): `use App\\{Models\\User, Helpers\\Format};`. Global namespace is `\\`.",
+      "<?php\nnamespace App\\Models;\nclass User {}\n\nnamespace App\\Controllers;\nuse App\\Models\\User;\nuse App\\Exceptions\\{NotFoundException, ValidationException};\n$stdClass = new \\stdClass();"
+    ],
+    "require/include/require_once": [
+      "require produces fatal error on failure; include produces warning. _once ensures single load. include returns value (the file's return value). Useful for config loading, template includes, code organization.",
+      "<?php\nrequire 'config.php';\nrequire_once 'vendor/autoload.php';\ninclude 'template/header.php';\n$config = require 'config.php';\nrequire_once 'helpers.php';  // ignored if already loaded\n$page = $_GET['page'] ?? 'home';\nif (file_exists(\"pages/$page.php\")) include \"pages/$page.php\";"
+    ],
+    "Composer & PSR-4 Autoloading": [
+      "Composer generates vendor/autoload.php. PSR-4 maps namespaces to directories: App\\\\ -> src/. Class name matches filename. composer dump-autoload regenerates. Single require at entry point loads all classes automatically.",
+      "<?php\n// composer.json PSR-4: \"App\\\\\": \"src/\"\nrequire __DIR__ . '/vendor/autoload.php';\nuse App\\Models\\User;\n// App\\Models\\User → src/Models/User.php"
+    ]
+  },
+  "Modern PHP & Ecosystem": {
+    "Composer & Autoloading": [
+      "Composer is the dependency manager for PHP. composer.json defines dependencies. composer install/downloads packages into vendor/. PSR-4 autoloading maps namespaces to directories. require 'vendor/autoload.php' loads everything.",
+      "{\n    \"name\": \"myapp/project\",\n    \"require\": {\n        \"php\": \">=8.1\",\n        \"monolog/monolog\": \"^3.0\",\n        \"guzzlehttp/guzzle\": \"^7.0\"\n    },\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"src/\"\n        }\n    }\n}\n\n<?php\nrequire 'vendor/autoload.php';\n\nuse Monolog\\Logger;\nuse Monolog\\Handler\\StreamHandler;\n\n$log = new Logger('app');\n$log->pushHandler(new StreamHandler('app.log', Logger::WARNING));\n$log->warning('This is a warning');"
+    ],
+    "PSR Standards": [
+      "PSR (PHP Standards Recommendations) define coding standards: PSR-1 (basic coding), PSR-4 (autoloading), PSR-7 (HTTP messages), PSR-12 (extended coding style). Following PSR standards ensures interoperability between PHP packages.",
+      "<?php\n// PSR-1: <?php tags, side effects separate\n// PSR-4: Namespace matches directory structure\n// PSR-12: Braces on new line for classes/methods\n\ndeclare(strict_types=1);\n\nnamespace App\\Service;\n\nuse Psr\\Http\\Message\\ResponseInterface;\nuse Psr\\Http\\Message\\ServerRequestInterface;\n\nclass UserService\n{\n    public function handle(ServerRequestInterface $request): ResponseInterface\n    {\n        // PSR-7 compatible\n    }\n}"
+    ],
+    "PHP 8 Features": [
+      "PHP 8 introduced: named arguments, attributes (annotations), constructor property promotion, union types, match expression, nullsafe operator (?->), str_contains(), str_starts_with(), str_ends_with(), readonly properties (8.1), enums (8.1), fibers (8.1).",
+      "<?php\n// Named arguments\nfunction createUser(string $name, int $age, string $role = 'user') {}\ncreateUser(age: 30, name: 'Alice');\n\n// Nullsafe operator\n$country = $user?->getAddress()?->getCountry();\n\n// String functions\nstr_contains('hello world', 'world');  // true\nstr_starts_with('hello', 'he');        // true\n\n// Readonly property (PHP 8.1)\nclass User {\n    public function __construct(\n        public readonly string $name,\n        public readonly int $age\n    ) {}\n}\n\n// Enum (PHP 8.1)\nenum Status: string {\n    case Active = 'active';\n    case Inactive = 'inactive';\n}"
+    ],
+    "Attributes (Annotations)": [
+      "PHP 8.0+ attributes add structured metadata to classes, methods, properties. Syntax: #[AttributeName]. Attributes can have arguments. Custom attributes extend #[Attribute] class. Use reflection to read attributes.",
+      "<?php\n#[Attribute]\nclass Route {\n    public function __construct(\n        public string $method,\n        public string $path\n    ) {}\n}\n\n#[Attribute]\nclass Middleware {\n    public function __construct(\n        public string ...$names\n    ) {}\n}\n\nclass UserController {\n    #[Route('GET', '/users')]\n    #[Middleware('auth', 'log')]\n    public function index(): array {\n        return ['users' => []];\n    }\n\n    #[Route('POST', '/users')]\n    public function store(): void {\n        // Create user\n    }\n}\n\n// Reading attributes via reflection\n$reflection = new ReflectionMethod(UserController::class, 'index');\n$attributes = $reflection->getAttributes(Route::class);\nforeach ($attributes as $attr) {\n    $route = $attr->newInstance();\n    echo \"{$route->method} {$route->path}\\n\";  // GET /users\n}"
+    ],
+    "Enums (PHP 8.1)": [
+      "Enums define a fixed set of named cases. Pure enums (just names). Backed enums with string/int values. Enums can have methods and implement interfaces. match works perfectly with enums. tryFrom returns null for invalid values.",
+      "<?php\n// Pure enum\nenum Status {\n    case Active;\n    case Inactive;\n    case Archived;\n}\n\n// Backed enum (string)\nenum UserRole: string {\n    case Admin = 'admin';\n    case Editor = 'editor';\n    case Viewer = 'viewer';\n}\n\n// Backed enum (int)\nenum HttpStatus: int {\n    case OK = 200;\n    case NotFound = 404;\n    case ServerError = 500;\n}\n\n// Enum with methods\nenum Color: string {\n    case Red = '#ff0000';\n    case Green = '#00ff00';\n    case Blue = '#0000ff';\n\n    public function luminance(): float {\n        return match ($this) {\n            Color::Red => 0.3,\n            Color::Green => 0.59,\n            Color::Blue => 0.11,\n        };\n    }\n}\n\n// Usage\n$role = UserRole::Admin;\necho $role->value;  // 'admin'\n$parsed = UserRole::tryFrom('editor');  // UserRole::Editor\n$parsed = UserRole::tryFrom('unknown'); // null\necho Color::Red->luminance();  // 0.3"
+    ],
+    "Fibers & Async Patterns (PHP 8.1)": [
+      "Fibers are lightweight cooperative concurrency primitives. Fiber::suspend pauses execution. $fiber->resume continues. Unlike threads, fibers share memory without locks. Useful for async I/O patterns and generators. Often used with frameworks like Amp or ReactPHP.",
+      "<?php\n// Basic fiber\n$fiber = new Fiber(function (): void {\n    $value = Fiber::suspend('first');\n    echo \"Resumed with: $value\\n\";\n    Fiber::suspend('second');\n    echo \"Done\\n\";\n});\n\necho $fiber->start() . \"\\n\";     // 'first'\necho $fiber->resume('hello') . \"\\n\"; // 'Resumed with: hello' then 'second'\n\n// Practical: async HTTP with fibers\nfunction fetchUrl(string $url): string {\n    // Simulated async I/O\n    $fiber = Fiber::getCurrent();\n    // In real code, schedule I/O and suspend\n    $result = Fiber::suspend(fn() => file_get_contents($url));\n    return $result;\n}\n\n// Fiber-based HTTP client\n$fiber = new Fiber(function () {\n    $result1 = fetchUrl('https://example.com/api/1');\n    $result2 = fetchUrl('https://example.com/api/2');\n    return json_decode($result1) + json_decode($result2);\n});\n\n// Start and let fibers run cooperatively\n$result = $fiber->start();\n// Resume when I/O completes\n$fiber->resume($http_response);"
+    ]
+  },
+  "Security & Performance": {
+    "SQL Injection Prevention": [
+      "Always use prepared statements (PDO or MySQLi) to separate SQL from data. Never concatenate user input into SQL. Use allowlist-based sorting/filtering for dynamic queries. Validate that column names for ORDER BY are from an allowlist. Use parameterized queries even for non-user data.",
+      "<?php\n// UNSAFE: String interpolation\n// $stmt = $pdo->query(\"SELECT * FROM users WHERE id = $id\");\n\n// SAFE: Prepared statements\n$stmt = $pdo->prepare('SELECT * FROM users WHERE id = ? AND active = ?');\n$stmt->execute([$id, true]);\n\n// Named parameters\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email');\n$stmt->execute(['email' => $email]);\n\n// Dynamic sorting (use allowlist)\n$allowedColumns = ['name', 'email', 'created_at'];\n$sortBy = $_GET['sort'] ?? 'name';\n$sortDir = strtoupper($_GET['dir']) === 'DESC' ? 'DESC' : 'ASC';\nif (in_array($sortBy, $allowedColumns)) {\n    $stmt = $pdo->prepare(\"SELECT * FROM users ORDER BY $sortBy $sortDir\");\n    $stmt->execute();\n}\n\n// Bulk insert\n$pdo->beginTransaction();\n$stmt = $pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');\nforeach ($users as $user) {\n    $stmt->execute([$user['name'], $user['email']]);\n}\n$pdo->commit();"
+    ],
+    "CSRF & Session Security": [
+      "Cross-Site Request Forgery (CSRF) protection: generate a random token per session, include in forms, verify on POST. Use SameSite cookies (Strict/Lax). Regenerate session ID after login. Set session timeout. Use secure, httponly cookies.",
+      "<?php\nsession_start();\n\n// Generate CSRF token\nif (empty($_SESSION['csrf_token'])) {\n    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));\n}\n$csrfToken = $_SESSION['csrf_token'];\n?>\n\n<form method=\"POST\">\n    <input type=\"hidden\" name=\"csrf_token\" value=\"<?= $csrfToken ?>\">\n    <input type=\"text\" name=\"email\">\n    <button type=\"submit\">Submit</button>\n</form>\n\n<?php\n// Verify CSRF token\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {\n        die('CSRF validation failed');\n    }\n    // Process form\n}\n\n// Session security\nsession_regenerate_id(true);  // After login\nini_set('session.cookie_httponly', '1');\nini_set('session.cookie_secure', '1');\nini_set('session.cookie_samesite', 'Strict');\nini_set('session.gc_maxlifetime', 3600);  // 1 hour"
+    ],
+    "OPcache & Caching": [
+      "OPcache caches compiled PHP bytecode, eliminating re-compilation on every request. Enable in php.ini: opcache.enable=1. Settings: opcache.memory_consumption (128MB+), opcache.max_accelerated_files, opcache.revalidate_freq. Application-level caching with APCu (user cache), Redis, or Memcached. Use cache keys with TTL for invalidation.",
+      "<?php\n// php.ini OPcache settings\n// opcache.enable=1\n// opcache.memory_consumption=256\n// opcache.max_accelerated_files=20000\n// opcache.revalidate_freq=2\n// opcache.validate_timestamps=0 (production, clear manually)\n\n// Check OPcache status\n$status = opcache_get_status();\necho \"Memory used: \" . ($status['memory_usage']['used_memory'] / 1024 / 1024) . \"MB\\n\";\necho \"Hit rate: \" . ($status['opcache_statistics']['hit_rate'] ?? 0) . \"%\\n\";\n\n// Clear cache after deployment\n// opcache_reset();\n\n// Simple file caching\nfunction cache_get(string $key, int $ttl = 3600): mixed {\n    $path = \"cache/$key.cache\";\n    if (!file_exists($path)) return null;\n    if (time() - filemtime($path) > $ttl) {\n        unlink($path);\n        return null;\n    }\n    return unserialize(file_get_contents($path));\n}\n\nfunction cache_set(string $key, mixed $value): void {\n    if (!is_dir('cache')) mkdir('cache', 0755, true);\n    file_put_contents(\"cache/$key.cache\", serialize($value));\n}"
+    ]
+  }
 }

@@ -1,8 +1,8 @@
 <script>
-  import { GAME_CHALLENGES, isCorrectAnswer } from '$lib/lib/games.js';
+  import { getChallenges, isCorrectAnswer } from '$lib/lib/games.js';
   import { getGameState } from '$lib/stores/game.svelte.js';
 
-  let { game } = $props();
+  let { game, lang = 'js' } = $props();
   let gameState = $derived(getGameState());
   let score = $state(0);
   let index = $state(0);
@@ -10,7 +10,7 @@
   let feedback = $state('');
   let feedbackType = $state('');
   let selectedPieces = $state([]);
-  let challenges = $derived(GAME_CHALLENGES[game.id] || []);
+  let challenges = $derived(getChallenges(game.id, lang) || []);
   let challenge = $derived(challenges[index % Math.max(1, challenges.length)] || {});
   let mode = $derived(game.mode || 'choice');
   let playRecorded = $state(false);
