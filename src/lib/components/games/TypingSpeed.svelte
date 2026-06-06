@@ -1,12 +1,12 @@
 <script>
   import { onDestroy } from 'svelte';
   import { getGameState } from '$lib/stores/game.svelte.js';
-  import { GAME_CHALLENGES } from '$lib/lib/games.js';
+  import { generateChallenges } from '$lib/lang/index.js';
 
-  let { game = { id: 'typing-speed', title: 'Typing Speed' } } = $props();
+  let { game = { id: 'typing-speed', title: 'Typing Speed' }, lang = 'js' } = $props();
   let gameState = $derived(getGameState());
 
-  let challenges = $derived(GAME_CHALLENGES[game.id] || []);
+  let challenges = $derived(generateChallenges(game.id, lang) || []);
   let challengeIndex = $state(0);
   let currentChallenge = $derived(challenges[challengeIndex % Math.max(1, challenges.length)] || {});
   let target = $derived(currentChallenge.answer || currentChallenge.target || '');

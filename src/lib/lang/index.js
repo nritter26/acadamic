@@ -1,3 +1,9 @@
+import { generateSyntaxSprint, generateSyntaxSwipe, generateMemoryMatch, generateSpeedRead, generateRaceCompiler, generateSqlJoinMatch, generateErrorpedia, generateApiArcade, generateLogicLadder } from './generators/choice.js';
+import { generateCodeScramble } from './generators/order.js';
+import { generateDebugTheBug } from './generators/debug.js';
+import { generateCodeGolf, generateBinaryHexBlitz, generateCrossword, generateRegexRally } from './generators/text.js';
+import { generateTypingSpeed } from './generators/typing.js';
+
 const HASH_SEED = 42;
 
 function hash(str) {
@@ -44,3 +50,37 @@ export const LANG_NAMES = {
   scala: 'Scala', swift: 'Swift', ts: 'TypeScript', wasm: 'WebAssembly',
   zig: 'Zig', react: 'React', vue: 'Vue', svelte: 'Svelte',
 };
+
+const GENERATORS = {
+  'typing-speed': generateTypingSpeed,
+  'code-scramble': generateCodeScramble,
+  'debug-the-bug': generateDebugTheBug,
+  'syntax-sprint': generateSyntaxSprint,
+  'memory-match': generateMemoryMatch,
+  'speed-read': generateSpeedRead,
+  'race-compiler': generateRaceCompiler,
+  'syntax-swipe': generateSyntaxSwipe,
+  'code-golf': generateCodeGolf,
+  'binary-hex-blitz': generateBinaryHexBlitz,
+  'crossword': generateCrossword,
+  'regex-rally': generateRegexRally,
+  'sql-join-match': generateSqlJoinMatch,
+  'errorpedia': generateErrorpedia,
+  'api-arcade': generateApiArcade,
+  'logic-ladder': generateLogicLadder,
+};
+
+export function generateChallenges(gameId, langId, count = 100) {
+  const gen = GENERATORS[gameId];
+  if (!gen) return [];
+  const results = [];
+  for (let i = 0; i < count; i++) {
+    const challenge = gen(langId, i);
+    if (challenge) results.push(challenge);
+    if (results.length >= count) break;
+  }
+  while (results.length < count) {
+    results.push({ prompt: 'Challenge', choices: ['Option A', 'Option B'], answer: 'Option A' });
+  }
+  return results;
+}
