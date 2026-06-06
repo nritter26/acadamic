@@ -98,6 +98,6 @@ export function createGameController(gameId, langId) {
     submit,
     next,
     reset,
-    isCorrect: isCorrectAnswer,
+    isCorrect(input) { return isCorrectAnswer(input, challenge.answer || challenge.target); },
   };
 }
