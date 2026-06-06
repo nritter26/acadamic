@@ -18,8 +18,7 @@
   import SyntaxSprint from './SyntaxSprint.svelte';
   import SyntaxSwipe from './SyntaxSwipe.svelte';
   import TypingSpeed from './TypingSpeed.svelte';
-  import MiniGameCard from './MiniGameCard.svelte';
-  import { LANG_NAMES } from '$lib/lang/index.js';
+    import { LANG_NAMES } from '$lib/lang/index.js';
 
   let game = $derived(getGameState());
 
@@ -53,7 +52,7 @@
     'syntax-swipe': SyntaxSwipe, 'typing-speed': TypingSpeed,
   };
 
-  let SelectedGame = $derived(selectedGame ? components[selectedGame.id] || MiniGameCard : null);
+  let SelectedGame = $derived(selectedGame ? components[selectedGame.id] : null);
 
   function launchGame(id) {
     const g = GAME_CATALOG.find(x => x.id === id);
