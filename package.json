@@ -7,7 +7,7 @@
   "scripts": {
     "build:ai": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser && esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser",
     "build:ai:watch": "esbuild ai/responses-data.ts --outdir=public/ai --platform=browser --watch & esbuild public/ai/responses.ts public/ai/core.ts --outdir=public/ai --platform=browser --watch",
-    "build:browser": "rm -rf browser-build && tsc -p tsconfig.browser.json",
+    "build:browser": "rm -rf browser-build static/browser-build && tsc -p tsconfig.browser.json && cp -R browser-build static/browser-build",
     "build:browser:watch": "tsc -p tsconfig.browser.json --watch",
     "start": "npm run build:ai && npm run build:browser && tsx server.ts",
     "dev": "npm run build:ai && npm run build:browser && tsx watch server.ts",
