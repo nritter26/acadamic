@@ -62,7 +62,7 @@ export const JS_SPEC = {
     { valid: 'async function getData() { return await fetch("url"); }', invalid: 'async function getData() { return fetch await ("url"); }', category: 'async' },
     { valid: 'try { doSomething(); } catch (e) {}', invalid: 'try { doSomething(); } catch e {}', category: 'error' },
     { valid: 'const val = x ?? "default";', invalid: 'const val = x ??? "default";', category: 'operator' },
-    { valid: 'console.log(typeof x);', invalid: 'console.log(typeof(x));', category: 'operator' },
-    { valid: 'arr.map(n => n * 2);', invalid: 'arr.map((n) => { n * 2 });', category: 'array' },
+    { valid: 'const t = typeof x;', invalid: 'typeof x = "string";', category: 'operator' },
+    { valid: 'arr.map(n => n * 2);', invalid: 'arr.map(n = > n * 2);', category: 'array' },
   ],
 };

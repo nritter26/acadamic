@@ -4,7 +4,7 @@ export const PY_SPEC = {
   keywords: [
     'def', 'return', 'if', 'elif', 'else', 'for', 'while', 'break',
     'continue', 'import', 'from', 'as', 'class', 'try', 'except',
-    'finally', 'raise', 'with', 'as', 'pass', 'yield', 'lambda',
+    'finally', 'raise', 'with', 'pass', 'yield', 'lambda',
     'True', 'False', 'None', 'and', 'or', 'not', 'in', 'is', 'del',
     'global', 'nonlocal', 'assert', 'async', 'await',
   ],
