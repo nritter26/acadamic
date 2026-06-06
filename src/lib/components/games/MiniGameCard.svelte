@@ -20,6 +20,12 @@
   let transitioning = $state(false);
   let showScorePopup = $state(false);
   let selectedChoice = $state(null);
+  let shuffledPieces = $state([]);
+
+  $effect(() => {
+    const pieces = challenge.pieces;
+    shuffledPieces = pieces ? [...pieces].sort(() => Math.random() - 0.5) : [];
+  });
 
   function recordPlayIfNeeded() {
     if (!playRecorded) {
@@ -134,7 +140,7 @@
   {:else if mode === 'order'}
     <div class="order-area">
       <div class="pieces">
-        {#each challenge.pieces || [] as piece, i}
+        {#each shuffledPieces as piece}
           <button class="piece-btn" onclick={() => addPiece(piece)}>{piece}</button>
         {/each}
       </div>
