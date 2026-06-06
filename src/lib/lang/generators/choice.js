@@ -15,7 +15,7 @@ const SPECS = [JS_SPEC, PY_SPEC, GO_SPEC, RS_SPEC, C_SPEC, CPP_SPEC, CS_SPEC, ZI
 const SPEC_MAP = {};
 SPECS.forEach(s => SPEC_MAP[s.id] = s);
 
-function getSpec(langId) {
+export function getSpec(langId) {
   return SPEC_MAP[langId] || JS_SPEC;
 }
 
