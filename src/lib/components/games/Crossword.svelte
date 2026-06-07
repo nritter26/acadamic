@@ -2,25 +2,30 @@
   import { createGameController } from '$lib/game/game-loop.svelte.js';
   let { game, lang = 'js' } = $props();
   let ctrl = createGameController(game.id, lang);
-  let input = $state('');
   let cells = $state([]);
+  let input = $state('');
 
   $effect(() => {
-    input = '';
     const answer = ctrl.challenge.answer || '';
     cells = answer.split('').map(() => '');
+    input = '';
   });
 
-  function setChar(i, ch) {
-    if (ctrl.feedbackType === 'ok') return;
-    cells[i] = ch.toLowerCase();
-    input = cells.join('');
-    if (input.length === cells.length && input === ctrl.challenge.answer.toLowerCase()) {
+  $effect(() => {
+    input = cells.join('').toLowerCase();
+    const answer = ctrl.challenge.answer || '';
+    if (input.length === answer.length && input === answer.toLowerCase()) {
       ctrl.submit(input);
     }
+  });
+
+  function handleInput(i, e) {
+    if (ctrl.feedbackType === 'ok') return;
+    cells[i] = e.target.value.toLowerCase().slice(0, 1);
   }
 
   function keydown(e) {
+    if (ctrl.feedbackType === 'ok') return;
     if (e.key === 'Enter' && input) ctrl.submit(input);
   }
 </script>
@@ -38,11 +43,10 @@
     {#each cells as cell, i}
       <input
         class="cw-cell"
-        class:cw-filled={cell}
+        class:cw-filled={cells[i]}
         class:cw-correct={ctrl.feedbackType === 'ok'}
-        class:cw-wrong-cell={ctrl.feedbackType === 'wrong' && cell && cell !== ctrl.challenge.answer[i]?.toLowerCase()}
-        bind:value={cell}
-        oninput={() => setChar(i, cell)}
+        value={cells[i]}
+        oninput={(e) => handleInput(i, e)}
         onkeydown={keydown}
         maxlength="1"
         disabled={ctrl.feedbackType === 'ok'}
