@@ -68,6 +68,7 @@
       }
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      if (isStandalone) return;
       e.preventDefault();
       exec.runCode(curr.lang, editor.code);
     }

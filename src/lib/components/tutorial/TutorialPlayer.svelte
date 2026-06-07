@@ -63,6 +63,8 @@
   async function loadTopicContent() {
     loadingTopic = true;
     topicLoading = true;
+    runOutput = '';
+    showOutput = false;
     try {
       const res = await fetch(`/content/${currentCourse.lang}.json`);
       const data = await res.json();
@@ -191,7 +193,7 @@
                 <button class="ca-btn-run" onclick={handleRun} disabled={running}>
                   {running ? '⏳ Running...' : '▶ Run'}
                 </button>
-                <button class="ca-btn" onclick={() => editMode = !editMode}>
+                <button class="ca-btn" onclick={() => { editMode = !editMode; runOutput = ''; showOutput = false; }}>
                   {editMode ? 'View Only' : 'Edit Code'}
                 </button>
                 <button class="ca-btn" onclick={() => window.dispatchEvent(new CustomEvent('toggle-cheatsheet'))}>Cheatsheet</button>
@@ -200,7 +202,7 @@
             {#if editMode}
               <MiniEditor bind:value={editableCode} />
             {:else}
-              <pre class="code-display"><code>{topicData[1] || ''}</code></pre>
+              <pre class="code-display"><code>{editableCode || ''}</code></pre>
             {/if}
           </div>
           <div class="code-right">
