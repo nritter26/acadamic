@@ -19,6 +19,10 @@
   "Zig Version Manager": [
    "Zig is pre-1.0 and evolves rapidly. Use `zigup` or `zigenv` to manage multiple Zig versions. Each Zig version may have subtle language or standard library changes.",
    "# zigup (cross-platform)\nzigup install master\nzigup use 0.13.0\nzigup list\n\n# Check current version\nzig version"
+  ],
+  "Build System Deep": [
+   "Zig's build system is written in Zig itself. build.zig uses std.Build API: addExecutable, addLibrary, addTest, addRun. Targets define cross-compilation. OptimizeMode: Debug, ReleaseSafe, ReleaseFast, ReleaseSmall. Dependencies in build.zig.zon. Custom steps via b.step(). Options passed via -D flags. Build.zig runs at compile time \u2014 no external build tool needed.",
+   "const std = @import(\"std\");\n\npub fn build(b: *std.Build) void {\n    const target = b.standardTargetOptions(.{});\n    const optimize = b.standardOptimizeOption(.{});\n\n    const exe = b.addExecutable(.{\n        .name = \"myapp\",\n        .root_source_file = b.path(\"src/main.zig\"),\n        .target = target,\n        .optimize = optimize,\n    });\n\n    // Library dependency\n    exe.root_module.addImport(\"httpz\", b.dependency(\"httpz\", .{}).module(\"httpz\"));\n\n    b.installArtifact(exe);\n\n    // Run step\n    const run = b.addRun(.{ .name = \"run\" });\n    run.addArtifactArg(exe);\n\n    // Test step\n    const test_step = b.step(\"test\", \"Run unit tests\");\n    const test_exe = b.addTest(.{\n        .root_source_file = b.path(\"src/main.zig\"),\n        .target = target,\n        .optimize = optimize,\n    });\n    test_step.dependOn(&test_exe.step);\n}"
   ]
  },
  "Types": {
@@ -45,6 +49,10 @@
   "enum & union": [
    "Enums define named constants with explicit or inferred integer tag values. Tagged unions combine a tag with variant payloads in a type-safe way without hidden fields.",
    "const Color = enum { red, green, blue };\nconst c: Color = .green;\n\nconst Shape = union(enum) {\n    circle: f64,\n    rect: struct { w: f64, h: f64 },\n};\nconst s: Shape = .{ .circle = 3.14 };\nstd.debug.print(\"{any}\\n\", .{s});"
+  ],
+  "Sentinel Arrays & Slices": [
+   "Sentinel-terminated arrays and slices: `[:0]u8` (null-terminated for C interop), `[_:0]u8` array with sentinel. @ptrCast and @alignCast for conversion. Sentinels enable zero-copy interop with C strings. Also: `[*c]` for C pointers, `[*]` for many-item pointers.",
+   "const std = @import(\"std\");\n\npub fn main() void {\n    // Null-terminated slice (compatible with C)\n    const c_string: [:0]const u8 = \"Hello C world!\";\n    _ = c_string;\n\n    // Sentinel-terminated array\n    const arr = [_]u8{ 'a', 'b', 'c' } ++ [_]u8{0};\n    _ = arr;\n\n    // Slice with sentinel\n    const slice: [:0]const u8 = &.{ 'H', 'i', 0 };\n    std.debug.print(\"{s}\\n\", .{slice});\n\n    // Mutable null-terminated buffer\n    var buf: [256:0]u8 = undefined;\n    _ = buf;\n\n    // C-style pointer\n    const c_ptr: [*c]const u8 = \"Hello\";\n    _ = c_ptr;\n}"
   ]
  },
  "Variables & Constants": {
@@ -67,6 +75,10 @@
   "Anonymous Bindings": [
    "Use `_` as a variable name to discard values. This suppresses unused-variable warnings and is required when you intentionally ignore a return value or loop index.",
    "const unused_result = 42;  // warning: unused\n_ = 42;  // no warning\n\nfor (0..10) |_, i| {\n    std.debug.print(\"idx={d}\\n\", .{i});\n}\n\nconst pair = .{ 1, 2 };\nconst a, _ = pair;\nstd.debug.print(\"{d}\\n\", .{a});"
+  ],
+  "Shadowing & Blocks": [
+   "Variables shadow outer declarations in inner scopes. Block expressions ({...}) create new scopes and return values. Labels (@label) for named blocks. Use blocks to limit variable lifetimes and scope. Shadowing is explicit \u2014 makes code clearer about redefinition.",
+   "const std = @import(\"std\");\n\npub fn main() void {\n    const x: u32 = 10;\n    {\n        // Inner scope shadows outer x\n        const x: u32 = 20;\n        std.debug.print(\"inner x = {d}\\n\", .{x});\n    }\n    std.debug.print(\"outer x = {d}\\n\", .{x});\n\n    // Block returns value\n    const result = blk: {\n        const a = 5;\n        const b = 7;\n        break :blk a + b;\n    };\n    std.debug.print(\"block result = {d}\\n\", .{result});\n\n    // Labeled while\n    var i: u32 = 0;\n    outer: while (i < 5) {\n        var j: u32 = 0;\n        while (j < 5) {\n            if (j > 2) break :outer;\n            j += 1;\n        }\n        i += 1;\n    }\n    std.debug.print(\"i = {d}\\n\", .{i});\n}"
   ]
  },
  "Control Flow": {
@@ -175,7 +187,7 @@
  },
  "Error Handling": {
   "Error Sets": [
-   "Error sets are declared with `error{...}` syntax. They define a set of named error values. Errors are values, not exceptions — they have no stack trace overhead until returned.",
+   "Error sets are declared with `error{...}` syntax. They define a set of named error values. Errors are values, not exceptions \u2014 they have no stack trace overhead until returned.",
    "const FileError = error{\n    NotFound,\n    PermissionDenied,\n    IoError,\n};\n\nfn openFile(path: []const u8) FileError!void {\n    if (path.len == 0) return error.NotFound;\n    std.debug.print(\"opened {s}\\n\", .{path});\n}\n\nopenFile(\"\") catch |e| {\n    std.debug.print(\"err: {}\\n\", .{e});\n};"
   ],
   "Error Union Inference": [
@@ -197,6 +209,10 @@
   "Global Error Set": [
    "`anyerror` is the global error set containing every possible error. It's the supertype of all error sets. Use for error-agnostic code or when the exact error set is unknown at compile time.",
    "fn logError(err: anyerror) void {\n    std.debug.print(\"Error: {}\\n\", .{err});\n}\n\nfn narrow() error{Foo}!void {\n    return error.Foo;\n}\n\nfn wide() anyerror!void {\n    return error.Bar;\n}\n\nlogError(error.Foo);\n_ = wide() catch |e| {\n    logError(e);\n};"
+  ],
+  "Custom Error Sets": [
+   "Define custom error sets with `const Error = error{ NotFound, PermissionDenied }`. Error sets infer from function bodies. Error union types: `Error!T`. Merge with `||`: `error{A} || error{B}`. AnyError for dynamic errors. The `!` before return type means any error. Use `anyerror!T` sparingly \u2014 prefer specific error sets.",
+   "const std = @import(\"std\");\n\nconst FileError = error{\n    NotFound,\n    PermissionDenied,\n    InvalidPath,\n};\n\nfn openConfig(path: []const u8) FileError![]const u8 {\n    if (!std.fs.path.isAbsolute(path))\n        return FileError.InvalidPath;\n    // ... actual file opening\n    return \"config content\";\n}\n\n// Merged error sets\nconst DbError = error{ ConnectionFailed, Timeout };\nconst AppError = FileError || DbError;\n\nfn loadApp() AppError!void {\n    _ = try openConfig(\"/etc/app.conf\");\n    // ...\n}\n\npub fn main() !void {\n    const result = openConfig(\"relative/path\");\n    // Handle specific errors\n    if (result) |content| {\n        std.debug.print(\"Got: {s}\\n\", .{content});\n    } else |err| switch (err) {\n        error.InvalidPath => std.debug.print(\"Bad path\\n\", .{}),\n        error.NotFound => std.debug.print(\"Not found\\n\", .{}),\n        else => std.debug.print(\"Other error\\n\", .{}),\n    }\n}"
   ]
  },
  "Optionals": {
@@ -215,6 +231,10 @@
   "Optional Pointers": [
    "Optional pointers `?*T` are size-optimized: null is represented as address 0, so no extra tag byte. This makes `?*T` the same size as `*T`. Useful for linked lists and trees.",
    "const Node = struct {\n    val: i32,\n    next: ?*Node,\n};\n\nvar third = Node{ .val = 3, .next = null };\nvar second = Node{ .val = 2, .next = &third };\nvar first = Node{ .val = 1, .next = &second };\n\nvar cur: ?*Node = &first;\nwhile (cur) |node| {\n    std.debug.print(\"{d} \", .{node.val});\n    cur = node.next;\n}\n// 1 2 3\n\nstd.debug.print(\"size of ?*Node = {d}\\n\", .{@sizeOf(?*Node)});\nstd.debug.print(\"size of *Node  = {d}\\n\", .{@sizeOf(*Node)});"
+  ],
+  "orelse & Unwrapping Patterns": [
+   "Optional unwrapping: `orelse` provides default, `.?` asserts non-null (panics if null), `if (x) |val|` captures, `while (x) |val|` loops until null. `x orelse unreachable` for invariants. `x orelse return` early exit. `x orelse continue` in loops. Nullable pointer interop via `?*T`. Compile-time optionals with `comptime`.",
+   "const std = @import(\"std\");\n\npub fn main() void {\n    const maybe: ?u32 = 42;\n\n    // orelse with default\n    const val = maybe orelse 0;\n    std.debug.print(\"val = {d}\\n\", .{val});\n\n    // Capture syntax\n    if (maybe) |n| {\n        std.debug.print(\"Got {d}\\n\", .{n});\n    } else {\n        std.debug.print(\"Got null\\n\", .{});\n    }\n\n    // Assert non-null\n    const asserted = maybe.?;\n    _ = asserted;\n\n    // While optional\n    var iter = ([]const u8{ \"a\", \"b\", \"c\" }).[0..];\n    while (iter.len > 0) {\n        const ch = iter[0];\n        iter = iter[1..];\n        std.debug.print(\"{c} \", .{ch});\n    }\n    std.debug.print(\"\\n\", .{});\n\n    // Chaining\n    const result = foo() orelse bar() orelse 0;\n    _ = result;\n}\n\nfn foo() ?u32 { return null; }\nfn bar() ?u32 { return 99; }"
   ]
  },
  "Comptime": {
@@ -241,6 +261,10 @@
   "Compile-time Reflection": [
    "`@typeInfo` returns a tagged union describing any type's structure (fields, decls, layout). `@Type` creates a type from `@typeInfo` data. `@typeName` returns the string name of a type.",
    "const User = struct {\n    name: []const u8 = \"\",\n    age: u8 = 0,\n    pub fn isAdult(self: @This()) bool {\n        return self.age >= 18;\n    }\n};\n\ncomptime {\n    const info = @typeInfo(User);\n    inline for (info.Struct.fields) |field| {\n        std.debug.print(\"field: {s} type: {s}\\n\", .{ field.name, @typeName(field.type) });\n    }\n    std.debug.print(\"has isAdult? {}\\n\", .{@hasDecl(User, \"isAdult\")});\n}\n\nconst T = @TypeOf(42);\nstd.debug.print(\"{s}\\n\", .{@typeName(T)});  // comptime_int"
+  ],
+  "Reflection & Type Info": [
+   "@typeInfo(T) returns a std.builtin.Type struct for runtime reflection of types. @TypeOf(x) returns the type. @hasDecl, @hasField check members. @field access. @typeName returns string name. comptime iteration over struct fields for serialization. @tagName for enum names. These enable generic serialization, ORMs, and schema generation.",
+   "const std = @import(\"std\");\nconst builtin = @import(\"builtin\");\n\npub fn dumpFields(comptime T: type, obj: T) void {\n    const info = @typeInfo(T);\n    switch (info) {\n        .Struct => |s| {\n            inline for (s.fields) |field| {\n                const val = @field(obj, field.name);\n                std.debug.print(\"  {s}: {any}\\n\", .{ field.name, val });\n            }\n        },\n        else => std.debug.print(\"Not a struct\\n\", .{}),\n    }\n}\n\nconst User = struct {\n    name: []const u8,\n    age: u32,\n    active: bool,\n};\n\npub fn main() void {\n    const u = User{ .name = \"Alice\", .age = 30, .active = true };\n    dumpFields(User, u);\n\n    // Compile-time type creation\n    const Point = struct { x: f64, y: f64 };\n    std.debug.print(\"Type: {s}\\n\", .{@typeName(Point)});\n\n    // @hasDecl, @hasField\n    std.debug.print(\"has x? {}\\n\", .{@hasField(User, \"name\")});\n}"
   ]
  },
  "Structs & Unions": {
@@ -293,6 +317,10 @@
   "Formatting": [
    "`std.fmt.format` is the core formatting function. `std.fmt.allocPrint` allocates a formatted string. `std.fmt.bufPrint` formats into a buffer. Custom formatters for user types via `format` method.",
    "const name = \"Zig\";\nconst version = \"0.13\";\n\n// Allocate formatted string\nconst msg = try std.fmt.allocPrint(allocator, \"{s} version {s}\", .{ name, version });\ndefer allocator.free(msg);\nstd.debug.print(\"{s}\\n\", .{msg});\n\n// Format into buffer\nvar buf: [100]u8 = undefined;\nconst slice = try std.fmt.bufPrint(&buf, \"{d} + {d} = {d}\", .{ 3, 4, 3 + 4 });\nstd.debug.print(\"{s}\\n\", .{slice});\n\n// Custom type formatting\nconst Point = struct {\n    x: i32, y: i32,\n    pub fn format(self: Point, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {\n        _ = fmt; _ = options;\n        try writer.print(\"({d}, {d})\", .{ self.x, self.y });\n    }\n};\nstd.debug.print(\"{}\\n\", .{Point{ .x = 1, .y = 2 }});"
+  ],
+  "File I/O with std.fs": [
+   "std.fs provides file operations: cwd().openFile, openDir, createFile. File.read/write, reader/writer helpers. Directory iteration with .iterate(). Path manipulation with std.fs.path. Temp files with tmpDir(). Atomic file operations. Memory-mapped files via std.os.mmap.",
+   "const std = @import(\"std\");\n\npub fn main() !void {\n    // Writing\n    const file = try std.fs.cwd().createFile(\n        \"test.txt\",\n        .{ .truncate = true },\n    );\n    defer file.close();\n\n    try file.writeAll(\"Hello, Zig file!\\n\");\n    try file.writer().print(\"Line {d}\\n\", .{42});\n\n    // Reading\n    const read_file = try std.fs.cwd().openFile(\"test.txt\", .{});\n    defer read_file.close();\n\n    const content = try read_file.readToEndAlloc(\n        std.heap.page_allocator,\n        1024,\n    );\n    defer std.heap.page_allocator.free(content);\n\n    std.debug.print(\"Read: {s}\", .{content});\n\n    // Directory iteration\n    var dir = try std.fs.cwd().openDir(\".\", .{ .iterate = true });\n    defer dir.close();\n\n    var iter = dir.iterate();\n    while (try iter.next()) |entry| {\n        std.debug.print(\"{s}: {s}\\n\", .{ @tagName(entry.kind), entry.name });\n    }\n}"
   ]
  },
  "Advanced": {
@@ -319,19 +347,23 @@
   "Build System Advanced": [
    "The build system supports conditional compilation with `comptime` options, custom build steps, dependency management via `build.zig.zon`, cross-compilation to any target, and custom run/test configurations.",
    "pub fn build(b: *std.Build) void {\n    const target = b.standardTargetOptions(.{});\n    const optimize = b.standardOptimizeOption(.{});\n\n    const exe = b.addExecutable(.{\n        .name = \"myapp\",\n        .root_source_file = b.path(\"src/main.zig\"),\n        .target = target,\n        .optimize = optimize,\n    });\n\n    // Add dependency\n    const zlib = b.dependency(\"zlib\", .{});\n    exe.root_module.addImport(\"zlib\", zlib.module(\"zlib\"));\n\n    // Custom build option\n    const enable_gpu = b.option(bool, \"enable-gpu\", \"Enable GPU support\") orelse false;\n    exe.root_module.addOptions(\"build_options\", .{\n        .enable_gpu = enable_gpu,\n    });\n\n    const test_step = b.step(\"test\", \"Run all tests\");\n    const unit_tests = b.addTest(.{\n        .root_source_file = b.path(\"src/main.zig\"),\n        .target = target,\n        .optimize = optimize,\n    });\n    test_step.dependOn(&b.addRunArtifact(unit_tests).step);\n\n    b.installArtifact(exe);\n}"
+  ],
+  "Inline Assembly (@asm)": [
+   "Zig inline assembly via `asm` expression. Syntax: `asm(volatile, \"instructions\", .(outputs), .(inputs), .(clobbers));`. Registers: [name] \"constraint\" (var). Constraints: \"r\" (register), \"m\" (memory), \"i\" (immediate). Volatile prevents dead-code elimination. No need for separate asm files \u2014 keeps everything in Zig.",
+   "const std = @import(\"std\");\n\npub fn main() void {\n    // Simple: read CPU timestamp\n    const tsc = asm volatile (\n        \\test rax, rax\n        \\test rdx, rdx\n        \\mfence\n        \\lfence\n        : // no outputs\n        : // no inputs\n        : \"rax\", \"rdx\", \"memory\"\n    );\n    _ = tsc;\n\n    // Addition\n    const a: u64 = 42;\n    const b: u64 = 58;\n    const result = asm volatile (\n        \\test add %[b], %[a]\n        : [a] \"+r\" (a),\n        : [b] \"r\" (b),\n        : \n    );\n    std.debug.print(\"{d} + {d} = {d}\\n\", .{ a, b, result });\n\n    // CPUID\n    var eax: u32 = 0;\n    var ebx: u32 = undefined;\n    var ecx: u32 = undefined;\n    var edx: u32 = undefined;\n    asm volatile (\n        \\test cpuid\n        : [eax] \"={eax}\" (eax),\n          [ebx] \"={ebx}\" (ebx),\n          [ecx] \"={ecx}\" (ecx),\n          [edx] \"={edx}\" (edx),\n        : [arg] \"{eax}\" (eax),\n        : \n    );\n    _ = .{ eax, ebx, ecx, edx };\n}"
   ]
  },
  "Zig in Practice (ziglang.org/learn)": {
   "Testing with zig test": [
-   "Zig has a built-in test framework. Write tests with `test` blocks. Run with `zig test src/main.zig`. The testing allocator catches memory leaks. `std.testing` provides expect, expectEqual, expectError, and allocator for leak detection.",
-   "const std = @import(\"std\");\nconst testing = std.testing;\n\nfn add(a: i32, b: i32) i32 { return a + b; }\n\ntest \"basic addition\" {\n    try testing.expectEqual(@as(i32, 5), add(2, 3));\n}\n\ntest \"string equality\" {\n    try testing.expectEqualStrings(\"hello\", \"hello\");\n}\n\ntest \"error expected\" {\n    const result = doRisky();\n    try testing.expectError(error.Fail, result);\n}\n\n// zig test src/main.zig\n// zig test src/main.zig --test-filter \"addition\""
+   "Zig's built-in test system: `test \"name\" { ... }` blocks. Run with `zig test src/main.zig` or `zig build test`. std.testing provides expect, expectEqual, expectError, expectString. Test allocator (std.testing.allocator) detects leaks. Test runner: `zig test --test-filter \"foo\"`. Tests compile and run at full speed \u2014 no test framework overhead.",
+   "const std = @import(\"std\");\nconst testing = std.testing;\n\nfn add(a: i32, b: i32) i32 {\n    return a + b;\n}\n\nfn divide(a: i32, b: i32) !i32 {\n    if (b == 0) return error.DivisionByZero;\n    return @divExact(a, b);\n}\n\ntest \"basic addition\" {\n    try testing.expectEqual(@as(i32, 5), add(2, 3));\n    try testing.expect(add(-1, 1) == 0);\n}\n\ntest \"division with error\" {\n    const result = divide(10, 0);\n    try testing.expectError(error.DivisionByZero, result);\n}\n\ntest \"memory allocation\" {\n    const allocator = testing.allocator;\n    var list = std.ArrayList(u32).init(allocator);\n    defer list.deinit();\n\n    try list.append(42);\n    try testing.expectEqual(@as(u32, 42), list.items[0]);\n}\n\n// Run: zig test src/main.zig\n// Run with filter: zig test src/main.zig --test-filter \"memory\"\n// Via build system: zig build test\n\npub fn main() !void {\n    std.debug.print(\"{d}\\n\", .{add(3, 4)});\n}"
   ],
   "build.zig.zon Package Manager": [
    "Zig's package manager uses `build.zig.zon` to declare dependencies with URL and hash verification. Use `zig fetch --save` to add packages. Dependencies expose modules importable in build.zig.",
    ".{\n    .name = \"my_project\",\n    .version = \"0.1.0\",\n    .dependencies = .{\n        .zlib = .{\n            .url = \"https://github.com/ziglibs/zlib/archive/v0.2.0.tar.gz\",\n            .hash = \"1220abcdef...\",\n        },\n    },\n    .paths = .{\"src\", \"build.zig\", \"build.zig.zon\"},\n}\n\n// zig fetch --save https://github.com/user/repo/archive/v1.0.tar.gz\n// zig build\n// zig build run"
   ],
   "Cross-Compilation": [
-   "Zig cross-compiles out of the box — no SDK needed. Specify `-target` with triple: `arch-os-abi`. Supports x86_64-linux, aarch64-macos, wasm32-freestanding, and hundreds more. Build.zig uses `b.standardTargetOptions(.{})` for configurable targets.",
+   "Zig cross-compiles out of the box \u2014 no SDK needed. Specify `-target` with triple: `arch-os-abi`. Supports x86_64-linux, aarch64-macos, wasm32-freestanding, and hundreds more. Build.zig uses `b.standardTargetOptions(.{})` for configurable targets.",
    "# Cross-compile for ARM Linux\nzig build-exe src/main.zig -target aarch64-linux-musl -O ReleaseSmall\n\n# Cross-compile for Windows from Linux\nzig build-exe src/main.zig -target x86_64-windows-gnu\n\n# WebAssembly\nzig build-exe src/main.zig -target wasm32-freestanding -O ReleaseSmall\n\n# List all targets: zig targets\n\n# In build.zig: const target = b.standardTargetOptions(.{});"
   ],
   "WebAssembly with Zig": [
@@ -349,6 +381,10 @@
   "Debugging Zig Programs": [
    "Use `std.debug.print` for logging, `@breakpoint()` for debugger breakpoints, `std.debug.assert` for invariants. Build with `-Doptimize=Debug` (default) for full debug info. Error Return Trace shows the call chain on errors. Use LLDB or GDB for step debugging.",
    "pub fn main() !void {\n    std.debug.print(\"Starting...\\n\", .{});\n\n    const x: i32 = 10;\n    std.debug.assert(x > 0);\n\n    @breakpoint();\n\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    const allocator = gpa.allocator();\n    const buf = try allocator.alloc(u8, 10);\n    allocator.free(buf);\n\n    const leaked = gpa.deinit();\n    if (leaked) @panic(\"Memory leak!\");\n}\n\n// zig build           (Debug)\n// zig build -Doptimize=ReleaseSafe\n// zig build -Doptimize=ReleaseFast"
+  ],
+  "Package Management": [
+   "Zig package manager uses build.zig.zon (Zig Object Notation). Define dependencies with URL and hash. `zig fetch` downloads and updates hash. Declare dependency in build.zig: b.dependency(). Module exposes .zig files via .addModule(). Version resolution is manual (no semver solver). Packages are cached globally.",
+   "// build.zig.zon\n.{\n    .name = \"myapp\",\n    .version = \"0.1.0\",\n    .dependencies = .{\n        .httpz = .{\n            .url = \"https://github.com/karlseguin/httpz/archive/refs/tags/v0.1.0.tar.gz\",\n            .hash = \"1220...\",  // auto-filled by zig fetch\n        },\n        .zap = .{\n            .url = \"https://github.com/zigzap/zap/archive/refs/tags/v0.3.0.tar.gz\",\n            .hash = \"1220...\",\n        },\n    },\n    .paths = .{\n        \"build.zig\",\n        \"build.zig.zon\",\n        \"src\",\n    },\n}\n\n// Terminal commands\n// zig fetch --save=httpz  // download and save hash\n// zig build              // builds with all dependencies\n\n// In build.zig:\n// const httpz = b.dependency(\"httpz\", .{}).module(\"httpz\");\n// exe.root_module.addImport(\"httpz\", httpz);\n\n// src/main.zig\n// const httpz = @import(\"httpz\");\n// pub fn main() !void { ... }"
   ]
  }
 }
