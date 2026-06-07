@@ -4,7 +4,7 @@ import { PY_SPEC } from '../specs/py.js';
 import { GO_SPEC } from '../specs/go.js';
 import { RS_SPEC } from '../specs/rs.js';
 import { C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC } from '../specs/c-family.js';
-import { JAVA_SPEC, KT_SPEC, SCALA_SPEC } from '../specs/jvm.js';
+import { JAVA_SPEC, KOTLIN_SPEC as KT_SPEC, SCALA_SPEC } from '../specs/jvm.js';
 import { HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC } from '../specs/web.js';
 import { SWIFT_SPEC, LUA_SPEC } from '../specs/mobile.js';
 import { SQL_SPEC, PHP_SPEC, RB_SPEC } from '../specs/sql-rb.php.js';

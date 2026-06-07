@@ -169,7 +169,7 @@ export const WASM_SPEC = {
   concepts: [
     { term: 'Linear memory', definition: 'A contiguous array of bytes that WebAssembly modules can read and write to.' },
     { term: 'Stack machine', definition: 'WASM execution model where instructions pop operands from and push results onto a stack.' },
-    { term: 'S-expression', definition: 'The text format for WebAssembly using parenthesized prefix notation ('(module ...)').' },
+    { term: 'S-expression', definition: 'The text format for WebAssembly using parenthesized prefix notation (like (module ...)).' },
     { term: 'Typed instructions', definition: 'WASM instructions are prefixed with their type (i32, i64, f32, f64) for type-safe operations.' },
     { term: 'Deterministic execution', definition: 'WASM guarantees deterministic behavior — same input always produces same output.' },
   ],
