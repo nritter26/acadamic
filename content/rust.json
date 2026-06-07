@@ -39,7 +39,7 @@
  },
  "Control Flow": {
   "if / else if / else": [
-   "Conditions must be `bool` — no truthy/falsy coercion. `if` is an expression, assignable with `let`. All arms must return the same type. Blocks evaluate to their last expression.",
+   "Conditions must be `bool` \u2014 no truthy/falsy coercion. `if` is an expression, assignable with `let`. All arms must return the same type. Blocks evaluate to their last expression.",
    "let n = 7;\nif n % 2 == 0 {\n    println!(\"even\");\n} else {\n    println!(\"odd\");\n}\nlet label = if n > 5 { \"big\" } else { \"small\" };\nprintln!(\"{}\", label);"
   ],
   "Loops (loop, while, for)": [
@@ -101,7 +101,7 @@
    "use std::cell::RefCell;\nlet data = RefCell::new(5);\n{\n    let mut b = data.borrow_mut();\n    *b += 1;\n}\nprintln!(\"{}\", data.borrow());"
   ],
   "RefCell & Borrow Checking at Runtime": [
-   "RefCell enforces borrow rules at runtime — panics on violation. `borrow()` returns `Ref<T>`, `borrow_mut()` returns `RefMut<T>`. Useful when the compiler can't verify correctness.",
+   "RefCell enforces borrow rules at runtime \u2014 panics on violation. `borrow()` returns `Ref<T>`, `borrow_mut()` returns `RefMut<T>`. Useful when the compiler can't verify correctness.",
    "use std::cell::RefCell;\nlet cell = RefCell::new(vec![1, 2, 3]);\n// let mut r1 = cell.borrow_mut();\n// let r2 = cell.borrow(); // panic: already mutably borrowed\n{\n    let mut r = cell.borrow_mut();\n    r.push(4);\n}\nprintln!(\"{:?}\", cell.borrow());"
   ]
  },
@@ -163,7 +163,7 @@
    "struct Color(i32, i32, i32);\nstruct Meters(f64);\nlet black = Color(0, 0, 0);\nlet dist = Meters(100.0);\nprintln!(\"r={} dist={}\", black.0, dist.0);"
   ],
   "Unit Structs": [
-   "Unit structs have no fields — act as markers or flags. Zero size. Useful for implementing traits without data, or as phantom types with `PhantomData`.",
+   "Unit structs have no fields \u2014 act as markers or flags. Zero size. Useful for implementing traits without data, or as phantom types with `PhantomData`.",
    "struct Unit;\nimpl Unit {\n    fn do_something(&self) -> &str { \"done\" }\n}\nlet u = Unit;\nprintln!(\"{}\", u.do_something());"
   ],
   "Enums": [
@@ -189,7 +189,7 @@
    "trait Greet: std::fmt::Display {\n    fn greet(&self) -> String {\n        format!(\"Hello, {}\", self)\n    }\n}\nstruct Person { name: String }\nimpl std::fmt::Display for Person {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{}\", self.name)\n    }\n}\nimpl Greet for Person {}\nprintln!(\"{}\", Person { name: \"Alice\".into() }.greet());"
   ],
   "Trait Objects & dyn Trait": [
-   "Trait objects enable dynamic dispatch via vtable. `dyn Trait` is unsized — must be behind a pointer (`&dyn Trait`, `Box<dyn Trait>`). Objects must be object-safe (no generic methods, no Self by value).",
+   "Trait objects enable dynamic dispatch via vtable. `dyn Trait` is unsized \u2014 must be behind a pointer (`&dyn Trait`, `Box<dyn Trait>`). Objects must be object-safe (no generic methods, no Self by value).",
    "trait Animal { fn sound(&self) -> String; }\nstruct Cat;\nimpl Animal for Cat { fn sound(&self) -> String { \"meow\".into() } }\nlet animals: Vec<Box<dyn Animal>> = vec![Box::new(Cat)];\nprintln!(\"{}\", animals[0].sound());"
   ],
   "impl Trait Syntax": [
@@ -197,7 +197,7 @@
    "fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |y| x + y\n}\nfn displayable() -> impl std::fmt::Display {\n    \"hello world\"\n}\nlet add5 = make_adder(5);\nprintln!(\"{}\", add5(3));\nprintln!(\"{}\", displayable());"
   ],
   "Associated Types": [
-   "Associated types define placeholder types within a trait. One implementation per type — unlike generics which allow multiple impls. Used extensively in Iterator, Deref, and operator traits.",
+   "Associated types define placeholder types within a trait. One implementation per type \u2014 unlike generics which allow multiple impls. Used extensively in Iterator, Deref, and operator traits.",
    "trait Container {\n    type Item;\n    fn first(&self) -> Option<&Self::Item>;\n}\nimpl<T> Container for Vec<T> {\n    type Item = T;\n    fn first(&self) -> Option<&Self::Item> {\n        self.first()\n    }\n}\nlet v = vec![1, 2, 3];\nprintln!(\"{:?}\", v.first());"
   ],
   "Blanket Implementations": [
@@ -239,13 +239,13 @@
    "use std::error::Error;\nfn print_chain(e: &dyn Error) {\n    let mut source = Some(e);\n    while let Some(err) = source {\n        println!(\"{}\", err);\n        source = err.source();\n    }\n}"
   ],
   "Result Combinators": [
-   "`map`, `map_err`, `and_then`, `or_else`, `unwrap_or`, `unwrap_or_else`, `ok`, `err`, `transpose` — these combinators transform Results without explicit match.",
+   "`map`, `map_err`, `and_then`, `or_else`, `unwrap_or`, `unwrap_or_else`, `ok`, `err`, `transpose` \u2014 these combinators transform Results without explicit match.",
    "fn parse(s: &str) -> Result<i32, String> {\n    s.parse().map_err(|e| format!(\"{}\", e))\n}\nfn add_results(a: Result<i32, String>, b: Result<i32, String>) -> Result<i32, String> {\n    a.and_then(|x| b.map(|y| x + y))\n}\nlet r = add_results(parse(\"5\"), parse(\"3\"));\nprintln!(\"{:?}\", r);"
   ]
  },
  "Collections": {
   "Vec": [
-   "`Vec<T>` is the primary sequence type — growable, heap-allocated, contiguous. Amortized O(1) push/pop. O(n) insert/remove. `with_capacity` pre-allocates. `drain`, `splice`, `retain` for advanced operations.",
+   "`Vec<T>` is the primary sequence type \u2014 growable, heap-allocated, contiguous. Amortized O(1) push/pop. O(n) insert/remove. `with_capacity` pre-allocates. `drain`, `splice`, `retain` for advanced operations.",
    "let mut v = vec![1, 2, 3];\nv.push(4);\nlet last = v.pop();\nv.splice(1..2, [10, 11]);\nprintln!(\"{:?} {:?}\", v, last);"
   ],
   "VecDeque": [
@@ -283,11 +283,11 @@
    "use std::rc::Rc;\nlet a = Rc::new(5);\nlet b = Rc::clone(&a);\nprintln!(\"count: {}\", Rc::strong_count(&a));\nprintln!(\"{} {}\", a, b);\nlet weak = Rc::downgrade(&a);\nprintln!(\"weak: {}\", weak.upgrade().unwrap());"
   ],
   "Arc<T> (Atomic RC)": [
-   "`Arc<T>` is `Rc` + atomic reference counting — thread-safe. `Arc::clone()` is atomic. Pair with `Mutex<T>` for mutable shared state. `Arc<[T]>` for shared slices.",
+   "`Arc<T>` is `Rc` + atomic reference counting \u2014 thread-safe. `Arc::clone()` is atomic. Pair with `Mutex<T>` for mutable shared state. `Arc<[T]>` for shared slices.",
    "use std::sync::Arc;\nlet data = Arc::new(vec![1, 2, 3]);\nlet mut handles = vec![];\nfor _ in 0..3 {\n    let d = Arc::clone(&data);\n    handles.push(std::thread::spawn(move || {\n        println!(\"{:?}\", d);\n    }));\n}\nfor h in handles { h.join().unwrap(); }"
   ],
   "Cell<T> & RefCell<T>": [
-   "`Cell<T>` provides interior mutability for Copy types (no borrow checking — just copy in/out). `RefCell<T>` provides interior mutability for any type, checking borrows at runtime.",
+   "`Cell<T>` provides interior mutability for Copy types (no borrow checking \u2014 just copy in/out). `RefCell<T>` provides interior mutability for any type, checking borrows at runtime.",
    "use std::cell::Cell;\nlet cell = Cell::new(42);\ncell.set(100);\nprintln!(\"{}\", cell.get());\nuse std::cell::RefCell;\nlet rc = RefCell::new(vec![1, 2, 3]);\nrc.borrow_mut().push(4);\nprintln!(\"{:?}\", rc.borrow());"
   ],
   "Cow (Clone-on-Write)": [
@@ -309,6 +309,10 @@
   "Channels (mpsc)": [
    "`std::sync::mpsc` provides multi-producer, single-consumer channels. `Sender` clones for multiple producers. `Receiver` has `recv`, `try_recv`, `iter`. `crossbeam` offers multi-consumer variants.",
    "use std::sync::mpsc;\nuse std::thread;\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send(\"hello\").unwrap();\n});\nlet msg = rx.recv().unwrap();\nprintln!(\"{}\", msg);"
+  ],
+  "Pinning & Pin<P>": [
+   "Pin<P> ensures a value won't be moved in memory. Essential for self-referential structs (e.g., async Futures). `Pin<Box<T>>` (heap-pinned), `Pin<&mut T>` (stack-pinned via `pin!` macro). Once pinned, cannot safely move. `Unpin` auto-trait: most types are Unpin (move OK). Async blocks/futures are `!Unpin` (not Unpin). Unsafe `get_unchecked_mut` to mutate pinned data. PhantomPinned marker make a type !Unpin.",
+   "use std::marker::PhantomPinned;\nuse std::pin::Pin;\n\n// Self-referential struct (must be !Unpin)\nstruct SelfReferential {\n    data: String,\n    ptr: *const String,  // Points to self.data\n    _pin: PhantomPinned,  // Make !Unpin\n}\n\nimpl SelfReferential {\n    fn new(data: String) -> Pin<Box<Self>> {\n        let mut s = Self {\n            ptr: std::ptr::null(),\n            data,\n            _pin: PhantomPinned,\n        };\n        let mut pinned = Box::pin(s);\n        // SAFETY: We never move after setting ptr\n        unsafe {\n            let mut_ref = Pin::as_mut(&mut pinned);\n            mut_ref.get_unchecked_mut().ptr = &mut_ref.get_unchecked_mut().data;\n        }\n        pinned\n    }\n\n    fn get_ptr(&self) -> &String {\n        unsafe { &*self.ptr }\n    }\n}\n\n// Stack pinning (nightly or with pin-utils)\n// use pin_utils::pin_mut;\n// let val = String::from(\"hello\");\n// pin_mut!(val);\n\n// Async futures are !Unpin\nasync fn example() -> i32 {\n    42\n}\n\nfn main() {\n    let pinned = SelfReferential::new(\"Hello\".to_string());\n    println!(\"{}\", pinned.get_ptr());  // Hello\n    \n    // This would not compile:\n    // let moved = *pinned;  // Error: cannot move out of Pin\n    \n    // Futures are not Unpin\n    let fut = example();\n    // Pin<&mut dyn Future> is needed for .await\n    // Box::pin(fut).await;\n    \n    println!(\"Self-referential pointer OK\");\n}"
   ]
  },
  "Modules & Cargo": {
@@ -377,7 +381,7 @@
  },
  "Async Rust": {
   "async/await Basics": [
-   "`async fn` returns a `Future`. `.await` polls the future to completion. Futures are lazy — they do nothing until awaited or polled. An executor is required to drive futures.",
+   "`async fn` returns a `Future`. `.await` polls the future to completion. Futures are lazy \u2014 they do nothing until awaited or polled. An executor is required to drive futures.",
    "async fn fetch_data() -> String {\n    \"data\".to_string()\n}\n#[tokio::main]\nasync fn main() {\n    let result = fetch_data().await;\n    println!(\"{}\", result);\n}"
   ],
   "Tokio Runtime Deep": [
@@ -393,7 +397,7 @@
    "use tokio::time::{sleep, Duration};\n#[tokio::main]\nasync fn main() {\n    tokio::select! {\n        _ = sleep(Duration::from_millis(100)) => println!(\"fast\"),\n        _ = sleep(Duration::from_millis(200)) => println!(\"slow\"),\n    }\n}"
   ],
   "join_all / FuturesUnordered": [
-   "`futures::future::join_all` awaits a collection of futures, returning all results. `FuturesUnordered` polls a set of futures, yielding results as they complete — ideal for dynamic workloads.",
+   "`futures::future::join_all` awaits a collection of futures, returning all results. `FuturesUnordered` polls a set of futures, yielding results as they complete \u2014 ideal for dynamic workloads.",
    "use futures::future::join_all;\nasync fn task(id: u32) -> u32 {\n    tokio::time::sleep(std::time::Duration::from_millis(10 * id as u64)).await;\n    id\n}\n#[tokio::main]\nasync fn main() {\n    let results = join_all((1..=5).map(task)).await;\n    println!(\"{:?}\", results);\n}"
   ],
   "Async Streams": [
@@ -445,11 +449,11 @@
    "struct RequestBuilder { url: String, method: String, body: Option<String> }\nimpl RequestBuilder {\n    fn new(url: &str) -> Self { Self { url: url.into(), method: \"GET\".into(), body: None } }\n    fn method(mut self, m: &str) -> Self { self.method = m.into(); self }\n    fn body(mut self, b: &str) -> Self { self.body = Some(b.into()); self }\n    fn build(&self) -> Request { Request { url: self.url.clone(), method: self.method.clone(), body: self.body.clone() } }\n}\nstruct Request { url: String, method: String, body: Option<String> }"
   ],
   "RAII (Resource Acquisition Is Initialization)": [
-   "RAII ties resource lifetime to scope. Files, locks, and memory are released in `Drop`. `MutexGuard`, `File`, `Box` all use RAII. Cannot forget to release — the compiler handles it.",
+   "RAII ties resource lifetime to scope. Files, locks, and memory are released in `Drop`. `MutexGuard`, `File`, `Box` all use RAII. Cannot forget to release \u2014 the compiler handles it.",
    "use std::fs::File;\nuse std::io::Write;\nfn write_file() -> std::io::Result<()> {\n    let mut f = File::create(\"hello.txt\")?; // acquired\n    f.write_all(b\"hello\")?;\n    Ok(()) // f dropped here: file closed\n}\nuse std::sync::Mutex;\nlet m = Mutex::new(42);\n{\n    let guard = m.lock().unwrap(); // acquired\n    println!(\"{}\", *guard);\n} // released here"
   ],
   "Newtype Pattern": [
-   "Wrap a single type in a tuple struct for type safety and trait impls. Zero-cost abstraction — the wrapper is optimized away. Used for units, IDs, and implementing external traits on external types.",
+   "Wrap a single type in a tuple struct for type safety and trait impls. Zero-cost abstraction \u2014 the wrapper is optimized away. Used for units, IDs, and implementing external traits on external types.",
    "struct UserId(u64);\nstruct Meters(f64);\nfn add_distance(a: Meters, b: Meters) -> Meters {\n    Meters(a.0 + b.0)\n}\nimpl std::fmt::Display for Meters {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{}m\", self.0)\n    }\n}\nlet d = Meters(5.0);\nprintln!(\"{}\", d);"
   ],
   "Deref Pattern & Deref Coercion": [
@@ -463,6 +467,10 @@
   "Typestate Pattern": [
    "Typestate encoding uses the type system to enforce state transitions. Methods consume the current state and return the next. Invalid transitions are compile-time errors. Common in builders and protocols.",
    "struct Door;\nstruct OpenDoor;\nimpl Door {\n    fn open(self) -> OpenDoor { OpenDoor }\n}\nimpl OpenDoor {\n    fn close(self) -> Door { Door }\n}\nlet door = Door;\nlet open = door.open();\n// open.open(); // error: no method named 'open'\nlet _closed = open.close();"
+  ],
+  "Interior Mutability Patterns": [
+   "Interior mutability: mutate data through shared references. Types: Cell<T> (Copy types, no sync), RefCell<T> (non-Copy, runtime borrow checking, no sync), OnceCell<T> (write once, no sync). Sync versions: Mutex<T>, RwLock<T>, AtomicBool/isize/ptr, OnceLock<T>. RefCell borrows checked at runtime \u2014 panics on double borrow. Rc<RefCell<T>> for shared mutable ownership (single-thread). Arc<Mutex<T>> for multi-thread.",
+   "use std::cell::{Cell, RefCell};\nuse std::rc::Rc;\nuse std::sync::{Arc, Mutex};\nuse std::thread;\n\n// Cell: Copy types\nfn cell_demo() {\n    let count = Cell::new(0);\n    count.set(count.get() + 1);\n    count.set(count.get() + 1);\n    println!(\"Cell count: {}\", count.get());  // 2\n}\n\n// RefCell: runtime borrow checks\nfn refcell_demo() -> i32 {\n    let data = RefCell::new(vec![1, 2, 3]);\n    data.borrow_mut().push(4);\n    data.borrow_mut().push(5);\n    let sum: i32 = data.borrow().iter().sum();\n    sum\n}\n\n// Rc<RefCell<T>>: shared mutable ownership\nfn rc_refcell_demo() {\n    let shared: Rc<RefCell<Vec<i32>>> = Rc::new(RefCell::new(vec![]));\n    let c1 = Rc::clone(&shared);\n    let c2 = Rc::clone(&shared);\n    \n    c1.borrow_mut().push(1);\n    c2.borrow_mut().push(2);\n    \n    println!(\"Shared vec: {:?}\", shared.borrow());  // [1, 2]\n}\n\n// Arc<Mutex<T>>: thread-safe shared state\nfn arc_mutex_demo() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec![];\n    \n    for _ in 0..10 {\n        let c = Arc::clone(&counter);\n        handles.push(thread::spawn(move || {\n            let mut val = c.lock().unwrap();\n            *val += 1;\n        }));\n    }\n    \n    for h in handles { h.join().unwrap(); }\n    println!(\"Final count: {}\", *counter.lock().unwrap());  // 10\n}\n\nfn main() {\n    cell_demo();\n    println!(\"RefCell sum: {}\", refcell_demo());\n    rc_refcell_demo();\n    arc_mutex_demo();\n}"
   ]
  },
  "Testing": {
@@ -501,7 +509,7 @@
    "macro_rules! vec_of {\n    ($($x:expr),* $(,)?) => {\n        {\n            let mut v = Vec::new();\n            $(v.push($x);)*\n            v\n        }\n    };\n}\nlet v = vec_of![1, 2, 3,];\nprintln!(\"{:?}\", v);"
   ],
   "Macro Patterns & Designators": [
-   "Designators: `block`, `expr`, `ident`, `item`, `lifetime`, `literal`, `meta`, `pat`, `path`, `stmt`, `tt`, `ty`, `vis`. `tt` (token tree) is the most flexible — matches any single token group.",
+   "Designators: `block`, `expr`, `ident`, `item`, `lifetime`, `literal`, `meta`, `pat`, `path`, `stmt`, `tt`, `ty`, `vis`. `tt` (token tree) is the most flexible \u2014 matches any single token group.",
    "macro_rules! make_struct {\n    ($name:ident, $field:ident: $ty:ty) => {\n        struct $name { $field: $ty }\n    };\n}\nmake_struct!(Point, x: f64);\nlet p = Point { x: 1.0 };\nprintln!(\"{}\", p.x);"
   ],
   "Procedural Macros (proc-macro)": [
@@ -519,6 +527,10 @@
   "Debugging Macros": [
    "`cargo expand` (cargo-expand) shows macro expansion output. `log_syntax!()` prints tokens during expansion. `trace_macros!()` logs all macro invocations. `stringify!()` converts to string.",
    "macro_rules! debug_log {\n    ($x:expr) => {\n        {\n            let val = $x;\n            println!(\"{} = {:?}\", stringify!($x), val);\n            val\n        }\n    };\n}\nlet x = debug_log!(42 + 1);\nprintln!(\"x = {}\", x);\n// cargo expand shows:\n// let x = { let val = 42 + 1; println!(\"42 + 1 = {:?}\", val); val };"
+  ],
+  "Declarative Macro Patterns": [
+   "Advanced macro_rules! patterns: TT muncher (recursive token tree processing), internal rules, hygiene control, token types (ident, expr, ty, pat, stmt, block, literal, tt, meta, lifetime, vis). Common: vec! (repeated expr), hashmap! (key=>value pairs), builder patterns. Repetition: `$($x:expr),*` (zero+), `$($x:expr),+` (one+). Use `@` for internal rules. Export with `#[macro_export]`.",
+   "#[macro_export]\nmacro_rules! hashmap {\n    ($($key:expr => $val:expr),* $(,)?) => {{\n        let mut map = ::std::collections::HashMap::new();\n        $(map.insert($key, $val);)*\n        map\n    }};\n}\n\n// Builder macro\n#[macro_export]\nmacro_rules! builder {\n    // Entry point\n    ($name:ident { $($field:ident: $ty:ty),* $(,)? }) => {\n        struct $name {\n            $($field: $ty,)*\n        }\n        \n        struct $name {\n            $($field: Option<$ty>,)*\n            _private: (),\n        }\n        \n        impl $name {\n            fn new() -> Self {\n                Self {\n                    $($field: None,)*\n                    _private: (),\n                }\n            }\n            $(fn $field(mut self, val: $ty) -> Self {\n                self.$field = Some(val);\n                self\n            })*\n            fn build(self) -> Result<$name, &'static str> {\n                Ok($name {\n                    $($field: self.$field.ok_or(concat!(\n                        stringify!($field), \" is required\"))?,)*\n                })\n            }\n        }\n    };\n}\n\n// TT muncher pattern\n#[macro_export]\nmacro_rules! compute {\n    // Base case: single number\n    ($x:expr) => { $x };\n    // Recursive: add\n    ($x:expr + $($rest:tt)+) => { $x + compute!($($rest)*) };\n    // Recursive: multiply\n    ($x:expr * $($rest:tt)+) => { $x * compute!($($rest)*) };\n}\n\n// Usage\nfn main() {\n    let m = hashmap!(\n        \"one\" => 1,\n        \"two\" => 2,\n        \"three\" => 3,\n    );\n    println!(\"Map len: {}\", m.len());  // 3\n    \n    let result = compute!(1 + 2 * 3 + 4);\n    println!(\"Compute: {}\", result);  // (1 + (2*3)) + 4 = 11\n} \n\n// macro_export makes macro available to crate users\n// Use path-based: crate::hashmap!\n// Hygiene: macro vars don't leak (unlike C preprocessor)"
   ]
  }
 }
