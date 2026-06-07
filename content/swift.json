@@ -52,7 +52,7 @@
   ],
   "Booleans & Characters": [
    "Bool has `true` and `false`. Character is a single Unicode grapheme cluster. `String` is a collection of Characters. Use toggle() to flip a Bool value.",
-   "var isOn = true\nisOn.toggle()\nprint(isOn)  // false\n\nlet star: Character = \"⭐️\"\nlet chars: [Character] = [\"H\", \"e\", \"l\", \"l\", \"o\"]\nprint(String(chars))"
+   "var isOn = true\nisOn.toggle()\nprint(isOn)  // false\n\nlet star: Character = \"\u2b50\ufe0f\"\nlet chars: [Character] = [\"H\", \"e\", \"l\", \"l\", \"o\"]\nprint(String(chars))"
   ],
   "Any & AnyObject": [
    "`Any` can represent any type (including functions and optionals). `AnyObject` represents any class instance. Avoid using these in favor of generics and protocol types for type safety.",
@@ -65,7 +65,7 @@
    "let score = 85\nif score >= 90 {\n    print(\"A\")\n} else if score >= 80 {\n    print(\"B\")\n} else {\n    print(\"C\")\n}\n\nif let value = Int(\"42\") {\n    print(value)\n}"
   ],
   "switch": [
-   "`switch` supports pattern matching, ranges, tuples, value binding, and where clauses. No implicit fallthrough — use `fallthrough` explicitly. Must be exhaustive with `default` or all cases covered.",
+   "`switch` supports pattern matching, ranges, tuples, value binding, and where clauses. No implicit fallthrough \u2014 use `fallthrough` explicitly. Must be exhaustive with `default` or all cases covered.",
    "let value = 3\nswitch value {\ncase 1:\n    print(\"one\")\ncase 2...5:\n    print(\"two to five\")\ncase let n where n % 2 == 0:\n    print(\"even\")\ndefault:\n    print(\"other\")\n}"
   ],
   "for-in & while": [
@@ -151,6 +151,10 @@
   "Optional Pattern Matching": [
    "Optionals integrate with switch-case pattern matching. Match `.some` and `.none` directly, or use optional pattern `let x?`. Works with `if case` and `for case`.",
    "let value: Int? = 42\nswitch value {\ncase .some(let x):\n    print(\"Has value: \\(x)\")\ncase .none:\n    print(\"Is nil\")\n}\n\nif case let x? = value {\n    print(x)\n}\n\nlet optionals: [Int?] = [nil, 1, nil, 2]\nfor case let x? in optionals {\n    print(x)  // 1, 2\n}"
+  ],
+  "Optional Chaining Deep": [
+   "Optional chaining (`?.`) short-circuits if nil. Can chain multiple levels: `person?.address?.city`. Returns optional at each level. Use `!` only when guaranteed non-nil. `??` nil-coalescing provides default. Combine with map/flatMap on optionals for functional transformations. Multiple optional binding: `if let a = x, let b = y { }`. Optional pattern matching in switch.",
+   "struct Address {\n    let street: String\n    let city: String\n}\n\nstruct Person {\n    let name: String\n    var address: Address?\n    var primaryEmail: String?\n    var secondaryEmail: String?\n}\n\nlet people = [\n    Person(name: \"Alice\", address: Address(street: \"123 Main\", city: \"NYC\")),\n    Person(name: \"Bob\", address: nil),\n]\n\nfor person in people {\n    // Chaining: each .? produces optional\n    let city = person.address?.city\n    print(\"\\(person.name): \\(city ?? \"unknown location\")\")\n    \n    // Map/filter on optional\n    let greeting = person.address.map {\n        \"\\(person.name) lives at \\($0.street)\"\n    }\n    print(greeting ?? \"No address\")\n    \n    // Multiple optional binding\n    if let email = person.primaryEmail ?? person.secondaryEmail {\n        print(\"Contact: \\(email)\")\n    }\n    \n    // flatMap for nested optionals\n    let firstChar: Character? = person.primaryEmail?.first\n    _ = firstChar\n}\n\n// Optional pattern matching\nlet name: String? = \"Swift\"\nswitch name {\ncase .some(let n):\n    print(\"Has name: \\(n)\")\ncase .none:\n    print(\"No name\")\n}\n\n// compactMap\nlet optionalNumbers: [Int?] = [1, nil, 3, nil, 5]\nlet numbers = optionalNumbers.compactMap { $0 }\nprint(numbers)"
   ]
  },
  "Collections": {
@@ -339,6 +343,10 @@
   "Type Erasure": [
    "Type erasure wraps a concrete generic type into an abstract type, hiding the generic parameter. Common patterns: AnySequence, AnyPublisher. Implement via a box/wrapper class.",
    "protocol Drawable {\n    associatedtype Color\n    func draw(with color: Color) -> String\n}\n\nstruct AnyDrawable<Color>: Drawable {\n    private let _draw: (Color) -> String\n    \n    init<T: Drawable>(_ drawable: T) where T.Color == Color {\n        self._draw = drawable.draw\n    }\n    \n    func draw(with color: Color) -> String {\n        _draw(color)\n    }\n}\n\nstruct Pen: Drawable {\n    func draw(with color: String) -> String { \"Drawing with \\(color) pen\" }\n}\n\nlet any: AnyDrawable<String> = AnyDrawable(Pen())\nprint(any.draw(with: \"blue\"))"
+  ],
+  "some & any Keywords": [
+   "`some` (opaque types, Swift 5.1) hides the concrete return type: `some View`. The compiler knows the concrete type; caller doesn't. `any` (existential types, Swift 5.6) erases the concrete type: `any Equatable`. Caller can store heterogeneous values. `some` enables efficient polymorphism (no box); `any` has runtime overhead from existential containers. Opaque types preserve identity; existentials don't.",
+   "import SwiftUI\n\n// Opaque return type (some)\n// Compiler knows concrete type, caller doesn't\nfunc makeView() -> some View {\n    Text(\"Hello\")  // Concrete type: Text\n    // return Button(\"Hi\") { }  // Error: must return Text\n}\n\n// Existential type (any)\nfunc makeEquatable() -> any Equatable {\n    if Bool.random() {\n        return 42\n    } else {\n        return \"Hello\"  // OK: different type! (runtime box)\n    }\n}\n\n// some in properties\nstruct ContentView: View {\n    var body: some View {\n        VStack {\n            Text(\"Opaque types\")\n                .font(.title)\n        }\n    }\n}\n\n// any in collections\nlet values: [any Equatable] = [1, \"hello\", true, 3.14]\n\n// Protocol with associated type\nprotocol Container {\n    associatedtype Item\n    var items: [Item] { get }\n}\n\n// some: return a specific concrete type\nfunc makeContainer() -> some Container {\n    struct StringContainer: Container {\n        var items: [String] = [\"a\", \"b\"]\n    }\n    return StringContainer()\n}\n\n// any erases the type (Swift 5.6+)\n// func showContainer(_ c: any Container) { ... }"
   ]
  },
  "Advanced Swift": {
@@ -373,6 +381,10 @@
   "Opaque Parameter Types": [
    "Swift 5.7+ allows `some` in function parameter position (like `some View`). Equivalent to a generic parameter with a protocol constraint but written more concisely.",
    "func drawShape(_ shape: some Shape) -> String {\n    \"Drawing shape with area: \\(shape.area())\"\n}\n\n// Equivalent to:\n// func drawShape<T: Shape>(_ shape: T) -> String\n\nfunc compareShapes(_ a: some Shape, _ b: some Shape) -> Bool {\n    // a and b can be different concrete types\n    a.area() > b.area()\n}\n\nprint(drawShape(Circle(radius: 5)))\nprint(compareShapes(Circle(radius: 3), Square(side: 4)))"
+  ],
+  "Macros (Swift 5.9+)": [
+   "Swift macros (Swift 5.9+) generate code at compile time. Freestanding macros (#stringify, #warning). Attached macros (@Observable, @Test, @MainActor). Declared with `@macro` or via external module. Built-in: #Preview, #Predicate. Macro roles: @freestanding(expression), @freestanding(declaration), @attached(member), @attached(conformance), @attached(peer).",
+   "import SwiftUI\n\n// Built-in macros\nlet x = 10\nlet y = 20\n// #stringify(x + y) expands to (x + y, \"x + y\")\n\n// @Observable macro (iOS 17+)\n@Observable\nclass AppModel {\n    var name = \"Alice\"\n    var score = 0\n}\n// Expands to:\n// class AppModel: Observable {\n//     @ObservationTracked var name = \"Alice\"\n//     @ObservationTracked var score = 0\n// }\n\n// @MainActor - ensures runs on main thread\n@MainActor\nclass ViewModel: ObservableObject {\n    @Published var data: [String] = []\n}\n\n// @Test for Swift Testing (Swift 6+)\n// import Testing\n// struct MyTests {\n//     @Test func verify() {\n//         #expect(2 + 2 == 4)\n//     }\n// }\n\n// #Preview macro (Xcode 15+)\n#Preview {\n    Text(\"Preview with macro\")\n        .padding()\n}\n\n// Custom macro (requires separate Macro target)\n// @freestanding(expression)\n// macro URL(_ string: String) -> URL = #externalMacro(...)\n// Usage: #URL(\"https://apple.com\")"
   ]
  },
  "Concurrency": {
@@ -437,6 +449,10 @@
   "Memory Layout": [
    "`MemoryLayout` provides the size, alignment, and stride of any type. Useful for understanding struct packing, interop with C, and performance optimization.",
    "struct Point {\n    var x: Double\n    var y: Double\n}\n\nprint(MemoryLayout<Int>.size)         // 8\nprint(MemoryLayout<Int>.stride)       // 8\nprint(MemoryLayout<Int>.alignment)    // 8\n\nprint(MemoryLayout<Point>.size)       // 16\nprint(MemoryLayout<Point>.stride)     // 16\n\nprint(MemoryLayout<Bool>.size)        // 1\nprint(MemoryLayout<Bool>.stride)      // 1\n\nprint(MemoryLayout<Int?>.size)        // 9 (Optional enum with associated)"
+  ],
+  "ARC & Reference Cycles": [
+   "Automatic Reference Counting (ARC) manages memory for reference types (classes). Each strong reference increments count; deinit occurs when count reaches 0. Strong reference cycles: class A holds strong ref to B, B holds strong ref to A. Break with `weak` (optional, auto-nilled on dealloc) or `unowned` (non-optional, crash if accessed after dealloc). Closures capture self strongly \u2014 use [weak self] or [unowned self].",
+   "import Foundation\n\nclass Child {\n    let name: String\n    init(name: String) { self.name = name; print(\"Child \\(name) init\") }\n    deinit { print(\"Child \\(name) deinit\") }\n}\n\n// Strong reference cycle\nclass Parent {\n    let name: String\n    var child: Child?\n    \n    init(name: String) { self.name = name; print(\"Parent \\(name) init\") }\n    deinit { print(\"Parent \\(name) deinit\") }\n}\n\n// Weak breaks the cycle\nclass WeakParent {\n    let name: String\n    weak var child: Child?  // weak: no ownership\n    \n    init(name: String) { self.name = name; print(\"WeakParent \\(name) init\") }\n    deinit { print(\"WeakParent \\(name) deinit\") }\n}\n\n// Closure capture cycle\nclass NetworkManager {\n    var onComplete: (() -> Void)?\n    \n    func fetch() {\n        onComplete = { [weak self] in  // weak capture\n            guard let self else { return }\n            print(\"Fetch completed for \\(self)\")\n        }\n    }\n    \n    deinit { print(\"NetworkManager deinit\") }\n}\n\n// Test\nfunc test() {\n    let wp = WeakParent(name: \"Alice\")\n    wp.child = Child(name: \"Bob\")\n    print(\"Exiting scope \u2014 both will deinit\")\n}\ntest()\n\n// Unowned: used when the other always outlives\nclass Owner {\n    unowned var item: Item?\n}\nclass Item {\n    let owner: Owner\n    init(owner: Owner) { self.owner = owner }\n}"
   ]
  },
  "Swift Package Manager": {
@@ -446,7 +462,7 @@
   ],
   "Package Structure": [
    "Standard SPM layout: Sources/PackageName/*.swift, Tests/PackageNameTests/*.swift, Package.swift at root. Resources in Sources/PackageName/Resources/. Use `.target(name:resources:)` to declare.",
-   "MyPackage/\n└── Package.swift\n└── Sources/\n│   └── MyPackage/\n│       └── Core.swift\n│       └── Resources/\n│           └── data.json\n└── Tests/\n    └── MyPackageTests/\n        └── CoreTests.swift"
+   "MyPackage/\n\u2514\u2500\u2500 Package.swift\n\u2514\u2500\u2500 Sources/\n\u2502   \u2514\u2500\u2500 MyPackage/\n\u2502       \u2514\u2500\u2500 Core.swift\n\u2502       \u2514\u2500\u2500 Resources/\n\u2502           \u2514\u2500\u2500 data.json\n\u2514\u2500\u2500 Tests/\n    \u2514\u2500\u2500 MyPackageTests/\n        \u2514\u2500\u2500 CoreTests.swift"
   ],
   "Binary Targets": [
    "Binary targets distribute pre-compiled frameworks (e.g., Firebase, Sentry). Reference remote .xcframework URLs or local paths. SPM downloads and links the binary.",
@@ -467,6 +483,10 @@
   "SPM Commands": [
    "Key SPM commands: `swift build`, `swift test`, `swift run`, `swift package generate-xcodeproj`, `swift package --version`. Resolution info with `swift package show-dependencies`.",
    "# Terminal commands:\n# swift build              # Build package\n# swift test               # Run tests\n# swift run <target>       # Run executable\n# swift package clean      # Clean build artifacts\n# swift package resolve    # Resolve dependencies\n# swift package show-dependencies  # Show dependency tree\n# swift package plugin --list     # List available plugins"
+  ],
+  "Creating Libraries": [
+   "Create reusable Swift packages: `swift package init --type library`. Package.swift defines targets, dependencies, products. Mark API with `public` access control. Document with `///` doc comments. Version with semantic versioning. Publish on GitHub and add via SPM URL. Use `@available` for platform version gating.",
+   "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"MyLibrary\",\n    platforms: [\n        .iOS(.v15),\n        .macOS(.v12),\n    ],\n    products: [\n        .library(\n            name: \"MyLibrary\",\n            targets: [\"MyLibrary\"]\n        ),\n    ],\n    dependencies: [\n        .package(url: \"https://github.com/apple/swift-log.git\", from: \"1.5.0\"),\n    ],\n    targets: [\n        .target(\n            name: \"MyLibrary\",\n            dependencies: [\n                .product(name: \"Logging\", package: \"swift-log\"),\n            ]\n        ),\n        .testTarget(\n            name: \"MyLibraryTests\",\n            dependencies: [\"MyLibrary\"]\n        ),\n    ]\n)\n\n// Usage in another package:\n// .package(url: \"https://github.com/user/MyLibrary.git\", from: \"1.0.0\")\n\n// Public API\n/// A greeting provider\npublic struct Greeter {\n    public let name: String\n    public init(name: String) { self.name = name }\n    public func greet() -> String { \"Hello, \\(name)!\" }\n}"
   ]
  },
  "Protocol-Oriented Programming": {
@@ -484,7 +504,7 @@
   ],
   "Empty Protocols (Marker)": [
    "Empty protocols mark types with a semantic property without requiring methods. `Sendable`, `Codable`, `Hashable` are examples. Combined with constrained extensions and generics.",
-   "protocol Loggable {}\n\n// Extension applies to all Loggable types with StringRepresentable\nextension Loggable where Self: StringRepresentable {\n    func log() {\n        print(\"[LOG] \\(stringValue)\")\n    }\n}\n\n// Conform by declaring — no implementation needed\nstruct Account: StringRepresentable, Loggable {\n    var id: Int\n    var stringValue: String { \"Account(\\(id))\" }\n}\n\nlet account = Account(id: 42)\naccount.log()  // [LOG] Account(42)\n\n// Built-in marker protocols:\n// - Sendable: safe across concurrency domains\n// - Codable: serializable\n// - CaseIterable: all cases enumerable"
+   "protocol Loggable {}\n\n// Extension applies to all Loggable types with StringRepresentable\nextension Loggable where Self: StringRepresentable {\n    func log() {\n        print(\"[LOG] \\(stringValue)\")\n    }\n}\n\n// Conform by declaring \u2014 no implementation needed\nstruct Account: StringRepresentable, Loggable {\n    var id: Int\n    var stringValue: String { \"Account(\\(id))\" }\n}\n\nlet account = Account(id: 42)\naccount.log()  // [LOG] Account(42)\n\n// Built-in marker protocols:\n// - Sendable: safe across concurrency domains\n// - Codable: serializable\n// - CaseIterable: all cases enumerable"
   ],
   "Self Requirements": [
    "Protocols can use `Self` to reference the conforming type. `Equatable` uses Self for ==. `Identifiable` uses Self for ID. Useful for type-safe comparison, copying, and factory patterns.",
@@ -494,7 +514,7 @@
  "Swift in Practice": {
   "Access Control": [
    "Swift's access levels: `open` (subclassable outside module), `public` (visible outside module), `internal` (default, module-wide), `fileprivate` (file scope), `private` (declaration scope). Use the most restrictive level possible.",
-   "public struct NetworkConfig {\n    public static let shared = NetworkConfig()\n    \n    private var baseURL: String  // only accessible within this struct\n    fileprivate var timeout: TimeInterval = 30  // accessible within this file\n    internal var retryCount = 3  // accessible within module\n    \n    public var apiURL: String {  // public computed property\n        \"\\(baseURL)/api/v1\"\n    }\n    \n    private init() {  // private init — use shared singleton\n        baseURL = \"https://api.example.com\"\n    }\n}\n\n// fileprivate access within same file\nstruct RequestBuilder {\n    func build() -> URLRequest {\n        var request = URLRequest(url: URL(string: NetworkConfig.shared.apiURL)!)\n        request.timeoutInterval = NetworkConfig.shared.timeout  // fileprivate: OK\n        return request\n    }\n}"
+   "public struct NetworkConfig {\n    public static let shared = NetworkConfig()\n    \n    private var baseURL: String  // only accessible within this struct\n    fileprivate var timeout: TimeInterval = 30  // accessible within this file\n    internal var retryCount = 3  // accessible within module\n    \n    public var apiURL: String {  // public computed property\n        \"\\(baseURL)/api/v1\"\n    }\n    \n    private init() {  // private init \u2014 use shared singleton\n        baseURL = \"https://api.example.com\"\n    }\n}\n\n// fileprivate access within same file\nstruct RequestBuilder {\n    func build() -> URLRequest {\n        var request = URLRequest(url: URL(string: NetworkConfig.shared.apiURL)!)\n        request.timeoutInterval = NetworkConfig.shared.timeout  // fileprivate: OK\n        return request\n    }\n}"
   ],
   "URLSession & Networking": [
    "Swift's URLSession provides async HTTP networking. `data(from:)` for GET requests, `upload(for:from:)` for POST. Combine with Codable for type-safe JSON parsing. From Hacking with Swift.",
@@ -549,6 +569,10 @@
   "Lists & Navigation": [
    "`List` renders scrollable rows. `NavigationStack` enables push navigation. `NavigationLink` links to detail views. Use `\\.self` for identifiable data or custom Identifiable conformance.",
    "struct Item: Identifiable {\n    let id = UUID()\n    var name: String\n}\n\nstruct ContentView: View {\n    let items = [\n        Item(name: \"Apple\"),\n        Item(name: \"Banana\"),\n        Item(name: \"Cherry\")\n    ]\n    \n    var body: some View {\n        NavigationStack {\n            List(items) { item in\n                NavigationLink(item.name) {\n                    DetailView(item: item)\n                }\n            }\n            .navigationTitle(\"Fruits\")\n        }\n    }\n}\n\nstruct DetailView: View {\n    let item: Item\n    var body: some View {\n        Text(\"\\(item.name) details\")\n            .font(.title)\n            .navigationTitle(item.name)\n    }\n}"
+  ],
+  "State Management Deep": [
+   "@State (local), @Binding (passed), @ObservedObject (reference type), @StateObject (owned reference), @EnvironmentObject (injected), @AppStorage (UserDefaults), @SceneStorage (scene state). @Published in ObservableObject triggers view updates. Observable macro (iOS 17+) simplifies observation with @Observable class. Use @Environment for system settings (colorScheme, locale, dismiss).",
+   "import SwiftUI\n\n// Observable pattern (iOS 17+)\n@Observable\nclass CounterModel {\n    var count = 0\n    var step = 1\n}\n\nstruct CounterView: View {\n    @State private var model = CounterModel()\n    @State private var isPremium = false\n\n    var body: some View {\n        VStack(spacing: 20) {\n            // @State for simple value types\n            Text(\"Count: \\(model.count)\")\n                .font(.title)\n\n            HStack {\n                Button(\"-\\(model.step)\") {\n                    model.count -= model.step\n                }\n                Button(\"+\\(model.step)\") {\n                    model.count += model.step\n                }\n            }\n\n            // @Binding passed to child\n            StepPicker(step: $model.step)\n\n            // @AppStorage\n            Toggle(\"Premium User\", isOn: $isPremium)\n\n            // @Environment\n            Text(\"Dynamic type: \\(@Environment(\\.dynamicTypeSize).wrappedValue)\")\n        }\n        .padding()\n    }\n}\n\nstruct StepPicker: View {\n    @Binding var step: Int\n\n    var body: some View {\n        Stepper(\"Step: \\(step)\", value: $step, in: 1...10)\n    }\n}\n\n// ObservedObject pattern (pre-iOS 17)\nclass OldModel: ObservableObject {\n    @Published var value = 0\n}"
   ]
  }
 }
