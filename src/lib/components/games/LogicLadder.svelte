@@ -1,5 +1,5 @@
 <script>
   import MiniGameCard from './MiniGameCard.svelte';
-  let { game } = $props();
+  let { game, lang = 'js' } = $props();
 </script>
-<MiniGameCard {game} />
+<MiniGameCard {game} {lang} />

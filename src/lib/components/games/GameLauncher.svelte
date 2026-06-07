@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { getGameState, showToast, ACHIEVEMENT_DEFS } from '$lib/stores/game.svelte.js';
   import { GAME_CATALOG } from '$lib/lib/games.js';
+  import { LANG_NAMES } from '$lib/lang/index.js';
   import APIArcade from './APIArcade.svelte';
   import BinaryHexBlitz from './BinaryHexBlitz.svelte';
   import CodeGolf from './CodeGolf.svelte';
@@ -25,6 +26,14 @@
   let view = $state('hub');
   let selectedGame = $state(null);
   let soundToggleKey = $state(0);
+  let selectedLang = $state(
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('game_lang') : null) || 'js'
+  );
+
+  function setLang(lang) {
+    selectedLang = lang;
+    if (typeof localStorage !== 'undefined') localStorage.setItem('game_lang', lang);
+  }
 
   onMount(() => {
     function handler(e) { launchGame(e.detail.gameId); }
@@ -81,7 +90,7 @@
       </div>
     </div>
     <div class="game-view-body">
-      <SelectedGame game={selectedGame} />
+      <SelectedGame game={selectedGame} lang={selectedLang} />
     </div>
   </div>
 {:else if view === 'leaderboard'}
@@ -132,6 +141,16 @@
     <div class="hub-xp-bar">
       <div class="hub-xp-fill" style="width:{xpPct}%"></div>
       <span class="hub-xp-label">{game.xp} XP</span>
+    </div>
+
+    <div class="lang-bar">
+      {#each Object.entries(LANG_NAMES) as [id, name]}
+        <button
+          class="lang-btn"
+          class:lang-active={selectedLang === id}
+          onclick={() => setLang(id)}
+        >{name}</button>
+      {/each}
     </div>
 
     {#if !dailyDone}
@@ -191,6 +210,18 @@
   .daily-banner:hover { background: linear-gradient(135deg, rgba(236,72,153,0.25), rgba(236,72,153,0.1)); }
   .daily-icon { font-size: 13px; font-weight: 700; color: #e2e8f0; }
   .daily-arrow { font-size: 16px; color: #ec4899; }
+
+  .lang-bar {
+    display: flex; gap: 6px; padding: 8px 24px; overflow-x: auto;
+    scrollbar-width: none; flex-wrap: wrap;
+  }
+  .lang-btn {
+    padding: 4px 12px; border-radius: 999px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8; font-size: 11px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  }
+  .lang-btn:hover { border-color: #f59e0b; color: #e2e8f0; }
+  .lang-active { background: #f59e0b; color: #111827; border-color: #f59e0b; }
 
   .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 0 24px 12px; }
   .hub-card { display: grid; gap: 4px; text-align: left; padding: 14px; background: #111827; border: 1px solid #1e293b; border-radius: 10px; color: #cbd5e1; cursor: pointer; }

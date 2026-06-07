@@ -17,6 +17,12 @@ export const GAME_CATALOG = [
   { id: 'logic-ladder', title: 'Logic Ladder', description: 'Step through branching logic puzzles.', mode: 'choice', icon: '🪜' },
 ];
 
+import { generateChallenges } from '$lib/lang/index.js';
+
+export function getChallenges(gameId, langId = 'js') {
+  return generateChallenges(gameId, langId);
+}
+
 export const GAME_CHALLENGES = {
   'typing-speed': [
     { prompt: 'Type exactly:', target: 'const answer = 42;', answer: 'const answer = 42;' },
