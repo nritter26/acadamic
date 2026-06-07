@@ -9,8 +9,11 @@ import { HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC } from '../specs/web.js';
 import { SWIFT_SPEC, LUA_SPEC } from '../specs/mobile.js';
 import { SQL_SPEC, PHP_SPEC, RB_SPEC } from '../specs/sql-rb.php.js';
 import { ASM_SPEC } from '../specs/asm.js';
+import { REACT_SPEC } from '../specs/react.js';
+import { VUE_SPEC } from '../specs/vue.js';
+import { SVELTE_SPEC } from '../specs/svelte.js';
 
-const SPECS = [JS_SPEC, PY_SPEC, GO_SPEC, RS_SPEC, C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC, JAVA_SPEC, KT_SPEC, SCALA_SPEC, HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC, SWIFT_SPEC, LUA_SPEC, SQL_SPEC, PHP_SPEC, RB_SPEC, ASM_SPEC];
+const SPECS = [JS_SPEC, PY_SPEC, GO_SPEC, RS_SPEC, C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC, JAVA_SPEC, KT_SPEC, SCALA_SPEC, HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC, SWIFT_SPEC, LUA_SPEC, SQL_SPEC, PHP_SPEC, RB_SPEC, ASM_SPEC, REACT_SPEC, VUE_SPEC, SVELTE_SPEC];
 const SPEC_MAP = {};
 SPECS.forEach(s => SPEC_MAP[s.id] = s);
 
