@@ -10,3 +10,4 @@ export { setupWebSocket, getWSStats, broadcastToProject } from './websocket';
 export { dockerExecute, isDockerAvailable, getSupportedDockerLangs, generateDockerfiles } from './docker-executor';
 export { metricsHandler, trackRequest } from './metrics';
 export { openapiHandler, swaggerUIHandler } from './openapi';
+export { getSession, createSession, transitionState, deleteSession } from './teaching-session';

@@ -1,11 +1,18 @@
 <script>
   import { getEditorState } from '$lib/stores/editor.svelte.js';
+  import { getAIState } from '$lib/stores/ai.svelte.js';
 
   let editor = $derived(getEditorState());
+  let ai = $derived(getAIState());
   let textareaEl;
+  let debounceTimer;
 
   function handleInput() {
     editor.code = textareaEl.value;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      ai.editorCode = textareaEl.value;
+    }, 2000);
   }
 </script>
 

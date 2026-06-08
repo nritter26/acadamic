@@ -5,6 +5,7 @@
   import AIMessage from './AIMessage.svelte';
   import AISettings from './AISettings.svelte';
   import AISuggestions from './AISuggestions.svelte';
+  import ExercisePrompt from './ExercisePrompt.svelte';
   import { slide } from 'svelte/transition';
 
   let ai = $derived(getAIState());
@@ -44,7 +45,7 @@
     ai.setStreaming(true);
 
     let streamed = '';
-    const body = { message, lang: curr.lang, topic: curr.topic, phase: curr.phase };
+    const body = { message, lang: curr.lang, topic: curr.topic, phase: curr.phase, code: ai.editorCode || undefined };
     if (ai.provider && ai.provider !== 'hybrid') body.provider = ai.provider;
     if (ai.model) body.model = ai.model;
     await apiStream('/api/chat', body, (chunk) => {
@@ -118,6 +119,7 @@
       {/if}
     </div>
     <AISuggestions onsuggest={handleSuggest} />
+    <ExercisePrompt />
     {#if offlineStatus}
       <div class="ai-offline-badge">{offlineStatus}</div>
     {/if}

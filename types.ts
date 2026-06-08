@@ -80,6 +80,37 @@ export const ExplainSchema = z.object({
 });
 export type ExplainInput = z.infer<typeof ExplainSchema>;
 
+export const ExplainTopicSchema = z.object({
+  topic: z.string().min(1),
+  lang: z.string().optional(),
+  phase: z.string().optional(),
+  learnerId: z.string().optional(),
+  code: z.string().optional(),
+});
+export type ExplainTopicInput = z.infer<typeof ExplainTopicSchema>;
+
+export const StartExerciseSchema = z.object({
+  topic: z.string().min(1),
+  lang: z.string().optional(),
+  level: z.union([z.literal('beginner'), z.literal('intermediate'), z.literal('expert')]).optional(),
+  learnerId: z.string().optional(),
+});
+export type StartExerciseInput = z.infer<typeof StartExerciseSchema>;
+
+export const AttemptExerciseSchema = z.object({
+  topic: z.string().min(1),
+  lang: z.string().optional(),
+  code: z.string().min(1),
+  learnerId: z.string().optional(),
+});
+export type AttemptExerciseInput = z.infer<typeof AttemptExerciseSchema>;
+
+export const RecommendSchema = z.object({
+  lang: z.string().min(1),
+  learnerId: z.string().optional(),
+});
+export type RecommendInput = z.infer<typeof RecommendSchema>;
+
 export const ReviewSchema = z.object({
   code: z.string().min(1),
   lang: z.string().optional(),
