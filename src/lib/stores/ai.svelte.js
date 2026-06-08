@@ -9,6 +9,8 @@ let _model = $state('');
 let _loaded = false;
 let _idCounter = 0;
 let _editorCode = $state('');
+let _exercise = $state(null);
+let _sessionState = $state('idle');
 
 const STORAGE_KEY = 'kodex_ai_chat';
 const CHANNEL_NAME = 'kodex_ai_sync';
@@ -116,6 +118,10 @@ export function getAIState() {
     set model(value) { _model = value; },
     get editorCode() { return _editorCode; },
     set editorCode(value) { _editorCode = value; },
+    get exercise() { return _exercise; },
+    set exercise(value) { _exercise = value; },
+    get sessionState() { return _sessionState; },
+    set sessionState(value) { _sessionState = value; },
 
     togglePanel() {
       _panelOpen = !_panelOpen;

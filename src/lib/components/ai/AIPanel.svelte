@@ -5,6 +5,7 @@
   import AIMessage from './AIMessage.svelte';
   import AISettings from './AISettings.svelte';
   import AISuggestions from './AISuggestions.svelte';
+  import ExercisePrompt from './ExercisePrompt.svelte';
   import { slide } from 'svelte/transition';
 
   let ai = $derived(getAIState());
@@ -118,6 +119,7 @@
       {/if}
     </div>
     <AISuggestions onsuggest={handleSuggest} />
+    <ExercisePrompt />
     {#if offlineStatus}
       <div class="ai-offline-badge">{offlineStatus}</div>
     {/if}
