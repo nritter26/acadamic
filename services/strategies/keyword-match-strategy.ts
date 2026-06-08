@@ -1,3 +1,4 @@
+import { getActiveAIProvider } from '../../ai/config';
 import aiResponses from '../../ai/responses-data';
 import * as conv from '../conversation';
 import type { TutorStrategy, TutorContext } from './types';
@@ -35,7 +36,7 @@ export class KeywordMatchStrategy implements TutorStrategy {
   priority = 6;
 
   async canHandle(_ctx: TutorContext): Promise<boolean> {
-    return true;
+    return getActiveAIProvider() === 'keyword';
   }
 
   async handle(
