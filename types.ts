@@ -80,6 +80,15 @@ export const ExplainSchema = z.object({
 });
 export type ExplainInput = z.infer<typeof ExplainSchema>;
 
+export const ExplainTopicSchema = z.object({
+  topic: z.string().min(1),
+  lang: z.string().optional(),
+  phase: z.string().optional(),
+  learnerId: z.string().optional(),
+  code: z.string().optional(),
+});
+export type ExplainTopicInput = z.infer<typeof ExplainTopicSchema>;
+
 export const ReviewSchema = z.object({
   code: z.string().min(1),
   lang: z.string().optional(),
