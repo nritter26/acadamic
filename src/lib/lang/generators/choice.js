@@ -103,14 +103,39 @@ export function generateLogicLadder(langId, index) {
   return qs[index % qs.length];
 }
 
+const DB_TABLES = [
+  {
+    prompt: 'Keep all left rows and matching right rows.',
+    choices: ['LEFT JOIN', 'INNER JOIN', 'RIGHT JOIN'],
+    answer: 'LEFT JOIN',
+    tableA: { name: 'Customers', columns: [{ name: 'CustomerID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Email', type: 'VARCHAR(255)' }] },
+    tableB: { name: 'Orders', columns: [{ name: 'OrderID', type: 'INT', pk: true }, { name: 'CustomerID', type: 'INT', fk: true, ref: 'Customers.CustomerID' }, { name: 'Total', type: 'DECIMAL(10,2)' }, { name: 'OrderDate', type: 'DATE' }] },
+  },
+  {
+    prompt: 'Only rows matching both tables.',
+    choices: ['INNER JOIN', 'LEFT JOIN', 'FULL JOIN'],
+    answer: 'INNER JOIN',
+    tableA: { name: 'Students', columns: [{ name: 'StudentID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Major', type: 'VARCHAR(50)' }] },
+    tableB: { name: 'Enrollments', columns: [{ name: 'EnrollID', type: 'INT', pk: true }, { name: 'StudentID', type: 'INT', fk: true, ref: 'Students.StudentID' }, { name: 'Course', type: 'VARCHAR(100)' }, { name: 'Grade', type: 'CHAR(2)' }] },
+  },
+  {
+    prompt: 'All rows from both tables, nulls where no match.',
+    choices: ['FULL JOIN', 'INNER JOIN', 'LEFT JOIN'],
+    answer: 'FULL JOIN',
+    tableA: { name: 'Employees', columns: [{ name: 'EmployeeID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Department', type: 'VARCHAR(50)' }] },
+    tableB: { name: 'Projects', columns: [{ name: 'ProjectID', type: 'INT', pk: true }, { name: 'ProjectName', type: 'VARCHAR(100)' }, { name: 'LeadID', type: 'INT', fk: true, ref: 'Employees.EmployeeID' }, { name: 'Budget', type: 'DECIMAL(12,2)' }] },
+  },
+  {
+    prompt: 'Keep all right rows and matching left rows.',
+    choices: ['RIGHT JOIN', 'LEFT JOIN', 'INNER JOIN'],
+    answer: 'RIGHT JOIN',
+    tableA: { name: 'Authors', columns: [{ name: 'AuthorID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }] },
+    tableB: { name: 'Books', columns: [{ name: 'BookID', type: 'INT', pk: true }, { name: 'Title', type: 'VARCHAR(200)' }, { name: 'AuthorID', type: 'INT', fk: true, ref: 'Authors.AuthorID' }, { name: 'Year', type: 'INT' }] },
+  },
+];
+
 export function generateSqlJoinMatch(langId, index) {
-  const qs = [
-    { prompt: 'Keep all left rows and matching right rows.', choices: ['LEFT JOIN', 'INNER JOIN', 'RIGHT JOIN'], answer: 'LEFT JOIN' },
-    { prompt: 'Only rows matching both tables.', choices: ['INNER JOIN', 'LEFT JOIN', 'FULL JOIN'], answer: 'INNER JOIN' },
-    { prompt: 'All rows from both tables, nulls where no match.', choices: ['FULL JOIN', 'INNER JOIN', 'LEFT JOIN'], answer: 'FULL JOIN' },
-    { prompt: 'Keep all right rows and matching left rows.', choices: ['RIGHT JOIN', 'LEFT JOIN', 'INNER JOIN'], answer: 'RIGHT JOIN' },
-  ];
-  return qs[index % qs.length];
+  return { ...DB_TABLES[index % DB_TABLES.length] };
 }
 
 export function generateRaceCompiler(langId, index) {

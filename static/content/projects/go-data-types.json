@@ -1,0 +1,71 @@
+{
+  "id": "go-data-types",
+  "title": "Go: Data Types",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "data-types", "int", "float64", "string", "bool", "type-conversion", "reflection"],
+  "description": "Work with basic Go types: int, float64, string, bool, type inference, and type conversion.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Declare Typed Variables",
+      "description": "Declare an `int`, a `float64`, a `string`, and a `bool` with explicit types and print them.",
+      "hints": ["`var age int = 25`", "`var price float64 = 9.99`", "`var name string = \"Go\"` and `var active bool = true`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('25') && output.includes('9.99') && output.includes('Go') && output.includes('true')",
+        "successMessage": "All basic types declared!",
+        "failureMessage": "Print an int, float64, string, and bool."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Type Inference",
+      "description": "Use `:=` to let Go infer types for `count := 5`, `pi := 3.14`, and `lang := \"Go\"`, then print them.",
+      "hints": ["Go infers `int`, `float64`, and `string` respectively.", "`count := 5`", "`pi := 3.14` and `lang := \"Go\"`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('3.14') && output.includes('Go')",
+        "successMessage": "Type inference works!",
+        "failureMessage": "Use := to declare count, pi, lang and print them."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Type Conversion",
+      "description": "Convert an `int` to `float64` and a `float64` to `int`, then print both results.",
+      "hints": ["Use `float64(42)` and `int(3.14)`", "`var x int = 42; var y float64 = float64(x)`", "Print both converted values."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('3.14')",
+        "successMessage": "Type conversion works!",
+        "failureMessage": "Convert an int to float64 and a float64 to int, then print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Zero Values",
+      "description": "Declare `var a int`, `var b float64`, `var c string`, `var d bool` without initial values and print them to see zero values.",
+      "hints": ["Zero value of `int` is `0`, `float64` is `0`, `string` is `\"\"`, `bool` is `false`.", "Empty string won't show visibly — that's expected.", "Print all four: `fmt.Println(a, b, c, d)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('false')",
+        "successMessage": "Zero values understood!",
+        "failureMessage": "Print zero values of int, float64, string, and bool."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Print Types with %T",
+      "description": "Print the types of `42`, `3.14`, `\"Go\"`, and `true` using `fmt.Printf` with `%T`.",
+      "hints": ["`fmt.Printf(\"%T\", 42)` prints `int`.", "`%T` is the type verb for any value.", "Print all four types on separate lines or in one line."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('int') && output.includes('float64') && output.includes('string') && output.includes('bool')",
+        "successMessage": "Type printing works!",
+        "failureMessage": "Use %T to print the types of 42, 3.14, 'Go', and true."
+      }
+    }
+  ]
+}

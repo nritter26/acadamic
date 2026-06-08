@@ -1,0 +1,83 @@
+{
+  "id": "go-websocket",
+  "title": "Go: WebSocket Server",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 45,
+  "concepts": ["go", "websocket", "gorilla/websocket", "real-time", "broadcast"],
+  "description": "Build a WebSocket server with message broadcasting, client lifecycle management, and ping/pong keepalive.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Upgrade HTTP to WebSocket",
+      "description": "Create an HTTP handler that upgrades the connection using `gorilla/websocket.Upgrader`. Define an `Upgrader` with `CheckOrigin` returning `true`. Use `upgrader.Upgrade(w, r, nil)` to get a `*websocket.Conn`. Print \"WebSocket connected\" using `fmt.Println`.",
+      "hints": ["Import \"github.com/gorilla/websocket\"", "Upgrader must allow origin for local testing", "Upgrade returns (*websocket.Conn, error)"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('WebSocket') && output.includes('connected')",
+        "successMessage": "HTTP to WebSocket upgrade works!",
+        "failureMessage": "Print 'WebSocket connected' when upgrade succeeds."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Read and write messages",
+      "description": "Start two goroutines: one reads messages with `conn.ReadMessage()`, one writes with `conn.WriteMessage()`. Use a channel to pass messages from reader to writer. Print received messages using `fmt.Printf(\"Received: %s\\n\", msg)`.",
+      "hints": ["ReadMessage returns (messageType, payload, error)", "WriteMessage takes messageType and []byte payload", "Use textMessage constant for text payloads"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Received:')",
+        "successMessage": "WebSocket read and write work!",
+        "failureMessage": "Print 'Received: message' for each incoming message."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Broadcast to all clients",
+      "description": "Create a `Broadcaster` struct with `clients map[*websocket.Conn]bool` and a `broadcast chan []byte`. A `Start()` goroutine iterates all clients in a select loop, writing each message. Print broadcast count using `fmt.Printf(\"Broadcast to %d clients\\n\", n)`.",
+      "hints": ["Serialize all writes through a single goroutine", "Remove clients that fail to write", "Use a sync.RWMutex if accessing the map outside the goroutine"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Broadcast') && output.includes('clients')",
+        "successMessage": "Broadcast to all clients works!",
+        "failureMessage": "Print the number of clients a message was broadcast to."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Handle client disconnect",
+      "description": "Detect client disconnection by checking for closed connection errors from `ReadMessage` (`websocket.IsCloseError`, `websocket.ErrCloseSent`). Register/unregister clients via channels. Print disconnect events using `fmt.Printf(\"Client %s disconnected\\n\", conn.RemoteAddr())`.",
+      "hints": ["ReadMessage returns an error on close", "Use register/unregister channels for safe map access", "Close the connection and clean up resources"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('disconnected') || output.includes('closed') || output.includes('cleanup')",
+        "successMessage": "Client disconnect handled correctly!",
+        "failureMessage": "Print when a client disconnects."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Ping/pong keepalive",
+      "description": "Configure the upgrader with `ReadDeadline` and set `PongHandler`. Use `conn.SetReadDeadline(time.Now().Add(60*time.Second))`. Send periodic pings from the server with `conn.WriteControl(websocket.PingMessage, ...)`. Print ping/pong activity using `fmt.Printf`.",
+      "hints": ["PongHandler updates the read deadline on each pong", "Use a ticker to send pings periodically", "WriteControl is for control messages (ping/pong/close)"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('ping') || output.includes('pong')",
+        "successMessage": "Ping/pong keepalive works!",
+        "failureMessage": "Print ping and pong events as they occur."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Chat room implementation",
+      "description": "Build a simple chat room: clients send JSON `{\"type\":\"chat\",\"data\":{\"user\":\"alice\",\"message\":\"hello\"}}`. Parse with `json.Unmarshal`, add server timestamp, and broadcast to all clients. Print formatted chat messages using `fmt.Printf(\"[%s] %s: %s\\n\", ...)`.",
+      "hints": ["Define a Message struct with Type and Data fields", "Use json.Unmarshal and json.Marshal", "Add a timestamp field server-side before broadcast"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('alice') || output.includes('chat') || output.includes(':')",
+        "successMessage": "Chat room implementation works!",
+        "failureMessage": "Print formatted chat messages with user and content."
+      }
+    }
+  ]
+}

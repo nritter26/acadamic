@@ -1,0 +1,83 @@
+{
+  "id": "go-plugin-system",
+  "title": "Go: Plugin Architecture",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 45,
+  "concepts": ["go", "plugins", "interfaces", "registry pattern", "composability"],
+  "description": "Design a flexible plugin system using Go interfaces, a registry pattern, and plugin composition.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define the plugin interface",
+      "description": "Define a `Plugin` interface with methods `Name() string`, `Init() error`, and `Execute(data map[string]interface{}) (interface{}, error)`. Then create a `BasePlugin` struct embedding the basics. Print the interface definition with `fmt.Println`.",
+      "hints": ["Interfaces are satisfied implicitly in Go", "Define the interface in a clean block", "BasePlugin can embed a name field"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Plugin') && output.includes('interface')",
+        "successMessage": "Plugin interface defined!",
+        "failureMessage": "Print the Plugin interface definition to output."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the registry pattern",
+      "description": "Create a `Registry` struct with a `sync.RWMutex` and a `map[string]Plugin`. Implement `Register(p Plugin) error` (returns error if name exists), `Get(name string) (Plugin, bool)`, and `List() []string`. Print registered plugin names after registering two plugins.",
+      "hints": ["Use RWMutex for safe concurrent access", "Register should check for duplicate names", "List should return sorted keys for deterministic output"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('registered') || output.includes('plugin')",
+        "successMessage": "Registry pattern implemented!",
+        "failureMessage": "Print the list of registered plugin names."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Load plugins from a map",
+      "description": "Create a function `LoadPlugins(plugins map[string]Plugin, reg *Registry) []error` that registers all plugins from the map, collecting any errors. Print which plugins loaded successfully and which failed using `fmt.Printf`.",
+      "hints": ["Map iteration order is random; sort keys for deterministic output", "Collect errors in a slice", "Use ok pattern to check registration results"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('loaded') || output.includes('success') || output.includes('failed')",
+        "successMessage": "Plugins loaded from map!",
+        "failureMessage": "Print each plugin's load status."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Plugin with configuration",
+      "description": "Create a `ConfigurablePlugin` struct that embeds `BasePlugin` and adds a `Config map[string]string` field. Implement a `Configure(key, value string)` method and make `Execute` use the config. Demonstrate by configuring and executing.",
+      "hints": ["Embed BasePlugin to reuse name and Init", "Store config as a simple map", "Execute should print which config keys it's using"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('configure') || output.includes('config')",
+        "successMessage": "Plugin with configuration works!",
+        "failureMessage": "Print configuration details during Execute."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Compose multiple plugins",
+      "description": "Create a `Pipeline` struct that implements `Plugin` and holds a slice of `Plugin`. Its `Execute` method runs each sub-plugin in sequence, passing the output data of one as input to the next. Print the pipeline execution trace using `fmt.Println`.",
+      "hints": ["Pipeline implements Plugin by running children sequentially", "Pass data between plugins through the map parameter", "Print each step with pipeline step index"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('pipeline') || output.includes('step') || output.includes('compose')",
+        "successMessage": "Plugin composition works!",
+        "failureMessage": "Print each step of the pipeline execution."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Graceful error recovery in plugins",
+      "description": "Enhance the registry to support `RunAll(data map[string]interface{})` that executes all plugins and recovers from panics using `defer` and `recover`. Print which plugins succeeded, failed with errors, or panicked using `fmt.Printf`.",
+      "hints": ["Wrap each Execute call in a function with deferred recover", "Use named return values for error propagation", "Recover returns the panic value as interface{}"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('panic') || output.includes('recovered') || output.includes('succeeded')",
+        "successMessage": "Graceful error recovery works!",
+        "failureMessage": "Print success, error, and panic recovery for each plugin."
+      }
+    }
+  ]
+}

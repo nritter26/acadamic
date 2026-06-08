@@ -1,0 +1,120 @@
+{
+  "id": "todo-list",
+  "title": "To-Do List App",
+  "difficulty": "intermediate",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 30,
+  "concepts": [
+    "DOM manipulation",
+    "arrays",
+    "CRUD",
+    "state management"
+  ],
+  "description": "Build a to-do list app with full CRUD operations \u2014 add tasks, toggle completion, and delete items by managing an array of task objects.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the task data structure",
+      "description": "Define an array of task objects where each task has `id`, `title`, and `completed` fields. Log the array using `JSON.stringify`.",
+      "hints": [
+        "Each task is an object: { id: 1, title: '...', completed: false }",
+        "Create an array with 3 sample tasks: one incomplete, two complete",
+        "Use console.log(JSON.stringify(tasks)) to see the full array"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"app\"></div>\n<script>\nconst tasks = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nconsole.log(JSON.stringify(tasks));\n// Render to DOM\ndocument.getElementById('app').textContent = JSON.stringify(tasks, null, 2);\n</script>\n",
+        "typescript": "<div id=\"app\"></div>\n<script>\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n}\n\nconst tasks: Task[] = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nconsole.log(JSON.stringify(tasks));\n// Render to DOM\ndocument.getElementById('app').textContent = JSON.stringify(tasks, null, 2);\n</script>\n",
+        "python": "import json\n\ntasks = [\n  {\"id\": 1, \"title\": \"Buy groceries\", \"completed\": False},\n  {\"id\": 2, \"title\": \"Walk the dog\", \"completed\": False},\n  {\"id\": 3, \"title\": \"Read a chapter\", \"completed\": True}\n]\n\nprint(json.dumps(tasks))\n"
+      },
+      "verification": {
+        "test": "output.includes('Buy groceries') && output.includes('completed')",
+        "successMessage": "Task data structure is ready with id, title, and completed fields!",
+        "failureMessage": "Make sure the tasks array contains objects with the required fields and sample data."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add a task function",
+      "description": "Write an `addTask` function that takes a `title`, creates a new task object with a unique id, and appends it to the tasks array. Log the updated array.",
+      "hints": [
+        "Generate a new id: tasks.length + 1 or Math.max(...tasks.map(t => t.id)) + 1",
+        "New tasks always start with completed: false",
+        "Use tasks.push(newTask) to add, then log JSON.stringify(tasks)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"app\"></div>\n<script>\nconst tasks = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false }\n];\n\nfunction addTask(title) {\n  \n}\n\naddTask(\"Read a chapter\");\nconsole.log(JSON.stringify(tasks));\n</script>\n",
+        "typescript": "<div id=\"app\"></div>\n<script>\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n}\n\nconst tasks: Task[] = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false }\n];\n\nfunction addTask(title: string): void {\n  \n}\n\naddTask(\"Read a chapter\");\nconsole.log(JSON.stringify(tasks));\n</script>\n",
+        "python": "import json\n\ntasks = [\n  {\"id\": 1, \"title\": \"Buy groceries\", \"completed\": False},\n  {\"id\": 2, \"title\": \"Walk the dog\", \"completed\": False}\n]\n\ndef addTask(title):\n  \n\naddTask(\"Read a chapter\")\nprint(json.dumps(tasks))\n"
+      },
+      "verification": {
+        "test": "output.includes('Read a chapter')",
+        "successMessage": "New tasks can be added to the list!",
+        "failureMessage": "addTask should create a task with a unique id and the given title, then push it to the tasks array."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Render the task list",
+      "description": "Write a `renderTasks` function that logs each task on its own line. Incomplete tasks show `[ ]` and complete tasks show `[x]`, like: `[ ] 1. Buy groceries`.",
+      "hints": [
+        "Loop through tasks with forEach or a for loop",
+        "Use template literals or string concatenation to format the line",
+        "Condition: task.completed ? '[x]' : '[ ]'"
+      ],
+      "codeTemplate": {
+        "javascript": "<ul id=\"taskList\"></ul>\n<script>\nconst tasks = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction renderTasks() {\n  \n}\n\nrenderTasks();\n</script>\n",
+        "typescript": "<ul id=\"taskList\"></ul>\n<script>\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n}\n\nconst tasks: Task[] = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction renderTasks(): void {\n  \n}\n\nrenderTasks();\n</script>\n",
+        "python": "tasks = [\n  {\"id\": 1, \"title\": \"Buy groceries\", \"completed\": False},\n  {\"id\": 2, \"title\": \"Walk the dog\", \"completed\": False},\n  {\"id\": 3, \"title\": \"Read a chapter\", \"completed\": True}\n]\n\ndef renderTasks():\n  \n\nrenderTasks()\n"
+      },
+      "verification": {
+        "test": "output.includes('[ ]') && output.includes('[x]')",
+        "successMessage": "Tasks render with status indicators showing completion!",
+        "failureMessage": "Incomplete tasks should show '[ ]' and complete tasks should show '[x]' before the task info."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Toggle task completion",
+      "description": "Write a `toggleComplete` function that takes a task `id`, finds the matching task, and flips its `completed` value. Log the state before and after.",
+      "hints": [
+        "Use .find() or findIndex() to locate the task by id: tasks.find(t => t.id === id)",
+        "Toggle with: task.completed = !task.completed",
+        "Log both before and after values to verify the toggle"
+      ],
+      "codeTemplate": {
+        "javascript": "<ul id=\"taskList\"></ul>\n<script>\nconst tasks = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction toggleComplete(id) {\n  \n}\n\nconsole.log(\"Before:\", tasks[0].completed);\ntoggleComplete(1);\nconsole.log(\"After:\", tasks[0].completed);\n</script>\n",
+        "typescript": "<ul id=\"taskList\"></ul>\n<script>\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n}\n\nconst tasks: Task[] = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction toggleComplete(id: number): void {\n  \n}\n\nconsole.log(\"Before:\", tasks[0].completed);\ntoggleComplete(1);\nconsole.log(\"After:\", tasks[0].completed);\n</script>\n",
+        "python": "tasks = [\n  {\"id\": 1, \"title\": \"Buy groceries\", \"completed\": False},\n  {\"id\": 2, \"title\": \"Walk the dog\", \"completed\": False},\n  {\"id\": 3, \"title\": \"Read a chapter\", \"completed\": True}\n]\n\ndef toggleComplete(id):\n  \n\nprint(\"Before:\", tasks[0][\"completed\"])\ntoggleComplete(1)\nprint(\"After:\", tasks[0][\"completed\"])\n"
+      },
+      "verification": {
+        "test": "output.includes('Before:') && output.includes('false') && output.includes('After:') && output.includes('true')",
+        "successMessage": "Task completion can be toggled on and off!",
+        "failureMessage": "toggleComplete should find the task by id and negate its completed property."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Delete a task",
+      "description": "Write a `deleteTask` function that removes a task by `id`. Show the task count before and after deletion.",
+      "hints": [
+        "Use .filter() to create a new array without the deleted task: tasks = tasks.filter(t => t.id !== id)",
+        "Or use .findIndex() and .splice()",
+        "Log the array length before and after deletion"
+      ],
+      "codeTemplate": {
+        "javascript": "<ul id=\"taskList\"></ul>\n<script>\nconst tasks = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction deleteTask(id) {\n  \n}\n\nconsole.log(\"Before:\", tasks.length);\ndeleteTask(2);\nconsole.log(\"After:\", tasks.length);\nconsole.log(JSON.stringify(tasks));\n</script>\n",
+        "typescript": "<ul id=\"taskList\"></ul>\n<script>\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n}\n\nconst tasks: Task[] = [\n  { id: 1, title: \"Buy groceries\", completed: false },\n  { id: 2, title: \"Walk the dog\", completed: false },\n  { id: 3, title: \"Read a chapter\", completed: true }\n];\n\nfunction deleteTask(id: number): void {\n  \n}\n\nconsole.log(\"Before:\", tasks.length);\ndeleteTask(2);\nconsole.log(\"After:\", tasks.length);\nconsole.log(JSON.stringify(tasks));\n</script>\n",
+        "python": "import json\n\ntasks = [\n  {\"id\": 1, \"title\": \"Buy groceries\", \"completed\": False},\n  {\"id\": 2, \"title\": \"Walk the dog\", \"completed\": False},\n  {\"id\": 3, \"title\": \"Read a chapter\", \"completed\": True}\n]\n\ndef deleteTask(id):\n  \n\nprint(\"Before:\", len(tasks))\ndeleteTask(2)\nprint(\"After:\", len(tasks))\nprint(json.dumps(tasks))\n"
+      },
+      "verification": {
+        "test": "output.includes('Before: 3') && output.includes('After: 2')",
+        "successMessage": "Tasks can be removed! Your full CRUD todo list is complete.",
+        "failureMessage": "deleteTask should remove the task matching the given id, reducing the array length from 3 to 2."
+      }
+    }
+  ]
+}

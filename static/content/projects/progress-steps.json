@@ -1,0 +1,91 @@
+{
+  "id": "progress-steps",
+  "title": "Progress Steps",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["state management", "step navigation", "progress calculation"],
+  "description": "Build a progress step component with next/previous navigation, boundary checks, and progress percentage calculation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Steps data array",
+      "description": "Create an array of step label strings, e.g., `['Start', 'Details', 'Review', 'Submit']`.",
+      "hints": ["Each string is a step label", "Array order determines step sequence", "At least 4 steps"],
+      "codeTemplate": {
+        "javascript": "<div id=\"progress-app\"></div>\n<script>\n  const steps = [\n    // Your code here\n  ];\n  console.log(JSON.stringify(steps));\n</script>\n",
+        "typescript": "<div id=\"progress-app\"></div>\n<script>\n  const steps: string[] = [\n    // Your code here\n  ];\n  console.log(JSON.stringify(steps));\n</script>\n",
+        "python": "steps = [\n    # Your code here\n]\nimport json\nprint(json.dumps(steps))\n"
+      },
+      "verification": {
+        "test": "Array.isArray(JSON.parse(output)) && JSON.parse(output).length >= 4",
+        "successMessage": "Steps array created!",
+        "failureMessage": "Create an array with at least 4 step labels."
+      }
+    },
+    {
+      "id": 2,
+      "title": "currentStep and nextStep",
+      "description": "Track `currentStep` (starting at 0). Write `nextStep()` that increments it if not on the last step and logs `'Step: [current]'`.",
+      "hints": ["Initialize currentStep = 0", "Check currentStep < steps.length - 1 before incrementing", "Log the current step index"],
+      "codeTemplate": {
+        "javascript": "<div id=\"progress-app\"></div>\n<script>\n  const steps = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep = 0;\n  function nextStep() {\n    // Your code here\n  }\n  nextStep();\n  nextStep();\n  console.log(currentStep);\n</script>\n",
+        "typescript": "<div id=\"progress-app\"></div>\n<script>\n  const steps: string[] = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep: number = 0;\n  function nextStep(): void {\n    // Your code here\n  }\n  nextStep();\n  nextStep();\n  console.log(currentStep);\n</script>\n",
+        "python": "steps = ['Start', 'Details', 'Review', 'Submit']\ncurrent_step = 0\n\ndef next_step():\n    # Your code here\n\nnext_step()\nnext_step()\nprint(current_step)\n"
+      },
+      "verification": {
+        "test": "output.includes('2')",
+        "successMessage": "Next step works!",
+        "failureMessage": "Increment currentStep but don't exceed the last index."
+      }
+    },
+    {
+      "id": 3,
+      "title": "prevStep function",
+      "description": "Write `prevStep()` that decrements `currentStep` if not on the first step and logs `'Step: [current]'`.",
+      "hints": ["Check currentStep > 0 before decrementing", "Log the current step index"],
+      "codeTemplate": {
+        "javascript": "<div id=\"progress-app\"></div>\n<script>\n  const steps = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep = 2;\n  function prevStep() {\n    // Your code here\n  }\n  prevStep();\n  console.log(currentStep);\n</script>\n",
+        "typescript": "<div id=\"progress-app\"></div>\n<script>\n  const steps: string[] = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep: number = 2;\n  function prevStep(): void {\n    // Your code here\n  }\n  prevStep();\n  console.log(currentStep);\n</script>\n",
+        "python": "steps = ['Start', 'Details', 'Review', 'Submit']\ncurrent_step = 2\n\ndef prev_step():\n    # Your code here\n\nprev_step()\nprint(current_step)\n"
+      },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "Previous step works!",
+        "failureMessage": "Decrement currentStep but don't go below 0."
+      }
+    },
+    {
+      "id": 4,
+      "title": "isFirst and isLast checks",
+      "description": "Write `isFirst()` and `isLast()` that return boolean values indicating if `currentStep` is at the start or end of the steps array.",
+      "hints": ["isFirst: currentStep === 0", "isLast: currentStep === steps.length - 1", "Return boolean values"],
+      "codeTemplate": {
+        "javascript": "<div id=\"progress-app\"></div>\n<script>\n  const steps = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep = 0;\n  function isFirst() {\n    // Your code here\n  }\n  function isLast() {\n    // Your code here\n  }\n  console.log(isFirst());\n  console.log(isLast());\n</script>\n",
+        "typescript": "<div id=\"progress-app\"></div>\n<script>\n  const steps: string[] = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep: number = 0;\n  function isFirst(): boolean {\n    // Your code here\n  }\n  function isLast(): boolean {\n    // Your code here\n  }\n  console.log(isFirst());\n  console.log(isLast());\n</script>\n",
+        "python": "steps = ['Start', 'Details', 'Review', 'Submit']\ncurrent_step = 0\n\ndef is_first():\n    # Your code here\n\ndef is_last():\n    # Your code here\n\nprint(is_first())\nprint(is_last())\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false') || output.includes('True') && output.includes('False')",
+        "successMessage": "Boundary checks work!",
+        "failureMessage": "isFirst returns true at step 0, isLast returns true at final step."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Progress percentage",
+      "description": "Write `getProgress()` that returns the progress percentage: `(currentStep / (steps.length - 1)) * 100`.",
+      "hints": ["Divide currentStep by max index (steps.length - 1)", "Multiply by 100", "Round to nearest integer"],
+      "codeTemplate": {
+        "javascript": "<div id=\"progress-app\"></div>\n<script>\n  const steps = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep = 2;\n  function getProgress() {\n    // Your code here\n  }\n  console.log(getProgress());\n</script>\n",
+        "typescript": "<div id=\"progress-app\"></div>\n<script>\n  const steps: string[] = ['Start', 'Details', 'Review', 'Submit'];\n  let currentStep: number = 2;\n  function getProgress(): number {\n    // Your code here\n  }\n  console.log(getProgress());\n</script>\n",
+        "python": "steps = ['Start', 'Details', 'Review', 'Submit']\ncurrent_step = 2\n\ndef get_progress():\n    # Your code here\n\nprint(get_progress())\n"
+      },
+      "verification": {
+        "test": "output.includes('66') || output.includes('67')",
+        "successMessage": "Progress percentage works!",
+        "failureMessage": "Return (currentStep / (steps.length - 1)) * 100."
+      }
+    }
+  ]
+}

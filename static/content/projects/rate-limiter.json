@@ -1,0 +1,139 @@
+{
+  "id": "rate-limiter",
+  "title": "Rate Limiter",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "sliding window",
+    "token bucket",
+    "algorithm design",
+    "concurrency"
+  ],
+  "description": "Build a configurable rate limiter supporting both sliding window log and token bucket algorithms.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement fixed window counter",
+      "description": "Write a `FixedWindowCounter` class that tracks requests per fixed time window. Constructor takes `windowMs` (window duration in ms) and `maxRequests`. Implement a `allow()` method that increments a counter for the current window and returns true if under the limit. Print the count and whether each request is allowed.",
+      "hints": [
+        "Use the current timestamp divided by windowMs to determine the current window key",
+        "Reset the counter when a new window starts (different key than stored)",
+        "Return count <= maxRequests from the allow() method"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('count:') && output.includes('allowed') && output.length > 30",
+        "successMessage": "Fixed window counter tracks requests and enforces the limit correctly!",
+        "failureMessage": "Print the current count and whether each request is allowed (true/false) as you call allow()."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Build sliding window log",
+      "description": "Implement a `SlidingWindowLog` class that maintains a sorted list of timestamped requests. On each `allow()` call, remove timestamps older than `windowMs`, add the current timestamp, and check if the count is within `maxRequests`. Print the number of requests in the current window and the allow decision.",
+      "hints": [
+        "Store timestamps in an array sorted chronologically",
+        "On each call, filter out timestamps where (now - timestamp) > windowMs",
+        "Push the current timestamp, then check if array length <= maxRequests"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('requests in window') && output.includes('allow:') && output.length > 30",
+        "successMessage": "Sliding window log accurately tracks requests across a moving time window!",
+        "failureMessage": "Print the number of requests currently in the window and whether the request is allowed."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement token bucket algorithm",
+      "description": "Create a `TokenBucket` class with configurable `capacity` and `refillRate` (tokens per second). Maintain a `tokens` count and a `lastRefill` timestamp. Implement `allow()` that refills tokens based on elapsed time, consumes one token if available, and returns true. Print token count and allow status.",
+      "hints": [
+        "Calculate tokens to add: elapsed seconds * refillRate, capped at capacity",
+        "If tokens >= 1, decrement by 1 and return true; otherwise return false",
+        "Update lastRefill timestamp on each call"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('tokens:') && output.includes('allow:') && output.length > 30",
+        "successMessage": "Token bucket properly refills tokens over time and enforces capacity!",
+        "failureMessage": "Print the current token count and the allow decision after each call."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add per-user rate limiting",
+      "description": "Wrap your sliding window log in a `PerUserRateLimiter` class that takes a `userId` parameter alongside each request. Maintain a separate window per user using a Map or dictionary. Implement `allow(userId)` that returns true if the user is under their limit. Print the remaining quota for each user after each request.",
+      "hints": [
+        "Use a Map where keys are userId strings and values are SlidingWindowLog instances",
+        "Create the per-user limiter lazily when a new userId is first seen"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('remaining:') && output.includes('user') && output.length > 40",
+        "successMessage": "Per-user rate limiting tracks separate quotas for each user!",
+        "failureMessage": "Print 'user: <id>, remaining: <quota>' after each allow() call for different users."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement rate limit headers",
+      "description": "Extend the rate limiter to return response headers. Create a `getHeaders()` method that returns an object with `X-RateLimit-Limit` (max requests), `X-RateLimit-Remaining` (requests left in window), and `X-RateLimit-Reset` (epoch ms when the window resets). Print the headers after each request.",
+      "hints": [
+        "X-RateLimit-Limit is the maxRequests from the window config",
+        "X-RateLimit-Remaining is maxRequests minus current window count",
+        "X-RateLimit-Reset is the end timestamp of the current window"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('X-RateLimit-Limit') && output.includes('X-RateLimit-Remaining') && output.includes('X-RateLimit-Reset')",
+        "successMessage": "Rate limit headers are correctly calculated with limit, remaining, and reset values!",
+        "failureMessage": "Print all three rate limit headers after each request."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Build a middleware wrapper",
+      "description": "Combine everything into a `rateLimiterMiddleware` function that takes a config object, returns a middleware function `(handler)` => `(userId)` => result. The middleware checks the rate limit, adds headers to the result, and either calls the handler or returns a 429 Too Many Requests response. Print the full response object for allowed and blocked requests.",
+      "hints": [
+        "The middleware should return an object: { allowed, headers, data, statusCode }",
+        "When rate limited, set statusCode to 429 and data to an error message",
+        "Merge the rate limit headers into every response object"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('429') && output.includes('Too Many Requests') && output.includes('X-RateLimit')",
+        "successMessage": "Middleware wrapper correctly allows requests under the limit and blocks with 429 over the limit!",
+        "failureMessage": "Print the full response object showing a successful request and a blocked 429 request."
+      }
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "id": "go-immutable-collections",
+  "title": "Go: Immutable Collections",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 60,
+  "concepts": ["go", "immutability", "persistent data structures", "structural sharing"],
+  "description": "Build a persistent immutable vector using structural sharing with Go slices and copy-on-write semantics.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Vector struct definition",
+      "description": "Define a `Vector` struct wrapping an internal `[]interface{}` slice. Write a `New(elements ...interface{}) Vector` constructor and a `Size() int` method. Print the size of a vector created with `New(1, 2, 3)` using `fmt.Println(v.Size())`.",
+      "hints": ["Use `[]interface{}` for the internal slice.", "`New` should copy the variadic args into the internal slice.", "`Size` returns `len(v.data)`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Vector created with correct size.",
+        "failureMessage": "Expected Size() to return 3"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Get and Set with copy-on-write",
+      "description": "Implement `Get(idx int) (interface{}, bool)` and `Set(idx int, val interface{}) Vector`. Set must return a **new** Vector with the modified element (copy-on-write), leaving the original unchanged. Print the value at index 1 from the original and modified vectors to prove immutability.",
+      "hints": ["`Get` returns `v.data[idx], true` with bounds check, else `nil, false`.", "`Set` copies `v.data` into a new slice, mutates the copy, returns a new Vector.", "Use `make([]interface{}, len(v.data))` and `copy()` for the clone."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('2')",
+        "successMessage": "Get/Set preserves immutability correctly.",
+        "failureMessage": "Check Set returns a new Vector without mutating the original."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Structural sharing via trie",
+      "description": "Refactor the Vector to use a 32-ary trie (trie node at each level). Define `node` with `children [32]*node` and `leaf interface{}`. Implement `trieGet` and `trieSet` that share unchanged nodes. Print the value before and after a set to confirm structural sharing works correctly.",
+      "hints": ["Use a `TrieVector` struct with `root *node`, `shift uint`, and `length int`.", "`trieSet` clones only the nodes on the path to the leaf, reusing all others.", "Use `shift` starting at a high bit (e.g. 32) and decrement by 5 bits per level."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('before') && output.includes('after')",
+        "successMessage": "Structural sharing trie works.",
+        "failureMessage": "Ensure trieGet and trieSet work with shared nodes."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Append and Remove",
+      "description": "Implement `Append(val interface{}) Vector` and `Remove() Vector`. Append adds at the end; Remove drops the last element. Both return new Vectors without mutation. Print the vector size and last element after an Append followed by a Remove.",
+      "hints": ["Append may need to create a new root if the current trie is full.", "Remove decrements length without modifying existing nodes.", "Use `fmt.Printf(\"size=%d last=%v\", v.Size(), last)` to display."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('size=')",
+        "successMessage": "Append and Remove work persistently.",
+        "failureMessage": "Check Append and Remove return new Vectors."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Merge",
+      "description": "Implement `Merge(other Vector) Vector` that returns a new Vector with all elements of the receiver followed by all elements of `other`. Print the merged vector's size and first element to verify correctness.",
+      "hints": ["Iterate `other` and Append each element, or bulk-copy at the trie level.", "For simplicity, use a loop calling `Append` on a copy.", "Print `fmt.Printf(\"merged size=%d first=%v\", m.Size(), m.Get(0))`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('merged size=')",
+        "successMessage": "Merge produces correct combined vector.",
+        "failureMessage": "Verify Merge returns a new Vector with all elements."
+      }
+    },
+    {
+      "id": 6,
+      "title": "ToSlice and FromSlice",
+      "description": "Implement `ToSlice() []interface{}` (returns a copy of all elements) and a `FromSlice(s []interface{}) Vector` factory. Print the elements of a vector created from `[]interface{}{10, 20, 30}` using a loop with `fmt.Println(v.Get(i))`.",
+      "hints": ["`ToSlice` walks the trie depth-first collecting leaves.", "`FromSlice` calls `New(s...)` for flat vectors, or bulk-builds the trie.", "Walk and print: `for i := 0; i < v.Size(); i++ { val, _ := v.Get(i); fmt.Println(val) }`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20') && output.includes('30')",
+        "successMessage": "ToSlice and FromSlice round-trip correctly.",
+        "failureMessage": "FromSlice should create a Vector that yields the same elements via ToSlice."
+      }
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "id": "unit-converter",
+  "title": "Unit Converter",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["functions", "arithmetic", "objects", "loops", "formatting"],
+  "description": "Convert between different units of measurement with a flexible converter function.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Kilometers to Miles",
+      "description": "Write a `kmToMiles` function that converts kilometers to miles. 1 km = 0.621371 miles.",
+      "hints": [
+        "Miles = kilometers * 0.621371",
+        "Make it a simple multiplication function"
+      ],
+      "codeTemplate": {
+        "javascript": "function kmToMiles(km) {\n  \n}\n\nconsole.log(kmToMiles(10));\nconsole.log(kmToMiles(5));\n",
+        "typescript": "function kmToMiles(km: number): number {\n  \n}\n\nconsole.log(kmToMiles(10));\nconsole.log(kmToMiles(5));\n",
+        "python": "def kmToMiles(km):\n  \n\nprint(kmToMiles(10))\nprint(kmToMiles(5))\n"
+      },
+      "verification": {
+        "test": "output.includes('6.2') && output.includes('3.1')",
+        "successMessage": "10 km ≈ 6.2 miles, 5 km ≈ 3.1 miles!",
+        "failureMessage": "kmToMiles(10) should be about 6.21371, kmToMiles(5) about 3.106855."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pounds to Kilograms",
+      "description": "Write a `lbsToKg` function that converts pounds to kilograms. 1 lb = 0.453592 kg.",
+      "hints": [
+        "Kilograms = pounds * 0.453592",
+        "Test with 1 pound and 10 pounds"
+      ],
+      "codeTemplate": {
+        "javascript": "function lbsToKg(lbs) {\n  \n}\n\nconsole.log(lbsToKg(1));\nconsole.log(lbsToKg(10));\n",
+        "typescript": "function lbsToKg(lbs: number): number {\n  \n}\n\nconsole.log(lbsToKg(1));\nconsole.log(lbsToKg(10));\n",
+        "python": "def lbsToKg(lbs):\n  \n\nprint(lbsToKg(1))\nprint(lbsToKg(10))\n"
+      },
+      "verification": {
+        "test": "output.includes('0.453') && output.includes('4.53')",
+        "successMessage": "1 lb ≈ 0.4536 kg, 10 lbs ≈ 4.5359 kg!",
+        "failureMessage": "lbsToKg(1) should be about 0.453592, lbsToKg(10) about 4.53592."
+      }
+    },
+    {
+      "id": 3,
+      "title": "General convert function",
+      "description": "Write a `convert` function that takes a value, a from-unit, and a to-unit, and returns the converted value.",
+      "hints": [
+        "Use a switch or if/else chain to handle different conversion types",
+        "Support 'km' to 'miles', 'miles' to 'km', 'lbs' to 'kg', 'kg' to 'lbs'",
+        "Return a helpful message for unsupported conversions"
+      ],
+      "codeTemplate": {
+        "javascript": "function convert(value, fromUnit, toUnit) {\n  \n}\n\nconsole.log(convert(10, \"km\", \"miles\"));\nconsole.log(convert(1, \"lbs\", \"kg\"));\nconsole.log(convert(100, \"kg\", \"lbs\"));\n",
+        "typescript": "function convert(value: number, fromUnit: string, toUnit: string): number | string {\n  \n}\n\nconsole.log(convert(10, \"km\", \"miles\"));\nconsole.log(convert(1, \"lbs\", \"kg\"));\nconsole.log(convert(100, \"kg\", \"lbs\"));\n",
+        "python": "def convert(value, fromUnit, toUnit):\n  \n\nprint(convert(10, \"km\", \"miles\"))\nprint(convert(1, \"lbs\", \"kg\"))\nprint(convert(100, \"kg\", \"lbs\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('6.2') && output.includes('0.453') && output.includes('220.4')",
+        "successMessage": "All supported conversions work!",
+        "failureMessage": "10 km → ~6.2 miles, 1 lbs → ~0.4536 kg, 100 kg → ~220.46 lbs."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format converted result",
+      "description": "Write a `formatConversion` function that returns a formatted string like `\"10 km = 6.21 miles\"` with 2 decimal places.",
+      "hints": [
+        "Call convert to get the numeric result",
+        "Format both values to 2 decimal places with .toFixed(2)",
+        "Return a descriptive string"
+      ],
+      "codeTemplate": {
+        "javascript": "function convert(value, from, to) {\n  const conversions = { \"km_miles\": 0.621371, \"miles_km\": 1.60934, \"lbs_kg\": 0.453592, \"kg_lbs\": 2.20462 };\n  const key = from + \"_\" + to;\n  return value * conversions[key];\n}\n\nfunction formatConversion(value, fromUnit, toUnit) {\n  \n}\n\nconsole.log(formatConversion(10, \"km\", \"miles\"));\nconsole.log(formatConversion(50, \"kg\", \"lbs\"));\n",
+        "typescript": "function convert(value: number, from: string, to: string): number {\n  const conversions: { [key: string]: number } = { \"km_miles\": 0.621371, \"miles_km\": 1.60934, \"lbs_kg\": 0.453592, \"kg_lbs\": 2.20462 };\n  const key = from + \"_\" + to;\n  return value * conversions[key];\n}\n\nfunction formatConversion(value: number, fromUnit: string, toUnit: string): string {\n  \n}\n\nconsole.log(formatConversion(10, \"km\", \"miles\"));\nconsole.log(formatConversion(50, \"kg\", \"lbs\"));\n",
+        "python": "def convert(value, fromUnit, toUnit):\n  conversions = { \"km_miles\": 0.621371, \"miles_km\": 1.60934, \"lbs_kg\": 0.453592, \"kg_lbs\": 2.20462 }\n  key = fromUnit + \"_\" + toUnit\n  return value * conversions[key]\n\ndef formatConversion(value, fromUnit, toUnit):\n  \n\nprint(formatConversion(10, \"km\", \"miles\"))\nprint(formatConversion(50, \"kg\", \"lbs\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('=') && output.includes('km') && output.includes('miles')",
+        "successMessage": "Formatted conversion strings look professional!",
+        "failureMessage": "Each output should be like '10 km = 6.21 miles'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Convert an array of values",
+      "description": "Write a function that takes an array of values and converts all of them, returning an array of formatted strings.",
+      "hints": [
+        "Use .map() in JS/TS or a list comprehension in Python",
+        "Call formatConversion for each value",
+        "Return the array of formatted strings"
+      ],
+      "codeTemplate": {
+        "javascript": "function formatConversion(value, from, to) {\n  const conversions = { \"km_miles\": 0.621371 };\n  const result = value * conversions[from + \"_\" + to];\n  return value + \" \" + from + \" = \" + result.toFixed(2) + \" \" + to;\n}\n\nfunction convertArray(values, fromUnit, toUnit) {\n  \n}\n\nconsole.log(convertArray([1, 5, 10], \"km\", \"miles\"));\n",
+        "typescript": "function formatConversion(value: number, from: string, to: string): string {\n  const conversions: { [key: string]: number } = { \"km_miles\": 0.621371 };\n  const result = value * conversions[from + \"_\" + to];\n  return value + \" \" + from + \" = \" + result.toFixed(2) + \" \" + to;\n}\n\nfunction convertArray(values: number[], fromUnit: string, toUnit: string): string[] {\n  \n}\n\nconsole.log(convertArray([1, 5, 10], \"km\", \"miles\"));\n",
+        "python": "def formatConversion(value, fromUnit, toUnit):\n  conversions = { \"km_miles\": 0.621371 }\n  result = value * conversions[fromUnit + \"_\" + toUnit]\n  return f\"{value} {fromUnit} = {result:.2f} {toUnit}\"\n\ndef convertArray(values, fromUnit, toUnit):\n  \n\nprint(convertArray([1, 5, 10], \"km\", \"miles\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('1 km') && output.includes('5 km') && output.includes('10 km')",
+        "successMessage": "All values converted: 1, 5, and 10 km to miles!",
+        "failureMessage": "The array should have three formatted conversion strings."
+      }
+    }
+  ]
+}

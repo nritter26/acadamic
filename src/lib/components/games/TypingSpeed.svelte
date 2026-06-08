@@ -36,7 +36,15 @@
 
   function handleKeydown(e) {
     if (done) return;
+    if (currentPos >= chars.length) return;
     const key = e.key;
+
+    if (chars[currentPos] === '\n') {
+      currentPos++;
+      if (currentPos >= chars.length) { finishGame(); }
+      return;
+    }
+
     if (key.length !== 1) return;
     e.preventDefault();
 
@@ -138,13 +146,17 @@
     <div class="typing-display">
       <div class="char-row">
         {#each chars as ch, i}
-          <span
-            class="char-box"
-            class:char-current={i === currentPos}
-            class:char-correct={i < currentPos && typedChars[i]?.correct}
-            class:char-wrong={i < currentPos && !typedChars[i]?.correct}
-            class:char-flash={i === wrongFlash}
-          >{ch}</span>
+          {#if ch === '\n'}
+            <span class="newline-break" class:char-current={i === currentPos}></span>
+          {:else}
+            <span
+              class="char-box"
+              class:char-current={i === currentPos}
+              class:char-correct={i < currentPos && typedChars[i]?.correct}
+              class:char-wrong={i < currentPos && !typedChars[i]?.correct}
+              class:char-flash={i === wrongFlash}
+            >{ch}</span>
+          {/if}
         {/each}
       </div>
     </div>
@@ -196,6 +208,12 @@
     width: 34px; height: 42px; display: flex; align-items: center; justify-content: center;
     border-radius: 6px; background: #1e293b; color: #475569;
     transition: all 0.15s ease; position: relative;
+  }
+  .newline-break { flex-basis: 100%; height: 4px; }
+  .newline-break.char-current {
+    height: 4px;
+    background: rgba(16,185,129,0.3);
+    border-radius: 2px;
   }
   .char-current {
     color: #e2e8f0; background: #334155;

@@ -2,13 +2,14 @@
   import { createGameController } from '$lib/game/game-loop.svelte.js';
   let { game, lang = 'js' } = $props();
   let ctrl = createGameController(game.id, lang);
+
   let selected = $state(null);
   let timeLeft = $state(15);
   let timerId = $state(null);
   let timeUp = $state(false);
+  let challengeKey = $state('');
 
-  $effect(() => {
-    ctrl.challenge;
+  function resetTimer() {
     selected = null;
     timeLeft = 15;
     timeUp = false;
@@ -17,19 +18,29 @@
       timeLeft = Math.max(0, timeLeft - 1);
       if (timeLeft === 0) timeUp = true;
     }, 1000);
+  }
+
+  $effect(() => {
+    ctrl.transitioning;
+    if (!ctrl.transitioning) {
+      resetTimer();
+    }
     return () => { if (timerId) clearInterval(timerId); };
   });
 
   function pick(choice) {
     if (ctrl.feedbackType === 'ok') return;
     selected = choice;
-    if (timerId) clearInterval(timerId);
     ctrl.submit(choice);
+    if (ctrl.feedbackType === 'ok') {
+      if (timerId) clearInterval(timerId);
+      timerId = null;
+    }
   }
 
   let timerPct = $derived((timeLeft / 15) * 100);
   let timerColor = $derived(timeLeft > 8 ? '#10b981' : timeLeft > 4 ? '#f59e0b' : '#ef4444');
-  let isCorrectSyntax = $derived(ctrl.challenge.prompt?.toLowerCase().includes('valid'));
+  let asksForInvalid = $derived(ctrl.challenge.prompt?.includes('INVALID'));
 </script>
 
 <div class="game-ss" class:transitioning={ctrl.transitioning}>
@@ -48,13 +59,13 @@
     {#each (ctrl.challenge.choices || []) as choice}
       <button
         class="ss-card"
+        class:ss-selected={selected === choice}
         class:ss-card-correct={ctrl.feedbackType === 'ok' && choice === ctrl.challenge.answer}
         class:ss-card-wrong={ctrl.feedbackType === 'wrong' && selected === choice}
         class:ss-card-reveal={ctrl.feedbackType === 'wrong' && choice === ctrl.challenge.answer}
         onclick={() => pick(choice)}
         disabled={ctrl.feedbackType === 'ok'}
       >
-        <div class="ss-card-label">{isCorrectSyntax ? 'Valid' : 'Invalid'}?</div>
         <pre class="ss-card-code"><code>{choice}</code></pre>
         {#if ctrl.feedbackType === 'ok' && choice === ctrl.challenge.answer}
           <div class="ss-card-badge ss-badge-correct">✓ Correct</div>
@@ -67,7 +78,7 @@
   </div>
 
   {#if timeUp && !ctrl.feedbackType}
-    <div class="ss-timeout">⏰ Time's up! Keep going.</div>
+    <div class="ss-timeout">⏰ Time's up!</div>
   {/if}
 
   {#if ctrl.feedback}
@@ -98,21 +109,21 @@
   h1 { font-size: 28px; margin: 8px 0; }
   .ss-q { color: #cbd5e1; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
 
-  .ss-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-  .ss-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: #0f172a; border: 2px solid #1e293b; border-radius: 12px; color: #e2e8f0; cursor: pointer; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: all 0.15s; position: relative; }
+  .ss-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .ss-card { display: flex; flex-direction: column; gap: 8px; padding: 20px 16px; background: #0f172a; border: 2px solid #1e293b; border-radius: 12px; color: #e2e8f0; cursor: pointer; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: all 0.15s; position: relative; align-items: center; }
   .ss-card:hover:not(:disabled) { border-color: #f59e0b; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.1); }
   .ss-card:disabled { cursor: default; }
+  .ss-selected { border-color: #f59e0b; }
   .ss-card-correct { border-color: #10b981 !important; background: rgba(16,185,129,0.08) !important; box-shadow: 0 0 16px rgba(16,185,129,0.2); }
   .ss-card-wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.08) !important; animation: shake 0.3s ease; }
   .ss-card-reveal { border-color: #10b981 !important; background: rgba(16,185,129,0.05) !important; }
-  .ss-card-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; }
-  .ss-card-code { margin: 0; white-space: pre-wrap; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #e2e8f0; }
+  .ss-card-code { margin: 0; white-space: pre-wrap; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #e2e8f0; text-align: center; }
   .ss-card-code code { font-family: 'JetBrains Mono', monospace; }
-  .ss-card-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; align-self: flex-start; }
+  .ss-card-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; align-self: center; }
   .ss-badge-correct { background: rgba(16,185,129,0.2); color: #10b981; }
   .ss-badge-reveal { background: rgba(16,185,129,0.15); color: #10b981; }
 
-  .ss-timeout { text-align: center; font-size: 13px; font-weight: 700; color: #ef4444; margin-bottom: 8px; animation: pulse-text 0.8s ease infinite; }
+  .ss-timeout { text-align: center; font-size: 14px; font-weight: 700; color: #ef4444; margin-bottom: 8px; animation: pulse-text 0.8s ease infinite; }
 
   .g-feedback { text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
   .ok { color: #10b981; }

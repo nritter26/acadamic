@@ -1,0 +1,80 @@
+{
+  "id": "vue-api-fetcher",
+  "title": "Vue API Fetcher",
+  "framework": "vue",
+  "languages": ["javascript"],
+  "difficulty": "intermediate",
+  "concepts": ["vue", "mounted", "fetch", "async", "conditional"],
+  "estimatedMinutes": 20,
+  "description": "Fetch and display data from a public API using Vue 3 lifecycle hooks",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Fetch on Mount",
+      "description": "Create a Vue app with a <code>users</code> data array. Use the <code>mounted()</code> lifecycle hook to fetch from <code>https://jsonplaceholder.typicode.com/users</code>. Store the result and log the count.",
+      "hints": [
+        "Use <code>fetch(...).then(res => res.json()).then(data => { this.users = data; console.log('Fetched', data.length, 'users'); })</code>",
+        "Initialize <code>users</code> as <code>[]</code> in data"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      users: []\n    };\n  },\n  mounted() {\n    fetch('https://jsonplaceholder.typicode.com/users')\n      .then(res => res.json())\n      .then(data => {\n        this.users = data;\n        console.log('Fetched', data.length, 'users');\n      })\n      .catch(err => console.error(err));\n  },\n  template: `\n    <div>\n      <h1>User Directory</h1>\n      <p>Check the console for fetched data</p>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "output.includes('Fetched')",
+        "successMessage": "Data fetched in mounted hook!",
+        "failureMessage": "Make sure you fetch from the API in mounted() and log the count"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Display Users",
+      "description": "Use <code>v-for</code> to render each user. Show <code>name</code> in an <code>&lt;h3&gt;</code> and <code>email</code> in a <code>&lt;p&gt;</code>.",
+      "hints": [
+        "Use <code>v-for=\"u in users\" :key=\"u.id\"</code>",
+        "Display with <code>{{ u.name }}</code> and <code>{{ u.email }}</code>"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      users: []\n    };\n  },\n  mounted() {\n    fetch('https://jsonplaceholder.typicode.com/users')\n      .then(res => res.json())\n      .then(data => { this.users = data; })\n      .catch(err => console.error(err));\n  },\n  template: `\n    <div>\n      <h1>User Directory</h1>\n      <div v-for=\"u in users\" :key=\"u.id\">\n        <h3>{{ u.name }}</h3>\n        <p>{{ u.email }}</p>\n      </div>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "output.includes('Leanne Graham')",
+        "successMessage": "Users render with names and emails!",
+        "failureMessage": "Display each user's name and email from the API"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Loading State",
+      "description": "Add a <code>loading</code> data field initialized to <code>true</code>. Show 'Loading...' while fetching, then the user list when complete.",
+      "hints": [
+        "Use <code>v-if=\"loading\"</code> for loading state",
+        "Set <code>this.loading = false</code> after setting users"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      users: [],\n      loading: true\n    };\n  },\n  mounted() {\n    fetch('https://jsonplaceholder.typicode.com/users')\n      .then(res => res.json())\n      .then(data => {\n        this.users = data;\n        this.loading = false;\n      })\n      .catch(err => console.error(err));\n  },\n  template: `\n    <div>\n      <h1>User Directory</h1>\n      <p v-if=\"loading\">Loading...</p>\n      <div v-else v-for=\"u in users\" :key=\"u.id\">\n        <h3>{{ u.name }}</h3>\n        <p>{{ u.email }}</p>\n      </div>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "true",
+        "successMessage": "Loading state works — users see feedback while fetching!",
+        "failureMessage": "Add a loading state that shows while data is being fetched"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Error Handling",
+      "description": "Add an <code>error</code> data field. In the <code>.catch()</code>, set error message and <code>loading = false</code>. Show the error in red if it occurs.",
+      "hints": [
+        "Use <code>v-if=\"error\"</code> to show error message",
+        "Set <code>this.error = err.message</code> in the catch block"
+      ],
+      "codeTemplate": {
+        "javascript": "const { createApp } = Vue;\n\ncreateApp({\n  data() {\n    return {\n      users: [],\n      loading: true,\n      error: null\n    };\n  },\n  mounted() {\n    fetch('https://jsonplaceholder.typicode.com/users')\n      .then(res => res.json())\n      .then(data => {\n        this.users = data;\n        this.loading = false;\n      })\n      .catch(err => {\n        this.error = err.message;\n        this.loading = false;\n      });\n  },\n  template: `\n    <div>\n      <h1>User Directory</h1>\n      <p v-if=\"loading\">Loading...</p>\n      <p v-else-if=\"error\" style=\"color: red\">Failed to load users. Please try again.</p>\n      <div v-else v-for=\"u in users\" :key=\"u.id\">\n        <h3>{{ u.name }}</h3>\n        <p>{{ u.email }}</p>\n      </div>\n    </div>\n  `\n}).mount('#root');"
+      },
+      "verification": {
+        "test": "true",
+        "successMessage": "All three states handled: loading, success, and error!",
+        "failureMessage": "Add error state handling for when the fetch fails"
+      }
+    }
+  ]
+}

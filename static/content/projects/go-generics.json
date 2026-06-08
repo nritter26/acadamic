@@ -1,0 +1,91 @@
+{
+  "id": "go-generics",
+  "title": "Go: Generics",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 30,
+  "concepts": ["go", "generics", "type parameters"],
+  "description": "Use Go 1.18+ generics — type parameters, generic types, constraints, and comparable.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Generic function with T any",
+      "description": "Write a generic function `Print[T any](v T)` that prints \"Value: <v>\" using fmt.Println. Call it with an int, a string, and a float64.",
+      "hints": [
+        "Syntax: `func Print[T any](v T)`",
+        "The `any` constraint allows any type",
+        "Call with `Print(42)`, `Print(\"hello\")`, `Print(3.14)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Value: 42') && output.includes('Value: hello') && output.includes('Value: 3.14')",
+        "successMessage": "Generic function works with multiple types!",
+        "failureMessage": "Use [T any] syntax in the function signature."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Generic type (List[T])",
+      "description": "Define a generic `List[T any]` struct with a `data []T` field. Add methods `Add(v T)` and `Get(index int) T`. Create a List[int], add 3 values, and print them via Get.",
+      "hints": [
+        "`type List[T any] struct { data []T }`",
+        "`func (l *List[T]) Add(v T) { l.data = append(l.data, v) }`",
+        "`func (l *List[T]) Get(i int) T { return l.data[i] }`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20') && output.includes('30')",
+        "successMessage": "Generic List type works with methods!",
+        "failureMessage": "Define methods with the [T] type parameter on the receiver."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Type constraints (interface)",
+      "description": "Define a `Number` constraint interface with `int | float64`. Write a generic `Sum[T Number](values []T) T` function that sums a slice. Call it with both `[]int{1,2,3}` and `[]float64{1.1, 2.2, 3.3}`.",
+      "hints": [
+        "`type Number interface { int | float64 }`",
+        "This is a type constraint interface — also called a union",
+        "The function can use + operator because the constraint allows it"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('6') && output.includes('6.6')",
+        "successMessage": "Type constraints restrict and enable operations!",
+        "failureMessage": "Define the Number constraint interface with int | float64."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Comparable constraint",
+      "description": "Write a generic function `Contains[T comparable](slice []T, val T) bool` that returns true if val is in the slice. Test with ints and strings and print the results.",
+      "hints": [
+        "`comparable` is a built-in constraint for types that support == and !=",
+        "Use range to iterate over the slice",
+        "Test: `Contains([]int{1,2,3}, 2)` should return true"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Comparable constraint enables equality checks!",
+        "failureMessage": "Use the built-in `comparable` constraint."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Multiple type params",
+      "description": "Write a generic function `Pair[K comparable, V any](key K, value V) string` that formats and returns `\"<key>: <value>\"`. Call it with different key/value types and print the results.",
+      "hints": [
+        "Syntax: `func Pair[K comparable, V any](k K, v V) string`",
+        "Return `fmt.Sprintf(\"%v: %v\", k, v)`",
+        "Call with `Pair(\"name\", \"Go\")` and `Pair(1, true)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('name: Go') && output.includes('1: true')",
+        "successMessage": "Multiple type parameters give maximum flexibility!",
+        "failureMessage": "Use fmt.Sprintf with %v to format different types."
+      }
+    }
+  ]
+}

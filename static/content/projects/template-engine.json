@@ -1,0 +1,123 @@
+{
+  "id": "template-engine",
+  "title": "Template Engine",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 60,
+  "concepts": ["string templating", "AST parsing", "expressions", "inheritance", "partials", "filters"],
+  "description": "Build a template engine with variable interpolation, conditionals, loops, template inheritance, and custom filters.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement variable interpolation",
+      "description": "Build a `render(template, context)` function that replaces `{{ variable }}` placeholders with values from the context object. Support dot notation for nested properties like `{{ user.name }}`. Print the rendered output to console.",
+      "hints": ["Use a regex like /\\{\\{\\s*(\\w+(\\.\\w+)*)\\s*\\}\\}/g to match placeholders", "Split dot notation and reduce into the context object to resolve nested values", "Trim whitespace around variable names and replace undefined with empty string"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Hello') && output.includes('World')",
+        "successMessage": "Variable interpolation renders the correct values",
+        "failureMessage": "Rendered output does not contain expected interpolated values"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add conditional blocks",
+      "description": "Implement `{% if condition %} ... {% else %} ... {% endif %}` blocks. The condition supports basic comparisons: `==`, `!=`, truthy/falsy checks. Support nested conditionals. Print the rendered result of both branches.",
+      "hints": ["Parse tokens between {% %} markers; track if/else/endif nesting depth", "Evaluate the condition expression and include or skip the block content", "Else is optional — if not present and condition is false, render nothing"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('if') && output.includes('else')",
+        "successMessage": "Conditional blocks render the correct branch",
+        "failureMessage": "Conditional did not render the expected branch content"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement for loops",
+      "description": "Implement `{% for item in list %} ... {% endfor %}` loops. Provide access to `loop.index`, `loop.first`, and `loop.last` variables inside the loop body. Support looping over arrays and object keys. Print the rendered list items.",
+      "hints": ["Parse the for expression: the word before 'in' is the loop variable, after is the iterable", "Set loop.index (1-based), loop.first, loop.last as local context variables", "Use a for-of loop for arrays and Object.keys for objects"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('item') && output.includes('loop.index')",
+        "successMessage": "For loops iterate correctly and expose loop variables",
+        "failureMessage": "Loop did not render items or loop variables are missing"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add filters (upper, lower, capitalize)",
+      "description": "Implement pipe syntax `{{ name | upper }}` and `{{ name | capitalize }}`. Filters are functions applied to the variable value. Support chaining: `{{ name | lower | capitalize }}`. Add built-in filters: upper, lower, capitalize, trim, default. Print the filtered output.",
+      "hints": ["Split on | to get the variable name and filter chain", "Each filter is a function registered in a filters registry", "Chaining applies filters left-to-right: result = filter2(filter1(value))"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('UPPER') && output.includes('Capitalized')",
+        "successMessage": "Filters transform values correctly and support chaining",
+        "failureMessage": "Filtered output does not match expected transformed values"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement template inheritance",
+      "description": "Implement `{% extends \"base\" %}` and `{% block name %}...{% endblock %}` tags. The child template defines blocks that override the parent template's blocks of the same name. Parent templates can have default block content. Print the composed output.",
+      "hints": ["Store templates in a registry by name; parse extends to load the parent", "First parse the child to extract block contents, then render the parent replacing matching blocks", "Blocks in the parent that are not overridden keep their default content"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('extends') && output.includes('block')",
+        "successMessage": "Template inheritance correctly composes parent and child blocks",
+        "failureMessage": "Block overriding or parent template loading did not work correctly"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Add partial includes",
+      "description": "Implement `{% include \"partial\" %}` tag that loads and renders another template within the current context. Partials have access to the current rendering context. Support passing additional context: `{% include \"item\" with { item: item } %}`. Print the composed page.",
+      "hints": ["Load the partial template from the registry and render it with the current context", "The with keyword replaces or extends context: merge the additional context into the current", "Partials should not have access to the caller's blocks — only the data context"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('include') && output.includes('partial')",
+        "successMessage": "Partial includes render correctly with shared context",
+        "failureMessage": "Partial template did not render or context was not passed correctly"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build expression evaluator",
+      "description": "Implement full expression evaluation inside `{{ }}` and `{% %}` tags. Support arithmetic (`+`, `-`, `*`, `/`), comparison (`==`, `!=`, `>`, `<`, `>=`, `<=`), and logical (`and`, `or`, `not`) operators. Respect operator precedence. Print results of complex expressions.",
+      "hints": ["Tokenize the expression into numbers, strings, operators, and parentheses", "Use the shunting-yard algorithm or recursive descent parser for precedence", "Support string literals in single or double quotes and boolean true/false"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('42') && output.includes('true')",
+        "successMessage": "Expression evaluator handles arithmetic, comparison, and logical operators",
+        "failureMessage": "Expression evaluator returned wrong values or failed to parse complex expressions"
+      }
+    }
+  ]
+}

@@ -3,13 +3,34 @@
   let { game, lang = 'js' } = $props();
   let ctrl = createGameController(game.id, lang);
   let selected = $state(null);
+  let expanded = $state(null);
 
-  $effect(() => { selected = null; });
+  $effect(() => { selected = null; expanded = null; });
+
+  let choices = $derived(ctrl.challenge.choices || []);
 
   function pick(choice) {
     if (ctrl.feedbackType === 'ok') return;
     selected = choice;
     ctrl.submit(choice);
+  }
+
+  function getIcon(idx) {
+    return ['💊', '🔧', '📘', '🧪', '⚙️', '🔬', '🩺', '📋'][idx] || '💊';
+  }
+
+  function getDescription(choice, idx) {
+    let descs = [
+      'incorrect type usage',
+      'missing or extra syntax',
+      'scope or reference error',
+      'runtime behavior mismatch',
+      'logic or flow issue',
+      'type coercion problem',
+      'API misuse',
+      'context binding issue'
+    ];
+    return descs[idx % descs.length];
   }
 </script>
 
@@ -20,21 +41,32 @@
   </div>
   <h1>❌ {game.title}</h1>
 
-  <div class="ep-error-card">
-    <div class="ep-error-type">{ctrl.challenge.prompt}</div>
+  <div class="ep-terminal">
+    <div class="ep-term-head">▼ CONSOLE</div>
+    <div class="ep-term-body">
+      <span class="ep-term-label">Error</span>
+      <span class="ep-term-type">{ctrl.challenge.prompt}</span>
+      <div class="ep-term-line">at &lt;unknown&gt; (index.js:1:1)</div>
+    </div>
   </div>
 
-  <div class="g-prompt">What is the cause?</div>
+  <div class="g-prompt">Select the diagnosis that matches this error:</div>
 
   <div class="ep-choices">
-    {#each (ctrl.challenge.choices || []) as choice}
+    {#each choices as choice, i}
       <button
-        class="ep-choice"
-        class:ep-correct={ctrl.feedbackType === 'ok' && choice === ctrl.challenge.answer}
-        class:ep-wrong={ctrl.feedbackType === 'wrong' && selected === choice}
-        onclick={() => pick(choice)}
+        class="ep-card"
+        class:ep-card-ok={ctrl.feedbackType === 'ok' && choice === ctrl.challenge.answer}
+        class:ep-card-wrong={ctrl.feedbackType === 'wrong' && selected === choice}
+        class:ep-card-dim={ctrl.feedbackType === 'ok' && choice !== ctrl.challenge.answer}
+        class:ep-expanded={expanded === i}
+        onclick={() => { if (ctrl.feedbackType !== 'ok') expanded = expanded === i ? null : i; pick(choice); }}
         disabled={ctrl.feedbackType === 'ok'}
-      >{choice}</button>
+      >
+        <span class="ep-card-icon">{getIcon(i)}</span>
+        <span class="ep-card-text">{choice}</span>
+        <span class="ep-card-desc">{getDescription(choice, i)}</span>
+      </button>
     {/each}
   </div>
 
@@ -59,15 +91,33 @@
   .g-badge { color: #fbbf24; text-transform: uppercase; font-size: 11px; font-weight: 900; letter-spacing: 0.12em; }
   .g-progress { font-size: 11px; font-weight: 700; color: #64748b; }
   h1 { font-size: 28px; margin: 8px 0; }
-  .ep-error-card { background: #1a0e0e; border: 1px solid #7f1d1d; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-  .ep-error-type { font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #fca5a5; font-weight: 700; }
+
+  .ep-terminal { margin-bottom: 16px; border-radius: 8px; overflow: hidden; }
+  .ep-term-head { background: #1e293b; color: #94a3b8; font-size: 11px; font-weight: 700; padding: 6px 12px; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; }
+  .ep-term-body { background: #0f172a; padding: 14px; font-family: 'JetBrains Mono', monospace; }
+  .ep-term-label { color: #ef4444; font-weight: 900; font-size: 11px; margin-right: 8px; }
+  .ep-term-type { color: #fca5a5; font-size: 14px; font-weight: 700; }
+  .ep-term-line { color: #475569; font-size: 11px; margin-top: 6px; }
+
   .g-prompt { color: #94a3b8; margin-bottom: 12px; font-size: 14px; }
+
   .ep-choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .ep-choice { padding: 12px; background: #1e293b; border: 2px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 13px; cursor: pointer; text-align: left; }
-  .ep-choice:hover:not(:disabled) { border-color: #f59e0b; }
-  .ep-choice:disabled { cursor: default; }
-  .ep-correct { border-color: #10b981 !important; background: rgba(16,185,129,0.08); }
-  .ep-wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.08); }
+  .ep-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; background: #1e293b; border: 2px solid #334155;
+    border-radius: 10px; color: #e2e8f0; font-size: 13px;
+    cursor: pointer; text-align: left; transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+    font-family: inherit;
+  }
+  .ep-card:hover:not(:disabled) { border-color: #f59e0b; background: rgba(245,158,11,0.04); }
+  .ep-card:disabled { cursor: default; }
+  .ep-card-icon { font-size: 20px; flex-shrink: 0; }
+  .ep-card-text { font-weight: 700; }
+  .ep-card-desc { font-size: 11px; color: #64748b; margin-left: auto; flex-shrink: 0; }
+  .ep-card-ok { border-color: #10b981 !important; background: rgba(16,185,129,0.1) !important; }
+  .ep-card-wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+  .ep-card-dim { opacity: 0.4; }
+
   .g-feedback { text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
   .ok { color: #10b981; }
   .wrong { color: #ef4444; }

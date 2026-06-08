@@ -28,7 +28,8 @@
         onclick={() => selectLang(lang)}
         aria-label={LANG_NAMES[lang] || lang}
       >
-        {lang === 'htmlcss' ? 'HTML/CSS' : lang.toUpperCase()}
+        <img class="lang-logo" src="/public/logos/{lang}.svg" alt="" onerror={e => e.target.style.display = 'none'}>
+        <span class="lang-label">{lang === 'htmlcss' ? 'HTML/CSS' : lang.toUpperCase()}</span>
       </button>
     {/each}
   </nav>
@@ -37,7 +38,9 @@
 <style>
   .sidebar { width: 80px; min-width: 80px; background: #0f172a; border-right: 1px solid #1e293b; overflow-y: auto; }
   .selector { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
-  .selector button { padding: 6px 4px; font-size: 10px; font-weight: 700; background: transparent; border: none; color: #64748b; cursor: pointer; border-radius: 4px; text-align: center; }
+  .selector button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; font-size: 10px; font-weight: 700; background: transparent; border: none; color: #64748b; cursor: pointer; border-radius: 4px; text-align: center; }
+  .lang-logo { width: 28px; height: 28px; object-fit: contain; }
+  .lang-label { line-height: 1; }
   .selector button:hover { background: #1e293b; color: #e2e8f0; }
   .selector button.active { background: #1e293b; color: var(--accent, #6366f1); }
   @media (max-width: 768px) { .sidebar { display: none; } .sidebar.open { display: block; position: fixed; z-index: 100; height: 100%; } }

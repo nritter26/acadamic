@@ -1,0 +1,83 @@
+{
+  "id": "go-testing-advanced",
+  "title": "Go: Advanced Testing",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 45,
+  "concepts": ["go", "testing", "fuzz testing", "golden files", "test fixtures", "coverage"],
+  "description": "Go beyond basic testing with test fixtures, golden files, fuzz testing, and TestMain orchestration.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Test fixtures with setup and teardown",
+      "description": "Write a test that uses a fixture (temporary directory created with `os.MkdirTemp`). Use `t.Cleanup` to remove it. Print fixture creation with `fmt.Printf(\"Fixture: %s\\n\", dir)` inside the test function declaration scope.",
+      "hints": ["t.Cleanup registers a cleanup function (Go 1.14+)", "os.MkdirTemp creates a random temp directory", "Cleanup functions run in LIFO order"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Fixture:') && output.includes('/tmp')",
+        "successMessage": "Test fixture with setup and teardown works!",
+        "failureMessage": "Print the fixture directory path."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Golden file testing",
+      "description": "Write a test that serializes a struct to JSON, then compares it to a \"golden file\" in `testdata/`. Use `flag.Update` to update golden files with `-update` flag. Print comparison result using `fmt.Printf(\"Golden: %s\\n\", goldenFile)`.",
+      "hints": ["Store expected output in testdata/*.golden files", "Use flag.Bool(\"update\", false, \"update golden files\")", "bytes.Equal or diff for comparison"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Golden:') || output.includes('testdata') || output.includes('update')",
+        "successMessage": "Golden file testing works!",
+        "failureMessage": "Print the golden file path and comparison result."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Fuzz testing (Fuzz function)",
+      "description": "Create a `FuzzHexEncoder(f *testing.F)` function that seeds with `f.Add(\"hello\")` and `f.Add(\"valid\")`. The fuzz target decodes hex and checks round-trip with `encoding/hex`. Print seed corpus entries using `fmt.Printf(\"Seed: %s\\n\", seed)`.",
+      "hints": ["Fuzz function takes *testing.F not *testing.T", "f.Add adds seed corpus entries", "f.Fuzz target takes *testing.T and fuzzed inputs"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Seed:') && output.includes('fuzz')",
+        "successMessage": "Fuzz testing function created!",
+        "failureMessage": "Print seed corpus entries for the fuzz test."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Test coverage analysis",
+      "description": "Write tests that achieve specific coverage targets. Use `go test -coverprofile=coverage.out` programmatically via `os/exec`. Call `go tool cover -html=coverage.out -o coverage.html`. Print coverage percentage using `fmt.Printf(\"Coverage: %.1f%%\\n\", pct)`.",
+      "hints": ["Use os/exec to run go test -coverprofile", "Parse go test -cover output with strings.Contains", "Run go tool cover to see detailed coverage"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Coverage:') || output.includes('%') || output.includes('coverage')",
+        "successMessage": "Test coverage analysis works!",
+        "failureMessage": "Print coverage percentage from test results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "TestMain for test orchestration",
+      "description": "Write a `TestMain(m *testing.M)` function that sets up a database (simulated map), runs tests with `m.Run()`, and tears down. Use `os.Exit` with the return value. Print setup and teardown messages using `fmt.Println`.",
+      "hints": ["TestMain runs in the main goroutine of the test binary", "m.Run() returns exit code", "os.Exit(code) must be called with the result"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('TestMain') || output.includes('setup') || output.includes('teardown')",
+        "successMessage": "TestMain orchestration works!",
+        "failureMessage": "Print setup and teardown messages."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Table-driven tests with subtests",
+      "description": "Write a table-driven test using an anonymous slice of test cases, each with `name`, `input`, and `want`. Run each case with `t.Run(tc.name, func(t *testing.T) { ... })`. Print test names and pass/fail using `fmt.Printf(\"%s: %v\\n\", tc.name, passed)`.",
+      "hints": ["Table-driven: define []struct{...} of test cases", "t.Run creates subtests with independent pass/fail", "Print each subtest name and result"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Test') && (output.includes('pass') || output.includes('fail'))",
+        "successMessage": "Table-driven tests with subtests work!",
+        "failureMessage": "Print each subtest name and whether it passed."
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "go-loops",
+  "title": "Go: Loops",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "loops", "for", "range", "break", "continue"],
+  "description": "Use Go's only loop keyword — for — in various forms: basic, while-style, range, break, and continue.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic For Loop",
+      "description": "Write a for loop that prints numbers 1 to 5, each on a new line.",
+      "hints": ["`for i := 1; i <= 5; i++ { fmt.Println(i) }`", "Go uses `i++` not `++i` as a statement.", "No parentheses around the three components."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4') && output.includes('5')",
+        "successMessage": "For loop works!",
+        "failureMessage": "Print numbers 1 through 5 using a for loop."
+      }
+    },
+    {
+      "id": 2,
+      "title": "For as While",
+      "description": "Use a for loop as a while loop to print numbers 1 to 5.",
+      "hints": ["`i := 1; for i <= 5 { ... i++ }`", "Omit the init and post statements.", "Just keep the condition part."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4') && output.includes('5')",
+        "successMessage": "While-style loop works!",
+        "failureMessage": "Print 1 to 5 using for as a while loop."
+      }
+    },
+    {
+      "id": 3,
+      "title": "For Range Over Slice",
+      "description": "Create a slice `fruits := []string{\"apple\", \"banana\", \"cherry\"}` and use `for range` to print each fruit.",
+      "hints": ["`for i, fruit := range fruits { fmt.Println(fruit) }`", "You can ignore the index with `_`.", "`for _, f := range fruits { ... }`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana') && output.includes('cherry')",
+        "successMessage": "Range loop works!",
+        "failureMessage": "Print each fruit using for range over the slice."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Break",
+      "description": "Write an infinite loop `for { ... }` that breaks when `i` reaches 5, printing each value of `i`.",
+      "hints": ["`for i := 1; ; i++ { if i > 5 { break }; fmt.Println(i) }`", "Or use `for { ... }` with a condition inside.", "Break exits the innermost loop immediately."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4') && output.includes('5')",
+        "successMessage": "Break works!",
+        "failureMessage": "Print 1 to 5 using an infinite loop with break."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Continue",
+      "description": "Print even numbers from 1 to 10 using a for loop with `continue`.",
+      "hints": ["`for i := 1; i <= 10; i++ { if i%2 != 0 { continue }; fmt.Println(i) }`", "`continue` skips to the next iteration.", "Even numbers are divisible by 2."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('4') && output.includes('6') && output.includes('8') && output.includes('10')",
+        "successMessage": "Continue works!",
+        "failureMessage": "Print even numbers 2,4,6,8,10 using continue."
+      }
+    }
+  ]
+}

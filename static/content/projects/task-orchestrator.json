@@ -1,0 +1,162 @@
+{
+  "id": "task-orchestrator",
+  "title": "Task Orchestrator (DAG)",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "DAG",
+    "task orchestration",
+    "topological sort",
+    "parallel execution",
+    "dependency resolution",
+    "error propagation"
+  ],
+  "description": "Build a DAG-based task orchestrator that resolves dependencies, parallelizes independent tasks, and handles failures.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create Task and DAG data structures",
+      "description": "Define a `Task` class with: `id` (string), `dependencies` (array of task IDs), `action` (function), `status` ('pending' | 'running' | 'completed' | 'failed'), `result`, and `duration`. Define a `DAG` class that holds a Map of tasks. Build a task graph with 5 tasks where task C depends on A, B; D depends on C; E depends on A. Print the full DAG structure showing each task and its dependencies.",
+      "hints": [
+        "Use a Map<string, Task> for O(1) task lookup by id",
+        "Each task stores its dependencies as an array of other task IDs (not references)",
+        "Print the DAG as 'Task A -> []', 'Task C -> [A, B]' to visualize edges"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Task') && output.includes('dependencies') && output.includes('->') && output.length > 30",
+        "successMessage": "Task and DAG data structures are correctly defined with dependency relationships!",
+        "failureMessage": "Print each task and its dependencies in the format 'Task <id> -> [dep1, dep2]'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement dependency graph",
+      "description": "Add `addTask(task)` and `addDependency(taskId, dependsOnId)` methods to the DAG class. `addDependency` should validate that both tasks exist and that adding the edge doesn't create a cycle (using DFS-based cycle detection). Build the sample DAG and print the adjacency list showing all edges between tasks.",
+      "hints": [
+        "For cycle detection, run DFS from the task being added; if you encounter the dependency task, it's a cycle",
+        "Store adjacency list as a Map<string, string[]> from task ID to its dependents",
+        "Print the adjacency list as 'A -> [C, E]' meaning C and E depend on A"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('adjacency') && output.includes('->') && output.includes('cycle') && output.length > 30",
+        "successMessage": "Dependency graph correctly validates edges and detects cycles!",
+        "failureMessage": "Print the adjacency list and also show that attempting a cycle returns an error message."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Add topological sort",
+      "description": "Implement Kahn's algorithm to compute a topological ordering of the DAG. Compute in-degree for each task, start with zero in-degree tasks, process them, decrement in-degree of dependents, and repeat. Return the sorted execution order. Print the topological sort order for your DAG and verify it respects all dependencies.",
+      "hints": [
+        "In-degree = number of direct dependencies a task has",
+        "When a task is processed, decrement in-degree of all its dependents; if any reach 0, add to queue",
+        "If the sorted result doesn't include all tasks, the graph has a cycle"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('topological') && output.includes('order') && output.includes('->') && output.length > 30",
+        "successMessage": "Topological sort produces a valid execution order that respects all dependencies!",
+        "failureMessage": "Print the topological order: 'Execution order: A -> B -> C -> D -> E'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement parallel execution",
+      "description": "Extend the DAG to execute tasks in parallel where possible. Tasks with all dependencies resolved (in-degree 0) should run concurrently. Use the topological order to identify parallel batches: each batch contains independent tasks. Simulate execution with `setTimeout` or async/await (different durations per task). Print the execution timeline showing which tasks ran in parallel.",
+      "hints": [
+        "Group tasks into waves: wave 0 = all tasks with in-degree 0, then process and collect next wave",
+        "Use Promise.all() to run each wave's tasks in parallel",
+        "Print 'Wave <N>: [taskA, taskB] running in parallel (duration: <X>ms)'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('wave') && output.includes('parallel') && output.includes('duration') && output.length > 40",
+        "successMessage": "Parallel execution correctly identifies independent tasks and runs them concurrently!",
+        "failureMessage": "Print each execution wave showing which tasks run in parallel and their durations."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add error propagation and rollback",
+      "description": "Implement error handling: if a task fails, mark it as 'failed', propagate the failure to all dependent tasks (mark them as 'skipped'), and stop their execution. Build a rollback mechanism that runs a registered `rollback` function on each completed task when a dependent fails. Print the error chain showing which task failed and which were skipped.",
+      "hints": [
+        "When a task fails, traverse its dependents recursively and mark them as 'skipped'",
+        "Run rollback on successfully completed tasks in reverse dependency order",
+        "Print 'Task <id> FAILED -> cascading: [taskC, taskD] SKIPPED, rolling back: [taskA]'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('failed') && output.includes('skipped') && output.includes('rollback') && output.length > 40",
+        "successMessage": "Error propagation correctly cascades failures to dependents and triggers rollback!",
+        "failureMessage": "Print the error chain: which task failed, which were skipped, and which were rolled back."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement retry for failed tasks",
+      "description": "Add retry logic to task execution. Support `maxRetries` (configurable per task, default 3) and `retryDelayMs` (delay between retries). If a task fails and has remaining retries, wait and re-execute. Track retryAttempts on the task. Only propagate failure if all retries are exhausted. Print retry status showing attempt number for each retry.",
+      "hints": [
+        "Wrap task execution in a retry loop: while attempts < maxRetries, try/catch with delay",
+        "Use setTimeout or sleep() between retry attempts",
+        "Print 'Task <id>: attempt 2/3 failed, retrying in <delay>ms...' and 'Task <id>: succeeded on attempt 2'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('retry') && output.includes('attempt') && output.includes('succeeded') && output.length > 40",
+        "successMessage": "Retry logic correctly re-executes failed tasks and succeeds after configurable attempts!",
+        "failureMessage": "Print retry status showing 'Task <id>: attempt 2/3 - failed, retrying...' and final outcome."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build execution report",
+      "description": "Combine everything into a `runPipeline()` method that executes the DAG and returns a comprehensive report. The report should include for each task: id, status, duration (ms), attempts, startTime, endTime, result. Also include overall stats: totalDuration, totalTasks, completedCount, failedCount, skippedCount. Print the full execution report in a formatted table.",
+      "hints": [
+        "Collect task execution data in a results Map as each task completes",
+        "Calculate totalDuration as max(endTime) - min(startTime) across all tasks",
+        "Print the report as a formatted table with columns: Task | Status | Duration | Attempts"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('report') && output.includes('completed') && output.includes('duration') && output.includes('status')",
+        "successMessage": "Execution report provides complete task-level details and overall pipeline statistics!",
+        "failureMessage": "Print a formatted report showing each task's id, status, duration, attempts, and overall pipeline stats."
+      }
+    }
+  ]
+}
