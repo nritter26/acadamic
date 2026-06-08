@@ -8,6 +8,7 @@ let _provider = $state('hybrid');
 let _model = $state('');
 let _loaded = false;
 let _idCounter = 0;
+let _editorCode = $state('');
 
 const STORAGE_KEY = 'kodex_ai_chat';
 const CHANNEL_NAME = 'kodex_ai_sync';
@@ -113,6 +114,8 @@ export function getAIState() {
     set provider(value) { _provider = value; },
     get model() { return _model; },
     set model(value) { _model = value; },
+    get editorCode() { return _editorCode; },
+    set editorCode(value) { _editorCode = value; },
 
     togglePanel() {
       _panelOpen = !_panelOpen;
