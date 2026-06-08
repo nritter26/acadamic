@@ -8,11 +8,23 @@ import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema } from '
 import { generateExercise } from '../ai/exercises';
 import { review as codeReview } from '../ai/reviewer';
 import { getNextRecommendedTopic, trackAttempt, trackError } from '../ai/learner';
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 const router = Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const prereqPath = path.join(__dirname, '..', 'data', 'prerequisites.json');
+let prereqData: Record<string, Record<string, { prerequisites: string[]; phase: string }>> = {};
+try {
+  if (fs.existsSync(prereqPath)) {
+    prereqData = JSON.parse(fs.readFileSync(prereqPath, 'utf-8'));
+  }
+} catch (e) {
+  console.error('Failed to load prerequisites.json:', e);
+}
 
 router.post('/explain-topic', validate(ExplainTopicSchema), async (req: Request, res: Response) => {
   const { topic, lang, phase, learnerId, code } = req.body;
@@ -41,19 +53,35 @@ router.post('/explain-topic', validate(ExplainTopicSchema), async (req: Request,
   const session = createSession(lid, useLang, topic, usePhase);
   transitionState(lid, useLang, topic, 'explaining');
 
+  let mastery: { topics: Array<{ topic: string; completed: boolean; mastery: number }>; overall: number } | null = null;
+  try {
+    const result = await getConceptMastery(lid, useLang);
+    if (result?.topics) mastery = result;
+  } catch {}
+
+  let prereqNote = '';
+  const langPrereqs = prereqData[useLang];
+  if (langPrereqs && langPrereqs[topic] && mastery && mastery.topics.length > 0) {
+    const needed = langPrereqs[topic].prerequisites;
+    const missingPrereqs = needed.filter(p => {
+      const t = mastery.topics.find((mt: { topic: string }) => mt.topic.toLowerCase() === p.toLowerCase());
+      return !t || !t.completed || t.mastery < 50;
+    });
+    if (missingPrereqs.length > 0) {
+      prereqNote = `NOTE: This topic requires understanding of: ${missingPrereqs.join(', ')}. If something is unclear, ask about those topics first.`;
+    }
+  }
+
   const { results } = await searchWithSources(topic, useLang, 3);
   let learnerLevel: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
   let weakAreas = '';
-  try {
-    const mastery = await getConceptMastery(lid, useLang);
-    if (mastery?.topics?.length > 0) {
-      const avg = mastery.overall;
-      if (avg > 85) learnerLevel = 'advanced';
-      else if (avg > 70) learnerLevel = 'intermediate';
-      const weak = mastery.topics.filter(t => t.completed && t.mastery < 60).map(t => t.topic);
-      if (weak.length > 0) weakAreas = `The learner struggles with: ${weak.join(', ')}. Focus extra attention here.`;
-    }
-  } catch {}
+  if (mastery && mastery.topics.length > 0) {
+    const avg = mastery.overall;
+    if (avg > 85) learnerLevel = 'advanced';
+    else if (avg > 70) learnerLevel = 'intermediate';
+    const weak = mastery.topics.filter(t => t.completed && t.mastery < 60).map(t => t.topic);
+    if (weak.length > 0) weakAreas = `The learner struggles with: ${weak.join(', ')}. Focus extra attention here.`;
+  }
 
   let ragContext = '';
   if (results.length > 0) {
@@ -73,6 +101,8 @@ Structure your explanation:
 
 Keep it conversational and encourage the student to try it themselves.`;
 
+  const fullSystemPrompt = prereqNote ? `${systemPrompt}\n\n${prereqNote}` : systemPrompt;
+
   let fullResponse = '';
   const sseSend = (chunk: string) => {
     if (aborted || sseDoneCalled) return;
@@ -83,7 +113,7 @@ Keep it conversational and encourage the student to try it themselves.`;
   try {
     await askLLM(
       [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: fullSystemPrompt },
         ...(code ? [{ role: 'user', content: `I have this code:\n\`\`\`\n${code}\n\`\`\`` }] : []),
         { role: 'user', content: `Explain "${topic}" in ${useLang} and help me understand it.` },
       ],
@@ -180,7 +210,7 @@ router.get('/recommend', async (req: Request, res: Response) => {
   }
 
   try {
-    const contentDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'content');
+    const contentDir = path.join(__dirname, '..', 'content');
     const filePath = path.join(contentDir, `${lang}.json`);
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     const recommended = await getNextRecommendedTopic(learnerId, lang, data);
