@@ -9,7 +9,7 @@ import http from 'http';
 import { fileURLToPath } from 'url'; // 1. Import fileURLToPath
 
 import { requestLogger, errorHandler, notFound, optionalAuth } from './middleware';
-import { rateLimit, detectOllama, setupWebSocket, getWSStats, metricsHandler, trackRequest, openapiHandler, swaggerUIHandler, pruneOldConversations, initWarmPool, shutdownWarmPool } from './services';
+import { rateLimit, detectOllama, setupWebSocket, getWSStats, metricsHandler, trackRequest, openapiHandler, swaggerUIHandler, pruneOldConversations } from './services';
 import { logger } from './middleware';
 import * as database from './sql/database';
 import apiRoutes from './routes';
@@ -115,7 +115,7 @@ const cleanupInterval = setInterval(pruneOldConversations, 3_600_000);
 function shutdown() {
   logger.info('Shutting down...');
   clearInterval(cleanupInterval);
-  shutdownWarmPool().catch(() => {});
+
   server.close(() => process.exit(0));
 }
 process.on('SIGTERM', shutdown);
@@ -126,9 +126,6 @@ server.listen(PORT, () => {
   logger.info(`Kodex's Lab running at http://localhost:${PORT}`);
   logger.info(`WebSocket ready at ws://localhost:${PORT}/ws`);
 });
-
-// ── Initialize Warm Container Pool (after listen so server is ready) ──
-initWarmPool().catch(err => logger.warn({ err: (err as Error).message }, 'Warm pool init deferred to first request'));
 
 export default app;
 
