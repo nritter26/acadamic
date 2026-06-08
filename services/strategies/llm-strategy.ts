@@ -7,7 +7,7 @@ import type { TutorStrategy, TutorContext } from './types';
 
 export class LLMStrategy implements TutorStrategy {
   name = 'llm';
-  priority = 7;
+  priority = 99;
 
   async canHandle(): Promise<boolean> {
     return getActiveAIProvider() !== 'keyword';

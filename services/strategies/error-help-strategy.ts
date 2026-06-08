@@ -1,3 +1,4 @@
+import { getActiveAIProvider } from '../../ai/config';
 import * as learner from '../../ai/learner';
 import { analyzeUserCode } from '../analyzer';
 import * as conv from '../conversation';
@@ -8,6 +9,7 @@ export class ErrorHelpStrategy implements TutorStrategy {
   priority = 9;
 
   async canHandle(ctx: TutorContext): Promise<boolean> {
+    if (getActiveAIProvider() !== 'keyword') return false;
     return !!(ctx.hasError || /error|bug|fix|wrong|not working|issue/.test(ctx.q));
   }
 

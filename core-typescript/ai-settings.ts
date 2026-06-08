@@ -10,7 +10,7 @@ const defaults = {
 };
 
 const providerDefaults: Record<string, { model: string; endpoint: string }> = {
-  local: { model: 'qwen2.5-coder:1.5b-instruct-q5_K_M', endpoint: 'http://localhost:11434/v1' },
+  local: { model: 'qwen2.5-coder:7b', endpoint: 'http://localhost:11434/v1' },
   openai: { model: 'gpt-4o-mini', endpoint: 'https://api.openai.com/v1' },
   anthropic: { model: 'claude-3-haiku-20240307', endpoint: 'https://api.anthropic.com/v1' },
   gemini: { model: 'gemini-2.0-flash', endpoint: 'https://generativelanguage.googleapis.com/v1beta' },

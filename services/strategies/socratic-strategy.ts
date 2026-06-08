@@ -1,3 +1,4 @@
+import { getActiveAIProvider } from '../../ai/config';
 import * as conv from '../conversation';
 import type { TutorStrategy, TutorContext } from './types';
 import { matchTopic } from '../../ai/tutor-keywords';
@@ -7,6 +8,7 @@ export class SocraticStrategy implements TutorStrategy {
   priority = 4;
 
   async canHandle(ctx: TutorContext): Promise<boolean> {
+    if (getActiveAIProvider() !== 'keyword') return false;
     if (ctx.topic) return true;
     const matchedTopics = matchTopic(ctx.message || ctx.q);
     if (matchedTopics.length > 0) return false;

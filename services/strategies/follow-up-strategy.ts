@@ -1,3 +1,4 @@
+import { getActiveAIProvider } from '../../ai/config';
 import * as conv from '../conversation';
 import type { TutorStrategy, TutorContext } from './types';
 
@@ -6,6 +7,7 @@ export class FollowUpStrategy implements TutorStrategy {
   priority = 8;
 
   async canHandle(ctx: TutorContext): Promise<boolean> {
+    if (getActiveAIProvider() !== 'keyword') return false;
     if (!ctx.history || ctx.history.length < 2) return false;
     if (ctx.q.includes('thank')) return true;
     const lastBotMsg = ctx.history.filter(h => h.role === 'bot').pop();
