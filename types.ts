@@ -105,6 +105,12 @@ export const AttemptExerciseSchema = z.object({
 });
 export type AttemptExerciseInput = z.infer<typeof AttemptExerciseSchema>;
 
+export const RecommendSchema = z.object({
+  lang: z.string().min(1),
+  learnerId: z.string().optional(),
+});
+export type RecommendInput = z.infer<typeof RecommendSchema>;
+
 export const ReviewSchema = z.object({
   code: z.string().min(1),
   lang: z.string().optional(),

@@ -7,7 +7,10 @@ import { validate } from '../middleware';
 import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema } from '../types';
 import { generateExercise } from '../ai/exercises';
 import { review as codeReview } from '../ai/reviewer';
-import { trackAttempt, trackError } from '../ai/learner';
+import { getNextRecommendedTopic, trackAttempt, trackError } from '../ai/learner';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const router = Router();
 
@@ -72,7 +75,7 @@ Keep it conversational and encourage the student to try it themselves.`;
 
   let fullResponse = '';
   const sseSend = (chunk: string) => {
-    if (aborted) return;
+    if (aborted || sseDoneCalled) return;
     fullResponse += chunk;
     res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
   };
@@ -166,6 +169,25 @@ router.post('/attempt-exercise', validate(AttemptExerciseSchema), async (req: Re
     hint: hint || undefined,
     passed: !hasErrors && session.codeAttempts >= 1,
   });
+});
+
+router.get('/recommend', async (req: Request, res: Response) => {
+  const lang = req.query.lang as string;
+  const learnerId = (req.query.learnerId as string) || 'default';
+  if (!lang) {
+    res.status(400).json({ error: 'lang query parameter required' });
+    return;
+  }
+
+  try {
+    const contentDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'content');
+    const filePath = path.join(contentDir, `${lang}.json`);
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    const recommended = await getNextRecommendedTopic(learnerId, lang, data);
+    res.json(recommended || { topic: null, reason: 'all-complete' });
+  } catch {
+    res.json({ topic: null, reason: 'unavailable' });
+  }
 });
 
 export default router;
