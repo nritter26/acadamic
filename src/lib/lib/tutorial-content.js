@@ -3962,6 +3962,175 @@ export const TUTORIAL_COURSES = [
         ]
       }
     ]
+  },
+  {
+    "id": "htmlcss",
+    "title": "HTML & CSS",
+    "summary": "Learn HTML & CSS from the ground up — html fundamentals, html media & embedded content, html forms & interactivity, and more.",
+    "lang": "htmlcss",
+    "icon": "/public/logos/htmlcss.svg",
+    "phases": [
+      {
+        "id": "html-fundamentals",
+        "title": "HTML Fundamentals",
+        "topics": [
+          "What is HTML?",
+          "Document Structure",
+          "Headings & Paragraphs",
+          "Text Formatting",
+          "Comments & Attributes",
+          "Links & Anchors",
+          "Images",
+          "Lists",
+          "Tables",
+          "Forms & Inputs",
+          "Block-Level vs Inline Elements",
+          "Semantic HTML"
+        ]
+      },
+      {
+        "id": "html-media-and-embedded-content",
+        "title": "HTML Media & Embedded Content",
+        "topics": [
+          "Audio & Video",
+          "Iframes",
+          "SVG Graphics",
+          "Canvas",
+          "Data Attributes",
+          "Picture & Responsive Images",
+          "Embedded Content",
+          "MathML"
+        ]
+      },
+      {
+        "id": "html-forms-and-interactivity",
+        "title": "HTML Forms & Interactivity",
+        "topics": [
+          "Form Validation",
+          "Form Styling & UX",
+          "Output & Progress",
+          "ARIA & Accessibility",
+          "SEO Meta Tags",
+          "Interactive Elements",
+          "Hidden Inputs & Form Security",
+          "Form Attributes Deep Dive"
+        ]
+      },
+      {
+        "id": "html-advanced-apis",
+        "title": "HTML Advanced APIs",
+        "topics": [
+          "Web Storage",
+          "Geolocation API",
+          "Drag & Drop API",
+          "Web Workers",
+          "Server-Sent Events",
+          "WebSockets",
+          "Fetch API",
+          "File API & Blobs",
+          "IndexedDB",
+          "History API",
+          "Web Components",
+          "Service Workers"
+        ]
+      },
+      {
+        "id": "html-best-practices",
+        "title": "HTML Best Practices",
+        "topics": [
+          "Semantic Structure Deep Dive",
+          "Microdata & Structured Data",
+          "Performance Optimization",
+          "Lazy Loading & Hints",
+          "WCAG Accessibility",
+          "SEO Fundamentals",
+          "Mobile-First HTML",
+          "HTML Security",
+          "Internationalization",
+          "HTML Validation"
+        ]
+      },
+      {
+        "id": "css-fundamentals",
+        "title": "CSS Fundamentals",
+        "topics": [
+          "What is CSS?",
+          "Selectors",
+          "Colors & Units",
+          "Typography",
+          "Box Model",
+          "CSS Variables",
+          "Specificity & Cascade",
+          "Inheritance",
+          "Cascade Layers Intro",
+          "CSS Reset & Normalize"
+        ]
+      },
+      {
+        "id": "css-layout-and-design",
+        "title": "CSS Layout & Design",
+        "topics": [
+          "Display Property",
+          "Flexbox",
+          "CSS Grid",
+          "Positioning",
+          "Responsive Design",
+          "Backgrounds & Gradients",
+          "Transitions & Transforms",
+          "Animations",
+          "Pseudo-classes",
+          "List Styling & Counters",
+          "Form Styling with CSS"
+        ]
+      },
+      {
+        "id": "css-visual-and-effects",
+        "title": "CSS Visual & Effects",
+        "topics": [
+          "Box Shadows",
+          "Text Effects",
+          "Filters & Blend Modes",
+          "Clip Path & Shapes",
+          "Object Fit & Position",
+          "Overflow & Scroll",
+          "Cursor & Pointer Events",
+          "Resize & Object View",
+          "Columns & Multi-Column"
+        ]
+      },
+      {
+        "id": "css-advanced-topics",
+        "title": "CSS Advanced Topics",
+        "topics": [
+          "CSS Architecture (BEM)",
+          "Preprocessors (Sass/SCSS)",
+          "CSS Layers (@layer)",
+          "Container Queries",
+          "Nesting & @scope",
+          "Logical Properties",
+          "CSS Functions",
+          "Content Visibility",
+          "CSS Color Modern Functions",
+          "@property & Custom Properties Deep Dive",
+          "Container Query Units & Style Queries",
+          "View Transitions API"
+        ]
+      },
+      {
+        "id": "css-architecture-and-tools",
+        "title": "CSS Architecture & Tools",
+        "topics": [
+          "CSS Methodologies",
+          "PostCSS & Autoprefixer",
+          "Tailwind CSS & Utility-First",
+          "CSS Modules & Scoped Styles",
+          "CSS Grid Advanced",
+          "Performance & Best Practices",
+          "CSS Debugging & DevTools",
+          "Print & Accessibility Styles"
+        ]
+      }
+    ]
   }
 ];
 
@@ -11450,6 +11619,246 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Process Creation & Syscalls\" is a key concept in Assembly's System Programming domain."
+    }
+  ],
+  "htmlcss:html-fundamentals": [
+    {
+      "question": "Which of these best describes \"What is HTML?\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in HTML Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"What is HTML?\" is one of the fundamental topics covered in the HTML Fundamentals section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Document Structure\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in html fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Document Structure\" is a key concept in HTML & CSS's HTML Fundamentals domain."
+    }
+  ],
+  "htmlcss:html-media-and-embedded-content": [
+    {
+      "question": "Which of these best describes \"Audio & Video\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in HTML Media & Embedded Content",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Audio & Video\" is one of the fundamental topics covered in the HTML Media & Embedded Content section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Iframes\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in html media & embedded content",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Iframes\" is a key concept in HTML & CSS's HTML Media & Embedded Content domain."
+    }
+  ],
+  "htmlcss:html-forms-and-interactivity": [
+    {
+      "question": "Which of these best describes \"Form Validation\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in HTML Forms & Interactivity",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Form Validation\" is one of the fundamental topics covered in the HTML Forms & Interactivity section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Form Styling & UX\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in html forms & interactivity",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Form Styling & UX\" is a key concept in HTML & CSS's HTML Forms & Interactivity domain."
+    }
+  ],
+  "htmlcss:html-advanced-apis": [
+    {
+      "question": "Which of these best describes \"Web Storage\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in HTML Advanced APIs",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Web Storage\" is one of the fundamental topics covered in the HTML Advanced APIs section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Geolocation API\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in html advanced apis",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Geolocation API\" is a key concept in HTML & CSS's HTML Advanced APIs domain."
+    }
+  ],
+  "htmlcss:html-best-practices": [
+    {
+      "question": "Which of these best describes \"Semantic Structure Deep Dive\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in HTML Best Practices",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Semantic Structure Deep Dive\" is one of the fundamental topics covered in the HTML Best Practices section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Microdata & Structured Data\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in html best practices",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Microdata & Structured Data\" is a key concept in HTML & CSS's HTML Best Practices domain."
+    }
+  ],
+  "htmlcss:css-fundamentals": [
+    {
+      "question": "Which of these best describes \"What is CSS?\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in CSS Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"What is CSS?\" is one of the fundamental topics covered in the CSS Fundamentals section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Selectors\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in css fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Selectors\" is a key concept in HTML & CSS's CSS Fundamentals domain."
+    }
+  ],
+  "htmlcss:css-layout-and-design": [
+    {
+      "question": "Which of these best describes \"Display Property\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in CSS Layout & Design",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Display Property\" is one of the fundamental topics covered in the CSS Layout & Design section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Flexbox\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in css layout & design",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Flexbox\" is a key concept in HTML & CSS's CSS Layout & Design domain."
+    }
+  ],
+  "htmlcss:css-visual-and-effects": [
+    {
+      "question": "Which of these best describes \"Box Shadows\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in CSS Visual & Effects",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Box Shadows\" is one of the fundamental topics covered in the CSS Visual & Effects section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Text Effects\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in css visual & effects",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Text Effects\" is a key concept in HTML & CSS's CSS Visual & Effects domain."
+    }
+  ],
+  "htmlcss:css-advanced-topics": [
+    {
+      "question": "Which of these best describes \"CSS Architecture (BEM)\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in CSS Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"CSS Architecture (BEM)\" is one of the fundamental topics covered in the CSS Advanced Topics section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Preprocessors (Sass/SCSS)\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in css advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Preprocessors (Sass/SCSS)\" is a key concept in HTML & CSS's CSS Advanced Topics domain."
+    }
+  ],
+  "htmlcss:css-architecture-and-tools": [
+    {
+      "question": "Which of these best describes \"CSS Methodologies\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in CSS Architecture & Tools",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"CSS Methodologies\" is one of the fundamental topics covered in the CSS Architecture & Tools section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"PostCSS & Autoprefixer\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in css architecture & tools",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"PostCSS & Autoprefixer\" is a key concept in HTML & CSS's CSS Architecture & Tools domain."
     }
   ]
 };

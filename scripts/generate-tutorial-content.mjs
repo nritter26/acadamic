@@ -19,9 +19,10 @@ const LANG_MAP = {
   lua: { title: 'Lua', icon: '/public/logos/lua.svg' },
   zig: { title: 'Zig', icon: '/public/logos/zig.svg' },
   asm: { title: 'Assembly', icon: '/public/logos/asm.svg' },
+  htmlcss: { title: 'HTML & CSS', icon: '/public/logos/htmlcss.svg' },
 };
 
-const LANG_ORDER = ['js', 'ts', 'py', 'go', 'rust', 'java', 'kt', 'cs', 'cpp', 'c', 'rb', 'php', 'swift', 'scala', 'lua', 'zig', 'asm'];
+const LANG_ORDER = ['js', 'ts', 'py', 'go', 'rust', 'java', 'kt', 'cs', 'cpp', 'c', 'rb', 'php', 'swift', 'scala', 'lua', 'zig', 'asm', 'htmlcss'];
 
 function slugify(text) {
   return text
