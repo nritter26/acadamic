@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { apiStream } from '$lib/lib/api.js';
 
 let _messages = $state([]);
 let _streaming = $state(false);
@@ -84,6 +85,21 @@ function nextId() {
   return Date.now().toString(36) + '-' + _idCounter;
 }
 
+function _addMessage(text, role = 'bot') {
+  _messages = [..._messages, { text, role, id: nextId() }];
+  save();
+  broadcast('messages', _messages);
+}
+
+function _updateLastMessage(text) {
+  if (_messages.length === 0) return;
+  _messages = _messages.map((message, index) => (
+    index === _messages.length - 1 ? { ...message, text } : message
+  ));
+  save();
+  broadcast('messages', _messages);
+}
+
 export function getAIState() {
   load();
   getChannel();
@@ -103,19 +119,40 @@ export function getAIState() {
       broadcast('panelOpen', _panelOpen);
     },
 
+    async exploreTopic(topic, lang, phase) {
+      if (_streaming) return;
+      _panelOpen = true;
+      broadcast('panelOpen', true);
+      _addMessage(`Explain "${topic}" in ${lang}`, 'user');
+      _addMessage('', 'bot');
+      _streaming = true;
+      broadcast('streaming', true);
+      let streamed = '';
+      try {
+        await apiStream('/api/tutor/explain-topic', { topic, lang, phase, learnerId: 'default' }, (chunk) => {
+          streamed += chunk;
+          _updateLastMessage(streamed);
+        }, () => {
+          _streaming = false;
+          broadcast('streaming', false);
+          _addMessage('Try writing some code or ask me a follow-up question!', 'bot');
+        }, (error) => {
+          _updateLastMessage(`Error: ${error}`);
+          _streaming = false;
+          broadcast('streaming', false);
+        });
+      } catch {
+        _streaming = false;
+        broadcast('streaming', false);
+      }
+    },
+
     addMessage(text, role = 'bot') {
-      _messages = [..._messages, { text, role, id: nextId() }];
-      save();
-      broadcast('messages', _messages);
+      _addMessage(text, role);
     },
 
     updateLastMessage(text) {
-      if (_messages.length === 0) return;
-      _messages = _messages.map((message, index) => (
-        index === _messages.length - 1 ? { ...message, text } : message
-      ));
-      save();
-      broadcast('messages', _messages);
+      _updateLastMessage(text);
     },
 
     setStreaming(value) {
