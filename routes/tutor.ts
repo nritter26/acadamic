@@ -4,7 +4,10 @@ import { createSession, transitionState, getSession } from '../services/teaching
 import { searchWithSources } from '../ai/embeddings';
 import { getConceptMastery } from '../ai/learner';
 import { validate } from '../middleware';
-import { ExplainTopicSchema } from '../types';
+import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema } from '../types';
+import { generateExercise } from '../ai/exercises';
+import { review as codeReview } from '../ai/reviewer';
+import { trackAttempt, trackError } from '../ai/learner';
 
 const router = Router();
 
@@ -104,6 +107,65 @@ Keep it conversational and encourage the student to try it themselves.`;
   res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
   res.write('data: [DONE]\n\n');
   res.end();
+});
+
+router.post('/start-exercise', validate(StartExerciseSchema), async (req: Request, res: Response) => {
+  const { topic, lang, level, learnerId } = req.body;
+  const lid = learnerId || 'default';
+  const useLang = lang || 'js';
+
+  const session = getSession(lid, useLang, topic);
+  if (!session) {
+    res.status(400).json({ error: 'No active session. Start with explain-topic first.' });
+    return;
+  }
+
+  try {
+    transitionState(lid, useLang, topic, 'exercising');
+
+    const exercise = await generateExercise(topic, useLang, level || 'beginner');
+    session.exercise = exercise as unknown as Record<string, unknown>;
+    session.codeAttempts = 0;
+
+    res.json({ exercise, sessionState: 'exercising' });
+  } catch {
+    res.status(500).json({ error: 'Failed to generate exercise' });
+  }
+});
+
+router.post('/attempt-exercise', validate(AttemptExerciseSchema), async (req: Request, res: Response) => {
+  const { topic, lang, code, learnerId } = req.body;
+  const lid = learnerId || 'default';
+  const useLang = lang || 'js';
+
+  const session = getSession(lid, useLang, topic);
+  if (!session) {
+    res.status(400).json({ error: 'No active session.' });
+    return;
+  }
+
+  session.codeAttempts += 1;
+  trackAttempt(lid, useLang, topic).catch(() => {});
+
+  const reviewResult = await codeReview(code, useLang, topic);
+  const hasErrors = reviewResult.issues?.some((i: { severity: string }) => i.severity === 'error') ?? false;
+  if (hasErrors) {
+    trackError(lid, useLang, topic).catch(() => {});
+  }
+
+  const remaining = 3 - session.codeAttempts;
+  const hint = remaining <= 0 && session.exercise
+    ? (session.exercise as Record<string, unknown>).hint || ''
+    : '';
+
+  res.json({
+    review: reviewResult.review,
+    score: reviewResult.score,
+    issues: reviewResult.issues,
+    attempts: session.codeAttempts,
+    hint: hint || undefined,
+    passed: !hasErrors && session.codeAttempts >= 1,
+  });
 });
 
 export default router;
