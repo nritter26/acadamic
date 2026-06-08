@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { getAppState } from '$lib/stores/app.svelte.js';
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import HintIndicator from '$lib/components/ai/HintIndicator.svelte';
 
   let app = $derived(getAppState());
   let curr = $derived(getCurriculumState());
@@ -20,3 +21,5 @@
     }
   });
 </script>
+
+<HintIndicator />
