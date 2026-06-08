@@ -1,0 +1,162 @@
+{
+  "id": "feature-flags",
+  "title": "Feature Flag System",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "feature flags",
+    "targeting",
+    "gradual rollout",
+    "A/B testing",
+    "override",
+    "flag evaluation"
+  ],
+  "description": "Build a feature flag system with boolean/percentage/targeted rollouts, gradual ramping, and user overrides.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create flag data structure",
+      "description": "Define a `Flag` data structure with: `key` (string), `type` (string: 'boolean', 'percentage', 'targeted', 'experiment'), `variants` (object mapping variant name to payload), `rules` (array of targeting rules), and `defaultVariant`. Create flags for 'dark-mode', 'new-checkout', 'premium-features', and 'recommendation-algo' and print each flag's configuration.",
+      "hints": [
+        "Use type-specific fields stored in a rules or config sub-object",
+        "variants should map variant names to their payloads, e.g. { on: true, off: false }",
+        "Print flag config in a readable format with key, type, and available variants"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('dark-mode') && output.includes('new-checkout') && output.includes('variants') && output.length > 30",
+        "successMessage": "Flag data structures with multiple types and variants are correctly defined and printed!",
+        "failureMessage": "Print each flag showing its key, type, variants, and default variant."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement boolean flags",
+      "description": "Build a `FlagEvaluator` class with `isEnabled(key, context)` that evaluates boolean flags and returns true/false. Boolean flags have two variants: `on` (enabled) and `off` (disabled). The flag's rules determine which variant applies. Register 'dark-mode' as a boolean flag, evaluate it for three test users, and print enabled/disabled for each.",
+      "hints": [
+        "For boolean flags, look up the active variant and convert to boolean: variant.payload === true",
+        "context should contain user info: { userId, country, plan, role }",
+        "Print 'dark-mode for user<id>: enabled' or 'dark-mode for user<id>: disabled'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('enabled') && output.includes('disabled') && output.includes('dark-mode')",
+        "successMessage": "Boolean flags correctly evaluate to enabled or disabled based on configuration!",
+        "failureMessage": "Print 'dark-mode for user<id>: enabled' or '...disabled' for each user evaluation."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Add percentage rollout",
+      "description": "Implement gradual percentage-based rollouts. Add a `percentage` field to flag rules. Use a deterministic hash of the user ID to assign users to a bucket (0-99). If the bucket is below the rollout percentage, the variant is on; otherwise off. Create a 'new-checkout' flag at 30% rollout and evaluate it for 10 users, printing each user's bucket and assignment.",
+      "hints": [
+        "Use a simple hash function: hash = userId.charCodeAt(0) or a proper hash modulo 100",
+        "The same user should always get the same bucket for consistent experience",
+        "Print 'user<id>: bucket=<N>, < 30, enabled' or 'bucket=<N>, >= 30, disabled'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('bucket') && output.includes('%') && output.includes('rollout') && output.length > 40",
+        "successMessage": "Percentage rollout deterministically assigns users to buckets and respects the rollout percentage!",
+        "failureMessage": "Print each user's bucket and whether they are in or out of the rollout, e.g. 'userA: bucket=22, within 30% -> enabled'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement targeted flags",
+      "description": "Add user attribute targeting to flag rules. Support targeting by `country`, `plan` (free/pro/enterprise), and `role` (admin/user). Each rule specifies target attributes and a variant. Evaluate 'premium-features' with rules targeting enterprise plan users in the US. Print match results showing which rules matched for each test user.",
+      "hints": [
+        "Each targeting rule has: { attributes: { country: 'US' }, variant: 'on' }",
+        "A rule matches when ALL specified attributes match the user context",
+        "First matching rule wins — print the matched rule and assigned variant"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('targeted') && output.includes('US') && output.includes('enterprise') && output.length > 40",
+        "successMessage": "Targeted flags correctly match users based on country, plan, and role attributes!",
+        "failureMessage": "Print which targeting rule matched each user, e.g. 'userA: matched rule country=US,plan=enterprise -> variant=on'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add A/B test variants",
+      "description": "Implement multi-variant experiment flags with weighted distribution. A 'recommendation-algo' experiment has three variants: `control` (30% weight), `algo-a` (50% weight), and `algo-b` (20% weight). Use the user ID hash to select a variant based on cumulative weights. Evaluate for 20 users and print the distribution count per variant.",
+      "hints": [
+        "Assign each variant a weight, compute cumulative ranges: control=0-29, algo-a=30-79, algo-b=80-99",
+        "Use the same bucket hash from percentage rollout and map into the cumulative ranges",
+        "Print 'Variant distribution: control=N, algo-a=N, algo-b=N' after evaluating all users"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('control') && output.includes('algo-a') && output.includes('distribution') && output.length > 40",
+        "successMessage": "A/B test variants are assigned according to their weighted distribution across users!",
+        "failureMessage": "Print 'User<id> assigned to variant <variant>' for each user, then show total distribution."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement user overrides",
+      "description": "Add a user override system that takes priority over all other evaluation rules. Support two override types: `forceOn` (always enabled for a user) and `forceOff` (always disabled). Each override specifies a `userId` and a `variant`. Store overrides in a map and check them before evaluating any rules. Print the active overrides list and demonstrate a forced override.",
+      "hints": [
+        "Check overrides as the first step in evaluate() — if userId has an override, return that variant immediately",
+        "Overrides map: { 'user-admin': { variant: 'on' }, 'user-test': { variant: 'off' } }",
+        "Print 'Override active for <userId>: forcing variant <variant> — skipping rule evaluation'"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('override') && output.includes('forcing') && output.includes('skipping') && output.length > 30",
+        "successMessage": "User overrides correctly bypass normal flag evaluation and force the assigned variant!",
+        "failureMessage": "Print active overrides and show that overriding a user bypasses all rules."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build evaluation pipeline",
+      "description": "Combine everything into a complete evaluation pipeline: `evaluate(flagKey, context)` that runs targeting rules -> percentage rollout -> user overrides -> default variant. Implement `getFullEvalResult(flagKey, context)` that returns the matched rule, variant, payload, and evaluation reason. Test with multiple flags and contexts, printing the full pipeline trace for each.",
+      "hints": [
+        "Chain the checks in priority order: overrides first, then targeting rules, then percentage, then default",
+        "getFullEvalResult() should return { flag, variant, payload, reason: 'override' | 'targeted' | 'rollout' | 'default' }",
+        "Print the full evaluation trace showing each step checked and the final result"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('pipeline') && output.includes('reason') && output.includes('variant') && output.length > 50",
+        "successMessage": "Evaluation pipeline correctly chains all checks in priority order and provides full trace!",
+        "failureMessage": "Print the full evaluation result showing flag, variant, payload, and reason for each test case."
+      }
+    }
+  ]
+}

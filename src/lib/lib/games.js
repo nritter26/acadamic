@@ -1,5 +1,3 @@
-import { generateChallenges } from '$lib/lang/index.js';
-
 export const GAME_CATALOG = [
   { id: 'typing-speed', title: 'Typing Speed', description: 'Type code snippets accurately under time pressure.', mode: 'typing', icon: '⌨️' },
   { id: 'code-scramble', title: 'Code Scramble', description: 'Reorder scrambled code into a working solution.', mode: 'order', icon: '🧩' },
@@ -19,9 +17,13 @@ export const GAME_CATALOG = [
   { id: 'logic-ladder', title: 'Logic Ladder', description: 'Step through branching logic puzzles.', mode: 'choice', icon: '🪜' },
 ];
 
+import { generateChallenges } from '$lib/lang/index.js';
+
 export function getChallenges(gameId, langId = 'js') {
   return generateChallenges(gameId, langId);
 }
+
+
 
 export function normalizeAnswer(value = '') {
   return String(value).trim().replace(/\s+/g, ' ').toLowerCase();

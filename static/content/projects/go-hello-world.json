@@ -1,0 +1,71 @@
+{
+  "id": "go-hello-world",
+  "title": "Go: Hello, World!",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 10,
+  "concepts": ["go", "hello-world", "fmt.Println", "fmt.Printf", "fmt.Sprintf"],
+  "description": "Print output to the console using fmt.Println, fmt.Printf, and fmt.Sprintf.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print Hello, Go!",
+      "description": "Write a Go program that prints `\"Hello, Go!\"` to the console using `fmt.Println`.",
+      "hints": ["Use `fmt.Println` from the `fmt` package.", "Import `\"fmt\"` at the top of your program.", "Wrap your string in double quotes."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello, Go!')",
+        "successMessage": "You printed to the console!",
+        "failureMessage": "Make sure you print exactly 'Hello, Go!'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Print Using Variables",
+      "description": "Declare a variable `message` with value `\"Go is fun!\"` and print it with `fmt.Println`.",
+      "hints": ["Use `var message string = \"Go is fun!\"` or `:=` shorthand.", "Pass the variable to `fmt.Println`.", "`fmt.Println(message)` will print the variable's value."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Go is fun!')",
+        "successMessage": "Variables work!",
+        "failureMessage": "Print the variable so 'Go is fun!' appears in the output."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Format with %v",
+      "description": "Use `fmt.Printf` with the `%v` verb to print `\"I am X years old\"` where X is an integer variable `age` set to `10`.",
+      "hints": ["`fmt.Printf(\"I am %v years old\", age)`", "`%v` is the default format verb for any value.", "Don't forget the newline — `fmt.Printf` doesn't add one automatically."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('I am 10 years old')",
+        "successMessage": "Formatting with %v works!",
+        "failureMessage": "Print 'I am 10 years old' using fmt.Printf and %v."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Print Multiple Values",
+      "description": "Print `\"apple\"`, `\"banana\"`, and `\"cherry\"` on the same line separated by spaces using `fmt.Println` with multiple arguments.",
+      "hints": ["`fmt.Println` accepts any number of arguments.", "`fmt.Println(\"a\", \"b\", \"c\")` prints them separated by spaces.", "Call it like `fmt.Println(\"apple\", \"banana\", \"cherry\")`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('apple banana cherry')",
+        "successMessage": "Multiple values printed!",
+        "failureMessage": "Print 'apple banana cherry' on one line using fmt.Println with multiple arguments."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Format with fmt.Sprintf",
+      "description": "Use `fmt.Sprintf` to create a formatted string `\"Hello, my name is NAME\"` and print it with `fmt.Println`.",
+      "hints": ["`msg := fmt.Sprintf(\"Hello, my name is %s\", name)`", "`%s` formats a string value.", "Assign the result to a variable and pass it to `fmt.Println`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello, my name is')",
+        "successMessage": "Sprintf works!",
+        "failureMessage": "Use fmt.Sprintf to create a formatted string and print it."
+      }
+    }
+  ]
+}

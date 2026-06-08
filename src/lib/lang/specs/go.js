@@ -12,7 +12,7 @@ export const GO_SPEC = {
     '+', '-', '*', '/', '%', '&', '|', '^', '<<', '>>',
     '==', '!=', '<', '>', '<=', '>=', '&&', '||', '!',
     '=', ':=', '+=', '-=', '*=', '/=',
-    '&^', '<-',
+    '&', '|', '^', '&^',
   ],
   types: ['int', 'int8', 'int16', 'int32', 'int64', 'uint', 'float32', 'float64', 'string', 'bool', 'byte', 'rune', 'slice', 'map'],
   patterns: [
@@ -28,6 +28,7 @@ export const GO_SPEC = {
   bugs: [
     { wrong: 'var x = 5\nx := 10', right: 'x := 5\nx = 10', prompt: 'What is the correct way to reassign a variable in Go?', choices: ['x := 5\nx = 10', 'var x = 5\nx := 10', 'x = 5\nx := 10'], answer: 'x := 5\nx = 10' },
     { wrong: 'func add(a int, b int) int {\n  return a + b\n}', right: 'func add(a, b int) int {\n  return a + b\n}', prompt: 'Which is the correct Go function signature?', choices: ['func add(a, b int) int', 'func add(a int, b int) int', 'func add(a int, b int) int { return a + b }'], answer: 'func add(a, b int) int' },
+    { wrong: 'if x > 0 {\n  fmt.Println("ok")\n}', right: 'if x > 0 {\n  fmt.Println("ok")\n}', prompt: 'What is missing from this Go if statement?', choices: ['Nothing, it is correct', 'Parentheses around condition', 'A then keyword'], answer: 'Nothing, it is correct' },
   ],
   concepts: [
     { term: 'Goroutine', definition: 'A lightweight thread of execution managed by the Go runtime.' },

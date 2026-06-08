@@ -1,0 +1,83 @@
+{
+  "id": "go-middleware",
+  "title": "Go: HTTP Middleware Pipeline",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 40,
+  "concepts": ["go", "http", "middleware", "handlers", "context"],
+  "description": "Build a composable HTTP middleware chain using Go's net/http package with logging, auth, and context propagation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define the Middleware type",
+      "description": "Define a type `Middleware func(http.Handler) http.Handler`. Write a function `Wrap(handler http.Handler, middlewares ...Middleware) http.Handler` that applies middlewares in order. Print a confirmation using `fmt.Println`.",
+      "hints": ["Middleware takes a Handler and returns a Handler", "Apply middlewares in reverse order (last wraps first)", "http.HandlerFunc adapts a func to http.Handler"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('middleware') || output.includes('wrap')",
+        "successMessage": "Middleware type defined and wrapping works!",
+        "failureMessage": "Print a message confirming the middleware chain was set up."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Logging middleware",
+      "description": "Create a `LoggingMiddleware` that logs each request's method, path, and duration using `fmt.Printf`. Use `time.Now()` before calling `next.ServeHTTP` and `time.Since()` after. Format: `\"GET /path took 1.2ms\"`.",
+      "hints": ["Capture start time before next.ServeHTTP", "Use time.Since(start) to compute duration", "Access request info via r.Method and r.URL.Path"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('took') && (output.includes('ms') || output.includes('GET') || output.includes('POST'))",
+        "successMessage": "Logging middleware works!",
+        "failureMessage": "Print method, path, and duration for each request."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Auth middleware",
+      "description": "Create an `AuthMiddleware` that checks for an `Authorization` header. If missing or not equal to `\"Bearer secret-token\"`, respond with `http.StatusUnauthorized` and a message. Otherwise call `next.ServeHTTP`. Print auth results using `fmt.Println`.",
+      "hints": ["Use r.Header.Get(\"Authorization\")", "Write error response with w.WriteHeader and w.Write", "Return early without calling next on failure"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('authorized') || output.includes('unauthorized') || output.includes('token')",
+        "successMessage": "Auth middleware works!",
+        "failureMessage": "Print whether the request was authorized or unauthorized."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Middleware chaining",
+      "description": "Compose a chain of three middlewares: `LoggingMiddleware`, `AuthMiddleware`, and a custom `RecoveryMiddleware` that recovers from panics. Apply them to a simple `helloHandler`. Print the chain order using `fmt.Println`.",
+      "hints": ["RecoveryMiddleware uses defer/recover inside a closure", "Pass the final handler through Wrap", "Print the middleware chain order before handling"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('chain') || output.includes('logging') || output.includes('auth') || output.includes('recovery')",
+        "successMessage": "Middleware chain assembled and works!",
+        "failureMessage": "Print the middleware chain order and execution trace."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Request-scoped context",
+      "description": "Create a `ContextMiddleware` that injects a request ID (UUID-like string) into `r.Context()` using `context.WithValue`. Define a custom type `ctxKey` to avoid collisions. The final handler retrieves the request ID and prints it with `fmt.Printf`.",
+      "hints": ["Define a private type for context keys to avoid collisions", "Use context.WithValue(parentCtx, key, val)", "Retrieve with r.Context().Value(key) in the handler"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('request') && output.includes('id') || output.includes('req-')",
+        "successMessage": "Request-scoped context values work!",
+        "failureMessage": "Print the request ID injected via context."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Rate limiter middleware",
+      "description": "Create a `RateLimitMiddleware` that limits requests using a token bucket (implemented with a channel of tokens). If a token is available, allow the request; otherwise respond with 429 Too Many Requests. Print rate limit stats using `fmt.Printf`.",
+      "hints": ["Use a buffered channel as the token bucket", "A goroutine refills tokens on a ticker", "Select on ctx.Done() or channel receive for timeout"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('rate') || output.includes('limit') || output.includes('429') || output.includes('too many')",
+        "successMessage": "Rate limiter middleware works!",
+        "failureMessage": "Print rate limit status for each request."
+      }
+    }
+  ]
+}

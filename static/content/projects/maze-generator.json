@@ -1,0 +1,123 @@
+{
+  "id": "maze-generator",
+  "title": "Maze Generator",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "2D arrays",
+    "recursive backtracking",
+    "graph algorithms",
+    "BFS pathfinding",
+    "generation algorithms"
+  ],
+  "description": "Build a maze generator using recursive backtracking, render it as ASCII, and solve it using BFS pathfinding.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the grid as a 2D array of cells",
+      "description": "Define a `grid` as a 2D array where each cell is an object with `x`, `y` coordinates. Initialize a grid of the given `rows` and `cols`. Log the grid dimensions.",
+      "hints": [
+        "Grid cell: { x: col, y: row }",
+        "Create rows * cols cells using nested loops",
+        "Log: 'Grid: ' + cols + 'x' + rows"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"maze\"></div>\n<script>\nfunction createGrid(rows, cols) {\n  \n}\n\nconst grid = createGrid(5, 5);\nconsole.log(\"Grid:\", grid.length + \"x\" + grid[0].length);\nconsole.log(JSON.stringify(grid[0]));\ndocument.getElementById('maze').textContent = \"Grid: \" + grid.length + \"x\" + grid[0].length;\n</script>\n",
+        "typescript": "<div id=\"maze\"></div>\n<script>\ninterface Cell {\n  x: number;\n  y: number;\n}\n\nfunction createGrid(rows: number, cols: number): Cell[][] {\n  \n}\n\nconst grid: Cell[][] = createGrid(5, 5);\nconsole.log(\"Grid:\", grid.length + \"x\" + grid[0].length);\nconsole.log(JSON.stringify(grid[0]));\ndocument.getElementById('maze').textContent = \"Grid: \" + grid.length + \"x\" + grid[0].length;\n</script>\n",
+        "python": "def createGrid(rows, cols):\n  \n\ngrid = createGrid(5, 5)\nimport json\nprint(\"Grid:\", str(len(grid)) + \"x\" + str(len(grid[0])))\nprint(json.dumps(grid[0]))\n"
+      },
+      "verification": {
+        "test": "output.includes('Grid: 5x5') && output.includes('x') && output.includes('y')",
+        "successMessage": "Grid created with the correct dimensions and cell structure!",
+        "failureMessage": "createGrid(5, 5) should return a 5x5 2D array where each cell has x and y coordinates."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add wall properties to each cell",
+      "description": "Modify the cell to include wall properties: `north`, `south`, `east`, `west` (all set to `true` initially). Also add a `visited` flag. Log a sample cell.",
+      "hints": [
+        "Cell: { x, y, walls: { north: true, south: true, east: true, west: true }, visited: false }",
+        "All walls start as true (closed)",
+        "Visited starts as false (not yet explored)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"maze\"></div>\n<script>\nfunction createCell(x, y) {\n  \n}\n\nconst cell = createCell(2, 3);\nconsole.log(JSON.stringify(cell));\ndocument.getElementById('maze').textContent = JSON.stringify(cell);\n</script>\n",
+        "typescript": "<div id=\"maze\"></div>\n<script>\ninterface Cell {\n  x: number;\n  y: number;\n  walls: { north: boolean; south: boolean; east: boolean; west: boolean };\n  visited: boolean;\n}\n\nfunction createCell(x: number, y: number): Cell {\n  \n}\n\nconst cell = createCell(2, 3);\nconsole.log(JSON.stringify(cell));\ndocument.getElementById('maze').textContent = JSON.stringify(cell);\n</script>\n",
+        "python": "def createCell(x, y):\n  \n\ncell = createCell(2, 3)\nimport json\nprint(json.dumps(cell))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') && output.includes('north') && output.includes('visited') && output.includes('false')",
+        "successMessage": "Cell has wall properties and visited flag initialized correctly!",
+        "failureMessage": "createCell should return a cell with all walls set to true and visited set to false."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement recursive backtracking maze generation",
+      "description": "Write a `generateMaze` function that uses recursive backtracking to carve a maze. Start at (0, 0), mark as visited, choose a random unvisited neighbor, remove the wall between them, and recurse.",
+      "hints": [
+        "Get unvisited neighbors (up, down, left, right within bounds)",
+        "Choose a random unvisited neighbor",
+        "Remove walls between current and chosen neighbor",
+        "Recursively call generateMaze on the chosen neighbor"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"maze\"></div>\n<script>\nfunction createCell(x, y) {\n  return { x, y, walls: { north: true, south: true, east: true, west: true }, visited: false };\n}\n\nfunction createGrid(rows, cols) {\n  const grid = [];\n  for (let r = 0; r < rows; r++) {\n    const row = [];\n    for (let c = 0; c < cols; c++) row.push(createCell(c, r));\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction generateMaze(grid, x, y) {\n  \n}\n\nconst maze = createGrid(5, 5);\ngenerateMaze(maze, 0, 0);\nconsole.log(\"Maze generated!\");\nconsole.log(\"Visited count:\", maze.flat().filter(c => c.visited).length);\ndocument.getElementById('maze').textContent = \"Maze generated: \" + maze.flat().filter(c => c.visited).length + \" cells\";\n</script>\n",
+        "typescript": "<div id=\"maze\"></div>\n<script>\ninterface Cell {\n  x: number;\n  y: number;\n  walls: { north: boolean; south: boolean; east: boolean; west: boolean };\n  visited: boolean;\n}\n\nfunction createCell(x: number, y: number): Cell {\n  return { x, y, walls: { north: true, south: true, east: true, west: true }, visited: false };\n}\n\nfunction createGrid(rows: number, cols: number): Cell[][] {\n  const grid: Cell[][] = [];\n  for (let r = 0; r < rows; r++) {\n    const row: Cell[] = [];\n    for (let c = 0; c < cols; c++) row.push(createCell(c, r));\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction generateMaze(grid: Cell[][], x: number, y: number): void {\n  \n}\n\nconst maze = createGrid(5, 5);\ngenerateMaze(maze, 0, 0);\nconsole.log(\"Maze generated!\");\nconsole.log(\"Visited count:\", maze.flat().filter(c => c.visited).length);\ndocument.getElementById('maze').textContent = \"Maze generated: \" + maze.flat().filter(c => c.visited).length + \" cells\";\n</script>\n",
+        "python": "import random\n\ndef createCell(x, y):\n  return {\"x\": x, \"y\": y, \"walls\": {\"north\": True, \"south\": True, \"east\": True, \"west\": True}, \"visited\": False}\n\ndef createGrid(rows, cols):\n  grid = []\n  for r in range(rows):\n    row = []\n    for c in range(cols):\n      row.append(createCell(c, r))\n    grid.append(row)\n  return grid\n\ndef generateMaze(grid, x, y):\n  \n\nmaze = createGrid(5, 5)\ngenerateMaze(maze, 0, 0)\nprint(\"Maze generated!\")\nvisited = sum(1 for row in maze for c in row if c[\"visited\"])\nprint(\"Visited count:\", visited)\n"
+      },
+      "verification": {
+        "test": "output.includes('Maze generated!') && output.includes('Visited count: 25')",
+        "successMessage": "Maze generation visited all 25 cells!",
+        "failureMessage": "generateMaze should use recursive backtracking to visit all cells, carving passages by removing walls between adjacent cells."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Render the maze to a string",
+      "description": "Write a `renderMaze` function that converts the maze grid to an ASCII string. Use `+`, `-`, `|` characters to draw walls. Log the rendered maze.",
+      "hints": [
+        "Each cell is surrounded by walls on all sides",
+        "Top row: '+---+---+---+...'",
+        "Middle rows: '|   |   |...' with walls shown as '|' or ' '"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"maze\"></div>\n<script>\nfunction createCell(x, y) {\n  return { x, y, walls: { north: true, south: true, east: true, west: true }, visited: false };\n}\n\nfunction createGrid(rows, cols) {\n  const grid = [];\n  for (let r = 0; r < rows; r++) {\n    const row = [];\n    for (let c = 0; c < cols; c++) row.push(createCell(c, r));\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction renderMaze(grid) {\n  \n}\n\nconst maze = createGrid(3, 3);\n// Carve some passages manually for testing\nmaze[0][0].walls.east = false;\nmaze[0][1].walls.west = false;\nconsole.log(renderMaze(maze));\ndocument.getElementById('maze').innerHTML = \"<pre>\" + renderMaze(maze) + \"</pre>\";\n</script>\n",
+        "typescript": "<div id=\"maze\"></div>\n<script>\ninterface Cell {\n  x: number;\n  y: number;\n  walls: { north: boolean; south: boolean; east: boolean; west: boolean };\n  visited: boolean;\n}\n\nfunction createCell(x: number, y: number): Cell {\n  return { x, y, walls: { north: true, south: true, east: true, west: true }, visited: false };\n}\n\nfunction createGrid(rows: number, cols: number): Cell[][] {\n  const grid: Cell[][] = [];\n  for (let r = 0; r < rows; r++) {\n    const row: Cell[] = [];\n    for (let c = 0; c < cols; c++) row.push(createCell(c, r));\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction renderMaze(grid: Cell[][]): string {\n  \n}\n\nconst maze = createGrid(3, 3);\n// Carve some passages manually for testing\nmaze[0][0].walls.east = false;\nmaze[0][1].walls.west = false;\nconsole.log(renderMaze(maze));\ndocument.getElementById('maze').innerHTML = \"<pre>\" + renderMaze(maze) + \"</pre>\";\n</script>\n",
+        "python": "def createCell(x, y):\n  return {\"x\": x, \"y\": y, \"walls\": {\"north\": True, \"south\": True, \"east\": True, \"west\": True}, \"visited\": False}\n\ndef createGrid(rows, cols):\n  grid = []\n  for r in range(rows):\n    row = []\n    for c in range(cols):\n      row.append(createCell(c, r))\n    grid.append(row)\n  return grid\n\ndef renderMaze(grid):\n  \n\nmaze = createGrid(3, 3)\n# Carve some passages manually for testing\nmaze[0][0][\"walls\"][\"east\"] = False\nmaze[0][1][\"walls\"][\"west\"] = False\nprint(renderMaze(maze))\n"
+      },
+      "verification": {
+        "test": "output.includes('+') && output.includes('-') && output.includes('|')",
+        "successMessage": "Maze renders with proper ASCII wall characters!",
+        "failureMessage": "renderMaze should use '+', '-', and '|' characters to draw the maze walls around each cell."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Solve the maze using BFS",
+      "description": "Write a `solveMaze` function that uses BFS to find a path from the start (0, 0) to the end (rows-1, cols-1). Return the path as an array of `{x, y}` coordinates. Log the path length.",
+      "hints": [
+        "Use a queue for BFS: start with { x: 0, y: 0, path: [{ x: 0, y: 0 }] }",
+        "For each cell, check neighbors where there is no wall between them",
+        "If neighbor is unvisited, enqueue with updated path",
+        "When reaching the goal, return the path"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"maze\"></div>\n<script>\n// Pre-made maze where all cells are carved (no walls between neighbors)\nfunction createOpenGrid(rows, cols) {\n  const grid = [];\n  for (let r = 0; r < rows; r++) {\n    const row = [];\n    for (let c = 0; c < cols; c++) {\n      row.push({\n        x: c, y: r,\n        walls: {\n          north: r === 0,\n          south: r === rows - 1,\n          east: c === cols - 1,\n          west: c === 0\n        },\n        visited: false\n      });\n    }\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction solveMaze(grid, startX, startY, endX, endY) {\n  \n}\n\nconst maze = createOpenGrid(4, 4);\nconst path = solveMaze(maze, 0, 0, 3, 3);\nconsole.log(\"Path length:\", path.length);\nconsole.log(\"Path:\", JSON.stringify(path));\ndocument.getElementById('maze').innerHTML = \"<p>Path length: \" + path.length + \"</p>\";\n</script>\n",
+        "typescript": "<div id=\"maze\"></div>\n<script>\ninterface Cell {\n  x: number;\n  y: number;\n  walls: { north: boolean; south: boolean; east: boolean; west: boolean };\n  visited: boolean;\n}\n\ninterface Point {\n  x: number;\n  y: number;\n}\n\nfunction createOpenGrid(rows: number, cols: number): Cell[][] {\n  const grid: Cell[][] = [];\n  for (let r = 0; r < rows; r++) {\n    const row: Cell[] = [];\n    for (let c = 0; c < cols; c++) {\n      row.push({\n        x: c, y: r,\n        walls: {\n          north: r === 0,\n          south: r === rows - 1,\n          east: c === cols - 1,\n          west: c === 0\n        },\n        visited: false\n      });\n    }\n    grid.push(row);\n  }\n  return grid;\n}\n\nfunction solveMaze(grid: Cell[][], startX: number, startY: number, endX: number, endY: number): Point[] {\n  \n}\n\nconst maze = createOpenGrid(4, 4);\nconst path = solveMaze(maze, 0, 0, 3, 3);\nconsole.log(\"Path length:\", path.length);\nconsole.log(\"Path:\", JSON.stringify(path));\ndocument.getElementById('maze').innerHTML = \"<p>Path length: \" + path.length + \"</p>\";\n</script>\n",
+        "python": "from collections import deque\n\ndef createOpenGrid(rows, cols):\n  grid = []\n  for r in range(rows):\n    row = []\n    for c in range(cols):\n      row.append({\n        \"x\": c, \"y\": r,\n        \"walls\": {\n          \"north\": r == 0,\n          \"south\": r == rows - 1,\n          \"east\": c == cols - 1,\n          \"west\": c == 0\n        },\n        \"visited\": False\n      })\n    grid.append(row)\n  return grid\n\ndef solveMaze(grid, startX, startY, endX, endY):\n  \n\nmaze = createOpenGrid(4, 4)\npath = solveMaze(maze, 0, 0, 3, 3)\nimport json\nprint(\"Path length:\", len(path))\nprint(\"Path:\", json.dumps(path))\n"
+      },
+      "verification": {
+        "test": "output.includes('Path length: 7') && output.includes('x') && output.includes('y')",
+        "successMessage": "BFS found a path from start to end!",
+        "failureMessage": "solveMaze should use BFS to find the shortest path from (0,0) to (3,3). In an open grid, the path should be 7 steps long."
+      }
+    }
+  ]
+}

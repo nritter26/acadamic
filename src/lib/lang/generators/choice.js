@@ -4,6 +4,7 @@ import { PY_SPEC } from '../specs/py.js';
 import { GO_SPEC } from '../specs/go.js';
 import { RS_SPEC } from '../specs/rs.js';
 import { C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC } from '../specs/c-family.js';
+<<<<<<< HEAD
 import { JAVA_SPEC, KT_SPEC, SCALA_SPEC } from '../specs/jvm.js';
 import { SWIFT_SPEC, LUA_SPEC } from '../specs/mobile.js';
 import { HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC } from '../specs/web.js';
@@ -12,6 +13,18 @@ import { RB_SPEC } from '../specs/rb.js';
 import { ASM_SPEC } from '../specs/asm.js';
 
 const SPECS = [JS_SPEC, PY_SPEC, GO_SPEC, RS_SPEC, C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC, JAVA_SPEC, KT_SPEC, SCALA_SPEC, SWIFT_SPEC, LUA_SPEC, HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC, SQL_SPEC, PHP_SPEC, RB_SPEC, ASM_SPEC];
+=======
+import { JAVA_SPEC, KOTLIN_SPEC as KT_SPEC, SCALA_SPEC } from '../specs/jvm.js';
+import { HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC } from '../specs/web.js';
+import { SWIFT_SPEC, LUA_SPEC } from '../specs/mobile.js';
+import { SQL_SPEC, PHP_SPEC, RB_SPEC } from '../specs/sql-rb.php.js';
+import { ASM_SPEC } from '../specs/asm.js';
+import { REACT_SPEC } from '../specs/react.js';
+import { VUE_SPEC } from '../specs/vue.js';
+import { SVELTE_SPEC } from '../specs/svelte.js';
+
+const SPECS = [JS_SPEC, PY_SPEC, GO_SPEC, RS_SPEC, C_SPEC, CPP_SPEC, CS_SPEC, ZIG_SPEC, JAVA_SPEC, KT_SPEC, SCALA_SPEC, HTML_SPEC, CSS_SPEC, BASH_SPEC, WASM_SPEC, SWIFT_SPEC, LUA_SPEC, SQL_SPEC, PHP_SPEC, RB_SPEC, ASM_SPEC, REACT_SPEC, VUE_SPEC, SVELTE_SPEC];
+>>>>>>> sveltetutorial
 const SPEC_MAP = {};
 SPECS.forEach(s => SPEC_MAP[s.id] = s);
 
@@ -19,7 +32,12 @@ export function getSpec(langId) {
   return SPEC_MAP[langId] || JS_SPEC;
 }
 
+<<<<<<< HEAD
 // syntax-sprint
+=======
+export { SPEC_MAP };
+
+>>>>>>> sveltetutorial
 export function generateSyntaxSprint(langId, index) {
   const spec = getSpec(langId);
   const tests = spec.syntaxTests;
@@ -32,7 +50,10 @@ export function generateSyntaxSprint(langId, index) {
   return q;
 }
 
+<<<<<<< HEAD
 // syntax-swipe
+=======
+>>>>>>> sveltetutorial
 export function generateSyntaxSwipe(langId, index) {
   const spec = getSpec(langId);
   const tests = spec.syntaxTests;
@@ -41,7 +62,10 @@ export function generateSyntaxSwipe(langId, index) {
   return { prompt: `\`${test.valid}\``, choices: ['Valid', 'Invalid'], answer: 'Valid' };
 }
 
+<<<<<<< HEAD
 // memory-match
+=======
+>>>>>>> sveltetutorial
 export function generateMemoryMatch(langId, index) {
   const spec = getSpec(langId);
   const concepts = spec.concepts;
@@ -52,7 +76,10 @@ export function generateMemoryMatch(langId, index) {
   return { prompt: `${target.term} means:`, choices: deterministicShuffle([target.definition, distractor.definition], langId + 'mm' + index), answer: target.definition };
 }
 
+<<<<<<< HEAD
 // speed-read
+=======
+>>>>>>> sveltetutorial
 export function generateSpeedRead(langId, index) {
   const spec = getSpec(langId);
   const patterns = spec.patterns;
@@ -67,7 +94,10 @@ export function generateSpeedRead(langId, index) {
   return { prompt: `${questions[qi].q}\n\`\`\`\n${code}\n\`\`\``, choices: deterministicShuffle([questions[qi].a, `${p.lines.length + 1}`, 'It throws an error'], langId + 'sr' + index), answer: questions[qi].a };
 }
 
+<<<<<<< HEAD
 // errorpedia
+=======
+>>>>>>> sveltetutorial
 export function generateErrorpedia(langId, index) {
   const spec = getSpec(langId);
   const errors = [
@@ -80,7 +110,10 @@ export function generateErrorpedia(langId, index) {
   return { prompt: `${e.error} in ${spec.name}:`, choices: deterministicShuffle([e.desc, 'Network connection failed', 'File not found'], langId + 'err' + index), answer: e.desc };
 }
 
+<<<<<<< HEAD
 // api-arcade
+=======
+>>>>>>> sveltetutorial
 export function generateApiArcade(langId, index) {
   const qs = [
     { prompt: 'Which HTTP method creates a resource?', choices: ['POST', 'GET', 'PUT', 'DELETE'], answer: 'POST' },
@@ -93,7 +126,10 @@ export function generateApiArcade(langId, index) {
   return qs[index % qs.length];
 }
 
+<<<<<<< HEAD
 // logic-ladder
+=======
+>>>>>>> sveltetutorial
 export function generateLogicLadder(langId, index) {
   const qs = [
     { prompt: 'If `x = 3`, what is `x > 2 && x < 5`?', choices: ['true', 'false'], answer: 'true' },
@@ -106,6 +142,7 @@ export function generateLogicLadder(langId, index) {
   return qs[index % qs.length];
 }
 
+<<<<<<< HEAD
 // sql-join-match
 export function generateSqlJoinMatch(langId, index) {
   const qs = [
@@ -118,6 +155,43 @@ export function generateSqlJoinMatch(langId, index) {
 }
 
 // race-compiler
+=======
+const DB_TABLES = [
+  {
+    prompt: 'Keep all left rows and matching right rows.',
+    choices: ['LEFT JOIN', 'INNER JOIN', 'RIGHT JOIN'],
+    answer: 'LEFT JOIN',
+    tableA: { name: 'Customers', columns: [{ name: 'CustomerID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Email', type: 'VARCHAR(255)' }] },
+    tableB: { name: 'Orders', columns: [{ name: 'OrderID', type: 'INT', pk: true }, { name: 'CustomerID', type: 'INT', fk: true, ref: 'Customers.CustomerID' }, { name: 'Total', type: 'DECIMAL(10,2)' }, { name: 'OrderDate', type: 'DATE' }] },
+  },
+  {
+    prompt: 'Only rows matching both tables.',
+    choices: ['INNER JOIN', 'LEFT JOIN', 'FULL JOIN'],
+    answer: 'INNER JOIN',
+    tableA: { name: 'Students', columns: [{ name: 'StudentID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Major', type: 'VARCHAR(50)' }] },
+    tableB: { name: 'Enrollments', columns: [{ name: 'EnrollID', type: 'INT', pk: true }, { name: 'StudentID', type: 'INT', fk: true, ref: 'Students.StudentID' }, { name: 'Course', type: 'VARCHAR(100)' }, { name: 'Grade', type: 'CHAR(2)' }] },
+  },
+  {
+    prompt: 'All rows from both tables, nulls where no match.',
+    choices: ['FULL JOIN', 'INNER JOIN', 'LEFT JOIN'],
+    answer: 'FULL JOIN',
+    tableA: { name: 'Employees', columns: [{ name: 'EmployeeID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }, { name: 'Department', type: 'VARCHAR(50)' }] },
+    tableB: { name: 'Projects', columns: [{ name: 'ProjectID', type: 'INT', pk: true }, { name: 'ProjectName', type: 'VARCHAR(100)' }, { name: 'LeadID', type: 'INT', fk: true, ref: 'Employees.EmployeeID' }, { name: 'Budget', type: 'DECIMAL(12,2)' }] },
+  },
+  {
+    prompt: 'Keep all right rows and matching left rows.',
+    choices: ['RIGHT JOIN', 'LEFT JOIN', 'INNER JOIN'],
+    answer: 'RIGHT JOIN',
+    tableA: { name: 'Authors', columns: [{ name: 'AuthorID', type: 'INT', pk: true }, { name: 'Name', type: 'VARCHAR(100)' }] },
+    tableB: { name: 'Books', columns: [{ name: 'BookID', type: 'INT', pk: true }, { name: 'Title', type: 'VARCHAR(200)' }, { name: 'AuthorID', type: 'INT', fk: true, ref: 'Authors.AuthorID' }, { name: 'Year', type: 'INT' }] },
+  },
+];
+
+export function generateSqlJoinMatch(langId, index) {
+  return { ...DB_TABLES[index % DB_TABLES.length] };
+}
+
+>>>>>>> sveltetutorial
 export function generateRaceCompiler(langId, index) {
   const qs = [
     { prompt: 'First stage in a typical compiler pipeline?', choices: ['Lexing/Tokenizing', 'Code generation', 'Optimization'], answer: 'Lexing/Tokenizing' },

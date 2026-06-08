@@ -1,0 +1,71 @@
+{
+  "id": "go-errors",
+  "title": "Go: Error Handling",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "errors", "error-interface", "fmt.Errorf", "custom-errors", "panic", "recover"],
+  "description": "Handle errors using the error interface, custom errors, fmt.Errorf with %w, and basic panic/recover.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Error Interface",
+      "description": "Create an `error` value from `errors.New(\"something went wrong\")` and print it.",
+      "hints": ["`err := errors.New(\"something went wrong\")`", "Import `\"errors\"` package.", "Print with `fmt.Println(err)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('something went wrong')",
+        "successMessage": "Error creation works!",
+        "failureMessage": "Create and print an error using errors.New."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Returning Errors",
+      "description": "Write a function `divide(a, b int) (int, error)` that returns an error when dividing by zero, otherwise returns the quotient. Print the result.",
+      "hints": ["`if b == 0 { return 0, errors.New(\"division by zero\") }`", "Return `a/b, nil` for success.", "Call `divide(10, 0)` and print the error."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('division by zero')",
+        "successMessage": "Error returning works!",
+        "failureMessage": "Return an error from divide(10, 0) and print it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "fmt.Errorf with %w",
+      "description": "Use `fmt.Errorf` with `%w` to wrap an error. Create a base error \"not found\" and wrap it as \"user not found\". Print the wrapped error.",
+      "hints": ["`base := errors.New(\"not found\")`", "`wrapped := fmt.Errorf(\"user %w\", base)`", "`%w` creates a wrapped error for unwrapping later."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('user not found')",
+        "successMessage": "Error wrapping works!",
+        "failureMessage": "Wrap 'not found' as 'user not found' using %w and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Custom Error Type",
+      "description": "Define a custom struct `ValidationError` that implements the `error` interface, with an `Field` string field. Create one and print it.",
+      "hints": ["`type ValidationError struct { Field string }`", "`func (e ValidationError) Error() string { return \"invalid: \" + e.Field }`", "Create and print `ValidationError{Field: \"email\"}`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('invalid: email')",
+        "successMessage": "Custom error works!",
+        "failureMessage": "Create ValidationError for field 'email' and print it."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Panic and Recover",
+      "description": "Write a function `safeDivide(a, b int) (result int)` that uses `defer` and `recover()` to handle a panic when dividing by zero, returning 0. Print the result.",
+      "hints": ["`defer func() { if r := recover(); r != nil { result = 0 } }()`", "Panic if b == 0: `if b == 0 { panic(\"zero\") }`", "Named return `result` lets recover set it."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0')",
+        "successMessage": "Panic and recover work!",
+        "failureMessage": "Handle division by zero with panic/recover, return 0."
+      }
+    }
+  ]
+}

@@ -1,21 +1,13 @@
 import { getChallenges, isCorrectAnswer } from '$lib/lib/games.js';
 import { getGameState } from '$lib/stores/game.svelte.js';
 
-const POPUP_DURATION = 800;
-const STREAK_POPUP_DURATION = 1200;
-const ANSWER_DELAY = 500;
-const TRANSITION_DURATION = 200;
-const CORRECT_POINTS = 10;
-const STREAK_INTERVAL = 5;
-const STREAK_BONUS = 10;
-const BIG_STREAK_BONUS = 15;
-
 export function createGameController(gameId, langId) {
   let index = $state(0);
   let score = $state(0);
   let streak = $state(0);
   let feedback = $state('');
   let feedbackType = $state('');
+  let playRecorded = $state(false);
   let transitioning = $state(false);
   let showScorePopup = $state(false);
   let showStreakPopup = $state(false);
@@ -31,28 +23,28 @@ export function createGameController(gameId, langId) {
 
   let gameState = $derived(getGameState());
 
-  function recordSession() {
-    if (score > 0) gameState.recordPlay(gameId, score);
-  }
-
   function submit(answer) {
     if (feedbackType === 'ok') return;
     if (isCorrectAnswer(answer, challenge.answer || challenge.target)) {
-      score += CORRECT_POINTS;
+      score += 10;
       streak++;
-      gameState.earnXP(CORRECT_POINTS);
+      gameState.earnXP(10);
+      if (!playRecorded) {
+        playRecorded = true;
+        gameState.recordPlay(gameId, score);
+      }
       gameState.recordAchievementStat(gameId + '_correct', 1);
       feedback = 'Correct!';
       feedbackType = 'ok';
       showScorePopup = true;
-      setTimeout(() => { showScorePopup = false; }, POPUP_DURATION);
+      setTimeout(() => { showScorePopup = false; }, 800);
 
-      if (streak > 0 && streak % STREAK_INTERVAL === 0) {
-        const bonus = streak >= 10 ? BIG_STREAK_BONUS : STREAK_BONUS;
+      if (streak > 0 && streak % 5 === 0) {
+        const bonus = streak >= 10 ? 15 : 10;
         gameState.earnXP(bonus);
-        streakPopupText = `🔥 ${streak} streak! +${bonus} XP`;
+        streakPopupText = `\u{1F525} ${streak} streak! +${bonus} XP`;
         showStreakPopup = true;
-        setTimeout(() => { showStreakPopup = false; }, STREAK_POPUP_DURATION);
+        setTimeout(() => { showStreakPopup = false; }, 1200);
       }
 
       setTimeout(() => {
@@ -62,11 +54,11 @@ export function createGameController(gameId, langId) {
           feedback = '';
           feedbackType = '';
           transitioning = false;
-        }, TRANSITION_DURATION);
-      }, ANSWER_DELAY);
+        }, 200);
+      }, 500);
     } else {
       streak = 0;
-      feedback = `✗ ${challenge.answer || challenge.target}`;
+      feedback = `\u2717 ${challenge.answer || challenge.target}`;
       feedbackType = 'wrong';
       showScorePopup = false;
     }
@@ -79,12 +71,12 @@ export function createGameController(gameId, langId) {
   }
 
   function reset() {
-    recordSession();
     index = 0;
     score = 0;
     streak = 0;
     feedback = '';
     feedbackType = '';
+    playRecorded = false;
     transitioning = false;
     showScorePopup = false;
     showStreakPopup = false;
@@ -106,6 +98,6 @@ export function createGameController(gameId, langId) {
     submit,
     next,
     reset,
-    isCorrect(input) { return isCorrectAnswer(input, challenge.answer || challenge.target); },
+    isCorrect: isCorrectAnswer,
   };
 }

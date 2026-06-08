@@ -1,0 +1,122 @@
+{
+  "id": "expense-tracker",
+  "title": "Expense Tracker",
+  "difficulty": "intermediate",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 30,
+  "concepts": [
+    "localStorage",
+    "CRUD",
+    "filtering",
+    "array methods",
+    "data persistence"
+  ],
+  "description": "Build an expense tracker that adds expenses, displays them in a list, calculates totals, filters by category, and saves data to localStorage.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Add an expense",
+      "description": "Write an `addExpense` function that takes `description`, `amount`, and `category`, creates an expense object with a unique id and date, and adds it to the expenses array. Log the new expense.",
+      "hints": [
+        "Expense object: { id: Date.now(), description: '...', amount: 25, category: 'Food', date: new Date().toISOString() }",
+        "Use Date.now() for a unique id",
+        "Push the expense to the array and log it"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\nconst expenses = [];\n\nfunction addExpense(description, amount, category) {\n  \n}\n\naddExpense(\"Lunch\", 15, \"Food\");\nconsole.log(expenses);\n</script>\n",
+        "typescript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\ninterface Expense {\n  id: number;\n  description: string;\n  amount: number;\n  category: string;\n  date: string;\n}\n\nconst expenses: Expense[] = [];\n\nfunction addExpense(description: string, amount: number, category: string): void {\n  \n}\n\naddExpense(\"Lunch\", 15, \"Food\");\nconsole.log(expenses);\n</script>\n",
+        "python": "import time\nfrom datetime import datetime\n\nexpenses = []\n\ndef addExpense(description, amount, category):\n  \n\naddExpense(\"Lunch\", 15, \"Food\")\nprint(expenses)\n"
+      },
+      "verification": {
+        "test": "output.includes('description') && output.includes('amount') && output.includes('category') && output.includes('Food')",
+        "successMessage": "Expenses can be added with all required fields!",
+        "failureMessage": "addExpense should create an expense object with id, description, amount, category, and date, then add it to the array."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Display the expense list",
+      "description": "Write a `renderExpenses` function that loops through the expenses array and logs each one as a formatted string: `\"$15.00 - Lunch [Food]\"`.",
+      "hints": [
+        "Format amount to 2 decimal places: amount.toFixed(2)",
+        "Use template literal: `$${expense.amount.toFixed(2)} - ${expense.description} [${expense.category}]`",
+        "Loop through each expense with forEach"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\nconst expenses = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\", date: \"2025-01-15\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\", date: \"2025-01-15\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\", date: \"2025-01-16\" }\n];\n\nfunction renderExpenses() {\n  \n}\n\nrenderExpenses();\n</script>\n",
+        "typescript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\ninterface Expense {\n  id: number;\n  description: string;\n  amount: number;\n  category: string;\n  date: string;\n}\n\nconst expenses: Expense[] = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\", date: \"2025-01-15\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\", date: \"2025-01-15\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\", date: \"2025-01-16\" }\n];\n\nfunction renderExpenses(): void {\n  \n}\n\nrenderExpenses();\n</script>\n",
+        "python": "expenses = [\n  {\"id\": 1, \"description\": \"Lunch\", \"amount\": 15, \"category\": \"Food\", \"date\": \"2025-01-15\"},\n  {\"id\": 2, \"description\": \"Bus fare\", \"amount\": 2.5, \"category\": \"Transport\", \"date\": \"2025-01-15\"},\n  {\"id\": 3, \"description\": \"Coffee\", \"amount\": 4.5, \"category\": \"Food\", \"date\": \"2025-01-16\"}\n]\n\ndef renderExpenses():\n  \n\nrenderExpenses()\n"
+      },
+      "verification": {
+        "test": "output.includes('$15.00') && output.includes('Lunch') && output.includes('[Food]') && output.includes('$2.50') && output.includes('[Transport]')",
+        "successMessage": "All expenses render with formatted amounts, descriptions, and categories!",
+        "failureMessage": "renderExpenses should log each expense as '$X.XX - Description [Category]'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Calculate the total",
+      "description": "Write a `calcTotal` function that uses `.reduce()` to sum all expense amounts and logs the total formatted with `toFixed(2)`.",
+      "hints": [
+        "Use expenses.reduce((sum, expense) => sum + expense.amount, 0)",
+        "Use .toFixed(2) to format to 2 decimal places",
+        "Log: 'Total: $22.00'"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\nconst expenses = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\" }\n];\n\nfunction calcTotal() {\n  \n}\n\ncalcTotal();\n</script>\n",
+        "typescript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\ninterface Expense {\n  id: number;\n  description: string;\n  amount: number;\n  category: string;\n}\n\nconst expenses: Expense[] = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\" }\n];\n\nfunction calcTotal(): void {\n  \n}\n\ncalcTotal();\n</script>\n",
+        "python": "expenses = [\n  {\"id\": 1, \"description\": \"Lunch\", \"amount\": 15, \"category\": \"Food\"},\n  {\"id\": 2, \"description\": \"Bus fare\", \"amount\": 2.5, \"category\": \"Transport\"},\n  {\"id\": 3, \"description\": \"Coffee\", \"amount\": 4.5, \"category\": \"Food\"}\n]\n\ndef calcTotal():\n  \n\ncalcTotal()\n"
+      },
+      "verification": {
+        "test": "output.includes('Total:') && output.includes('$22.00')",
+        "successMessage": "Total calculation works! Lunch, Bus fare, and Coffee add up to $22.00.",
+        "failureMessage": "calcTotal should use reduce to sum amounts and log 'Total: $22.00'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filter expenses by category",
+      "description": "Write a `filterByCategory` function that takes a category string, filters the expenses array, and logs only matching expenses.",
+      "hints": [
+        "Use .filter(): expenses.filter(e => e.category === category)",
+        "Pass the filtered array to renderExpenses or log it directly",
+        "Handle case-insensitive matching with .toLowerCase()"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\nconst expenses = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\" },\n  { id: 4, description: \"Movie\", amount: 12, category: \"Entertainment\" }\n];\n\nfunction filterByCategory(category) {\n  \n}\n\nfilterByCategory(\"Food\");\n</script>\n",
+        "typescript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\ninterface Expense {\n  id: number;\n  description: string;\n  amount: number;\n  category: string;\n}\n\nconst expenses: Expense[] = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" },\n  { id: 3, description: \"Coffee\", amount: 4.5, category: \"Food\" },\n  { id: 4, description: \"Movie\", amount: 12, category: \"Entertainment\" }\n];\n\nfunction filterByCategory(category: string): void {\n  \n}\n\nfilterByCategory(\"Food\");\n</script>\n",
+        "python": "expenses = [\n  {\"id\": 1, \"description\": \"Lunch\", \"amount\": 15, \"category\": \"Food\"},\n  {\"id\": 2, \"description\": \"Bus fare\", \"amount\": 2.5, \"category\": \"Transport\"},\n  {\"id\": 3, \"description\": \"Coffee\", \"amount\": 4.5, \"category\": \"Food\"},\n  {\"id\": 4, \"description\": \"Movie\", \"amount\": 12, \"category\": \"Entertainment\"}\n]\n\ndef filterByCategory(category):\n  \n\nfilterByCategory(\"Food\")\n"
+      },
+      "verification": {
+        "test": "output.includes('Lunch') && output.includes('Coffee') && output.includes('Food') && !output.includes('Bus fare')",
+        "successMessage": "Category filtering works! Only 'Food' expenses are shown.",
+        "failureMessage": "filterByCategory('Food') should show Lunch and Coffee but not Bus fare or Movie."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Save and load from localStorage",
+      "description": "Write `saveExpenses` and `loadExpenses` functions. `saveExpenses` serializes the array to JSON and stores it in localStorage. `loadExpenses` retrieves and parses it. Log the loaded data.",
+      "hints": [
+        "Use localStorage.setItem('expenses', JSON.stringify(expenses))",
+        "Use JSON.parse(localStorage.getItem('expenses')) to load",
+        "Handle the case where nothing is saved: return an empty array",
+        "Log 'Saved!' and 'Loaded: ' + JSON.stringify(loaded)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\nlet expenses = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" }\n];\n\nfunction saveExpenses() {\n  \n}\n\nfunction loadExpenses() {\n  \n}\n\nsaveExpenses();\nconst loaded = loadExpenses();\nconsole.log(\"Loaded:\", JSON.stringify(loaded));\n</script>\n",
+        "typescript": "<div id=\"expense-app\"><div id=\"expenses\"></div><div id=\"total\"></div></div>\n<script>\ninterface Expense {\n  id: number;\n  description: string;\n  amount: number;\n  category: string;\n}\n\nlet expenses: Expense[] = [\n  { id: 1, description: \"Lunch\", amount: 15, category: \"Food\" },\n  { id: 2, description: \"Bus fare\", amount: 2.5, category: \"Transport\" }\n];\n\nfunction saveExpenses(): void {\n  \n}\n\nfunction loadExpenses(): Expense[] {\n  \n}\n\nsaveExpenses();\nconst loaded: Expense[] = loadExpenses();\nconsole.log(\"Loaded:\", JSON.stringify(loaded));\n</script>\n",
+        "python": "import json\n\nstore = {}\nexpenses = [\n  {\"id\": 1, \"description\": \"Lunch\", \"amount\": 15, \"category\": \"Food\"},\n  {\"id\": 2, \"description\": \"Bus fare\", \"amount\": 2.5, \"category\": \"Transport\"}\n]\n\ndef saveExpenses():\n  \n\ndef loadExpenses():\n  \n\nsaveExpenses()\nloaded = loadExpenses()\nprint(\"Loaded:\", json.dumps(loaded))\n"
+      },
+      "verification": {
+        "test": "output.includes('Saved') && output.includes('Loaded') && output.includes('Lunch') && output.includes('Bus fare')",
+        "successMessage": "Data persistence works! Expenses saved to localStorage and loaded back.",
+        "failureMessage": "saveExpenses should store JSON in localStorage, loadExpenses should retrieve it and log the loaded array."
+      }
+    }
+  ]
+}

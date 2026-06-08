@@ -1,0 +1,83 @@
+{
+  "id": "go-distributed-lock",
+  "title": "Go: Distributed Lock",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "distributed locking", "fencing tokens", "leases", "channels", "timers"],
+  "description": "Build a distributed lock manager with fencing tokens, lease expiry, heartbeats, and deadlock detection using Go channels and timers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Lock struct with fencing token",
+      "description": "Define a `Lock` struct with `Token int64` and `Owner string`. Create a `LockManager` with a `sync.Mutex`, a `held *Lock`, and a monotonic token counter. Implement `NewLockManager() *LockManager` and a method to issue tokens. Print the initial state with `fmt.Printf(\"manager ready, next token=%d\", lm.nextToken)`.",
+      "hints": ["Use `sync.Mutex` for thread safety.", "`nextToken` increments atomically (use `atomic.AddInt64`).", "`held` is nil when no lock is held."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('manager ready')",
+        "successMessage": "LockManager initializes correctly.",
+        "failureMessage": "LockManager should be created with nextToken starting at 1."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Acquire with fencing token",
+      "description": "Implement `Acquire(owner string) (*Lock, error)`. If the lock is free, create a `Lock` with the next token and mark it held. Return the lock. If held, return an error. Print the token of an acquired lock and try to acquire again to see the error.",
+      "hints": ["Check `lm.held == nil` before acquiring.", "Increment `lm.nextToken` (use `atomic.AddInt64` for safety), assign to the new Lock.", "Return `fmt.Errorf(\"lock held by %s\", lm.held.Owner)` on conflict."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('token=')",
+        "successMessage": "Acquire returns a lock with unique fencing token.",
+        "failureMessage": "Acquiring an already-held lock should return an error."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Lease expiry with time.Timer",
+      "description": "Add a `leaseDuration time.Duration` to `LockManager`. When acquiring, start a `time.Timer`. If the timer fires before `Release`, automatically release the lock. Print `\"lease expired\"` when a lock is auto-released.",
+      "hints": ["Store `*time.Timer` on the Lock struct.", "Use a goroutine with `select` on the timer channel or acquire's `defer`.", "When timer fires, set `lm.held = nil` and call the expired callback."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('lease expired')",
+        "successMessage": "Lease expiry auto-releases the lock.",
+        "failureMessage": "After lease duration, the lock should be auto-released."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Heartbeat renewal",
+      "description": "Implement `Renew(lock *Lock) error` that resets the lease timer. Only the lock owner can renew. Use `lock.timer.Reset(leaseDuration)`. Print `\"renewed\"` after a successful renewal and verify the lock remains held past the original expiry.",
+      "hints": ["Check `lock.Owner` matches the caller (accept owner string param).", "Call `timer.Reset(leaseDuration)` to postpone expiry.", "Print `fmt.Printf(\"lock %d renewed by %s\", lock.Token, owner)` on success."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('renewed')",
+        "successMessage": "Heartbeat renewal extends the lease.",
+        "failureMessage": "Renew should reset the timer; only the owner should renew."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Deadlock detection",
+      "description": "Implement deadlock detection: track how long a lock has been held. If held longer than a configurable `maxLockDuration`, `ForceRelease` it and log the deadlock. Print `\"deadlock detected\"` when this triggers.",
+      "hints": ["Record `acquiredAt time.Time` on the Lock struct.", "A background goroutine runs every second checking `time.Since(lock.acquiredAt) > maxLockDuration`.", "On force release, print the deadlock warning and clear `lm.held`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('deadlock detected')",
+        "successMessage": "Deadlock detection triggers force release.",
+        "failureMessage": "A held lock past maxLockDuration should be force-released."
+      }
+    },
+    {
+      "id": 6,
+      "title": "LockManager with queue",
+      "description": "Add a channel-based FIFO request queue to `LockManager`. `AcquireQueued(owner string) <-chan *Lock` returns a channel that receives the lock when available. Blocking callers line up. Print `\"acquired\"` when each waiting caller gets the lock.",
+      "hints": ["Create a `request` struct with `owner string` and `resp chan *Lock`.", "A dispatcher goroutine processes requests sequentially.", "When Release happens, the dispatcher dequeues the next waiting request."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('acquired')",
+        "successMessage": "Lock queue dispatches to waiting callers.",
+        "failureMessage": "Multiple queued acquires should each receive the lock in turn."
+      }
+    }
+  ]
+}

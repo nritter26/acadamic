@@ -1,0 +1,91 @@
+{
+  "id": "go-state-machine",
+  "title": "Go: State Machine",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "finite state machine", "interfaces", "guards", "callbacks"],
+  "description": "Implement a flexible finite state machine in Go with typed states, events, guard conditions, and entry/exit actions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define state and event types",
+      "description": "Define string types `State` and `Event` with constants for a document workflow (draft, review, published states; submit, approve, reject events). Create a `Transition` struct with From, To states and Event. Print the defined transitions to verify them.",
+      "hints": [
+        "Use `type State string` and `type Event string` for type safety",
+        "Define constants: `const Draft State = \"draft\"`, etc.",
+        "The Transition struct should have fields: `From State`, `Event Event`, `To State`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('draft ->') && (output.includes('review') || output.includes('published'))",
+        "successMessage": "State, Event types and Transition struct define the FSM vocabulary!",
+        "failureMessage": "Print your transition definitions showing From, Event, and To values."
+      }
+    },
+    {
+      "id": 2,
+      "title": "FSM struct with transition table",
+      "description": "Create an `FSM` struct with a `current State` and a `transitions map[State]map[Event]State`. Implement `AddTransition(from, event, to)` and `Send(event)` methods. `Send` looks up the transition and updates the current state. Print the state before and after each event.",
+      "hints": [
+        "Use a nested map: `map[State]map[Event]State` for O(1) transition lookup",
+        "`Send(event)` should return an error if no transition exists for the current state+event",
+        "Print state changes with `fmt.Printf(\"State: %s -> %s\\n\", before, after)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('draft') && output.includes('review') && output.includes('published')",
+        "successMessage": "FSM correctly transitions between states based on events!",
+        "failureMessage": "Print the state before and after each transition using fmt.Printf."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Guard functions on transitions",
+      "description": "Add guard support to the FSM. Define a `type Guard func() bool` and extend the transition table to include optional guards. Modify `Send(event)` to evaluate the guard before allowing the transition. Print \"Transition blocked by guard\" when a guard returns false.",
+      "hints": [
+        "Create a `TransitionRule` struct with To, Guard fields instead of a plain State",
+        "A nil guard means the transition is always allowed",
+        "After updating the transition table, call `guard()` in `Send` and skip the transition if false"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('blocked') && output.includes('draft')",
+        "successMessage": "Guard functions prevent transitions when conditions are not met!",
+        "failureMessage": "Print 'Transition blocked by guard' when a guard prevents a transition."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Entry and exit action callbacks",
+      "description": "Extend the FSM with entry and exit callbacks. Define `type Action func()` and add `onEntry map[State][]Action` and `onExit map[State][]Action`. Call exit actions when leaving a state and entry actions when entering. Print \"Entering <state>\" and \"Exiting <state>\" messages.",
+      "hints": [
+        "Register actions with `fsm.OnEntry(state, func() { ... })` and `fsm.OnExit(state, func() { ... })`",
+        "In `Send`, call exit actions of the current state before the transition, entry actions of the new state after",
+        "Actions are slices so multiple callbacks can be registered per state"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Entering') && output.includes('Exiting')",
+        "successMessage": "Entry and exit callbacks fire correctly during state transitions!",
+        "failureMessage": "Print 'Entering <state>' on entry and 'Exiting <state>' on exit."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Nested states with parent hierarchy",
+      "description": "Implement nested states where a parent state contains substates. Define a `type CompoundState struct` with `Name` and `Initial` substate. Extend the FSM to handle substate transitions and inherit parent transitions. Print the full state path (e.g. \"review.editing\") after transitions.",
+      "hints": [
+        "Store states as a hierarchical path string like \"review.editing\" for nested representation",
+        "When an event matches a parent transition, reset to the parent's initial substate",
+        "Use `strings.SplitN(statePath, \".\", 2)` to parse the hierarchy"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('.') && output.length > 20",
+        "successMessage": "Nested states correctly inherit parent transitions and track substate paths!",
+        "failureMessage": "Print the full state path (e.g. 'review.editing') after each transition."
+      }
+    }
+  ]
+}

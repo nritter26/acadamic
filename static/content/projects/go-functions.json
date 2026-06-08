@@ -1,0 +1,71 @@
+{
+  "id": "go-functions",
+  "title": "Go: Functions",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "functions", "parameters", "return-values", "multiple-returns", "named-returns"],
+  "description": "Define and call functions with parameters, return values, multiple returns, and named returns.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Function",
+      "description": "Define a function `greet` that prints `\"Hi!\"` and call it from `main`.",
+      "hints": ["`func greet() { fmt.Println(\"Hi!\") }`", "Call it with `greet()` in main.", "The function must be defined before or after main."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hi!')",
+        "successMessage": "Function called!",
+        "failureMessage": "Define and call a function that prints 'Hi!'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Function with Parameters",
+      "description": "Write a function `sayHello(name string)` that prints `\"Hello, NAME!\"` and call it with your name.",
+      "hints": ["`func sayHello(name string) { fmt.Println(\"Hello, \" + name + \"!\") }`", "Call `sayHello(\"Go\")` in main.", "You can use fmt.Printf or string concatenation."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello')",
+        "successMessage": "Parameters work!",
+        "failureMessage": "Write sayHello(name string) that prints 'Hello, NAME!'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Return Values",
+      "description": "Write a function `add(a int, b int) int` that returns the sum and print the result.",
+      "hints": ["`func add(a int, b int) int { return a + b }`", "Call it: `sum := add(3, 7)`", "Print the returned value."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('10')",
+        "successMessage": "Return values work!",
+        "failureMessage": "Write add(a, b int) int that returns a+b and print the result of 3+7."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multiple Returns",
+      "description": "Write a function `divide(a, b int) (int, int)` that returns quotient and remainder, then print both.",
+      "hints": ["`return a / b, a % b`", "Call it: `q, r := divide(10, 3)`", "Print both: `fmt.Println(q, r)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('3') && output.includes('1')",
+        "successMessage": "Multiple returns work!",
+        "failureMessage": "Write divide(10, 3) returning quotient 3 and remainder 1."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Named Returns",
+      "description": "Write a function `rectangle(w, h float64) (area, perimeter float64)` using named returns and print both.",
+      "hints": ["`func rectangle(w, h float64) (area, perimeter float64) { area = w * h; perimeter = 2 * (w + h); return }`", "Named returns are initialized to zero.", "A bare `return` returns the named values."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('15') && output.includes('16')",
+        "successMessage": "Named returns work!",
+        "failureMessage": "Write rectangle(3, 5) returning area=15 and perimeter=16."
+      }
+    }
+  ]
+}

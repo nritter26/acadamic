@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { getGameState, showToast, ACHIEVEMENT_DEFS } from '$lib/stores/game.svelte.js';
   import { GAME_CATALOG } from '$lib/lib/games.js';
+  import { LANG_NAMES } from '$lib/lang/index.js';
   import APIArcade from './APIArcade.svelte';
   import BinaryHexBlitz from './BinaryHexBlitz.svelte';
   import CodeGolf from './CodeGolf.svelte';
@@ -18,14 +19,12 @@
   import SyntaxSprint from './SyntaxSprint.svelte';
   import SyntaxSwipe from './SyntaxSwipe.svelte';
   import TypingSpeed from './TypingSpeed.svelte';
-    import { LANG_NAMES } from '$lib/lang/index.js';
 
   let game = $derived(getGameState());
 
   let view = $state('hub');
   let selectedGame = $state(null);
   let soundToggleKey = $state(0);
-
   let selectedLang = $state(
     (typeof localStorage !== 'undefined' ? localStorage.getItem('game_lang') : null) || 'js'
   );
@@ -202,8 +201,17 @@
   .hub-title { font-size: 22px; font-weight: 900; color: #e2e8f0; }
   .hub-level { font-size: 12px; font-weight: 700; color: #64748b; background: #1e293b; padding: 2px 10px; border-radius: 999px; }
 
+  .hub-xp-bar { margin: 0 24px 12px; position: relative; height: 12px; background: #1e293b; border-radius: 999px; overflow: hidden; }
+  .hub-xp-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #f97316); border-radius: 999px; transition: width 0.3s; }
+  .hub-xp-label { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+  .daily-banner { margin: 0 24px 12px; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(236,72,153,0.05)); border: 1px solid rgba(236,72,153,0.3); border-radius: 10px; cursor: pointer; }
+  .daily-banner:hover { background: linear-gradient(135deg, rgba(236,72,153,0.25), rgba(236,72,153,0.1)); }
+  .daily-icon { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+  .daily-arrow { font-size: 16px; color: #ec4899; }
+
   .lang-bar {
-    display: flex; gap: 6px; padding: 4px 24px 12px; overflow-x: auto;
+    display: flex; gap: 6px; padding: 8px 24px; overflow-x: auto;
     scrollbar-width: none; flex-wrap: wrap;
   }
   .lang-btn {
@@ -213,15 +221,6 @@
   }
   .lang-btn:hover { border-color: #f59e0b; color: #e2e8f0; }
   .lang-active { background: #f59e0b; color: #111827; border-color: #f59e0b; }
-
-  .hub-xp-bar { margin: 0 24px 12px; position: relative; height: 12px; background: #1e293b; border-radius: 999px; overflow: hidden; }
-  .hub-xp-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #f97316); border-radius: 999px; transition: width 0.3s; }
-  .hub-xp-label { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-
-  .daily-banner { margin: 0 24px 12px; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(236,72,153,0.05)); border: 1px solid rgba(236,72,153,0.3); border-radius: 10px; cursor: pointer; }
-  .daily-banner:hover { background: linear-gradient(135deg, rgba(236,72,153,0.25), rgba(236,72,153,0.1)); }
-  .daily-icon { font-size: 13px; font-weight: 700; color: #e2e8f0; }
-  .daily-arrow { font-size: 16px; color: #ec4899; }
 
   .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 0 24px 12px; }
   .hub-card { display: grid; gap: 4px; text-align: left; padding: 14px; background: #111827; border: 1px solid #1e293b; border-radius: 10px; color: #cbd5e1; cursor: pointer; }

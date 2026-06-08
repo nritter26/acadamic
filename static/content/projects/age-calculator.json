@@ -1,0 +1,91 @@
+{
+  "id": "age-calculator",
+  "title": "Age Calculator",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["date manipulation", "date parsing", "zodiac signs", "birthday calculation"],
+  "description": "Build an age calculator that parses dates, calculates exact age in years/months/days, finds days until next birthday, and determines zodiac sign.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse date string",
+      "description": "Write `parseDate(dateStr)` that accepts a date string in `YYYY-MM-DD` format and returns a Date object.",
+      "hints": ["Split by '-' to get year, month, day", "Months are 0-indexed in Date constructor", "Return new Date(year, month - 1, day)"],
+      "codeTemplate": {
+        "javascript": "<div id=\"age-calc\"></div>\n<script>\n  function parseDate(dateStr) {\n    // Your code here\n  }\n  const d = parseDate('1990-06-15');\n  console.log(d.toISOString().split('T')[0]);\n</script>\n",
+        "typescript": "<div id=\"age-calc\"></div>\n<script>\n  function parseDate(dateStr: string): Date {\n    // Your code here\n  }\n  const d = parseDate('1990-06-15');\n  console.log(d.toISOString().split('T')[0]);\n</script>\n",
+        "python": "from datetime import datetime\n\ndef parse_date(date_str):\n    # Your code here\n\nd = parse_date('1990-06-15')\nprint(d.isoformat().split('T')[0])\n"
+      },
+      "verification": {
+        "test": "output.includes('1990-06-15')",
+        "successMessage": "Date parsing works!",
+        "failureMessage": "Return a date object for YYYY-MM-DD input."
+      }
+    },
+    {
+      "id": 2,
+      "title": "calcAge function",
+      "description": "Write `calcAge(birthDate)` that takes a Date object and returns the age in years as a number.",
+      "hints": ["Subtract birth year from current year", "Adjust if birthday hasn't occurred yet this year", "Use Date objects for comparison"],
+      "codeTemplate": {
+        "javascript": "<div id=\"age-calc\"></div>\n<script>\n  function calcAge(birthDate) {\n    // Your code here\n  }\n  const birth = new Date('1990-06-15');\n  console.log(calcAge(birth));\n</script>\n",
+        "typescript": "<div id=\"age-calc\"></div>\n<script>\n  function calcAge(birthDate: Date): number {\n    // Your code here\n  }\n  const birth = new Date('1990-06-15');\n  console.log(calcAge(birth));\n</script>\n",
+        "python": "from datetime import datetime, date\n\ndef calc_age(birth_date):\n    # Your code here\n\nbirth = datetime(1990, 6, 15)\nprint(calc_age(birth))\n"
+      },
+      "verification": {
+        "test": "parseInt(output.trim()) >= 30 && parseInt(output.trim()) <= 50",
+        "successMessage": "Age calculation works!",
+        "failureMessage": "Return whole years as a number."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Exact age (years, months, days)",
+      "description": "Write `exactAge(birthDate)` that returns an object `{ years, months, days }` representing the precise age.",
+      "hints": ["Calculate years first", "Calculate remaining months", "Calculate remaining days", "Handle month/day boundaries correctly"],
+      "codeTemplate": {
+        "javascript": "<div id=\"age-calc\"></div>\n<script>\n  function exactAge(birthDate) {\n    // Your code here\n  }\n  const birth = new Date('1990-06-15');\n  console.log(JSON.stringify(exactAge(birth)));\n</script>\n",
+        "typescript": "<div id=\"age-calc\"></div>\n<script>\n  interface Age {\n    years: number;\n    months: number;\n    days: number;\n  }\n  function exactAge(birthDate: Date): Age {\n    // Your code here\n  }\n  const birth = new Date('1990-06-15');\n  console.log(JSON.stringify(exactAge(birth)));\n</script>\n",
+        "python": "def exact_age(birth_date):\n    # Your code here\n\nfrom datetime import datetime\nbirth = datetime(1990, 6, 15)\nimport json\nprint(json.dumps(exact_age(birth)))\n"
+      },
+      "verification": {
+        "test": "output.includes('years') && output.includes('months') && output.includes('days')",
+        "successMessage": "Exact age calculation works!",
+        "failureMessage": "Return { years, months, days } object."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Days until next birthday",
+      "description": "Write `daysUntilNextBirthday(birthDate)` that returns the number of days until the next birthday.",
+      "hints": ["Create a birthday date for the current year", "If it already passed, use next year", "Calculate the difference in days"],
+      "codeTemplate": {
+        "javascript": "<div id=\"age-calc\"></div>\n<script>\n  function daysUntilNextBirthday(birthDate) {\n    // Your code here\n  }\n  const birth = new Date();\n  console.log(daysUntilNextBirthday(birth));\n</script>\n",
+        "typescript": "<div id=\"age-calc\"></div>\n<script>\n  function daysUntilNextBirthday(birthDate: Date): number {\n    // Your code here\n  }\n  const birth = new Date();\n  console.log(daysUntilNextBirthday(birth));\n</script>\n",
+        "python": "from datetime import datetime, date\n\ndef days_until_next_birthday(birth_date):\n    # Your code here\n\nbirth = datetime.now()\nprint(days_until_next_birthday(birth))\n"
+      },
+      "verification": {
+        "test": "output.includes('0') || output.includes('365') || output.includes('366')",
+        "successMessage": "Days until birthday works!",
+        "failureMessage": "Return 0 if today is birthday, otherwise days remaining."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Zodiac sign",
+      "description": "Write `getZodiac(birthDate)` that returns the zodiac sign as a string based on the month and day.",
+      "hints": ["Zodiac signs: Aries (Mar 21-Apr 19), Taurus (Apr 20-May 20), etc.", "Use month and day to determine", "Return the sign name"],
+      "codeTemplate": {
+        "javascript": "<div id=\"age-calc\"></div>\n<script>\n  function getZodiac(birthDate) {\n    // Your code here\n  }\n  console.log(getZodiac(new Date('1990-06-15')));\n  console.log(getZodiac(new Date('2000-01-01')));\n</script>\n",
+        "typescript": "<div id=\"age-calc\"></div>\n<script>\n  function getZodiac(birthDate: Date): string {\n    // Your code here\n  }\n  console.log(getZodiac(new Date('1990-06-15')));\n  console.log(getZodiac(new Date('2000-01-01')));\n</script>\n",
+        "python": "def get_zodiac(birth_date):\n    # Your code here\n\nfrom datetime import datetime\nprint(get_zodiac(datetime(1990, 6, 15)))\nprint(get_zodiac(datetime(2000, 1, 1)))\n"
+      },
+      "verification": {
+        "test": "output.includes('Gemini') || output.includes('Capricorn')",
+        "successMessage": "Zodiac sign works!",
+        "failureMessage": "Return correct zodiac sign based on month and day."
+      }
+    }
+  ]
+}

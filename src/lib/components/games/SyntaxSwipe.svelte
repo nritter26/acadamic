@@ -1,5 +1,84 @@
 <script>
-  import MiniGameCard from './MiniGameCard.svelte';
-  let { game } = $props();
+  import { createGameController } from '$lib/game/game-loop.svelte.js';
+  let { game, lang = 'js' } = $props();
+  let ctrl = createGameController(game.id, lang);
+  let choice = $state(null);
+
+  $effect(() => { choice = null; });
+
+  function swipe(v) {
+    if (ctrl.feedbackType === 'ok') return;
+    choice = v;
+    ctrl.submit(v);
+  }
 </script>
-<MiniGameCard {game} />
+
+<div class="game-sw" class:transitioning={ctrl.transitioning}>
+  <div class="g-top">
+    <span class="g-badge">syntax-swipe</span>
+    <span class="g-progress">{ctrl.progress.current}/{ctrl.progress.total}</span>
+  </div>
+  <h1>{game.title}</h1>
+
+  <div class="sw-card">
+    <code>{ctrl.challenge.prompt}</code>
+  </div>
+
+  <div class="sw-actions">
+    <button
+      class="sw-btn sw-invalid"
+      class:sw-chosen={choice === 'Invalid'}
+      onclick={() => swipe('Invalid')}
+      disabled={ctrl.feedbackType === 'ok'}
+    >✗ Invalid</button>
+    <button
+      class="sw-btn sw-valid"
+      class:sw-chosen={choice === 'Valid'}
+      onclick={() => swipe('Valid')}
+      disabled={ctrl.feedbackType === 'ok'}
+    >✓ Valid</button>
+  </div>
+
+  {#if ctrl.feedback}
+    <div class="g-feedback" class:ok={ctrl.feedbackType === 'ok'} class:wrong={ctrl.feedbackType === 'wrong'}>{ctrl.feedback}</div>
+  {/if}
+
+  <div class="g-footer">
+    {#if ctrl.streak > 0}<span class="g-streak">🔥 {ctrl.streak}</span>{/if}
+    <span class="g-score">Score: {ctrl.score}</span>
+    <button class="g-btn g-btn-sm" onclick={ctrl.reset}>↺ Restart</button>
+  </div>
+</div>
+
+{#if ctrl.showScorePopup}<div class="xp-popup">+10 XP</div>{/if}
+{#if ctrl.showStreakPopup}<div class="streak-popup">{ctrl.streakPopupText}</div>{/if}
+
+<style>
+  .game-sw { max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #334155; border-radius: 24px; background: linear-gradient(145deg, rgba(245,158,11,0.18), rgba(15,23,42,0.9)); position: relative; transition: opacity 0.15s; }
+  .transitioning { opacity: 0; }
+  .g-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .g-badge { color: #fbbf24; text-transform: uppercase; font-size: 11px; font-weight: 900; letter-spacing: 0.12em; }
+  .g-progress { font-size: 11px; font-weight: 700; color: #64748b; }
+  h1 { font-size: 28px; margin: 8px 0; }
+  .sw-card { background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 32px; margin-bottom: 16px; text-align: center; }
+  .sw-card code { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #e2e8f0; white-space: pre-wrap; }
+  .sw-actions { display: flex; gap: 12px; margin-bottom: 12px; }
+  .sw-btn { flex: 1; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: 900; border: 2px solid transparent; cursor: pointer; }
+  .sw-btn:disabled { cursor: default; opacity: 0.6; }
+  .sw-valid { background: rgba(16,185,129,0.1); color: #10b981; border-color: #10b981; }
+  .sw-valid:hover:not(:disabled) { background: rgba(16,185,129,0.2); }
+  .sw-valid.sw-chosen { background: rgba(16,185,129,0.3); }
+  .sw-invalid { background: rgba(239,68,68,0.1); color: #ef4444; border-color: #ef4444; }
+  .sw-invalid:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
+  .sw-invalid.sw-chosen { background: rgba(239,68,68,0.3); }
+  .g-feedback { text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+  .ok { color: #10b981; }
+  .wrong { color: #ef4444; }
+  .g-footer { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .g-streak { font-size: 14px; font-weight: 900; color: #f59e0b; }
+  .g-score { flex: 1; font-weight: 800; color: #fef3c7; }
+  .g-btn { padding: 10px 20px; background: #f59e0b; color: #111827; border: none; border-radius: 8px; font-weight: 900; font-size: 13px; cursor: pointer; }
+  .g-btn-sm { padding: 6px 14px; font-size: 11px; }
+  .xp-popup { position: fixed; top: 40%; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: #f59e0b; pointer-events: none; animation: float-up 0.8s ease forwards; z-index: 100; }
+  .streak-popup { position: fixed; top: 46%; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 900; color: #ec4899; pointer-events: none; animation: float-up 1s ease forwards; z-index: 100; }
+</style>

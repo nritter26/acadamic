@@ -1,0 +1,91 @@
+{
+  "id": "go-cache-layer",
+  "title": "Go: Multi-Level Cache",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "LRU cache", "TTL", "sync.RWMutex", "container/list"],
+  "description": "Build a multi-level caching system in Go with LRU eviction, TTL expiration, write-through strategy, and cache statistics.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "LRU eviction with container/list",
+      "description": "Implement an LRU cache using `container/list` for ordering and `map[string]*list.Element` for O(1) lookups. Implement `Get(key)` and `Set(key, value)` with eviction of the least recently used item when over capacity. Print cache state after each operation.",
+      "hints": [
+        "Each list element stores a `KeyValue` struct with key and value",
+        "On `Get`, move the accessed element to the front with `l.MoveToFront(el)`",
+        "On `Set` when full, evict the back element with `l.Remove(l.Back())`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('evicted') && output.includes('cache')",
+        "successMessage": "LRU cache with container/list correctly evicts the least recently used item!",
+        "failureMessage": "Print 'evicted: <key>' when an item is evicted due to capacity."
+      }
+    },
+    {
+      "id": 2,
+      "title": "TTL expiration with time.Timer",
+      "description": "Extend the cache with TTL (time-to-live) support. Each entry stores an expiration timestamp. `Get` checks if the entry is expired and returns `nil, false` if so. Clean up expired entries periodically using `time.Ticker`. Print \"Expired: <key>\" when entries are cleaned up.",
+      "hints": [
+        "Add an `expiresAt time.Time` field to the cache entry struct",
+        "In `Get`, compare `time.Now()` with `expiresAt` before returning the value",
+        "Start a background goroutine with `time.NewTicker(5 * time.Second)` for periodic cleanup"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Expired:') && output.includes('nil')",
+        "successMessage": "TTL expiration correctly invalidates and cleans up expired cache entries!",
+        "failureMessage": "Print 'Expired: <key>' when a TTL-expired entry is cleaned up."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Write-through strategy",
+      "description": "Implement a write-through cache strategy. The cache wraps a backing store (a simple map). On `Set`, write to both cache and backing store. On `Get`, check cache first, then backing store on miss, populating the cache. Print \"Cache hit\", \"Cache miss\", and \"Write through\" messages.",
+      "hints": [
+        "Define a `Store` interface with `Get(key)`, `Set(key, value)` for the backing store",
+        "The write-through cache implements the same interface and delegates to the store",
+        "Print 'Cache miss — fetching from store' when falling through to the backing store"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Cache hit') && output.includes('Cache miss') && output.includes('Write through')",
+        "successMessage": "Write-through cache correctly coordinates between cache and backing store!",
+        "failureMessage": "Print 'Cache hit', 'Cache miss', and 'Write through' for each operation type."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multi-level cache (L1/L2)",
+      "description": "Build a `MultiLevelCache` with L1 (fast, small, short TTL) and L2 (slower, larger, longer TTL). On `Get`, check L1 first, then L2 on miss, promoting to L1. On `Set`, write to both. Use `sync.RWMutex` for thread safety. Print which level served each request.",
+      "hints": [
+        "Embed both caches in a struct: `L1 *LRUCache`, `L2 *LRUCache` with different configs",
+        "L1 should have a smaller capacity and shorter TTL than L2",
+        "Print 'L1 hit' or 'L2 hit' to show which cache level served the request"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('L1') && output.includes('L2')",
+        "successMessage": "Multi-level cache correctly promotes entries from L2 to L1 on access!",
+        "failureMessage": "Print 'L1 hit' or 'L2 hit' for each cache request."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Cache statistics",
+      "description": "Add comprehensive stats tracking: hits, misses, evictions, stale reads, average access time. Use `sync/atomic` for counters. Implement a `Stats()` method that returns a struct and a `PrintStats()` method. Run a workout of operations and print the stats report.",
+      "hints": [
+        "Track with `atomic.AddUint64(&c.hits, 1)` for thread-safe counters",
+        "Use `time.Since(start)` to measure access times and compute running average",
+        "Print a formatted report: `fmt.Printf(\"Hits: %d, Misses: %d, Hit ratio: %.2f%%\\n\", ...)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hits:') && output.includes('Misses:') && output.includes('Hit ratio')",
+        "successMessage": "Cache stats accurately report hits, misses, evictions, and hit ratio!",
+        "failureMessage": "Print a formatted stats report showing hits, misses, evictions, and hit ratio."
+      }
+    }
+  ]
+}

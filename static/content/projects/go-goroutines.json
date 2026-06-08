@@ -1,0 +1,91 @@
+{
+  "id": "go-goroutines",
+  "title": "Go: Basic Goroutines",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "concurrency", "goroutines"],
+  "description": "Learn to launch and manage goroutines for concurrent execution in Go.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Launch a basic goroutine",
+      "description": "Use the `go` keyword to launch a function as a goroutine. Write a program that prints \"Hello from goroutine\" from a goroutine and \"Hello from main\" from main.",
+      "hints": [
+        "Use `go myFunction()` to launch a goroutine",
+        "Add a small `time.Sleep` so the goroutine has time to run before main exits",
+        "The `go` keyword immediately returns — the calling thread does not wait"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello from goroutine') && output.includes('Hello from main')",
+        "successMessage": "Great! Your goroutine ran and printed its message.",
+        "failureMessage": "Make sure both messages appear in the output."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Anonymous goroutine",
+      "description": "Launch an anonymous function as a goroutine. Use `go func()` with no arguments to print \"Anonymous goroutine running\".",
+      "hints": [
+        "Use `go func() { ... }()` syntax",
+        "Anonymous goroutines can close over variables from the enclosing scope",
+        "Remember to give the goroutine time to execute"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Anonymous goroutine running')",
+        "successMessage": "Anonymous goroutines are a clean way to run quick concurrent tasks!",
+        "failureMessage": "Ensure you used an anonymous function with the go keyword."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Multiple goroutines",
+      "description": "Launch 3 separate goroutines that each print a distinct message (\"Goroutine 1\", \"Goroutine 2\", \"Goroutine 3\"). All messages should appear.",
+      "hints": [
+        "Each goroutine needs its own `go` statement",
+        "The order of output is non-deterministic — goroutines run concurrently",
+        "Use enough sleep time for all goroutines to complete"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Goroutine 1') && output.includes('Goroutine 2') && output.includes('Goroutine 3')",
+        "successMessage": "All three goroutines ran concurrently!",
+        "failureMessage": "Make sure all three goroutines print their messages."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sync without wait group",
+      "description": "Use a channel to signal when a goroutine completes. The goroutine prints \"Work done\" then sends a value on a `chan bool`. Main receives before exiting.",
+      "hints": [
+        "Create a `done := make(chan bool)` channel",
+        "Have the goroutine send `done <- true` after printing",
+        "In main, use `<-done` to wait for the signal"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Work done')",
+        "successMessage": "You used a channel to synchronize your goroutine!",
+        "failureMessage": "Remember to send on the channel in the goroutine and receive in main."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Goroutine with closure capture",
+      "description": "Launch a goroutine inside a loop that captures the loop variable correctly. Print \"i = 0\" through \"i = 4\" from goroutines.",
+      "hints": [
+        "Loop variables in Go are reused — pass the value as an argument to avoid closure issues",
+        "Use `for i := 0; i < 5; i++ { go func(n int) { ... }(i) }`",
+        "Without copying the variable, all goroutines may see the final value"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('i = 0') && output.includes('i = 4')",
+        "successMessage": "Correct! You avoided the closure capture pitfall.",
+        "failureMessage": "Make sure each goroutine receives its own copy of the loop variable."
+      }
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "id": "go-microservice",
+  "title": "Go: Microservice Architecture",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 50,
+  "concepts": ["go", "microservice", "http", "rest", "middleware", "service discovery"],
+  "description": "Build a microservice architecture in Go with HTTP handlers, middleware, service discovery, and inter-service communication.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "HTTP service with health endpoint",
+      "description": "Create an HTTP server that listens on a configurable port. Add a `/health` endpoint returning JSON `{\"status\":\"ok\"}`. Add a `GET /api/version` returning `{\"service\":\"user-service\",\"version\":\"1.0.0\"}`. Print each request using `fmt.Printf(\"[%s] %s %s\\n\", method, path, status)`.",
+      "hints": ["Use net/http for the server", "ServeMux for routing", "json.NewEncoder for JSON responses"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('/health') || output.includes('/api/version') || output.includes('200')",
+        "successMessage": "HTTP service with health endpoint works!",
+        "failureMessage": "Print incoming requests with method, path, and status code."
+      }
+    },
+    {
+      "id": 2,
+      "title": "REST API with CRUD operations",
+      "description": "Add CRUD endpoints for a `User` resource: `POST /api/users`, `GET /api/users/:id`, `PUT /api/users/:id`, `DELETE /api/users/:id`. Use an in-memory map with `sync.RWMutex`. Print operations using `fmt.Printf(\"CRUD: %s %s\\n\", method, path)`.",
+      "hints": ["Parse path parameters manually or use a router", "Use json.Decoder for request body parsing", "RWMutex allows concurrent reads"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('CRUD:') || output.includes('POST') || output.includes('GET')",
+        "successMessage": "REST CRUD API works!",
+        "failureMessage": "Print each CRUD operation with method and path."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Middleware: logging and recovery",
+      "description": "Implement a logging middleware that records method, path, duration, and status code. Implement a recovery middleware that catches panics and returns 500. Wrap your handlers using `func(next http.Handler) http.Handler`. Print log entries using `fmt.Printf(\"LOG: %s %s (%dms)\\n\", method, path, ms)`.",
+      "hints": ["Middleware pattern: http.Handler wrapping", "Use a ResponseWriter wrapper to capture status code", "recover() in defer catches panics"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('LOG:') || output.includes('ms')",
+        "successMessage": "Middleware chain works!",
+        "failureMessage": "Print log entries with method, path, and duration."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Service registry and discovery",
+      "description": "Create a `ServiceRegistry` that stores `(name, url, healthy)` tuples. Implement `Register(name, url)`, `Deregister(name)`, `Discover(name)`, and `Heartbeat(name)`. Services send heartbeats every 5s (simulated with ticker). Print registry state using `fmt.Printf(\"Registry: %s -> %s (healthy: %v)\\n\", name, url, healthy)`.",
+      "hints": ["Service registry is a map of service info", "Heartbeat updates lastSeen timestamp", "Stale entries (no heartbeat in 15s) marked unhealthy"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Registry:') || output.includes('healthy:')",
+        "successMessage": "Service registry and discovery works!",
+        "failureMessage": "Print registered services with their health status."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Inter-service HTTP calls",
+      "description": "Create a client that discovers a service via the registry and makes an HTTP call to it. Implement retry with backoff (3 attempts, exponential delay). Handle service not found and request failures. Print results using `fmt.Printf(\"Call %s: status=%d, body=%s\\n\", service, status, body)`.",
+      "hints": ["Use net/http client for service calls", "Exponential backoff: delay = base * 2^attempt", "Circuit breaker pattern prevents cascading failures"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Call ') && output.includes('status=')",
+        "successMessage": "Inter-service communication works!",
+        "failureMessage": "Print service call results with status and response body."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Graceful shutdown",
+      "description": "Add graceful shutdown using `os.Signal` and `signal.Notify` for SIGINT and SIGTERM. Drain connections with `server.Shutdown(ctx)`. Print shutdown stages using `fmt.Printf(\"Shutdown: %s\\n\", stage)`.",
+      "hints": ["signal.Notify captures OS signals", "http.Server.Shutdown gracefully stops", "Context with timeout prevents hanging forever"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Shutdown:') || output.includes('SIGINT') || output.includes('SIGTERM')",
+        "successMessage": "Graceful shutdown works!",
+        "failureMessage": "Print each stage of the shutdown process."
+      }
+    }
+  ]
+}

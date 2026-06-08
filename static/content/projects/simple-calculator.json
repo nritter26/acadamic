@@ -1,0 +1,110 @@
+{
+  "id": "simple-calculator",
+  "title": "Simple Calculator",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 15,
+  "concepts": ["functions", "arithmetic", "conditionals", "operators"],
+  "description": "Build arithmetic functions step by step — from basic addition to exponentiation with the ** operator.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Add two numbers",
+      "description": "Write an `add` function that takes two numbers and returns their sum.",
+      "hints": [
+        "Use `function add(a, b) { ... }`",
+        "The + operator adds two numbers together",
+        "Use `return` to send back the result"
+      ],
+      "codeTemplate": {
+        "javascript": "function add(a, b) {\n  \n}\n\nconsole.log(add(2, 3));\n",
+        "typescript": "function add(a: number, b: number): number {\n  \n}\n\nconsole.log(add(2, 3));\n",
+        "python": "def add(a, b):\n  \n\nprint(add(2, 3))\n"
+      },
+      "verification": {
+        "test": "output.includes('5')",
+        "successMessage": "The add function works! 2 + 3 = 5",
+        "failureMessage": "Make sure add(2, 3) returns 5."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Subtract and multiply",
+      "description": "Create `subtract` and `multiply` functions. Then test all three operations.",
+      "hints": [
+        "Use - for subtraction and * for multiplication",
+        "Keep the same function pattern as add()"
+      ],
+      "codeTemplate": {
+        "javascript": "function add(a, b) {\n  return a + b;\n}\n\nfunction subtract(a, b) {\n  \n}\n\nfunction multiply(a, b) {\n  \n}\n\nconsole.log(add(10, 5));\nconsole.log(subtract(10, 5));\nconsole.log(multiply(10, 5));\n",
+        "typescript": "function add(a: number, b: number): number {\n  return a + b;\n}\n\nfunction subtract(a: number, b: number): number {\n  \n}\n\nfunction multiply(a: number, b: number): number {\n  \n}\n\nconsole.log(add(10, 5));\nconsole.log(subtract(10, 5));\nconsole.log(multiply(10, 5));\n",
+        "python": "def add(a, b):\n  return a + b\n\ndef subtract(a, b):\n  \n\ndef multiply(a, b):\n  \n\nprint(add(10, 5))\nprint(subtract(10, 5))\nprint(multiply(10, 5))\n"
+      },
+      "verification": {
+        "test": "output.includes('15') && output.includes('5') && output.includes('50')",
+        "successMessage": "All three operations work!",
+        "failureMessage": "Check each function: add(10,5)=15, subtract(10,5)=5, multiply(10,5)=50"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Divide safely",
+      "description": "Create a `divide` function that checks for division by zero. If the divisor is 0, return `\"Cannot divide by zero\"`.",
+      "hints": [
+        "Use an if statement to check if b === 0",
+        "Return the error message string when b is 0",
+        "Otherwise return a / b"
+      ],
+      "codeTemplate": {
+        "javascript": "function divide(a, b) {\n  \n}\n\nconsole.log(divide(10, 2));\nconsole.log(divide(10, 0));\n",
+        "typescript": "function divide(a: number, b: number): number | string {\n  \n}\n\nconsole.log(divide(10, 2));\nconsole.log(divide(10, 0));\n",
+        "python": "def divide(a, b):\n  \n\nprint(divide(10, 2))\nprint(divide(10, 0))\n"
+      },
+      "verification": {
+        "test": "output.includes('5') && output.includes('Cannot divide by zero')",
+        "successMessage": "Safe division — you handled the edge case!",
+        "failureMessage": "Make sure divide(10,2) returns 5 and divide(10,0) returns the error message."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Build a calculator dispatcher",
+      "description": "Create a `calculate` function that takes an operator string (`'+'`, `'-'`, `'*'`, `'/'`) and two numbers, then calls the right function.",
+      "hints": [
+        "Use a switch statement or if/else chain to check the operator",
+        "Call the appropriate function and return its result",
+        "Return 'Unknown operator' for unrecognized operators"
+      ],
+      "codeTemplate": {
+        "javascript": "function add(a, b) { return a + b; }\nfunction subtract(a, b) { return a - b; }\nfunction multiply(a, b) { return a * b; }\nfunction divide(a, b) {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\n\nfunction calculate(operator, a, b) {\n  \n}\n\nconsole.log(calculate('+', 5, 3));\nconsole.log(calculate('*', 4, 3));\nconsole.log(calculate('/', 10, 0));\n",
+        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  \n}\n\nconsole.log(calculate('+', 5, 3));\nconsole.log(calculate('*', 4, 3));\nconsole.log(calculate('/', 10, 0));\n",
+        "python": "def add(a, b): return a + b\ndef subtract(a, b): return a - b\ndef multiply(a, b): return a * b\ndef divide(a, b):\n  if b == 0:\n    return \"Cannot divide by zero\"\n  return a / b\n\ndef calculate(operator, a, b):\n  \n\nprint(calculate('+', 5, 3))\nprint(calculate('*', 4, 3))\nprint(calculate('/', 10, 0))\n"
+      },
+      "verification": {
+        "test": "output.includes('8') && output.includes('12') && output.includes('Cannot divide by zero')",
+        "successMessage": "Your calculator dispatcher works like a real app!",
+        "failureMessage": "Check: '+' with 5,3 = 8, '*' with 4,3 = 12, '/' with 10,0 = error message."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add exponentiation",
+      "description": "Extend the calculator with a `power` function using the `**` operator. Add `'^'` support to the dispatcher.",
+      "hints": [
+        "The exponentiation operator is **: a ** b means a raised to the power b",
+        "Add a new case for '^' in your switch/if chain",
+        "2 ** 3 = 8, 5 ** 2 = 25"
+      ],
+      "codeTemplate": {
+        "javascript": "function add(a, b) { return a + b; }\nfunction subtract(a, b) { return a - b; }\nfunction multiply(a, b) { return a * b; }\nfunction divide(a, b) {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\nfunction power(a, b) {\n  \n}\n\nfunction calculate(operator, a, b) {\n  switch (operator) {\n    case '+': return add(a, b);\n    case '-': return subtract(a, b);\n    case '*': return multiply(a, b);\n    case '/': return divide(a, b);\n    case '^': return power(a, b);\n    default: return \"Unknown operator\";\n  }\n}\n\nconsole.log(calculate('^', 2, 3));\nconsole.log(calculate('^', 5, 2));\n",
+        "typescript": "function add(a: number, b: number): number { return a + b; }\nfunction subtract(a: number, b: number): number { return a - b; }\nfunction multiply(a: number, b: number): number { return a * b; }\nfunction divide(a: number, b: number): number | string {\n  if (b === 0) return \"Cannot divide by zero\";\n  return a / b;\n}\nfunction power(a: number, b: number): number {\n  \n}\n\nfunction calculate(operator: string, a: number, b: number): number | string {\n  switch (operator) {\n    case '+': return add(a, b);\n    case '-': return subtract(a, b);\n    case '*': return multiply(a, b);\n    case '/': return divide(a, b);\n    case '^': return power(a, b);\n    default: return \"Unknown operator\";\n  }\n}\n\nconsole.log(calculate('^', 2, 3));\nconsole.log(calculate('^', 5, 2));\n",
+        "python": "def add(a, b): return a + b\ndef subtract(a, b): return a - b\ndef multiply(a, b): return a * b\ndef divide(a, b):\n  if b == 0:\n    return \"Cannot divide by zero\"\n  return a / b\ndef power(a, b):\n  \n\ndef calculate(operator, a, b):\n  if operator == '+': return add(a, b)\n  elif operator == '-': return subtract(a, b)\n  elif operator == '*': return multiply(a, b)\n  elif operator == '/': return divide(a, b)\n  elif operator == '^': return power(a, b)\n  else: return \"Unknown operator\"\n\nprint(calculate('^', 2, 3))\nprint(calculate('^', 5, 2))\n"
+      },
+      "verification": {
+        "test": "output.includes('8') && output.includes('25')",
+        "successMessage": "Exponentiation works! Your calculator is complete.",
+        "failureMessage": "Make sure 2^3 = 8 and 5^2 = 25."
+      }
+    }
+  ]
+}

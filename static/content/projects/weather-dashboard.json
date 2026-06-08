@@ -1,0 +1,122 @@
+{
+  "id": "weather-dashboard",
+  "title": "Weather Dashboard",
+  "difficulty": "intermediate",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 35,
+  "concepts": [
+    "objects",
+    "API data",
+    "temperature conversion",
+    "arrays",
+    "formatting"
+  ],
+  "description": "Build a weather dashboard that fetches mock data, displays current conditions, toggles between Fahrenheit and Celsius, shows a forecast, and supports city search.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Fetch mock weather data",
+      "description": "Write a `getWeatherData` function that returns a mock weather object with `city`, `temperature`, `conditions`, `humidity`, and `windSpeed`. Log the data.",
+      "hints": [
+        "Return an object: { city: 'London', temperature: 72, conditions: 'Sunny', humidity: 55, windSpeed: 10 }",
+        "The temperature is in Fahrenheit by default",
+        "Log the object to verify all fields are present"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"weather-dashboard\"></div>\n<script>\nfunction getWeatherData() {\n  \n}\n\nconst weather = getWeatherData();\nconsole.log(weather);\n</script>\n",
+        "typescript": "<div id=\"weather-dashboard\"></div>\n<script>\ninterface WeatherData {\n  city: string;\n  temperature: number;\n  conditions: string;\n  humidity: number;\n  windSpeed: number;\n}\n\nfunction getWeatherData(): WeatherData {\n  \n}\n\nconst weather: WeatherData = getWeatherData();\nconsole.log(weather);\n</script>\n",
+        "python": "def getWeatherData():\n  \n\nweather = getWeatherData()\nprint(weather)\n"
+      },
+      "verification": {
+        "test": "output.includes('city') && output.includes('temperature') && output.includes('conditions')",
+        "successMessage": "Weather data object has all required fields!",
+        "failureMessage": "getWeatherData should return an object with city, temperature, conditions, humidity, and windSpeed."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Render current conditions",
+      "description": "Write a `renderCurrentWeather` function that takes a weather data object and logs a formatted string: `\"London | 72\u00b0F | Sunny | Humidity: 55% | Wind: 10 mph\"`.",
+      "hints": [
+        "Access each field: data.city, data.temperature, data.conditions",
+        "Use template literals for clean formatting: `${data.city} | ${data.temperature}\u00b0F`",
+        "Include all fields in a single string"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"weather-dashboard\"></div>\n<script>\nconst weather = {\n  city: \"London\",\n  temperature: 72,\n  conditions: \"Sunny\",\n  humidity: 55,\n  windSpeed: 10\n};\n\nfunction renderCurrentWeather(data) {\n  \n}\n\nrenderCurrentWeather(weather);\n</script>\n",
+        "typescript": "<div id=\"weather-dashboard\"></div>\n<script>\ninterface WeatherData {\n  city: string;\n  temperature: number;\n  conditions: string;\n  humidity: number;\n  windSpeed: number;\n}\n\nconst weather: WeatherData = {\n  city: \"London\",\n  temperature: 72,\n  conditions: \"Sunny\",\n  humidity: 55,\n  windSpeed: 10\n};\n\nfunction renderCurrentWeather(data: WeatherData): void {\n  \n}\n\nrenderCurrentWeather(weather);\n</script>\n",
+        "python": "weather = {\n  \"city\": \"London\",\n  \"temperature\": 72,\n  \"conditions\": \"Sunny\",\n  \"humidity\": 55,\n  \"windSpeed\": 10\n}\n\ndef renderCurrentWeather(data):\n  \n\nrenderCurrentWeather(weather)\n"
+      },
+      "verification": {
+        "test": "output.includes('London') && output.includes('72\u00b0F') && output.includes('Sunny') && output.includes('Humidity')",
+        "successMessage": "Current weather conditions display in a clean format!",
+        "failureMessage": "renderCurrentWeather should display city, temperature with \u00b0F, conditions, humidity, and wind speed."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Toggle between Fahrenheit and Celsius",
+      "description": "Write a `convertTemp` function that takes a temperature in Fahrenheit and a target unit (`'F'` or `'C'`). If `'C'`, convert using `(\u00b0F - 32) * 5/9` and round to the nearest integer. Log both values.",
+      "hints": [
+        "If unit is 'F', return the temperature as-is",
+        "Conversion: (fahrenheit - 32) * 5 / 9",
+        "Use Math.round() to round the Celsius result",
+        "Log the converted temperature with the degree symbol"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"weather-dashboard\"></div>\n<script>\nfunction convertTemp(fahrenheit, unit) {\n  \n}\n\nconsole.log(convertTemp(72, \"F\"));\nconsole.log(convertTemp(72, \"C\"));\n</script>\n",
+        "typescript": "<div id=\"weather-dashboard\"></div>\n<script>\nfunction convertTemp(fahrenheit: number, unit: string): number {\n  \n}\n\nconsole.log(convertTemp(72, \"F\"));\nconsole.log(convertTemp(72, \"C\"));\n</script>\n",
+        "python": "def convertTemp(fahrenheit, unit):\n  \n\nprint(convertTemp(72, \"F\"))\nprint(convertTemp(72, \"C\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('72') && output.includes('22')",
+        "successMessage": "Temperature conversion works! 72\u00b0F = 22\u00b0C.",
+        "failureMessage": "convertTemp(72, 'F') should return 72, convertTemp(72, 'C') should return 22."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Render the 5-day forecast",
+      "description": "Write a `renderForecast` function that takes an array of day objects with `day`, `high`, `low`, and `conditions`. Log each day in the format `\"Mon: 72\u00b0F / 55\u00b0F - Sunny\"`.",
+      "hints": [
+        "Each day: { day: 'Mon', high: 72, low: 55, conditions: 'Sunny' }",
+        "Loop through the array and format each day's data",
+        "Use .forEach() or a for loop"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"weather-dashboard\"><div id=\"forecast\"></div></div>\n<script>\nconst forecast = [\n  { day: \"Mon\", high: 72, low: 55, conditions: \"Sunny\" },\n  { day: \"Tue\", high: 68, low: 50, conditions: \"Cloudy\" },\n  { day: \"Wed\", high: 75, low: 60, conditions: \"Partly Cloudy\" },\n  { day: \"Thu\", high: 70, low: 52, conditions: \"Rain\" },\n  { day: \"Fri\", high: 65, low: 48, conditions: \"Sunny\" }\n];\n\nfunction renderForecast(forecastData) {\n  \n}\n\nrenderForecast(forecast);\n</script>\n",
+        "typescript": "<div id=\"weather-dashboard\"><div id=\"forecast\"></div></div>\n<script>\ninterface ForecastDay {\n  day: string;\n  high: number;\n  low: number;\n  conditions: string;\n}\n\nconst forecast: ForecastDay[] = [\n  { day: \"Mon\", high: 72, low: 55, conditions: \"Sunny\" },\n  { day: \"Tue\", high: 68, low: 50, conditions: \"Cloudy\" },\n  { day: \"Wed\", high: 75, low: 60, conditions: \"Partly Cloudy\" },\n  { day: \"Thu\", high: 70, low: 52, conditions: \"Rain\" },\n  { day: \"Fri\", high: 65, low: 48, conditions: \"Sunny\" }\n];\n\nfunction renderForecast(forecastData: ForecastDay[]): void {\n  \n}\n\nrenderForecast(forecast);\n</script>\n",
+        "python": "forecast = [\n  {\"day\": \"Mon\", \"high\": 72, \"low\": 55, \"conditions\": \"Sunny\"},\n  {\"day\": \"Tue\", \"high\": 68, \"low\": 50, \"conditions\": \"Cloudy\"},\n  {\"day\": \"Wed\", \"high\": 75, \"low\": 60, \"conditions\": \"Partly Cloudy\"},\n  {\"day\": \"Thu\", \"high\": 70, \"low\": 52, \"conditions\": \"Rain\"},\n  {\"day\": \"Fri\", \"high\": 65, \"low\": 48, \"conditions\": \"Sunny\"}\n]\n\ndef renderForecast(forecastData):\n  \n\nrenderForecast(forecast)\n"
+      },
+      "verification": {
+        "test": "output.includes('Mon') && output.includes('72\u00b0F') && output.includes('55\u00b0F') && output.includes('Sunny') && output.includes('Fri')",
+        "successMessage": "5-day forecast renders with high/low temps and conditions!",
+        "failureMessage": "renderForecast should display each day with high, low, and conditions in the specified format."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Search for a city",
+      "description": "Write a `searchCity` function that takes a city name, returns mock weather data for that city, and calls `renderCurrentWeather` on it. Log the rendered output.",
+      "hints": [
+        "Create a mock data object for the searched city",
+        "Build a data object with the city name and sample values",
+        "Call renderCurrentWeather with the new data"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"weather-dashboard\"></div>\n<script>\nfunction renderCurrentWeather(data) {\n  console.log(data.city + \" | \" + data.temperature + \"\u00b0F | \" + data.conditions + \" | Humidity: \" + data.humidity + \"% | Wind: \" + data.windSpeed + \" mph\");\n}\n\nfunction searchCity(city) {\n  \n}\n\nsearchCity(\"Tokyo\");\n</script>\n",
+        "typescript": "<div id=\"weather-dashboard\"></div>\n<script>\ninterface WeatherData {\n  city: string;\n  temperature: number;\n  conditions: string;\n  humidity: number;\n  windSpeed: number;\n}\n\nfunction renderCurrentWeather(data: WeatherData): void {\n  console.log(data.city + \" | \" + data.temperature + \"\u00b0F | \" + data.conditions + \" | Humidity: \" + data.humidity + \"% | Wind: \" + data.windSpeed + \" mph\");\n}\n\nfunction searchCity(city: string): void {\n  \n}\n\nsearchCity(\"Tokyo\");\n</script>\n",
+        "python": "def renderCurrentWeather(data):\n  print(data[\"city\"] + \" | \" + str(data[\"temperature\"]) + \"\u00b0F | \" + data[\"conditions\"] + \" | Humidity: \" + str(data[\"humidity\"]) + \"% | Wind: \" + str(data[\"windSpeed\"]) + \" mph\")\n\ndef searchCity(city):\n  \n\nsearchCity(\"Tokyo\")\n"
+      },
+      "verification": {
+        "test": "output.includes('Tokyo') && output.includes('\u00b0F') && output.includes('Humidity')",
+        "successMessage": "City search returns and renders weather data for any city! Your dashboard is complete.",
+        "failureMessage": "searchCity should create a WeatherData object with the given city name and pass it to renderCurrentWeather."
+      }
+    }
+  ]
+}

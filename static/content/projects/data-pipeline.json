@@ -1,0 +1,141 @@
+{
+  "id": "data-pipeline",
+  "title": "Data Pipeline (ETL)",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "ETL",
+    "data transformation",
+    "streaming",
+    "error handling",
+    "pipeline composition"
+  ],
+  "description": "Build an ETL pipeline framework with extractors, transformers, loaders, error handling, and pipeline composition.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create data source extractors",
+      "description": "Build extractor functions that read data from different sources. Implement `arrayExtractor(data)` that returns the array as-is, `generatorExtractor(gen)` that exhausts a generator and returns all items, and `simulatedFileExtractor(filePath)` that reads a simulated file (an array of lines). Each extractor should return an object with `{ data, source, recordCount }`. Print the extracted data and record count.",
+      "hints": [
+        "arrayExtractor: just wrap data with metadata: { data: arr, source: 'array', recordCount: arr.length }",
+        "generatorExtractor: use a for...of loop or list() to consume the generator",
+        "simulatedFileExtractor: accept an array of strings as 'file lines' and parse them (e.g. CSV-like splitting)"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('extracted') && output.includes('recordCount') && output.length > 30",
+        "successMessage": "All three extractors produce data with correct metadata!",
+        "failureMessage": "Print the extracted data and recordCount for each extractor type (array, generator, file)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement data transformers",
+      "description": "Create transformer functions that can be chained together. Implement `filterTransform(predicate)` that filters records, `mapTransform(fn)` that transforms each record, and `aggregateTransform(key, fn)` that groups records by a key and applies an aggregation function. Chain these together: extract numbers, filter evens, map to strings, then aggregate by parity. Print the output of each step.",
+      "hints": [
+        "Each transform returns a function that takes data and returns transformed data",
+        "Chain by passing the output of one transform as input to the next",
+        "aggregateTransform should use a Map or dict to group by key, then apply fn to each group"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('transform') && output.includes('filter') && output.includes('map') && output.length > 40",
+        "successMessage": "Transformers chain together correctly with filter, map, and aggregate!",
+        "failureMessage": "Print the output after each transformation step in the chain."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Build data sink loaders",
+      "description": "Implement loader functions that consume transformed data. Create `consoleLoader()` that prints each record, `arrayLoader()` that collects records into an internal array (accessible via `.getData()`), and `accumulatorLoader(reduceFn, initial)` that reduces records into a single value. Load the transformed output from step 2 into all three loaders and print the results.",
+      "hints": [
+        "consoleLoader: return { load: (records) => records.forEach(r => console.log('Record:', r)) }",
+        "arrayLoader: store records in an internal array, expose getData() to retrieve them",
+        "accumulatorLoader: call reduceFn on each record, maintaining an accumulator starting from initial"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('loaded') && output.includes('Record:') && output.includes('accumulator')",
+        "successMessage": "All three loaders consume data and produce correct output!",
+        "failureMessage": "Print each record through consoleLoader and show the accumulated result."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add error handling with retry",
+      "description": "Wrap pipeline steps with error handling. Implement a `withRetry(step, options)` wrapper that retries a step up to `maxRetries` times with exponential backoff if it throws. Also implement `withErrorFallback(step, fallbackFn)` that catches errors and calls a fallback function. Test by creating a transformer that fails on certain inputs and show retry attempts and fallback results.",
+      "hints": [
+        "withRetry: try the step, catch error, wait backoffMs * 2^attempt, retry up to maxRetries",
+        "withErrorFallback: try the step, on error call fallbackFn(error) and return its result",
+        "Print 'Retry attempt X of Y' during retries so the user can see the retry logic"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('retry') && output.includes('attempt') && output.includes('fallback')",
+        "successMessage": "Error handling correctly retries failed steps and uses fallbacks!",
+        "failureMessage": "Print retry attempt numbers and show that the fallback result is used after max retries."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement pipeline composition",
+      "description": "Build a `Pipeline` class that chains extract -> transform -> load. Constructor takes an extractor, an array of transformers, and a loader. Implement a `run()` method that executes the full pipeline and returns the final result. Support `.pipe()` for method chaining. Build a pipeline that extracts numbers, filters > 5, maps to strings, and loads to array. Print the final output.",
+      "hints": [
+        "run() should call extract(), then apply each transform in sequence, then call loader.load()",
+        ".pipe() returns 'this' (the Pipeline instance) to enable chaining",
+        "Include a stage tracking array that logs which stage is executing"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('Pipeline') && output.includes('running') && output.length > 30",
+        "successMessage": "Pipeline correctly composes extract, transform, and load stages in sequence!",
+        "failureMessage": "Print 'Pipeline running: <stage>' for each stage as the pipeline executes."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Add pipeline metrics",
+      "description": "Instrument the pipeline with performance metrics. Track execution time per stage (using high-resolution timers), record counts entering and leaving each stage, and error counts. Implement `getMetrics()` that returns a formatted report. Run a pipeline over 1000 records and print the full metrics report showing stage names, durations, record counts, and error stats.",
+      "hints": [
+        "Use process.hrtime(), performance.now(), or time.perf_counter() for timing",
+        "Before and after each stage, record: stageName, inputCount, outputCount, durationMs, errors",
+        "getMetrics() should print a formatted table or multi-line report"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('duration') && output.includes('records') && output.includes('errors') && output.includes('stage')",
+        "successMessage": "Pipeline metrics report shows timing, record counts, and error stats per stage!",
+        "failureMessage": "Print a metrics report with each stage's name, duration in ms, input/output record counts, and any errors."
+      }
+    }
+  ]
+}

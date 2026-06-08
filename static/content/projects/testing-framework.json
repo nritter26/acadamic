@@ -1,0 +1,123 @@
+{
+  "id": "testing-framework",
+  "title": "Testing Framework",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 75,
+  "concepts": ["testing", "assertions", "mocking", "spies", "test runners", "code coverage"],
+  "description": "Build a testing framework with describe/it blocks, assertions, mock functions, spies, and a test runner.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement describe and it blocks",
+      "description": "Create a test suite system with `describe()` for grouping and `it()` for individual test cases. Each block should register tests without executing them yet. Print the registered test structure as a formatted tree showing suite names and test names.",
+      "hints": ["Store suites in a registry object with nested arrays of tests", "Use a stack to track the current describe scope when nesting", "Each it() call should push a {name, fn} object into the current suite"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('describe') && output.includes('it') && output.includes('should')",
+        "successMessage": "Test suite registers and prints describe/it structure correctly",
+        "failureMessage": "Output does not show the describe/it tree structure"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Build assertion library",
+      "description": "Implement an `expect()` function returning an object with `.toBe()`, `.toEqual()`, and `.toContain()` matchers. On failure, print a diff showing expected vs actual values. On success, print a passing indicator.",
+      "hints": ["Use JSON.stringify for deep equality in toEqual", "Track assertion count and pass/fail status globally", "Format diff output by showing expected on one line and actual on the next with markers"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('PASS') || output.includes('pass') || output.includes('✓')",
+        "successMessage": "Assertion library passes and fails correctly with diff output",
+        "failureMessage": "Assertion output does not show expected pass/fail behavior"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Add beforeEach/afterEach hooks",
+      "description": "Implement `beforeEach()` and `afterEach()` hooks that run before and after every `it()` block within the same describe scope. Hooks must nest correctly. Print hook execution order alongside test names to verify sequencing.",
+      "hints": ["Maintain a hooks stack per describe scope that gets flattened when running tests", "Run beforeEach in the order they were defined (outer to inner), afterEach in reverse", "Print 'BEFORE: hookName' and 'AFTER: hookName' around each test execution"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('before') && output.includes('after') && output.includes('test')",
+        "successMessage": "Hooks run around each test in the correct order",
+        "failureMessage": "Hook execution order is incorrect or missing from output"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement mock functions",
+      "description": "Create a `fn()` factory that produces mock functions. Mocks must record every call's arguments, return values, and track implementation. Support `.mock.calls`, `.mock.results`, and `mockReturnValue()`. Print all recorded calls after execution.",
+      "hints": ["Store each invocation as an entry in mock.calls array with the arguments spread", "Use mock.results to store {type, value} objects for each return", "mockImplementation() should override the default no-op with a custom function"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('mock') && output.includes('call') && output.includes('args')",
+        "successMessage": "Mock functions record calls and return values correctly",
+        "failureMessage": "Mock call tracking is not shown in the output"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Add spy on existing functions",
+      "description": "Build a `spy()` wrapper that intercepts calls on real objects. Spies track call count, arguments, and the original return value. Print the call count and argument history after the spied function is invoked.",
+      "hints": ["Wrap the original function and store a reference to it for forwarding calls", "Spy objects should expose a .calls array and a .callCount property", "Use object property replacement and restore pattern to avoid modifying the original permanently"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('spy') && output.includes('called') && /\\d+/.test(output)",
+        "successMessage": "Spy intercepts calls and prints accurate call count",
+        "failureMessage": "Spy call count or argument tracking is missing from output"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Implement test runner",
+      "description": "Create a runner that executes all registered tests, catches errors, and collects results. Print a formatted summary showing total tests, passed, failed, and the duration in milliseconds. Failed tests must print their error messages.",
+      "hints": ["Wrap each it() callback in try/catch to prevent one failure from stopping the suite", "Use console.time and console.timeEnd or Date.now() to measure duration", "Color-code output: green for pass, red for fail if terminal supports it"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('passed') && output.includes('failed') && output.includes('ms')",
+        "successMessage": "Test runner executes all tests and prints a complete summary",
+        "failureMessage": "Test runner summary missing pass/fail counts or duration"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Build a coverage reporter",
+      "description": "Track which lines of each function were executed during tests. Implement a simple instrumentation wrapper that records executed line ranges. Print a per-function coverage report with line numbers and a coverage percentage.",
+      "hints": ["Wrap functions with a proxy that marks line ranges as hit when called", "Track coverage as a Set of {functionName, lineNumber} tuples", "Calculate percentage as (executedLines / totalLines) * 100 for each instrumented function"],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('%') && (output.includes('line') || output.includes('function'))",
+        "successMessage": "Coverage reporter prints percentage per function with line data",
+        "failureMessage": "Coverage report missing percentage or function names"
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "id": "go-command-pattern",
+  "title": "Go: Command Pattern",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 30,
+  "concepts": ["go", "command pattern", "design patterns", "interfaces", "undo", "queue"],
+  "description": "Implement the Command design pattern in Go to encapsulate requests as objects, supporting queuing, logging, and undo.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Command interface and concrete commands",
+      "description": "Define a `Command` interface with `Execute() error`. Create concrete commands: `PrintCommand{Message string}` and `AddCommand{A, B int, Result *int}`. Implement Execute for both. Create and run them through an `Invoker`. Print results using `fmt.Printf(\"Executed: %s\\n\", description)`.",
+      "hints": ["Command interface abstracts the action", "Concrete commands hold all needed state", "Invoker triggers Execute without knowing the details"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Executed:') || output.includes('PrintCommand') || output.includes('AddCommand')",
+        "successMessage": "Command interface and concrete commands work!",
+        "failureMessage": "Print each command's execution description."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Command queue and invoker",
+      "description": "Create a `CommandQueue` that maintains a slice of commands. Add `Enqueue(cmd Command)` and `ExecuteAll() error` methods that run each command sequentially. Queue 3 different commands and execute them all at once. Print the queue processing using `fmt.Printf(\"Queue[%d]: executing %T\\n\", pos, cmd)`.",
+      "hints": ["Queue stores commands for later execution", "ExecuteAll iterates and runs each command", "Commands can be reordered or scheduled"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Queue[') && output.includes('executing')",
+        "successMessage": "Command queue processing works!",
+        "failureMessage": "Print each queued command with its position and type."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Undo support",
+      "description": "Add an `Undo()` method to the Command interface. Implement undo for each command. Create a history stack in the invoker. After executing commands, undo the last one. Print undo operations using `fmt.Printf(\"Undo: %s\\n\", description)`.",
+      "hints": ["Each command must store reverse state for undo", "History stack tracks executed commands", "Pop from stack and call Undo() in reverse order"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Undo:') || output.includes('undo')",
+        "successMessage": "Command undo works!",
+        "failureMessage": "Print each undo operation with its description."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Composite command (macro)",
+      "description": "Create a `MacroCommand` that holds a slice of commands and executes them in sequence. Implement `Execute()` and `Undo()` for it (undo executes child undos in reverse). Build a macro that performs a multi-step operation. Print macro execution using `fmt.Printf(\"Macro[%d steps]: %s\\n\", len(steps), name)`.",
+      "hints": ["MacroCommand is itself a Command", "Composite pattern: treat group as individual", "Undo reverses children in opposite order"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Macro[') && output.includes('steps')",
+        "successMessage": "Composite macro command works!",
+        "failureMessage": "Print the macro name and number of steps."
+      }
+    }
+  ]
+}

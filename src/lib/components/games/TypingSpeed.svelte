@@ -6,7 +6,7 @@
   let { game = { id: 'typing-speed', title: 'Typing Speed' }, lang = 'js' } = $props();
   let gameState = $derived(getGameState());
 
-  let challenges = $derived(getChallenges(game.id, lang) || []);
+  let challenges = $derived(getChallenges(game.id, lang));
   let challengeIndex = $state(0);
   let currentChallenge = $derived(challenges[challengeIndex % Math.max(1, challenges.length)] || {});
   let target = $derived(currentChallenge.answer || currentChallenge.target || '');
@@ -36,10 +36,17 @@
 
   function handleKeydown(e) {
     if (done) return;
+    if (currentPos >= chars.length) return;
     const key = e.key;
-    if (key === ' ') { e.preventDefault(); }
-    else if (key.length !== 1) return;
-    else e.preventDefault();
+
+    if (chars[currentPos] === '\n') {
+      currentPos++;
+      if (currentPos >= chars.length) { finishGame(); }
+      return;
+    }
+
+    if (key.length !== 1) return;
+    e.preventDefault();
 
     if (!startTime) {
       startTime = Date.now();
@@ -139,14 +146,17 @@
     <div class="typing-display">
       <div class="char-row">
         {#each chars as ch, i}
-          <span
-            class="char-box"
-            class:char-current={i === currentPos}
-            class:char-correct={i < currentPos && typedChars[i]?.correct}
-            class:char-wrong={i < currentPos && !typedChars[i]?.correct}
-            class:char-flash={i === wrongFlash}
-            class:char-space={ch === ' '}
-          >{ch === ' ' ? '\u00A0' : ch}</span>
+          {#if ch === '\n'}
+            <span class="newline-break" class:char-current={i === currentPos}></span>
+          {:else}
+            <span
+              class="char-box"
+              class:char-current={i === currentPos}
+              class:char-correct={i < currentPos && typedChars[i]?.correct}
+              class:char-wrong={i < currentPos && !typedChars[i]?.correct}
+              class:char-flash={i === wrongFlash}
+            >{ch}</span>
+          {/if}
         {/each}
       </div>
     </div>
@@ -199,6 +209,12 @@
     border-radius: 6px; background: #1e293b; color: #475569;
     transition: all 0.15s ease; position: relative;
   }
+  .newline-break { flex-basis: 100%; height: 4px; }
+  .newline-break.char-current {
+    height: 4px;
+    background: rgba(16,185,129,0.3);
+    border-radius: 2px;
+  }
   .char-current {
     color: #e2e8f0; background: #334155;
     animation: pulse-glow 1s ease-in-out infinite;
@@ -210,7 +226,6 @@
   .char-correct { color: #10b981; background: rgba(16,185,129,0.15); animation: scale-pop 0.15s ease; }
   .char-wrong { color: #ef4444; background: rgba(239,68,68,0.15); }
   .char-flash { animation: shake 0.2s ease; }
-  .char-space { width: 44px; }
 
   .typing-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .progress-track { flex: 1; height: 6px; background: #1e293b; border-radius: 999px; overflow: hidden; }

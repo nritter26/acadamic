@@ -1,0 +1,91 @@
+{
+  "id": "go-env-config",
+  "title": "Go: Environment Config",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "environment", "configuration", "os", "flag"],
+  "description": "Read environment variables and use the flag package to configure Go applications.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "os.Getenv",
+      "description": "Read the `HOME` environment variable with `os.Getenv(\"HOME\")` and print \"HOME: <value>\". Also print `GOPATH` in the same way.",
+      "hints": [
+        "`os.Getenv(key)` returns the value as a string",
+        "If the variable is not set, Getenv returns empty string",
+        "Use `os.Getenv(\"HOME\")` for home directory"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('HOME:')",
+        "successMessage": "Environment variable read with os.Getenv!",
+        "failureMessage": "Pass the variable name as a string to os.Getenv."
+      }
+    },
+    {
+      "id": 2,
+      "title": "os.LookupEnv",
+      "description": "Use `os.LookupEnv(\"MY_APP_PORT\")` to check if a variable exists. If it does, print \"PORT: <value>\". If not, print \"MY_APP_PORT not set\".",
+      "hints": [
+        "`os.LookupEnv(key)` returns `(string, bool)`",
+        "The bool is true if the variable is set (even if empty)",
+        "Use this when you need to distinguish \"unset\" from \"empty\""
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('not set') || output.includes('PORT:')",
+        "successMessage": "LookupEnv distinguishes unset from empty!",
+        "failureMessage": "Use the boolean return value from LookupEnv."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Default values",
+      "description": "Write a helper `getEnv(key, defaultVal string) string` that returns the env value or a default if not set. Use it to get a `DB_HOST` (default \"localhost\") and print the result.",
+      "hints": [
+        "Check with `os.LookupEnv` — if not set, return defaultValue",
+        "Return value if found, otherwise defaultValue",
+        "Call: `host := getEnv(\"DB_HOST\", \"localhost\")`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('localhost') || output.includes('DB_HOST')",
+        "successMessage": "Default value helper works!",
+        "failureMessage": "Use LookupEnv inside your helper function."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Parsing to types",
+      "description": "Read `WORKERS` env var (default \"4\") and parse it to an int using `strconv.Atoi`. Print the value and the type using `fmt.Printf(\"Workers: %d (%T)\\n\", workers, workers)`.",
+      "hints": [
+        "`strconv.Atoi(string)` converts string to int",
+        "Use `getEnv(\"WORKERS\", \"4\")` to get the value, then parse it",
+        "Handle the error from Atoi — use a default if parsing fails"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Workers:') && output.includes('int')",
+        "successMessage": "String parsed to int successfully!",
+        "failureMessage": "Use strconv.Atoi to convert the string to int."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Flag package basics",
+      "description": "Define flags for `--port` (int, default 8080) and `--mode` (string, default \"dev\") using the `flag` package. Parse them and print \"Running on port X in Y mode\".",
+      "hints": [
+        "`flag.Int(\"port\", 8080, \"server port\")` defines an int flag",
+        "`flag.Parse()` must be called after defining all flags",
+        "Access values: `fmt.Printf(\"Running on port %d in %s mode\", *port, *mode)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Running on port') && output.includes('mode')",
+        "successMessage": "Flag package parses command-line arguments!",
+        "failureMessage": "Call flag.Parse() after defining your flags."
+      }
+    }
+  ]
+}

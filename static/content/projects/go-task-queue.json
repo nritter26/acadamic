@@ -1,0 +1,91 @@
+{
+  "id": "go-task-queue",
+  "title": "Go: Background Task Queue",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 70,
+  "concepts": ["go", "task queue", "priority queue", "container/heap", "worker pool", "goroutines"],
+  "description": "Build a background task queue in Go with priority scheduling, worker pools, retries with backoff, and scheduled jobs.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Job struct with priority",
+      "description": "Define a `Job` struct with `ID string`, `Priority int`, `Payload func() error`, `CreatedAt time.Time`. Create a few jobs with different priorities and print them sorted by priority to verify ordering.",
+      "hints": [
+        "Use `type Job struct { ID string; Priority int; Payload func() error; CreatedAt time.Time }`",
+        "Implement `String()` method on Job for pretty printing with fmt.Stringer interface",
+        "Print jobs: `fmt.Printf(\"%s (priority %d)\\n\", job.ID, job.Priority)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('priority') && output.length > 20",
+        "successMessage": "Job struct with priority and payload function is properly defined!",
+        "failureMessage": "Print each job's ID and priority using fmt.Printf."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Priority queue with container/heap",
+      "description": "Implement a `PriorityQueue` that implements `heap.Interface` (Len, Less, Swap, Push, Pop). Use `container/heap` to manage jobs by priority (higher value = higher priority). Push 5 jobs with varied priorities, pop them one by one, and print the order to verify highest priority comes first.",
+      "hints": [
+        "Define `type PriorityQueue []*Job` and implement the 5 heap.Interface methods",
+        "`Less` should return `pq[i].Priority > pq[j].Priority` for max-heap behavior",
+        "Use `heap.Push(&pq, job)` and `heap.Pop(&pq)` — not direct slice append/pop"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.indexOf('high') < output.indexOf('low') || output.indexOf('10') < output.indexOf('1')",
+        "successMessage": "Priority queue with container/heap correctly returns highest priority jobs first!",
+        "failureMessage": "Print jobs in the order they are popped — highest priority should come first."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Worker pool with goroutines",
+      "description": "Create a `WorkerPool` with a configurable number of workers. Each worker runs in a goroutine, pulls jobs from a shared channel, executes them, and reports completion. Use a `sync.WaitGroup` to wait for all workers to finish. Submit 10 jobs to a pool of 3 workers and print execution results.",
+      "hints": [
+        "Create worker goroutines in a loop: `for i := 0; i < n; i++ { go w.worker(i) }`",
+        "Each worker reads from `jobs <-chan *Job` and calls `job.Payload()`",
+        "Print which worker executed each job: `fmt.Printf(\"Worker %d processed %s\\n\", id, job.ID)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Worker') && output.includes('processed') && output.length > 50",
+        "successMessage": "Worker pool with goroutines processes jobs concurrently across multiple workers!",
+        "failureMessage": "Print 'Worker X processed job Y' for each completed job."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Retry with exponential backoff",
+      "description": "Implement retry logic for failed jobs. Wrap the job payload with a `Retry` decorator that retries up to `maxRetries` times with exponential backoff (100ms, 200ms, 400ms, ...). Print \"Attempt X failed\" on failure and \"Job succeeded after X attempts\" on success. Print \"Job failed permanently\" if all retries are exhausted.",
+      "hints": [
+        "Create a `Retry(payload func() error, maxRetries int) func() error` wrapper",
+        "Sleep with `time.Sleep(time.Duration(math.Pow(2, float64(attempt))) * 100 * time.Millisecond)`",
+        "Print each attempt: `fmt.Printf(\"Attempt %d failed: %v\\n\", attempt+1, err)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Attempt') && (output.includes('succeeded') || output.includes('failed permanently'))",
+        "successMessage": "Retry with exponential backoff correctly retries failed jobs and reports results!",
+        "failureMessage": "Print each retry attempt and the final success or permanent failure message."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Scheduled jobs with timer",
+      "description": "Implement a `Scheduler` that runs jobs at specified intervals. Add `Schedule(job *Job, interval time.Duration)` that runs the job periodically using `time.NewTicker`. Support `Cancel(id)` to stop a scheduled job. Schedule two jobs with different intervals, let them run for a few ticks, then cancel one. Print execution timestamps.",
+      "hints": [
+        "Store `map[string]*time.Ticker` for active scheduled jobs on the scheduler",
+        "Launch a goroutine for each scheduled job that reads from the ticker channel",
+        "Print with timestamps: `fmt.Printf(\"[%s] Running %s\\n\", time.Now().Format(\"15:04:05\"), job.ID)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Running') && output.includes('Cancelled')",
+        "successMessage": "Scheduler correctly runs periodic jobs and stops them on cancellation!",
+        "failureMessage": "Print periodic execution timestamps and confirm cancellation with 'Cancelled: <job>'."
+      }
+    }
+  ]
+}

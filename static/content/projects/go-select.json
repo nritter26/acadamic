@@ -1,0 +1,91 @@
+{
+  "id": "go-select",
+  "title": "Go: Select Statement",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "concurrency", "select"],
+  "description": "Use the select statement to handle multiple channel operations concurrently.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic select",
+      "description": "Create two channels `ch1` and `ch2`. Send \"A\" on ch1 and \"B\" on ch2 from goroutines. Use a `select` to receive from whichever is ready and print the value.",
+      "hints": [
+        "Use `select { case v := <-ch1: ...; case v := <-ch2: ... }`",
+        "Select picks a random ready case if multiple are ready",
+        "Run the select twice to receive both values"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('A') && output.includes('B')",
+        "successMessage": "Select handled both channels!",
+        "failureMessage": "Make sure both cases print their received values."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Select with default",
+      "description": "Try to receive from a channel that has no data. Use a `default` case to print \"No data ready\" instead of blocking.",
+      "hints": [
+        "`default` runs when no other case is ready",
+        "This makes select non-blocking",
+        "Don't send any data on the channel so the default triggers"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('No data ready')",
+        "successMessage": "Non-blocking select with default case works!",
+        "failureMessage": "Make sure the default case prints the expected message."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Timeout with select",
+      "description": "Use a select with `time.After(1 * time.Second)` to implement a timeout when waiting on a slow channel. Print \"timed out\" if the channel doesn't respond in time.",
+      "hints": [
+        "`time.After(d)` returns a channel that sends after duration d",
+        "Combine a channel read case with a `<-time.After(1 * time.Second)` case",
+        "Don't send on the data channel so the timeout fires"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('timed out')",
+        "successMessage": "Timeout pattern implemented correctly!",
+        "failureMessage": "Use time.After in a case to detect timeout."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Select with multiple ready channels",
+      "description": "Create two channels, send on both immediately from goroutines. Use a select in a loop to read 2 values. Print each received value with its source (\"Got from ch1: ...\" or \"Got from ch2: ...\").",
+      "hints": [
+        "Both channels will be ready simultaneously",
+        "Select picks randomly among ready cases — order may vary",
+        "Loop the select twice to drain both channels"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('ch1') && output.includes('ch2')",
+        "successMessage": "You handled multiple ready channels with select!",
+        "failureMessage": "Make sure to print which channel each value came from."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Select with nil channels",
+      "description": "Create a channel and set it to `nil` after receiving from it. Use select to skip nil channels (they are never ready). Print \"ch is nil\" when the nil case is skipped.",
+      "hints": [
+        "Reading from a nil channel blocks forever — it is never select-ready",
+        "Assign `ch = nil` after receiving to disable that case in select",
+        "This is useful for dynamically enabling/disabling channel cases"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('nil') || output.includes('done')",
+        "successMessage": "Nil channels are silently ignored by select!",
+        "failureMessage": "Set the channel to nil after receiving from it."
+      }
+    }
+  ]
+}

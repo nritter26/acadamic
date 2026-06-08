@@ -1,0 +1,83 @@
+{
+  "id": "go-feature-flags",
+  "title": "Go: Feature Flags",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 60,
+  "concepts": ["go", "feature flags", "targeting", "A/B testing", "percentage rollout"],
+  "description": "Build a feature flag system with boolean flags, percentage rollouts, user targeting, multi-variant A/B testing, and an evaluation pipeline.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Flag struct and boolean isEnabled",
+      "description": "Define a `Flag` struct with `Key string`, `Enabled bool`, and `Description string`. Create a `FlagManager` with `map[string]*Flag`. Implement `AddFlag(f *Flag)` and `IsEnabled(key string) bool`. Print whether a flag named `\"new-checkout\"` is enabled via `fmt.Println(fm.IsEnabled(\"new-checkout\"))`.",
+      "hints": ["Use a `sync.RWMutex` for concurrent access.", "`IsEnabled` returns the `Enabled` field if the flag exists.", "Return `false` if the flag key is not found."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true') || output.includes('false')",
+        "successMessage": "Boolean flag evaluation works.",
+        "failureMessage": "IsEnabled should return the flag's Enabled value."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Percentage rollout using hash",
+      "description": "Add `RolloutPercentage int` (0-100) to `Flag`. Implement `IsEnabledForUser(key, userID string) bool` that uses a consistent hash (e.g. `hash(userID + key) % 100 < RolloutPercentage`) to determine if the flag is enabled for that user. Print results for multiple user IDs with a 50% rollout.",
+      "hints": ["Use `hash/fnv` or `crc32.ChecksumIEEE` for consistent hashing.", "Compute `hash % 100` and compare against `RolloutPercentage`.", "Same user ID consistently gets the same result."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Percentage rollout works with consistent hashing.",
+        "failureMessage": "Same userID should always get the same result for a given flag."
+      }
+    },
+    {
+      "id": 3,
+      "title": "User attribute targeting",
+      "description": "Add `TargetingRules []TargetingRule` to `Flag`. Each `TargetingRule` has `Attribute string`, `Operator string` (`\"equals\"`, `\"contains\"`, `\"in\"`), and `Values []string`. `IsEnabledFor(key string, user map[string]string)` evaluates rules against user attributes. Print the result for a user with `{\"country\": \"US\"}` and a rule `country equals US`.",
+      "hints": ["Iterate rules; if any rule matches, return the flag's enabled for that user.", "Use `user[rule.Attribute]` to get the attribute value.", "For `\"in\"` operator, check if the value is in `rule.Values`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true')",
+        "successMessage": "User targeting evaluates rules correctly.",
+        "failureMessage": "A user with country=US should match a rule country equals US."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multi-variant A/B testing",
+      "description": "Add `Variants []Variant` to `Flag` where `Variant` has `Name string` and `Weight int` (percentage). Implement `GetVariant(key, userID string) (string, error)` that returns a variant based on weighted random assignment (consistent hash). Print the variant name for a given user.",
+      "hints": ["Total weights should sum to 100 (validate on add).", "Hash userID+key to get a number 0-99, then iterate variants accumulating weight.", "Return the variant where the hash falls in its weight range."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Multi-variant A/B test returns a variant.",
+        "failureMessage": "GetVariant should return one of the defined variants consistently."
+      }
+    },
+    {
+      "id": 5,
+      "title": "User overrides",
+      "description": "Add `UserOverrides map[string]bool` (userID → enabled) and `VariantOverrides map[string]string` (userID → variantName) to `Flag`. Override evaluation takes priority over all other logic. Print the result for an overridden user vs a non-overridden user.",
+      "hints": ["Check overrides first in `IsEnabledForUser` before applying any other logic.", "Check `VariantOverrides` in `GetVariant` before hash-based assignment.", "Use `ok` pattern: `if val, ok := f.UserOverrides[userID]; ok { return val }`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true')",
+        "successMessage": "User overrides take priority over other evaluation.",
+        "failureMessage": "An overridden user should always get the override value."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Evaluation pipeline",
+      "description": "Implement a `Evaluate(key string, user User) Evaluation` pipeline that runs all steps in order: (1) overrides, (2) targeting rules, (3) percentage rollout, (4) default enabled. `Evaluation` has `Key, Variant string` and `Reason string`. Print the evaluation result for a complex scenario with all layers.",
+      "hints": ["Define `User` struct with `ID string` and `Attributes map[string]string`.", "Pipeline short-circuits at the first match.", "`Reason` explains which step determined the result (e.g. `\"override\"`, `\"targeting\"`, `\"rollout\"`, `\"default\"`)."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Reason:') || output.includes('reason:')",
+        "successMessage": "Evaluation pipeline runs all steps in order.",
+        "failureMessage": "Evaluation should include the reason for the flag's state."
+      }
+    }
+  ]
+}

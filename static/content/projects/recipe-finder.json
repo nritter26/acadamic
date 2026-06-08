@@ -1,0 +1,91 @@
+{
+  "id": "recipe-finder",
+  "title": "Recipe Finder",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["filtering", "search", "data manipulation", "string formatting"],
+  "description": "Build a recipe finder that searches by ingredients, filters by cook time, and combines search criteria.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Recipe data array",
+      "description": "Create an array of recipe objects with `name`, `ingredients` (array), `cookTime` (minutes), and `difficulty` properties. Include at least 4 recipes.",
+      "hints": ["ingredients should be an array of strings", "cookTime is in minutes", "difficulty can be 'easy', 'medium', or 'hard'"],
+      "codeTemplate": {
+        "javascript": "<div id=\"recipe-finder\"></div>\n<script>\n  const recipes = [\n    // Your code here - at least 4 recipes\n  ];\n  console.log(JSON.stringify(recipes));\n</script>\n",
+        "typescript": "<div id=\"recipe-finder\"></div>\n<script>\n  interface Recipe {\n    name: string;\n    ingredients: string[];\n    cookTime: number;\n    difficulty: string;\n  }\n  const recipes: Recipe[] = [\n    // Your code here - at least 4 recipes\n  ];\n  console.log(JSON.stringify(recipes));\n</script>\n",
+        "python": "recipes = [\n    # Your code here - at least 4 recipes\n]\nimport json\nprint(json.dumps(recipes))\n"
+      },
+      "verification": {
+        "test": "output.includes('name') && output.includes('ingredients')",
+        "successMessage": "Recipe data created!",
+        "failureMessage": "Include name, ingredients, cookTime, and difficulty for at least 4 recipes."
+      }
+    },
+    {
+      "id": 2,
+      "title": "searchByIngredient function",
+      "description": "Write `searchByIngredient(recipes, ingredient)` that filters recipes containing a given ingredient (case-insensitive).",
+      "hints": ["Convert ingredient to lowercase for comparison", "Use .some() to check if any ingredient matches", "Return the filtered array"],
+      "codeTemplate": {
+        "javascript": "<div id=\"recipe-finder\"></div>\n<script>\n  const recipes = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato', 'garlic'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato', 'cucumber'], cookTime: 10, difficulty: 'easy' },\n    { name: 'Soup', ingredients: ['carrot', 'onion', 'celery'], cookTime: 40, difficulty: 'medium' }\n  ];\n  function searchByIngredient(recipes, ingredient) {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchByIngredient(recipes, 'tomato')));\n</script>\n",
+        "typescript": "<div id=\"recipe-finder\"></div>\n<script>\n  const recipes: Recipe[] = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato', 'garlic'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato', 'cucumber'], cookTime: 10, difficulty: 'easy' },\n    { name: 'Soup', ingredients: ['carrot', 'onion', 'celery'], cookTime: 40, difficulty: 'medium' }\n  ];\n  function searchByIngredient(recipes: Recipe[], ingredient: string): Recipe[] {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchByIngredient(recipes, 'tomato')));\n</script>\n",
+        "python": "recipes = [\n    {'name': 'Pasta', 'ingredients': ['pasta', 'tomato', 'garlic'], 'cookTime': 20, 'difficulty': 'easy'},\n    {'name': 'Salad', 'ingredients': ['lettuce', 'tomato', 'cucumber'], 'cookTime': 10, 'difficulty': 'easy'},\n    {'name': 'Soup', 'ingredients': ['carrot', 'onion', 'celery'], 'cookTime': 40, 'difficulty': 'medium'}\n]\n\ndef search_by_ingredient(recipes, ingredient):\n    # Your code here\n\nimport json\nprint(json.dumps(search_by_ingredient(recipes, 'tomato')))\n"
+      },
+      "verification": {
+        "test": "output.includes('Pasta') && output.includes('Salad')",
+        "successMessage": "Ingredient search works!",
+        "failureMessage": "Return recipes that contain the given ingredient."
+      }
+    },
+    {
+      "id": 3,
+      "title": "searchByTime function",
+      "description": "Write `searchByTime(recipes, maxMinutes)` that returns recipes with `cookTime` less than or equal to `maxMinutes`.",
+      "hints": ["Use .filter() to compare cookTime", "Return recipes where cookTime <= maxMinutes", "Include the filtered array"],
+      "codeTemplate": {
+        "javascript": "<div id=\"recipe-finder\"></div>\n<script>\n  const recipes = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Stew', ingredients: ['beef', 'carrot'], cookTime: 90, difficulty: 'hard' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato'], cookTime: 10, difficulty: 'easy' }\n  ];\n  function searchByTime(recipes, maxMinutes) {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchByTime(recipes, 20)));\n</script>\n",
+        "typescript": "<div id=\"recipe-finder\"></div>\n<script>\n  function searchByTime(recipes: Recipe[], maxMinutes: number): Recipe[] {\n    // Your code here\n  }\n  const recipes = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Stew', ingredients: ['beef', 'carrot'], cookTime: 90, difficulty: 'hard' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato'], cookTime: 10, difficulty: 'easy' }\n  ];\n  console.log(JSON.stringify(searchByTime(recipes, 20)));\n</script>\n",
+        "python": "recipes = [\n    {'name': 'Pasta', 'ingredients': ['pasta', 'tomato'], 'cookTime': 20, 'difficulty': 'easy'},\n    {'name': 'Stew', 'ingredients': ['beef', 'carrot'], 'cookTime': 90, 'difficulty': 'hard'},\n    {'name': 'Salad', 'ingredients': ['lettuce', 'tomato'], 'cookTime': 10, 'difficulty': 'easy'}\n]\n\ndef search_by_time(recipes, max_minutes):\n    # Your code here\n\nimport json\nprint(json.dumps(search_by_time(recipes, 20)))\n"
+      },
+      "verification": {
+        "test": "output.includes('Pasta') && output.includes('Salad') && !output.includes('Stew')",
+        "successMessage": "Time-based search works!",
+        "failureMessage": "Return recipes with cookTime <= maxMinutes."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Combined search",
+      "description": "Write `searchRecipes(recipes, filters)` that accepts a filters object with `ingredient` and `maxTime` properties and applies both filters.",
+      "hints": ["Start with the full recipes array", "Apply ingredient filter if provided", "Apply time filter if provided", "Chain filter methods"],
+      "codeTemplate": {
+        "javascript": "<div id=\"recipe-finder\"></div>\n<script>\n  const recipes = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Stew', ingredients: ['beef', 'tomato'], cookTime: 90, difficulty: 'hard' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato'], cookTime: 10, difficulty: 'easy' }\n  ];\n  function searchRecipes(recipes, filters) {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchRecipes(recipes, { ingredient: 'tomato', maxTime: 20 })));\n</script>\n",
+        "typescript": "<div id=\"recipe-finder\"></div>\n<script>\n  interface SearchFilters {\n    ingredient?: string;\n    maxTime?: number;\n  }\n  function searchRecipes(recipes: Recipe[], filters: SearchFilters): Recipe[] {\n    // Your code here\n  }\n  const recipes = [\n    { name: 'Pasta', ingredients: ['pasta', 'tomato'], cookTime: 20, difficulty: 'easy' },\n    { name: 'Stew', ingredients: ['beef', 'tomato'], cookTime: 90, difficulty: 'hard' },\n    { name: 'Salad', ingredients: ['lettuce', 'tomato'], cookTime: 10, difficulty: 'easy' }\n  ];\n  console.log(JSON.stringify(searchRecipes(recipes, { ingredient: 'tomato', maxTime: 20 })));\n</script>\n",
+        "python": "recipes = [\n    {'name': 'Pasta', 'ingredients': ['pasta', 'tomato'], 'cookTime': 20, 'difficulty': 'easy'},\n    {'name': 'Stew', 'ingredients': ['beef', 'tomato'], 'cookTime': 90, 'difficulty': 'hard'},\n    {'name': 'Salad', 'ingredients': ['lettuce', 'tomato'], 'cookTime': 10, 'difficulty': 'easy'}\n]\n\ndef search_recipes(recipes, filters):\n    # Your code here\n\nimport json\nprint(json.dumps(search_recipes(recipes, {'ingredient': 'tomato', 'maxTime': 20})))\n"
+      },
+      "verification": {
+        "test": "output.includes('Pasta') && output.includes('Salad') && !output.includes('Stew')",
+        "successMessage": "Combined search works!",
+        "failureMessage": "Apply both ingredient and time filters."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Recipe detail string",
+      "description": "Write `formatRecipe(recipe)` that returns a formatted string: `'[name] - [cookTime] min - [difficulty]\\nIngredients: [ingredients list]'`.",
+      "hints": ["Join ingredients array with ', '", "Combine all fields into one string", "Use newline characters for formatting"],
+      "codeTemplate": {
+        "javascript": "<div id=\"recipe-finder\"></div>\n<script>\n  function formatRecipe(recipe) {\n    // Your code here\n  }\n  const recipe = { name: 'Pasta', ingredients: ['pasta', 'tomato', 'garlic'], cookTime: 20, difficulty: 'easy' };\n  console.log(formatRecipe(recipe));\n</script>\n",
+        "typescript": "<div id=\"recipe-finder\"></div>\n<script>\n  function formatRecipe(recipe: Recipe): string {\n    // Your code here\n  }\n  const recipe: Recipe = { name: 'Pasta', ingredients: ['pasta', 'tomato', 'garlic'], cookTime: 20, difficulty: 'easy' };\n  console.log(formatRecipe(recipe));\n</script>\n",
+        "python": "def format_recipe(recipe):\n    # Your code here\n\nrecipe = {'name': 'Pasta', 'ingredients': ['pasta', 'tomato', 'garlic'], 'cookTime': 20, 'difficulty': 'easy'}\nprint(format_recipe(recipe))\n"
+      },
+      "verification": {
+        "test": "output.includes('Pasta') && output.includes('20 min') && output.includes('easy') && output.includes('Ingredients')",
+        "successMessage": "Recipe formatted correctly!",
+        "failureMessage": "Format: '[name] - [time] min - [difficulty]' with ingredients list."
+      }
+    }
+  ]
+}

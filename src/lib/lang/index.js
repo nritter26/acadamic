@@ -1,9 +1,3 @@
-import { generateSyntaxSprint, generateSyntaxSwipe, generateMemoryMatch, generateSpeedRead, generateRaceCompiler, generateSqlJoinMatch, generateErrorpedia, generateApiArcade, generateLogicLadder } from './generators/choice.js';
-import { generateCodeScramble } from './generators/order.js';
-import { generateDebugTheBug } from './generators/debug.js';
-import { generateCodeGolf, generateBinaryHexBlitz, generateCrossword, generateRegexRally } from './generators/text.js';
-import { generateTypingSpeed } from './generators/typing.js';
-
 const HASH_SEED = 42;
 
 function hash(str) {
@@ -50,6 +44,12 @@ export const LANG_NAMES = {
   scala: 'Scala', swift: 'Swift', ts: 'TypeScript', wasm: 'WebAssembly',
   zig: 'Zig', react: 'React', vue: 'Vue', svelte: 'Svelte',
 };
+
+import { generateSyntaxSprint, generateSyntaxSwipe, generateMemoryMatch, generateSpeedRead, generateRaceCompiler, generateSqlJoinMatch, generateErrorpedia, generateApiArcade, generateLogicLadder } from './generators/choice.js';
+import { generateCodeScramble } from './generators/order.js';
+import { generateDebugTheBug } from './generators/debug.js';
+import { generateCodeGolf, generateBinaryHexBlitz, generateCrossword, generateRegexRally } from './generators/text.js';
+import { generateTypingSpeed } from './generators/typing.js';
 
 const GENERATORS = {
   'typing-speed': generateTypingSpeed,
