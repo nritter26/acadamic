@@ -6,7 +6,7 @@ const LANG_MAP = {
   ts: { title: 'TypeScript', icon: '/public/logos/ts.svg' },
   py: { title: 'Python', icon: '/public/logos/py.svg' },
   go: { title: 'Go', icon: '/public/logos/go.svg' },
-  rust: { title: 'Rust', icon: '/public/logos/rust.svg' },
+  rust: { title: 'Rust', icon: '/public/logos/rs.svg' },
   java: { title: 'Java', icon: '/public/logos/java.svg' },
   kt: { title: 'Kotlin', icon: '/public/logos/kt.svg' },
   cs: { title: 'C#', icon: '/public/logos/cs.svg' },
@@ -19,10 +19,9 @@ const LANG_MAP = {
   lua: { title: 'Lua', icon: '/public/logos/lua.svg' },
   zig: { title: 'Zig', icon: '/public/logos/zig.svg' },
   asm: { title: 'Assembly', icon: '/public/logos/asm.svg' },
-  dk: { title: 'Dart', icon: '/public/logos/dk.svg' },
 };
 
-const LANG_ORDER = ['js', 'ts', 'py', 'go', 'rust', 'java', 'kt', 'cs', 'cpp', 'c', 'rb', 'php', 'swift', 'scala', 'lua', 'zig', 'asm', 'dk'];
+const LANG_ORDER = ['js', 'ts', 'py', 'go', 'rust', 'java', 'kt', 'cs', 'cpp', 'c', 'rb', 'php', 'swift', 'scala', 'lua', 'zig', 'asm'];
 
 function slugify(text) {
   return text

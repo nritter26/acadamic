@@ -1,0 +1,498 @@
+{
+ "Getting Started": {
+  "What is C": [
+   "C is a low-level, statically typed language developed by Dennis Ritchie in 1972. It provides direct memory access, minimal runtime, and is the foundation for most operating systems, embedded systems, and virtually every modern language.",
+   "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, C!\\n\");\n    return 0;\n}"
+  ],
+  "Hello World": [
+   "Every C program starts execution in `main()`. `#include <stdio.h>` brings in the standard I/O library. `printf()` prints formatted text. `return 0` signals success to the OS.",
+   "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}"
+  ],
+  "C Syntax & Structure": [
+   "C programs consist of functions. `main()` is the entry point. Statements end with semicolons. Blocks are enclosed in braces. `#include` directives include header files. C is case-sensitive and whitespace-insensitive.",
+   "#include <stdio.h>\n\nint main() {\n    int x = 10;\n    printf(\"Value: %d\\n\", x);\n    return 0;\n}"
+  ],
+  "Compilation Process": [
+   "C source code goes through preprocessing, compilation, assembly, and linking. `gcc` (GNU C Compiler) is the standard compiler. Use `-o` to name the output, `-Wall` for warnings, `-g` for debug symbols.",
+   "gcc -Wall -g -o program program.c\n./program\n# Or with multiple files\ngcc -Wall -o program main.c helper.c -lm"
+  ],
+  "Data Types": [
+   "Basic types: `int`, `char`, `float`, `double`, `void`. Modifiers: `short`, `long`, `signed`, `unsigned`. `sizeof()` returns bytes. Type sizes vary by platform (int is usually 4 bytes, char is always 1).",
+   "int a = 42;\nchar c = 'A';\nfloat f = 3.14f;\ndouble d = 3.14159;\nunsigned int u = 100;\nlong big = 100000L;\nprintf(\"%zu\\n\", sizeof(int));"
+  ],
+  "Comments": [
+   "C supports `//` single-line comments (C99+) and `/* */` multi-line comments. Comments are stripped by the preprocessor. Use comments to explain why, not what.",
+   "// This is a single-line comment\nint x = 5; /* This also works\n   across multiple lines */"
+  ],
+  "C Standards": [
+   "C standards: C89/C90 (ANSI/ISO), C99 (designated initializers, // comments, inline, stdint.h), C11 (threads, _Generic, anonymous structs, _Static_assert), C17 (bugfix), C23 (embed, #elifdef, typeof, constexpr). GCC default: gnu17. Use -std=c11 -pedantic for strict compliance.",
+   "#include <stdio.h>\n#include <stdint.h>\n\nint main() {\n    // C99: designated initializers\n    int arr[5] = {[0]=1, [3]=42};\n    \n    // C11: static assert\n    _Static_assert(sizeof(int) >= 4, \"int too small\");\n    \n    // C99: stdint types\n    int32_t x = INT32_MAX;\n    uint64_t y = UINT64_MAX;\n    \n    printf(\"C17 features active\\n\");\n    return 0;\n}"
+  ]
+ },
+ "Variables & Storage": {
+  "Variables & Assignment": [
+   "Variables must be declared with a type before use. Naming rules: letters, digits, underscores; cannot start with digit. Convention uses snake_case. Uninitialized local variables contain garbage values.",
+   "int age = 25;\nfloat price = 19.99;\nchar initial = 'A';\nint count;  // uninitialized (garbage)\ncount = 10; // assignment"
+  ],
+  "Constants & Literals": [
+   "Constants are fixed values that cannot be changed. Use `const` keyword or `#define` preprocessor. Integer, floating-point, character, and string literals. Suffixes: L (long), U (unsigned), F (float).",
+   "const int MAX_USERS = 100;\n#define PI 3.14159\n\nint x = 42;        // decimal\nint y = 0x2A;      // hexadecimal\nint z = 052;       // octal\nfloat f = 3.14f;\nlong big = 1000L;"
+  ],
+  "Scope & Lifetime": [
+   "Scope determines where a variable is accessible. Block scope `{}`, file scope (global), function scope. Lifetime: automatic (stack) vs static (program duration). Variables shadow outer scopes.",
+   "#include <stdio.h>\nint global = 100;  // file scope\n\nvoid func() {\n    int local = 10;  // block scope\n    static int stat = 0;  // static lifetime\n    stat++;\n    printf(\"%d %d\\n\", local, stat);\n}"
+  ],
+  "Storage Classes": [
+   "`auto` (default for locals), `register` (suggest CPU register), `static` (persists lifetime, limits scope), `extern` (declares variable defined elsewhere). `static` on globals limits to file.",
+   "static int file_counter = 0;  // internal linkage\n\nvoid count() {\n    static int calls = 0;  // persists across calls\n    calls++;\n    printf(\"Called %d times\\n\", calls);\n}\n\nextern int external_var;  // defined in another file"
+  ],
+  "Type Qualifiers": [
+   "Type qualifiers: const (immutable), volatile (may change externally \u2014 for memory-mapped I/O, signal handlers), restrict (pointer is sole access path \u2014 optimization hint). volatile prevents compiler from optimizing away reads/writes. restrict only in C99+. `_Atomic` (C11) for atomic operations.",
+   "#include <stdio.h>\n#include <stdint.h>\n\nconst int MAX = 100;             // cannot modify\n\nvoid delay(volatile int *count) { // volatile: don't optimize\n    while ((*count)--) { /* busy wait */ }\n}\n\nvoid copy(int *restrict dst,       // no overlap\n          const int *restrict src,  // guarantees no alias\n          size_t n) {\n    for (size_t i = 0; i < n; i++)\n        dst[i] = src[i];\n}\n\nint main() {\n    volatile uint32_t *reg = (volatile uint32_t *)0x40001000;\n    // *reg = 0x01;  // memory-mapped register write\n    printf(\"MAX = %d\\n\", MAX);\n    return 0;\n}"
+  ],
+  "Type Conversion": [
+   "Implicit conversion (type coercion) happens automatically: `int` -> `float` -> `double`. Explicit conversion (casting) uses `(type)` syntax. Promotion rules: values are promoted to the larger type.",
+   "int a = 5;\nfloat b = a;  // implicit: 5.0\nfloat c = 3.14;\nint d = (int)c;  // explicit cast: 3\n\nchar ch = 'A';\nint ascii = (int)ch;  // 65"
+  ],
+  "typedef": [
+   "`typedef` creates type aliases for cleaner code. Commonly used with structs, function pointers, and complex types. Doesn't create new types \u2014 just aliases.",
+   "typedef unsigned long ulong;\ntypedef struct { int x; int y; } Point;\ntypedef int (*MathOp)(int, int);\n\nulong big = 100000;\nPoint p = {10, 20};\nMathOp op = add;"
+  ]
+ },
+ "Operators": {
+  "Arithmetic Operators": [
+   "Standard math: `+` addition, `-` subtraction, `*` multiplication, `/` division, `%` modulo (remainder). Integer division truncates toward zero. Mixing types causes implicit conversion.",
+   "int a = 10 + 5;\nint b = 20 - 3;\nint c = 4 * 5;\nint d = 20 / 3;  // 6 (integer truncation)\nint e = 17 % 5;  // 2\nfloat f = 20.0 / 3.0;  // 6.666..."
+  ],
+  "Relational & Logical Operators": [
+   "Relational: `==`, `!=`, `<`, `>`, `<=`, `>=`. Logical: `&&` (AND), `||` (OR), `!` (NOT). C treats 0 as false, non-zero as true. Short-circuit evaluation for && and ||.",
+   "int x = 5, y = 10;\nif (x > 0 && y < 20) {\n    printf(\"Both true\\n\");\n}\nif (!(x == y)) {\n    printf(\"Not equal\\n\");\n}"
+  ],
+  "Bitwise Operators": [
+   "Manipulate individual bits: `&` AND, `|` OR, `^` XOR, `~` NOT, `<<` left shift, `>>` right shift. Used for flags, hardware control, and performance optimization.",
+   "unsigned int a = 5;   // 0101\nunsigned int b = 3;   // 0011\nunsigned int c = a & b;  // 0001 = 1\nunsigned int d = a | b;  // 0111 = 7\nunsigned int e = a ^ b;  // 0110 = 6\nunsigned int f = a << 1; // 1010 = 10"
+  ],
+  "Assignment Operators": [
+   "Compound assignments: `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `<<=`, `>>=`. More concise and can be more efficient than separate operation and assignment.",
+   "int x = 10;\nx += 5;   // x = 15\nx *= 2;   // x = 30\nx %= 7;   // x = 2\n\nunsigned int flags = 0;\nflags |= 0x01;  // set bit 0\nflags &= ~0x01; // clear bit 0"
+  ],
+  "sizeof, Ternary & Comma": [
+   "`sizeof` returns size in bytes (type or expression). Ternary `?:` is a compact if-else. Comma `,` evaluates both operands, returns the second. Useful in `for` loops.",
+   "printf(\"%zu\\n\", sizeof(int));  // 4\nint max = (a > b) ? a : b;\n\nfor (int i = 0, j = 10; i < j; i++, j--) {\n    printf(\"%d %d\\n\", i, j);\n}"
+  ],
+  "Operator Precedence": [
+   "Precedence determines evaluation order. Postfix > Unary > Multiplicative > Additive > Shift > Relational > Equality > Bitwise AND > XOR > OR > Logical AND > OR > Ternary > Assignment > Comma. Use parentheses to clarify.",
+   "int x = 5 + 3 * 4;     // 17 (not 32)\nint y = (5 + 3) * 4;   // 32\nint z = 1 << 2 + 3;     // 1 << 5 = 32\nprintf(\"%d %d %d\\n\", x, y, z);"
+  ],
+  "Comma & Sequence Points": [
+   "The comma operator evaluates left-to-right, returns the rightmost value. Sequence points guarantee evaluation order: between &&, ||, ?:, comma operator, and at the end of full expressions. Between sequence points, modify a variable at most once (otherwise undefined behavior). Avoid comma operator in most code \u2014 use separate statements.",
+   "#include <stdio.h>\n\nint main() {\n    int a = 1, b = 2, c = 3;\n    \n    // Comma operator: evaluates left, returns right\n    int result = (a += 2, b += 3, a + b);\n    printf(\"a=%d, b=%d, result=%d\\n\", a, b, result);\n    \n    // Sequence points\n    int x = 0;\n    // x = x++ + ++x;  // UNDEFINED \u2014 two modifications\n    \n    // Safe: && is a sequence point\n    int *p = NULL;\n    if (p && *p == 42) { }  // safe: short-circuit protects deref\n    \n    // Comma in for loops\n    for (int i = 0, j = 10; i < j; i++, j--) {\n        printf(\"%d %d\\n\", i, j);\n    }\n    \n    return 0;\n}"
+  ]
+ },
+ "Control Flow": {
+  "if / else if / else": [
+   "Conditional branching with `if`, `else if`, `else`. Conditions must be in parentheses. C treats 0 as false, non-zero as true. No boolean type in early C \u2014 use `<stdbool.h>` for `bool`.",
+   "int score = 85;\nif (score >= 90) {\n    printf(\"A\\n\");\n} else if (score >= 80) {\n    printf(\"B\\n\");\n} else {\n    printf(\"C\\n\");\n}"
+  ],
+  "Switch Statement": [
+   "`switch` branches on integer/enum values. Each `case` must end with `break` to prevent fallthrough. `default` handles unmatched values. C23 allows `switch` on expression with multiple cases per label.",
+   "int day = 3;\nswitch (day) {\n    case 1: printf(\"Mon\\n\"); break;\n    case 2: printf(\"Tue\\n\"); break;\n    case 3: printf(\"Wed\\n\"); break;\n    default: printf(\"Unknown\\n\");\n}"
+  ],
+  "Loops: for, while, do-while": [
+   "`for` when count is known (init; condition; increment). `while` when condition-based. `do-while` runs body at least once. All loops can be nested. Watch for infinite loops and off-by-one errors.",
+   "for (int i = 0; i < 5; i++) {\n    printf(\"%d \", i);\n}\nprintf(\"\\n\");\n\nint j = 0;\nwhile (j < 5) {\n    printf(\"%d \", j);\n    j++;\n}"
+  ],
+  "break & continue": [
+   "`break` exits the innermost loop or switch immediately. `continue` skips rest of current iteration and goes to next. In nested loops, break only exits the innermost one.",
+   "for (int i = 0; i < 10; i++) {\n    if (i == 2) continue;\n    if (i == 5) break;\n    printf(\"%d \", i);\n}\n// Output: 0 1 3 4"
+  ],
+  "goto & Labels": [
+   "`goto` jumps to a labeled statement in the same function. Generally discouraged for structured flow, but useful for breaking out of deeply nested loops or centralized error cleanup.",
+   "for (int i = 0; i < 10; i++) {\n    for (int j = 0; j < 10; j++) {\n        if (i * j > 50) goto found;\n    }\n}\nfound:\n    printf(\"Found at i=%d\\n\", i);"
+  ],
+  "Infinite Loops & Pitfalls": [
+   "Common loop bugs: off-by-one (`<=` vs `<`), missing braces causing unintended body, using assignment `=` instead of comparison `==`, forgetting increment, and semicolon after `for` or `while`.",
+   "// Common mistakes:\nint i = 0;\nwhile (i < 5); {  // semicolon: infinite loop\n    i++;\n}\n\nif (x = 5)  // assignment, not comparison!\n    printf(\"always true\");"
+  ],
+  "Switch Deep & Duff's Device": [
+   "switch evaluates an expression and jumps to matching case. Fallthrough is implicit \u2014 use break to prevent it. C23 adds `[[fallthrough]]` attribute. Duff's Device: a loop unrolling technique using switch/case fallthrough for performance. Default handles unmatched values.",
+   "#include <stdio.h>\n\n// Duff's Device: unrolled loop via switch\nvoid send_buffer(char *to, char *from, int count) {\n    int n = (count + 7) / 8;\n    switch (count % 8) {\n        case 0: do { *to++ = *from++;\n        case 7:      *to++ = *from++;\n        case 6:      *to++ = *from++;\n        case 5:      *to++ = *from++;\n        case 4:      *to++ = *from++;\n        case 3:      *to++ = *from++;\n        case 2:      *to++ = *from++;\n        case 1:      *to++ = *from++;\n        } while (--n > 0);\n    }\n}\n\nint main() {\n    char src[] = \"Hello World\";\n    char dst[12] = {0};\n    send_buffer(dst, src, 11);\n    printf(\"%s\\n\", dst);\n    \n    // Fallthrough annotation (C23)\n    int val = 2;\n    switch (val) {\n        case 1:\n        case 2:  // intentional fallthrough\n            puts(\"One or two\");\n            break;\n        case 3:\n            puts(\"Three\");\n            [[fallthrough]];  // C23 explicit\n        default:\n            puts(\"Other\");\n    }\n    \n    return 0;\n}"
+  ]
+ },
+ "Functions": {
+  "Function Declaration & Definition": [
+   "Functions must be declared before use (prototype) or defined first. Return type, name, parameter list with types. `void` for no return value or no parameters. K&R style is obsolete.",
+   "#include <stdio.h>\n\nint add(int a, int b);  // prototype\n\nint main() {\n    printf(\"%d\\n\", add(3, 4));\n    return 0;\n}\n\nint add(int a, int b) {  // definition\n    return a + b;\n}"
+  ],
+  "Pass by Value": [
+   "C passes arguments by value \u2014 functions receive copies. To modify variables in the caller, pass pointers. Arrays decay to pointers when passed. Structs are copied unless passed by pointer.",
+   "void swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf(\"%d %d\\n\", x, y);\n}"
+  ],
+  "Return Values": [
+   "Functions return a value matching their declared return type. No value needed for `void`. Returned value can be ignored by caller. Never return pointer to local variable \u2014 use `static` or dynamic allocation.",
+   "#include <stdio.h>\n\nint square(int n) {\n    return n * n;\n}\n\nint* bad() {\n    int x = 5;\n    return &x;  // BUG: dangling pointer!\n}"
+  ],
+  "Recursion": [
+   "A recursive function calls itself. Must have a base case to terminate. Stack memory is used for each call \u2014 deep recursion can cause stack overflow. Example: factorial, Fibonacci, tree traversal.",
+   "int factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n-1) + fibonacci(n-2);\n}\n\nprintf(\"%d\\n\", factorial(5));"
+  ],
+  "Inline Functions": [
+   "`inline` suggests the compiler replace function calls with the body code to avoid call overhead (C99). Compiler may ignore. Static inline in headers is common. Modern compilers auto-inline better than programmers.",
+   "static inline int max(int a, int b) {\n    return a > b ? a : b;\n}\n\n// Compiler may inline this call:\nint m = max(x, y);"
+  ],
+  "Variadic Functions": [
+   "Functions with variable arguments use `<stdarg.h>`: `va_list`, `va_start()`, `va_arg()`, `va_end()`. At least one named parameter is required. No type safety \u2014 caller must provide correct types.",
+   "#include <stdarg.h>\n\ndouble average(int count, ...) {\n    va_list args;\n    va_start(args, count);\n    double sum = 0;\n    for (int i = 0; i < count; i++) {\n        sum += va_arg(args, double);\n    }\n    va_end(args);\n    return sum / count;\n}\n\nprintf(\"%.2f\\n\", average(3, 1.0, 2.0, 3.0));"
+  ],
+  "main() Arguments": [
+   "`int main(int argc, char *argv[])` receives command-line arguments. `argc` is argument count (program name is argv[0]). `argv` is array of strings. `getopt()` for parsing flags.",
+   "int main(int argc, char *argv[]) {\n    for (int i = 0; i < argc; i++) {\n        printf(\"arg[%d]: %s\\n\", i, argv[i]);\n    }\n    return 0;\n}"
+  ],
+  "Variable Arguments (stdarg)": [
+   "Variadic functions accept variable number of arguments using <stdarg.h>. Macros: va_list, va_start, va_arg, va_end, va_copy (C99). va_start initializes after named parameter. va_arg steps through. va_end cleans up. No type safety \u2014 printf-like format string is the convention. Use compiler attributes: __attribute__((format(printf,...))).",
+   "#include <stdio.h>\n#include <stdarg.h>\n\n// Safer: compiler-checked format\n__attribute__((format(printf, 1, 2)))\nvoid log_error(const char *fmt, ...) {\n    va_list args;\n    va_start(args, fmt);\n    vfprintf(stderr, fmt, args);\n    va_end(args);\n}\n\n// Sum variable arguments (last named is count)\ndouble average(int count, ...) {\n    va_list args;\n    va_start(args, count);\n    double sum = 0;\n    for (int i = 0; i < count; i++)\n        sum += va_arg(args, double);  // type must match!\n    va_end(args);\n    return sum / count;\n}\n\nint main() {\n    log_error(\"Error: %s at line %d\\n\", \"file not found\", 42);\n    \n    double avg = average(4, 1.0, 2.0, 3.0, 4.0);\n    printf(\"Avg: %.1f\\n\", avg);\n    \n    // va_copy for rescanning\n    // va_list copy;\n    // va_copy(copy, args);\n    // ... use copy ...\n    // va_end(copy);\n    \n    return 0;\n}"
+  ]
+ },
+ "Pointers": {
+  "Pointer Basics": [
+   "Pointers store memory addresses. `&` gets address of variable. `*` dereferences (accesses value at address). `NULL` is a safe pointer value. Always initialize pointers. Size is platform-dependent (4 or 8 bytes).",
+   "int x = 42;\nint *ptr = &x;\n\nprintf(\"Address: %p\\n\", (void*)ptr);\nprintf(\"Value: %d\\n\", *ptr);\n\n*ptr = 99;\nprintf(\"x is now: %d\\n\", x);"
+  ],
+  "Pointer Arithmetic": [
+   "Incrementing a pointer moves to the next element of its type: `ptr + n` adds `n * sizeof(type)` bytes. Arrays and pointers are closely related. Subtraction gives the number of elements between two pointers.",
+   "int arr[] = {10, 20, 30, 40};\nint *p = arr;\n\nprintf(\"%d\\n\", *p);       // 10\nprintf(\"%d\\n\", *(p + 2)); // 30\np++;\nprintf(\"%d\\n\", *p);       // 20\n\nint *start = &arr[0];\nint *end = &arr[3];\nprintf(\"diff: %td\\n\", end - start);  // 3"
+  ],
+  "Pointers & Arrays": [
+   "Array name decays to pointer to first element. `arr[i]` is equivalent to `*(arr + i)`. The `[]` operator works on pointers too. But `sizeof(arr)` differs from `sizeof(ptr)` \u2014 arrays remember their size at compile time.",
+   "int arr[5] = {1, 2, 3, 4, 5};\nint *p = arr;\n\nfor (int i = 0; i < 5; i++) {\n    printf(\"%d == %d\\n\", p[i], *(arr + i));\n}\n\nprintf(\"Array size: %zu\\n\", sizeof(arr));  // 20\nprintf(\"Pointer size: %zu\\n\", sizeof(p));  // 8"
+  ],
+  "Pointer to Pointer": [
+   "`int **pp` stores address of an `int*`. Used for dynamic 2D arrays, modifying pointer arguments in functions, and arrays of strings. Can be chained arbitrarily deep.",
+   "int x = 42;\nint *p = &x;\nint **pp = &p;\n\nprintf(\"%d\\n\", **pp);  // 42\n**pp = 99;\nprintf(\"%d\\n\", x);     // 99\n\n// Array of strings\nchar *fruits[] = {\"apple\", \"banana\", \"cherry\"};"
+  ],
+  "Void Pointers": [
+   "`void*` is a generic pointer that can hold any address. Must be cast to a specific type before dereferencing. Used in generic functions like `malloc()`, `qsort()`, `memcpy()`. No pointer arithmetic on void*.",
+   "int x = 42;\nfloat f = 3.14;\nvoid *ptr;\n\nptr = &x;\nprintf(\"%d\\n\", *(int*)ptr);\n\nptr = &f;\nprintf(\"%.2f\\n\", *(float*)ptr);"
+  ],
+  "Function Pointers": [
+   "Function pointers store addresses of functions. Used for callbacks, strategy patterns, and dynamic dispatch. Syntax: `returnType (*name)(params)`. `qsort()` takes a comparator function pointer.",
+   "#include <stdlib.h>\n\nint compare(const void *a, const void *b) {\n    return (*(int*)a - *(int*)b);\n}\n\nint main() {\n    int arr[] = {3, 1, 4, 1, 5};\n    qsort(arr, 5, sizeof(int), compare);\n}\n\n// typedef for clarity\ntypedef int (*Comparator)(const void*, const void*);"
+  ],
+  "Dynamic Memory Allocation": [
+   "`malloc()` allocates on heap, `free()` releases it. `calloc()` allocates and zero-initializes. `realloc()` resizes. Always check for NULL return. Free to avoid leaks. Include `<stdlib.h>`.",
+   "#include <stdlib.h>\n\nint *arr = (int*)malloc(5 * sizeof(int));\nif (arr == NULL) { printf(\"OOM\\n\"); return 1; }\n\nfor (int i = 0; i < 5; i++) arr[i] = i * 10;\n\nint *bigger = (int*)realloc(arr, 10 * sizeof(int));\nif (bigger == NULL) { free(arr); return 1; }\n\nfree(bigger);"
+  ],
+  "Memory Leaks & Debugging": [
+   "A memory leak occurs when allocated memory is never freed. Tools: Valgrind, AddressSanitizer (`-fsanitize=address`), leak sanitizer. Common issues: forgetting to free, losing the pointer, double free, use-after-free.",
+   "// Compile with AddressSanitizer:\n// gcc -fsanitize=address -g program.c -o program\n\nvoid leak() {\n    int *p = (int*)malloc(100 * sizeof(int));\n    // forgot to free(p);\n}\n\nvoid use_after_free() {\n    int *p = (int*)malloc(sizeof(int));\n    free(p);\n    *p = 42;  // BUG: use after free\n}"
+  ],
+  "Function Pointers & Callbacks": [
+   "Function pointers store addresses of callable functions. Syntax: `return_type (*ptr)(params)`. Used for callbacks, plugin systems, dispatch tables. qsort takes a comparator function pointer. Callbacks are central to event-driven and GUI programming. Typedef improves readability.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\n// Function pointer type\ntypedef int (*Comparator)(const void *, const void *);\n\nint ascending(const void *a, const void *b) {\n    return *(int*)a - *(int*)b;\n}\n\nint descending(const void *a, const void *b) {\n    return *(int*)b - *(int*)a;\n}\n\n// Callback array\nvoid apply(int *arr, size_t n, int (*op)(int)) {\n    for (size_t i = 0; i < n; i++)\n        arr[i] = op(arr[i]);\n}\n\nint square(int x) { return x * x; }\nint negate(int x) { return -x; }\n\nint main() {\n    int vals[] = {3, 1, 4, 1, 5, 9};\n    size_t n = sizeof(vals) / sizeof(*vals);\n    \n    // qsort with callback\n    qsort(vals, n, sizeof(int), ascending);\n    \n    // Dispatch table\n    int op = 42;\n    int (*funcs[])(int) = {square, negate};\n    // apply(vals, n, funcs[op & 1]);\n    \n    for (size_t i = 0; i < n; i++)\n        printf(\"%d \", vals[i]);\n    printf(\"\\n\");\n    return 0;\n}"
+  ]
+ },
+ "Arrays & Strings": {
+  "One-Dimensional Arrays": [
+   "Contiguous memory blocks of the same type. Fixed size determined at compile time. Index from 0. No bounds checking \u2014 buffer overflows are dangerous and a common security vulnerability.",
+   "int arr[5] = {10, 20, 30, 40, 50};\n\nfor (int i = 0; i < 5; i++) {\n    printf(\"arr[%d] = %d\\n\", i, arr[i]);\n}\n\n// Partial initialization (rest zeroed)\nint partial[5] = {1, 2};  // {1, 2, 0, 0, 0}"
+  ],
+  "Multidimensional Arrays": [
+   "Arrays of arrays stored in row-major order. `int matrix[rows][cols]`. Access with `matrix[r][c]`. Can be passed to functions with all dimensions except first specified.",
+   "int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};\n\nfor (int r = 0; r < 2; r++) {\n    for (int c = 0; c < 3; c++) {\n        printf(\"%d \", matrix[r][c]);\n    }\n    printf(\"\\n\");\n}\n\n// 3D array\nint cube[2][3][4];"
+  ],
+  "Array Initialization & Bounds": [
+   "Arrays can be initialized with `= {values}`. Designated initializers (C99): `int arr[5] = {[0]=1, [4]=5}`. C has no runtime bounds checking \u2014 accessing out of bounds causes undefined behavior: crashes or security holes.",
+   "#include <stdio.h>\n\nint arr[3] = {1, 2, 3};\narr[5] = 100;  // BUG: buffer overflow!\n\n// Designated initializers (C99)\nint days[] = {[0]=31, [1]=28, [2]=31};"
+  ],
+  "Strings as char Arrays": [
+   "C strings are null-terminated char arrays (`\\0` marks end). String literals are `char*` pointing to read-only memory. Always ensure buffer is large enough for the null terminator.",
+   "#include <stdio.h>\n\nchar s1[] = \"Doge\";\nchar *s2 = \"Doge\";\nchar s3[10] = {68,111,103,101,0};  // explicit\n\nprintf(\"First char: %c\\n\", s1[0]);\nprintf(\"String: %s\\n\", s1);"
+  ],
+  "String Library": [
+   "`<string.h>` provides: `strlen()` (length), `strcpy()` (copy), `strncpy()` (bounded copy), `strcat()` (append), `strncat()` (bounded append), `strcmp()` (compare), `strchr()` (find char), `strstr()` (find substring). Always prefer bounded versions.",
+   "#include <string.h>\n\nchar dest[50] = \"Hello \";\nchar src[] = \"World\";\n\nstrcat(dest, src);\nprintf(\"%s\\n\", dest);\n\nprintf(\"Length: %zu\\n\", strlen(dest));\nprintf(\"Compare: %d\\n\", strcmp(\"abc\", \"abd\"));\n\nchar *found = strstr(dest, \"World\");"
+  ],
+  "Array of Strings": [
+   "An array of strings is a 2D char array or array of char pointers. `char names[5][20]` \u2014 fixed size. `char *names[5]` \u2014 flexible, each string can differ in length. Both have different memory layouts.",
+   "#include <stdio.h>\n\n// Option 1: 2D array (fixed, contiguous)\nchar grid[3][10] = {\"cat\", \"elephant\", \"dog\"};\n\n// Option 2: array of pointers (flexible lengths)\nchar *words[3] = {\"apple\", \"banana\", \"cherry\"};\n\nfor (int i = 0; i < 3; i++) {\n    printf(\"%s\\n\", words[i]);\n}"
+  ],
+  "Character Classification": [
+   "`<ctype.h>` provides: `isalpha()`, `isdigit()`, `isalnum()`, `isspace()`, `islower()`, `isupper()`, `tolower()`, `toupper()`. Functions work with `int` (EOF-safe). Very efficient \u2014 lookup-table based.",
+   "#include <ctype.h>\n\nchar c = 'A';\nif (isalpha(c)) printf(\"Letter\\n\");\nif (isdigit(c)) printf(\"Digit\\n\");\n\nchar lower = tolower(c);\n\n// Count alphanumeric chars\nchar *s = \"Hello 123!\";\nint count = 0;\nfor (int i = 0; s[i]; i++) {\n    if (isalnum(s[i])) count++;\n}"
+  ],
+  "Variable-Length Arrays": [
+   "VLAs (C99) allow array size determined at runtime. Can't be global, can't be initialized in declaration. sizeof on VLA is evaluated at runtime. VLAs are optional since C11 (compiler may not support). Risk: stack overflow with large sizes. Alternatives: malloc or alloca. GCC supports VLAs as extension in C++ mode too.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\n// VLA as function parameter\nvoid print_matrix(int rows, int cols, int matrix[rows][cols]) {\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++)\n            printf(\"%d \", matrix[i][j]);\n        printf(\"\\n\");\n    }\n}\n\nint main() {\n    int n = 5;\n    int vla[n];  // runtime-size array\n    for (int i = 0; i < n; i++)\n        vla[i] = i * i;\n    \n    printf(\"sizeof(vla) = %zu\\n\", sizeof(vla));  // runtime eval\n    \n    // 2D VLA\n    int rows = 3, cols = 4;\n    int grid[rows][cols];\n    for (int i = 0; i < rows; i++)\n        for (int j = 0; j < cols; j++)\n            grid[i][j] = i * cols + j;\n    \n    print_matrix(rows, cols, grid);\n    \n    // Caution: large VLAs cause stack overflow\n    // size_t too_big = 100000000;\n    // int boom[too_big];  // stack overflow!\n    \n    // Use heap instead:\n    int *safe = malloc(n * sizeof(*safe));\n    free(safe);\n    return 0;\n}"
+  ]
+ },
+ "Structures, Unions & Enums": {
+  "Structs": [
+   "Structures group related data of different types. Define with `struct`. Access members with `.` (dot) operator. Use `->` with pointers to structs. Structs can be copied by assignment.",
+   "struct Person {\n    char name[50];\n    int age;\n    float score;\n};\n\nstruct Person p1 = {\"Alice\", 20, 95.5};\nprintf(\"%s: %d\\n\", p1.name, p1.age);\n\nstruct Person *ptr = &p1;\nprintf(\"%s\\n\", ptr->name);"
+  ],
+  "Unions": [
+   "Unions store different types in the same memory location (size = largest member). Only one member can hold a value at a time. Useful for variant types, register access, and memory-efficient design. Type punning is common but can be undefined behavior.",
+   "union Data {\n    int i;\n    float f;\n    char str[20];\n};\n\nunion Data data;\ndata.i = 42;\nprintf(\"%d\\n\", data.i);\ndata.f = 3.14;\nprintf(\"%f\\n\", data.f);  // i value is now invalid"
+  ],
+  "Bit Fields": [
+   "Bit fields pack multiple values into a single integer, specifying exact bits. Used in device drivers, network protocols, and embedded systems. Can't take address of a bit field. Order and alignment are implementation-defined.",
+   "struct Flags {\n    unsigned int active : 1;\n    unsigned int visible : 1;\n    unsigned int mode : 2;\n    unsigned int id : 4;\n};\n\nstruct Flags f = {1, 0, 2, 5};\nprintf(\"Size: %zu bytes\\n\", sizeof(f));"
+  ],
+  "enum": [
+   "Enums define named integer constants (default: 0, 1, 2...). Can specify explicit values. Enums improve code readability and type safety (some compilers warn on switch missing cases). C23 allows `enum` with type specifier.",
+   "enum Color { RED, GREEN, BLUE };\nenum Color c = GREEN;\nprintf(\"%d\\n\", c);  // 1\n\nenum Status { OK = 200, NOT_FOUND = 404, ERROR = 500 };\nprintf(\"%d\\n\", NOT_FOUND);"
+  ],
+  "Struct Padding & Alignment": [
+   "Compilers may add padding bytes between struct members for alignment. Reorder members from largest to smallest to minimize padding. `offsetof()` from `<stddef.h>` gets member offset. Packed structs with `__attribute__((packed))`.",
+   "#include <stddef.h>\n\nstruct Padded {\n    char c;     // 1 byte + 3 padding\n    int i;      // 4 bytes\n    short s;    // 2 bytes + 2 padding\n};  // total: 12 bytes\n\nstruct Packed {\n    int i;      // 4 bytes\n    short s;    // 2 bytes\n    char c;     // 1 byte + 1 padding\n};  // total: 8 bytes\n\nprintf(\"%zu\\n\", sizeof(struct Padded));\nprintf(\"%zu\\n\", offsetof(struct Padded, i));"
+  ],
+  "Flexible Array Members": [
+   "A struct can have an incomplete array as its last member (C99). Allows variable-length data without pointers. The struct is allocated with extra space for the array. Common in network protocols and variable-length records.",
+   "struct Buffer {\n    int length;\n    char data[];  // flexible array member (must be last)\n};\n\nstruct Buffer *buf = malloc(sizeof(struct Buffer) + 100);\nbuf->length = 100;\nfor (int i = 0; i < 100; i++) buf->data[i] = i;\nfree(buf);"
+  ],
+  "Nested & Self-Referential Structs": [
+   "Structs can contain other structs as members. Self-referential structs (containing pointer to same type) are used for linked data structures: linked lists, trees, graphs. Forward declaration with `struct Name;`.",
+   "struct Point {\n    int x, y;\n};\n\nstruct Rectangle {\n    struct Point top_left;\n    struct Point bottom_right;\n};\n\n// Self-referential for linked list\nstruct Node {\n    int data;\n    struct Node *next;\n};"
+  ],
+  "Bit Fields & Packing": [
+   "Bit fields allow member-level bit allocation in structs. Syntax: `type name : width`. Width in bits. Unnamed fields for padding. Zero-width unnamed field aligns to next storage unit. Implementation-defined: allocation order, alignment, whether fields overlap int boundaries. `__attribute__((packed))` (GCC) removes padding. Use bit fields for hardware registers, flags, protocols.",
+   "#include <stdio.h>\n#include <stdint.h>\n\n// Bit field struct \u2014 compact flags\nstruct Flags {\n    unsigned int active : 1;    // 1 bit\n    unsigned int visible : 1;   // 1 bit\n    unsigned int type    : 2;   // 2 bits (0-3)\n    unsigned int : 0;            // zero-width: align to next unit\n    unsigned int id      : 8;   // 8 bits\n};\n\n// Packed struct \u2014 no padding\nstruct __attribute__((packed)) Packet {\n    uint8_t  version : 4;\n    uint8_t  type    : 4;\n    uint16_t length;\n    uint32_t payload;\n};\n\nint main() {\n    printf(\"Flags: %zu bytes\\n\", sizeof(struct Flags));\n    printf(\"Packet: %zu bytes\\n\", sizeof(struct Packet));\n    \n    struct Flags f = {1, 1, 3, 42};\n    printf(\"active=%u, type=%u\\n\", f.active, f.type);\n    \n    // Hardware register example\n    struct __attribute__((packed)) Timer {\n        uint32_t control : 8;\n        uint32_t prescale : 8;\n        uint32_t compare : 16;\n    };\n    // volatile struct Timer *timer = (void*)0x40001000;\n    \n    return 0;\n}"
+  ]
+ },
+ "File I/O": {
+  "Opening & Closing Files": [
+   "`fopen()` opens a file: `r` read, `w` write (truncates), `a` append, `r+` read/write, `w+` read/write (truncates), `a+` read/append. `fclose()` closes. Always check return value for NULL. Binary mode: append `b` (e.g. `rb`, `wb`).",
+   "#include <stdio.h>\n\nFILE *fp = fopen(\"test.txt\", \"w\");\nif (fp == NULL) {\n    perror(\"Failed to open\");\n    return 1;\n}\nfprintf(fp, \"Hello, file!\\n\");\nfclose(fp);"
+  ],
+  "Reading & Writing Text": [
+   "Character: `fgetc()`, `fputc()`. Line: `fgets()` (safe, includes newline), `fputs()`. Block: `fread()`, `fwrite()`. `fgets()` reads at most n-1 chars and adds null terminator. `getline()` is POSIX, not standard C.",
+   "#include <stdio.h>\n\nFILE *fp = fopen(\"test.txt\", \"r\");\nif (!fp) return 1;\n\nchar line[256];\nwhile (fgets(line, sizeof(line), fp)) {\n    printf(\"%s\", line);\n}\nfclose(fp);"
+  ],
+  "Formatted I/O": [
+   "`fprintf()` writes formatted output to a file. `fscanf()` reads formatted input from a file. Format specifiers: `%d` int, `%f` float, `%s` string, `%c` char, `%x` hex. `sscanf()` / `sprintf()` work with strings.",
+   "#include <stdio.h>\n\nstruct Person { char name[50]; int age; };\nstruct Person p = {\"Alice\", 30};\n\n// Write\nFILE *fp = fopen(\"data.txt\", \"w\");\nfprintf(fp, \"%s,%d\\n\", p.name, p.age);\nfclose(fp);\n\n// Read\nfp = fopen(\"data.txt\", \"r\");\nfscanf(fp, \"%49[^,],%d\", p.name, &p.age);\nfclose(fp);"
+  ],
+  "Binary I/O": [
+   "`fread()` and `fwrite()` read/write raw binary data. Parameters: pointer to data, size of each element, count, file pointer. Binary files are more compact and precise but not portable across endianness. Use `\"rb\"` / `\"wb\"` modes.",
+   "#include <stdio.h>\n\nint data[] = {1, 2, 3, 4, 5};\nFILE *fp = fopen(\"data.bin\", \"wb\");\nfwrite(data, sizeof(int), 5, fp);\nfclose(fp);\n\nint readback[5];\nfp = fopen(\"data.bin\", \"rb\");\nfread(readback, sizeof(int), 5, fp);\nfor (int i = 0; i < 5; i++) printf(\"%d \", readback[i]);\nfclose(fp);"
+  ],
+  "File Positioning": [
+   "`fseek(fp, offset, whence)` moves file position: `SEEK_SET` (beginning), `SEEK_CUR` (current), `SEEK_END` (end). `ftell()` returns current position. `rewind()` resets to beginning. `feof()` checks for end-of-file.",
+   "#include <stdio.h>\n\nFILE *fp = fopen(\"data.bin\", \"rb\");\n\nfseek(fp, 0, SEEK_END);\nlong size = ftell(fp);\nprintf(\"File size: %ld bytes\\n\", size);\n\nrewind(fp);  // back to start\n\nfseek(fp, 100, SEEK_SET);  // skip to byte 100\n\nfclose(fp);"
+  ],
+  "Error Handling": [
+   "File operations set `errno` on failure. `perror()` prints a descriptive error message to stderr. `strerror()` returns the error string. `ferror()` checks if a file stream has an error. Always check return values of I/O functions.",
+   "#include <errno.h>\n#include <string.h>\n\nFILE *fp = fopen(\"nonexistent.txt\", \"r\");\nif (fp == NULL) {\n    perror(\"Error\");\n    printf(\"errno: %d - %s\\n\", errno, strerror(errno));\n    return 1;\n}"
+  ],
+  "Stream Buffering & setvbuf": [
+   "Set buffering mode with setvbuf: _IOFBF (full buffered), _IOLBF (line buffered), _IONBF (unbuffered). Default: stdin/stdout line-buffered if terminal, block-buffered otherwise; stderr unbuffered. setvbuf must be called before any I/O on the stream. fflush forces buffer write. fpurge/__fpurge discards buffer. Buffering affects performance and output timing.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    char buffer[4096];\n    \n    // Full buffering with custom buffer\n    if (setvbuf(stdout, buffer, _IOFBF, sizeof(buffer)) != 0) {\n        perror(\"setvbuf\");\n        return 1;\n    }\n    \n    printf(\"This is buffered\\n\");\n    printf(\"Won't appear until buffer fills or fflush\\n\");\n    fflush(stdout);  // force write\n    \n    // Line buffered\n    setvbuf(stdout, NULL, _IOLBF, 0);\n    printf(\"Line-buffered: each newline flushes\\n\");\n    \n    // Unbuffered\n    setvbuf(stderr, NULL, _IONBF, 0);\n    fprintf(stderr, \"Stderr is unbuffered by default\\n\");\n    \n    // Change stdin buffering\n    setvbuf(stdin, NULL, _IONBF, 0);\n    \n    return 0;\n}"
+  ]
+ },
+ "Preprocessor": {
+  "Macros (#define)": [
+   "The preprocessor runs before compilation. `#define` creates macros (constants or function-like). Use parentheses to avoid precedence bugs. No type checking. Convention: UPPER_CASE names.",
+   "#define PI 3.14159\n#define SQUARE(x) ((x) * (x))\n#define MAX(a,b) ((a) > (b) ? (a) : (b))\n\nprintf(\"%f\\n\", SQUARE(5 + 1));  // (6*6) = 36\nprintf(\"%d\\n\", MAX(3, 7));"
+  ],
+  "Conditional Compilation": [
+   "`#if`, `#ifdef`, `#ifndef`, `#else`, `#elif`, `#endif` control which code gets compiled. Used for platform-specific code, debug builds, feature toggles. `defined()` operator works in `#if`.",
+   "#define DEBUG 1\n\n#ifdef DEBUG\n    printf(\"Debug: x = %d\\n\", x);\n#endif\n\n#ifndef NDEBUG\n    assert(ptr != NULL);\n#endif\n\n#if defined(__linux__)\n    printf(\"Linux\\n\");\nelif defined(_WIN32)\n    printf(\"Windows\\n\");\n#endif"
+  ],
+  "Header Files & Guards": [
+   "Header files (`.h`) declare functions, macros, and types. Use include guards (`#ifndef`) to prevent double inclusion. `#pragma once` is a modern alternative (non-standard but widely supported).",
+   "// mylib.h\n#ifndef MYLIB_H\n#define MYLIB_H\n\nint add(int a, int b);\nvoid greet(const char *name);\n\n#endif\n\n// mylib.c\n#include \"mylib.h\"\nint add(int a, int b) { return a + b; }"
+  ],
+  "#pragma & #error": [
+   "`#error` emits a compiler error with a custom message \u2014 stops compilation. `#pragma` provides compiler-specific instructions: `#pragma once` (header guard), `#pragma pack(push, 1)` (packing), `#pragma GCC optimize`. Non-standard.",
+   "#ifndef REQUIRED_FEATURE\n    #error \"REQUIRED_FEATURE must be defined\"\n#endif\n\n#pragma once  // modern header guard\n#pragma pack(push, 1)  // pack structs tightly\n#pragma GCC optimize(\"O3\")"
+  ],
+  "Predefined Macros": [
+   "Standard predefined macros: `__FILE__` (current file), `__LINE__` (current line), `__DATE__` (compilation date), `__TIME__` (compilation time), `__STDC__` (1 if standard C), `__STDC_VERSION__` (C version: 199901L, 201112L, 202311L).",
+   "#include <stdio.h>\n\nprintf(\"File: %s\\n\", __FILE__);\nprintf(\"Line: %d\\n\", __LINE__);\nprintf(\"Date: %s\\n\", __DATE__);\nprintf(\"Time: %s\\n\", __TIME__);\nprintf(\"C std: %ld\\n\", __STDC_VERSION__);"
+  ],
+  "Stringification & Token Pasting": [
+   "`#` converts macro parameter to string literal. `##` concatenates two tokens into one. Useful for generating repetitive code patterns and creating type-generic macros.",
+   "#define STRINGIFY(x) #x\n#define CONCAT(a, b) a ## b\n#define MAKE_TYPE(name) \\\n    typedef struct { int data; } name ## _t\n\nprintf(\"%s\\n\", STRINGIFY(hello));  // \"hello\"\n\nint xy = 42;\nprintf(\"%d\\n\", CONCAT(x, y));  // 42\n\nMAKE_TYPE(User);\nUser_t u = {42};"
+  ],
+  "Variadic Macros": [
+   "Macros with variable arguments using `__VA_ARGS__` (C99). Named variadic argument in C23 (`__VA_OPT__` for trailing comma handling). Useful for debug logging and generic printing.",
+   "#include <stdio.h>\n\n#define DEBUG_PRINT(fmt, ...) \\\n    fprintf(stderr, \"%s:%d: \" fmt \"\\n\", \\\n            __FILE__, __LINE__, __VA_ARGS__)\n\n#define LOG(...) printf(__VA_ARGS__)\n\nDEBUG_PRINT(\"x = %d\", 42);\nLOG(\"Hello %s\\n\", \"World\");"
+  ],
+  "#pragma & Implementation Extensions": [
+   "#pragma provides compiler-specific instructions. Common: #pragma once (include guard), #pragma GCC poison, #pragma pack(push,1), #pragma GCC diagnostic ignored \"-Wunused\". _Pragma() operator (C99) for use in macros. #warning (non-standard) prints warning at compile time. #error halts compilation. Compiler builtins: __attribute__, __declspec, __builtin_expect.",
+   "#include <stdio.h>\n\n// Include guard alternative\n#pragma once\n\n// Pack structs\n#pragma pack(push, 1)\nstruct Packed {\n    char c;\n    int  i;\n};\n#pragma pack(pop)\n\n// GCC diagnostic control\n#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused\"\nstatic int unused_var;\n#pragma GCC diagnostic pop\n\n// Compile-time assertion\n#define STATIC_ASSERT(cond, msg) \\\n    typedef char STATIC_ASSERT_##msg[(cond) ? 1 : -1]\n\nSTATIC_ASSERT(sizeof(int) >= 4, int_too_small);\n\n// _Pragma in macros\n#define STRINGIFY(x) #x\n#define DIAG_IGNORE(w) _Pragma(STRINGIFY(GCC diagnostic ignored w))\n\n// Built-in functions\n#define likely(x)   __builtin_expect(!!(x), 1)\n#define unlikely(x) __builtin_expect(!!(x), 0)\n\nint main() {\n    if (unlikely(0)) {\n        puts(\"This won't print\");\n    }\n    printf(\"Pragma: packed=%zu bytes\\n\", sizeof(struct Packed));\n    return 0;\n}"
+  ]
+ },
+ "Standard Library": {
+  "stdlib.h Utilities": [
+   "`atoi()` / `atol()` / `atof()` parse strings to numbers. `itoa()` is non-standard \u2014 use `sprintf()`. `rand()` / `srand()` for pseudo-random numbers. `qsort()` for sorting. `abs()` / `labs()` for absolute value. `div()` / `ldiv()` for quotient and remainder.",
+   "#include <stdlib.h>\n\nint n = atoi(\"42\");\ndouble d = atof(\"3.14\");\n\nsrand(time(NULL));\nint r = rand() % 100;  // 0-99\n\nint arr[] = {3, 1, 4, 1, 5};\nint cmp(const void *a, const void *b) {\n    return *(int*)a - *(int*)b;\n}\nqsort(arr, 5, sizeof(int), cmp);"
+  ],
+  "math.h Functions": [
+   "Mathematical functions: `sqrt()`, `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan2()`, `pow()`, `exp()`, `log()`, `log10()`, `floor()`, `ceil()`, `fabs()`, `fmod()`. Link with `-lm`. Angles in radians.",
+   "#include <math.h>\n\ndouble x = 3.14159 / 4;\nprintf(\"sqrt(16) = %.2f\\n\", sqrt(16));\nprintf(\"sin(pi/4) = %.2f\\n\", sin(x));\nprintf(\"pow(2, 10) = %.2f\\n\", pow(2, 10));\nprintf(\"ceil(3.14) = %.2f\\n\", ceil(3.14));\nprintf(\"fabs(-5) = %.2f\\n\", fabs(-5));\n\n// Compile: gcc program.c -lm"
+  ],
+  "time.h Functions": [
+   "`time()` gets current time. `clock()` gets CPU time. `difftime()` calculates difference. `strftime()` formats time. `localtime()` / `gmtime()` convert to struct. `mktime()` converts back. `clock_gettime()` for nanosecond precision (POSIX).",
+   "#include <time.h>\n\ntime_t now = time(NULL);\nprintf(\"Unix time: %ld\\n\", now);\n\nstruct tm *local = localtime(&now);\nchar buf[64];\nstrftime(buf, sizeof(buf), \"%Y-%m-%d %H:%M:%S\", local);\nprintf(\"%s\\n\", buf);\n\nclock_t start = clock();\n// ... do work ...\nclock_t end = clock();\ndouble sec = (double)(end - start) / CLOCKS_PER_SEC;"
+  ],
+  "assert.h & setjmp.h": [
+   "`assert(expr)` aborts if expr is false (debug builds). Disable with `#define NDEBUG`. `setjmp()` / `longjmp()` provide non-local jumps (like try/catch). Save state with `jmp_buf`. Limited, use sparingly \u2014 complicates resource cleanup.",
+   "#include <assert.h>\n#include <setjmp.h>\n\nassert(x > 0);  // abort if x <= 0\n\njmp_buf env;\nif (setjmp(env) == 0) {\n    // normal code\n    longjmp(env, 1);  // jump back\n} else {\n    printf(\"Recovered from error\\n\");\n}"
+  ],
+  "signal.h Handling": [
+   "`signal()` sets a handler for OS signals: SIGINT (Ctrl+C), SIGTERM (termination), SIGSEGV (segfault), SIGFPE (divide by zero). Handler must be `void handler(int sig)`. Some signals (SIGKILL, SIGSTOP) cannot be caught.",
+   "#include <signal.h>\n\nvolatile sig_atomic_t interrupted = 0;\n\nvoid handler(int sig) {\n    interrupted = 1;\n}\n\nint main() {\n    signal(SIGINT, handler);\n    \n    while (!interrupted) {\n        // main loop\n    }\n    printf(\"\\nGraceful shutdown\\n\");\n}"
+  ],
+  "stddef.h & Limits": [
+   "`<stddef.h>`: `size_t`, `ptrdiff_t`, `NULL`, `offsetof()`. `<limits.h>`: integer limits (INT_MIN, INT_MAX, LONG_MAX, CHAR_BIT). `<float.h>`: floating limits (FLT_MAX, DBL_EPSILON). `<stdint.h>`: fixed-width types (int32_t, uint64_t).",
+   "#include <stddef.h>\n#include <limits.h>\n#include <stdint.h>\n\nprintf(\"Max int: %d\\n\", INT_MAX);\nprintf(\"Bits per byte: %d\\n\", CHAR_BIT);\n\nint32_t exact = 100;  // exactly 32 bits\nuint64_t big = 1000000;\n\nstruct S { char c; int i; };\nprintf(\"Offset of i: %zu\\n\", offsetof(struct S, i));"
+  ],
+  "Time & Date (<time.h>)": [
+   "time() returns current calendar time (time_t). localtime/gmtime converts to struct tm. strftime formats as string. clock() returns CPU time (clocks). difftime computes difference in seconds. mktime converts struct tm to time_t. timespec_get (C11) provides nanosecond resolution. Portable timing: clock_gettime on POSIX.",
+   "#include <stdio.h>\n#include <time.h>\n\nint main() {\n    // Current time\n    time_t now = time(NULL);\n    printf(\"Seconds since epoch: %ld\\n\", (long)now);\n    \n    // Formatted date/time\n    struct tm *local = localtime(&now);\n    char buf[64];\n    strftime(buf, sizeof(buf), \"%Y-%m-%d %H:%M:%S\", local);\n    printf(\"Local time: %s\\n\", buf);\n    \n    // Parsing\n    struct tm parsed = {0};\n    strptime(\"2024-01-15\", \"%Y-%m-%d\", &parsed);  // POSIX, not C standard\n    printf(\"Parsed year: %d\\n\", parsed.tm_year + 1900);\n    \n    // Timing code\n    clock_t start = clock();\n    volatile unsigned long sum = 0;\n    for (int i = 0; i < 100000000; i++) sum += i;\n    clock_t end = clock();\n    \n    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;\n    printf(\"Elapsed: %.3f seconds\\n\", elapsed);\n    \n    // C11: timespec\n    struct timespec ts;\n    timespec_get(&ts, TIME_UTC);\n    printf(\"ns: %ld\\n\", ts.tv_nsec);\n    \n    return 0;\n}"
+  ]
+ },
+ "Advanced Topics": {
+  "Linked Lists": [
+   "A linked list is a sequence of nodes where each node points to the next. Singly linked: `next` pointer. Doubly linked: `prev` and `next`. Operations: insert, delete, traverse, search. O(1) insert/delete given pointer, O(n) access by index.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int data;\n    struct Node *next;\n};\n\nvoid append(struct Node **head, int data) {\n    struct Node *new = malloc(sizeof(struct Node));\n    new->data = data;\n    new->next = NULL;\n    if (!*head) { *head = new; return; }\n    struct Node *cur = *head;\n    while (cur->next) cur = cur->next;\n    cur->next = new;\n}"
+  ],
+  "Debugging with GDB": [
+   "GDB is the GNU debugger. Compile with `-g` for debug symbols. Commands: `run`, `break`, `next`, `step`, `print`, `backtrace`, `watch`, `continue`. Set breakpoints on functions or lines. Inspect variables and memory.",
+   "# Compile with debug symbols\ngcc -g -o program program.c\n\n# GDB commands:\n# gdb ./program\n# (gdb) break main\n# (gdb) run\n# (gdb) print x\n# (gdb) next\n# (gdb) continue\n# (gdb) backtrace\n# (gdb) quit"
+  ],
+  "Memory Debugging (Valgrind)": [
+   "Valgrind detects memory leaks, invalid accesses, and use-after-free. Run with `valgrind ./program`. Tools: `memcheck` (default), `callgrind` (profiling), `helgrind` (race conditions). Focus on errors = definitely lost bytes.",
+   "# Compile with -g for better output\ngcc -g -o program program.c\n\n# Check for memory errors\nvalgrind --leak-check=full ./program\n\n# Typical output:\n# HEAP SUMMARY:\n#     definitely lost: 40 bytes in 2 blocks\n# ERROR SUMMARY: 3 errors"
+  ],
+  "Build Systems (Make)": [
+   "Make automates compilation. Rules: `target: dependencies`, then tab-indented commands. Variables: `CC=gcc`, `CFLAGS=-Wall`. Automatic variables: `$@` (target), `$<` (first dep), `$^` (all deps).",
+   "CC = gcc\nCFLAGS = -Wall -Wextra -std=c17 -g\nLDFLAGS = -lm\n\nprogram: main.o helper.o\n\t$(CC) -o $@ $^ $(LDFLAGS)\n\nmain.o: main.c helper.h\n\t$(CC) $(CFLAGS) -c $<\n\nhelper.o: helper.c helper.h\n\t$(CC) $(CFLAGS) -c $<\n\n.PHONY: clean\nclean:\n\trm -f *.o program"
+  ],
+  "Multithreading (pthreads)": [
+   "POSIX threads (`<pthreads.h>`) create concurrent execution. `pthread_create()`, `pthread_join()`, `pthread_mutex_lock/unlock()`, `pthread_cond_wait/signal()`. Data races cause undefined behavior. Always synchronize shared data.",
+   "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t lock;\nlong counter = 0;\n\nvoid* worker(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&lock);\n        counter++;\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&lock, NULL);\n    pthread_create(&t1, NULL, worker, NULL);\n    pthread_create(&t2, NULL, worker, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Counter: %ld\\n\", counter);\n    pthread_mutex_destroy(&lock);\n}"
+  ],
+  "Network Programming (Sockets)": [
+   "Berkeley sockets (`<sys/socket.h>`) for networking. Steps: `socket()`, `bind()`, `listen()`, `accept()` (server) or `connect()` (client). `send()` / `recv()` for data. Use `inet_pton()` for IP addresses. Compile with `-lsocket` on some systems.",
+   "#include <sys/socket.h>\n#include <netinet/in.h>\n\nint server = socket(AF_INET, SOCK_STREAM, 0);\nstruct sockaddr_in addr = {\n    .sin_family = AF_INET,\n    .sin_port = htons(8080),\n    .sin_addr.s_addr = INADDR_ANY\n};\nbind(server, (struct sockaddr*)&addr, sizeof(addr));\nlisten(server, 10);\n\nint client = accept(server, NULL, NULL);\nchar buf[1024];\nrecv(client, buf, sizeof(buf), 0);\nsend(client, \"OK\", 2, 0);"
+  ],
+  "Atomics & _Generic (C11)": [
+   "`<stdatomic.h>` (C11) provides portable atomic operations: `atomic_int`, `atomic_store()`, `atomic_load()`, `atomic_fetch_add()`, `atomic_compare_exchange_weak()`. `_Generic` (C11) enables type-generic macros like built-in overloads.",
+   "#include <stdatomic.h>\n\natomic_int counter = 0;\n\n// Thread-safe increment\natomic_fetch_add(&counter, 1);\n\n#define TYPE_NAME(x) _Generic((x), \\\n    int: \"int\", \\\n    double: \"double\", \\\n    char*: \"string\", \\\n    default: \"other\")\n\nprintf(\"%s\\n\", TYPE_NAME(42));      // int\nprintf(\"%s\\n\", TYPE_NAME(3.14));    // double"
+  ],
+  "POSIX Threads (pthreads)": [
+   "POSIX threads (pthreads) API: pthread_create, pthread_join, pthread_exit, pthread_self. Mutex: pthread_mutex_t with lock/unlock. Condition variables: pthread_cond_t for signaling. Compile with -pthread. Thread safety requires synchronization. Avoid data races with mutexes.",
+   "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\nint shared_counter = 0;\n\nvoid *worker(void *arg) {\n    long id = (long)arg;\n    pthread_mutex_lock(&mutex);\n    shared_counter++;\n    printf(\"Thread %ld: counter = %d\\n\", id, shared_counter);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    \n    for (long i = 0; i < NUM_THREADS; i++)\n        pthread_create(&threads[i], NULL, worker, (void*)i);\n    \n    for (int i = 0; i < NUM_THREADS; i++)\n        pthread_join(threads[i], NULL);\n    \n    printf(\"Final counter: %d\\n\", shared_counter);\n    return 0;\n}"
+  ]
+ },
+ "C in Practice": {
+  "Interactive I/O (getchar/putchar)": [
+   "K&R-style character I/O with `getchar()` and `putchar()`. EOF is a macro (-1 on most systems). Ctrl+D (Unix) / Ctrl+Z (Windows) sends EOF. `getchar()` returns `int`, not `char`, to accommodate EOF. Classic book-copying program.",
+   "#include <stdio.h>\n\nint main() {\n    int c;  // must be int, not char \u2014 holds EOF too\n    long count = 0;\n\n    // read chars until EOF, echoing each\n    while ((c = getchar()) != EOF) {\n        putchar(c);  // write char to stdout\n        count++;\n    }\n\n    // Ctrl+D on Unix, Ctrl+Z on Windows to trigger EOF\n    printf(\"\\nRead %ld chars\\n\", count);\n    return 0;\n}"
+  ],
+  "Low-Level I/O (UNIX System Interface)": [
+   "`<unistd.h>` provides `read()`, `write()`, `open()`, `close()`, `lseek()`. Lower-level than stdio \u2014 no buffering, direct file descriptors (ints). Used in systems programming, signal handlers, and performance-critical code. K&R Chapter 8 covers this.",
+   "#include <unistd.h>\n#include <fcntl.h>\n#include <errno.h>\n\nint main() {\n    int fd = open(\"data.txt\", O_RDONLY);  // get file descriptor\n    if (fd == -1) { perror(\"open\"); return 1; }\n\n    char buf[1024];\n    ssize_t n = read(fd, buf, sizeof(buf) - 1);  // read raw bytes\n    if (n == -1) { perror(\"read\"); close(fd); return 1; }\n\n    buf[n] = '\\0';  // null-terminate for printf\n    write(STDOUT_FILENO, buf, n);  // write to stdout\n\n    // seek to beginning\n    off_t pos = lseek(fd, 0, SEEK_SET);\n\n    close(fd);  // release descriptor\n    return 0;\n}"
+  ],
+  "Storage Allocator (K&R Chapter 8)": [
+   "K&R builds a `malloc()`-like allocator using a free list of headers. Each block has a header with size and pointer to next free block. `sbrk()` grows the program break. Real allocators are more sophisticated (thread caches, slab allocators, buddy system).",
+   "#include <unistd.h>\n\ntypedef struct header {  // block header\n    size_t size;\n    struct header *next;\n} Header;\n\n// free list (circular)\nstatic Header base = {0, &base};\nstatic Header *freep = &base;  // last found block\n\nvoid *kalloc(size_t n) {\n    // round up to header units + header itself\n    size_t nunits = (n + sizeof(Header) - 1) / sizeof(Header) + 1;\n    Header *prev = freep;\n\n    for (Header *p = prev->next; ; prev = p, p = p->next) {\n        if (p->size >= nunits) {  // enough space?\n            if (p->size == nunits)\n                prev->next = p->next;  // exact fit\n            else {\n                p->size -= nunits;  // split block\n                p += p->size;\n                p->size = nunits;\n            }\n            freep = prev;\n            return (void *)(p + 1);  // past header\n        }\n        if (p == freep) return NULL;  // wrapped: no space\n    }\n}"
+  ],
+  "Complex Declarations (Right-Left Rule)": [
+   "Read C declarations spirally: start at identifier, go right, then left, then right again (spiral rule). `int *(*fp)(int)` is pointer-to-function taking int returning pointer-to-int. Practice with `signal()`: `void (*signal(int, void (*)(int)))(int)`.",
+   "int (*fp)(int);           // fp: pointer to function(int) -> int\nint *(*fpa[5])(double);   // fpa: array[5] of pointer to function(double) -> int*\n\n#include <signal.h>\n\nvoid handler(int sig) {\n    printf(\"Got signal %d\\n\", sig);\n}\n\nint main() {\n    // signal() returns a function pointer\n    void (*prev)(int) = signal(SIGINT, handler);\n    return 0;\n}\n\n// Right-Left Rule: int *(*fp)(int)\n// 1. Start at fp:  fp is a\n// 2. Right:  ) \u2014 go left\n// 3. Left:   * \u2014 pointer to\n// 4. Left:   ( \u2014 go right\n// 5. Right:  (int) \u2014 function taking int\n// 6. Left:   int * \u2014 returning pointer to int"
+  ],
+  "Variable-Length Arrays (C99)": [
+   "VLA syntax: `int arr[n]` where `n` is not a compile-time constant. Memory on stack (auto duration). `sizeof` on VLA computed at runtime. No VLA in file scope or structs. Support is optional in C11 (most compilers still provide it).",
+   "#include <stdio.h>\n\n// VLA function parameters\nvoid matrix_multiply(int m, int n, int p,\n    int a[m][n], int b[n][p], int c[m][p]) {\n    for (int i = 0; i < m; i++)\n        for (int j = 0; j < p; j++) {\n            c[i][j] = 0;\n            for (int k = 0; k < n; k++)\n                c[i][j] += a[i][k] * b[k][j];\n        }\n}\n\nint main() {\n    int n = 5;\n    int arr[n];  // VLA: size determined at runtime\n    for (int i = 0; i < n; i++) arr[i] = i * i;\n\n    printf(\"Size: %zu bytes\\n\", sizeof arr);  // runtime\n    return 0;\n}"
+  ],
+  "Complex Numbers (C99)": [
+   "`<complex.h>` provides `complex` type, `I` (imaginary unit), `creal()`, `cimag()`, `cabs()`, `carg()`, `conj()`, `csqrt()`, `cexp()`. Types: `float complex`, `double complex`, `long double complex`. Link with `-lm`.",
+   "#include <complex.h>\n#include <stdio.h>\n\nint main() {\n    double complex z = 1.0 + 2.0 * I;  // 1 + 2i\n    double complex w = 3.0 + 4.0 * I;\n\n    double complex sum = z + w;          // 4 + 6i\n    double complex prod = z * w;         // (1+2i)*(3+4i) = -5+10i\n\n    printf(\"Sum: %.2f + %.2fi\\n\", creal(sum), cimag(sum));\n    printf(\"Mag: %.2f, Phase: %.2f\\n\", cabs(z), carg(z));\n    printf(\"Conj: %.2f + %.2fi\\n\", creal(conj(z)), cimag(conj(z)));\n\n    double complex root = csqrt(-1.0);   // 0 + 1i\n    printf(\"sqrt(-1) = %.2f + %.2fi\\n\", creal(root), cimag(root));\n\n    return 0;\n}\n\n// Compile with: gcc -std=c99 -lm program.c"
+  ],
+  "Building Larger Projects": [
+   "Organize C projects: header files (.h) declare interfaces, source files (.c) implement. Use include guards (#ifndef/#define/#endif). Separate compilation: compile each .c to .o, link together. Header should only declare what users need. Static functions are private to the file. Use forward declarations to break circular dependencies.",
+   "// calc.h \u2014 interface\n#ifndef CALC_H\n#define CALC_H\n\ndouble add(double a, double b);\ndouble sub(double a, double b);\ndouble mul(double a, double b);\ndouble div(double a, double b);\n\n#endif\n\n// calc.c \u2014 implementation\n#include \"calc.h\"\n\ndouble add(double a, double b) { return a + b; }\ndouble sub(double a, double b) { return a - b; }\ndouble mul(double a, double b) { return a * b; }\ndouble div(double a, double b) { return (b != 0) ? a / b : 0; }\n\n// main.c \u2014 usage\n#include <stdio.h>\n#include \"calc.h\"\n\nint main() {\n    printf(\"3 + 4 = %.0f\\n\", add(3, 4));\n    return 0;\n}\n\n// Build:\n// gcc -c calc.c -o calc.o\n// gcc -c main.c -o main.o\n// gcc calc.o main.o -o program\n// Or: gcc -o program main.c calc.c"
+  ]
+ },
+ "Defensive C": {
+  "Defensive Programming": [
+   "From Learn C the Hard Way: always check return values, validate pointers before dereferencing, assert invariants in debug builds, and enable all compiler warnings. Use `const` for read-only parameters. Never trust user input or buffer sizes.",
+   "#include <assert.h>\n#include <string.h>\n#include <stdio.h>\n\nvoid safe_copy(const char *src, char *dst, size_t dst_size) {\n    assert(src != NULL);   // crash in debug instead of silent\n    assert(dst != NULL);\n\n    size_t len = strlen(src);\n    if (len >= dst_size) {  // check before copy\n        fprintf(stderr, \"Buffer too small: %zu >= %zu\\n\", len, dst_size);\n        return;\n    }\n    memcpy(dst, src, len + 1);  // include null terminator\n}\n\nint divide(int a, int b, int *result) {\n    if (b == 0) return -1;   // guard against division by zero\n    if (result == NULL) return -1;  // guard output pointer\n    *result = a / b;\n    return 0;  // success\n}\n\n// Always compile with warnings:\n// gcc -Wall -Wextra -Wpedantic -Werror -g program.c"
+  ],
+  "Three Common Bugs": [
+   "Learn C the Hard Way drills these: 1) Off-by-one: loop runs one iteration too many/few. 2) Buffer overflow: writing past allocated space. 3) Use-after-free: accessing freed heap memory. Detect with `-fsanitize=address` and Valgrind.",
+   "#include <stdlib.h>\n#include <string.h>\n#include <stdio.h>\n\n// 1. OFF-BY-ONE\nvoid off_by_one() {\n    int arr[5];\n    for (int i = 0; i <= 5; i++)  // BUG: should be i < 5\n        arr[i] = i;  // writes beyond end\n}\n\n// 2. BUFFER OVERFLOW\nvoid buffer_overflow(const char *input) {\n    char buf[10];\n    strcpy(buf, input);  // BUG: copies unbounded data\n}\n\n// 3. USE-AFTER-FREE\nvoid use_after_free() {\n    int *p = malloc(sizeof(int));\n    *p = 42;\n    free(p);\n    *p = 99;  // BUG: dangling pointer, heap corruption\n}\n\n// Detecting with AddressSanitizer:\n// gcc -fsanitize=address -g -o check program.c && ./check\n\nint main() {\n    // printf(\"Run with: gcc -fsanitize=address -g ...\\n\");\n    return 0;\n}"
+  ],
+  "Safe String Handling": [
+   "C string functions are inherently unsafe. Prefer bounded versions: `strncpy()`, `strncat()`, `snprintf()` (always null-terminates). For POSIX: `strlcpy()` / `strlcat()`. Better yet, use a string struct with explicit length field.",
+   "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\n// Use snprintf \u2014 always null-terminates, never overflows\nvoid safe_build_path(char *buf, size_t size,\n    const char *dir, const char *file) {\n    snprintf(buf, size, \"%s/%s\", dir, file);\n}\n\n// Self-contained safe string type\nstruct SafeStr {\n    char *data;\n    size_t len;\n    size_t cap;\n};\n\nstruct SafeStr *ss_new(size_t cap) {\n    struct SafeStr *s = malloc(sizeof(*s));\n    s->data = malloc(cap);\n    s->data[0] = '\\0';\n    s->len = 0;\n    s->cap = cap;\n    return s;\n}\n\nvoid ss_append(struct SafeStr *s, const char *src) {\n    size_t add = strlen(src);\n    if (s->len + add >= s->cap) return;  // prevent overflow\n    memcpy(s->data + s->len, src, add + 1);\n    s->len += add;\n}\n\nvoid ss_free(struct SafeStr *s) {\n    free(s->data);\n    free(s);\n}"
+  ],
+  "Pointer Pitfalls": [
+   "From Absolute Beginner's Guide: 1) Uninitialized pointers hold garbage \u2014 always init to NULL. 2) Dangling pointers reference freed memory \u2014 NULL after free. 3) Null dereference crashes. 4) Pointer arithmetic past bounds is UB. 5) Alignment violations on cast.",
+   "#include <stdlib.h>\n#include <stdio.h>\n\nvoid pointer_pitfalls() {\n    // 1. Uninitialized pointer\n    int *p1;  // garbage address\n    // *p1 = 42;  // CRASH: undefined behavior\n\n    // 2. Dangling after free\n    int *p2 = malloc(sizeof(int));\n    free(p2);\n    p2 = NULL;  // BEST PRACTICE: null after free\n\n    // 3. Null dereference\n    int *p3 = NULL;\n    if (p3 != NULL) *p3 = 42;  // always check\n\n    // 4. Past-bounds arithmetic\n    int arr[5];\n    int *p4 = arr;\n    // *(p4 + 10) = 99;  // UB: writing past end\n\n    // 5. Alignment violation\n    void *raw = malloc(16);\n    char *misaligned = (char *)raw + 1;\n    // int *bad = (int *)misaligned;  // UB: misaligned access\n\n    free(raw);\n}"
+  ],
+  "Debugging Strategies": [
+   "Layer your approach: 1) Compiler warnings (`-Wall -Wextra`). 2) `assert()` to catch invariants. 3) `printf()` / `fprintf(stderr)` for tracing. 4) GDB for interactive debugging. 5) Valgrind for memory leaks. 6) AddressSanitizer for fast memory checking.",
+   "#include <assert.h>\n#include <stdio.h>\n\n// Debug print macro (disabled in release)\n#ifndef NDEBUG\n    #define DEBUG_LOG(fmt, ...) \\\n        fprintf(stderr, \"%s:%d: \" fmt \"\\n\", \\\n                __FILE__, __LINE__, __VA_ARGS__)\n#else\n    #define DEBUG_LOG(fmt, ...)  // no-op\n#endif\n\nint factorial(int n) {\n    assert(n >= 0);  // catch invalid input in debug\n    DEBUG_LOG(\"n = %d\", n);\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    printf(\"%d\\n\", factorial(5));\n    return 0;\n}\n\n// GDB session:\n// $ gcc -g -o prog debug.c && gdb ./prog\n// (gdb) break factorial\n// (gdb) run\n// (gdb) print n\n// (gdb) backtrace\n// (gdb) continue\n\n// Valgrind:\n// $ gcc -g -o prog debug.c\n// $ valgrind --leak-check=full ./prog"
+  ],
+  "Working with Multiple Files": [
+   "Split code across `.h` (declarations with include guards) and `.c` (definitions). `static` functions/variables are file-private. `extern` references names defined in other files. Compile all `.c` files and link them into one executable.",
+   "// ===== math_utils.h =====\n#ifndef MATH_UTILS_H\n#define MATH_UTILS_H\n\nint add(int a, int b);\nint multiply(int a, int b);\n\n#endif\n\n// ===== math_utils.c =====\n#include \"math_utils.h\"\n\nstatic int op_count = 0;  // private to this file\n\nint add(int a, int b) {\n    op_count++;\n    return a + b;\n}\n\nint multiply(int a, int b) {\n    op_count++;\n    return a * b;\n}\n\n// ===== main.c =====\n#include <stdio.h>\n#include \"math_utils.h\"\n\nint main() {\n    int sum = add(3, 4);       // defined in math_utils.c\n    int prod = multiply(5, 2);\n    printf(\"%d %d\\n\", sum, prod);\n    return 0;\n}\n\n// Compile: gcc -Wall -o app main.c math_utils.c"
+  ],
+  "Static Analysis & Sanitizers": [
+   "Static analysis catches bugs at compile time: -Wall -Wextra -Wpedantic -Wconversion -Wshadow. AddressSanitizer (-fsanitize=address) detects buffer overflows, use-after-free. UndefinedBehaviorSanitizer (-fsanitize=undefined) catches integer overflow, null deref. Valgrind checks runtime memory errors. clang-tidy/clang-analyzer for deeper analysis. Coverity, PVS-Studio for commercial analysis.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\n// Compile with sanitizers:\n// gcc -fsanitize=address -fsanitize=undefined -g -O1 -o probe probe.c\n\nint main() {\n    // AddressSanitizer catches:\n    int *arr = malloc(10 * sizeof(int));\n    arr[10] = 42;  // ASAN: heap-buffer-overflow!\n    free(arr);\n    // arr[0] = 99;  // ASAN: use-after-free!\n    \n    // UBSan catches:\n    int x = INT_MAX;\n    // x + 1;  // UBSan: signed integer overflow!\n    \n    // clang-tidy:\n    // clang-tidy --checks=\"*,-llvm*\" probe.c --\n    \n    // Valgrind:\n    // valgrind --leak-check=full ./probe\n    \n    printf(\"Sanitizer demo\\n\");\n    return 0;\n}"
+  ]
+ },
+ "Build Systems & Makefiles": {
+  "Makefile Basics": [
+   "Make automates builds. Rules: target: prerequisites; commands. Variables: CC=gcc, CFLAGS=-Wall. Automatic variables: $@ (target), $^ (all deps), $< (first dep). Phony targets: .PHONY for clean, all. Pattern rules: %.o: %.c.",
+   "CC = gcc\nCFLAGS = -Wall -Wextra -g -O2\nLDFLAGS =\nLIBS = -lm\n\n# Default target\nall: program test\n\n# Object files\nSRC = main.c calc.c util.c\nOBJ = $(SRC:.c=.o)\n\n# Link\nprogram: $(OBJ)\n\t$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)\n\n# Compile\n%.o: %.c\n\t$(CC) $(CFLAGS) -c -o $@ $<\n\n# Test target\ntest: test_calc.c calc.o\n\t$(CC) $(CFLAGS) -o $@ $^\n\n# Clean\n.PHONY: clean\nclean:\n\trm -f $(OBJ) program test\n\n# Debug build\ndebug: CFLAGS += -DDEBUG -g3\ndebug: program"
+  ],
+  "Autotools & CMake": [
+   "GNU Autotools (autoconf/automake) generates configure scripts for portable builds. CMake is the modern standard. CMakeLists.txt defines targets, dependencies, and options. CMake generates Makefiles, Ninja files, or IDE projects. Modern CMake uses target-based (not directory-based) configuration.",
+   "# CMakeLists.txt\ncmake_minimum_required(VERSION 3.20)\nproject(myapp C)\n\nset(CMAKE_C_STANDARD 17)\nset(CMAKE_C_STANDARD_REQUIRED ON)\n\n# Options\noption(BUILD_TESTS \"Build tests\" ON)\n\n# Library\nadd_library(utils STATIC\n    src/utils.c\n    src/hash.c\n)\ntarget_include_directories(utils PUBLIC include)\n\n# Executable\nadd_executable(myapp\n    src/main.c\n)\ntarget_link_libraries(myapp PRIVATE utils)\n\n# Tests\nif(BUILD_TESTS)\n    add_executable(test_runner\n        test/test_utils.c\n    )\n    target_link_libraries(test_runner PRIVATE utils)\nendif()\n\n# Build:\n# mkdir build && cd build\n# cmake .. -DCMAKE_BUILD_TYPE=Release\n# make -j$(nproc)"
+  ]
+ },
+ "Data Structures": {
+  "Linked Lists": [
+   "Singly-linked list: each node has data + next pointer. Operations: insert (O(1) at head, O(n) at tail), delete (O(n)), search (O(n)). Doubly-linked: prev + next pointers. Circular list: tail points to head. Common in low-level code; prefer arrays for cache-friendly access in hot paths.",
+   "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int data;\n    struct Node *next;\n};\n\nvoid push(struct Node **head, int val) {\n    struct Node *n = malloc(sizeof(*n));\n    n->data = val;\n    n->next = *head;\n    *head = n;\n}\n\nint pop(struct Node **head) {\n    if (!*head) return -1;\n    struct Node *tmp = *head;\n    int val = tmp->data;\n    *head = tmp->next;\n    free(tmp);\n    return val;\n}\n\nvoid print(struct Node *head) {\n    for (; head; head = head->next)\n        printf(\"%d -> \", head->data);\n    printf(\"NULL\\n\");\n}\n\nint main() {\n    struct Node *list = NULL;\n    push(&list, 3);\n    push(&list, 2);\n    push(&list, 1);\n    print(list);\n    printf(\"Popped: %d\\n\", pop(&list));\n    print(list);\n    return 0;\n}"
+  ],
+  "Hash Tables": [
+   "Hash table: array of buckets, hash function maps keys to buckets. Collision resolution via chaining (linked list per bucket) or open addressing (linear/quadratic probing). Load factor = entries / buckets; rehash when threshold exceeded. Simple hash: djb2 for strings. For production, use uthash library or implement carefully.",
+   "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define TABLE_SIZE 16\n\nstruct Entry {\n    char *key;\n    int value;\n    struct Entry *next;\n};\n\nunsigned long hash(const char *str) {\n    unsigned long h = 5381;\n    int c;\n    while ((c = *str++))\n        h = ((h << 5) + h) + c;\n    return h;\n}\n\nvoid insert(struct Entry *table[TABLE_SIZE], char *k, int v) {\n    struct Entry *e = malloc(sizeof(*e));\n    e->key = strdup(k);\n    e->value = v;\n    int idx = hash(k) % TABLE_SIZE;\n    e->next = table[idx];\n    table[idx] = e;\n}\n\nint *lookup(struct Entry *table[TABLE_SIZE], const char *k) {\n    int idx = hash(k) % TABLE_SIZE;\n    for (struct Entry *e = table[idx]; e; e = e->next)\n        if (strcmp(e->key, k) == 0)\n            return &e->value;\n    return NULL;\n}\n\nint main() {\n    struct Entry *ht[TABLE_SIZE] = {0};\n    insert(ht, \"foo\", 42);\n    insert(ht, \"bar\", 99);\n    \n    int *v = lookup(ht, \"bar\");\n    if (v) printf(\"bar = %d\\n\", *v);\n    return 0;\n}"
+  ],
+  "Dynamic Arrays": [
+   "Dynamic array (aka vector/arraylist): contiguous memory that grows on demand. Internal: pointer, capacity, size. Double capacity on resize (amortized O(1) insert). Realloc extends or moves. Shrink-to-fit when size drops below 1/4 capacity. Pre-allocate capacity with reserve for predictable performance.",
+   "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct DynArray {\n    int *data;\n    size_t size;\n    size_t capacity;\n};\n\nvoid da_init(struct DynArray *da, size_t cap) {\n    da->data = malloc(cap * sizeof(int));\n    da->size = 0;\n    da->capacity = cap;\n}\n\nvoid da_push(struct DynArray *da, int val) {\n    if (da->size >= da->capacity) {\n        da->capacity *= 2;\n        da->data = realloc(da->data, da->capacity * sizeof(int));\n    }\n    da->data[da->size++] = val;\n}\n\nint da_pop(struct DynArray *da) {\n    if (da->size == 0) return -1;\n    return da->data[--da->size];\n}\n\nvoid da_free(struct DynArray *da) {\n    free(da->data);\n    da->data = NULL;\n    da->size = da->capacity = 0;\n}\n\nint main() {\n    struct DynArray da;\n    da_init(&da, 4);\n    for (int i = 0; i < 10; i++)\n        da_push(&da, i * i);\n    for (size_t i = 0; i < da.size; i++)\n        printf(\"%d \", da.data[i]);\n    printf(\"\\n\");\n    printf(\"Popped: %d\\n\", da_pop(&da));\n    da_free(&da);\n    return 0;\n}"
+  ]
+ },
+ "Embedded & Bit Manipulation": {
+  "Bitwise Operations": [
+   "Bitwise: & (AND), | (OR), ^ (XOR), ~ (NOT), << (left shift), >> (right shift). Common uses: set bits (x |= mask), clear bits (x &= ~mask), toggle bits (x ^= mask), test bits (x & mask). Shifts: unsigned right shift fills with 0; signed right shift is implementation-defined (usually arithmetic). Prefer unsigned types for bit manipulation.",
+   "#include <stdio.h>\n#include <stdint.h>\n\n// Bit manipulation macros\n#define BIT(n)       (1UL << (n))\n#define SET_BIT(x,n) ((x) |= BIT(n))\n#define CLR_BIT(x,n) ((x) &= ~BIT(n))\n#define TGL_BIT(x,n) ((x) ^= BIT(n))\n#define IS_SET(x,n)  (((x) >> (n)) & 1)\n\n// Extract bitfield\n#define GET_BITS(x,hi,lo) (((x) >> (lo)) & ((1UL << ((hi)-(lo)+1)) - 1))\n\nint main() {\n    uint8_t reg = 0;\n    \n    SET_BIT(reg, 3);       // bit 3 set\n    SET_BIT(reg, 5);       // bit 5 set\n    printf(\"Reg: 0x%02x\\n\", reg);  // 0x28\n    \n    CLR_BIT(reg, 3);\n    printf(\"After clear: 0x%02x\\n\", reg);  // 0x20\n    \n    // Extract bits 4-6\n    uint16_t val = 0b01101100;\n    uint8_t extracted = GET_BITS(val, 6, 4);\n    printf(\"Bits 6:4 = %u\\n\", extracted);  // 0b110 = 6\n    \n    // Swap nibbles\n    uint8_t byte = 0xAB;\n    uint8_t swapped = (byte << 4) | (byte >> 4);\n    printf(\"Swapped: 0x%02x\\n\", swapped);  // 0xBA\n    \n    return 0;\n}"
+  ],
+  "Endianness & Binary Protocols": [
+   "Endianness: little-endian (x86, most ARM) stores LSB first; big-endian (network, some RISC). htonl/htons/ntohl/ntohs convert between host and network byte order. For manual endian conversion: shift and mask. Binary protocol parsing: read fixed-size fields, handle alignment and endianness. Use stdint.h exact-width types for portable binary I/O.",
+   "#include <stdio.h>\n#include <stdint.h>\n#include <arpa/inet.h>  // htonl, ntohl\n\n// Detect endianness\nint is_little_endian() {\n    uint32_t test = 0x01020304;\n    return *(uint8_t*)&test == 0x04;\n}\n\n// Manual byte swap\nuint32_t bswap32(uint32_t x) {\n    return ((x >> 24) & 0xFF) |\n           ((x >> 8)  & 0xFF00) |\n           ((x << 8)  & 0xFF0000) |\n           ((x << 24) & 0xFF000000);\n}\n\n// Binary protocol header\nstruct __attribute__((packed)) PacketHeader {\n    uint32_t magic;      // network byte order\n    uint16_t type;       // network byte order\n    uint16_t length;     // network byte order\n    uint32_t checksum;   // network byte order\n};\n\nint main() {\n    printf(\"System: %s-endian\\n\",\n           is_little_endian() ? \"little\" : \"big\");\n    \n    uint32_t host = 0xDEADBEEF;\n    uint32_t net = htonl(host);\n    uint32_t back = ntohl(net);\n    printf(\"Network order: 0x%x -> 0x%x\\n\", host, net);\n    \n    return 0;\n}"
+  ],
+  "Memory-Mapped I/O": [
+   "Memory-mapped I/O assigns hardware registers to memory addresses. On embedded MCUs: GPIO, UART, timer registers at fixed addresses. Use volatile to prevent compiler optimization. Use struct overlay for clean register access. On Linux with mmap: /dev/mem, /sys/class/gpio, or uio driver. Always check return values and handle errors.",
+   "#include <stdio.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <fcntl.h>\n#include <sys/mman.h>\n\n// GPIO register layout (example)\nstruct gpio_regs {\n    volatile uint32_t mode;    // 0x00\n    volatile uint32_t output;  // 0x04\n    volatile uint32_t input;   // 0x08\n    volatile uint32_t set;     // 0x0C\n    volatile uint32_t clear;   // 0x10\n};\n\nint main() {\n    // On embedded: direct address access\n    // volatile struct gpio_regs *gpio = (void*)0x40001000;\n    // gpio->mode = 0x01;  // set pin 0 to output\n    // gpio->set = 0x01;   // set pin 0 high\n    \n    // On Linux via /dev/mem (requires root)\n    int fd = open(\"/dev/mem\", O_RDWR | O_SYNC);\n    if (fd == -1) {\n        perror(\"/dev/mem\");\n        // return 1;  // disabled for demo\n    }\n    \n    // Bit-twiddling for register fields\n    uint32_t reg = 0;\n    reg |= (0b10 << 8);     // field at bits 9:8 = 2\n    reg |= (1 << 15);       // enable bit 15\n    reg &= ~(0xFF << 16);   // clear byte at bits 23:16\n    printf(\"Register value: 0x%08x\\n\", reg);\n    \n    close(fd);\n    return 0;\n}"
+  ]
+ },
+ "POSIX & System Programming": {
+  "Process Management": [
+   "fork() creates a child process (0 in child, PID in parent). execve() replaces process image. waitpid() waits for child. exit() terminates. getpid()/getppid() get PIDs. The classic fork-exec pattern creates a new process running a different program. signal() or sigaction() handles signals.",
+   "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    pid_t pid = fork();\n    \n    if (pid == 0) {\n        // Child process\n        printf(\"Child: PID=%d, parent=%d\\n\", getpid(), getppid());\n        execlp(\"/bin/echo\", \"echo\", \"Hello from child!\", NULL);\n        perror(\"exec failed\");  // only reached on error\n        exit(1);\n    } else if (pid > 0) {\n        // Parent process\n        printf(\"Parent: child PID=%d\\n\", pid);\n        int status;\n        waitpid(pid, &status, 0);\n        if (WIFEXITED(status))\n            printf(\"Child exited with %d\\n\", WEXITSTATUS(status));\n    } else {\n        perror(\"fork failed\");\n        return 1;\n    }\n    \n    return 0;\n}"
+  ],
+  "Pipes & IPC": [
+   "Pipes (pipe() syscall) allow unidirectional communication between processes. pipe() creates two fds: fd[0] (read), fd[1] (write). Fork + pipe = parent writes, child reads. Named pipes (FIFOs) via mkfifo(). POSIX shared memory (shm_open + mmap). Message queues (mq_open). Signals (kill(), sigaction()) for async notification.",
+   "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int pipefd[2];\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        return 1;\n    }\n    \n    pid_t pid = fork();\n    if (pid == 0) {\n        // Child: write to pipe\n        close(pipefd[0]);  // close unused read end\n        const char *msg = \"Hello from child!\";\n        write(pipefd[1], msg, 20);\n        close(pipefd[1]);\n        exit(0);\n    } else {\n        // Parent: read from pipe\n        close(pipefd[1]);  // close unused write end\n        char buf[32] = {0};\n        read(pipefd[0], buf, sizeof(buf));\n        printf(\"Parent received: %s\\n\", buf);\n        close(pipefd[0]);\n        waitpid(pid, NULL, 0);\n    }\n    return 0;\n}"
+  ]
+ }
+}
