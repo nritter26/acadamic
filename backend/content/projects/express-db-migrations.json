@@ -1,0 +1,99 @@
+{
+  "id": "express-db-migrations",
+  "title": "Database Migrations",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["migrations", "schema", "database", "sqlite", "alter-table"],
+  "description": "Run schema migrations on startup, add columns dynamically, and verify migration state.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Initial schema migration",
+      "description": "Run a schema migration on startup that creates a users table with id, name, and email columns using CREATE TABLE IF NOT EXISTS. Return 200 from GET /health.",
+      "hints": [
+        "Run the CREATE TABLE statement when the server starts",
+        "Use IF NOT EXISTS to make the migration idempotent",
+        "Track migration state in a migrations table"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS _migrations (\n    id INTEGER PRIMARY KEY,\n    name TEXT,\n    applied_at TEXT DEFAULT CURRENT_TIMESTAMP\n  )\n`);\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS users (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    email TEXT NOT NULL\n  )\n`);\n\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', migrations: 1 });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS _migrations (\n    id INTEGER PRIMARY KEY,\n    name TEXT,\n    applied_at TEXT DEFAULT CURRENT_TIMESTAMP\n  )\n`);\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS users (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    email TEXT NOT NULL\n  )\n`);\n\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', migrations: 1 });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''\n  CREATE TABLE IF NOT EXISTS _migrations (\n    id INTEGER PRIMARY KEY,\n    name TEXT,\n    applied_at TEXT DEFAULT CURRENT_TIMESTAMP\n  )\n''')\ndb.executescript('''\n  CREATE TABLE IF NOT EXISTS users (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    email TEXT NOT NULL\n  )\n''')\ndb.execute('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)', (1, 'create_users'))\ndb.commit()\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'migrations': 1}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`)\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`)\n\tdb.Exec(\"INSERT OR IGNORE INTO _migrations (id, name) VALUES (1, 'create_users')\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"status\": \"ok\", \"migrations\": 1})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Add column migration",
+      "description": "Implement POST /migrate that runs a new migration adding an 'age' column to the users table, and GET /schema that returns the current columns of the users table.",
+      "hints": [
+        "Use ALTER TABLE to add the age column",
+        "Track the migration in _migrations table",
+        "Use PRAGMA table_info to get column names for /schema"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`);\ndb.exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`);\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', migrations: 1 });\n});\n\napp.post('/migrate', (req, res) => {\n  db.exec('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0');\n  db.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(2, 'add_age');\n  res.json({ message: 'Migration applied', migration: 2 });\n});\n\napp.get('/schema', (req, res) => {\n  const columns = db.prepare('PRAGMA table_info(users)').all();\n  res.json(columns);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`);\ndb.exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`);\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', migrations: 1 });\n});\n\napp.post('/migrate', (_req: Request, res: Response) => {\n  db.exec('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0');\n  db.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(2, 'add_age');\n  res.json({ message: 'Migration applied', migration: 2 });\n});\n\napp.get('/schema', (_req: Request, res: Response) => {\n  const columns = db.prepare('PRAGMA table_info(users)').all();\n  res.json(columns);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)')\ndb.executescript('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)')\ndb.execute('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)', (1, 'create_users'))\ndb.commit()\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'migrations': 1}\n\n@app.post('/migrate')\ndef migrate():\n    db.executescript('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0')\n    db.execute('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)', (2, 'add_age'))\n    db.commit()\n    return {'message': 'Migration applied', 'migration': 2}\n\n@app.get('/schema')\ndef schema():\n    cursor = db.execute('PRAGMA table_info(users)')\n    rows = cursor.fetchall()\n    return [{'cid': r[0], 'name': r[1], 'type': r[2], 'notnull': r[3], 'dflt_value': r[4], 'pk': r[5]} for r in rows]\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`)\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`)\n\tdb.Exec(\"INSERT OR IGNORE INTO _migrations (id, name) VALUES (1, 'create_users')\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"status\": \"ok\", \"migrations\": 1})\n\t})\n\n\thttp.HandleFunc(\"/migrate\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method == \"POST\" {\n\t\t\tdb.Exec(\"ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0\")\n\t\t\tdb.Exec(\"INSERT OR IGNORE INTO _migrations (id, name) VALUES (2, 'add_age')\")\n\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Migration applied\", \"migration\": 2})\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/schema\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\trows, _ := db.Query(\"PRAGMA table_info(users)\")\n\t\tvar cols []map[string]interface{}\n\t\tfor rows.Next() {\n\t\t\tvar cid, notnull, pk int\n\t\t\tvar name, coltype string\n\t\t\tvar dflt sql.NullString\n\t\t\trows.Scan(&cid, &name, &coltype, &notnull, &dflt, &pk)\n\t\t\tcols = append(cols, map[string]interface{}{\"cid\": cid, \"name\": name, \"type\": coltype, \"notnull\": notnull, \"pk\": pk})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(cols)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/migrate",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Migration applied"
+          },
+          {
+            "method": "GET",
+            "path": "/schema",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "age"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Verify migration state",
+      "description": "Ensure GET /health returns 200 and includes the migration count. Verify that the schema migration was applied correctly by checking the _migrations table.",
+      "hints": [
+        "Query the _migrations table to get the count",
+        "Include the migration count in the health response",
+        "Make sure the server is stable after migrations"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`);\ndb.exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`);\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\n\ndb.exec('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0');\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(2, 'add_age');\n\napp.get('/health', (req, res) => {\n  const count = db.prepare('SELECT COUNT(*) as count FROM _migrations').get();\n  res.json({ status: 'ok', migrations: count.count, schema: ['id', 'name', 'email', 'age'] });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`);\ndb.exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`);\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(1, 'create_users');\ndb.exec('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0');\ndb.prepare('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)').run(2, 'add_age');\n\napp.get('/health', (_req: Request, res: Response) => {\n  const count = db.prepare('SELECT COUNT(*) as count FROM _migrations').get() as { count: number };\n  res.json({ status: 'ok', migrations: count.count, schema: ['id', 'name', 'email', 'age'] });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)')\ndb.executescript('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)')\ndb.execute('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)', (1, 'create_users'))\ndb.executescript('ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0')\ndb.execute('INSERT OR IGNORE INTO _migrations (id, name) VALUES (?, ?)', (2, 'add_age'))\ndb.commit()\n\n@app.get('/health')\ndef health():\n    cursor = db.execute('SELECT COUNT(*) FROM _migrations')\n    count = cursor.fetchone()[0]\n    return {'status': 'ok', 'migrations': count, 'schema': ['id', 'name', 'email', 'age']}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT DEFAULT CURRENT_TIMESTAMP)`)\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL)`)\n\tdb.Exec(\"INSERT OR IGNORE INTO _migrations (id, name) VALUES (1, 'create_users')\")\n\tdb.Exec(\"ALTER TABLE users ADD COLUMN age INTEGER DEFAULT 0\")\n\tdb.Exec(\"INSERT OR IGNORE INTO _migrations (id, name) VALUES (2, 'add_age')\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar count int\n\t\tdb.QueryRow(\"SELECT COUNT(*) FROM _migrations\").Scan(&count)\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"status\":     \"ok\",\n\t\t\t\"migrations\": count,\n\t\t\t\"schema\":     []string{\"id\", \"name\", \"email\", \"age\"},\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "migrations"
+          }
+        ]
+      }
+    }
+  ]
+}

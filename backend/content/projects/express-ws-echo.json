@@ -1,0 +1,92 @@
+{
+  "id": "express-ws-echo",
+  "title": "WebSocket Echo Server",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["websocket", "echo", "upgrade", "real-time", "express-ws"],
+  "serverMode": true,
+  "description": "Build a WebSocket echo server that upgrades HTTP connections to WebSocket and echoes back any message received.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Health check endpoint",
+      "description": "Create a GET /health endpoint that returns JSON with status ok.",
+      "hints": [
+        "Use app.get('/health', handler) in Express",
+        "Return JSON with { status: 'ok' }",
+        "Listen on process.env.PORT or 3000"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "status"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "WebSocket upgrade endpoint",
+      "description": "Add a WS /ws endpoint that upgrades HTTP to a WebSocket connection. Return 101 on upgrade.",
+      "hints": [
+        "Use express-ws or ws library to handle WebSocket upgrades",
+        "Create a ws /ws route that accepts connections",
+        "On connection, log 'Client connected'"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.ws('/ws', (ws, req) => {\n  console.log('Client connected');\n  ws.on('message', msg => {\n    ws.send(msg);\n  });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.ws('/ws', (ws, req) => {\n  console.log('Client connected');\n  ws.on('message', msg => {\n    ws.send(msg);\n  });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.websocket('/ws')\nasync def websocket_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    print('Client connected')\n    while True:\n        msg = await websocket.receive_text()\n        await websocket.send_text(msg)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t\"github.com/gorilla/websocket\"\n)\n\nvar upgrader = websocket.Upgrader{\n\tCheckOrigin: func(r *http.Request) bool { return true },\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/ws\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tdefer conn.Close()\n\t\tfor {\n\t\t\t_, msg, _ := conn.ReadMessage()\n\t\t\tconn.WriteMessage(websocket.TextMessage, msg)\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/ws",
+            "expectedStatus": 101
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Echo server with status endpoint",
+      "description": "Add a GET /ws-status endpoint that returns 200 confirming the WebSocket echo server is running.",
+      "hints": [
+        "Track server state with a variable",
+        "Return JSON with { status: 'echo server running' }",
+        "Ensure /ws endpoint echoes messages back to client"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\nlet messageCount = 0;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.get('/ws-status', (req, res) => {\n  res.json({ status: 'echo server running', messagesEchoed: messageCount });\n});\n\napp.ws('/ws', (ws, req) => {\n  console.log('Client connected');\n  ws.on('message', msg => {\n    messageCount++;\n    ws.send(msg);\n  });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\nlet messageCount = 0;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.get('/ws-status', (req: Request, res: Response) => {\n  res.json({ status: 'echo server running', messagesEchoed: messageCount });\n});\n\napp.ws('/ws', (ws, req) => {\n  console.log('Client connected');\n  ws.on('message', msg => {\n    messageCount++;\n    ws.send(msg);\n  });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nmessage_count = 0\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.get('/ws-status')\ndef ws_status():\n    global message_count\n    return {'status': 'echo server running', 'messagesEchoed': message_count}\n\n@app.websocket('/ws')\nasync def websocket_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    print('Client connected')\n    while True:\n        msg = await websocket.receive_text()\n        global message_count\n        message_count += 1\n        await websocket.send_text(msg)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync/atomic\"\n\n\t\"github.com/gorilla/websocket\"\n)\n\nvar (\n\tupgrader     = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}\n\tmessageCount int64\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/ws-status\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"status\":          \"echo server running\",\n\t\t\t\"messagesEchoed\": atomic.LoadInt64(&messageCount),\n\t\t})\n\t})\n\n\thttp.HandleFunc(\"/ws\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tdefer conn.Close()\n\t\tfor {\n\t\t\t_, msg, _ := conn.ReadMessage()\n\t\t\tatomic.AddInt64(&messageCount, 1)\n\t\t\tconn.WriteMessage(websocket.TextMessage, msg)\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/ws-status",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "echo server running"
+          }
+        ]
+      }
+    }
+  ]
+}

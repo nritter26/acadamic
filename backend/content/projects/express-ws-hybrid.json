@@ -1,0 +1,146 @@
+{
+  "id": "express-ws-hybrid",
+  "title": "WebSocket Hybrid API Server",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 50,
+  "concepts": ["websocket", "hybrid", "real-time", "REST", "express-ws", "stats"],
+  "serverMode": true,
+  "description": "Build a hybrid API server combining REST endpoints for data operations with WebSocket for real-time updates, plus hybrid mode statistics.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Health check endpoint",
+      "description": "Create a GET /health endpoint that returns JSON with status ok.",
+      "hints": [
+        "Use app.get('/health', handler)",
+        "Return JSON: { status: 'ok' }",
+        "Listen on process.env.PORT or 3000"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "status"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "REST data creation",
+      "description": "Create a POST /data endpoint that accepts JSON payload and stores it, returning 201.",
+      "hints": [
+        "Accept JSON body with any data fields",
+        "Assign a unique id to each stored item",
+        "Return 201 with the created item"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet dataStore = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req, res) => {\n  const item = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface DataItem {\n  id: number;\n  [key: string]: any;\n}\n\nlet dataStore: DataItem[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req: Request, res: Response) => {\n  const item: DataItem = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndata_store = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/data', status_code=201)\ndef create_data(item: dict):\n    global next_id\n    new_item = {'id': next_id, **item, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    data_store.append(new_item)\n    return new_item\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\nvar (\n\tdataStore []map[string]interface{}\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body map[string]interface{}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tbody[\"id\"] = nextID\n\t\tnextID++\n\t\tbody[\"createdAt\"] = time.Now().Format(time.RFC3339)\n\t\tdataStore = append(dataStore, body)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(body)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/data",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "REST data retrieval",
+      "description": "Add a GET /data/:id endpoint that retrieves a stored data item by id.",
+      "hints": [
+        "Use app.get('/data/:id', handler)",
+        "Find the item by id in the data store",
+        "Return 404 if not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet dataStore = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req, res) => {\n  const item = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface DataItem {\n  id: number;\n  [key: string]: any;\n}\n\nlet dataStore: DataItem[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req: Request, res: Response) => {\n  const item: DataItem = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndata_store = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/data', status_code=201)\ndef create_data(item: dict):\n    global next_id\n    new_item = {'id': next_id, **item, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    data_store.append(new_item)\n    return new_item\n\n@app.get('/data/{item_id}')\ndef get_data(item_id: int):\n    for item in data_store:\n        if item['id'] == item_id:\n            return item\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\nvar (\n\tdataStore []map[string]interface{}\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/data/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/data/\")\n\t\tid, err := strconv.Atoi(path)\n\t\tif err != nil {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tfor _, item := range dataStore {\n\t\t\tif item[\"id\"] == float64(id) {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body map[string]interface{}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tbody[\"id\"] = nextID\n\t\tnextID++\n\t\tbody[\"createdAt\"] = time.Now().Format(time.RFC3339)\n\t\tdataStore = append(dataStore, body)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(body)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/data/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "WebSocket real-time updates",
+      "description": "Add a WS /ws endpoint that broadcasts real-time data updates to all connected clients.",
+      "hints": [
+        "Use express-ws or similar WebSocket library",
+        "Track connected clients in a Set",
+        "On new POST /data, broadcast to all WebSocket clients"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet dataStore = [];\nlet nextId = 1;\nlet wsClients = new Set();\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req, res) => {\n  const item = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  const msg = JSON.stringify({ type: 'new_data', data: item });\n  wsClients.forEach(ws => ws.send(msg));\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.send(JSON.stringify({ type: 'connected', message: 'Welcome to hybrid API' }));\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface DataItem {\n  id: number;\n  [key: string]: any;\n}\n\nlet dataStore: DataItem[] = [];\nlet nextId = 1;\nlet wsClients = new Set<WebSocket>();\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req: Request, res: Response) => {\n  const item: DataItem = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  const msg = JSON.stringify({ type: 'new_data', data: item });\n  wsClients.forEach(ws => ws.send(msg));\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.send(JSON.stringify({ type: 'connected', message: 'Welcome to hybrid API' }));\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nfrom datetime import datetime\nfrom typing import List\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndata_store = []\nnext_id = 1\nactive_connections: List[WebSocket] = []\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/data', status_code=201)\ndef create_data(item: dict):\n    global next_id\n    new_item = {'id': next_id, **item, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    data_store.append(new_item)\n    for conn in active_connections:\n        await conn.send_json({'type': 'new_data', 'data': new_item})\n    return new_item\n\n@app.get('/data/{item_id}')\ndef get_data(item_id: int):\n    for item in data_store:\n        if item['id'] == item_id:\n            return item\n    return {'error': 'Not found'}\n\n@app.websocket('/ws')\nasync def websocket_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    active_connections.append(websocket)\n    await websocket.send_json({'type': 'connected', 'message': 'Welcome to hybrid API'})\n    try:\n        while True:\n            await websocket.receive_text()\n    except:\n        active_connections.remove(websocket)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"sync\"\n\t\"time\"\n\n\t\"github.com/gorilla/websocket\"\n)\n\nvar (\n\tdataStore  []map[string]interface{}\n\tnextID     = 1\n\twsClients  = make(map[*websocket.Conn]bool)\n\tmu         sync.Mutex\n\tupgrader   = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body map[string]interface{}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tbody[\"id\"] = nextID\n\t\tnextID++\n\t\tbody[\"createdAt\"] = time.Now().Format(time.RFC3339)\n\t\tdataStore = append(dataStore, body)\n\t\tmsg, _ := json.Marshal(map[string]interface{}{\"type\": \"new_data\", \"data\": body})\n\t\tmu.Lock()\n\t\tfor conn := range wsClients {\n\t\t\tconn.WriteMessage(websocket.TextMessage, msg)\n\t\t}\n\t\tmu.Unlock()\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(body)\n\t})\n\n\thttp.HandleFunc(\"/data/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/data/\")\n\t\tid, _ := strconv.Atoi(path)\n\t\tfor _, item := range dataStore {\n\t\t\tif item[\"id\"] == float64(id) {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.HandleFunc(\"/ws\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tmu.Lock()\n\t\twsClients[conn] = true\n\t\tmu.Unlock()\n\t\tconn.WriteMessage(websocket.TextMessage, []byte(`{\"type\":\"connected\",\"message\":\"Welcome to hybrid API\"}`))\n\t\tdefer func() {\n\t\t\tmu.Lock()\n\t\t\tdelete(wsClients, conn)\n\t\t\tmu.Unlock()\n\t\t\tconn.Close()\n\t\t}()\n\t\tfor {\n\t\t\t_, _, _ = conn.ReadMessage()\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/ws",
+            "expectedStatus": 101
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Hybrid mode statistics",
+      "description": "Add a GET /stats endpoint that returns hybrid mode statistics including REST and WebSocket counts.",
+      "hints": [
+        "Track REST request count and WebSocket connection count",
+        "Return stats like totalDataItems, wsConnections, and hybridMode status",
+        "Increment counters in each route handler"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet dataStore = [];\nlet nextId = 1;\nlet wsClients = new Set();\nlet restRequestCount = 0;\n\napp.use((req, res, next) => {\n  if (req.path !== '/stats') restRequestCount++;\n  next();\n});\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req, res) => {\n  const item = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  const msg = JSON.stringify({ type: 'new_data', data: item });\n  wsClients.forEach(ws => ws.send(msg));\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.get('/stats', (req, res) => {\n  res.json({\n    mode: 'hybrid',\n    totalDataItems: dataStore.length,\n    wsConnections: wsClients.size,\n    restRequestCount\n  });\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.send(JSON.stringify({ type: 'connected', message: 'Welcome to hybrid API' }));\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface DataItem { id: number; [key: string]: any; }\n\nlet dataStore: DataItem[] = [];\nlet nextId = 1;\nlet wsClients = new Set<WebSocket>();\nlet restRequestCount = 0;\n\napp.use((req, res, next) => {\n  if (req.path !== '/stats') restRequestCount++;\n  next();\n});\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/data', (req: Request, res: Response) => {\n  const item: DataItem = { id: nextId++, ...req.body, createdAt: new Date().toISOString() };\n  dataStore.push(item);\n  const msg = JSON.stringify({ type: 'new_data', data: item });\n  wsClients.forEach(ws => ws.send(msg));\n  res.status(201).json(item);\n});\n\napp.get('/data/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = dataStore.find(d => d.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.get('/stats', (req: Request, res: Response) => {\n  res.json({ mode: 'hybrid', totalDataItems: dataStore.length, wsConnections: wsClients.size, restRequestCount });\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.send(JSON.stringify({ type: 'connected', message: 'Welcome to hybrid API' }));\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nfrom datetime import datetime\nfrom typing import List\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndata_store = []\nnext_id = 1\nactive_connections: List[WebSocket] = []\nrest_request_count = 0\n\n@app.middleware('http')\nasync def count_requests(request, call_next):\n    global rest_request_count\n    if request.url.path != '/stats':\n        rest_request_count += 1\n    return await call_next(request)\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/data', status_code=201)\ndef create_data(item: dict):\n    global next_id\n    new_item = {'id': next_id, **item, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    data_store.append(new_item)\n    for conn in active_connections:\n        await conn.send_json({'type': 'new_data', 'data': new_item})\n    return new_item\n\n@app.get('/data/{item_id}')\ndef get_data(item_id: int):\n    for item in data_store:\n        if item['id'] == item_id:\n            return item\n    return {'error': 'Not found'}\n\n@app.get('/stats')\ndef get_stats():\n    return {'mode': 'hybrid', 'totalDataItems': len(data_store), 'wsConnections': len(active_connections), 'restRequestCount': rest_request_count}\n\n@app.websocket('/ws')\nasync def websocket_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    active_connections.append(websocket)\n    await websocket.send_json({'type': 'connected', 'message': 'Welcome to hybrid API'})\n    try:\n        while True:\n            await websocket.receive_text()\n    except:\n        active_connections.remove(websocket)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"sync\"\n\t\"sync/atomic\"\n\t\"time\"\n\n\t\"github.com/gorilla/websocket\"\n)\n\nvar (\n\tdataStore       []map[string]interface{}\n\tnextID          = 1\n\twsClients       = make(map[*websocket.Conn]bool)\n\tmu              sync.Mutex\n\trestReqCount    int64\n\tupgrader        = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}\n)\n\nfunc countingHandler(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tif r.URL.Path != \"/stats\" {\n\t\t\tatomic.AddInt64(&restReqCount, 1)\n\t\t}\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", countingHandler(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t}))\n\n\thttp.HandleFunc(\"/data\", countingHandler(func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body map[string]interface{}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tbody[\"id\"] = nextID\n\t\tnextID++\n\t\tbody[\"createdAt\"] = time.Now().Format(time.RFC3339)\n\t\tdataStore = append(dataStore, body)\n\t\tmsg, _ := json.Marshal(map[string]interface{}{\"type\": \"new_data\", \"data\": body})\n\t\tmu.Lock()\n\t\tfor conn := range wsClients {\n\t\t\tconn.WriteMessage(websocket.TextMessage, msg)\n\t\t}\n\t\tmu.Unlock()\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(body)\n\t}))\n\n\thttp.HandleFunc(\"/data/\", countingHandler(func(w http.ResponseWriter, r *http.Request) {\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/data/\")\n\t\tid, _ := strconv.Atoi(path)\n\t\tfor _, item := range dataStore {\n\t\t\tif item[\"id\"] == float64(id) {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t}))\n\n\thttp.HandleFunc(\"/stats\", func(w http.ResponseWriter, r *http.Request) {\n\t\tmu.Lock()\n\t\twsCount := len(wsClients)\n\t\tmu.Unlock()\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"mode\":             \"hybrid\",\n\t\t\t\"totalDataItems\":   len(dataStore),\n\t\t\t\"wsConnections\":    wsCount,\n\t\t\t\"restRequestCount\": atomic.LoadInt64(&restReqCount),\n\t\t})\n\t})\n\n\thttp.HandleFunc(\"/ws\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tmu.Lock()\n\t\twsClients[conn] = true\n\t\tmu.Unlock()\n\t\tconn.WriteMessage(websocket.TextMessage, []byte(`{\"type\":\"connected\",\"message\":\"Welcome to hybrid API\"}`))\n\t\tdefer func() {\n\t\t\tmu.Lock()\n\t\t\tdelete(wsClients, conn)\n\t\t\tmu.Unlock()\n\t\t\tconn.Close()\n\t\t}()\n\t\tfor {\n\t\t\t_, _, _ = conn.ReadMessage()\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/stats",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "hybrid"
+          }
+        ]
+      }
+    }
+  ]
+}

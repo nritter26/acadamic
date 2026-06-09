@@ -1,0 +1,93 @@
+{
+  "id": "express-test-validation",
+  "title": "API Validation Testing",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["validation", "testing", "email", "error-handling", "REST"],
+  "serverMode": true,
+  "description": "Build an API validation testing suite that validates email format, handles missing fields, and returns appropriate error responses.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Validate email format",
+      "description": "Create a POST /validate endpoint that accepts an email field and returns 200 if valid, 400 if invalid.",
+      "hints": [
+        "Accept JSON body with an email field",
+        "Check if email contains @ and a domain with a dot",
+        "Return 400 with error message if invalid, 200 with success if valid"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email) {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req, res) => {\n  const { email } = req.body;\n  if (!email || !isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email: string): boolean {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req: Request, res: Response) => {\n  const { email } = req.body;\n  if (!email || !isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel, EmailStr\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass EmailRequest(BaseModel):\n    email: str\n\n@app.post('/validate')\ndef validate_email(req: EmailRequest):\n    import re\n    if not re.match(r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$', req.email):\n        return {'error': 'Invalid email format'}\n    return {'valid': True, 'email': req.email}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"regexp\"\n)\n\nvar emailRegex = regexp.MustCompile(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/validate\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tEmail string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif !emailRegex.MatchString(body.Email) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Invalid email format\"})\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"valid\": true, \"email\": body.Email})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/validate",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "valid"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Missing field validation",
+      "description": "Test that POST /validate with a missing email field returns 400.",
+      "hints": [
+        "Send a request without the email field",
+        "Ensure the server returns 400 Bad Request",
+        "Check that the error response includes a descriptive message"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email) {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req, res) => {\n  const { email } = req.body;\n  if (!email) {\n    return res.status(400).json({ error: 'Email is required' });\n  }\n  if (!isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email: string): boolean {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req: Request, res: Response) => {\n  const { email } = req.body;\n  if (!email) {\n    return res.status(400).json({ error: 'Email is required' });\n  }\n  if (!isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass EmailRequest(BaseModel):\n    email: str\n\n@app.post('/validate')\ndef validate_email(req: EmailRequest):\n    import re\n    if not req.email:\n        return {'error': 'Email is required'}\n    if not re.match(r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$', req.email):\n        return {'error': 'Invalid email format'}\n    return {'valid': True, 'email': req.email}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"regexp\"\n)\n\nvar emailRegex = regexp.MustCompile(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/validate\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tEmail string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Email == \"\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Email is required\"})\n\t\t\treturn\n\t\t}\n\t\tif !emailRegex.MatchString(body.Email) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Invalid email format\"})\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"valid\": true, \"email\": body.Email})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/validate",
+            "expectedStatus": 400,
+            "expectedBodySubstring": "error"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Correct data validation",
+      "description": "Test POST /validate with correct email data to confirm 200 response.",
+      "hints": [
+        "Send a valid email like test@example.com",
+        "Expect 200 with valid: true in the response",
+        "Make sure previous error handling still works"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email) {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req, res) => {\n  const { email } = req.body;\n  if (!email) {\n    return res.status(400).json({ error: 'Email is required' });\n  }\n  if (!isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction isValidEmail(email: string): boolean {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n}\n\napp.post('/validate', (req: Request, res: Response) => {\n  const { email } = req.body;\n  if (!email) {\n    return res.status(400).json({ error: 'Email is required' });\n  }\n  if (!isValidEmail(email)) {\n    return res.status(400).json({ error: 'Invalid email format' });\n  }\n  res.json({ valid: true, email });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass EmailRequest(BaseModel):\n    email: str\n\n@app.post('/validate')\ndef validate_email(req: EmailRequest):\n    import re\n    if not req.email:\n        return {'error': 'Email is required'}\n    if not re.match(r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$', req.email):\n        return {'error': 'Invalid email format'}\n    return {'valid': True, 'email': req.email}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"regexp\"\n)\n\nvar emailRegex = regexp.MustCompile(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/validate\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tEmail string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Email == \"\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Email is required\"})\n\t\t\treturn\n\t\t}\n\t\tif !emailRegex.MatchString(body.Email) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Invalid email format\"})\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"valid\": true, \"email\": body.Email})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/validate",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "valid"
+          }
+        ]
+      }
+    }
+  ]
+}

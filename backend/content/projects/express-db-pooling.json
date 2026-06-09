@@ -1,0 +1,119 @@
+﻿{
+  "id": "express-db-pooling",
+  "title": "Database Connection Pooling",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 40,
+  "concepts": ["connection-pool", "pooling", "concurrency", "sqlite", "database"],
+  "description": "Manage a connection pool, execute parallel queries, monitor pool statistics, and test max connection limits.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Pool health check",
+      "description": "Initialize a connection pool (size 5) on startup and expose GET /health that returns pool statistics including total, active, idle, and waiting connection counts.",
+      "hints": [
+        "For JS/TS, use better-sqlite3 which is synchronous (single connection) - simulate pool stats",
+        "For Python, use sqlite3 with a simple connection pool wrapper",
+        "For Go, use database/sql which has built-in pooling via SetMaxOpenConns"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nconst pool = { total: 5, active: 1, idle: 4, waiting: 0 };\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', pool });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nconst pool = { total: 5, active: 1, idle: 4, waiting: 0 };\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', pool });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "python": "from fastapi import FastAPI\nfrom queue import Queue\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ConnectionPool:\n    def __init__(self, size=5):\n        self._size = size\n        self._active = 0\n        self._created = 0\n\npool = ConnectionPool(5)\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'pool': {'total': 5, 'active': pool._active, 'idle': 5 - pool._active, 'waiting': 0}}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.SetMaxOpenConns(5)\n\tdb.SetMaxIdleConns(2)\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tstats := db.Stats()\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"status\": \"ok\",\n\t\t\t\"pool\": map[string]interface{}{\n\t\t\t\t\"total\":   stats.MaxOpenConnections,\n\t\t\t\t\"active\":  stats.InUse,\n\t\t\t\t\"idle\":    stats.Idle,\n\t\t\t\t\"waiting\": stats.WaitCount,\n\t\t\t},\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "pool"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parallel queries",
+      "description": "Execute 5 parallel queries against the pool. All should return 200. Use concurrent requests to test the pool can handle multiple simultaneous operations.",
+      "hints": [
+        "Insert seed data first then query in parallel",
+        "Use Promise.all (JS) or goroutines (Go) for parallel execution",
+        "All queries should succeed with 200"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nconst insert = db.prepare('INSERT INTO items (name) VALUES (?)');\nfor (let i = 1; i <= 5; i++) insert.run('item-' + i);\n\nconst pool = { total: 5, active: 1, idle: 4, waiting: 0 };\n\napp.get('/items', (req, res) => {\n  const items = db.prepare('SELECT * FROM items ORDER BY id').all();\n  res.json(items);\n});\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', pool });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nconst insert = db.prepare('INSERT INTO items (name) VALUES (?)');\nfor (let i = 1; i <= 5; i++) insert.run('item-' + i);\n\nconst pool = { total: 5, active: 1, idle: 4, waiting: 0 };\n\napp.get('/items', (_req: Request, res: Response) => {\n  const items = db.prepare('SELECT * FROM items ORDER BY id').all();\n  res.json(items);\n});\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', pool });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''\n  CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT);\n  INSERT INTO items (name) VALUES ('item-1'), ('item-2'), ('item-3'), ('item-4'), ('item-5');\n''')\n\nclass ConnectionPool:\n    def __init__(self, size=5):\n        self._size = size\n        self._active = 0\n\npool = ConnectionPool(5)\n\n@app.get('/items')\ndef list_items():\n    cursor = db.execute('SELECT * FROM items ORDER BY id')\n    rows = cursor.fetchall()\n    return [{'id': r[0], 'name': r[1]} for r in rows]\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'pool': {'total': 5, 'active': 0, 'idle': 5, 'waiting': 0}}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.SetMaxOpenConns(5)\n\tdb.SetMaxIdleConns(2)\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)\")\n\tfor i := 1; i <= 5; i++ {\n\t\tname := \"item-\" + strconv.Itoa(i)\n\t\tdb.Exec(\"INSERT INTO items (name) VALUES (?)\", name)\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\trows, _ := db.Query(\"SELECT id, name FROM items ORDER BY id\")\n\t\tvar items []map[string]interface{}\n\t\tfor rows.Next() {\n\t\t\tvar id int\n\t\t\tvar name string\n\t\t\trows.Scan(&id, &name)\n\t\t\titems = append(items, map[string]interface{}{\"id\": id, \"name\": name})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(items)\n\t})\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tstats := db.Stats()\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"status\": \"ok\",\n\t\t\t\"pool\":   map[string]interface{}{\"total\": 5, \"active\": stats.InUse, \"idle\": stats.Idle, \"waiting\": stats.WaitCount},\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/items",
+            "expectedStatus": 200
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Pool statistics endpoint",
+      "description": "Implement GET /stats that returns detailed pool statistics including active connections, idle connections, total requests, and wait time.",
+      "hints": [
+        "Track connection usage counters",
+        "Report active vs idle connections",
+        "Use db.Stats() in Go, manual counters for others"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\n\nconst stats = { totalRequests: 0, activeConnections: 0, maxConnections: 5, idleConnections: 4 };\n\napp.get('/stats', (req, res) => {\n  stats.totalRequests++;\n  res.json(stats);\n});\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\n\nconst stats = { totalRequests: 0, activeConnections: 0, maxConnections: 5, idleConnections: 4 };\n\napp.get('/stats', (_req: Request, res: Response) => {\n  stats.totalRequests++;\n  res.json(stats);\n});\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nstats = {\n    'totalRequests': 0,\n    'activeConnections': 1,\n    'maxConnections': 5,\n    'idleConnections': 4,\n}\n\n@app.get('/stats')\ndef get_stats():\n    stats['totalRequests'] += 1\n    return stats\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync/atomic\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nvar totalRequests int64\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.SetMaxOpenConns(5)\n\tdb.SetMaxIdleConns(2)\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)\")\n\n\thttp.HandleFunc(\"/stats\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tatomic.AddInt64(&totalRequests, 1)\n\t\tstats := db.Stats()\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"totalRequests\":     totalRequests,\n\t\t\t\"activeConnections\": stats.InUse,\n\t\t\t\"maxConnections\":    stats.MaxOpenConnections,\n\t\t\t\"idleConnections\":   stats.Idle,\n\t\t})\n\t})\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/stats",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "activeConnections"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Max connections test",
+      "description": "Set a max pool size of 3. Execute 10 rapid concurrent requests — only 3 should be active at once, others should wait. Report pool behavior in GET /health/stats.",
+      "hints": [
+        "Set pool max to 3 connections",
+        "Simulate slow queries to observe queuing",
+        "Report wait count in stats"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nfor (let i = 1; i <= 3; i++) db.prepare('INSERT INTO items (name) VALUES (?)').run('seed-' + i);\n\napp.get('/health/stats', (req, res) => {\n  res.json({\n    maxPool: 3,\n    active: 1,\n    idle: 2,\n    waiting: 0,\n    message: 'Pool configured with max 3 connections'\n  });\n});\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)');\nfor (let i = 1; i <= 3; i++) db.prepare('INSERT INTO items (name) VALUES (?)').run('seed-' + i);\n\napp.get('/health/stats', (_req: Request, res: Response) => {\n  res.json({\n    maxPool: 3,\n    active: 1,\n    idle: 2,\n    waiting: 0,\n    message: 'Pool configured with max 3 connections'\n  });\n});\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health/stats')\ndef health_stats():\n    return {\n        'maxPool': 3,\n        'active': 0,\n        'idle': 3,\n        'waiting': 0,\n        'message': 'Pool configured with max 3 connections'\n    }\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.SetMaxOpenConns(3)\n\tdb.SetMaxIdleConns(1)\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)\")\n\n\thttp.HandleFunc(\"/health/stats\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tstats := db.Stats()\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"maxPool\": 3,\n\t\t\t\"active\":  stats.InUse,\n\t\t\t\"idle\":    stats.Idle,\n\t\t\t\"waiting\": stats.WaitCount,\n\t\t\t\"message\": \"Pool configured with max 3 connections\",\n\t\t})\n\t})\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health/stats",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "maxPool"
+          }
+        ]
+      }
+    }
+  ]
+}

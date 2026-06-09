@@ -1,0 +1,120 @@
+{
+  "id": "express-test-property",
+  "title": "Property-Based Testing API",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["property-testing", "API", "items", "response-shape", "consistency"],
+  "serverMode": true,
+  "description": "Build a property-based testing API that verifies items are created correctly and all items share the same consistent shape.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create an item",
+      "description": "Create a POST /items endpoint that creates an item with name and price, returning 201.",
+      "hints": [
+        "Accept JSON with name (string) and price (number)",
+        "Assign a unique id to each item",
+        "Return 201 with the created item"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name, price } = req.body;\n  const item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item {\n  id: number;\n  name: string;\n  price: number;\n}\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, price } = req.body;\n  const item: Item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n    price: float\n\nclass Item(BaseModel):\n    id: int\n    name: str\n    price: float\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = Item(id=next_id, name=item.name, price=item.price)\n    next_id += 1\n    items.append(new_item)\n    return new_item\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Item struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tName  string  `json:\"name\"`\n\t\t\tPrice float64 `json:\"price\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\titem := Item{ID: nextID, Name: body.Name, Price: body.Price}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Get single item with id property",
+      "description": "Add GET /items/:id that returns 200 and verify the id property exists in the response.",
+      "hints": [
+        "Use app.get('/items/:id', handler)",
+        "Return the item by id, 404 if not found",
+        "Property: id should always exist and be a number"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name, price } = req.body;\n  const item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item {\n  id: number;\n  name: string;\n  price: number;\n}\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, price } = req.body;\n  const item: Item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n    price: float\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = {'id': next_id, 'name': item.name, 'price': item.price}\n    next_id += 1\n    items.append(new_item)\n    return new_item\n\n@app.get('/items/{item_id}')\ndef get_item(item_id: int):\n    for i in items:\n        if i['id'] == item_id:\n            return i\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype Item struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tName  string  `json:\"name\"`\n\t\t\tPrice float64 `json:\"price\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\titem := Item{ID: nextID, Name: body.Name, Price: body.Price}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.HandleFunc(\"/items/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/items/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor _, item := range items {\n\t\t\tif item.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/items/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "List items returns array",
+      "description": "Add GET /items that returns all items. Property: the response should be an array.",
+      "hints": [
+        "Return the full items array as JSON",
+        "Property: always returns an array type",
+        "Even when empty, return []"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name, price } = req.body;\n  const item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items', (req, res) => {\n  res.json(items);\n});\n\napp.get('/items/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item { id: number; name: string; price: number; }\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, price } = req.body;\n  const item: Item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items', (req: Request, res: Response) => {\n  res.json(items);\n});\n\napp.get('/items/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n    price: float\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = {'id': next_id, 'name': item.name, 'price': item.price}\n    next_id += 1\n    items.append(new_item)\n    return new_item\n\n@app.get('/items')\ndef list_items():\n    return items\n\n@app.get('/items/{item_id}')\ndef get_item(item_id: int):\n    for i in items:\n        if i['id'] == item_id:\n            return i\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype Item struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tif r.Method == \"GET\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(items)\n\t\t\treturn\n\t\t}\n\t\tvar body struct {\n\t\t\tName  string  `json:\"name\"`\n\t\t\tPrice float64 `json:\"price\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\titem := Item{ID: nextID, Name: body.Name, Price: body.Price}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.HandleFunc(\"/items/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/items/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor _, item := range items {\n\t\t\tif item.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/items",
+            "expectedStatus": 200,
+            "expectedBodyShape": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "All items have same shape as single item",
+      "description": "Property: every item in the list should have the same shape (id, name, price) as a single item.",
+      "hints": [
+        "Create multiple items via POST",
+        "Compare the shape of each item in GET /items",
+        "All items must have id, name, and price"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name, price } = req.body;\n  const item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items', (req, res) => {\n  res.json(items);\n});\n\napp.get('/items/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item { id: number; name: string; price: number; }\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, price } = req.body;\n  const item: Item = { id: nextId++, name, price };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.get('/items', (req: Request, res: Response) => {\n  res.json(items);\n});\n\napp.get('/items/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const item = items.find(i => i.id === id);\n  if (!item) return res.status(404).json({ error: 'Not found' });\n  res.json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n    price: float\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = {'id': next_id, 'name': item.name, 'price': item.price}\n    next_id += 1\n    items.append(new_item)\n    return new_item\n\n@app.get('/items')\ndef list_items():\n    return items\n\n@app.get('/items/{item_id}')\ndef get_item(item_id: int):\n    for i in items:\n        if i['id'] == item_id:\n            return i\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype Item struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tif r.Method == \"GET\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(items)\n\t\t\treturn\n\t\t}\n\t\tvar body struct {\n\t\t\tName  string  `json:\"name\"`\n\t\t\tPrice float64 `json:\"price\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\titem := Item{ID: nextID, Name: body.Name, Price: body.Price}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.HandleFunc(\"/items/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/items/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor _, item := range items {\n\t\t\tif item.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/items/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "price"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "express-upload-multi",
+  "title": "Multi-File Upload with Validation",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["multi-file", "validation", "file-type", "size-limit", "multer"],
+  "description": "Accept multiple file uploads with file type and size validation, returning detailed results for each file.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Multi-file upload endpoint",
+      "description": "Implement POST /uploads that accepts multiple files (field name 'files') and returns 200 with an array of file info objects, each containing name, size, and type.",
+      "hints": ["Use upload.array('files') in multer for multiple files", "Loop through req.files to build response array", "Return array of { name, size, type } objects"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nconst fileStore = {};\nfunction fileInfo(f) { return { name: f.originalname, size: f.size, type: f.mimetype }; }\napp.post('/uploads', upload.array('files'), (req, res) => {\n  const files = req.files.map(f => {\n    fileStore[f.originalname] = f.buffer;\n    return fileInfo(f);\n  });\n  res.json(files);\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nconst fileStore: Record<string, Buffer> = {};\napp.post('/uploads', upload.array('files'), (req: Request, res: Response) => {\n  const files = (req.files as Express.Multer.File[]).map(f => {\n    fileStore[f.originalname] = f.buffer;\n    return { name: f.originalname, size: f.size, type: f.mimetype };\n  });\n  res.json(files);\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom typing import List\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfile_store = {}\n@app.post('/uploads')\nasync def uploads(files: List[UploadFile] = File(...)):\n    result = []\n    for f in files:\n        data = await f.read()\n        file_store[f.filename] = data\n        result.append({'name': f.filename, 'size': len(data), 'type': f.content_type})\n    return result\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n)\n\nvar fileStore = map[string][]byte{}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/uploads\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfiles := r.MultipartForm.File[\"files\"]\n\t\tvar result []map[string]interface{}\n\t\tfor _, fh := range files {\n\t\t\tf, _ := fh.Open()\n\t\t\tdata, _ := io.ReadAll(f)\n\t\t\tf.Close()\n\t\t\tfileStore[fh.Filename] = data\n\t\t\tresult = append(result, map[string]interface{}{\"name\": fh.Filename, \"size\": len(data), \"type\": fh.Header.Get(\"Content-Type\")})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/uploads", "expectedStatus": 200, "expectedBodySubstring": "[" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "File type validation",
+      "description": "Add file type validation that only allows image files (image/jpeg, image/png, image/gif). Return 400 with an error if any file has the wrong type.",
+      "hints": ["Check mimetype against allowed types before storing", "Reject with 400 if any file is not an image", "Return error message listing rejected files"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];\nconst upload = multer({\n  storage: multer.memoryStorage(),\n  fileFilter: (req, file, cb) => {\n    if (allowedTypes.includes(file.mimetype)) cb(null, true);\n    else cb(new Error('Only images allowed'));\n  }\n});\napp.post('/uploads', upload.array('files'), (req, res) => {\n  res.json(req.files.map(f => ({ name: f.originalname, size: f.size, type: f.mimetype })));\n});\napp.use((err, req, res, next) => {\n  res.status(400).json({ error: err.message });\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];\nconst upload = multer({\n  storage: multer.memoryStorage(),\n  fileFilter: (_req: any, file: any, cb: any) => {\n    if (allowedTypes.includes(file.mimetype)) cb(null, true);\n    else cb(new Error('Only images allowed'));\n  }\n});\napp.post('/uploads', upload.array('files'), (req: Request, res: Response) => {\n  const files = (req.files as Express.Multer.File[]).map(f => ({ name: f.originalname, size: f.size, type: f.mimetype }));\n  res.json(files);\n});\napp.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {\n  res.status(400).json({ error: err.message });\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File, HTTPException\nfrom typing import List\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nALLOWED_TYPES = {'image/jpeg', 'image/png', 'image/gif'}\n@app.post('/uploads')\nasync def uploads(files: List[UploadFile] = File(...)):\n    result = []\n    for f in files:\n        if f.content_type not in ALLOWED_TYPES:\n            raise HTTPException(status_code=400, detail=f'File {f.filename}: Only images allowed')\n        data = await f.read()\n        result.append({'name': f.filename, 'size': len(data), 'type': f.content_type})\n    return result\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n)\n\nvar allowedTypes = map[string]bool{\"image/jpeg\": true, \"image/png\": true, \"image/gif\": true}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/uploads\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfiles := r.MultipartForm.File[\"files\"]\n\t\tvar result []map[string]interface{}\n\t\tfor _, fh := range files {\n\t\t\tmime := fh.Header.Get(\"Content-Type\")\n\t\t\tif !allowedTypes[strings.Split(mime, \";\")[0]] {\n\t\t\t\tw.WriteHeader(400)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Only images allowed\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\tf, _ := fh.Open()\n\t\t\tdata, _ := io.ReadAll(f)\n\t\t\tf.Close()\n\t\t\tresult = append(result, map[string]interface{}{\"name\": fh.Filename, \"size\": len(data), \"type\": mime})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/uploads", "expectedStatus": 400 }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "File size validation",
+      "description": "Add a max file size limit of 1MB. Return 400 with an error if any uploaded file exceeds this limit.",
+      "hints": ["Set limits: { fileSize: 1 * 1024 * 1024 } in multer", "Reject with 400 and descriptive message", "Check ALL files, not just the first one"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];\nconst MAX_SIZE = 1 * 1024 * 1024;\nconst upload = multer({\n  storage: multer.memoryStorage(),\n  limits: { fileSize: MAX_SIZE },\n  fileFilter: (req, file, cb) => {\n    if (allowedTypes.includes(file.mimetype)) cb(null, true);\n    else cb(new Error('Only images allowed'));\n  }\n});\napp.post('/uploads', upload.array('files'), (req, res) => {\n  res.json(req.files.map(f => ({ name: f.originalname, size: f.size, type: f.mimetype })));\n});\napp.use((err, req, res, next) => {\n  if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'File too large. Max 1MB' });\n  res.status(400).json({ error: err.message });\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];\nconst MAX_SIZE = 1 * 1024 * 1024;\nconst upload = multer({\n  storage: multer.memoryStorage(),\n  limits: { fileSize: MAX_SIZE },\n  fileFilter: (_req: any, file: any, cb: any) => {\n    if (allowedTypes.includes(file.mimetype)) cb(null, true);\n    else cb(new Error('Only images allowed'));\n  }\n});\napp.post('/uploads', upload.array('files'), (req: Request, res: Response) => {\n  const files = (req.files as Express.Multer.File[]).map(f => ({ name: f.originalname, size: f.size, type: f.mimetype }));\n  res.json(files);\n});\napp.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {\n  if ((err as any).code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'File too large. Max 1MB' });\n  res.status(400).json({ error: err.message });\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File, HTTPException\nfrom typing import List\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nALLOWED_TYPES = {'image/jpeg', 'image/png', 'image/gif'}\nMAX_SIZE = 1 * 1024 * 1024\n@app.post('/uploads')\nasync def uploads(files: List[UploadFile] = File(...)):\n    result = []\n    for f in files:\n        if f.content_type not in ALLOWED_TYPES:\n            raise HTTPException(status_code=400, detail=f'File {f.filename}: Only images allowed')\n        data = await f.read()\n        if len(data) > MAX_SIZE:\n            raise HTTPException(status_code=400, detail=f'File {f.filename}: Too large. Max 1MB')\n        result.append({'name': f.filename, 'size': len(data), 'type': f.content_type})\n    return result\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n)\n\nvar allowedTypes = map[string]bool{\"image/jpeg\": true, \"image/png\": true, \"image/gif\": true}\nconst maxSize = 1 << 20\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/uploads\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(maxSize)\n\t\tfiles := r.MultipartForm.File[\"files\"]\n\t\tvar result []map[string]interface{}\n\t\tfor _, fh := range files {\n\t\t\tif fh.Size > maxSize {\n\t\t\t\tw.WriteHeader(400)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"File too large. Max 1MB\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\tmime := fh.Header.Get(\"Content-Type\")\n\t\t\tif !allowedTypes[strings.Split(mime, \";\")[0]] {\n\t\t\t\tw.WriteHeader(400)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Only images allowed\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\tf, _ := fh.Open()\n\t\t\tdata, _ := io.ReadAll(f)\n\t\t\tf.Close()\n\t\t\tresult = append(result, map[string]interface{}{\"name\": fh.Filename, \"size\": len(data), \"type\": mime})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/uploads", "expectedStatus": 400 }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "List uploaded files",
+      "description": "Implement GET /uploads that returns a JSON array of all uploaded file metadata (name, size, type).",
+      "hints": ["Maintain a global list of uploaded file info", "Return the list as JSON array", "Return empty array if no uploads yet"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1<<20 } });\nconst uploadedFiles = [];\napp.post('/uploads', upload.array('files'), (req, res) => {\n  const infos = req.files.map(f => ({ name: f.originalname, size: f.size, type: f.mimetype }));\n  uploadedFiles.push(...infos);\n  res.json(infos);\n});\napp.get('/uploads', (req, res) => res.json(uploadedFiles));\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1<<20 } });\nconst uploadedFiles: { name: string; size: number; type: string }[] = [];\napp.post('/uploads', upload.array('files'), (req: Request, res: Response) => {\n  const infos = (req.files as Express.Multer.File[]).map(f => ({ name: f.originalname, size: f.size, type: f.mimetype }));\n  uploadedFiles.push(...infos);\n  res.json(infos);\n});\napp.get('/uploads', (_req: Request, res: Response) => res.json(uploadedFiles));\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom typing import List\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nuploaded_files = []\n@app.post('/uploads')\nasync def uploads(files: List[UploadFile] = File(...)):\n    result = []\n    for f in files:\n        data = await f.read()\n        info = {'name': f.filename, 'size': len(data), 'type': f.content_type}\n        result.append(info)\n        uploaded_files.append(info)\n    return result\n@app.get('/uploads')\ndef list_uploads():\n    return uploaded_files\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n)\n\ntype FileInfo struct {\n\tName string `json:\"name\"`\n\tSize int    `json:\"size\"`\n\tType string `json:\"type\"`\n}\n\nvar (\n\tuploadedFiles []FileInfo\n\tmu            sync.Mutex\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/uploads\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"POST\":\n\t\t\tr.ParseMultipartForm(1 << 20)\n\t\t\tfiles := r.MultipartForm.File[\"files\"]\n\t\t\tvar infos []FileInfo\n\t\t\tfor _, fh := range files {\n\t\t\t\tf, _ := fh.Open()\n\t\t\t\tdata, _ := io.ReadAll(f)\n\t\t\t\tf.Close()\n\t\t\t\tinfos = append(infos, FileInfo{Name: fh.Filename, Size: len(data), Type: fh.Header.Get(\"Content-Type\")})\n\t\t\t}\n\t\t\tmu.Lock()\n\t\t\tuploadedFiles = append(uploadedFiles, infos...)\n\t\t\tmu.Unlock()\n\t\t\tjson.NewEncoder(w).Encode(infos)\n\t\tcase \"GET\":\n\t\t\tmu.Lock()\n\t\t\tjson.NewEncoder(w).Encode(uploadedFiles)\n\t\t\tmu.Unlock()\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "GET", "path": "/uploads", "expectedStatus": 200, "expectedBodySubstring": "[" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "express-upload-single",
+  "title": "Single File Upload",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["file-upload", "multipart", "form-data", "express", "multer"],
+  "description": "Build a single file upload system with a form, multipart upload endpoint, and file retrieval by name.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Upload form page",
+      "description": "Serve an HTML form at GET /upload-form that allows users to select a file and submit it via POST to /upload.",
+      "hints": ["Return HTML with <form> using enctype='multipart/form-data'", "Include a file input and submit button", "Set action='/upload' and method='POST'"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\napp.get('/upload-form', (req, res) => {\n  res.send(`<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>`);\n});\napp.listen(port, () => console.log('Server on port ' + port));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\napp.get('/upload-form', (_req: Request, res: Response) => {\n  res.send('<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>');\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI\nfrom fastapi.responses import HTMLResponse\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n@app.get('/upload-form', response_class=HTMLResponse)\ndef upload_form():\n    return '<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>'\n",
+        "go": "package main\n\nimport (\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload-form\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t\tw.Write([]byte(`<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>`))\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "GET", "path": "/upload-form", "expectedStatus": 200 }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Upload endpoint",
+      "description": "Implement POST /upload that accepts a multipart file upload, stores the file in memory, and returns 200 with file info (name, size, type).",
+      "hints": ["Use multer (npm) for JS/TS file parsing", "Use python-multipart for FastAPI", "Store file in an in-memory map"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nconst files = {};\napp.post('/upload', upload.single('file'), (req, res) => {\n  const { originalname, buffer, mimetype, size } = req.file;\n  files[originalname] = { buffer, mimetype, size };\n  res.json({ name: originalname, size, type: mimetype });\n});\napp.get('/upload-form', (req, res) => {\n  res.send('<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>');\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nconst files: Record<string, { buffer: Buffer; mimetype: string; size: number }> = {};\napp.post('/upload', upload.single('file'), (req: Request, res: Response) => {\n  const file = req.file!;\n  files[file.originalname] = { buffer: file.buffer, mimetype: file.mimetype, size: file.size };\n  res.json({ name: file.originalname, size: file.size, type: file.mimetype });\n});\napp.get('/upload-form', (_req: Request, res: Response) => {\n  res.send('<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>');\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom fastapi.responses import HTMLResponse\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfiles = {}\n@app.post('/upload')\nasync def upload(file: UploadFile = File(...)):\n    content = await file.read()\n    files[file.filename] = {'data': content, 'mimetype': file.content_type, 'size': len(content)}\n    return {'name': file.filename, 'size': len(content), 'type': file.content_type}\n@app.get('/upload-form', response_class=HTMLResponse)\ndef upload_form():\n    return '<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>'\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n)\n\nvar files = map[string][]byte{}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfile, header, _ := r.FormFile(\"file\")\n\t\tdefer file.Close()\n\t\tdata, _ := io.ReadAll(file)\n\t\tfiles[header.Filename] = data\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"name\": header.Filename, \"size\": len(data), \"type\": header.Header.Get(\"Content-Type\")})\n\t})\n\n\thttp.HandleFunc(\"/upload-form\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t\tw.Write([]byte(`<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>`))\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/upload", "expectedStatus": 200, "expectedBodySubstring": "name" }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "File download endpoint",
+      "description": "Implement GET /files/:name that retrieves and returns a previously uploaded file by its name with the correct Content-Type and status 200.",
+      "hints": ["Look up the file by name in the in-memory store", "Set Content-Type header to the file's mimetype", "Return 404 if file not found"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nconst files = {};\napp.post('/upload', upload.single('file'), (req, res) => {\n  const { originalname, buffer, mimetype } = req.file;\n  files[originalname] = { buffer, mimetype };\n  res.json({ name: originalname, size: buffer.length, type: mimetype });\n});\napp.get('/files/:name', (req, res) => {\n  const f = files[req.params.name];\n  if (!f) return res.status(404).json({ error: 'Not found' });\n  res.set('Content-Type', f.mimetype);\n  res.send(f.buffer);\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\ninterface FileEntry { buffer: Buffer; mimetype: string; size: number }\nconst files: Record<string, FileEntry> = {};\napp.post('/upload', upload.single('file'), (req: Request, res: Response) => {\n  const file = req.file!;\n  files[file.originalname] = { buffer: file.buffer, mimetype: file.mimetype, size: file.size };\n  res.json({ name: file.originalname, size: file.size, type: file.mimetype });\n});\napp.get('/files/:name', (req: Request, res: Response) => {\n  const f = files[req.params.name];\n  if (!f) return res.status(404).json({ error: 'Not found' });\n  res.set('Content-Type', f.mimetype);\n  res.send(f.buffer);\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom fastapi.responses import Response, HTMLResponse\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfiles = {}\n@app.post('/upload')\nasync def upload(file: UploadFile = File(...)):\n    content = await file.read()\n    files[file.filename] = {'data': content, 'mimetype': file.content_type}\n    return {'name': file.filename, 'size': len(content), 'type': file.content_type}\n@app.get('/files/{name}')\ndef get_file(name: str):\n    f = files.get(name)\n    if not f: return Response(status_code=404)\n    return Response(content=f['data'], media_type=f['mimetype'])\n@app.get('/upload-form', response_class=HTMLResponse)\ndef upload_form():\n    return '<form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\"><button type=\"submit\">Upload</button></form>'\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n)\n\nvar files = map[string]struct {\n\tdata     []byte\n\tmimetype string\n}{}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfile, header, _ := r.FormFile(\"file\")\n\t\tdefer file.Close()\n\t\tdata, _ := io.ReadAll(file)\n\t\tfiles[header.Filename] = struct {\n\t\t\tdata     []byte\n\t\t\tmimetype string\n\t\t}{data, header.Header.Get(\"Content-Type\")}\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"name\": header.Filename, \"size\": len(data), \"type\": header.Header.Get(\"Content-Type\")})\n\t})\n\n\thttp.HandleFunc(\"/files/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tname := strings.TrimPrefix(r.URL.Path, \"/files/\")\n\t\tf, ok := files[name]\n\t\tif !ok { w.WriteHeader(404); json.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"}); return }\n\t\tw.Header().Set(\"Content-Type\", f.mimetype)\n\t\tw.Write(f.data)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "GET", "path": "/files/test.txt", "expectedStatus": 404 },
+          { "method": "POST", "path": "/upload", "expectedStatus": 200 },
+          { "method": "GET", "path": "/files/test.txt", "expectedStatus": 200 }
+        ]
+      }
+    }
+  ]
+}
