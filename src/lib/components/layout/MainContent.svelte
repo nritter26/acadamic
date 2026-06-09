@@ -142,6 +142,13 @@
   const DIFF_FILTERS = ['all', 'beginner', 'intermediate', 'advanced', 'expert'];
   const LANG_LABELS = { all: 'All', javascript: 'JS', typescript: 'TS', python: 'PY', java: 'Java', cs: 'C#', rb: 'Ruby', php: 'PHP', go: 'GO', rust: 'Rust', cpp: 'C++', c: 'C', zig: 'Zig', kt: 'KT', lua: 'Lua', swift: 'Swift', scala: 'Scala', bash: 'Bash', asm: 'ASM', wasm: 'WASM' };
   const DIFF_LABELS = { all: 'All', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' };
+  const LANG_ALIASES = { javascript: 'js', typescript: 'ts', python: 'py' };
+  function langMatchesFilter(projectLangs, filterVal) {
+    if (filterVal === 'all') return true;
+    if (!projectLangs) return false;
+    const alias = LANG_ALIASES[filterVal];
+    return projectLangs.some(l => l === filterVal || (alias && l === alias));
+  }
 
   $effect(() => {
     if (isTechStackMode && !curr.topic) {
@@ -170,7 +177,7 @@
   let filteredProjects = $derived(
     projects.filter(p => {
       if (projectDiffFilter !== 'all' && p.difficulty !== projectDiffFilter) return false;
-      if (projectLangFilter !== 'all' && (!p.languages || !p.languages.includes(projectLangFilter))) return false;
+      if (!langMatchesFilter(p.languages, projectLangFilter)) return false;
       if (projectFrameworkFilter !== 'all' && p.framework !== projectFrameworkFilter) return false;
       return true;
     })
