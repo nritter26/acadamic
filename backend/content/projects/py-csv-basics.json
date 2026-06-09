@@ -1,0 +1,16 @@
+{
+  "id": "py-csv-basics",
+  "title": "Python: CSV Basics",
+  "description": "Write a Python program that reads and processes CSV data using the csv module.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import csv\nfrom io import StringIO\n\ncsv_data = \"\"\"name,age,score\nAlice,30,95\nBob,25,87\nCharlie,35,92\n\"\"\"\n\nreader = csv.DictReader(StringIO(csv_data))\nstudents = list(reader)\n\nprint(\"Students:\")\nfor s in students:\n    print(f\"  {s['name']}: age {s['age']}, score {s['score']}\")\n\nscores = [int(s['score']) for s in students]\navg = sum(scores) / len(scores)\nprint(f\"Average score: {avg}\")\nprint(f\"Max score: {max(scores)}\")"
+  },
+  "verificationTest": "output.includes('Alice: age 30, score 95') && output.includes('Average score: 91.33') && output.includes('Max score: 95')",
+  "hints": [
+    "Use `csv.DictReader` to read CSV as dictionaries",
+    "StringIO allows treating a string as a file-like object",
+    "List comprehensions work well for extracting columns"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "py-fibonacci",
+  "title": "Python: Fibonacci Sequence",
+  "description": "Write a Python function that generates the Fibonacci sequence up to n terms.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def fibonacci(n):\n    fib = [0, 1]\n    for i in range(2, n):\n        fib.append(fib[i-1] + fib[i-2])\n    return fib[:n]\n\nresult = fibonacci(10)\nprint(f\"First 10 Fibonacci numbers: {result}\")\nprint(f\"Sum: {sum(result)}\")"
+  },
+  "verificationTest": "output.includes('0, 1, 1, 2, 3, 5, 8, 13, 21, 34') && output.includes('Sum: 88')",
+  "hints": [
+    "Start with the first two terms: 0 and 1",
+    "Each subsequent term is the sum of the two preceding terms",
+    "Slice the result to get exactly n terms"
+  ]
+}

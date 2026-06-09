@@ -1,0 +1,16 @@
+{
+  "id": "ts-generics",
+  "title": "TypeScript: Generics",
+  "description": "Write a TypeScript program that uses generic types for type-safe collections and functions.",
+  "difficulty": "intermediate",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "function first<T>(arr: T[]): T | undefined {\n  return arr[0];\n}\n\nfunction identity<T>(value: T): T {\n  return value;\n}\n\ninterface Pair<K, V> {\n  key: K;\n  value: V;\n}\n\nconst num = first([1, 2, 3]);\nconst str = first(['a', 'b', 'c']);\nconsole.log(`First number: ${num}`);\nconsole.log(`First string: ${str}`);\n\nconst pair: Pair<string, number> = { key: 'age', value: 30 };\nconsole.log(`Pair: ${pair.key} = ${pair.value}`);\n\nconst id = identity<string>('TypeScript');\nconsole.log(`Identity: ${id}`);"
+  },
+  "verificationTest": "output.includes('First number: 1') && output.includes('First string: a') && output.includes('Pair: age = 30') && output.includes('Identity: TypeScript')",
+  "hints": [
+    "Generics use `<T>` syntax: `function func<T>(arg: T): T`",
+    "Multiple type params: `<K, V>` for keys and values",
+    "Generic interfaces: `interface Name<T> { ... }`"
+  ]
+}

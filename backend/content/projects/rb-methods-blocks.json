@@ -1,0 +1,17 @@
+{
+  "id": "rb-methods-blocks",
+  "title": "Ruby: Methods and Blocks",
+  "description": "Write a Ruby program demonstrating method definitions, blocks, procs, and lambdas.",
+  "difficulty": "beginner",
+  "languages": ["rb"],
+  "codeTemplate": {
+    "rb": "# Methods\ndef greet(name)\n  \"Hello, #{name}!\"\nend\n\ndef add(a, b)\n  a + b\nend\n\nputs greet('Ruby')\nputs \"3 + 5 = #{add(3, 5)}\"\n\n# Blocks\nputs \"\\nEach:\"\n[1, 2, 3].each { |n| puts \"  #{n} squared = #{n * n}\" }\n\nputs \"\\nTimes:\"\n3.times { |i| puts \"  iteration #{i + 1}\" }\n\n# Proc\nmultiply = Proc.new { |x, y| x * y }\nputs \"\\nProc result: #{multiply.call(4, 5)}\"\n\n# Lambda\nsquare = ->(x) { x * x }\nputs \"Lambda: #{square.call(6)}\"\n\n# Yield\n\ndef repeat(times)\n  times.times { |i| yield i }\nend\n\nputs \"\\nYield:\"\nrepeat(3) { |i| puts \"  hello #{i + 1}\" }"
+  },
+  "verificationTest": "output.includes('Hello, Ruby!') && output.includes('3 + 5 = 8') && output.includes('1 squared = 1') && output.includes('Proc result: 20')",
+  "hints": [
+    "Methods return the last expression evaluated",
+    "Blocks are chunks of code passed to methods, using `do..end` or `{..}`",
+    "Procs are objects that wrap blocks, lambdas are a special type of Proc",
+    "`yield` calls the block passed to a method"
+  ]
+}

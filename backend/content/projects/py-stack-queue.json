@@ -1,0 +1,16 @@
+{
+  "id": "py-stack-queue",
+  "title": "Python: Stack and Queue",
+  "description": "Write a Python program implementing a stack (LIFO) and queue (FIFO) using lists and collections.deque.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "from collections import deque\n\nprint(\"Stack (LIFO):\")\nstack = []\nfor item in ['a', 'b', 'c']:\n    stack.append(item)\n    print(f\"  Push: {item}\")\nwhile stack:\n    print(f\"  Pop: {stack.pop()}\")\n\nprint(\"\\nQueue (FIFO):\")\nqueue = deque()\nfor item in ['x', 'y', 'z']:\n    queue.append(item)\n    print(f\"  Enqueue: {item}\")\nwhile queue:\n    print(f\"  Dequeue: {queue.popleft()}\")"
+  },
+  "verificationTest": "output.includes('Stack (LIFO):') && output.includes('Push: a') && output.includes('Pop: c') && output.includes('Queue (FIFO):')",
+  "hints": [
+    "Use `list.append()` and `list.pop()` for a stack (LIFO)",
+    "Use `deque.append()` and `deque.popleft()` for a queue (FIFO)",
+    "`collections.deque` is optimized for fast appends and pops on both ends"
+  ]
+}

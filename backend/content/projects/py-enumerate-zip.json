@@ -1,0 +1,16 @@
+{
+  "id": "py-enumerate-zip",
+  "title": "Python: Enumerate and Zip",
+  "description": "Write a Python program demonstrating the enumerate() and zip() functions for clean iteration.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "names = ['Alice', 'Bob', 'Charlie', 'Diana']\nscores = [95, 87, 92, 78]\ngrades = ['A', 'B', 'A', 'C']\n\nprint(\"Rankings:\")\nfor i, name in enumerate(names, 1):\n    print(f\"  {i}. {name}\")\n\nprint(\"\\nStudent data:\")\nfor name, score, grade in zip(names, scores, grades):\n    print(f\"  {name}: {score} ({grade})\")\n\ncombined = list(zip(names, scores))\nprint(f\"\\nCombined list: {combined}\")"
+  },
+  "verificationTest": "output.includes('Rankings:') && output.includes('1. Alice') && output.includes('2. Bob') && output.includes('Alice: 95 (A)')",
+  "hints": [
+    "`enumerate(iterable, start=0)` yields (index, value) pairs",
+    "`zip(*iterables)` pairs up elements from multiple iterables",
+    "Use `list()` to realize a zip object into a list"
+  ]
+}

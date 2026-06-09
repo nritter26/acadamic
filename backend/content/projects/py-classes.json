@@ -1,0 +1,17 @@
+{
+  "id": "py-classes",
+  "title": "Python: Classes & Objects",
+  "description": "Write a Python program that defines a BankAccount class with deposit, withdraw, and balance methods.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self.balance = balance\n    \n    def deposit(self, amount):\n        self.balance += amount\n        return f\"Deposited ${amount}. Balance: ${self.balance}\"\n    \n    def withdraw(self, amount):\n        if amount > self.balance:\n            return \"Insufficient funds\"\n        self.balance -= amount\n        return f\"Withdrew ${amount}. Balance: ${self.balance}\"\n    \n    def __str__(self):\n        return f\"{self.owner}'s account: ${self.balance}\"\n\nacc = BankAccount(\"Alice\", 100)\nprint(acc)\nprint(acc.deposit(50))\nprint(acc.withdraw(30))\nprint(acc.withdraw(200))"
+  },
+  "verificationTest": "output.includes(\"Alice's account: $100\") && output.includes('Deposited $50. Balance: $150') && output.includes('Withdrew $30. Balance: $120') && output.includes('Insufficient funds')",
+  "hints": [
+    "Define a class with `class Name:`",
+    "Constructor is `__init__(self, ...)`",
+    "All instance methods take `self` as the first parameter",
+    "Use `__str__` for a readable string representation"
+  ]
+}

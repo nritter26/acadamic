@@ -1,0 +1,16 @@
+{
+  "id": "js-functions",
+  "title": "JavaScript: Functions",
+  "description": "Write a JavaScript program that demonstrates function declarations, arrow functions, and default parameters.",
+  "difficulty": "beginner",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconst add = (a, b) => a + b;\n\nconst multiply = (a, b = 1) => a * b;\n\nconsole.log(greet('World'));\nconsole.log(`3 + 7 = ${add(3, 7)}`);\nconsole.log(`5 * 3 = ${multiply(5, 3)}`);\nconsole.log(`5 * default = ${multiply(5)}`);"
+  },
+  "verificationTest": "output.includes('Hello, World!') && output.includes('3 + 7 = 10') && output.includes('5 * 3 = 15') && output.includes('5 * default = 5')",
+  "hints": [
+    "Function declarations: `function name(params) { }`",
+    "Arrow functions: `(params) => expression`",
+    "Default parameters: `function(a, b = defaultValue)`"
+  ]
+}

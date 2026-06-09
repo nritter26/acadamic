@@ -1,0 +1,17 @@
+{
+  "id": "java-arrays",
+  "title": "Java: Arrays",
+  "description": "Write a Java program that declares, initializes, and manipulates arrays.",
+  "difficulty": "beginner",
+  "languages": ["java"],
+  "codeTemplate": {
+    "java": "public class Main {\n    public static void main(String[] args) {\n        int[] numbers = {10, 20, 30, 40, 50};\n        \n        System.out.println(\"First: \" + numbers[0]);\n        System.out.println(\"Last: \" + numbers[numbers.length - 1]);\n        System.out.println(\"Length: \" + numbers.length);\n        \n        int sum = 0;\n        for (int n : numbers) {\n            sum += n;\n        }\n        System.out.println(\"Sum: \" + sum);\n        \n        int[] squared = new int[numbers.length];\n        for (int i = 0; i < numbers.length; i++) {\n            squared[i] = numbers[i] * numbers[i];\n        }\n        System.out.print(\"Squared: \");\n        for (int s : squared) {\n            System.out.print(s + \" \");\n        }\n        System.out.println();\n    }\n}"
+  },
+  "verificationTest": "output.includes('First: 10') && output.includes('Last: 50') && output.includes('Length: 5') && output.includes('Sum: 150') && output.includes('Squared: 100 400 900 1600 2500')",
+  "hints": [
+    "Array declaration: `type[] name = {values}` or `new type[size]`",
+    "`array.length` gives the number of elements",
+    "Use enhanced for loop: `for (type var : array)`",
+    "Squared values: 100, 400, 900, 1600, 2500"
+  ]
+}

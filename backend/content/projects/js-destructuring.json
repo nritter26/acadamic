@@ -1,0 +1,17 @@
+{
+  "id": "js-destructuring",
+  "title": "JavaScript: Destructuring",
+  "description": "Write a JavaScript program that uses array and object destructuring with spread/rest operators.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "// Array destructuring\nconst colors = ['red', 'green', 'blue', 'yellow'];\nconst [first, second, ...rest] = colors;\nconsole.log(`First: ${first}, Second: ${second}`);\nconsole.log(`Rest: ${rest}`);\n\n// Object destructuring\nconst person = { name: 'Alice', age: 30, city: 'NYC' };\nconst { name, age, ...others } = person;\nconsole.log(`Name: ${name}, Age: ${age}`);\nconsole.log(`Others: ${JSON.stringify(others)}`);\n\n// Spread operator\nconst arr1 = [1, 2, 3];\nconst arr2 = [4, 5, 6];\nconst combined = [...arr1, ...arr2];\nconsole.log(`Combined: ${combined}`);\n\n// Default values\nconst options = { title: 'Hello' };\nconst { title, subtitle = 'Default Subtitle' } = options;\nconsole.log(`${title} - ${subtitle}`);"
+  },
+  "verificationTest": "output.includes('First: red, Second: green') && output.includes('Rest: blue,yellow') && output.includes('Name: Alice, Age: 30') && output.includes('Combined: 1,2,3,4,5,6') && output.includes('Hello - Default Subtitle')",
+  "hints": [
+    "Array destructuring: `const [a, b] = [1, 2]`",
+    "Object destructuring: `const {name} = obj`",
+    "Rest operator collects remaining items: `...rest`",
+    "Spread expands iterables: `[...arr1, ...arr2]`"
+  ]
+}

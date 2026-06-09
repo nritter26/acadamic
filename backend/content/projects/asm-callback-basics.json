@@ -1,0 +1,16 @@
+{
+  "id": "asm-callback-basics",
+  "title": "Assembly: Callback Basics",
+  "description": "Practice callback basics in Assembly.",
+  "difficulty": "intermediate",
+  "languages": [
+    "asm"
+  ],
+  "codeTemplate": {
+    "asm": "; callback basics\\nsection .data\\n    msg db 'callback basics',0\\nsection .text\\n    global _start\\n_start:\\n    mov eax,4\\n    mov ebx,1\\n    mov ecx,msg\\n    int 0x80\\n    mov eax,1\\n    xor ebx,ebx\\n    int 0x80"
+  },
+  "verificationTest": "output && output.length > 0",
+  "hints": [
+    "Learn callback basics in Assembly"
+  ]
+}

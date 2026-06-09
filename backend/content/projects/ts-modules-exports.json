@@ -1,0 +1,18 @@
+{
+  "id": "ts-modules-exports",
+  "title": "TypeScript: Modules and Exports",
+  "description": "Write a TypeScript program demonstrating module patterns with imports and exports.",
+  "difficulty": "intermediate",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "namespace Geometry {\n  export interface Shape {\n    area(): number;\n  }\n\n  export class Circle implements Shape {\n    constructor(private radius: number) {}\n    area(): number {\n      return Math.PI * this.radius ** 2;\n    }\n  }\n\n  export class Rectangle implements Shape {\n    constructor(private w: number, private h: number) {}\n    area(): number {\n      return this.w * this.h;\n    }\n  }\n}\n\nconst shapes: Geometry.Shape[] = [\n  new Geometry.Circle(5),\n  new Geometry.Rectangle(4, 6)\n];\n\nfor (const s of shapes) {\n  console.log(`Area: ${s.area().toFixed(2)}`);\n}\n\ntype Logger = (msg: string) => void;\n\nconst info: Logger = (msg) => console.log(`[INFO] ${msg}`);\nconst error: Logger = (msg) => console.log(`[ERROR] ${msg}`);\n\ninfo('System ready');\nerror('Connection failed');"
+  },
+  "instructions": "TypeScript modules and exports project",
+  "path": "backend/content/projects/ts-modules-exports.json",
+  "verificationTest": "output.includes('Area: 78.54') && output.includes('Area: 24.00') && output.includes('[INFO] System ready')",
+  "hints": [
+    "Namespaces group related code under a single name",
+    "Use `export` to make members accessible outside a namespace",
+    "Type aliases work well for function type signatures"
+  ]
+}

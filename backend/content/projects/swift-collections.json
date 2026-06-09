@@ -1,0 +1,16 @@
+{
+  "id": "swift-collections",
+  "title": "Swift: Collections",
+  "description": "Write a Swift program demonstrating arrays, dictionaries, sets, and functional operations.",
+  "difficulty": "beginner",
+  "languages": ["swift"],
+  "codeTemplate": {
+    "swift": "// Array\nvar numbers = [1, 2, 3, 4, 5]\nprint(\"Original: \\(numbers)\")\nnumbers.append(6)\nprint(\"After append: \\(numbers)\")\nprint(\"Sum: \\(numbers.reduce(0, +))\")\n\n// Dictionary\nvar scores = [\"Alice\": 95, \"Bob\": 87, \"Charlie\": 92]\nprint(\"\\nScores: \\(scores)\")\nprint(\"Alice score: \\(scores[\"Alice\"]!)\")\nscores[\"Diana\"] = 78\nprint(\"After add: \\(scores)\")\n\n// Set\nlet evenSet: Set = [2, 4, 6, 8, 10]\nlet smallSet: Set = [1, 2, 3, 4, 5]\nprint(\"\\nUnion: \\(evenSet.union(smallSet).sorted())\")\nprint(\"Intersection: \\(evenSet.intersection(smallSet).sorted())\")\n\n// Functional\nlet doubled = numbers.map { $0 * 2 }\nprint(\"\\nDoubled: \\(doubled)\")\nlet evens = numbers.filter { $0 % 2 == 0 }\nprint(\"Evens: \\(evens)\")"
+  },
+  "verificationTest": "output.includes('Original: [1, 2, 3, 4, 5]') && output.includes('Sum: 21') && output.includes('Alice score: 95')",
+  "hints": [
+    "Arrays are ordered collections, dictionaries are key-value, sets are unordered unique",
+    "Use `reduce`, `filter`, `map` for functional transformations",
+    "Dictionaries return Optionals — use `!` to force unwrap when sure"
+  ]
+}

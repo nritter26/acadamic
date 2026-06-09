@@ -1,0 +1,16 @@
+{
+  "id": "ts-enums",
+  "title": "TypeScript: Enums",
+  "description": "Write a TypeScript program that uses numeric and string enums for representing states.",
+  "difficulty": "intermediate",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "enum Direction {\n  North,\n  South,\n  East,\n  West\n}\n\nenum Status {\n  Pending = 'PENDING',\n  Active = 'ACTIVE',\n  Completed = 'COMPLETED',\n  Failed = 'FAILED'\n}\n\nfunction getDirectionMessage(dir: Direction): string {\n  switch (dir) {\n    case Direction.North: return 'Going North';\n    case Direction.South: return 'Going South';\n    case Direction.East: return 'Going East';\n    case Direction.West: return 'Going West';\n  }\n}\n\nconsole.log(getDirectionMessage(Direction.North));\nconsole.log(`Direction value: ${Direction.North}`);\nconsole.log(`Status: ${Status.Active}`);\nconsole.log(`All directions: ${Direction.North}, ${Direction.South}, ${Direction.East}, ${Direction.West}`);"
+  },
+  "verificationTest": "output.includes('Going North') && output.includes('Direction value: 0') && output.includes('Status: ACTIVE') && output.includes('All directions: 0, 1, 2, 3')",
+  "hints": [
+    "Numeric enums auto-increment starting from 0",
+    "String enums have explicit string values",
+    "Use switch/case with enum members for exhaustive handling"
+  ]
+}

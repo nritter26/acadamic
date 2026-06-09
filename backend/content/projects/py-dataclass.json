@@ -1,0 +1,16 @@
+{
+  "id": "py-dataclass",
+  "title": "Python: Dataclasses",
+  "description": "Write a Python program that uses the dataclass decorator to create data-oriented classes.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "from dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: float\n    y: float\n\n@dataclass\nclass Rectangle:\n    width: float\n    height: float\n\n    def area(self):\n        return self.width * self.height\n    \n    def perimeter(self):\n        return 2 * (self.width + self.height)\n\np = Point(3.0, 4.0)\nr = Rectangle(5.0, 3.0)\n\nprint(f\"Point: {p}\")\nprint(f\"Rectangle: {r}\")\nprint(f\"Area: {r.area()}\")\nprint(f\"Perimeter: {r.perimeter()}\")\nprint(f\"Point x: {p.x}\")"
+  },
+  "verificationTest": "output.includes('Point: Point(x=3.0, y=4.0)') && output.includes('Area: 15.0') && output.includes('Perimeter: 16.0')",
+  "hints": [
+    "`@dataclass` auto-generates __init__, __repr__, __eq__",
+    "Type annotations are required: `field_name: type`",
+    "Can add regular methods alongside auto-generated ones"
+  ]
+}

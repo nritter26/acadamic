@@ -1,0 +1,16 @@
+{
+  "id": "js-prototypes",
+  "title": "JavaScript: Prototypes",
+  "description": "Write a JavaScript program that demonstrates prototypal inheritance using constructor functions.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "function Animal(name) {\n  this.name = name;\n}\n\nAnimal.prototype.speak = function() {\n  return `${this.name} makes a sound`;\n};\n\nfunction Dog(name) {\n  Animal.call(this, name);\n}\n\nDog.prototype = Object.create(Animal.prototype);\nDog.prototype.constructor = Dog;\nDog.prototype.speak = function() {\n  return `${this.name} says Woof!`;\n};\n\nconst animal = new Animal('Creature');\nconst dog = new Dog('Buddy');\n\nconsole.log(animal.speak());\nconsole.log(dog.speak());\nconsole.log(`Dog is Animal: ${dog instanceof Animal}`);\nconsole.log(`Dog is Dog: ${dog instanceof Dog}`);"
+  },
+  "verificationTest": "output.includes('Creature makes a sound') && output.includes('Buddy says Woof!') && output.includes('Dog is Animal: true')",
+  "hints": [
+    "Use `Constructor.prototype.method = function() {}` to add methods",
+    "`Object.create(Parent.prototype)` sets up prototype chain",
+    "`instanceof` checks if an object is an instance of a constructor"
+  ]
+}

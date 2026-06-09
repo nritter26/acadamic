@@ -1,0 +1,17 @@
+{
+  "id": "py-decorators",
+  "title": "Python: Decorators",
+  "description": "Write a Python program that defines and uses a decorator to time function execution.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        elapsed = time.time() - start\n        print(f\"{func.__name__} took {elapsed:.4f}s\")\n        return result\n    return wrapper\n\n@timer\ndef slow_add(a, b):\n    time.sleep(0.01)\n    return a + b\n\n@timer\ndef slow_square(n):\n    time.sleep(0.01)\n    return n * n\n\nresult1 = slow_add(3, 7)\nresult2 = slow_square(5)\nprint(f\"3 + 7 = {result1}\")\nprint(f\"5^2 = {result2}\")"
+  },
+  "verificationTest": "output.includes('3 + 7 = 10') && output.includes('5^2 = 25') && output.includes('took')",
+  "hints": [
+    "A decorator is a function that wraps another function",
+    "Use `*args, **kwargs` to pass through any arguments",
+    "`@decorator` syntax is syntactic sugar for `func = decorator(func)`",
+    "`func.__name__` gives the wrapped function's name"
+  ]
+}

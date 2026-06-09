@@ -1,0 +1,16 @@
+{
+  "id": "ts-type-aliases",
+  "title": "TypeScript: Type Aliases",
+  "description": "Write a TypeScript program using type aliases, union types, and intersection types.",
+  "difficulty": "beginner",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "type ID = string | number;\ntype Name = { firstName: string; lastName: string };\ntype Age = { age: number };\ntype Person = Name & Age;\ntype Status = 'active' | 'inactive' | 'pending';\n\nfunction formatId(id: ID): string {\n  return `ID: ${id}`;\n}\n\nfunction greet(person: Person): void {\n  console.log(`Hello, ${person.firstName} ${person.lastName}!`);\n  console.log(`Age: ${person.age}`);\n}\n\nfunction getStatusMessage(status: Status): string {\n  switch (status) {\n    case 'active': return 'User is active';\n    case 'inactive': return 'User is inactive';\n    case 'pending': return 'User is pending';\n  }\n}\n\nconsole.log(formatId(123));\nconsole.log(formatId('abc'));\ngreet({ firstName: 'Alice', lastName: 'Smith', age: 30 });\nconsole.log(getStatusMessage('active'));"
+  },
+  "verificationTest": "output.includes('ID: 123') && output.includes('ID: abc') && output.includes('Hello, Alice Smith!') && output.includes('User is active')",
+  "hints": [
+    "Use `type` keyword to create type aliases",
+    "Union types allow a value to be one of several types",
+    "Intersection types combine multiple types with &"
+  ]
+}

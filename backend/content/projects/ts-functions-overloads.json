@@ -1,0 +1,16 @@
+{
+  "id": "ts-functions-overloads",
+  "title": "TypeScript: Function Overloads",
+  "description": "Write a TypeScript program demonstrating function overloads and type guards.",
+  "difficulty": "intermediate",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "// Function overloads\nfunction combine(a: string, b: string): string;\nfunction combine(a: number, b: number): number;\nfunction combine(a: boolean, b: boolean): boolean;\nfunction combine(a: any, b: any): any {\n  if (typeof a === 'string' && typeof b === 'string') {\n    return a + ' ' + b;\n  }\n  if (typeof a === 'number' && typeof b === 'number') {\n    return a + b;\n  }\n  return a && b;\n}\n\nconsole.log(combine('Hello', 'World'));\nconsole.log(combine(10, 20));\nconsole.log(combine(true, false));\n\n// Type guard function\nfunction isString(value: any): value is string {\n  return typeof value === 'string';\n}\n\nfunction process(value: string | number): void {\n  if (isString(value)) {\n    console.log(`String length: ${value.length}`);\n  } else {\n    console.log(`Number squared: ${value * value}`);\n  }\n}\n\nprocess('TypeScript');\nprocess(7);"
+  },
+  "verificationTest": "output.includes('Hello World') && output.includes('30') && output.includes('String length: 10') && output.includes('Number squared: 49')",
+  "hints": [
+    "Function overloads provide multiple type signatures for one function",
+    "Only the implementation signature has a body",
+    "Type predicates (`value is string`) narrow types in type guards"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "cs-variables",
+  "title": "C#: Variables & Types",
+  "description": "Write a C# program that declares variables with different types using implicit and explicit typing.",
+  "difficulty": "beginner",
+  "languages": ["cs"],
+  "codeTemplate": {
+    "cs": "using System;\n\nclass Program {\n    static void Main() {\n        string name = \"C#\";\n        int version = 12;\n        double pi = 3.14159;\n        bool isFun = true;\n        var message = \"Implicitly typed!\";\n        \n        Console.WriteLine($\"Name: {name}\");\n        Console.WriteLine($\"Version: {version}\");\n        Console.WriteLine($\"Pi: {pi}\");\n        Console.WriteLine($\"Is fun: {isFun}\");\n        Console.WriteLine(message);\n    }\n}"
+  },
+  "verificationTest": "output.includes('Name: C#') && output.includes('Version: 12') && output.includes('Pi: 3.14159') && output.includes('Is fun: True') && output.includes('Implicitly typed!')",
+  "hints": [
+    "Use explicit types: `int x = 5;` or `var x = 5;` for implicit typing",
+    "`var` is resolved at compile time",
+    "String interpolation: `$\"text {variable}\"`"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "py-regex-basics",
+  "title": "Python: Regex Basics",
+  "description": "Write a Python program that uses regular expressions to search, match, and extract patterns from text.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import re\n\ntext = \"Contact us at support@example.com or sales@example.org. Call (555) 123-4567.\"\n\nemails = re.findall(r'[\\w.]+@[\\w.]+', text)\nprint(f\"Emails: {emails}\")\n\nphone = re.search(r'\\(\\d{3}\\) \\d{3}-\\d{4}', text)\nif phone:\n    print(f\"Phone: {phone.group()}\")\n\nwords_with_a = re.findall(r'\\b\\w*a\\w*\\b', text.lower())\nprint(f\"Words containing 'a': {words_with_a}\")\n\nclean = re.sub(r'[^\\w\\s@.]', '', text)\nprint(f\"Cleaned: {clean}\")"
+  },
+  "verificationTest": "output.includes('Emails: ') && output.includes('Phone: (555) 123-4567')",
+  "hints": [
+    "Use `re.findall()` to find all matches of a pattern",
+    "Use `re.search()` to find the first match",
+    "Use `re.sub()` to replace patterns",
+    "Raw strings `r'...'` avoid escaping backslashes"
+  ]
+}

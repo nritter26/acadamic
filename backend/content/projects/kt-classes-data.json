@@ -1,0 +1,17 @@
+{
+  "id": "kt-classes-data",
+  "title": "Kotlin: Classes and Data Classes",
+  "description": "Write a Kotlin program demonstrating classes, data classes, and object declarations.",
+  "difficulty": "beginner",
+  "languages": ["kt"],
+  "codeTemplate": {
+    "kt": "// Data class\n data class Person(val name: String, var age: Int)\n\n// Class with methods\nclass Calculator {\n    fun add(a: Int, b: Int) = a + b\n    fun multiply(a: Int, b: Int) = a * b\n    fun power(a: Double, b: Double) = Math.pow(a, b)\n}\n\n// Object (singleton)\nobject MathUtils {\n    fun factorial(n: Int): Long {\n        return if (n <= 1) 1 else n * factorial(n - 1)\n    }\n}\n\nfun main() {\n    val alice = Person(\"Alice\", 30)\n    val bob = alice.copy(name = \"Bob\", age = 25)\n    \n    println(\"Person: $alice\")\n    println(\"Bob: $bob\")\n    println(\"Same? ${alice == bob}\")\n    \n    val calc = Calculator()\n    println(\"3 + 4 = ${calc.add(3, 4)}\")\n    println(\"6 * 7 = ${calc.multiply(6, 7)}\")\n    \n    println(\"Factorial 5 = ${MathUtils.factorial(5)}\")\n}"
+  },
+  "verificationTest": "output.includes('Person: Person(name=Alice, age=30)') && output.includes('3 + 4 = 7') && output.includes('Factorial 5 = 120')",
+  "hints": [
+    "Data classes automatically generate equals(), hashCode(), toString(), copy()",
+    "Use `data class` for classes that primarily hold data",
+    "`object` declarations create singletons",
+    "Single-expression functions use `= expression` syntax"
+  ]
+}

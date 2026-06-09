@@ -1,0 +1,16 @@
+{
+  "id": "py-sqlite-sim",
+  "title": "Python: Simulated Database",
+  "description": "Write a Python program that simulates a simple in-memory database with tables, insert, and select operations.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class Table:\n    def __init__(self, name, columns):\n        self.name = name\n        self.columns = columns\n        self.rows = []\n    \n    def insert(self, values):\n        self.rows.append(dict(zip(self.columns, values)))\n    \n    def select_all(self):\n        return self.rows\n    \n    def select_where(self, col, value):\n        return [r for r in self.rows if r.get(col) == value]\n\ndb = {}\ndb['users'] = Table('users', ['id', 'name', 'age'])\ndb['users'].insert([1, 'Alice', 30])\ndb['users'].insert([2, 'Bob', 25])\ndb['users'].insert([3, 'Charlie', 35])\n\nfor user in db['users'].select_all():\n    print(f\"{user['id']}: {user['name']} ({user['age']})\")\n\nprint(\"\\nUsers age 30:\")\nfor user in db['users'].select_where('age', 30):\n    print(f\"  {user['name']}\")"
+  },
+  "verificationTest": "output.includes('1: Alice (30)') && output.includes('2: Bob (25)') && output.includes('3: Charlie (35)') && output.includes('Alice')",
+  "hints": [
+    "Use dict for in-memory storage with column names as keys",
+    "`zip(self.columns, values)` pairs column names with values",
+    "List comprehensions with conditions can filter rows"
+  ]
+}

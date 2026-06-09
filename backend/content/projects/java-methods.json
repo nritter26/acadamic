@@ -1,0 +1,16 @@
+{
+  "id": "java-methods",
+  "title": "Java: Methods",
+  "description": "Write a Java program that defines and calls methods with parameters and return values.",
+  "difficulty": "beginner",
+  "languages": ["java"],
+  "codeTemplate": {
+    "java": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(greet(\"Java\"));\n        System.out.println(\"3 + 7 = \" + add(3, 7));\n        System.out.println(\"Factorial 5: \" + factorial(5));\n        System.out.println(\"Is 10 even? \" + isEven(10));\n    }\n    \n    static String greet(String name) {\n        return \"Hello, \" + name + \"!\";\n    }\n    \n    static int add(int a, int b) {\n        return a + b;\n    }\n    \n    static int factorial(int n) {\n        if (n <= 1) return 1;\n        return n * factorial(n - 1);\n    }\n    \n    static boolean isEven(int n) {\n        return n % 2 == 0;\n    }\n}"
+  },
+  "verificationTest": "output.includes('Hello, Java!') && output.includes('3 + 7 = 10') && output.includes('Factorial 5: 120') && output.includes('Is 10 even? true')",
+  "hints": [
+    "Method declaration: `static ReturnType name(Params) { }`",
+    "Methods must specify return type or `void`",
+    "`static` methods belong to the class, not instances"
+  ]
+}

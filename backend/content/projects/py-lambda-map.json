@@ -1,0 +1,16 @@
+{
+  "id": "py-lambda-map",
+  "title": "Python: Lambda, Map & Filter",
+  "description": "Write a Python program that uses lambda functions with map() and filter() to process data.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n\nsquared = list(map(lambda x: x**2, numbers))\nevens = list(filter(lambda x: x % 2 == 0, numbers))\ncelsius = [0, 10, 20, 30, 40]\nfahrenheit = list(map(lambda c: c * 9/5 + 32, celsius))\n\nprint(f\"Squared: {squared}\")\nprint(f\"Evens: {evens}\")\nprint(f\"Celsius: {celsius}\")\nprint(f\"Fahrenheit: {fahrenheit}\")"
+  },
+  "verificationTest": "output.includes('Squared: [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]') && output.includes('Evens: [2, 4, 6, 8, 10]') && output.includes('Fahrenheit: [32.0, 50.0, 68.0, 86.0, 104.0]')",
+  "hints": [
+    "Lambda: `lambda args: expression` creates an anonymous function",
+    "`map(func, iterable)` applies func to each element",
+    "`filter(func, iterable)` keeps elements where func returns True"
+  ]
+}

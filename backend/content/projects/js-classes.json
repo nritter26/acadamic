@@ -1,0 +1,17 @@
+{
+  "id": "js-classes",
+  "title": "JavaScript: ES6 Classes",
+  "description": "Write a JavaScript program that uses ES6 class syntax with inheritance and static methods.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "class Vehicle {\n  constructor(type, speed) {\n    this.type = type;\n    this.speed = speed;\n  }\n  \n  move() {\n    return `${this.type} moves at ${this.speed} km/h`;\n  }\n  \n  static info() {\n    return 'Vehicles transport people and goods';\n  }\n}\n\nclass Car extends Vehicle {\n  constructor(brand, speed) {\n    super('Car', speed);\n    this.brand = brand;\n  }\n  \n  honk() {\n    return `${this.brand} goes Beep!`;\n  }\n}\n\nconst car = new Car('Tesla', 200);\nconsole.log(car.move());\nconsole.log(car.honk());\nconsole.log(Vehicle.info());\nconsole.log(`Car is Vehicle: ${car instanceof Vehicle}`);"
+  },
+  "verificationTest": "output.includes('Car moves at 200 km/h') && output.includes('Tesla goes Beep!') && output.includes('Vehicles transport people and goods') && output.includes('Car is Vehicle: true')",
+  "hints": [
+    "Use `class` keyword for ES6 class syntax",
+    "`constructor()` initializes new instances",
+    "`extends` sets up inheritance, `super()` calls parent constructor",
+    "Static methods are called on the class, not instances"
+  ]
+}

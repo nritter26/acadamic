@@ -1,0 +1,17 @@
+{
+  "id": "py-os-module",
+  "title": "Python: OS Module Basics",
+  "description": "Write a Python program that uses the os module to work with file paths and environment variables.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import os\n\ncwd = os.getcwd()\nprint(f\"Current directory: {cwd}\")\n\nnew_path = os.path.join('folder', 'subfolder', 'file.txt')\nprint(f\"Joined path: {new_path}\")\n\npath_parts = os.path.splitext('document.txt')\nprint(f\"File parts: {path_parts}\")\n\nenv_var = os.environ.get('HOME', 'not set')\nprint(f\"HOME: {env_var}\")\n\nitems = os.listdir('.')\nprint(f\"Files: {len(items)} items\")"
+  },
+  "verificationTest": "output.includes('Current directory:') && output.includes('Joined path:') && output.includes('File parts:')",
+  "hints": [
+    "Use `os.getcwd()` to get the current working directory",
+    "`os.path.join()` creates platform-independent paths",
+    "`os.path.splitext()` splits filename from extension",
+    "`os.environ` provides access to environment variables"
+  ]
+}

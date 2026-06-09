@@ -1,0 +1,16 @@
+{
+  "id": "py-binary-search",
+  "title": "Python: Binary Search",
+  "description": "Write a Python program implementing binary search recursively and iteratively.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def binary_search_iterative(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\ndef binary_search_recursive(arr, target, low, high):\n    if low > high:\n        return -1\n    mid = (low + high) // 2\n    if arr[mid] == target:\n        return mid\n    elif arr[mid] < target:\n        return binary_search_recursive(arr, target, mid + 1, high)\n    else:\n        return binary_search_recursive(arr, target, low, mid - 1)\n\nnumbers = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]\nprint(f\"Searching in: {numbers}\")\nprint(f\"Find 23 (iter): {binary_search_iterative(numbers, 23)}\")\nprint(f\"Find 23 (rec): {binary_search_recursive(numbers, 23, 0, len(numbers)-1)}\")\nprint(f\"Find 99: {binary_search_iterative(numbers, 99)}\")"
+  },
+  "verificationTest": "output.includes('Find 23 (iter): 5') && output.includes('Find 99: -1')",
+  "hints": [
+    "Binary search requires a sorted array",
+    "Repeatedly divide the search interval in half",
+    "Return the index if found, -1 otherwise"
+  ]
+}

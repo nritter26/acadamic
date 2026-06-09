@@ -1,0 +1,16 @@
+{
+  "id": "asm-input-output",
+  "title": "Assembly: Input Output",
+  "description": "Practice input output in Assembly.",
+  "difficulty": "intermediate",
+  "languages": [
+    "asm"
+  ],
+  "codeTemplate": {
+    "asm": "; input output\\nsection .data\\n    msg db 'input output',0\\nsection .text\\n    global _start\\n_start:\\n    mov eax,4\\n    mov ebx,1\\n    mov ecx,msg\\n    int 0x80\\n    mov eax,1\\n    xor ebx,ebx\\n    int 0x80"
+  },
+  "verificationTest": "output && output.length > 0",
+  "hints": [
+    "Learn input output in Assembly"
+  ]
+}

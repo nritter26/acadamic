@@ -1,0 +1,17 @@
+{
+  "id": "py-exceptions",
+  "title": "Python: Exception Handling",
+  "description": "Write a Python program that demonstrates try/except/finally with division and file operations.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def divide_safe(a, b):\n    try:\n        result = a / b\n        return f\"{a} / {b} = {result}\"\n    except ZeroDivisionError:\n        return \"Error: Cannot divide by zero\"\n    except TypeError:\n        return \"Error: Invalid type\"\n    finally:\n        print(\"Division attempted\")\n\nprint(divide_safe(10, 2))\nprint(divide_safe(10, 0))\nprint(divide_safe(10, \"a\"))"
+  },
+  "verificationTest": "output.includes('10 / 2 = 5.0') && output.includes('Cannot divide by zero') && output.includes('Division attempted')",
+  "hints": [
+    "Use `try:` block for code that might raise exceptions",
+    "Catch specific exceptions with `except ExceptionType:`",
+    "`finally:` runs regardless of whether an exception occurred",
+    "Always catch specific exceptions, not bare `except:`"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "wasm-hello-world",
+  "title": "WebAssembly: Hello World",
+  "description": "Write a WebAssembly text format (WAT) program that exports a function to add two numbers.",
+  "difficulty": "beginner",
+  "languages": ["wasm"],
+  "codeTemplate": {
+    "wasm": "(module\n  (func $add (param $a i32) (param $b i32) (result i32)\n    local.get $a\n    local.get $b\n    i32.add)\n  (export \"add\" (func $add))\n)"
+  },
+  "verificationTest": "output.includes('add') || output.includes('module')",
+  "hints": [
+    "WAT uses S-expressions: `(func ...)`",
+    "`(module ...)` is the top-level container",
+    "`local.get` pushes a local variable onto the stack",
+    "`i32.add` pops two values and pushes their sum"
+  ]
+}

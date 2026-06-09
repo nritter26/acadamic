@@ -1,0 +1,16 @@
+{
+  "id": "js-closures",
+  "title": "JavaScript: Closures",
+  "description": "Write a JavaScript program that demonstrates closures with counter and multiplier functions.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "function createCounter() {\n  let count = 0;\n  return {\n    increment: function() { count++; },\n    decrement: function() { count--; },\n    getCount: function() { return count; }\n  };\n}\n\nfunction createMultiplier(factor) {\n  return function(number) {\n    return number * factor;\n  };\n}\n\nconst counter = createCounter();\ncounter.increment();\ncounter.increment();\nconsole.log(`Count: ${counter.getCount()}`);\ncounter.decrement();\nconsole.log(`After decrement: ${counter.getCount()}`);\n\nconst double = createMultiplier(2);\nconst triple = createMultiplier(3);\nconsole.log(`Double 5: ${double(5)}`);\nconsole.log(`Triple 5: ${triple(5)}`);"
+  },
+  "verificationTest": "output.includes('Count: 2') && output.includes('After decrement: 1') && output.includes('Double 5: 10') && output.includes('Triple 5: 15')",
+  "hints": [
+    "A closure is a function that remembers its outer scope even after the outer function returns",
+    "Inner functions have access to outer function variables",
+    "Use closures for data encapsulation and function factories"
+  ]
+}

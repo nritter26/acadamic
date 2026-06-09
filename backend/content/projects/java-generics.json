@@ -1,0 +1,16 @@
+{
+  "id": "java-generics",
+  "title": "Java: Generics",
+  "description": "Write a Java program demonstrating generic classes, methods, and type parameters.",
+  "difficulty": "intermediate",
+  "languages": ["java"],
+  "codeTemplate": {
+    "java": "public class Main {\n    // Generic class\n    static class Box<T> {\n        private T value;\n        public Box(T value) { this.value = value; }\n        public T getValue() { return value; }\n        public void setValue(T value) { this.value = value; }\n    }\n\n    // Generic method\n    static <T> void printArray(T[] array) {\n        for (T item : array) {\n            System.out.print(item + \" \");\n        }\n        System.out.println();\n    }\n\n    // Bounded type parameter\n    static <T extends Comparable<T>> T findMax(T a, T b) {\n        return a.compareTo(b) > 0 ? a : b;\n    }\n\n    public static void main(String[] args) {\n        Box<Integer> intBox = new Box<>(42);\n        Box<String> strBox = new Box<>(\"Hello Generics\");\n\n        System.out.println(\"Integer box: \" + intBox.getValue());\n        System.out.println(\"String box: \" + strBox.getValue());\n\n        Integer[] nums = {1, 2, 3, 4, 5};\n        String[] words = {\"a\", \"b\", \"c\"};\n        printArray(nums);\n        printArray(words);\n\n        System.out.println(\"Max of 10 and 20: \" + findMax(10, 20));\n        System.out.println(\"Max of Apple and Banana: \" + findMax(\"Apple\", \"Banana\"));\n    }\n}"
+  },
+  "verificationTest": "output.includes('Integer box: 42') && output.includes('String box: Hello Generics') && output.includes('Max of 10 and 20: 20')",
+  "hints": [
+    "Use `<T>` to declare a type parameter on classes or methods",
+    "Type parameters enable compile-time type safety",
+    "Bounded type parameters with `extends` restrict types to those with specific capabilities"
+  ]
+}

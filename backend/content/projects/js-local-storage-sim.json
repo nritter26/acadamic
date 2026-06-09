@@ -1,0 +1,16 @@
+{
+  "id": "js-local-storage-sim",
+  "title": "JavaScript: LocalStorage Simulation",
+  "description": "Write a JavaScript program simulating localStorage with getItem, setItem, removeItem, and clear.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "const storage = new Map();\n\nconst localStorage = {\n  setItem(key, value) {\n    storage.set(key, String(value));\n  },\n  getItem(key) {\n    return storage.get(key) || null;\n  },\n  removeItem(key) {\n    storage.delete(key);\n  },\n  clear() {\n    storage.clear();\n  },\n  get length() {\n    return storage.size;\n  }\n};\n\nlocalStorage.setItem('name', 'Alice');\nlocalStorage.setItem('theme', 'dark');\nlocalStorage.setItem('score', '95');\n\nconsole.log('Items:', localStorage.length);\nconsole.log('Name:', localStorage.getItem('name'));\nconsole.log('Theme:', localStorage.getItem('theme'));\nconsole.log('Score:', localStorage.getItem('score'));\n\nlocalStorage.removeItem('score');\nconsole.log('After remove:', localStorage.length);\n\nlocalStorage.clear();\nconsole.log('After clear:', localStorage.length);\nconsole.log('Name after clear:', localStorage.getItem('name'));"
+  },
+  "verificationTest": "output.includes('Items: 3') && output.includes('Name: Alice') && output.includes('After clear: 0')",
+  "hints": [
+    "localStorage stores string key-value pairs",
+    "Use `setItem()` to store, `getItem()` to retrieve",
+    "Use `removeItem()` for single deletion, `clear()` for all"
+  ]
+}

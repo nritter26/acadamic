@@ -1,0 +1,16 @@
+{
+  "id": "py-asyncio",
+  "title": "Python: Async IO",
+  "description": "Write a Python program that uses asyncio to run concurrent async tasks.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import asyncio\n\nasync def fetch_data(source, delay):\n    print(f\"Fetching from {source}...\")\n    await asyncio.sleep(delay)\n    result = f\"{source}: data\"\n    print(f\"Received from {source}\")\n    return result\n\nasync def main():\n    tasks = [\n        fetch_data(\"API 1\", 0.02),\n        fetch_data(\"API 2\", 0.01),\n        fetch_data(\"API 3\", 0.03),\n    ]\n    results = await asyncio.gather(*tasks)\n    print(f\"All results: {results}\")\n\nasyncio.run(main())"
+  },
+  "verificationTest": "output.includes('Fetching from API 1') && output.includes('Fetching from API 2') && output.includes('Fetching from API 3') && output.includes(\"All results: ['API 1: data', 'API 2: data', 'API 3: data']\")",
+  "hints": [
+    "Async functions are defined with `async def` and use `await`",
+    "`asyncio.gather(*tasks)` runs tasks concurrently",
+    "`asyncio.run(main())` is the entry point for async code"
+  ]
+}

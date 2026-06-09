@@ -1,0 +1,17 @@
+{
+  "id": "asm-hello-world",
+  "title": "Assembly: Hello World",
+  "description": "Write an assembly program (using NASM syntax simulation) that prints 'Hello, Assembly!'.",
+  "difficulty": "beginner",
+  "languages": ["asm"],
+  "codeTemplate": {
+    "asm": "; Simulated assembly\nsection .data\n    msg db 'Hello, Assembly!', 0\n\nsection .text\n    global _start\n_start:\n    ; Print message\n    mov eax, 4\n    mov ebx, 1\n    mov ecx, msg\n    int 0x80\n    ; Exit\n    mov eax, 1\n    xor ebx, ebx\n    int 0x80"
+  },
+  "verificationTest": "output.includes('Hello, Assembly')",
+  "hints": [
+    "NASM syntax: `section .data` for data, `section .text` for code",
+    "`mov` moves values between registers",
+    "`int 0x80` triggers a system call",
+    "System call 4 = write, 1 = exit"
+  ]
+}

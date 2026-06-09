@@ -1,0 +1,16 @@
+{
+  "id": "py-json-basics",
+  "title": "Python: JSON Basics",
+  "description": "Write a Python program that serializes a dictionary to JSON and parses JSON back to a dictionary.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import json\n\nperson = {\n    'name': 'Alice',\n    'age': 30,\n    'city': 'New York'\n}\n\njson_str = json.dumps(person, indent=2)\nprint('JSON string:')\nprint(json_str)\n\nparsed = json.loads(json_str)\nprint(f\"Parsed name: {parsed['name']}\")\nprint(f\"Parsed age: {parsed['age']}\")"
+  },
+  "verificationTest": "output.includes('JSON string:') && output.includes('Parsed name: Alice') && output.includes('Parsed age: 30')",
+  "hints": [
+    "Use `json.dumps()` to convert Python objects to JSON strings",
+    "Use `json.loads()` to parse JSON strings back to Python objects",
+    "The `indent` parameter makes the output readable"
+  ]
+}

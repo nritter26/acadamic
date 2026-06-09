@@ -1,0 +1,17 @@
+{
+  "id": "js-error-handling",
+  "title": "JavaScript: Error Handling",
+  "description": "Write a JavaScript program using try/catch/finally and throwing custom errors.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "function divide(a, b) {\n  if (b === 0) {\n    throw new Error('Division by zero');\n  }\n  if (typeof a !== 'number' || typeof b !== 'number') {\n    throw new TypeError('Arguments must be numbers');\n  }\n  return a / b;\n}\n\nfunction safeDivide(a, b) {\n  try {\n    const result = divide(a, b);\n    console.log(a + ' / ' + b + ' = ' + result);\n  } catch (err) {\n    if (err instanceof TypeError) {\n      console.log('TypeError: ' + err.message);\n    } else {\n      console.log('Error: ' + err.message);\n    }\n  } finally {\n    console.log('  (attempted: ' + a + ', ' + b + ')');\n  }\n}\n\nsafeDivide(10, 2);\nsafeDivide(10, 0);\nsafeDivide(10, 'a');"
+  },
+  "verificationTest": "output.includes('10 / 2 = 5') && output.includes('Error: Division by zero') && output.includes('TypeError: Arguments must be numbers')",
+  "hints": [
+    "Wrap risky code in `try` blocks",
+    "Catch specific error types in `catch` blocks",
+    "Use `finally` for cleanup code that always runs",
+    "Throw errors with `throw new Error('message')`"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "cs-arrays",
+  "title": "C#: Arrays and Collections",
+  "description": "Write a C# program demonstrating arrays, List, Dictionary, and LINQ operations.",
+  "difficulty": "beginner",
+  "languages": ["cs"],
+  "codeTemplate": {
+    "cs": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nclass Program {\n    static void Main() {\n        // Array\n        int[] numbers = { 10, 20, 30, 40, 50 };\n        Console.WriteLine($\"Array sum: {numbers.Sum()}\");\n        Console.WriteLine($\"Array avg: {numbers.Average()}\");\n\n        // List\n        List<string> fruits = new List<string> { \"apple\", \"banana\", \"cherry\" };\n        fruits.Add(\"date\");\n        Console.WriteLine($\"Fruits: {string.Join(\", \", fruits)}\");\n        Console.WriteLine($\"Count: {fruits.Count}\");\n\n        // Dictionary\n        Dictionary<string, int> scores = new Dictionary<string, int> {\n            {\"Alice\", 95}, {\"Bob\", 87}, {\"Charlie\", 92}\n        };\n        Console.WriteLine($\"Alice score: {scores[\"Alice\"]}\");\n\n        // LINQ\n        var evens = numbers.Where(n => n % 20 == 0);\n        Console.WriteLine($\"Multiples of 20: {string.Join(\", \", evens)}\");\n    }\n}"
+  },
+  "verificationTest": "output.includes('Array sum: 150') && output.includes('Array avg: 30') && output.includes('Fruits: apple, banana, cherry, date')",
+  "hints": [
+    "Use `List<T>` for dynamic arrays, `Dictionary<K,V>` for key-value pairs",
+    "LINQ provides `Where()`, `Select()`, `Sum()`, `Average()` on collections",
+    "`string.Join()` concatenates collection elements with a separator"
+  ]
+}

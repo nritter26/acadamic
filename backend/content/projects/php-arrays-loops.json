@@ -1,0 +1,17 @@
+{
+  "id": "php-arrays-loops",
+  "title": "PHP: Arrays and Loops",
+  "description": "Write a PHP program demonstrating indexed arrays, associative arrays, and loop constructs.",
+  "difficulty": "beginner",
+  "languages": ["php"],
+  "codeTemplate": {
+    "php": "<?php\n// Indexed array\n$fruits = ['apple', 'banana', 'cherry', 'date'];\necho \"Fruits: \" . implode(', ', $fruits) . \"\\n\";\necho \"Count: \" . count($fruits) . \"\\n\";\n\n// Associative array\n$person = [\n    'name' => 'Alice',\n    'age' => 30,\n    'city' => 'New York'\n];\necho \"Name: {$person['name']}\\n\";\necho \"Age: {$person['age']}\\n\";\n\n// For loop\necho \"For: \";\nfor ($i = 1; $i <= 5; $i++) {\n    echo $i . \" \";\n}\necho \"\\n\";\n\n// Foreach\necho \"\\nFruits list:\\n\";\nforeach ($fruits as $i => $fruit) {\n    echo \"  \" . ($i + 1) . \". $fruit\\n\";\n}\n\n// Array functions\n$numbers = [3, 1, 4, 1, 5, 9, 2, 6];\nsort($numbers);\necho \"Sorted: \" . implode(', ', $numbers) . \"\\n\";\necho \"Sum: \" . array_sum($numbers) . \"\\n\";\n?>" 
+  },
+  "verificationTest": "output.includes('Fruits: apple, banana, cherry, date') && output.includes('Count: 4') && output.includes('Name: Alice') && output.includes('Sum: 31')",
+  "hints": [
+    "PHP arrays can be indexed (0-based) or associative (key-value)",
+    "Use `foreach` to iterate over array elements",
+    "`implode()` joins array elements into a string with a separator",
+    "`array_sum()` calculates the sum of array values"
+  ]
+}

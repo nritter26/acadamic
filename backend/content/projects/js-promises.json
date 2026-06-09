@@ -1,0 +1,17 @@
+{
+  "id": "js-promises",
+  "title": "JavaScript: Promises",
+  "description": "Write a JavaScript program that creates and chains Promises with async/await.",
+  "difficulty": "advanced",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "function delay(ms) {\n  return new Promise(resolve => setTimeout(resolve, ms));\n}\n\nasync function fetchUser(id) {\n  console.log(`Fetching user ${id}...`);\n  await delay(10);\n  const user = { id, name: `User${id}` };\n  console.log(`Got user ${id}`);\n  return user;\n}\n\nasync function main() {\n  const user = await fetchUser(1);\n  console.log(`Name: ${user.name}`);\n  \n  const results = await Promise.all([\n    fetchUser(2),\n    fetchUser(3)\n  ]);\n  console.log(`Results: ${results.map(u => u.name).join(', ')}`);\n}\n\nmain().then(() => console.log('Done'));"
+  },
+  "verificationTest": "output.includes('Fetching user 1...') && output.includes('Got user 1') && output.includes('Name: User1') && output.includes('Results: User2, User3') && output.includes('Done')",
+  "hints": [
+    "Use `new Promise((resolve, reject) => {})` to create promises",
+    "`async` functions return a promise automatically",
+    "`await` pauses execution until a promise settles",
+    "`Promise.all([...])` waits for all promises to resolve"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "py-unittest-basics",
+  "title": "Python: UnitTest Basics",
+  "description": "Write a Python program demonstrating testing concepts with assertions.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def add(a, b):\n    return a + b\n\ndef divide(a, b):\n    if b == 0:\n        raise ValueError(\"Cannot divide by zero\")\n    return a / b\n\ndef is_palindrome(s):\n    s = s.lower().replace(' ', '')\n    return s == s[::-1]\n\n# Test with assertions\nassert add(2, 3) == 5, \"add should return 5\"\nassert add(-1, 1) == 0, \"add should return 0\"\n\ntry:\n    divide(5, 0)\n    assert False, \"Should raise ValueError\"\nexcept ValueError:\n    pass\n\nassert is_palindrome(\"racecar\") == True\nassert is_palindrome(\"A man a plan a canal Panama\") == True\nassert is_palindrome(\"hello\") == False\n\nprint(f\"add(2,3) = {add(2,3)}\")\nprint(f\"divide(10,4) = {divide(10,4)}\")\nprint(f\"is_palindrome('racecar'): {is_palindrome('racecar')}\")\nprint(\"All tests passed!\")"
+  },
+  "verificationTest": "output.includes('add(2,3) = 5') && output.includes('divide(10,4) = 2.5') && output.includes('All tests passed!')",
+  "hints": [
+    "Use `assert condition, message` for simple tests",
+    "Wrap expected exceptions in try/except blocks with assert False",
+    "Test edge cases: empty inputs, negatives, zero division"
+  ]
+}

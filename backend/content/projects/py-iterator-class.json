@@ -1,0 +1,16 @@
+{
+  "id": "py-iterator-class",
+  "title": "Python: Custom Iterator",
+  "description": "Write a Python program that implements the iterator protocol with __iter__ and __next__.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class Countdown:\n    def __init__(self, start):\n        self.current = start\n    \n    def __iter__(self):\n        return self\n    \n    def __next__(self):\n        if self.current <= 0:\n            raise StopIteration\n        self.current -= 1\n        return self.current + 1\n\nclass Fibonacci:\n    def __init__(self, limit):\n        self.limit = limit\n        self.a, self.b = 0, 1\n        self.count = 0\n    \n    def __iter__(self):\n        return self\n    \n    def __next__(self):\n        if self.count >= self.limit:\n            raise StopIteration\n        result = self.a\n        self.a, self.b = self.b, self.a + self.b\n        self.count += 1\n        return result\n\nprint(\"Countdown:\")\nfor n in Countdown(5):\n    print(n, end=' ')\n\nprint(\"\\n\\nFibonacci (10):\")\nfor n in Fibonacci(10):\n    print(n, end=' ')\nprint()"
+  },
+  "verificationTest": "output.includes('Countdown:') && output.includes('5 4 3 2 1') && output.includes('Fibonacci (10):') && output.includes('0 1 1 2 3 5 8 13 21 34')",
+  "hints": [
+    "Implement `__iter__` returning self and `__next__` returning next value",
+    "Raise `StopIteration` when there are no more items",
+    "This is the protocol used by `for...in` loops"
+  ]
+}

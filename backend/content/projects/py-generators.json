@@ -1,0 +1,17 @@
+{
+  "id": "py-generators",
+  "title": "Python: Generators",
+  "description": "Write a Python program that uses generator functions with yield to produce sequences lazily.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ndef evens_up_to(n):\n    for i in range(n + 1):\n        if i % 2 == 0:\n            yield i\n\nfib = fibonacci()\nprint(\"First 8 Fibonacci:\")\nfor _ in range(8):\n    print(next(fib), end=' ')\n\nprint(\"\\n\\nEvens up to 10:\")\nfor e in evens_up_to(10):\n    print(e, end=' ')\nprint()"
+  },
+  "verificationTest": "output.includes('First 8 Fibonacci:') && output.includes('0 1 1 2 3 5 8 13') && output.includes('Evens up to 10:') && output.includes('0 2 4 6 8 10')",
+  "hints": [
+    "Use `yield` instead of `return` to create a generator",
+    "Generators produce values lazily — one at a time on demand",
+    "`next(gen)` gets the next yielded value",
+    "Generators maintain their state between calls"
+  ]
+}

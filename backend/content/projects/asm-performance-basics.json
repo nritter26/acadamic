@@ -1,0 +1,16 @@
+{
+  "id": "asm-performance-basics",
+  "title": "Assembly: Performance Basics",
+  "description": "Practice performance basics in Assembly.",
+  "difficulty": "beginner",
+  "languages": [
+    "asm"
+  ],
+  "codeTemplate": {
+    "asm": "; performance basics\\nsection .data\\n    msg db 'performance basics',0\\nsection .text\\n    global _start\\n_start:\\n    mov eax,4\\n    mov ebx,1\\n    mov ecx,msg\\n    int 0x80\\n    mov eax,1\\n    xor ebx,ebx\\n    int 0x80"
+  },
+  "verificationTest": "output && output.length > 0",
+  "hints": [
+    "Learn performance basics in Assembly"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "js-array-methods",
+  "title": "JavaScript: Array Methods",
+  "description": "Write a JavaScript program using map, filter, reduce, find, and some array methods.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\nconst doubled = numbers.map(n => n * 2);\nconsole.log('Doubled:', doubled);\n\nconst evens = numbers.filter(n => n % 2 === 0);\nconsole.log('Evens:', evens);\n\nconst sum = numbers.reduce((acc, n) => acc + n, 0);\nconsole.log('Sum:', sum);\n\nconst firstEven = numbers.find(n => n % 2 === 0);\nconsole.log('First even:', firstEven);\n\nconst hasBig = numbers.some(n => n > 8);\nconsole.log('Has >8:', hasBig);\n\nconst allPositive = numbers.every(n => n > 0);\nconsole.log('All positive:', allPositive);\n\nconst fruits = ['apple', 'banana', 'cherry', 'date'];\nfruits.forEach((f, i) => console.log(i + 1 + '. ' + f));"
+  },
+  "verificationTest": "output.includes('Doubled: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]') && output.includes('Evens: [2, 4, 6, 8, 10]') && output.includes('Sum: 55')",
+  "hints": [
+    "`map()` transforms each element and returns a new array",
+    "`filter()` keeps elements that pass a test",
+    "`reduce()` accumulates values into a single result",
+    "Arrow functions `n => n * 2` are concise callbacks"
+  ]
+}

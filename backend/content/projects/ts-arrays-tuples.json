@@ -1,0 +1,16 @@
+{
+  "id": "ts-arrays-tuples",
+  "title": "TypeScript: Arrays and Tuples",
+  "description": "Write a TypeScript program using typed arrays, tuples, and readonly arrays.",
+  "difficulty": "beginner",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "// Typed arrays\nconst numbers: number[] = [1, 2, 3, 4, 5];\nconst doubled: number[] = numbers.map(n => n * 2);\nconsole.log('Doubled:', doubled);\n\n// Tuples\nconst person: [string, number, boolean] = ['Alice', 30, true];\nconsole.log(`Name: ${person[0]}, Age: ${person[1]}, Active: ${person[2]}`);\n\n// Readonly array\nconst fruits: readonly string[] = ['apple', 'banana', 'cherry'];\nconsole.log('Fruits:', fruits);\n// fruits.push('date'); // Error: Property 'push' does not exist\n\n// Tuple with optional and rest\ntype Score = [string, number, ...number[]];\nconst scores: Score = ['Alice', 95, 90, 85, 92];\nconsole.log(`${scores[0]}: ${scores[1]} (all: ${scores.slice(2)})`);\n\n// Array destructuring\nconst [first, second, ...rest] = [10, 20, 30, 40, 50];\nconsole.log(`First: ${first}, Second: ${second}, Rest: ${rest}`);"
+  },
+  "verificationTest": "output.includes('Doubled: [2, 4, 6, 8, 10]') && output.includes('Name: Alice, Age: 30') && output.includes('Fruits: [')",
+  "hints": [
+    "Use `type[]` or `Array<type>` for typed arrays",
+    "Tuples have fixed-length with specific types per position",
+    "`readonly` prevents array mutation"
+  ]
+}

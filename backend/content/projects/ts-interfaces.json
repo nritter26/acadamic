@@ -1,0 +1,16 @@
+{
+  "id": "ts-interfaces",
+  "title": "TypeScript: Interfaces",
+  "description": "Write a TypeScript program that defines and implements interfaces with optional properties.",
+  "difficulty": "beginner",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "interface Person {\n  name: string;\n  age: number;\n  email?: string;\n}\n\nfunction greet(person: Person): string {\n  if (person.email) {\n    return `Hello ${person.name}, email: ${person.email}`;\n  }\n  return `Hello ${person.name}`;\n}\n\nconst alice: Person = { name: 'Alice', age: 30 };\nconst bob: Person = { name: 'Bob', age: 25, email: 'bob@test.com' };\n\nconsole.log(greet(alice));\nconsole.log(greet(bob));"
+  },
+  "verificationTest": "output.includes('Hello Alice') && output.includes('Hello Bob, email: bob@test.com')",
+  "hints": [
+    "Define interfaces with `interface Name { ... }`",
+    "Optional properties use `?:` syntax",
+    "Functions can specify parameter and return types"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "py-linked-list",
+  "title": "Python: Linked List",
+  "description": "Write a Python program implementing a singly linked list with basic operations.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n\n    def append(self, data):\n        if not self.head:\n            self.head = Node(data)\n            return\n        curr = self.head\n        while curr.next:\n            curr = curr.next\n        curr.next = Node(data)\n\n    def display(self):\n        values = []\n        curr = self.head\n        while curr:\n            values.append(str(curr.data))\n            curr = curr.next\n        return ' -> '.join(values)\n\n    def reverse(self):\n        prev = None\n        curr = self.head\n        while curr:\n            next_node = curr.next\n            curr.next = prev\n            prev = curr\n            curr = next_node\n        self.head = prev\n\nll = LinkedList()\nfor val in [1, 2, 3, 4, 5]:\n    ll.append(val)\nprint(f\"Original: {ll.display()}\")\nll.reverse()\nprint(f\"Reversed: {ll.display()}\")"
+  },
+  "verificationTest": "output.includes('Original: 1 -> 2 -> 3 -> 4 -> 5') && output.includes('Reversed: 5 -> 4 -> 3 -> 2 -> 1')",
+  "hints": [
+    "Each node stores data and a reference to the next node",
+    "Traverse by following `next` until None",
+    "To reverse, change each node's next to point to the previous node"
+  ]
+}

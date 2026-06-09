@@ -1,0 +1,16 @@
+{
+  "id": "js-dom-sim",
+  "title": "JavaScript: DOM Simulation",
+  "description": "Write a JavaScript program simulating DOM manipulation with an HTML-like structure.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "// Simulated DOM\nconst elements = new Map();\n\nfunction createElement(tag, id, text) {\n  const el = { tag, id, text, children: [], style: {} };\n  elements.set(id, el);\n  return el;\n}\n\nfunction setText(id, text) {\n  const el = elements.get(id);\n  if (el) el.text = text;\n}\n\nfunction addClass(id, cls) {\n  const el = elements.get(id);\n  if (el) {\n    if (!el.classes) el.classes = [];\n    el.classes.push(cls);\n  }\n}\n\nfunction render(id) {\n  const el = elements.get(id);\n  if (!el) return '';\n  let html = '<' + el.tag;\n  if (el.classes && el.classes.length) {\n    html += ' class=\"' + el.classes.join(' ') + '\"';\n  }\n  html += '>' + (el.text || '');\n  for (const child of el.children) {\n    html += render(child);\n  }\n  html += '</' + el.tag + '>';\n  return html;\n}\n\nconst div = createElement('div', 'app', '');\nconst h1 = createElement('h1', 'title', 'Hello, DOM!');\nconst p = createElement('p', 'desc', 'This is a simulation.');\ndiv.children.push('title', 'desc');\naddClass('title', 'highlight');\naddClass('desc', 'text-muted');\n\nconsole.log(render('app'));\nconsole.log('Elements created:', elements.size);\nconsole.log('Title text:', elements.get('title').text);"
+  },
+  "verificationTest": "output.includes('<div class') && output.includes('Hello, DOM!') && output.includes('Elements created: 3')",
+  "hints": [
+    "Simulates DOM elements using Map data structure",
+    "Each element has tag, id, text, children, and style properties",
+    "Use Map to store and retrieve elements by ID"
+  ]
+}

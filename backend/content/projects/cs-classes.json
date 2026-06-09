@@ -1,0 +1,17 @@
+{
+  "id": "cs-classes",
+  "title": "C#: Classes and Inheritance",
+  "description": "Write a C# program demonstrating classes, inheritance, interfaces, and polymorphism.",
+  "difficulty": "beginner",
+  "languages": ["cs"],
+  "codeTemplate": {
+    "cs": "using System;\n\ninterface IAnimal {\n    void MakeSound();\n}\n\nabstract class Animal : IAnimal {\n    protected string Name { get; }\n\n    public Animal(string name) {\n        Name = name;\n    }\n\n    public abstract void MakeSound();\n\n    public void Sleep() {\n        Console.WriteLine($\"{Name} is sleeping\");\n    }\n}\n\nclass Dog : Animal {\n    public string Breed { get; }\n\n    public Dog(string name, string breed) : base(name) {\n        Breed = breed;\n    }\n\n    public override void MakeSound() {\n        Console.WriteLine($\"{Name} says Woof!\");\n    }\n}\n\nclass Cat : Animal {\n    public Cat(string name) : base(name) {}\n\n    public override void MakeSound() {\n        Console.WriteLine($\"{Name} says Meow!\");\n    }\n}\n\nclass Program {\n    static void Main() {\n        IAnimal[] animals = { new Dog(\"Rex\", \"Lab\"), new Cat(\"Whiskers\") };\n        foreach (var a in animals) a.MakeSound();\n\n        Dog d = (Dog)animals[0];\n        Console.WriteLine($\"Breed: {d.Breed}\");\n    }\n}"
+  },
+  "verificationTest": "output.includes('Rex says Woof!') && output.includes('Whiskers says Meow!') && output.includes('Breed: Lab')",
+  "hints": [
+    "Use `interface` to define contracts without implementation",
+    "`abstract` classes can have both abstract and concrete members",
+    "`virtual`/`override` enables polymorphism",
+    "Properties with `{ get; }` are read-only auto-properties"
+  ]
+}

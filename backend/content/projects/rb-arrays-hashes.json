@@ -1,0 +1,17 @@
+{
+  "id": "rb-arrays-hashes",
+  "title": "Ruby: Arrays and Hashes",
+  "description": "Write a Ruby program demonstrating arrays, hashes, and common iteration methods.",
+  "difficulty": "beginner",
+  "languages": ["rb"],
+  "codeTemplate": {
+    "rb": "# Arrays\nnumbers = [1, 2, 3, 4, 5]\nputs \"Original: #{numbers}\"\nputs \"Doubled: #{numbers.map { |n| n * 2 }}\"\nputs \"Evens: #{numbers.select { |n| n.even? }}\"\nputs \"Sum: #{numbers.sum}\"\n\n# Hashes\nperson = { name: 'Alice', age: 30, city: 'New York' }\nputs \"\\nPerson: #{person}\"\nputs \"Name: #{person[:name]}\"\nperson[:job] = 'Engineer'\nputs \"Updated: #{person}\"\n\n# Iteration\nputs \"\\nFruits:\"\n%w[apple banana cherry].each_with_index do |f, i|\n  puts \"  #{i + 1}. #{f}\"\nend\n\n# Ranges\nputs \"\\nRange 1..5: #{(1..5).to_a}\"\nputs \"Sum 1 to 10: #{(1..10).sum}\""
+  },
+  "verificationTest": "output.includes('Original: [1, 2, 3, 4, 5]') && output.includes('Sum: 15') && output.includes('Name: Alice') && output.includes('Sum 1 to 10: 55')",
+  "hints": [
+    "Arrays use square brackets, hashes use curly braces with `=>` or `:` syntax",
+    "Use `map`, `select`, `each` for iteration instead of for loops",
+    "Symbols `:name` are lightweight identifiers often used as hash keys",
+    "`%w[]` creates an array of strings from whitespace-separated words"
+  ]
+}

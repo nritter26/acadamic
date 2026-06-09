@@ -1,0 +1,17 @@
+{
+  "id": "scala-collections",
+  "title": "Scala: Collections",
+  "description": "Write a Scala program demonstrating List, Map, Set, and functional operations.",
+  "difficulty": "beginner",
+  "languages": ["scala"],
+  "codeTemplate": {
+    "scala": "object Main extends App {\n  // List\n  val numbers = List(1, 2, 3, 4, 5)\n  println(s\"Numbers: $numbers\")\n  println(s\"Sum: ${numbers.sum}\")\n  println(s\"Doubled: ${numbers.map(_ * 2)}\")\n  println(s\"Evens: ${numbers.filter(_ % 2 == 0)}\")\n\n  // Map\n  val scores = Map(\"Alice\" -> 95, \"Bob\" -> 87, \"Charlie\" -> 92)\n  println(s\"\\nScores: $scores\")\n  println(s\"Alice: ${scores(\"Alice\")}\")\n\n  // Higher-order functions\n  val words = List(\"apple\", \"banana\", \"cherry\", \"date\")\n  println(s\"\\nLong words: ${words.filter(_.length > 5)}\")\n  println(s\"Upper: ${words.map(_.toUpperCase)}\")\n  \n  val triple = (n: Int) => n * 3\n  println(s\"\\nTripled: ${numbers.map(triple)}\")\n}"
+  },
+  "verificationTest": "output.includes('Numbers: List(1, 2, 3, 4, 5)') && output.includes('Sum: 15') && output.includes('Doubled: List(2, 4, 6, 8, 10)') && output.includes('Alice: 95')",
+  "hints": [
+    "Scala collections are immutable by default",
+    "`map`, `filter`, `reduce` are higher-order functions on collections",
+    "`_` is a placeholder syntax for anonymous function parameters",
+    "`Map(k -> v)` creates a map with arrow syntax"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "bash-variables",
+  "title": "Bash: Variables and Conditionals",
+  "description": "Write a Bash script demonstrating variables, conditionals, and arithmetic operations.",
+  "difficulty": "beginner",
+  "languages": ["bash"],
+  "codeTemplate": {
+    "bash": "#!/bin/bash\n\n# Variables\nname=\"Alice\"\nage=30\necho \"Hello, $name!\"\necho \"Age: $age\"\n\n# Arithmetic\nnum1=10\nnum2=5\necho \"$num1 + $num2 = $((num1 + num2))\"\necho \"$num1 * $num2 = $((num1 * num2))\"\n\n# Conditionals\nif [ $age -ge 18 ]; then\n  echo \"Adult\"\nelse\n  echo \"Minor\"\nfi\n\n# Loops\necho \"Numbers 1-5:\"\nfor i in 1 2 3 4 5; do\n  echo \"  $i\"\ndone\n\n# Arrays\nfruits=(\"apple\" \"banana\" \"cherry\")\necho \"First fruit: ${fruits[0]}\"\necho \"All fruits: ${fruits[@]}\"\necho \"Count: ${#fruits[@]}\""
+  },
+  "verificationTest": "output.includes('Hello, Alice!') && output.includes('10 + 5 = 15') && output.includes('Adult') && output.includes('All fruits: apple banana cherry')",
+  "hints": [
+    "Variables are accessed with `$variable` or `${variable}` syntax",
+    "Arithmetic uses `$((expression))` syntax",
+    "Use `-ge`, `-le`, `-eq`, `-ne` for numeric comparisons",
+    "Arrays use parentheses for definition, indices start at 0"
+  ]
+}

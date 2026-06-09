@@ -1,0 +1,17 @@
+{
+  "id": "py-recursion",
+  "title": "Python: Recursion",
+  "description": "Write a Python program using recursion to solve factorial, fibonacci, and tower of hanoi.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)\n\ndef tower_of_hanoi(n, source, target, auxiliary):\n    if n == 1:\n        print(f\"  Move disk 1 from {source} to {target}\")\n        return\n    tower_of_hanoi(n - 1, source, auxiliary, target)\n    print(f\"  Move disk {n} from {source} to {target}\")\n    tower_of_hanoi(n - 1, auxiliary, target, source)\n\nprint(f\"Factorial of 5: {factorial(5)}\")\nprint(f\"Fibonacci of 7: {fibonacci(7)}\")\nprint(\"Tower of Hanoi (3 disks):\")\ntower_of_hanoi(3, 'A', 'C', 'B')"
+  },
+  "verificationTest": "output.includes('Factorial of 5: 120') && output.includes('Fibonacci of 7: 13') && output.includes('Move disk 1 from A to C')",
+  "hints": [
+    "A recursive function calls itself with a smaller input",
+    "Always define a base case to stop recursion",
+    "Tower of Hanoi moves n-1 disks, then the largest, then n-1 again"
+  ],
+  "instructions": "Python recursion project"
+}

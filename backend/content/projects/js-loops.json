@@ -1,0 +1,16 @@
+{
+  "id": "js-loops",
+  "title": "JavaScript: Loops",
+  "description": "Write a JavaScript program using for loops, while loops, and for-of iteration.",
+  "difficulty": "beginner",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "console.log('For loop:');\nfor (let i = 1; i <= 5; i++) {\n  process.stdout.write(i + ' ');\n}\nconsole.log();\n\nconsole.log('While loop:');\nlet count = 5;\nwhile (count > 0) {\n  process.stdout.write(count + ' ');\n  count--;\n}\nconsole.log();\n\nconsole.log('For-of loop:');\nconst fruits = ['apple', 'banana', 'cherry'];\nfor (const fruit of fruits) {\n  console.log('  ' + fruit);\n}\n\nconsole.log('Sum 1 to 10:', [...Array(11).keys()].slice(1).reduce((a,b) => a+b, 0));"
+  },
+  "verificationTest": "output.includes('For loop:') && output.includes('1 2 3 4 5') && output.includes('While loop:') && output.includes('5 4 3 2 1') && output.includes('Sum 1 to 10: 55')",
+  "hints": [
+    "Use `for (init; condition; increment)` for counter-based loops",
+    "Use `while (condition)` when the number of iterations is unknown",
+    "Use `for...of` to iterate over array elements"
+  ]
+}

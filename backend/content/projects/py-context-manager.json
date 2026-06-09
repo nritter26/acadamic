@@ -1,0 +1,17 @@
+{
+  "id": "py-context-manager",
+  "title": "Python: Context Managers",
+  "description": "Write a Python program that defines a custom context manager using __enter__ and __exit__.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class TimerContext:\n    def __enter__(self):\n        import time\n        self.start = time.time()\n        return self\n    \n    def __exit__(self, exc_type, exc_val, exc_tb):\n        import time\n        self.elapsed = time.time() - self.start\n        print(f\"Elapsed: {self.elapsed:.4f}s\")\n        return False\n\nprint(\"Outside context\")\nwith TimerContext() as timer:\n    total = sum(range(1, 1000001))\n    print(f\"Sum 1..1000000 = {total}\")\nprint(f\"Timer elapsed attribute: {timer.elapsed:.4f}s\")"
+  },
+  "verificationTest": "output.includes('Sum 1..1000000 = 500000500000') && output.includes('Elapsed:') && output.includes('Outside context')",
+  "hints": [
+    "Context managers use `__enter__` and `__exit__` methods",
+    "Use `with` statement to enter/exit the context",
+    "`__exit__` parameters handle exceptions: return True to suppress",
+    "Common usage: file handling, database connections, timing"
+  ]
+}

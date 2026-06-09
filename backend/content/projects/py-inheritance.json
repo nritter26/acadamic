@@ -1,0 +1,16 @@
+{
+  "id": "py-inheritance",
+  "title": "Python: Inheritance",
+  "description": "Write a Python program that demonstrates inheritance and method overriding with Animal classes.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return f\"{self.name} makes a sound\"\n\nclass Dog(Animal):\n    def speak(self):\n        return f\"{self.name} says Woof!\"\n\nclass Cat(Animal):\n    def speak(self):\n        return f\"{self.name} says Meow!\"\n\nanimals = [Dog(\"Buddy\"), Cat(\"Whiskers\"), Animal(\"Generic\")]\nfor a in animals:\n    print(a.speak())"
+  },
+  "verificationTest": "output.includes('Buddy says Woof!') && output.includes('Whiskers says Meow!') && output.includes('Generic makes a sound')",
+  "hints": [
+    "Inherit from a parent: `class Child(Parent):`",
+    "Override methods by defining them with the same name in the child",
+    "Polymorphism: parent-type reference can call child methods"
+  ]
+}

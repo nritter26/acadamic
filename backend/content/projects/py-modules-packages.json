@@ -1,0 +1,16 @@
+{
+  "id": "py-modules-packages",
+  "title": "Python: Modules and Packages",
+  "description": "Write a Python program demonstrating how to import and use standard library modules.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import math\nimport random\nfrom datetime import datetime\nfrom statistics import mean, median, stdev\n\nprint(f\"Pi: {math.pi:.4f}\")\nprint(f\"Sin(90°): {math.sin(math.radians(90))}\")\n\nprint(f\"Random 1-10: {random.randint(1, 10)}\")\n\nnow = datetime.now()\nprint(f\"Current: {now.strftime('%Y-%m-%d %H:%M')}\")\n\ndata = [10, 20, 30, 40, 50]\nprint(f\"Mean: {mean(data)}\")\nprint(f\"Median: {median(data)}\")"
+  },
+  "verificationTest": "output.includes('Pi: 3.1416') && output.includes('Mean: 30') && output.includes('Median: 30')",
+  "hints": [
+    "Use `import module_name` for standard imports",
+    "Use `from module import name` for specific items",
+    "`datetime.strftime()` formats dates as strings"
+  ]
+}

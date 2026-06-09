@@ -1,0 +1,16 @@
+{
+  "id": "js-timing-functions",
+  "title": "JavaScript: Timing Functions",
+  "description": "Write a JavaScript program using setTimeout and setInterval for timed execution.",
+  "difficulty": "intermediate",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "console.log('Start');\n\nsetTimeout(() => {\n  console.log('Timeout after 10ms');\n}, 10);\n\nconsole.log('After scheduling timeout');\n\nlet count = 0;\nconst interval = setInterval(() => {\n  count++;\n  console.log('Tick ' + count);\n  if (count >= 3) {\n    clearInterval(interval);\n  }\n}, 5);\n\nsetTimeout(() => {\n  console.log('All done!');\n}, 30);"
+  },
+  "verificationTest": "output.includes('Start') && output.includes('After scheduling timeout') && output.includes('Tick 1') && output.includes('Tick 3')",
+  "hints": [
+    "`setTimeout(callback, delay)` runs a callback once after delay ms",
+    "`setInterval(callback, interval)` runs a callback repeatedly",
+    "Use `clearTimeout()` and `clearInterval()` to cancel pending timers"
+  ]
+}

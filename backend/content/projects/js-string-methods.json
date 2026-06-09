@@ -1,0 +1,16 @@
+{
+  "id": "js-string-methods",
+  "title": "JavaScript: String Methods",
+  "description": "Write a JavaScript program demonstrating common string methods like split, join, slice, replace, and includes.",
+  "difficulty": "beginner",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "const text = 'Hello, World!';\nconsole.log('Original:', text);\nconsole.log('Upper:', text.toUpperCase());\nconsole.log('Lower:', text.toLowerCase());\nconsole.log('Length:', text.length);\nconsole.log('Replace:', text.replace('World', 'JavaScript'));\n\nconst csv = 'apple,banana,cherry,date';\nconst fruits = csv.split(',');\nconsole.log('Split:', fruits);\nconsole.log('Joined:', fruits.join(' | '));\n\nconst msg = '  hello there  ';\nconsole.log('Trimmed:', msg.trim());\nconsole.log('Includes:', text.includes('World'));\nconsole.log('Starts:', text.startsWith('Hello'));\nconsole.log('Slice:', text.slice(7, 12));"
+  },
+  "verificationTest": "output.includes('Original: Hello, World!') && output.includes('Replace: Hello, JavaScript!') && output.includes('Split: [') && output.includes('Trimmed: hello there')",
+  "hints": [
+    "Strings are immutable - methods return new strings",
+    "Use `split()` to convert a string to an array",
+    "Use `trim()` to remove whitespace from both ends"
+  ]
+}

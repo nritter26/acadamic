@@ -1,0 +1,17 @@
+{
+  "id": "js-objects",
+  "title": "JavaScript: Objects",
+  "description": "Write a JavaScript program that creates and manipulates objects with properties and methods.",
+  "difficulty": "beginner",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "let person = {\n  name: 'Alice',\n  age: 30,\n  greet() {\n    return `Hi, I'm ${this.name}!`;\n  },\n  haveBirthday() {\n    this.age++;\n  }\n};\n\nconsole.log(person.greet());\nconsole.log(`Age: ${person.age}`);\nperson.haveBirthday();\nconsole.log(`After birthday: ${person.age}`);\nconsole.log(`Keys: ${Object.keys(person)}`);\nconsole.log(`Values: ${Object.values(person).filter(v => typeof v !== 'function')}`);"
+  },
+  "verificationTest": "output.includes(\"Hi, I'm Alice!\") && output.includes('Age: 30') && output.includes('After birthday: 31') && output.includes('Keys: name,age,greet,haveBirthday')",
+  "hints": [
+    "Objects use `{key: value}` syntax",
+    "Methods can use shorthand: `methodName() { }`",
+    "`this` refers to the current object",
+    "`Object.keys()` and `Object.values()` get object properties"
+  ]
+}

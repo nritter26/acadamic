@@ -1,0 +1,17 @@
+{
+  "id": "py-multithreading",
+  "title": "Python: Multithreading",
+  "description": "Write a Python program that uses threading to perform parallel tasks with a lock for shared state.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import threading\n\ncounter = 0\nlock = threading.Lock()\nresults = []\n\ndef worker(name, n):\n    global counter\n    for _ in range(n):\n        with lock:\n            counter += 1\n    results.append(f\"{name}: done\")\n\nthreads = []\nfor i in range(5):\n    t = threading.Thread(target=worker, args=(f\"W{i}\", 1000))\n    threads.append(t)\n    t.start()\n\nfor t in threads:\n    t.join()\n\nprint(f\"Counter: {counter}\")\nfor r in results:\n    print(r)"
+  },
+  "verificationTest": "output.includes('Counter: 5000') && output.includes('W0: done') && output.includes('W4: done')",
+  "hints": [
+    "Use `threading.Thread(target=func, args=(...))` to create threads",
+    "`t.start()` begins execution, `t.join()` waits for completion",
+    "Use `threading.Lock()` with `with lock:` for thread-safe access",
+    "Global variables need special handling in multi-threaded code"
+  ]
+}

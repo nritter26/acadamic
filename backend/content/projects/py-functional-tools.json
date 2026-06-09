@@ -1,0 +1,16 @@
+{
+  "id": "py-functional-tools",
+  "title": "Python: Functional Tools",
+  "description": "Write a Python program using functools and itertools for functional programming patterns.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "from functools import reduce, lru_cache\nimport itertools\n\n# Reduce\nnumbers = [1, 2, 3, 4, 5]\nproduct = reduce(lambda x, y: x * y, numbers)\nprint(f\"Product: {product}\")\n\n# LRU Cache\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n-1) + fib(n-2)\n\nprint(f\"Fib(35): {fib(35)}\")\nprint(f\"Cache info: {fib.cache_info()}\")\n\n# Itertools\nprint(f\"Chain: {list(itertools.chain([1,2], [3,4]))}\")\nprint(f\"Cycle 3: {list(itertools.islice(itertools.cycle('AB'), 6))}\")\nprint(f\"Permutations: {list(itertools.permutations('ABC', 2))[:3]}\")"
+  },
+  "verificationTest": "output.includes('Product: 120') && output.includes('Fib(35): 9227465') && output.includes('Chain: [1, 2, 3, 4]')",
+  "hints": [
+    "`reduce` accumulates values from left to right",
+    "`@lru_cache` memoizes function results for performance",
+    "`itertools` provides efficient iterator building blocks"
+  ]
+}

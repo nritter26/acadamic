@@ -1,0 +1,17 @@
+{
+  "id": "py-property-decorator",
+  "title": "Python: @property Decorator",
+  "description": "Write a Python program that uses @property for getters/setters with validation.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "class Temperature:\n    def __init__(self, celsius=0):\n        self._celsius = celsius\n    \n    @property\n    def celsius(self):\n        return self._celsius\n    \n    @celsius.setter\n    def celsius(self, value):\n        if value < -273.15:\n            raise ValueError(\"Below absolute zero!\")\n        self._celsius = value\n    \n    @property\n    def fahrenheit(self):\n        return self._celsius * 9/5 + 32\n    \n    @fahrenheit.setter\n    def fahrenheit(self, value):\n        self._celsius = (value - 32) * 5/9\n\nt = Temperature(25)\nprint(f\"Celsius: {t.celsius}\")\nprint(f\"Fahrenheit: {t.fahrenheit}\")\nt.fahrenheit = 100\nprint(f\"After setting to 100F - Celsius: {t.celsius:.1f}\")\nt.celsius = 30\nprint(f\"After setting to 30C - Fahrenheit: {t.fahrenheit:.1f}\")"
+  },
+  "verificationTest": "output.includes('Celsius: 25') && output.includes('Fahrenheit: 77.0') && output.includes('After setting to 100F - Celsius: 37.8') && output.includes('After setting to 30C - Fahrenheit: 86.0')",
+  "hints": [
+    "Use `@property` to define a getter method",
+    "Use `@property_name.setter` for the setter",
+    "Properties allow attribute access with validation logic",
+    "Getters/setters encapsulate internal state"
+  ]
+}

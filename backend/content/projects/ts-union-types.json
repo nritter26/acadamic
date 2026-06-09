@@ -1,0 +1,17 @@
+{
+  "id": "ts-union-types",
+  "title": "TypeScript: Union Types",
+  "description": "Write a TypeScript program that uses union types, type guards, and discriminated unions.",
+  "difficulty": "intermediate",
+  "languages": ["ts"],
+  "codeTemplate": {
+    "ts": "type StringOrNumber = string | number;\n\nfunction format(value: StringOrNumber): string {\n  if (typeof value === 'string') {\n    return `String: ${value.toUpperCase()}`;\n  }\n  return `Number: ${value.toFixed(2)}`;\n}\n\ninterface Circle {\n  kind: 'circle';\n  radius: number;\n}\n\ninterface Square {\n  kind: 'square';\n  side: number;\n}\n\ntype Shape = Circle | Square;\n\nfunction area(shape: Shape): number {\n  switch (shape.kind) {\n    case 'circle': return Math.PI * shape.radius ** 2;\n    case 'square': return shape.side ** 2;\n  }\n}\n\nconsole.log(format('hello'));\nconsole.log(format(42));\nconsole.log(`Circle area: ${area({ kind: 'circle', radius: 5 }).toFixed(2)}`);\nconsole.log(`Square area: ${area({ kind: 'square', side: 4 })}`);"
+  },
+  "verificationTest": "output.includes('String: HELLO') && output.includes('Number: 42.00') && output.includes('Circle area: 78.54') && output.includes('Square area: 16')",
+  "hints": [
+    "Union types: `TypeA | TypeB`",
+    "Use `typeof` type guards for primitive unions",
+    "Discriminated unions use a literal type property as discriminant",
+    "Switch on the discriminant property for exhaustive handling"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "asm-enumeration",
+  "title": "Assembly: Enumeration",
+  "description": "Practice enumeration in Assembly.",
+  "difficulty": "advanced",
+  "languages": [
+    "asm"
+  ],
+  "codeTemplate": {
+    "asm": "; enumeration\\nsection .data\\n    msg db 'enumeration',0\\nsection .text\\n    global _start\\n_start:\\n    mov eax,4\\n    mov ebx,1\\n    mov ecx,msg\\n    int 0x80\\n    mov eax,1\\n    xor ebx,ebx\\n    int 0x80"
+  },
+  "verificationTest": "output && output.length > 0",
+  "hints": [
+    "Learn enumeration in Assembly"
+  ]
+}

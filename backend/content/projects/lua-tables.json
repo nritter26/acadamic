@@ -1,0 +1,17 @@
+{
+  "id": "lua-tables",
+  "title": "Lua: Tables",
+  "description": "Write a Lua program demonstrating tables as arrays, dictionaries, and objects with metatables.",
+  "difficulty": "beginner",
+  "languages": ["lua"],
+  "codeTemplate": {
+    "lua": "-- Table as array\nlocal fruits = {\"apple\", \"banana\", \"cherry\"}\ntable.insert(fruits, \"date\")\nprint(\"Fruits: \" .. table.concat(fruits, \", \"))\nprint(\"Count: \" .. #fruits)\n\n-- Table as dictionary\nlocal person = {\n    name = \"Alice\",\n    age = 30,\n    city = \"New York\"\n}\nprint(\"Name: \" .. person.name)\nprint(\"Age: \" .. person.age)\n\n-- Iteration\nprint(\"\\nIterating fruits:\")\nfor i, fruit in ipairs(fruits) do\n    print(\"  \" .. i .. \". \" .. fruit)\nend\n\nprint(\"\\nIterating person:\")\nfor key, value in pairs(person) do\n    print(\"  \" .. key .. \": \" .. value)\nend\n\n-- Metatables\nlocal vec = {x = 3, y = 4}\nlocal mt = {\n    __tostring = function(t)\n        return \"(\" .. t.x .. \", \" .. t.y .. \")\"\n    end\n}\nsetmetatable(vec, mt)\nprint(\"\\nVector: \" .. vec)\nprint(\"Length: \" .. math.sqrt(vec.x^2 + vec.y^2))"
+  },
+  "verificationTest": "output.includes('Fruits: apple, banana, cherry, date') && output.includes('Name: Alice') && output.includes('Vector: (3, 4)') && output.includes('Length: 5')",
+  "hints": [
+    "Tables are the only data structure in Lua — used for arrays, dicts, and objects",
+    "Use `ipairs()` for array-like iteration, `pairs()` for dictionary iteration",
+    "Metatables customize table behavior with metamethods like __tostring",
+    "`#` operator gives the length of an array-like table"
+  ]
+}

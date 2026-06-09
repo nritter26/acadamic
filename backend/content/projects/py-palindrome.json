@@ -1,0 +1,16 @@
+{
+  "id": "py-palindrome",
+  "title": "Python: Palindrome Checker",
+  "description": "Write a Python program that checks if a string is a palindrome.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "def is_palindrome(s):\n    s = s.lower().replace(' ', '')\n    return s == s[::-1]\n\ntest_words = [\"racecar\", \"hello\", \"A man a plan a canal Panama\"]\nfor word in test_words:\n    if is_palindrome(word):\n        print(f\"'{word}' is a palindrome\")\n    else:\n        print(f\"'{word}' is not a palindrome\")"
+  },
+  "verificationTest": "output.includes('racecar is a palindrome') && output.includes('hello is not a palindrome') && output.includes('A man a plan a canal Panama is a palindrome')",
+  "hints": [
+    "Use `s[::-1]` to reverse a string",
+    "Remove spaces and convert to lowercase before checking",
+    "A palindrome reads the same forwards and backwards"
+  ]
+}

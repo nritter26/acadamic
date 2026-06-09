@@ -1,0 +1,16 @@
+{
+  "id": "py-file-read",
+  "title": "Python: File Reading",
+  "description": "Write a Python program that reads from a simulated file (list of strings) and counts lines, words, and characters.",
+  "difficulty": "intermediate",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "lines = [\n    \"Hello world\",\n    \"Python is great\",\n    \"File processing is fun\",\n]\n\nline_count = len(lines)\nword_count = sum(len(line.split()) for line in lines)\nchar_count = sum(len(line) for line in lines)\n\nprint(f\"Lines: {line_count}\")\nprint(f\"Words: {word_count}\")\nprint(f\"Characters: {char_count}\")\n\nprint(\"\\nUppercased:\")\nfor line in lines:\n    print(line.upper())"
+  },
+  "verificationTest": "output.includes('Lines: 3') && output.includes('Words: 9') && output.includes('Characters: 48') && output.includes('Uppercased:') && output.includes('HELLO WORLD')",
+  "hints": [
+    "Use `len()` to get counts for sequences",
+    "`line.split()` splits a line into words by whitespace",
+    "Use a for loop to process each line individually"
+  ]
+}

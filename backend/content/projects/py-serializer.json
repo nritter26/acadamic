@@ -1,0 +1,17 @@
+{
+  "id": "py-serializer",
+  "title": "Python: JSON Serializer",
+  "description": "Write a Python program that serializes custom objects to JSON using a custom encoder.",
+  "difficulty": "advanced",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "import json\n\nclass Person:\n    def __init__(self, name, age, skills):\n        self.name = name\n        self.age = age\n        self.skills = skills\n\nclass PersonEncoder(json.JSONEncoder):\n    def default(self, obj):\n        if isinstance(obj, Person):\n            return {'__type__': 'Person', 'name': obj.name, 'age': obj.age, 'skills': obj.skills}\n        return super().default(obj)\n\ndef decode_person(dct):\n    if dct.get('__type__') == 'Person':\n        return Person(dct['name'], dct['age'], dct['skills'])\n    return dct\n\np = Person('Alice', 30, ['Python', 'Java', 'SQL'])\njson_str = json.dumps(p, cls=PersonEncoder, indent=2)\nprint(\"Serialized:\")\nprint(json_str)\n\nrestored = json.loads(json_str, object_hook=decode_person)\nprint(f\"\\nRestored: {restored.name}, Age: {restored.age}\")\nprint(f\"Skills: {', '.join(restored.skills)}\")"
+  },
+  "verificationTest": "output.includes('Serialized:') && output.includes('\"__type__\": \"Person\"') && output.includes('\"name\": \"Alice\"') && output.includes('Restored: Alice, Age: 30') && output.includes('Skills: Python, Java, SQL')",
+  "hints": [
+    "Subclass `json.JSONEncoder` and override `default()` for custom serialization",
+    "Use `json.dumps(obj, cls=YourEncoder)` to serialize",
+    "Use `json.loads(json_str, object_hook=decode)` to restore",
+    "Include a type marker to distinguish custom objects"
+  ]
+}

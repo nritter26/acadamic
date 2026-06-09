@@ -1,0 +1,17 @@
+{
+  "id": "js-arrays",
+  "title": "JavaScript: Arrays",
+  "description": "Write a JavaScript program that demonstrates array creation, methods, and iteration.",
+  "difficulty": "beginner",
+  "languages": ["js"],
+  "codeTemplate": {
+    "js": "let fruits = ['apple', 'banana', 'cherry'];\nconsole.log(`Fruits: ${fruits}`);\nconsole.log(`First: ${fruits[0]}, Last: ${fruits[fruits.length - 1]}`);\n\nfruits.push('date');\nconsole.log(`After push: ${fruits}`);\n\nlet popped = fruits.pop();\nconsole.log(`Popped: ${popped}`);\nconsole.log(`Remaining: ${fruits}`);\n\nfruits.forEach((f, i) => console.log(`${i + 1}: ${f}`));\n\nlet uppercased = fruits.map(f => f.toUpperCase());\nconsole.log(`Uppercased: ${uppercased}`);"
+  },
+  "verificationTest": "output.includes('First: apple, Last: cherry') && output.includes('After push: apple,banana,cherry,date') && output.includes('Popped: date') && output.includes('1: apple') && output.includes('3: cherry') && output.includes('Uppercased: APPLE,BANANA,CHERRY')",
+  "hints": [
+    "Arrays are zero-indexed: `arr[0]` gets the first element",
+    "`push()` adds to end, `pop()` removes from end",
+    "`forEach()` iterates, `map()` transforms each element",
+    "`arr.length` gives the number of elements"
+  ]
+}
