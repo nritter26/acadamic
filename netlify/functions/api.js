@@ -37,6 +37,125 @@ try {
   getCurriculumContext = s.getCurriculumContext;
 } catch {}
 
+// ── Tutor ──
+async function handleTutor(event, body, subRoute) {
+  if (subRoute === 'explain-topic') {
+    const { topic, lang, code } = body;
+    if (!topic) return { statusCode: 400, body: JSON.stringify({ error: 'No topic provided' }) };
+    const useLang = lang || 'js';
+
+    // LLM path if available
+    if (askLLM && ACTIVE_AI_PROVIDER !== 'keyword') {
+      try {
+        const systemPrompt = `You are a programming tutor teaching a student about "${topic}" in ${useLang}.
+Structure your explanation:
+1. What is ${topic}? (simple definition)
+2. Why is it useful?
+3. Code example
+4. Common pitfalls
+5. End with a question to check understanding
+
+Keep it conversational and encourage the student to try it themselves.`;
+
+        const messages = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: code ? `I have this code:\n\`\`\`\n${code}\n\`\`\`\n\nExplain "${topic}" in ${useLang}.` : `Explain "${topic}" in ${useLang} and help me understand it.` },
+        ];
+        const reply = await askLLM(messages);
+        if (reply) return { statusCode: 200, body: JSON.stringify({ explanation: reply, source: 'llm' }) };
+      } catch {}
+    }
+
+    // Fallback: curriculum-based explanation
+    const keywordExplanation = aiResponses.find(e => e.keywords.some(k => topic.toLowerCase().includes(k)));
+    if (keywordExplanation) {
+      return { statusCode: 200, body: JSON.stringify({ explanation: keywordExplanation.response, source: 'keyword' }) };
+    }
+    return { statusCode: 200, body: JSON.stringify({ explanation: `**${topic}** is an important concept in ${useLang}. Check the curriculum for examples and try writing code to practice.`, source: 'fallback' }) };
+  }
+
+  if (subRoute === 'start-exercise') {
+    const { topic, lang, level } = body;
+    if (!topic) return { statusCode: 400, body: JSON.stringify({ error: 'No topic provided' }) };
+
+    if (generateExercise) {
+      try {
+        const exercise = await generateExercise(topic, lang || 'js', level || 'beginner');
+        return { statusCode: 200, body: JSON.stringify({ exercise, sessionState: 'exercising' }) };
+      } catch {}
+    }
+
+    // Fallback exercise
+    const langs = lang || 'js';
+    const exercises = {
+      js: {
+        beginner: {
+          'variable': { title: 'Variable Declaration', description: 'Declare a variable called `name` and assign your name to it. Then print it using console.log().', starterCode: "// Declare name variable here\n// Print it here", hint: 'Use const or let to declare a variable.' },
+          'function': { title: 'Write a Function', description: 'Write a function called `add` that takes two numbers and returns their sum.', starterCode: 'function add(a, b) {\n  // your code here\n}', hint: 'Use the return keyword.' },
+        },
+      },
+      py: {
+        beginner: {
+          'variable': { title: 'Variable Declaration', description: 'Create a variable called `name` and assign your name. Then print it.', starterCode: "# Create name variable here\n# Print it here", hint: 'Use the print() function.' },
+        },
+      },
+    };
+    const ex = exercises[langs]?.[level || 'beginner']?.[topic];
+    if (ex) return { statusCode: 200, body: JSON.stringify({ exercise: ex, sessionState: 'exercising' }) };
+    return { statusCode: 200, body: JSON.stringify({ exercise: { title: `Practice ${topic}`, description: `Practice ${topic} in ${langs}.`, starterCode: '// Write your code here', hint: 'Review the curriculum for this topic.' }, sessionState: 'exercising' }) };
+  }
+
+  if (subRoute === 'attempt-exercise') {
+    const { code, lang, topic } = body;
+    if (!code) return { statusCode: 400, body: JSON.stringify({ error: 'No code provided' }) };
+
+    if (codeReview) {
+      try {
+        const result = await codeReview(code, lang || 'js', topic);
+        const hasErrors = result.issues?.some(i => i.severity === 'error') ?? false;
+        return { statusCode: 200, body: JSON.stringify({
+          review: result.review, score: result.score, issues: result.issues,
+          attempts: 1, passed: !hasErrors,
+        }) };
+      } catch {}
+    }
+
+    // Static review fallback
+    const issues = [];
+    const openB = (code.match(/\{/g) || []).length;
+    const closeB = (code.match(/\}/g) || []).length;
+    if (openB !== closeB) issues.push({ message: `Unbalanced braces: ${openB} opening vs ${closeB} closing.`, severity: 'error' });
+    const openP = (code.match(/\(/g) || []).length;
+    const closeP = (code.match(/\)/g) || []).length;
+    if (openP !== closeP) issues.push({ message: `Unbalanced parentheses: ${openP} opening vs ${closeP} closing.`, severity: 'error' });
+    return { statusCode: 200, body: JSON.stringify({
+      review: `Static review found ${issues.length} issue(s).`, score: issues.length > 0 ? 5 : 10,
+      issues, attempts: 1, passed: issues.length === 0,
+    }) };
+  }
+
+  if (subRoute === 'recommend') {
+    if (learner) {
+      try {
+        const lid = body.learnerId || event.queryStringParameters?.learnerId || 'default';
+        const lang = body.lang || event.queryStringParameters?.lang;
+        if (lang) {
+          const contentDir = path.join(ROOT, 'content');
+          const filePath = path.join(contentDir, `${lang}.json`);
+          if (fs.existsSync(filePath)) {
+            const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            const recommended = await learner.getNextRecommendedTopic(lid, lang, data);
+            return { statusCode: 200, body: JSON.stringify(recommended || { topic: null, reason: 'all-complete' }) };
+          }
+        }
+      } catch {}
+    }
+    return { statusCode: 200, body: JSON.stringify({ topic: null, reason: 'unavailable' }) };
+  }
+
+  return { statusCode: 404, body: JSON.stringify({ error: 'Unknown tutor route' }) };
+}
+
 exports.handler = async (event) => {
   const pathParts = event.path.replace(/^\/api\//, '').split('/');
   const route = pathParts[0];
@@ -70,6 +189,7 @@ exports.handler = async (event) => {
     'proxy':        () => handleProxy(body),
     'benchmark':    () => handleBenchmark(event),
     'courses':      () => handleCourses(),
+    'tutor':        () => handleTutor(event, body, subRoute),
     'learner':      () => {
       const sub = { state: handleLearnerState, track: handleLearnerTrack, reviews: handleLearnerReviews, recommend: handleLearnerRecommend }[subRoute];
       return sub ? sub(event, body) : { statusCode: 404, body: JSON.stringify({ error: 'Unknown learner route' }) };
