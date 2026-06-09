@@ -12,6 +12,7 @@
   let aiHint = $state('');
   let aiHintLoading = $state(false);
   let aiHintError = $state('');
+  let aiHintController = null;
 
   $effect(() => {
     userCode = exercise.code;
@@ -20,6 +21,10 @@
     aiHint = '';
     aiHintLoading = false;
     aiHintError = '';
+    return () => {
+      aiHintController?.abort();
+      aiHintController = null;
+    };
   });
 
   function handleCheck() {
@@ -35,11 +40,14 @@
 
   function requestAiHint() {
     aiHintLoading = true;
+    const ac = new AbortController();
+    aiHintController = ac;
     requestHint(topic, lang, userCode,
       'The user is filling in blank code and got it wrong. Give them a hint.',
       (hint) => { aiHint = hint; },
       () => { aiHintLoading = false; },
-      (err) => { aiHintError = err; aiHintLoading = false; }
+      (err) => { aiHintError = err; aiHintLoading = false; },
+      ac.signal
     );
   }
 </script>

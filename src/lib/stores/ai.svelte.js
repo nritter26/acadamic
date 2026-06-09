@@ -6,6 +6,7 @@ let _streaming = $state(false);
 let _panelOpen = $state(false);
 let _provider = $state('hybrid');
 let _model = $state('');
+let _useAI = $state(false);
 let _loaded = false;
 let _idCounter = 0;
 let _editorCode = $state('');
@@ -116,6 +117,8 @@ export function getAIState() {
     set provider(value) { _provider = value; },
     get model() { return _model; },
     set model(value) { _model = value; },
+    get useAI() { return _useAI; },
+    set useAI(value) { _useAI = value; },
     get editorCode() { return _editorCode; },
     set editorCode(value) { _editorCode = value; },
     get exercise() { return _exercise; },
@@ -128,6 +131,14 @@ export function getAIState() {
       broadcast('panelOpen', _panelOpen);
     },
 
+    toggleAI() {
+      _useAI = !_useAI;
+      if (_useAI) {
+        _panelOpen = true;
+        broadcast('panelOpen', true);
+      }
+    },
+
     async exploreTopic(topic, lang, phase) {
       if (_streaming) return;
       _panelOpen = true;
@@ -138,7 +149,7 @@ export function getAIState() {
       broadcast('streaming', true);
       let streamed = '';
       try {
-        await apiStream('/api/tutor/explain-topic', { topic, lang, phase, learnerId: 'default' }, (chunk) => {
+        await apiStream('/api/tutor/explain-topic', { topic, lang, phase, learnerId: 'default', useAI: _useAI }, (chunk) => {
           streamed += chunk;
           _updateLastMessage(streamed);
         }, () => {
@@ -184,7 +195,7 @@ export function getAIState() {
       _streaming = true;
       broadcast('streaming', true);
       let streamed = '';
-      apiStream('/api/tutor/explain-topic', { topic, lang, phase, code, learnerId: 'default' }, (chunk) => {
+      apiStream('/api/tutor/explain-topic', { topic, lang, phase, code, learnerId: 'default', useAI: _useAI }, (chunk) => {
         streamed += chunk;
         _updateLastMessage(streamed);
       }, () => {

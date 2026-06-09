@@ -86,6 +86,8 @@ export const ExplainTopicSchema = z.object({
   phase: z.string().optional(),
   learnerId: z.string().optional(),
   code: z.string().optional(),
+  include_checkin: z.boolean().optional(),
+  useAI: z.boolean().optional(),
 });
 export type ExplainTopicInput = z.infer<typeof ExplainTopicSchema>;
 

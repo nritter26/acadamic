@@ -1,4 +1,7 @@
 <script>
+  import { onDestroy } from 'svelte';
+  import { getAIState } from '$lib/stores/ai.svelte.js';
+
   let { label = 'Ask Devin', topic, lang = 'js', phase = '', code = '', context = '' } = $props();
 
   let expanded = $state(false);
@@ -7,7 +10,7 @@
   let error = $state('');
   let controller = $state(null);
 
-  import { getAIState } from '$lib/stores/ai.svelte.js';
+  onDestroy(() => { controller?.abort(); });
 
   async function handleClick() {
     if (loading) return;
@@ -17,6 +20,12 @@
     error = '';
 
     const ai = getAIState();
+    if (!ai.useAI) {
+      ai.toggleAI();
+      loading = false;
+      return;
+    }
+
     ai.togglePanel();
 
     const prompt = context
@@ -42,6 +51,7 @@
       let buf = '';
       let streamed = '';
       while (true) {
+        if (ac.signal.aborted) return;
         const { done, value } = await reader.read();
         if (done) break;
         buf += decoder.decode(value, { stream: true });
@@ -50,9 +60,10 @@
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const data = line.slice(6);
-          if (data === '[DONE]') break;
+          if (data === '[DONE]') return;
           try {
             const parsed = JSON.parse(data);
+            if (parsed.type === 'explanation_end') continue;
             const chunk = parsed.content ?? parsed.text ?? data;
             streamed += chunk;
             response = streamed;

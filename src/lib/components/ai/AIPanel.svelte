@@ -36,8 +36,24 @@
   }
 
   async function send() {
+    if (!ai.useAI) {
+      ai.toggleAI();
+      return;
+    }
+
     const message = input.trim();
     if (!message || ai.streaming) return;
+
+    if (offlineStatus && !offlineStatus.includes('Checking')) {
+      try {
+        const r = await fetch('/api/health', { signal: AbortSignal.timeout(3000) });
+        if (!r.ok) { ai.addMessage('The backend server is not responding. Make sure it is running (npm run server).', 'bot'); return; }
+        offlineStatus = '';
+      } catch {
+        ai.addMessage('Cannot reach the backend server. Start it with: npm run server', 'bot');
+        return;
+      }
+    }
 
     input = '';
     ai.addMessage(message, 'user');
@@ -55,7 +71,10 @@
     }, () => {
       ai.setStreaming(false);
     }, (error) => {
-      ai.updateLastMessage(`Error: ${error}`);
+      const msg = error.includes('502') || error.includes('unreachable')
+        ? '⚠️ Backend server unreachable. Make sure the server is running: npm run server'
+        : `Error: ${error}`;
+      ai.updateLastMessage(msg);
       ai.setStreaming(false);
     });
   }
@@ -90,8 +109,14 @@
   }
 </script>
 
-<button class="ai-toggle" onclick={() => ai.togglePanel()} aria-label="Open AI tutor panel">
-  Devin
+<button
+  class="ai-toggle"
+  class:ai-on={ai.useAI}
+  onclick={() => ai.useAI ? ai.togglePanel() : ai.toggleAI()}
+  aria-label={ai.useAI ? 'Open AI tutor panel' : 'Enable AI tutor'}
+  title={ai.useAI ? 'Devin AI is on' : 'Devin AI is off — click to enable'}
+>
+  Devin {ai.useAI ? '✦' : '✧'}
 </button>
 
 {#if ai.panelOpen}
@@ -108,6 +133,14 @@
     {#if showSettings}
       <div class="ai-settings-panel">
         <AISettings />
+      </div>
+    {/if}
+    {#if !ai.useAI}
+      <div class="ai-disabled">
+        <div class="ai-disabled-icon">✦</div>
+        <p>Devin AI is currently off.</p>
+        <button class="ai-enable-btn" onclick={() => ai.toggleAI()}>Enable Devin AI</button>
+        <p class="ai-disabled-hint">Toggle AI on to get coding help, hints, and explanations.</p>
       </div>
     {/if}
     <div class="ai-messages" bind:this={messagesEl}>
@@ -143,7 +176,15 @@
 {/if}
 
 <style>
-  .ai-toggle { position: fixed; bottom: 16px; right: 16px; z-index: 500; padding: 8px 14px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; }
+  .ai-toggle { position: fixed; bottom: 16px; right: 16px; z-index: 500; padding: 8px 14px; background: #334155; color: #94a3b8; border: 1px solid #475569; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+  .ai-toggle.ai-on { background: #6366f1; color: #fff; border-color: #6366f1; }
+  .ai-toggle:hover { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .ai-disabled { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; gap: 12px; }
+  .ai-disabled-icon { font-size: 28px; color: #6366f1; }
+  .ai-disabled p { color: #94a3b8; font-size: 13px; margin: 0; }
+  .ai-disabled-hint { font-size: 11px !important; color: #64748b !important; }
+  .ai-enable-btn { padding: 8px 20px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; }
+  .ai-enable-btn:hover { background: #4f46e5; }
   .ai-panel { position: fixed; right: 0; top: 0; bottom: 0; width: min(380px, 100vw); z-index: 900; background: #0b1120; border-left: 1px solid #1e293b; display: flex; flex-direction: column; }
   .ai-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #1e293b; color: #e2e8f0; font-weight: 800; }
   .ai-header-actions { display: flex; gap: 2px; }

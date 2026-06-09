@@ -1,4 +1,5 @@
 <script>
+  import { getAIState } from '$lib/stores/ai.svelte.js';
   let { topic, lang = 'js', phase = '', alreadyCompleted = false } = $props();
 
   let collapsed = $state(alreadyCompleted);
@@ -11,11 +12,21 @@
   let checkinAnswered = $state(false);
   let checkinResult = $state(null);
 
+  let aiState = $derived(getAIState());
+
+  let aiDisabled = $state(false);
+
   $effect(() => {
-    if (!topic || collapsed) return;
-    loadGuide();
-    return () => { controller?.abort(); };
+    aiDisabled = !!topic && !aiState.useAI;
   });
+
+  function toggleGuide() {
+    collapsed = !collapsed;
+  }
+
+  function explain() {
+    if (!guide && !loading) loadGuide();
+  }
 
   async function loadGuide() {
     if (loading) return;
@@ -43,6 +54,7 @@
       let buf = '';
       let streamed = '';
       while (true) {
+        if (ac.signal.aborted) return;
         const { done, value } = await reader.read();
         if (done) break;
         buf += decoder.decode(value, { stream: true });
@@ -51,12 +63,14 @@
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const data = line.slice(6);
-          if (data === '[DONE]') break;
+          if (data === '[DONE]') return;
           try {
             const parsed = JSON.parse(data);
             if (parsed.type === 'checkin') {
               checkinQuestion = parsed;
               guide = streamed;
+            } else if (parsed.type === 'explanation_end') {
+              continue;
             } else {
               const chunk = parsed.content ?? parsed.text ?? data;
               streamed += chunk;
@@ -91,7 +105,7 @@
 </script>
 
 <div class="ai-guide" class:collapsed>
-  <button class="ag-header" onclick={() => collapsed = !collapsed} aria-expanded={!collapsed}>
+  <button class="ag-header" onclick={toggleGuide} aria-expanded={!collapsed}>
     <span class="ag-icon">{collapsed ? '▶' : '▼'}</span>
     <span class="ag-title">AI Guide</span>
     {#if loading}
@@ -135,6 +149,12 @@
             {/if}
           </div>
         {/if}
+      {:else if aiDisabled}
+        <div class="ag-empty">AI is disabled. <button class="ag-retry" onclick={() => { const a = getAIState(); a.toggleAI(); }}>Enable Devin AI</button> for AI guides.</div>
+      {:else if !guide && !loading}
+        <div class="ag-empty">
+          <button class="ag-explain-btn" onclick={explain}>Explain this topic</button>
+        </div>
       {:else}
         <div class="ag-empty">No guide content available.</div>
       {/if}
@@ -158,6 +178,8 @@
   .ag-error { color: #ef4444; font-size: 13px; }
   .ag-retry { margin-top: 8px; padding: 6px 14px; background: #4c1d95; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 12px; }
   .ag-empty { color: #6b7280; font-size: 13px; font-style: italic; }
+  .ag-explain-btn { padding: 8px 20px; background: #4c1d95; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .ag-explain-btn:hover { background: #6d28d9; }
   .ag-checkin { margin-top: 16px; padding: 12px; background: rgba(15,23,42,0.5); border: 1px solid #334155; border-radius: 8px; }
   .ag-checkin-q { font-size: 14px; font-weight: 600; color: #e2e8f0; margin: 0 0 10px; }
   .ag-checkin-options { display: flex; flex-direction: column; gap: 6px; }

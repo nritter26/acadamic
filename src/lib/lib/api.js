@@ -22,16 +22,20 @@ export async function apiGet(path) {
   return response.json();
 }
 
-export async function apiStream(path, body, onChunk, onDone, onError) {
+export async function apiStream(path, body, onChunk, onDone, onError, signal) {
   try {
     const response = await fetch(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      signal,
     });
 
     if (!response.ok) {
-      onError?.(`HTTP ${response.status}`);
+      const msg = response.status === 502
+        ? 'Server unreachable (502). Make sure the backend is running.'
+        : `HTTP ${response.status}`;
+      onError?.(msg);
       return;
     }
 
@@ -40,6 +44,7 @@ export async function apiStream(path, body, onChunk, onDone, onError) {
     let buffer = '';
 
     while (true) {
+      if (signal?.aborted) break;
       const { done, value } = await reader.read();
       if (done) break;
 
@@ -57,6 +62,7 @@ export async function apiStream(path, body, onChunk, onDone, onError) {
         }
         try {
           const parsed = JSON.parse(data);
+          if (parsed.type === 'explanation_end') continue;
           onChunk?.(parsed.content ?? parsed.text ?? data);
         } catch {
           onChunk?.(data);
