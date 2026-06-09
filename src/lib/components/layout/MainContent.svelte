@@ -15,7 +15,7 @@
   import QuizView from '$lib/components/quiz/QuizView.svelte';
   import ProjectList from '$lib/components/projects/ProjectList.svelte';
   import ProjectDetail from '$lib/components/projects/ProjectDetail.svelte';
-  import { loadProjectCatalog } from '$lib/lib/projects.js';
+  import { loadProjectCatalog, loadProjectCatalogStream } from '$lib/lib/projects.js';
   import { STYLING_SCENARIOS, SCENARIO_ORDER } from '$lib/lib/styling-scenarios.js';
   import { LANG_INTROS } from '$lib/lib/lang-intros.js';
   import { runPipeline, highlightCode, renderTokens, renderAST, renderStats } from '$lib/lib/compiler.js';
@@ -44,6 +44,7 @@
 
   let showApiClient = $state(false);
   let projects = $state([]);
+  let projectsLoading = $state({ active: false, loaded: 0, total: 0 });
   let selectedProject = $state(null);
   let projectDiffFilter = $state('all');
   let projectLangFilter = $state('all');
@@ -132,7 +133,31 @@
         }
       }
       if (m === 'projects') {
-        loadProjectCatalog().then(p => projects = p);
+        projects = [];
+        projectsLoading = { active: true, loaded: 0, total: 0 };
+        // Try streaming first for lazy loading
+        let streamBatchTimer;
+        loadProjectCatalogStream(
+          (project, loaded, total) => {
+            projects.push(project);
+            clearTimeout(streamBatchTimer);
+            streamBatchTimer = setTimeout(() => {
+              projectsLoading = { active: true, loaded, total };
+            }, 50);
+          },
+          (loaded, total) => {
+            clearTimeout(streamBatchTimer);
+            projectsLoading = { active: false, loaded, total };
+          }
+        ).then(streamTotal => {
+          // If streaming failed (returned -1), fall back to bulk
+          if (streamTotal < 0) {
+            loadProjectCatalog().then(p => {
+              projects = p;
+              projectsLoading = { active: false, loaded: p.length, total: p.length };
+            });
+          }
+        });
       }
       app.workspaceOpen = !STANDALONE_MODES.includes(m);
     }
@@ -142,7 +167,7 @@
   const DIFF_FILTERS = ['all', 'beginner', 'intermediate', 'advanced', 'expert'];
   const LANG_LABELS = { all: 'All', javascript: 'JS', typescript: 'TS', python: 'PY', java: 'Java', cs: 'C#', rb: 'Ruby', php: 'PHP', go: 'GO', rust: 'Rust', cpp: 'C++', c: 'C', zig: 'Zig', kt: 'KT', lua: 'Lua', swift: 'Swift', scala: 'Scala', bash: 'Bash', asm: 'ASM', wasm: 'WASM' };
   const DIFF_LABELS = { all: 'All', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' };
-  const LANG_ALIASES = { javascript: 'js', typescript: 'ts', python: 'py' };
+  const LANG_ALIASES = { javascript: 'js', typescript: 'ts', python: 'py', js: 'javascript', ts: 'typescript', py: 'python', rb: 'ruby', ruby: 'rb', rs: 'rust', rust: 'rs', kt: 'kotlin', kotlin: 'kt', bash: 'shell', shell: 'bash', asm: 'assembly', assembly: 'asm' };
   function langMatchesFilter(projectLangs, filterVal) {
     if (filterVal === 'all') return true;
     if (!projectLangs) return false;
@@ -273,6 +298,7 @@
             selectedId={selectedProject?.id}
             language={projectLanguage}
             progress={projectProgress}
+            loading={projectsLoading}
             onselect={handleProjectSelect}
             onlanguagechange={handleProjectLangChange}
           />

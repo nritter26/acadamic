@@ -17,12 +17,23 @@ export const GAME_CATALOG = [
   { id: 'logic-ladder', title: 'Logic Ladder', description: 'Step through branching logic puzzles.', mode: 'choice', icon: '🪜' },
 ];
 
-import { generateChallenges } from '$lib/lang/index.js';
+import { generateChallenges, GENERATORS } from '$lib/lang/index.js';
 
 export function getChallenges(gameId, langId = 'js') {
   return generateChallenges(gameId, langId);
 }
 
+// On-demand single challenge generation for infinite play
+// Generates one challenge at a given index without pre-generating the full set
+export function getChallenge(gameId, langId = 'js', index = 0) {
+  return generateChallenge(gameId, langId, index);
+}
+
+function generateChallenge(gameId, langId, index) {
+  const gen = GENERATORS[gameId];
+  if (!gen) return { prompt: 'Challenge', choices: ['A', 'B'], answer: 'A' };
+  return gen(langId, index) || { prompt: 'Challenge', choices: ['A', 'B'], answer: 'A' };
+}
 
 
 export function normalizeAnswer(value = '') {

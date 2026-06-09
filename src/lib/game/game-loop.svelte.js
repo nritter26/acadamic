@@ -1,4 +1,4 @@
-import { getChallenges, isCorrectAnswer } from '$lib/lib/games.js';
+import { getChallenge, isCorrectAnswer } from '$lib/lib/games.js';
 import { getGameState } from '$lib/stores/game.svelte.js';
 
 export function createGameController(gameId, langId) {
@@ -13,12 +13,12 @@ export function createGameController(gameId, langId) {
   let showStreakPopup = $state(false);
   let streakPopupText = $state('');
 
-  let challenges = $derived(getChallenges(gameId, langId) || []);
-  let challenge = $derived(challenges[index % Math.max(1, challenges.length)] || {});
+  // On-demand challenge: generate one at a time based on current index
+  let challenge = $derived(getChallenge(gameId, langId, index));
   let progress = $derived({
     current: index + 1,
-    total: challenges.length,
-    pct: challenges.length > 0 ? ((index + 1) / challenges.length) * 100 : 0
+    total: null, // infinite — no total
+    pct: 0
   });
 
   let gameState = $derived(getGameState());
@@ -89,7 +89,6 @@ export function createGameController(gameId, langId) {
     get feedback() { return feedback; },
     get feedbackType() { return feedbackType; },
     get challenge() { return challenge; },
-    get challenges() { return challenges; },
     get progress() { return progress; },
     get transitioning() { return transitioning; },
     get showScorePopup() { return showScorePopup; },

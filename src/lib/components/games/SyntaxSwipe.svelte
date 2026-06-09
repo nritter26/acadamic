@@ -16,7 +16,7 @@
 <div class="game-sw" class:transitioning={ctrl.transitioning}>
   <div class="g-top">
     <span class="g-badge">syntax-swipe</span>
-    <span class="g-progress">{ctrl.progress.current}/{ctrl.progress.total}</span>
+    <span class="g-progress">{ctrl.progress.current}{#if ctrl.progress.total}/{ctrl.progress.total}{:else} ∞{/if}</span>
   </div>
   <h1>{game.title}</h1>
 

@@ -6,6 +6,7 @@
     selectedId = '',
     language = 'all',
     progress = {},
+    loading = { active: false, loaded: 0, total: 0 },
     onselect = () => {},
     onlanguagechange = () => {},
   } = $props();
@@ -50,14 +51,14 @@
     if (langs.includes('rust') || langs.includes('rs')) return '#dea584';
     if (langs.includes('cpp')) return '#f34b7d';
     if (langs.includes('c')) return '#555555';
-    if (langs.includes('zig')) return '#ec913c';
+    if (langs.includes('zig')) return '#ec915c';
     if (langs.includes('kt') || langs.includes('kotlin')) return '#A97BFF';
     if (langs.includes('lua')) return '#000080';
     if (langs.includes('swift')) return '#F05138';
     if (langs.includes('scala')) return '#c22d40';
     if (langs.includes('bash') || langs.includes('shell')) return '#89e051';
     if (langs.includes('asm') || langs.includes('assembly')) return '#6E4C13';
-    if (langs.includes('wasm')) return '#654ff0';
+    if (langs.includes('wasm')) return '#04133b';
     return '#f1e05a';
   }
 
@@ -124,6 +125,15 @@
       {/each}
     {/if}
   {/each}
+  {#if loading.active}
+    <div class="loading-bar">
+      <div class="loading-bar-fill" style="width: {loading.total > 0 ? (loading.loaded / loading.total * 100) : 0}%"></div>
+    </div>
+    <div class="loading-text">
+      <span class="loading-spinner"></span>
+      Loading {loading.loaded}{#if loading.total > 0}/{loading.total}{/if} projects…
+    </div>
+  {/if}
 </div>
 
 <div class="lang-toggle">
@@ -178,16 +188,22 @@
   .badge-rs { background: #dea584; color: #000; }
   .badge-cpp { background: #f34b7d; color: #fff; }
   .badge-c { background: #555555; color: #fff; }
-  .badge-zig { background: #ec913c; color: #000; }
+  .badge-zig { background: #ec915c; color: #000; }
   .badge-kt { background: #A97BFF; color: #000; }
   .badge-lua { background: #000080; color: #fff; }
   .badge-swift { background: #F05138; color: #fff; }
   .badge-scala { background: #c22d40; color: #fff; }
   .badge-bash { background: #89e051; color: #000; }
   .badge-asm { background: #6E4C13; color: #fff; }
-  .badge-wasm { background: #654ff0; color: #fff; }
+  .badge-wasm { background: #04133b; color: #fff; }
   .py-p { color: #FFD43B; font-weight: 800; }
   .py-y { color: #FFD43B; font-weight: 800; }
+
+  .loading-bar { height: 2px; background: #1e293b; margin: 0 8px 4px; border-radius: 999px; overflow: hidden; }
+  .loading-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); transition: width 0.2s; border-radius: 999px; }
+  .loading-text { display: flex; align-items: center; gap: 5px; padding: 2px 8px 6px; font-size: 9px; color: #64748b; }
+  .loading-spinner { width: 8px; height: 8px; border: 1.5px solid #334155; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .lang-toggle { display: flex; align-items: center; gap: 4px; padding: 8px; border-top: 1px solid #1e293b; background: #0f172a; }
   .lang-toggle-label { font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-right: 2px; }
