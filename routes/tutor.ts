@@ -27,7 +27,7 @@ try {
 }
 
 router.post('/explain-topic', validate(ExplainTopicSchema), async (req: Request, res: Response) => {
-  const { topic, lang, phase, learnerId, code } = req.body;
+  const { topic, lang, phase, learnerId, code, useAI } = req.body;
   const lid = learnerId || 'default';
   const useLang = lang || 'js';
   const usePhase = phase || 'general';
@@ -88,6 +88,19 @@ router.post('/explain-topic', validate(ExplainTopicSchema), async (req: Request,
     ragContext = results.map(r => `[${r.phase}] ${r.topic}: ${r.exp?.slice(0, 300) || ''}`).join('\n');
   }
 
+  let fullResponse = '';
+
+  if (useAI === false) {
+    fullResponse = `**${topic}**\n\nThis is a key concept in ${useLang}. Try exploring it through the curriculum and writing code. You can enable the AI tutor in settings for personalized explanations.\n\n---\n\n*AI-assisted explanations are currently disabled.*`;
+    res.write(`data: ${JSON.stringify({ content: fullResponse })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
+    res.write('data: [DONE]\n\n');
+    clearTimeout(timeoutHandle);
+    sseDoneCalled = true;
+    res.end();
+    return;
+  }
+
   const systemPrompt = `You are a programming tutor teaching a ${learnerLevel} student about "${topic}" in ${useLang}.
 ${weakAreas}
 ${ragContext ? `Use this curriculum context:\n${ragContext}` : ''}
@@ -103,7 +116,6 @@ Keep it conversational and encourage the student to try it themselves.`;
 
   const fullSystemPrompt = prereqNote ? `${systemPrompt}\n\n${prereqNote}` : systemPrompt;
 
-  let fullResponse = '';
   const sseSend = (chunk: string) => {
     if (aborted || sseDoneCalled) return;
     fullResponse += chunk;
@@ -118,6 +130,7 @@ Keep it conversational and encourage the student to try it themselves.`;
     ];
     await askLLM(messages, sseSend, { lang: useLang, topic });
   } catch (e) {
+    console.error('[tutor] explain-topic LLM error:', (e as Error).message);
     if (!sseDoneCalled) {
       sseDoneCalled = true;
       clearTimeout(timeoutHandle);
@@ -127,13 +140,29 @@ Keep it conversational and encourage the student to try it themselves.`;
     }
   }
 
-  if (sseDoneCalled) return;
+  if (sseDoneCalled || aborted) return;
   sseDoneCalled = true;
   clearTimeout(timeoutHandle);
 
   const s = getSession(lid, useLang, topic);
   if (s) s.explanation = fullResponse;
 
+  if (req.body.include_checkin) {
+    const checkinMessages: LLMMessage[] = [
+      { role: 'system', content: `Generate one multiple-choice check-in question about "${topic}" in ${useLang} to test understanding. Respond with valid JSON: { "question": "...", "options": ["...","...","..."], "answerIndex": 0, "explanation": "..." }` },
+    ];
+    let checkinJson = '';
+    try {
+      await askLLM(checkinMessages, (chunk: string) => { checkinJson += chunk; }, { lang: useLang, topic });
+      const jsonStr = checkinJson.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(jsonStr);
+      res.write(`data: ${JSON.stringify({ type: 'checkin', question: parsed.question, options: parsed.options, answerIndex: parsed.answerIndex, explanation: parsed.explanation })}\n\n`);
+    } catch (e2) {
+      console.error('[tutor] check-in generation failed:', (e2 as Error).message);
+    }
+  }
+
+  if (aborted) return;
   res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
   res.write('data: [DONE]\n\n');
   res.end();

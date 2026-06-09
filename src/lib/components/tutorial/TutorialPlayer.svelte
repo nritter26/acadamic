@@ -6,6 +6,8 @@
   import TutorialQuizOverlay from './TutorialQuizOverlay.svelte';
   import TutorialShortcuts from './TutorialShortcuts.svelte';
   import ExerciseGroup from './ExerciseGroup.svelte';
+  import AIGuide from './AIGuide.svelte';
+  import TutorialHelpButton from './TutorialHelpButton.svelte';
   import { getGamificationState, awardTopicXp, awardPhaseXp, checkStreak } from '$lib/stores/tutorial-gamification.svelte.js';
 
   let tutorial = $derived(getTutorialState());
@@ -22,7 +24,9 @@
   let showCelebration = $state(false);
   let xpToast = $state(null);
   let xpToastTimer = $state(null);
-  let loadingTopic = false;
+  const contentCache = {};
+  let pendingLang = null;
+  let fetchKey = $state(0);
 
   function showXpToast(amount) {
     xpToast = { amount };
@@ -54,33 +58,47 @@
     checkStreak();
   });
 
+  let topicLoadId = 0;
+
   $effect(() => {
     if (!currentCourse || !currentPhase || !topicName) return;
-    if (loadingTopic) return;
-    loadTopicContent();
-  });
+    fetchKey;
+    const id = ++topicLoadId;
+    const lang = currentCourse.lang;
+    if (pendingLang === lang) return;
 
-  async function loadTopicContent() {
-    loadingTopic = true;
     topicLoading = true;
     runOutput = '';
     showOutput = false;
-    try {
-      const res = await fetch(`/content/${currentCourse.lang}.json`);
-      const data = await res.json();
-      if (data[currentPhase.title] && data[currentPhase.title][topicName]) {
-        topicData = data[currentPhase.title][topicName];
-        editableCode = topicData[1] || '';
-      } else {
-        topicData = null;
-      }
-    } catch (e) {
-      topicData = null;
-    } finally {
-      topicLoading = false;
-      loadingTopic = false;
+
+    const loaded = (data) => {
+      if (id !== topicLoadId) return;
+      queueMicrotask(() => {
+        if (id !== topicLoadId) return;
+        const course = currentCourse;
+        const phase = currentPhase;
+        const topic = topicName;
+        if (!course || !phase || !topic || !data) { topicLoading = false; return; }
+        if (data[phase.title] && data[phase.title][topic]) {
+          topicData = data[phase.title][topic];
+          editableCode = topicData[1] || '';
+        } else {
+          topicData = null;
+        }
+        topicLoading = false;
+      });
+    };
+
+    if (!contentCache[lang]) {
+      pendingLang = lang;
+      fetch(`/content/${lang}.json`)
+        .then(r => r.json())
+        .then(data => { contentCache[lang] = data; pendingLang = null; loaded(data); })
+        .catch(() => { if (id === topicLoadId) { pendingLang = null; queueMicrotask(() => { if (id === topicLoadId) { topicData = null; topicLoading = false; }}); } });
+    } else {
+      loaded(contentCache[lang]);
     }
-  }
+  });
 
   function handleNext() {
     if (topicName && currentCourse) {
@@ -161,8 +179,7 @@
   {:else if topicLoading}
     <div class="loading">Loading lesson...</div>
   {:else if topicData}
-{#key topicName}
-    <div class="lesson-view">
+    <div class="lesson-view" style="view-transition-name: lesson-view">
       <div class="lesson-header">
         <div class="lesson-breadcrumb">
           <button class="bc-btn" onclick={() => tutorial.setCourse(null)}>Courses</button>
@@ -184,6 +201,7 @@
         <div class="lesson-explanation">
           <p>{topicData[0]}</p>
         </div>
+        <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} context="I'd like a different explanation of this topic" />
 
         <div class="lesson-code">
           <div class="code-left">
@@ -215,6 +233,8 @@
         </div>
       </div>
 
+      <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} code={editableCode} context="Help me understand this code example" />
+
       {#if showCelebration}
         <div class="celebration" onclick={() => showCelebration = false}>
           <div class="celebration-icon">🎉</div>
@@ -225,9 +245,18 @@
         </div>
       {/if}
 
+      <AIGuide
+        topic={topicName}
+        lang={currentCourse?.lang || 'js'}
+        phase={currentPhase?.id || ''}
+        alreadyCompleted={tutorial.state.completedTopics.includes(`${currentCourse.id}:${topicName}`)}
+      />
+
       {#if topicData[2] && topicData[2].length > 0}
-        <ExerciseGroup exercises={topicData[2]} />
+        <ExerciseGroup exercises={topicData[2]} lang={currentCourse?.lang || 'js'} />
       {/if}
+
+      <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} />
 
       <div class="lesson-footer">
         <button class="nav-btn" onclick={handlePrevious} disabled={tutorial.state.currentTopic === 0}>
@@ -254,7 +283,6 @@
         <div class="xp-toast" aria-live="polite">+{xpToast.amount} XP</div>
       {/if}
     </div>
-  {/key}
     <TutorialShortcuts
       onprev={handlePrevious}
       onnext={handleNext}
@@ -263,7 +291,7 @@
       enabled={!!topicData}
     />
   {:else}
-    <div class="error">Topic content not found. <button onclick={loadTopicContent}>Retry</button></div>
+    <div class="error">Topic content not found. <button onclick={() => { delete contentCache[currentCourse?.lang]; fetchKey++; }}>Retry</button></div>
   {/if}
 </div>
 

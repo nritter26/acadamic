@@ -4,7 +4,7 @@
   import FixBug from './FixBug.svelte';
   import ReorderLines from './ReorderLines.svelte';
 
-  let { exercises = [] } = $props();
+  let { exercises = [], lang = 'js' } = $props();
 
   let completed = $state(new Set());
 
@@ -31,9 +31,9 @@
         {#if exercise.type === 'mcq'}
           <InlineMCQ {exercise} oncomplete={() => markDone(i)} />
         {:else if exercise.type === 'fill-blank'}
-          <FillBlank {exercise} oncomplete={() => markDone(i)} />
+          <FillBlank {exercise} {lang} oncomplete={() => markDone(i)} />
         {:else if exercise.type === 'fix-bug'}
-          <FixBug {exercise} oncomplete={() => markDone(i)} />
+          <FixBug {exercise} {lang} oncomplete={() => markDone(i)} />
         {:else if exercise.type === 'reorder'}
           <ReorderLines {exercise} oncomplete={() => markDone(i)} />
         {/if}

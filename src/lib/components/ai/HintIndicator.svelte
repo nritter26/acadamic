@@ -21,6 +21,10 @@
   });
 
   function askHint() {
+    if (!ai.useAI) {
+      ai.toggleAI();
+      return;
+    }
     visible = false;
     ai.addMessage('Give me a hint', 'user');
     ai.panelOpen = true;
