@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { executeCode, getCompileHint } from '../services';
+import { executeCode, getCompileHint, executeServerCode } from '../services';
 import { validate } from '../middleware';
 import { ExecuteSchema } from '../types';
 
@@ -7,7 +7,13 @@ const router = Router();
 
 router.post('/', validate(ExecuteSchema), async (req: Request, res: Response) => {
   try {
-    const { lang, code, stdin } = req.body;
+    const { lang, code, stdin, serverMode, httpTests } = req.body;
+
+    if (serverMode && httpTests?.length > 0) {
+      const result = await executeServerCode(lang, code, httpTests);
+      res.json(result);
+      return;
+    }
 
     if (lang === 'js') {
       const result = await executeCode(lang, code, stdin);
