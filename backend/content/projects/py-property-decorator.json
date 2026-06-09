@@ -3,7 +3,9 @@
   "title": "Python: @property Decorator",
   "description": "Write a Python program that uses @property for getters/setters with validation.",
   "difficulty": "advanced",
-  "languages": ["py"],
+  "languages": [
+    "py"
+  ],
   "codeTemplate": {
     "py": "class Temperature:\n    def __init__(self, celsius=0):\n        self._celsius = celsius\n    \n    @property\n    def celsius(self):\n        return self._celsius\n    \n    @celsius.setter\n    def celsius(self, value):\n        if value < -273.15:\n            raise ValueError(\"Below absolute zero!\")\n        self._celsius = value\n    \n    @property\n    def fahrenheit(self):\n        return self._celsius * 9/5 + 32\n    \n    @fahrenheit.setter\n    def fahrenheit(self, value):\n        self._celsius = (value - 32) * 5/9\n\nt = Temperature(25)\nprint(f\"Celsius: {t.celsius}\")\nprint(f\"Fahrenheit: {t.fahrenheit}\")\nt.fahrenheit = 100\nprint(f\"After setting to 100F - Celsius: {t.celsius:.1f}\")\nt.celsius = 30\nprint(f\"After setting to 30C - Fahrenheit: {t.fahrenheit:.1f}\")"
   },
@@ -13,5 +15,102 @@
     "Use `@property_name.setter` for the setter",
     "Properties allow attribute access with validation logic",
     "Getters/setters encapsulate internal state"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "design pattern",
+    "py"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Python: @property Decorator project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Python: @property Decorator",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "py": "// Step 1: Set up the Python: @property Decorator project\n// Your code here\n\nconsole.log(\"Testing Python: @property Decorator...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Python: @property Decorator",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "py": "// Step 2: Implement the core logic for Python: @property Decorator\n// Your code here\n\nconsole.log(\"Testing Python: @property Decorator...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "py": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing Python: @property Decorator...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "py": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing Python: @property Decorator...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "py": "// Step 5: Test with sample inputs\n// Your code here\n\nconsole.log(\"Testing Python: @property Decorator...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

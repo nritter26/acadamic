@@ -3,7 +3,9 @@
   "title": "TypeScript: Classes",
   "description": "Write a TypeScript program using classes with access modifiers, getters/setters, and inheritance.",
   "difficulty": "beginner",
-  "languages": ["ts"],
+  "languages": [
+    "ts"
+  ],
   "codeTemplate": {
     "ts": "abstract class Animal {\n  constructor(protected name: string) {}\n  abstract makeSound(): void;\n}\n\nclass Dog extends Animal {\n  private _breed: string;\n\n  constructor(name: string, breed: string) {\n    super(name);\n    this._breed = breed;\n  }\n\n  get breed(): string {\n    return this._breed;\n  }\n\n  set breed(value: string) {\n    this._breed = value;\n  }\n\n  makeSound(): void {\n    console.log(`${this.name} says Woof!`);\n  }\n}\n\nclass Cat extends Animal {\n  makeSound(): void {\n    console.log(`${this.name} says Meow!`);\n  }\n}\n\nconst dog = new Dog('Rex', 'German Shepherd');\nconst cat = new Cat('Whiskers');\ndog.makeSound();\ncat.makeSound();\nconsole.log(`Breed: ${dog.breed}`);\ndog.breed = 'Labrador';\nconsole.log(`Updated: ${dog.breed}`);"
   },
@@ -12,5 +14,84 @@
     "Use `abstract` keyword for base classes that can't be instantiated",
     "Access modifiers: `public`, `private`, `protected`",
     "Getters/setters use `get` and `set` keywords"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "general",
+    "ts"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the TypeScript: Classes project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for TypeScript: Classes",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 1: Set up the TypeScript: Classes project\n// Your code here\n\nconsole.log(\"Testing TypeScript: Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for TypeScript: Classes",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 2: Implement the core logic for TypeScript: Classes\n// Your code here\n\nconsole.log(\"Testing TypeScript: Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing TypeScript: Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing TypeScript: Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
   ]
 }

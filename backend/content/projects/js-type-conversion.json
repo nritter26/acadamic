@@ -12,5 +12,41 @@
   "verificationTest": "output.includes('type conversion')",
   "hints": [
     "Learn type conversion in JavaScript"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Convert string to number",
+      "description": "Write code that converts the string \"42\" to a number and prints it, then adds 10.",
+      "hints": [
+        "Use Number() or parseInt()",
+        "String concatenation vs numeric addition"
+      ],
+      "codeTemplate": {
+        "javascript": "const strNum = \"42\";\nconst num = ; // convert to number\nconsole.log(num + 10);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"52\")",
+        "successMessage": "Type conversion works!",
+        "failureMessage": "Return 42+10=52 after conversion."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Convert number to string",
+      "description": "Convert the number 100 to a string and check that typeof returns \"string\".",
+      "hints": [
+        "Use String() or .toString()",
+        "console.log(typeof result)"
+      ],
+      "codeTemplate": {
+        "javascript": "const num = 100;\nconst str = ; // convert to string\nconsole.log(typeof str);\nconsole.log(str.length);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"string\")",
+        "successMessage": "String conversion works!",
+        "failureMessage": "Check typeof after conversion."
+      }
+    }
   ]
 }

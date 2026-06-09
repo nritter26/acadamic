@@ -3,7 +3,9 @@
   "title": "Python: Async IO",
   "description": "Write a Python program that uses asyncio to run concurrent async tasks.",
   "difficulty": "advanced",
-  "languages": ["py"],
+  "languages": [
+    "py"
+  ],
   "codeTemplate": {
     "py": "import asyncio\n\nasync def fetch_data(source, delay):\n    print(f\"Fetching from {source}...\")\n    await asyncio.sleep(delay)\n    result = f\"{source}: data\"\n    print(f\"Received from {source}\")\n    return result\n\nasync def main():\n    tasks = [\n        fetch_data(\"API 1\", 0.02),\n        fetch_data(\"API 2\", 0.01),\n        fetch_data(\"API 3\", 0.03),\n    ]\n    results = await asyncio.gather(*tasks)\n    print(f\"All results: {results}\")\n\nasyncio.run(main())"
   },
@@ -12,5 +14,102 @@
     "Async functions are defined with `async def` and use `await`",
     "`asyncio.gather(*tasks)` runs tasks concurrently",
     "`asyncio.run(main())` is the entry point for async code"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "thread",
+    "py"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Python: Async IO project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Python: Async IO",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "py": "// Step 1: Set up the Python: Async IO project\n// Your code here\n\nconsole.log(\"Testing Python: Async IO...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Python: Async IO",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "py": "// Step 2: Implement the core logic for Python: Async IO\n// Your code here\n\nconsole.log(\"Testing Python: Async IO...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "py": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing Python: Async IO...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "py": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing Python: Async IO...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "py": "// Step 5: Test with sample inputs\n// Your code here\n\nconsole.log(\"Testing Python: Async IO...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

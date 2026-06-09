@@ -3,7 +3,9 @@
   "title": "RSA Key Generator",
   "description": "Write a Zig program that demonstrates RSA key generation concepts using small prime numbers.",
   "difficulty": "expert",
-  "languages": ["zig"],
+  "languages": [
+    "zig"
+  ],
   "codeTemplate": {
     "zig": "const std = @import(\"std\");\n\nfn isPrime(n: u32) bool {\n    if (n < 2) return false;\n    var i: u32 = 2;\n    while (i * i <= n) {\n        if (@mod(n, i) == 0) return false;\n        i += 1;\n    }\n    return true;\n}\n\nfn gcd(a: u32, b: u32) u32 {\n    return if (b == 0) a else gcd(b, a % b);\n}\n\npub fn main() !void {\n    const p: u32 = 61;\n    const q: u32 = 53;\n    const n = p * q;\n    const phi = (p - 1) * (q - 1);\n    var e: u32 = 3;\n    while (e < phi) {\n        if (gcd(e, phi) == 1) break;\n        e += 2;\n    }\n    \n    std.debug.print(\"p={}\\n\", .{p});\n    std.debug.print(\"q={}\\n\", .{q});\n    std.debug.print(\"n={}\\n\", .{n});\n    std.debug.print(\"phi={}\\n\", .{phi});\n    std.debug.print(\"e={}\\n\", .{e});\n    std.debug.print(\"isPrime(p)={}\\n\", .{isPrime(p)});\n}"
   },
@@ -13,5 +15,102 @@
     "phi = (p-1)(q-1) is Euler's totient function",
     "Choose e such that 1 < e < phi and gcd(e, phi) = 1",
     "Use @mod for modulo operations and gcd from Euclid's algorithm"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "graph",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the RSA Key Generator project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for RSA Key Generator",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the RSA Key Generator project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing RSA Key Generator...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for RSA Key Generator",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for RSA Key Generator\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing RSA Key Generator...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing RSA Key Generator...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing RSA Key Generator...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing RSA Key Generator...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

@@ -3,7 +3,9 @@
   "title": "Go: Custom Error Types",
   "description": "Write a Go program that defines and uses custom error types with additional context.",
   "difficulty": "advanced",
-  "languages": ["go"],
+  "languages": [
+    "go"
+  ],
   "codeTemplate": {
     "go": "package main\n\nimport (\n\t\"fmt\"\n)\n\ntype ValidationError struct {\n\tField string\n\tValue interface{}\n\tMsg   string\n}\n\nfunc (e *ValidationError) Error() string {\n\treturn fmt.Sprintf(\"validation failed: %s = %v - %s\", e.Field, e.Value, e.Msg)\n}\n\nfunc validateAge(age int) error {\n\tif age < 0 {\n\t\treturn &ValidationError{\"age\", age, \"must be non-negative\"}\n\t}\n\tif age > 150 {\n\t\treturn &ValidationError{\"age\", age, \"must be <= 150\"}\n\t}\n\treturn nil\n}\n\nfunc main() {\n\terr := validateAge(-5)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t}\n\n\terr = validateAge(200)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t}\n\n\tfmt.Println(\"All validations complete\")\n}"
   },
@@ -12,5 +14,102 @@
     "Custom error types implement the `Error() string` interface",
     "Use a struct to carry additional context in error values",
     "Check errors with `if err != nil { }` pattern"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "general",
+    "go"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Go: Custom Error Types project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Go: Custom Error Types",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "go": "// Step 1: Set up the Go: Custom Error Types project\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Custom Error Types...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Go: Custom Error Types",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "go": "// Step 2: Implement the core logic for Go: Custom Error Types\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Custom Error Types...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "go": "// Step 3: Handle edge cases and errors\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Custom Error Types...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "go": "// Step 4: Format and display the output\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Custom Error Types...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "go": "// Step 5: Test with sample inputs\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Custom Error Types...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

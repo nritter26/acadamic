@@ -3,7 +3,9 @@
   "title": "JavaScript: Promises",
   "description": "Write a JavaScript program that creates and chains Promises with async/await.",
   "difficulty": "advanced",
-  "languages": ["js"],
+  "languages": [
+    "js"
+  ],
   "codeTemplate": {
     "js": "function delay(ms) {\n  return new Promise(resolve => setTimeout(resolve, ms));\n}\n\nasync function fetchUser(id) {\n  console.log(`Fetching user ${id}...`);\n  await delay(10);\n  const user = { id, name: `User${id}` };\n  console.log(`Got user ${id}`);\n  return user;\n}\n\nasync function main() {\n  const user = await fetchUser(1);\n  console.log(`Name: ${user.name}`);\n  \n  const results = await Promise.all([\n    fetchUser(2),\n    fetchUser(3)\n  ]);\n  console.log(`Results: ${results.map(u => u.name).join(', ')}`);\n}\n\nmain().then(() => console.log('Done'));"
   },
@@ -13,5 +15,41 @@
     "`async` functions return a promise automatically",
     "`await` pauses execution until a promise settles",
     "`Promise.all([...])` waits for all promises to resolve"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a resolved promise",
+      "description": "Create a Promise that resolves with the value \"Success!\" and use .then() to print it.",
+      "hints": [
+        "new Promise((resolve) => resolve(\"Success!\"))",
+        ".then(result => console.log(result))"
+      ],
+      "codeTemplate": {
+        "javascript": "const promise = new Promise((resolve, reject) => {\n  // resolve with \"Success!\"\n});\n\npromise.then(result => {\n  console.log(result);\n});\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Success!\")",
+        "successMessage": "Promise resolved!",
+        "failureMessage": "Resolve the promise with \"Success!\"."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Promise with delay",
+      "description": "Create delay(ms) function that returns a Promise resolving after ms milliseconds.",
+      "hints": [
+        "return new Promise(resolve => setTimeout(resolve, ms))",
+        "Test with .then()"
+      ],
+      "codeTemplate": {
+        "javascript": "function delay(ms) {\n\n}\n\nconsole.log(\"Start\");\ndelay(1000).then(() => {\n  console.log(\"After 1 second\");\n});\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Start\") && output.includes(\"After 1 second\")",
+        "successMessage": "Delay promise works!",
+        "failureMessage": "Use setTimeout inside the Promise."
+      }
+    }
   ]
 }

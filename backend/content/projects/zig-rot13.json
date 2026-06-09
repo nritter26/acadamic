@@ -3,7 +3,9 @@
   "title": "ROT13 Cipher",
   "description": "Write a Zig program that applies the ROT13 cipher (shift by 13) to a string.",
   "difficulty": "intermediate",
-  "languages": ["zig"],
+  "languages": [
+    "zig"
+  ],
   "codeTemplate": {
     "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"Hello, Zig!\";\n    std.debug.print(\"Original: {s}\\n\", .{text});\n    std.debug.print(\"ROT13: \", .{});\n    for (text) |ch| {\n        var rotated = ch;\n        if (ch >= 'a' and ch <= 'z') {\n            rotated = ((ch - 'a' + 13) % 26) + 'a';\n        } else if (ch >= 'A' and ch <= 'Z') {\n            rotated = ((ch - 'A' + 13) % 26) + 'A';\n        }\n        std.debug.print(\"{c}\", .{rotated});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
   },
@@ -12,5 +14,102 @@
     "ROT13 is a Caesar cipher with shift of 13 — applying twice returns the original",
     "Use `and` for logical AND in Zig conditions",
     "Character range check: `ch >= 'A' and ch <= 'Z'`"
+  ],
+  "estimatedMinutes": 25,
+  "concepts": [
+    "encryption",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the ROT13 Cipher project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for ROT13 Cipher",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the ROT13 Cipher project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing ROT13 Cipher...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for ROT13 Cipher",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for ROT13 Cipher\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing ROT13 Cipher...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing ROT13 Cipher...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing ROT13 Cipher...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing ROT13 Cipher...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

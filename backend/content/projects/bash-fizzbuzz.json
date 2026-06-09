@@ -12,5 +12,98 @@
   "verificationTest": "output.includes('FizzBuzz') && output.includes('Fizz') && output.includes('Buzz')",
   "hints": [
     "Practice fizzbuzz concepts in Bash"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "fizzbuzz",
+    "bash"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print numbers 1 to N",
+      "description": "Write a for loop that prints the numbers from 1 to 20 to the console, each on its own line. This establishes the basic loop structure.",
+      "hints": [
+        "Use a for loop: for (let i = 1; i <= 20; i++)",
+        "Use console.log(i) inside the loop",
+        "Test that numbers 1 through 20 are printed"
+      ],
+      "codeTemplate": {
+        "bash": "# Step 1: Print numbers 1 to N\n# Your code here\n\necho \"Testing Bash: Fizzbuzz 1...\"\n"
+      },
+      "verification": {
+        "test": "output.includes('1') && output.includes('20')",
+        "successMessage": "The loop prints 1 through 20!",
+        "failureMessage": "Make sure you print each number from 1 to 20."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fizz for multiples of 3",
+      "description": "Modify the loop to print \"Fizz\" instead of the number when the current number is divisible by 3.",
+      "hints": [
+        "Use if (i % 3 === 0) to check divisibility by 3",
+        "Print \"Fizz\" for multiples of 3, otherwise print the number"
+      ],
+      "codeTemplate": {
+        "bash": "# Step 2: Fizz for multiples of 3\n# Your code here\n\necho \"Testing Bash: Fizzbuzz 1...\"\n"
+      },
+      "verification": {
+        "test": "output.includes('Fizz') && output.includes('1')",
+        "successMessage": "Fizz appears for multiples of 3!",
+        "failureMessage": "Multiples of 3 should show Fizz."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Buzz for multiples of 5",
+      "description": "Add a condition to print \"Buzz\" when the number is divisible by 5. Make sure the order of conditions is correct.",
+      "hints": [
+        "Use else if (i % 5 === 0) for multiples of 5",
+        "Check divisibility by 3 FIRST, then by 5"
+      ],
+      "codeTemplate": {
+        "bash": "# Step 3: Buzz for multiples of 5\n# Your code here\n\necho \"Testing Bash: Fizzbuzz 1...\"\n"
+      },
+      "verification": {
+        "test": "output.includes('Buzz')",
+        "successMessage": "Now multiples of 5 show Buzz!",
+        "failureMessage": "Multiples of 5 should show Buzz."
+      }
+    },
+    {
+      "id": 4,
+      "title": "FizzBuzz for both",
+      "description": "Add a condition that prints \"FizzBuzz\" when a number is divisible by BOTH 3 and 5. This check must come first!",
+      "hints": [
+        "Check i % 3 === 0 && i % 5 === 0 as the FIRST condition",
+        "15 is the first number divisible by both 3 and 5"
+      ],
+      "codeTemplate": {
+        "bash": "# Step 4: FizzBuzz for both\n# Your code here\n\necho \"Testing Bash: Fizzbuzz 1...\"\n"
+      },
+      "verification": {
+        "test": "output.includes('FizzBuzz')",
+        "successMessage": "FizzBuzz appears for numbers divisible by both!",
+        "failureMessage": "15 should show FizzBuzz, not Fizz or Buzz."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Refactor as a function",
+      "description": "Refactor the logic into a reusable function fizzbuzz(n) that returns the result for a single number, then call it from a loop.",
+      "hints": [
+        "The function should return \"FizzBuzz\", \"Fizz\", \"Buzz\", or the number as a string",
+        "Using a function makes the code reusable and testable"
+      ],
+      "codeTemplate": {
+        "bash": "# Step 5: Refactor as a function\n# Your code here\n\necho \"Testing Bash: Fizzbuzz 1...\"\n"
+      },
+      "verification": {
+        "test": "output.includes('FizzBuzz') && output.includes('Fizz') && output.includes('Buzz')",
+        "successMessage": "Refactored function works correctly!",
+        "failureMessage": "Create a fizzbuzz function and use it in a loop."
+      }
+    }
   ]
 }

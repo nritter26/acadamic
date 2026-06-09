@@ -3,7 +3,9 @@
   "title": "Go: Nil Slice & Map",
   "description": "Write a Go program that demonstrates nil slices and maps and how to safely work with them.",
   "difficulty": "beginner",
-  "languages": ["go"],
+  "languages": [
+    "go"
+  ],
   "codeTemplate": {
     "go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tvar s []int\n\tvar m map[string]int\n\n\tfmt.Println(\"nil slice len:\", len(s))\n\tfmt.Println(\"nil slice == nil:\", s == nil)\n\tfmt.Println(\"nil map len:\", len(m))\n\tfmt.Println(\"nil map == nil:\", m == nil)\n\n\ts = append(s, 10)\n\tfmt.Println(\"appended slice:\", s)\n\n\tm = make(map[string]int)\n\tm[\"a\"] = 1\n\tfmt.Println(\"map after init:\", m[\"a\"])\n}"
   },
@@ -12,5 +14,84 @@
     "A nil slice has length 0 and is safe to use with append",
     "A nil map has length 0 but assigning to a nil map causes a panic",
     "Use `make()` to initialize a map before adding elements"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "general",
+    "go"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Go: Nil Slice & Map project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Go: Nil Slice & Map",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "go": "// Step 1: Set up the Go: Nil Slice & Map project\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Nil Slice & Map...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Go: Nil Slice & Map",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "go": "// Step 2: Implement the core logic for Go: Nil Slice & Map\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Nil Slice & Map...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "go": "// Step 3: Handle edge cases and errors\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Nil Slice & Map...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "go": "// Step 4: Format and display the output\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Nil Slice & Map...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
   ]
 }

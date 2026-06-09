@@ -3,7 +3,9 @@
   "title": "Kotlin: Classes and Data Classes",
   "description": "Write a Kotlin program demonstrating classes, data classes, and object declarations.",
   "difficulty": "beginner",
-  "languages": ["kt"],
+  "languages": [
+    "kt"
+  ],
   "codeTemplate": {
     "kt": "// Data class\n data class Person(val name: String, var age: Int)\n\n// Class with methods\nclass Calculator {\n    fun add(a: Int, b: Int) = a + b\n    fun multiply(a: Int, b: Int) = a * b\n    fun power(a: Double, b: Double) = Math.pow(a, b)\n}\n\n// Object (singleton)\nobject MathUtils {\n    fun factorial(n: Int): Long {\n        return if (n <= 1) 1 else n * factorial(n - 1)\n    }\n}\n\nfun main() {\n    val alice = Person(\"Alice\", 30)\n    val bob = alice.copy(name = \"Bob\", age = 25)\n    \n    println(\"Person: $alice\")\n    println(\"Bob: $bob\")\n    println(\"Same? ${alice == bob}\")\n    \n    val calc = Calculator()\n    println(\"3 + 4 = ${calc.add(3, 4)}\")\n    println(\"6 * 7 = ${calc.multiply(6, 7)}\")\n    \n    println(\"Factorial 5 = ${MathUtils.factorial(5)}\")\n}"
   },
@@ -13,5 +15,84 @@
     "Use `data class` for classes that primarily hold data",
     "`object` declarations create singletons",
     "Single-expression functions use `= expression` syntax"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "general",
+    "kt"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Kotlin: Classes and Data Classes project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Kotlin: Classes and Data Classes",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "kt": "// Step 1: Set up the Kotlin: Classes and Data Classes project\nfun main() {\n  // Your code here\n  println(\"Testing Kotlin: Classes and Data Classes...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Kotlin: Classes and Data Classes",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "kt": "// Step 2: Implement the core logic for Kotlin: Classes and Data Classes\nfun main() {\n  // Your code here\n  println(\"Testing Kotlin: Classes and Data Classes...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "kt": "// Step 3: Handle edge cases and errors\nfun main() {\n  // Your code here\n  println(\"Testing Kotlin: Classes and Data Classes...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "kt": "// Step 4: Format and display the output\nfun main() {\n  // Your code here\n  println(\"Testing Kotlin: Classes and Data Classes...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
   ]
 }

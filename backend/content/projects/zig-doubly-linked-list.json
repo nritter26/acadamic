@@ -3,7 +3,9 @@
   "title": "Doubly Linked List",
   "description": "Write a Zig program that implements a doubly linked list with forward and backward traversal.",
   "difficulty": "advanced",
-  "languages": ["zig"],
+  "languages": [
+    "zig"
+  ],
   "codeTemplate": {
     "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    value: i32,\n    prev: ?*Node,\n    next: ?*Node,\n};\n\npub fn main() !void {\n    var n3 = Node{ .value = 30, .prev = undefined, .next = null };\n    var n2 = Node{ .value = 20, .prev = undefined, .next = &n3 };\n    var n1 = Node{ .value = 10, .prev = null, .next = &n2 };\n    n2.prev = &n1;\n    n3.prev = &n2;\n    \n    std.debug.print(\"Forward: \", .{});\n    var cur: ?*Node = &n1;\n    while (cur) |node| {\n        std.debug.print(\"{} \", .{node.value});\n        cur = node.next;\n    }\n    std.debug.print(\"\\n\", .{});\n    \n    std.debug.print(\"Backward: \", .{});\n    cur = &n3;\n    while (cur) |node| {\n        std.debug.print(\"{} \", .{node.value});\n        cur = node.prev;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
   },
@@ -13,5 +15,102 @@
     "Initialize `prev` and `next` as `?*Node` (optional pointers) for null safety",
     "Forward traversal follows `next`, backward follows `prev`",
     "Wire up `prev` links after creating all nodes"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "linked list",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a zig Node class",
+      "description": "Define a Node class with `data` and `next` properties. Each node holds a value and a reference to the next node in the list. Test by creating a few standalone nodes and linking them manually.",
+      "hints": [
+        "The Node class should have a constructor that takes data and sets next to null",
+        "Create 3 nodes and link them: node1.next = node2; node2.next = node3",
+        "Print the data of the first node to verify the chain"
+      ],
+      "codeTemplate": {
+        "zig": "// Create a Node class with data and next fields\n// Then create and link some test nodes\nconsole.log(\"Node structure created\");\n"
+      },
+      "verification": {
+        "test": "output.includes('test') || output.length > 0",
+        "successMessage": "Node class created and linked successfully!",
+        "failureMessage": "Create a Node class with data and next properties, then link multiple nodes."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement insert operations",
+      "description": "Add methods to insert nodes at the beginning (prepend), end (append), and at a specific index in the linked list. Each insertion should update the appropriate next references.",
+      "hints": [
+        "For prepend: create new node, point its next to current head, update head",
+        "For append: traverse to the last node, set its next to the new node",
+        "Handle edge cases: inserting into an empty list"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement insert operations\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Doubly Linked List...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Insert operations work correctly!",
+        "failureMessage": "Implement prepend, append, and insert methods."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement delete and search",
+      "description": "Add methods to delete a node by value and search for a value in the list. Deletion should properly reconnect the surrounding nodes.",
+      "hints": [
+        "For delete: find the node before the target, skip the target node",
+        "For search: traverse the list and return the node if found",
+        "Handle deletion of head node separately"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Implement delete and search\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Doubly Linked List...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Delete and search work correctly!",
+        "failureMessage": "Implement deletion and search operations."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add utility methods",
+      "description": "Implement printList(), size(), isEmpty(), and toArray() methods. These utilities make the linked list easier to use and debug.",
+      "hints": [
+        "printList should traverse and display each node data",
+        "size() should return the count of nodes",
+        "toArray() should return an array of all node data values"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Add utility methods\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Doubly Linked List...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Utility methods are working!",
+        "failureMessage": "Implement printList, size, isEmpty, and toArray."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test the complete linked list",
+      "description": "Create a comprehensive test: insert several values, delete some, search for a value, and display the final list. Verify all operations work end-to-end.",
+      "hints": [
+        "Insert values at different positions",
+        "Delete both the head and a middle node",
+        "Print the final list to verify correctness"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test the complete linked list\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Doubly Linked List...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Complete linked list implementation works!",
+        "failureMessage": "Create a comprehensive test of all linked list operations."
+      }
+    }
   ]
 }

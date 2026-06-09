@@ -3,7 +3,9 @@
   "title": "Python: Binary Search",
   "description": "Write a Python program implementing binary search recursively and iteratively.",
   "difficulty": "beginner",
-  "languages": ["py"],
+  "languages": [
+    "py"
+  ],
   "codeTemplate": {
     "py": "def binary_search_iterative(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\ndef binary_search_recursive(arr, target, low, high):\n    if low > high:\n        return -1\n    mid = (low + high) // 2\n    if arr[mid] == target:\n        return mid\n    elif arr[mid] < target:\n        return binary_search_recursive(arr, target, mid + 1, high)\n    else:\n        return binary_search_recursive(arr, target, low, mid - 1)\n\nnumbers = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]\nprint(f\"Searching in: {numbers}\")\nprint(f\"Find 23 (iter): {binary_search_iterative(numbers, 23)}\")\nprint(f\"Find 23 (rec): {binary_search_recursive(numbers, 23, 0, len(numbers)-1)}\")\nprint(f\"Find 99: {binary_search_iterative(numbers, 99)}\")"
   },
@@ -12,5 +14,84 @@
     "Binary search requires a sorted array",
     "Repeatedly divide the search interval in half",
     "Return the index if found, -1 otherwise"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "searching",
+    "py"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Python: Binary Search project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Python: Binary Search",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "py": "// Step 1: Set up the Python: Binary Search project\n// Your code here\n\nconsole.log(\"Testing Python: Binary Search...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Python: Binary Search",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "py": "// Step 2: Implement the core logic for Python: Binary Search\n// Your code here\n\nconsole.log(\"Testing Python: Binary Search...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "py": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing Python: Binary Search...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "py": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing Python: Binary Search...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
   ]
 }

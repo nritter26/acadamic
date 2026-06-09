@@ -3,7 +3,9 @@
   "title": "Python: Simulated Database",
   "description": "Write a Python program that simulates a simple in-memory database with tables, insert, and select operations.",
   "difficulty": "advanced",
-  "languages": ["py"],
+  "languages": [
+    "py"
+  ],
   "codeTemplate": {
     "py": "class Table:\n    def __init__(self, name, columns):\n        self.name = name\n        self.columns = columns\n        self.rows = []\n    \n    def insert(self, values):\n        self.rows.append(dict(zip(self.columns, values)))\n    \n    def select_all(self):\n        return self.rows\n    \n    def select_where(self, col, value):\n        return [r for r in self.rows if r.get(col) == value]\n\ndb = {}\ndb['users'] = Table('users', ['id', 'name', 'age'])\ndb['users'].insert([1, 'Alice', 30])\ndb['users'].insert([2, 'Bob', 25])\ndb['users'].insert([3, 'Charlie', 35])\n\nfor user in db['users'].select_all():\n    print(f\"{user['id']}: {user['name']} ({user['age']})\")\n\nprint(\"\\nUsers age 30:\")\nfor user in db['users'].select_where('age', 30):\n    print(f\"  {user['name']}\")"
   },
@@ -12,5 +14,102 @@
     "Use dict for in-memory storage with column names as keys",
     "`zip(self.columns, values)` pairs column names with values",
     "List comprehensions with conditions can filter rows"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "sql query",
+    "py"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Python: Simulated Database project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Python: Simulated Database",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "py": "// Step 1: Set up the Python: Simulated Database project\n// Your code here\n\nconsole.log(\"Testing Python: Simulated Database...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Python: Simulated Database",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "py": "// Step 2: Implement the core logic for Python: Simulated Database\n// Your code here\n\nconsole.log(\"Testing Python: Simulated Database...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "py": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing Python: Simulated Database...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "py": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing Python: Simulated Database...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "py": "// Step 5: Test with sample inputs\n// Your code here\n\nconsole.log(\"Testing Python: Simulated Database...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

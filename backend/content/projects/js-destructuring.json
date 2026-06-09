@@ -3,7 +3,9 @@
   "title": "JavaScript: Destructuring",
   "description": "Write a JavaScript program that uses array and object destructuring with spread/rest operators.",
   "difficulty": "intermediate",
-  "languages": ["js"],
+  "languages": [
+    "js"
+  ],
   "codeTemplate": {
     "js": "// Array destructuring\nconst colors = ['red', 'green', 'blue', 'yellow'];\nconst [first, second, ...rest] = colors;\nconsole.log(`First: ${first}, Second: ${second}`);\nconsole.log(`Rest: ${rest}`);\n\n// Object destructuring\nconst person = { name: 'Alice', age: 30, city: 'NYC' };\nconst { name, age, ...others } = person;\nconsole.log(`Name: ${name}, Age: ${age}`);\nconsole.log(`Others: ${JSON.stringify(others)}`);\n\n// Spread operator\nconst arr1 = [1, 2, 3];\nconst arr2 = [4, 5, 6];\nconst combined = [...arr1, ...arr2];\nconsole.log(`Combined: ${combined}`);\n\n// Default values\nconst options = { title: 'Hello' };\nconst { title, subtitle = 'Default Subtitle' } = options;\nconsole.log(`${title} - ${subtitle}`);"
   },
@@ -13,5 +15,41 @@
     "Object destructuring: `const {name} = obj`",
     "Rest operator collects remaining items: `...rest`",
     "Spread expands iterables: `[...arr1, ...arr2]`"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Array destructuring",
+      "description": "Destructure an array [1, 2, 3] into variables a, b, c and print them.",
+      "hints": [
+        "const [a, b, c] = [1, 2, 3]",
+        "You can skip elements with commas"
+      ],
+      "codeTemplate": {
+        "javascript": "const numbers = [1, 2, 3];\nconst [a, b, c] = ; // destructure here\n\nconsole.log(\"a:\", a, \"b:\", b, \"c:\", c);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"a: 1\") && output.includes(\"b: 2\")",
+        "successMessage": "Array destructuring works!",
+        "failureMessage": "Destructure [1,2,3] into a,b,c."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Object destructuring",
+      "description": "Destructure an object {name: \"Alice\", age: 30} into variables name and age.",
+      "hints": [
+        "const {name, age} = person",
+        "Variable names match property names"
+      ],
+      "codeTemplate": {
+        "javascript": "const person = { name: \"Alice\", age: 30, city: \"NYC\" };\nconst { name, age } = ; // destructure\n\nconsole.log(name, \"is\", age, \"years old\");\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Alice\") && output.includes(\"30\")",
+        "successMessage": "Object destructuring works!",
+        "failureMessage": "Extract name and age from the object."
+      }
+    }
   ]
 }

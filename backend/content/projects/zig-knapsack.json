@@ -3,7 +3,9 @@
   "title": "0-1 Knapsack",
   "description": "Write a Zig program that solves the 0-1 knapsack problem using dynamic programming.",
   "difficulty": "expert",
-  "languages": ["zig"],
+  "languages": [
+    "zig"
+  ],
   "codeTemplate": {
     "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const weights = [_]u32{ 2, 3, 4, 5 };\n    const values = [_]u32{ 3, 4, 5, 6 };\n    const capacity: u32 = 5;\n    const n = weights.len;\n    \n    var dp: [4 + 1][5 + 1]u32 = [_][5 + 1]u32{[_]u32{0} ** (5 + 1)} ** (4 + 1);\n    \n    for (1..n + 1) |i| {\n        for (1..capacity + 1) |w| {\n            if (weights[i - 1] <= w) {\n                dp[i][w] = @max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);\n            } else {\n                dp[i][w] = dp[i - 1][w];\n            }\n        }\n    }\n    \n    std.debug.print(\"Max value: {}\\n\", .{dp[n][capacity]});\n}"
   },
@@ -13,5 +15,102 @@
     "If item i weighs too much: dp[i][w] = dp[i-1][w]",
     "Otherwise: dp[i][w] = max(values[i-1] + dp[i-1][w-weights[i-1]], dp[i-1][w])",
     "Use `@max()` built-in for finding the maximum"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "dynamic programming",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the 0-1 Knapsack project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for 0-1 Knapsack",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the 0-1 Knapsack project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing 0-1 Knapsack...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for 0-1 Knapsack",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for 0-1 Knapsack\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing 0-1 Knapsack...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing 0-1 Knapsack...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing 0-1 Knapsack...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing 0-1 Knapsack...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
   ]
 }

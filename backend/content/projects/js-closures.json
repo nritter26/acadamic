@@ -3,7 +3,9 @@
   "title": "JavaScript: Closures",
   "description": "Write a JavaScript program that demonstrates closures with counter and multiplier functions.",
   "difficulty": "intermediate",
-  "languages": ["js"],
+  "languages": [
+    "js"
+  ],
   "codeTemplate": {
     "js": "function createCounter() {\n  let count = 0;\n  return {\n    increment: function() { count++; },\n    decrement: function() { count--; },\n    getCount: function() { return count; }\n  };\n}\n\nfunction createMultiplier(factor) {\n  return function(number) {\n    return number * factor;\n  };\n}\n\nconst counter = createCounter();\ncounter.increment();\ncounter.increment();\nconsole.log(`Count: ${counter.getCount()}`);\ncounter.decrement();\nconsole.log(`After decrement: ${counter.getCount()}`);\n\nconst double = createMultiplier(2);\nconst triple = createMultiplier(3);\nconsole.log(`Double 5: ${double(5)}`);\nconsole.log(`Triple 5: ${triple(5)}`);"
   },
@@ -12,5 +14,43 @@
     "A closure is a function that remembers its outer scope even after the outer function returns",
     "Inner functions have access to outer function variables",
     "Use closures for data encapsulation and function factories"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple closure counter",
+      "description": "Write createCounter() that returns a function. Each call to the returned function increments and returns a count.",
+      "hints": [
+        "let count = 0 in outer function",
+        "Return inner function that increments count",
+        "Closure preserves count between calls"
+      ],
+      "codeTemplate": {
+        "javascript": "function createCounter() {\n  let count = 0;\n  return function() {\n    count++;\n    return count;\n  };\n}\n\nconst counter = createCounter();\nconsole.log(counter());\nconsole.log(counter());\nconsole.log(counter());\n"
+      },
+      "verification": {
+        "test": "output.includes(\"1\") && output.includes(\"2\") && output.includes(\"3\")",
+        "successMessage": "Closure counter works!",
+        "failureMessage": "Each call to counter() returns the next number."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Function with private state",
+      "description": "Write createBankAccount(initialBalance) that returns an object with deposit(amount) and withdraw(amount) methods.",
+      "hints": [
+        "let balance = initialBalance",
+        "Return { deposit, withdraw }",
+        "Closures keep balance private"
+      ],
+      "codeTemplate": {
+        "javascript": "function createBankAccount(initialBalance) {\n  let balance = initialBalance;\n  \n  return {\n    deposit: function(amount) {\n      balance += amount;\n      return balance;\n    },\n    withdraw: function(amount) {\n      balance -= amount;\n      return balance;\n    }\n  };\n}\n\nconst acct = createBankAccount(100);\nconsole.log(acct.deposit(50));\nconsole.log(acct.withdraw(30));\n"
+      },
+      "verification": {
+        "test": "output.includes(\"150\") && output.includes(\"120\")",
+        "successMessage": "Bank account works!",
+        "failureMessage": "deposit adds, withdraw subtracts, balance is private."
+      }
+    }
   ]
 }
