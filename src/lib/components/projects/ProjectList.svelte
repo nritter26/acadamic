@@ -79,6 +79,9 @@
           <div class="card-desc">{(project.description || '').substring(0, 60)}...</div>
           <div class="card-meta">
             <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['javascript','typescript','python','go'].includes(l)) : (project.languages || ['javascript']))}</span>
+            {#if project.serverMode}
+              <span class="proj-badge badge-api">API</span>
+            {/if}
             <span class="card-steps">
               <span class="steps-dot" style="background:{accent}"></span>
               {done}/{total} steps
@@ -137,6 +140,7 @@
   .badge-ts { background: #3b82f6; color: #fff; }
   .badge-py { background: #eab308; color: #000; padding: 0 2px; }
   .badge-go { background: #06b6d4; color: #000; }
+  .badge-api { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; display: inline-block; }
   .py-p { color: #2563eb; font-weight: 800; }
   .py-y { color: #eab308; font-weight: 800; }
 
