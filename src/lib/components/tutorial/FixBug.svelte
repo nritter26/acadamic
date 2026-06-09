@@ -1,16 +1,27 @@
 <script>
-  let { exercise, oncomplete = () => {} } = $props();
+  import { requestHint } from '$lib/lib/tutorial-ai.js';
+  import TutorialHelpButton from './TutorialHelpButton.svelte';
+
+  let { exercise, oncomplete = () => {}, lang = 'js' } = $props();
+
+  let topic = $derived(exercise.prompt?.split('\n')[0] || 'programming');
 
   let userCode = $state(exercise.code);
   let answered = $state(false);
   let correct = $state(false);
   let showHint = $state(false);
+  let aiHint = $state('');
+  let aiHintLoading = $state(false);
+  let aiHintError = $state('');
 
   $effect(() => {
     userCode = exercise.code;
     answered = false;
     correct = false;
     showHint = false;
+    aiHint = '';
+    aiHintLoading = false;
+    aiHintError = '';
   });
 
   function handleCheck() {
@@ -19,7 +30,21 @@
     answered = true;
     if (correct) {
       oncomplete();
+    } else {
+      requestAiHint();
     }
+  }
+
+  function requestAiHint() {
+    aiHintLoading = true;
+    const promptText = exercise.hint
+      ? `Hint from exercise: ${exercise.hint}\nThe user got it wrong. Give them a helpful hint.`
+      : 'The user got this wrong. Give them a helpful hint.';
+    requestHint(topic, lang, userCode, promptText,
+      (hint) => { aiHint = hint; },
+      () => { aiHintLoading = false; },
+      (err) => { aiHintError = err; aiHintLoading = false; }
+    );
   }
 </script>
 
@@ -42,7 +67,19 @@
       {#if correct}
         &#10003; Correct
       {:else}
-        &#10007; Not quite — expected: <pre class="expected-code">{exercise.expected}</pre>
+        &#10007; Not quite
+        {#if aiHint}
+          <div class="ai-hint">&#128161; {aiHint}</div>
+        {:else if aiHintLoading}
+          <div class="ai-hint-loading">Generating hint...</div>
+        {/if}
+        <TutorialHelpButton
+          label="Ask Devin for more help"
+          topic={topic}
+          lang={lang}
+          code={userCode}
+          context="I got this exercise wrong, can you help me understand why?"
+        />
       {/if}
     </div>
   {/if}
@@ -66,4 +103,6 @@
   .feedback.correct { color: #22c55e; border: 1px solid #22c55e; }
   .feedback.wrong { color: #ef4444; border: 1px solid #ef4444; }
   .expected-code { display: inline; margin: 0; padding: 2px 6px; background: #0a0f1e; border: 1px solid #334155; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #e2e8f0; white-space: pre; }
+  .ai-hint { margin-top: 8px; padding: 10px; background: #1e1b4b; border: 1px solid #4c1d95; border-radius: 6px; font-size: 12px; color: #c4b5fd; line-height: 1.5; font-weight: 400; }
+  .ai-hint-loading { margin-top: 8px; padding: 10px; font-size: 12px; color: #8b5cf6; font-style: italic; }
 </style>

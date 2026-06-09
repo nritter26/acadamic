@@ -230,7 +230,7 @@
       {/if}
 
       {#if topicData[2] && topicData[2].length > 0}
-        <ExerciseGroup exercises={topicData[2]} />
+        <ExerciseGroup exercises={topicData[2]} lang={currentCourse?.lang || 'js'} />
       {/if}
 
       <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} />
