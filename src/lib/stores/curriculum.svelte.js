@@ -63,7 +63,7 @@ export function getCurriculumState() {
         const res = await r.json();
         if (version !== _loadVersion) return;
         const cd = _topicData || {};
-        cd[lang] = res;
+        cd[lang] = res.data;
         _topicData = cd;
       } catch (e) {
         console.error('Failed to load curriculum for', lang, e);
