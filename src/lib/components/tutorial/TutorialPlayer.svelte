@@ -6,6 +6,7 @@
   import TutorialQuizOverlay from './TutorialQuizOverlay.svelte';
   import TutorialShortcuts from './TutorialShortcuts.svelte';
   import ExerciseGroup from './ExerciseGroup.svelte';
+  import AIGuide from './AIGuide.svelte';
   import TutorialHelpButton from './TutorialHelpButton.svelte';
   import { getGamificationState, awardTopicXp, awardPhaseXp, checkStreak } from '$lib/stores/tutorial-gamification.svelte.js';
 
@@ -228,6 +229,13 @@
           </div>
         </div>
       {/if}
+
+      <AIGuide
+        topic={topicName}
+        lang={currentCourse?.lang || 'js'}
+        phase={currentPhase?.id || ''}
+        alreadyCompleted={tutorial.state.completedTopics.includes(`${currentCourse.id}:${topicName}`)}
+      />
 
       {#if topicData[2] && topicData[2].length > 0}
         <ExerciseGroup exercises={topicData[2]} lang={currentCourse?.lang || 'js'} />

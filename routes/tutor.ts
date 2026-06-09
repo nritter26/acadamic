@@ -136,6 +136,18 @@ Keep it conversational and encourage the student to try it themselves.`;
 
   res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
   res.write('data: [DONE]\n\n');
+  if (req.body.include_checkin) {
+    const checkinMessages: LLMMessage[] = [
+      { role: 'system', content: `Generate one multiple-choice check-in question about "${topic}" in ${useLang} to test understanding. Respond with valid JSON: { "question": "...", "options": ["...","...","..."], "answerIndex": 0, "explanation": "..." }` },
+    ];
+    let checkinJson = '';
+    try {
+      await askLLM(checkinMessages, (chunk: string) => { checkinJson += chunk; }, { lang: useLang, topic });
+      const jsonStr = checkinJson.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(jsonStr);
+      res.write(`data: ${JSON.stringify({ type: 'checkin', question: parsed.question, options: parsed.options, answerIndex: parsed.answerIndex, explanation: parsed.explanation })}\n\n`);
+    } catch { /* skip check-in on failure */ }
+  }
   res.end();
 });
 
