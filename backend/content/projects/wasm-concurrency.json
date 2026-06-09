@@ -9,7 +9,7 @@
   "codeTemplate": {
     "wasm": "(module\\n  (func (export \"concurrency\") (result i32)\\n    i32.const 42)\\n)"
   },
-  "verificationTest": "output && output.length > 0",
+  "verificationTest": "output.includes('thread') || output.includes('Thread') || output.includes('counter=300')",
   "hints": [
     "Practice concurrency in WebAssembly"
   ]

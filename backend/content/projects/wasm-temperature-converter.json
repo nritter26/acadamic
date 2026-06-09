@@ -9,7 +9,7 @@
   "codeTemplate": {
     "wasm": "(module\\n  (func (export \"temperature-converter\") (result i32)\\n    i32.const 42)\\n)"
   },
-  "verificationTest": "output && output.length > 0",
+  "verificationTest": "output.includes('0C = 32F') && output.includes('100C = 212F')",
   "hints": [
     "Practice temperature converter in WebAssembly"
   ]

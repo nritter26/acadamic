@@ -9,7 +9,7 @@
   "codeTemplate": {
     "wasm": "(module\\n  (func (export \"binary-search\") (result i32)\\n    i32.const 42)\\n)"
   },
-  "verificationTest": "output && output.length > 0",
+  "verificationTest": "output.includes('find(23)=5') && output.includes('find(99)=-1')",
   "hints": [
     "Practice binary search in WebAssembly"
   ]

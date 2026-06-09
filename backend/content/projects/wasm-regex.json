@@ -9,7 +9,7 @@
   "codeTemplate": {
     "wasm": "(module\\n  (func (export \"regex\") (result i32)\\n    i32.const 42)\\n)"
   },
-  "verificationTest": "output && output.length > 0",
+  "verificationTest": "output.includes('email') && output.includes('phone')",
   "hints": [
     "Practice regular expressions in WebAssembly"
   ]

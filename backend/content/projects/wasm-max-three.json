@@ -9,7 +9,7 @@
   "codeTemplate": {
     "wasm": "(module\\n  (func (export \"max-three\") (result i32)\\n    i32.const 42)\\n)"
   },
-  "verificationTest": "output && output.length > 0",
+  "verificationTest": "output.includes('max(') && output.includes('= 12')",
   "hints": [
     "Practice max of three in WebAssembly"
   ]
