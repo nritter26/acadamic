@@ -1,156 +1,166 @@
 {
-  "Getting Started": {
-    "Routing": [
-      "Remix uses a file-based routing system in the app/routes directory. Each file represents a route segment, with dot and folder conventions creating nested URL structures automatically.",
-      "// app/routes/posts.$id.tsx\n// Creates /posts/:id"
-    ],
-    "Nested Routes": [
-      "Nested routes in Remix allow multiple components to render on the same URL. The parent route's layout wraps child routes through the <Outlet /> component, enabling complex UI hierarchies.",
-      "// app/routes/posts.tsx\nexport default function PostsLayout() {\n  return (\n    <div>\n      <Sidebar />\n      <Outlet />\n    </div>\n  );\n}"
-    ],
-    "Layouts": [
-      "Layout routes use the special app/root.tsx file and route-specific layout.tsx files. Layouts wrap child routes and persist across navigation, preventing full page re-renders.",
-      "// app/routes/posts.layout.tsx\nexport default function Layout({ children }) {\n  return <div className='posts-layout'>{children}</div>;\n}"
-    ]
-  },
-  "Data Loading": {
-    "loader": [
-      "Loaders are server-side functions that fetch data before rendering a route. They run on every request, returning data that becomes available to the component via the useLoaderData hook.",
-      "export async function loader({ params, request }) {\n  const post = await db.post.findUnique({ where: { id: params.id } });\n  return json(post);\n}"
-    ],
-    "useLoaderData": [
-      "useLoaderData returns the typed data from the nearest route loader. It provides type safety when used with TypeScript and the typeof loader generic pattern.",
-      "import { useLoaderData } from '@remix-run/react';\nexport default function Post() {\n  const post = useLoaderData<typeof loader>();\n  return <h1>{post.title}</h1>;\n}"
-    ],
-    "params": [
-      "Params give access to dynamic segments from the URL pattern. They are available in loaders and actions via the params argument, matching the bracket syntax in the route filename.",
-      "// app/routes/users.$userId.projects.$projectId.tsx\nexport async function loader({ params }) {\n  const { userId, projectId } = params;\n  return json(await getProject(userId, projectId));\n}"
-    ]
-  },
-  "Mutations": {
-    "action": [
-      "Actions handle form submissions and data mutations on the server. They run on POST, PUT, PATCH, or DELETE requests and can return data, redirects, or errors to the client.",
-      "export async function action({ request, params }) {\n  const formData = await request.formData();\n  const title = formData.get('title');\n  await db.post.update({ where: { id: params.id }, data: { title } });\n  return redirect('/posts');\n}"
-    ],
-    "Form": [
-      "The <Form> component submits data without JavaScript by default. When JS loads, it progressively enhances to use fetch, providing optimistic UI and pending states without full page reloads.",
-      "import { Form } from '@remix-run/react';\n<Form method='post'>\n  <input name='title' />\n  <button type='submit'>Create</button>\n</Form>"
-    ],
-    "useFetcher": [
-      "useFetcher allows submitting actions or loading data without navigational transitions. It is ideal for non-blocking interactions like add-to-cart buttons or inline search suggestions.",
-      "const fetcher = useFetcher();\n<fetcher.Form method='post' action='/api/cart'>\n  <button type='submit'>Add to Cart</button>\n</fetcher.Form>"
-    ]
-  },
-  "Web Standards": {
-    "Request/Response": [
-      "Remix embraces Web Fetch API standards. Loaders and actions receive native Request objects and return Response objects, making routes portable across server environments.",
-      "export async function loader({ request }) {\n  const url = new URL(request.url);\n  const search = url.searchParams.get('q');\n  return json({ results: await searchPosts(search) });\n}"
-    ],
-    "Headers": [
-      "Headers in Remix can be set at the route level for caching, security, and content negotiation. The headers export controls both document and resource route responses.",
-      "export function headers({ loaderHeaders, parentHeaders }) {\n  return { 'Cache-Control': 'public, max-age=3600' };\n}"
-    ],
-    "Cookies": [
-      "Remix provides a cookies API that integrates with the Web Fetch standard. Cookies are created, read, and written using the cookie utilities from @remix-run/node.",
-      "import { createCookie } from '@remix-run/node';\nconst cookie = createCookie('preferences', { maxAge: 604800 });\nconst value = await cookie.parse(request.headers.get('Cookie'));"
-    ]
-  },
-  "Error Handling": {
-    "ErrorBoundary": [
-      "ErrorBoundary catches unexpected rendering errors in a route. When an error is thrown, Remix renders the closest ErrorBoundary instead of the default component, showing a fallback UI.",
-      "export function ErrorBoundary({ error }) {\n  return <div>Something went wrong: {error.message}</div>;\n}"
-    ],
-    "CatchBoundary": [
-      "CatchBoundary handles expected error responses from loaders and actions. It receives the thrown Response object, allowing different UI for 404, 403, and other status codes.",
-      "export function CatchBoundary() {\n  const caught = useCatch();\n  if (caught.status === 404) return <div>Page not found</div>;\n  return <div>Error: {caught.status}</div>;\n}"
-    ]
-  },
-  "CSS & Styling": {
-    "Links": [
-      "Remix manages CSS through the links export, which adds link tags to the document head. This enables route-level CSS loading and automatic cleanup when navigating away.",
-      "export function links() {\n  return [{ rel: 'stylesheet', href: styles }];\n}"
-    ],
-    "Route Styles": [
-      "Route styles in Remix support both traditional CSS files and CSS-in-JS solutions. CSS files can be imported in links functions, with automatic scoping via CSS Modules.",
-      "import styles from './dashboard.css';\nexport function links() {\n  return [{ rel: 'stylesheet', href: styles }];\n}"
-    ],
-    "Tailwind": [
-      "Remix supports Tailwind CSS through the conventional PostCSS setup. The @tailwind directives are processed during build, generating optimized CSS with unused class purging.",
-      "/* app/tailwind.css */\n@tailwind base;\n@tailwind components;\n@tailwind utilities;"
-    ]
-  },
-  "Deployment": {
-    "Fly.io": [
-      "Fly.io is the recommended deployment target for Remix, offering global edge regions and effortless scaling. Remix apps deploy as Docker containers running close to users worldwide.",
-      "// Dockerfile and fly.toml\n# fly.toml\n[build]\n  builder = \"heroku/buildpacks:20\""
-    ],
-    "Vercel": [
-      "Vercel supports Remix via the @remix-run/vercel adapter. It automatically optimizes serverless functions and delivers assets through Vercel's edge network.",
-      "npm install @remix-run/vercel\n// remix.config.js\nmodule.exports = { server: '@remix-run/vercel' };"
-    ],
-    "Netlify": [
-      "Netlify deploys Remix apps using the Netlify adapter, providing serverless functions for the Remix server and global CDN for static assets via Netlify Edge.",
-      "npm install @remix-run/netlify\n// remix.config.js\nmodule.exports = { server: '@remix-run/netlify' };"
-    ],
-    "Cloudflare": [
-      "The Cloudflare Workers adapter runs Remix on Cloudflare's edge network. It uses Workers KV for sessions and Durable Objects for real-time state.",
-      "npm install @remix-run/cloudflare-pages\n// remix.config.js\nmodule.exports = { server: '@remix-run/cloudflare-pages' };"
-    ]
-  },
-  "Advanced": {
-    "Resource Routes": [
-      "Resource Routes return non-HTML content such as JSON, images, PDFs, or sitemaps. They handle requests without rendering a component, functioning as pure API endpoints within the routes system.",
-      "// app/routes/api.sitemap[.]xml.tsx\nexport async function loader({ request }) {\n  const posts = await db.post.findMany();\n  return new Response(generateSitemap(posts), {\n    headers: { 'Content-Type': 'application/xml' },\n  });\n}"
-    ],
-    "WebSockets": [
-      "Real-time features in Remix are achieved through WebSocket integrations. While Remix does not include WebSockets natively, it pairs well with libraries like Socket.io or PartyKit.",
-      "// PartyKit integration for real-time\nimport { useFetcher } from '@remix-run/react';\nconst party = usePartyKit();\nparty.connect('my-room');"
-    ],
-    "Caching": [
-      "Remix leverages HTTP caching extensively. The headers export allows setting Cache-Control headers per route, and loaders can implement conditional requests with ETags for efficient revalidation.",
-      "export async function loader({ request }) {\n  const data = await getData();\n  const etag = hash(data);\n  if (request.headers.get('If-None-Match') === etag) {\n    return new Response(null, { status: 304 });\n  }\n  return json(data, { headers: { ETag: etag } });\n}"
-    ]
-  },
-  "Vite Plugin": {
-    "Remix Vite Plugin": [
-      "Remix now ships as a Vite plugin for faster builds, HMR, and streamlined configuration. The vite.config replaces remix.config with a familiar Vite API and automatic React Fast Refresh.",
-      "import { vitePlugin as remix } from '@remix-run/dev';\nimport { defineConfig } from 'vite';\n\nexport default defineConfig({\n  plugins: [remix()]\n});"
-    ],
-    "Plugin Configuration": [
-      "The Remix Vite plugin accepts options for server entry, routes directory, future flags, and build output. It integrates with other Vite plugins like Tailwind and MDX for a unified build pipeline.",
-      "export default defineConfig({\n  plugins: [remix({\n    appDirectory: 'my-app',\n    future: { v3_fetcherPersist: true }\n  })]\n});"
-    ],
-    "HMR & Fast Refresh": [
-      "Vite-powered HMR updates Remix route components in milliseconds without losing page state. React Fast Refresh preserves component state across edits, dramatically improving the dev feedback loop.",
-      "// No config needed - Vite HMR works out of the box\n// Edits to route components reflect instantly\n// Edits to loaders/actions trigger a full reload"
-    ]
-  },
-  "Session Management": {
-    "createCookieSessionStorage": [
-      "Cookie session storage encodes session data directly in encrypted cookies, suitable for small payloads. It requires no database and is the simplest session strategy for Remix apps.",
-      "import { createCookieSessionStorage } from '@remix-run/node';\n\nconst { getSession, commitSession, destroySession } = createCookieSessionStorage({\n  cookie: { name: '__session', secrets: ['s3cret'], sameSite: 'lax' }\n});"
-    ],
-    "createSessionStorage": [
-      "createSessionStorage allows custom backing stores (database, Redis) for larger session data while using a cookie only for the session ID. This scales beyond cookie size limits.",
-      "const { getSession, commitSession, destroySession } = createSessionStorage({\n  cookie: { name: 'sid', secrets: ['s3cret'] },\n  createData: (data) => db.sessions.create(data),\n  readData: (id) => db.sessions.find(id),\n  updateData: (id, data) => db.sessions.update(id, data),\n  deleteData: (id) => db.sessions.delete(id)\n});"
-    ],
-    "Flash Messages": [
-      "Flash messages are one-time session values that are cleared after being read, ideal for success or error notifications after form submissions. They use the session's flash method.",
-      "// In action\nexport async function action({ request }) {\n  const session = await getSession(request.headers.get('Cookie'));\n  session.flash('success', 'Post created!');\n  return redirect('/posts', { headers: { 'Set-Cookie': await commitSession(session) } });\n}"
-    ]
-  },
-  "Type Inference": {
-    "Typed Loader Data": [
-      "useLoaderData infers the return type of the route's loader using typeof loader. This provides end-to-end type safety from the server to the client without manual type definitions.",
-      "import { useLoaderData } from '@remix-run/react';\nimport type { loader } from './route';\n\nexport default function Posts() {\n  const posts = useLoaderData<typeof loader>();\n  // posts is fully typed based on loader return\n  return <div>{posts.map(p => p.title)}</div>;\n}"
-    ],
-    "Typed Actions": [
-      "useActionData provides type-safe access to action return values. Combine with typeof action for compile-time checking of error messages, form data, and mutation results.",
-      "import { useActionData } from '@remix-run/react';\nimport type { action } from './route';\n\nconst actionData = useActionData<typeof action>();\n{actionData?.error && <p>{actionData.error}</p>}"
-    ],
-    "serialize Type": [
-      "Remix's SerializeFrom type unwraps Promise and Response types from loaders, providing a cleaner type for client-side hooks when the loader uses async patterns.",
-      "import type { SerializeFrom } from '@remix-run/node';\nimport type { loader } from './route';\n\ntype LoaderData = SerializeFrom<typeof loader>;\n// Removes Promise/Response wrappers for client consumption"
-    ]
-  }
+ "Getting Started": {
+  "Routing": [
+   "Remix uses a file-based routing system in the app/routes directory. Each file represents a route segment, with dot and folder conventions creating nested URL structures automatically.",
+   "// app/routes/posts.$id.tsx\n// Creates /posts/:id"
+  ],
+  "Nested Routes": [
+   "Nested routes in Remix allow multiple components to render on the same URL. The parent route's layout wraps child routes through the <Outlet /> component, enabling complex UI hierarchies.",
+   "// app/routes/posts.tsx\nexport default function PostsLayout() {\n  return (\n    <div>\n      <Sidebar />\n      <Outlet />\n    </div>\n  );\n}"
+  ],
+  "Layouts": [
+   "Layout routes use the special app/root.tsx file and route-specific layout.tsx files. Layouts wrap child routes and persist across navigation, preventing full page re-renders.",
+   "// app/routes/posts.layout.tsx\nexport default function Layout({ children }) {\n  return <div className='posts-layout'>{children}</div>;\n}"
+  ]
+ },
+ "Data Loading": {
+  "loader": [
+   "Loaders are server-side functions that fetch data before rendering a route. They run on every request, returning data that becomes available to the component via the useLoaderData hook.",
+   "export async function loader({ params, request }) {\n  const post = await db.post.findUnique({ where: { id: params.id } });\n  return json(post);\n}"
+  ],
+  "useLoaderData": [
+   "useLoaderData returns the typed data from the nearest route loader. It provides type safety when used with TypeScript and the typeof loader generic pattern.",
+   "import { useLoaderData } from '@remix-run/react';\nexport default function Post() {\n  const post = useLoaderData<typeof loader>();\n  return <h1>{post.title}</h1>;\n}"
+  ],
+  "params": [
+   "Params give access to dynamic segments from the URL pattern. They are available in loaders and actions via the params argument, matching the bracket syntax in the route filename.",
+   "// app/routes/users.$userId.projects.$projectId.tsx\nexport async function loader({ params }) {\n  const { userId, projectId } = params;\n  return json(await getProject(userId, projectId));\n}"
+  ]
+ },
+ "Mutations": {
+  "action": [
+   "Actions handle form submissions and data mutations on the server. They run on POST, PUT, PATCH, or DELETE requests and can return data, redirects, or errors to the client.",
+   "export async function action({ request, params }) {\n  const formData = await request.formData();\n  const title = formData.get('title');\n  await db.post.update({ where: { id: params.id }, data: { title } });\n  return redirect('/posts');\n}"
+  ],
+  "Form": [
+   "The <Form> component submits data without JavaScript by default. When JS loads, it progressively enhances to use fetch, providing optimistic UI and pending states without full page reloads.",
+   "import { Form } from '@remix-run/react';\n<Form method='post'>\n  <input name='title' />\n  <button type='submit'>Create</button>\n</Form>"
+  ],
+  "useFetcher": [
+   "useFetcher allows submitting actions or loading data without navigational transitions. It is ideal for non-blocking interactions like add-to-cart buttons or inline search suggestions.",
+   "const fetcher = useFetcher();\n<fetcher.Form method='post' action='/api/cart'>\n  <button type='submit'>Add to Cart</button>\n</fetcher.Form>"
+  ]
+ },
+ "Web Standards": {
+  "Request/Response": [
+   "Remix embraces Web Fetch API standards. Loaders and actions receive native Request objects and return Response objects, making routes portable across server environments.",
+   "export async function loader({ request }) {\n  const url = new URL(request.url);\n  const search = url.searchParams.get('q');\n  return json({ results: await searchPosts(search) });\n}"
+  ],
+  "Headers": [
+   "Headers in Remix can be set at the route level for caching, security, and content negotiation. The headers export controls both document and resource route responses.",
+   "export function headers({ loaderHeaders, parentHeaders }) {\n  return { 'Cache-Control': 'public, max-age=3600' };\n}"
+  ],
+  "Cookies": [
+   "Remix provides a cookies API that integrates with the Web Fetch standard. Cookies are created, read, and written using the cookie utilities from @remix-run/node.",
+   "import { createCookie } from '@remix-run/node';\nconst cookie = createCookie('preferences', { maxAge: 604800 });\nconst value = await cookie.parse(request.headers.get('Cookie'));"
+  ]
+ },
+ "Error Handling": {
+  "ErrorBoundary": [
+   "ErrorBoundary catches unexpected rendering errors in a route. When an error is thrown, Remix renders the closest ErrorBoundary instead of the default component, showing a fallback UI.",
+   "export function ErrorBoundary({ error }) {\n  return <div>Something went wrong: {error.message}</div>;\n}"
+  ],
+  "CatchBoundary": [
+   "CatchBoundary handles expected error responses from loaders and actions. It receives the thrown Response object, allowing different UI for 404, 403, and other status codes.",
+   "export function CatchBoundary() {\n  const caught = useCatch();\n  if (caught.status === 404) return <div>Page not found</div>;\n  return <div>Error: {caught.status}</div>;\n}"
+  ]
+ },
+ "CSS & Styling": {
+  "Links": [
+   "Remix manages CSS through the links export, which adds link tags to the document head. This enables route-level CSS loading and automatic cleanup when navigating away.",
+   "export function links() {\n  return [{ rel: 'stylesheet', href: styles }];\n}"
+  ],
+  "Route Styles": [
+   "Route styles in Remix support both traditional CSS files and CSS-in-JS solutions. CSS files can be imported in links functions, with automatic scoping via CSS Modules.",
+   "import styles from './dashboard.css';\nexport function links() {\n  return [{ rel: 'stylesheet', href: styles }];\n}"
+  ],
+  "Tailwind": [
+   "Remix supports Tailwind CSS through the conventional PostCSS setup. The @tailwind directives are processed during build, generating optimized CSS with unused class purging.",
+   "/* app/tailwind.css */\n@tailwind base;\n@tailwind components;\n@tailwind utilities;"
+  ]
+ },
+ "Deployment": {
+  "Fly.io": [
+   "Fly.io is the recommended deployment target for Remix, offering global edge regions and effortless scaling. Remix apps deploy as Docker containers running close to users worldwide.",
+   "// Dockerfile and fly.toml\n# fly.toml\n[build]\n  builder = \"heroku/buildpacks:20\""
+  ],
+  "Vercel": [
+   "Vercel supports Remix via the @remix-run/vercel adapter. It automatically optimizes serverless functions and delivers assets through Vercel's edge network.",
+   "npm install @remix-run/vercel\n// remix.config.js\nmodule.exports = { server: '@remix-run/vercel' };"
+  ],
+  "Netlify": [
+   "Netlify deploys Remix apps using the Netlify adapter, providing serverless functions for the Remix server and global CDN for static assets via Netlify Edge.",
+   "npm install @remix-run/netlify\n// remix.config.js\nmodule.exports = { server: '@remix-run/netlify' };"
+  ],
+  "Cloudflare": [
+   "The Cloudflare Workers adapter runs Remix on Cloudflare's edge network. It uses Workers KV for sessions and Durable Objects for real-time state.",
+   "npm install @remix-run/cloudflare-pages\n// remix.config.js\nmodule.exports = { server: '@remix-run/cloudflare-pages' };"
+  ]
+ },
+ "Advanced": {
+  "Resource Routes": [
+   "Resource Routes return non-HTML content such as JSON, images, PDFs, or sitemaps. They handle requests without rendering a component, functioning as pure API endpoints within the routes system.",
+   "// app/routes/api.sitemap[.]xml.tsx\nexport async function loader({ request }) {\n  const posts = await db.post.findMany();\n  return new Response(generateSitemap(posts), {\n    headers: { 'Content-Type': 'application/xml' },\n  });\n}"
+  ],
+  "WebSockets": [
+   "Real-time features in Remix are achieved through WebSocket integrations. While Remix does not include WebSockets natively, it pairs well with libraries like Socket.io or PartyKit.",
+   "// PartyKit integration for real-time\nimport { useFetcher } from '@remix-run/react';\nconst party = usePartyKit();\nparty.connect('my-room');"
+  ],
+  "Caching": [
+   "Remix leverages HTTP caching extensively. The headers export allows setting Cache-Control headers per route, and loaders can implement conditional requests with ETags for efficient revalidation.",
+   "export async function loader({ request }) {\n  const data = await getData();\n  const etag = hash(data);\n  if (request.headers.get('If-None-Match') === etag) {\n    return new Response(null, { status: 304 });\n  }\n  return json(data, { headers: { ETag: etag } });\n}"
+  ]
+ },
+ "Vite Plugin": {
+  "Remix Vite Plugin": [
+   "Remix now ships as a Vite plugin for faster builds, HMR, and streamlined configuration. The vite.config replaces remix.config with a familiar Vite API and automatic React Fast Refresh.",
+   "import { vitePlugin as remix } from '@remix-run/dev';\nimport { defineConfig } from 'vite';\n\nexport default defineConfig({\n  plugins: [remix()]\n});"
+  ],
+  "Plugin Configuration": [
+   "The Remix Vite plugin accepts options for server entry, routes directory, future flags, and build output. It integrates with other Vite plugins like Tailwind and MDX for a unified build pipeline.",
+   "export default defineConfig({\n  plugins: [remix({\n    appDirectory: 'my-app',\n    future: { v3_fetcherPersist: true }\n  })]\n});"
+  ],
+  "HMR & Fast Refresh": [
+   "Vite-powered HMR updates Remix route components in milliseconds without losing page state. React Fast Refresh preserves component state across edits, dramatically improving the dev feedback loop.",
+   "// No config needed - Vite HMR works out of the box\n// Edits to route components reflect instantly\n// Edits to loaders/actions trigger a full reload"
+  ]
+ },
+ "Session Management": {
+  "createCookieSessionStorage": [
+   "Cookie session storage encodes session data directly in encrypted cookies, suitable for small payloads. It requires no database and is the simplest session strategy for Remix apps.",
+   "import { createCookieSessionStorage } from '@remix-run/node';\n\nconst { getSession, commitSession, destroySession } = createCookieSessionStorage({\n  cookie: { name: '__session', secrets: ['s3cret'], sameSite: 'lax' }\n});"
+  ],
+  "createSessionStorage": [
+   "createSessionStorage allows custom backing stores (database, Redis) for larger session data while using a cookie only for the session ID. This scales beyond cookie size limits.",
+   "const { getSession, commitSession, destroySession } = createSessionStorage({\n  cookie: { name: 'sid', secrets: ['s3cret'] },\n  createData: (data) => db.sessions.create(data),\n  readData: (id) => db.sessions.find(id),\n  updateData: (id, data) => db.sessions.update(id, data),\n  deleteData: (id) => db.sessions.delete(id)\n});"
+  ],
+  "Flash Messages": [
+   "Flash messages are one-time session values that are cleared after being read, ideal for success or error notifications after form submissions. They use the session's flash method.",
+   "// In action\nexport async function action({ request }) {\n  const session = await getSession(request.headers.get('Cookie'));\n  session.flash('success', 'Post created!');\n  return redirect('/posts', { headers: { 'Set-Cookie': await commitSession(session) } });\n}"
+  ]
+ },
+ "Type Inference": {
+  "Typed Loader Data": [
+   "useLoaderData infers the return type of the route's loader using typeof loader. This provides end-to-end type safety from the server to the client without manual type definitions.",
+   "import { useLoaderData } from '@remix-run/react';\nimport type { loader } from './route';\n\nexport default function Posts() {\n  const posts = useLoaderData<typeof loader>();\n  // posts is fully typed based on loader return\n  return <div>{posts.map(p => p.title)}</div>;\n}"
+  ],
+  "Typed Actions": [
+   "useActionData provides type-safe access to action return values. Combine with typeof action for compile-time checking of error messages, form data, and mutation results.",
+   "import { useActionData } from '@remix-run/react';\nimport type { action } from './route';\n\nconst actionData = useActionData<typeof action>();\n{actionData?.error && <p>{actionData.error}</p>}"
+  ],
+  "serialize Type": [
+   "Remix's SerializeFrom type unwraps Promise and Response types from loaders, providing a cleaner type for client-side hooks when the loader uses async patterns.",
+   "import type { SerializeFrom } from '@remix-run/node';\nimport type { loader } from './route';\n\ntype LoaderData = SerializeFrom<typeof loader>;\n// Removes Promise/Response wrappers for client consumption"
+  ]
+ },
+ "Remix Advanced Patterns": {
+  "Nested Routes & Layouts": [
+   "Remix provides nested routing with shared layouts. Files in <code>app/routes/</code> follow directory-based routing. <code>app/root.tsx</code> is the root layout. <code>_layout.tsx</code> files create shared layouts. Outlets render child routes. Nested routes load data in parallel via <code>loader</code> functions. <code>useLoaderData</code>, <code>useRouteLoaderData</code>, and <code>useMatches</code> access data from any route. <code>shouldRevalidate</code> optimizes data reloads. Error boundaries per route (<code>ErrorBoundary</code>). Pending UI with <code>useNavigation</code>. Optimistic UI with <code>useFetcher</code> form submissions.",
+   "// Remix nested routes structure\n// app/routes/products._layout.tsx (shared layout for /products)\nimport { Outlet, NavLink } from '@remix-run/react';\n\nexport default function ProductsLayout() {\n  return (\n    <div className=\"flex gap-8\">\n      <nav className=\"w-48 space-y-2\">\n        <NavLink to=\"/products\" end className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          All Products\n        </NavLink>\n        <NavLink to=\"/products/new\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          New Product\n        </NavLink>\n        <NavLink to=\"/products/categories\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          Categories\n        </NavLink>\n      </nav>\n      <main className=\"flex-1\">\n        <Outlet />\n      </main>\n    </div>\n  );\n}\n\n// app/routes/products.$productId.tsx\nimport { json, type LoaderFunctionArgs } from '@remix-run/node';\nimport { useLoaderData, useNavigate } from '@remix-run/react';\n\nexport async function loader({ params, context }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.productId },\n    include: { reviews: true }\n  });\n  \n  if (!product) {\n    throw new Response('Not Found', { status: 404 });\n  }\n  \n  return json({ product });\n}\n\nexport function ErrorBoundary() {\n  return <div className=\"error\">Failed to load product</div>;\n}\n\nexport default function ProductDetail() {\n  const { product } = useLoaderData<typeof loader>();\n  const navigate = useNavigate();\n  \n  return (\n    <div>\n      <button onClick={() => navigate(-1)}>Back</button>\n      <h1>{product.name}</h1>\n      <p>{product.description}</p>\n    </div>\n  );\n}"
+  ],
+  "Remix Resource Routes & Webhooks": [
+   "Remix resource routes return non-HTML responses: JSON APIs, files, redirects, and webhooks. Resource routes don't render components — they only export <code>loader</code> (GET) and <code>action</code> (POST/PUT/DELETE). <code>app/routes/api.products.$id.tsx</code> becomes <code>/api/products/:id</code>. Webhook handlers verify signatures and process events. File uploads with <code>unstable_parseMultipartFormData</code>. RSS feeds, sitemaps, and PDF generation. <code>response</code> helpers: <code>json</code>, <code>redirect</code>, <code>defer</code> (streaming). CORS headers for public API routes.",
+   "// Remix resource routes\n// app/routes/api.products.$id.tsx\nimport { json } from '@remix-run/node';\nimport type { LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/node';\n\nexport async function loader({ params, request }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.id }\n  });\n  \n  if (!product) {\n    return json({ error: 'Not found' }, { status: 404 });\n  }\n  \n  return json(product, {\n    headers: {\n      'Cache-Control': 'public, max-age=300'\n    }\n  });\n}\n\nexport async function action({ params, request }: ActionFunctionArgs) {\n  switch (request.method) {\n    case 'PUT': {\n      const body = await request.json();\n      const product = await db.product.update({\n        where: { id: params.id },\n        data: body\n      });\n      return json(product);\n    }\n    case 'DELETE': {\n      await db.product.delete({ where: { id: params.id } });\n      return json({ success: true }, { status: 200 });\n    }\n    default:\n      return json({ error: 'Method not allowed' }, { status: 405 });\n  }\n}\n\n// Webhook handler\n// app/routes/api.webhooks.stripe.tsx\nexport async function action({ request }: ActionFunctionArgs) {\n  const sig = request.headers.get('stripe-signature');\n  const body = await request.text();\n  \n  try {\n    const event = stripe.webhooks.constructEvent(body, sig!, process.env.STRIPE_WEBHOOK_SECRET);\n    \n    switch (event.type) {\n      case 'checkout.session.completed':\n        await handleCheckoutComplete(event.data.object);\n        break;\n      case 'customer.subscription.updated':\n        await handleSubscriptionUpdate(event.data.object);\n        break;\n    }\n    \n    return json({ received: true });\n  } catch (err) {\n    return json({ error: 'Invalid signature' }, { status: 400 });\n  }\n}"
+  ]
+ }
 }

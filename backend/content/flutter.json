@@ -1,72 +1,210 @@
 {
-  "Getting Started": {
-    "Dart Basics": ["Dart is a client-optimized language with sound null safety, type inference, and async/await. It compiles either ahead-of-time (AOT) for production or just-in-time (JIT) for hot reload.", "void main() {\n  var name = 'Flutter';\n  print('Hello $name');\n}\n\n// Null safety\nString? nullable;\nString nonNullable = 'always has value';"],
-    "Widgets": ["Everything in Flutter is a widget. StatelessWidget builds immutable UI, while StatefulWidget manages mutable state that can trigger rebuilds via setState.", "class MyWidget extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return Text('Hello');\n  }\n}"],
-    "MaterialApp": ["MaterialApp wraps your app with Material Design conventions, including theming, navigation, and localization. It provides Scaffold and other Material widgets.", "MaterialApp(\n  home: Scaffold(\n    appBar: AppBar(title: Text('Home')),\n    body: Center(child: Text('Hello'))\n  )\n)"],
-    "Hot Reload": ["Flutter's hot reload injects source code changes into the running Dart VM in under a second. It preserves app state so you can iterate on UI without restarting.", "# Press r in the terminal or click the lightning bolt in IDE\n# State is preserved on hot reload (not hot restart)\n# Only modified widgets are rebuilt"]
-  },
-  "Layout": {
-    "Row": ["Row arranges child widgets horizontally. It uses MainAxisAlignment for horizontal alignment and CrossAxisAlignment for vertical alignment.", "Row(\n  mainAxisAlignment: MainAxisAlignment.spaceEvenly,\n  children: [Icon(Icons.star), Icon(Icons.favorite)]\n)"],
-    "Column": ["Column arranges child widgets vertically with support for scrolling via Expanded and Flexible widgets for proportional sizing.", "Column(\n  mainAxisAlignment: MainAxisAlignment.center,\n  children: [Text('Top'), Text('Bottom')]\n)"],
-    "Stack": ["Stack overlays children on top of each other, positioning them with Positioned widget relative to the stack edges.", "Stack(\n  children: [\n    Container(color: Colors.blue),\n    Positioned(top: 10, left: 10, child: Text('Overlay'))\n  ]\n)"],
-    "Container": ["Container combines painting, positioning, and sizing widgets. It supports padding, margins, borders, background color, and constraints.", "Container(\n  padding: EdgeInsets.all(16),\n  color: Colors.white,\n  child: Text('Content')\n)"],
-    "Expanded & Flexible": ["Expanded forces a child to fill available space in a Row or Column. Flexible allows the child to be smaller than available space if needed.", "Row(children: [\n  Expanded(flex: 2, child: Container(color: Colors.red)),\n  Expanded(flex: 1, child: Container(color: Colors.blue)),\n])"]
-  },
-  "Animations": {
-    "AnimatedContainer": ["AnimatedContainer automatically animates changes to its properties like color, size, padding, and border radius over a specified duration.", "AnimatedContainer(\n  duration: Duration(milliseconds: 300),\n  color: isActive ? Colors.blue : Colors.grey,\n  width: isActive ? 200 : 100,\n  child: Text('Animate'),\n)"],
-    "TweenAnimationBuilder": ["TweenAnimationBuilder animates a value from a start to end point using a curve. It rebuilds the widget tree on each frame during the animation.", "TweenAnimationBuilder<double>(\n  tween: Tween(begin: 0, end: 1),\n  duration: Duration(seconds: 2),\n  builder: (context, value, child) => Opacity(opacity: value, child: child),\n  child: Text('Fade in'),\n)"],
-    "Hero": ["Hero animates a widget from one screen to another during navigation. Both screens must have a Hero widget with the same tag for the shared transition.", "// Screen 1\nHero(tag: 'profile', child: CircleAvatar(radius: 50))\n\n// Screen 2\nHero(tag: 'profile', child: CircleAvatar(radius: 100))"],
-    "CustomPainter": ["CustomPainter lets you draw custom graphics using a Canvas API with Paint objects. It's essential for charts, signatures, and complex visual effects.", "class MyPainter extends CustomPainter {\n  @override\n  void paint(Canvas canvas, Size size) {\n    final paint = Paint()\n      ..color = Colors.blue\n      ..style = PaintingStyle.fill;\n    canvas.drawCircle(Offset(100, 100), 50, paint);\n  }\n  \n  @override\n  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;\n}\n\n// Usage\nCustomPaint(painter: MyPainter(), size: Size(200, 200))"]
-  },
-  "State Management": {
-    "setState": ["setState is the simplest state management approach, notifying the framework to rebuild the widget tree when state changes inside StatefulWidget.", "setState(() { _counter++; });"],
-    "Provider": ["Provider exposes values down the widget tree via InheritedWidget. It is the recommended simple state management solution for Flutter apps.", "Provider<Counter>(\n  create: (_) => Counter(),\n  child: Consumer<Counter>(\n    builder: (ctx, counter, _) => Text('${counter.value}')\n  )\n)"],
-    "Riverpod": ["Riverpod improves on Provider with compile-time safety, no BuildContext dependency, and support for async providers and code generation.", "final counterProvider = StateNotifierProvider<CounterNotifier, int>(\n  (ref) => CounterNotifier()\n);"],
-    "Bloc": ["Bloc separates business logic from UI using streams of events and states. It enforces unidirectional data flow and testability.", "class CounterCubit extends Cubit<int> {\n  void increment() => emit(state + 1);\n}"]
-  },
-  "Concurrency": {
-    "Isolates": ["Isolates are independent workers that run Dart code in parallel with their own memory heap. Use compute() for simple parallel tasks or Isolate.spawn for complex ones.", "import 'dart:isolate';\n\n// Simple parallel computation\nFuture<int> calculateHeavy() async {\n  return await Isolate.run(() {\n    var sum = 0;\n    for (var i = 0; i < 1000000; i++) sum += i;\n    return sum;\n  });\n}\n\n// Using compute helper (Flutter)\nimport 'package:flutter/foundation.dart';\nfinal result = await compute(heavyFunction, input);"],
-    "Futures & Streams": ["Futures represent single async values, while Streams represent sequences of async events. Both are core to Flutter's async programming model.", "// Future\nFuture<String> fetchData() async {\n  final response = await http.get(Uri.parse('https://api.example.com'));\n  return response.body;\n}\n\n// Stream\nStream<int> countStream() async* {\n  for (var i = 0; i < 10; i++) {\n    await Future.delayed(Duration(seconds: 1));\n    yield i;\n  }\n}\n\n// StreamBuilder in UI\nStreamBuilder<int>(\n  stream: countStream(),\n  builder: (context, snapshot) => Text('${snapshot.data}'),\n)"]
-  },
-  "Navigation": {
-    "Routes": ["Named routes map string identifiers to widget builders. Navigator.push and Navigator.pop handle stack-based navigation.", "Navigator.push(\n  context,\n  MaterialPageRoute(builder: (_) => SecondPage())\n);"],
-    "Navigator 2.0": ["Navigator 2.0 provides declarative routing with pages list, allowing deep linking and full control over the navigation stack.", "Navigator(\n  pages: [MaterialPage(child: HomePage())],\n  onPopPage: (route, result) => route.didPop(result)\n);"],
-    "GoRouter": ["GoRouter provides declarative, URL-based routing with support for deep linking, redirects, and nested navigation using ShellRoute.", "GoRouter(\n  routes: [\n    GoRoute(path: '/', builder: (ctx, state) => HomePage()),\n    GoRoute(path: '/details/:id', builder: (ctx, state) => DetailsPage(id: state.pathParameters['id']!))\n  ]\n);"]
-  },
-  "Forms": {
-    "Form": ["Form widget groups form fields for validation and saving. It uses a GlobalKey to access form state and validate all fields at once.", "final formKey = GlobalKey<FormState>();\nForm(\n  key: formKey,\n  child: Column(children: [TextFormField()])\n)"],
-    "TextFormField": ["TextFormField is a Material Design text input with built-in validation, error display, and controller access for programmatic manipulation.", "TextFormField(\n  controller: _controller,\n  validator: (v) => v!.isEmpty ? 'Required' : null\n)"],
-    "Validation": ["Form validation uses validator callbacks that return error strings or null. AutovalidateMode controls when validation triggers automatically.", "TextFormField(\n  autovalidateMode: AutovalidateMode.onUserInteraction,\n  validator: (v) => v!.length < 3 ? 'Too short' : null\n)"]
-  },
-  "Networking": {
-    "http": ["The http package provides a simple, stream-based HTTP client for making REST API calls. It returns Response objects with status codes and bodies.", "var response = await http.get(Uri.parse('https://api.example.com/data'));\nprint(response.body);"],
-    "dio": ["Dio is a powerful HTTP client with interceptors, request cancellation, timeout handling, and file download/upload progress tracking.", "final response = await Dio().get('https://api.example.com/users');\nprint(response.data);"],
-    "REST API": ["REST APIs are consumed by mapping JSON responses to Dart models using fromJson/toJson methods. jsonDecode parses raw JSON strings.", "final json = jsonDecode(response.body);\nfinal user = User.fromJson(json);"],
-    "GraphQL": ["GraphQL queries request specific fields from the server, reducing over-fetching. The graphql_flutter package integrates with the widget tree.", "final result = await client.query(QueryOptions(document: gql('{ users { name email } }')));"]
-  },
-  "Storage": {
-    "SharedPreferences": ["SharedPreferences stores simple key-value pairs persistently. It is platform-native, backed by NSUserDefaults on iOS and SharedPreferences on Android.", "await prefs.setString('key', 'value');\nfinal val = prefs.getString('key');"],
-    "SQLite": ["SQLite provides relational local storage via the sqflite package. Tables are created with SQL and queried using raw or helper methods.", "final db = await openDatabase('mydb.db', version: 1, onCreate: (db, v) => db.execute('CREATE TABLE items(id INTEGER PRIMARY KEY, name TEXT)'));"],
-    "Hive": ["Hive is a lightweight, NoSQL key-value database written in Dart. It is fast and supports type adapters for complex objects without native dependencies.", "final box = await Hive.openBox('myBox');\nawait box.put('key', value);\nfinal val = box.get('key');"]
-  },
-  "Platform": {
-    "Platform Channels": ["Platform channels enable bidirectional communication between Dart and native Kotlin/Swift code via MethodChannel for platform-specific features.", "MethodChannel('com.example/channel').invokeMethod('getBatteryLevel');"],
-    "iOS/Android Specific": ["Platform-specific code uses dart:io Platform checks or conditional imports to handle OS differences in UI, permissions, and behavior.", "if (Platform.isIOS) { /* iOS code */ } else if (Platform.isAndroid) { /* Android code */ }"],
-    "Material 3": ["Material 3 (Material You) is the latest Material Design iteration with dynamic color theming based on wallpaper colors. Enable via useMaterial3 flag.", "MaterialApp(\n  theme: ThemeData(\n    useMaterial3: true,\n    colorSchemeSeed: Colors.blue,\n    brightness: Brightness.light\n  )\n)"],
-    "Web": ["Flutter Web compiles Dart to JavaScript and renders via CanvasKit or HTML renderers. Responsive layouts use LayoutBuilder and MediaQuery for breakpoints.", "LayoutBuilder(\n  builder: (ctx, constraints) {\n    if (constraints.maxWidth > 600) return WideLayout();\n    else return NarrowLayout();\n  }\n)"]
-  },
-  "Testing": {
-    "Widget Testing": ["Widget tests verify individual widget behavior using the flutter_test package. They run in a simulated environment without a real device.", "void main() {\n  testWidgets('MyWidget shows message', (tester) async {\n    await tester.pumpWidget(MyWidget(message: 'Hello'));\n    expect(find.text('Hello'), findsOneWidget);\n  });\n}"],
-    "Unit Testing": ["Unit tests test individual functions and classes in isolation. Use the test package with expect, group, and setUp for organized tests.", "void main() {\n  group('Calculator', () {\n    test('adds two numbers', () {\n      expect(add(2, 3), equals(5));\n    });\n  });\n}"],
-    "Integration Testing": ["Integration tests run on a real device or emulator, testing the full app flow from user interactions to UI changes.", "void main() {\n  IntegrationTestWidgetsFlutterBinding.ensureInitialized();\n  testWidgets('complete login flow', (tester) async {\n    app.main();\n    await tester.pumpAndSettle();\n    await tester.enterText(find.byKey(Key('email')), 'user@test.com');\n    await tester.tap(find.text('Login'));\n    await tester.pumpAndSettle();\n    expect(find.text('Welcome'), findsOneWidget);\n  });\n}"]
-  },
-  "DevTools & Debugging": {
-    "Flutter DevTools": ["Flutter DevTools is a suite of debugging and profiling tools: widget inspector, timeline view, memory/CPU profiler, network logging, and app size analysis.", "flutter pub global activate devtools\nflutter run --observatory-port=9200\n# Then run: devtools\n\n# Key DevTools features:\n# - Widget Inspector: see widget tree and properties\n# - Timeline: frame-by-frame performance analysis\n# - Memory: track allocations and leaks\n# - Network: monitor HTTP traffic in real-time"],
-    "Performance Profile": ["Use Flutter's performance overlay and profile mode to identify jank, rebuild causes, and layout inefficiencies during development.", "// Enable performance overlay\nMaterialApp(showPerformanceOverlay: true)\n\n// Profile mode (CLI)\nflutter run --profile\n\n// Track rebuilds\nclass MyWidget extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    print('MyWidget rebuilt');\n    return Text('Hello');\n  }\n}"]
-  },
-  "Firebase Integration": {
-    "Firebase Auth": ["Firebase Authentication provides backend services for email/password, phone, OAuth (Google, Facebook, Apple), and anonymous auth in Flutter.", "import 'package:firebase_auth/firebase_auth.dart';\n\nFuture<User?> signInWithGoogle() async {\n  final provider = GoogleAuthProvider();\n  final credential = await FirebaseAuth.instance.signInWithPopup(provider);\n  return credential.user;\n}"],
-    "Firestore": ["Cloud Firestore is a flexible, scalable NoSQL database for Flutter apps. It provides real-time listeners, offline support, and automatic data synchronization.", "import 'package:cloud_firestore/cloud_firestore.dart';\n\nStream<List<User>> getUsers() {\n  return FirebaseFirestore.instance\n      .collection('users')\n      .snapshots()\n      .map((snapshot) => snapshot.docs.map((doc) => User.fromFirestore(doc)).toList());\n}"],
-    "Cloud Messaging": ["Firebase Cloud Messaging (FCM) sends push notifications to Flutter apps. Supports notification messages, data messages, and topic-based subscriptions.", "import 'package:firebase_messaging/firebase_messaging.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp();\n  \n  final messaging = FirebaseMessaging.instance;\n  final token = await messaging.getToken();\n  print('FCM token: $token');\n  \n  FirebaseMessaging.onMessage.listen((RemoteMessage message) {\n    print('Received: ${message.notification?.title}');\n  });\n}"]
-  }
+ "Getting Started": {
+  "Dart Basics": [
+   "Dart is a client-optimized language with sound null safety, type inference, and async/await. It compiles either ahead-of-time (AOT) for production or just-in-time (JIT) for hot reload.",
+   "void main() {\n  var name = 'Flutter';\n  print('Hello $name');\n}\n\n// Null safety\nString? nullable;\nString nonNullable = 'always has value';"
+  ],
+  "Widgets": [
+   "Everything in Flutter is a widget. StatelessWidget builds immutable UI, while StatefulWidget manages mutable state that can trigger rebuilds via setState.",
+   "class MyWidget extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return Text('Hello');\n  }\n}"
+  ],
+  "MaterialApp": [
+   "MaterialApp wraps your app with Material Design conventions, including theming, navigation, and localization. It provides Scaffold and other Material widgets.",
+   "MaterialApp(\n  home: Scaffold(\n    appBar: AppBar(title: Text('Home')),\n    body: Center(child: Text('Hello'))\n  )\n)"
+  ],
+  "Hot Reload": [
+   "Flutter's hot reload injects source code changes into the running Dart VM in under a second. It preserves app state so you can iterate on UI without restarting.",
+   "# Press r in the terminal or click the lightning bolt in IDE\n# State is preserved on hot reload (not hot restart)\n# Only modified widgets are rebuilt"
+  ]
+ },
+ "Layout": {
+  "Row": [
+   "Row arranges child widgets horizontally. It uses MainAxisAlignment for horizontal alignment and CrossAxisAlignment for vertical alignment.",
+   "Row(\n  mainAxisAlignment: MainAxisAlignment.spaceEvenly,\n  children: [Icon(Icons.star), Icon(Icons.favorite)]\n)"
+  ],
+  "Column": [
+   "Column arranges child widgets vertically with support for scrolling via Expanded and Flexible widgets for proportional sizing.",
+   "Column(\n  mainAxisAlignment: MainAxisAlignment.center,\n  children: [Text('Top'), Text('Bottom')]\n)"
+  ],
+  "Stack": [
+   "Stack overlays children on top of each other, positioning them with Positioned widget relative to the stack edges.",
+   "Stack(\n  children: [\n    Container(color: Colors.blue),\n    Positioned(top: 10, left: 10, child: Text('Overlay'))\n  ]\n)"
+  ],
+  "Container": [
+   "Container combines painting, positioning, and sizing widgets. It supports padding, margins, borders, background color, and constraints.",
+   "Container(\n  padding: EdgeInsets.all(16),\n  color: Colors.white,\n  child: Text('Content')\n)"
+  ],
+  "Expanded & Flexible": [
+   "Expanded forces a child to fill available space in a Row or Column. Flexible allows the child to be smaller than available space if needed.",
+   "Row(children: [\n  Expanded(flex: 2, child: Container(color: Colors.red)),\n  Expanded(flex: 1, child: Container(color: Colors.blue)),\n])"
+  ]
+ },
+ "Animations": {
+  "AnimatedContainer": [
+   "AnimatedContainer automatically animates changes to its properties like color, size, padding, and border radius over a specified duration.",
+   "AnimatedContainer(\n  duration: Duration(milliseconds: 300),\n  color: isActive ? Colors.blue : Colors.grey,\n  width: isActive ? 200 : 100,\n  child: Text('Animate'),\n)"
+  ],
+  "TweenAnimationBuilder": [
+   "TweenAnimationBuilder animates a value from a start to end point using a curve. It rebuilds the widget tree on each frame during the animation.",
+   "TweenAnimationBuilder<double>(\n  tween: Tween(begin: 0, end: 1),\n  duration: Duration(seconds: 2),\n  builder: (context, value, child) => Opacity(opacity: value, child: child),\n  child: Text('Fade in'),\n)"
+  ],
+  "Hero": [
+   "Hero animates a widget from one screen to another during navigation. Both screens must have a Hero widget with the same tag for the shared transition.",
+   "// Screen 1\nHero(tag: 'profile', child: CircleAvatar(radius: 50))\n\n// Screen 2\nHero(tag: 'profile', child: CircleAvatar(radius: 100))"
+  ],
+  "CustomPainter": [
+   "CustomPainter lets you draw custom graphics using a Canvas API with Paint objects. It's essential for charts, signatures, and complex visual effects.",
+   "class MyPainter extends CustomPainter {\n  @override\n  void paint(Canvas canvas, Size size) {\n    final paint = Paint()\n      ..color = Colors.blue\n      ..style = PaintingStyle.fill;\n    canvas.drawCircle(Offset(100, 100), 50, paint);\n  }\n  \n  @override\n  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;\n}\n\n// Usage\nCustomPaint(painter: MyPainter(), size: Size(200, 200))"
+  ]
+ },
+ "State Management": {
+  "setState": [
+   "setState is the simplest state management approach, notifying the framework to rebuild the widget tree when state changes inside StatefulWidget.",
+   "setState(() { _counter++; });"
+  ],
+  "Provider": [
+   "Provider exposes values down the widget tree via InheritedWidget. It is the recommended simple state management solution for Flutter apps.",
+   "Provider<Counter>(\n  create: (_) => Counter(),\n  child: Consumer<Counter>(\n    builder: (ctx, counter, _) => Text('${counter.value}')\n  )\n)"
+  ],
+  "Riverpod": [
+   "Riverpod improves on Provider with compile-time safety, no BuildContext dependency, and support for async providers and code generation.",
+   "final counterProvider = StateNotifierProvider<CounterNotifier, int>(\n  (ref) => CounterNotifier()\n);"
+  ],
+  "Bloc": [
+   "Bloc separates business logic from UI using streams of events and states. It enforces unidirectional data flow and testability.",
+   "class CounterCubit extends Cubit<int> {\n  void increment() => emit(state + 1);\n}"
+  ]
+ },
+ "Concurrency": {
+  "Isolates": [
+   "Isolates are independent workers that run Dart code in parallel with their own memory heap. Use compute() for simple parallel tasks or Isolate.spawn for complex ones.",
+   "import 'dart:isolate';\n\n// Simple parallel computation\nFuture<int> calculateHeavy() async {\n  return await Isolate.run(() {\n    var sum = 0;\n    for (var i = 0; i < 1000000; i++) sum += i;\n    return sum;\n  });\n}\n\n// Using compute helper (Flutter)\nimport 'package:flutter/foundation.dart';\nfinal result = await compute(heavyFunction, input);"
+  ],
+  "Futures & Streams": [
+   "Futures represent single async values, while Streams represent sequences of async events. Both are core to Flutter's async programming model.",
+   "// Future\nFuture<String> fetchData() async {\n  final response = await http.get(Uri.parse('https://api.example.com'));\n  return response.body;\n}\n\n// Stream\nStream<int> countStream() async* {\n  for (var i = 0; i < 10; i++) {\n    await Future.delayed(Duration(seconds: 1));\n    yield i;\n  }\n}\n\n// StreamBuilder in UI\nStreamBuilder<int>(\n  stream: countStream(),\n  builder: (context, snapshot) => Text('${snapshot.data}'),\n)"
+  ]
+ },
+ "Navigation": {
+  "Routes": [
+   "Named routes map string identifiers to widget builders. Navigator.push and Navigator.pop handle stack-based navigation.",
+   "Navigator.push(\n  context,\n  MaterialPageRoute(builder: (_) => SecondPage())\n);"
+  ],
+  "Navigator 2.0": [
+   "Navigator 2.0 provides declarative routing with pages list, allowing deep linking and full control over the navigation stack.",
+   "Navigator(\n  pages: [MaterialPage(child: HomePage())],\n  onPopPage: (route, result) => route.didPop(result)\n);"
+  ],
+  "GoRouter": [
+   "GoRouter provides declarative, URL-based routing with support for deep linking, redirects, and nested navigation using ShellRoute.",
+   "GoRouter(\n  routes: [\n    GoRoute(path: '/', builder: (ctx, state) => HomePage()),\n    GoRoute(path: '/details/:id', builder: (ctx, state) => DetailsPage(id: state.pathParameters['id']!))\n  ]\n);"
+  ]
+ },
+ "Forms": {
+  "Form": [
+   "Form widget groups form fields for validation and saving. It uses a GlobalKey to access form state and validate all fields at once.",
+   "final formKey = GlobalKey<FormState>();\nForm(\n  key: formKey,\n  child: Column(children: [TextFormField()])\n)"
+  ],
+  "TextFormField": [
+   "TextFormField is a Material Design text input with built-in validation, error display, and controller access for programmatic manipulation.",
+   "TextFormField(\n  controller: _controller,\n  validator: (v) => v!.isEmpty ? 'Required' : null\n)"
+  ],
+  "Validation": [
+   "Form validation uses validator callbacks that return error strings or null. AutovalidateMode controls when validation triggers automatically.",
+   "TextFormField(\n  autovalidateMode: AutovalidateMode.onUserInteraction,\n  validator: (v) => v!.length < 3 ? 'Too short' : null\n)"
+  ]
+ },
+ "Networking": {
+  "http": [
+   "The http package provides a simple, stream-based HTTP client for making REST API calls. It returns Response objects with status codes and bodies.",
+   "var response = await http.get(Uri.parse('https://api.example.com/data'));\nprint(response.body);"
+  ],
+  "dio": [
+   "Dio is a powerful HTTP client with interceptors, request cancellation, timeout handling, and file download/upload progress tracking.",
+   "final response = await Dio().get('https://api.example.com/users');\nprint(response.data);"
+  ],
+  "REST API": [
+   "REST APIs are consumed by mapping JSON responses to Dart models using fromJson/toJson methods. jsonDecode parses raw JSON strings.",
+   "final json = jsonDecode(response.body);\nfinal user = User.fromJson(json);"
+  ],
+  "GraphQL": [
+   "GraphQL queries request specific fields from the server, reducing over-fetching. The graphql_flutter package integrates with the widget tree.",
+   "final result = await client.query(QueryOptions(document: gql('{ users { name email } }')));"
+  ]
+ },
+ "Storage": {
+  "SharedPreferences": [
+   "SharedPreferences stores simple key-value pairs persistently. It is platform-native, backed by NSUserDefaults on iOS and SharedPreferences on Android.",
+   "await prefs.setString('key', 'value');\nfinal val = prefs.getString('key');"
+  ],
+  "SQLite": [
+   "SQLite provides relational local storage via the sqflite package. Tables are created with SQL and queried using raw or helper methods.",
+   "final db = await openDatabase('mydb.db', version: 1, onCreate: (db, v) => db.execute('CREATE TABLE items(id INTEGER PRIMARY KEY, name TEXT)'));"
+  ],
+  "Hive": [
+   "Hive is a lightweight, NoSQL key-value database written in Dart. It is fast and supports type adapters for complex objects without native dependencies.",
+   "final box = await Hive.openBox('myBox');\nawait box.put('key', value);\nfinal val = box.get('key');"
+  ]
+ },
+ "Platform": {
+  "Platform Channels": [
+   "Platform channels enable bidirectional communication between Dart and native Kotlin/Swift code via MethodChannel for platform-specific features.",
+   "MethodChannel('com.example/channel').invokeMethod('getBatteryLevel');"
+  ],
+  "iOS/Android Specific": [
+   "Platform-specific code uses dart:io Platform checks or conditional imports to handle OS differences in UI, permissions, and behavior.",
+   "if (Platform.isIOS) { /* iOS code */ } else if (Platform.isAndroid) { /* Android code */ }"
+  ],
+  "Material 3": [
+   "Material 3 (Material You) is the latest Material Design iteration with dynamic color theming based on wallpaper colors. Enable via useMaterial3 flag.",
+   "MaterialApp(\n  theme: ThemeData(\n    useMaterial3: true,\n    colorSchemeSeed: Colors.blue,\n    brightness: Brightness.light\n  )\n)"
+  ],
+  "Web": [
+   "Flutter Web compiles Dart to JavaScript and renders via CanvasKit or HTML renderers. Responsive layouts use LayoutBuilder and MediaQuery for breakpoints.",
+   "LayoutBuilder(\n  builder: (ctx, constraints) {\n    if (constraints.maxWidth > 600) return WideLayout();\n    else return NarrowLayout();\n  }\n)"
+  ]
+ },
+ "Testing": {
+  "Widget Testing": [
+   "Widget tests verify individual widget behavior using the flutter_test package. They run in a simulated environment without a real device.",
+   "void main() {\n  testWidgets('MyWidget shows message', (tester) async {\n    await tester.pumpWidget(MyWidget(message: 'Hello'));\n    expect(find.text('Hello'), findsOneWidget);\n  });\n}"
+  ],
+  "Unit Testing": [
+   "Unit tests test individual functions and classes in isolation. Use the test package with expect, group, and setUp for organized tests.",
+   "void main() {\n  group('Calculator', () {\n    test('adds two numbers', () {\n      expect(add(2, 3), equals(5));\n    });\n  });\n}"
+  ],
+  "Integration Testing": [
+   "Integration tests run on a real device or emulator, testing the full app flow from user interactions to UI changes.",
+   "void main() {\n  IntegrationTestWidgetsFlutterBinding.ensureInitialized();\n  testWidgets('complete login flow', (tester) async {\n    app.main();\n    await tester.pumpAndSettle();\n    await tester.enterText(find.byKey(Key('email')), 'user@test.com');\n    await tester.tap(find.text('Login'));\n    await tester.pumpAndSettle();\n    expect(find.text('Welcome'), findsOneWidget);\n  });\n}"
+  ]
+ },
+ "DevTools & Debugging": {
+  "Flutter DevTools": [
+   "Flutter DevTools is a suite of debugging and profiling tools: widget inspector, timeline view, memory/CPU profiler, network logging, and app size analysis.",
+   "flutter pub global activate devtools\nflutter run --observatory-port=9200\n# Then run: devtools\n\n# Key DevTools features:\n# - Widget Inspector: see widget tree and properties\n# - Timeline: frame-by-frame performance analysis\n# - Memory: track allocations and leaks\n# - Network: monitor HTTP traffic in real-time"
+  ],
+  "Performance Profile": [
+   "Use Flutter's performance overlay and profile mode to identify jank, rebuild causes, and layout inefficiencies during development.",
+   "// Enable performance overlay\nMaterialApp(showPerformanceOverlay: true)\n\n// Profile mode (CLI)\nflutter run --profile\n\n// Track rebuilds\nclass MyWidget extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    print('MyWidget rebuilt');\n    return Text('Hello');\n  }\n}"
+  ]
+ },
+ "Firebase Integration": {
+  "Firebase Auth": [
+   "Firebase Authentication provides backend services for email/password, phone, OAuth (Google, Facebook, Apple), and anonymous auth in Flutter.",
+   "import 'package:firebase_auth/firebase_auth.dart';\n\nFuture<User?> signInWithGoogle() async {\n  final provider = GoogleAuthProvider();\n  final credential = await FirebaseAuth.instance.signInWithPopup(provider);\n  return credential.user;\n}"
+  ],
+  "Firestore": [
+   "Cloud Firestore is a flexible, scalable NoSQL database for Flutter apps. It provides real-time listeners, offline support, and automatic data synchronization.",
+   "import 'package:cloud_firestore/cloud_firestore.dart';\n\nStream<List<User>> getUsers() {\n  return FirebaseFirestore.instance\n      .collection('users')\n      .snapshots()\n      .map((snapshot) => snapshot.docs.map((doc) => User.fromFirestore(doc)).toList());\n}"
+  ],
+  "Cloud Messaging": [
+   "Firebase Cloud Messaging (FCM) sends push notifications to Flutter apps. Supports notification messages, data messages, and topic-based subscriptions.",
+   "import 'package:firebase_messaging/firebase_messaging.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp();\n  \n  final messaging = FirebaseMessaging.instance;\n  final token = await messaging.getToken();\n  print('FCM token: $token');\n  \n  FirebaseMessaging.onMessage.listen((RemoteMessage message) {\n    print('Received: ${message.notification?.title}');\n  });\n}"
+  ]
+ },
+ "Flutter State Management Deep Dive": {
+  "Riverpod & Bloc Patterns": [
+   "Flutter state management choices depend on app complexity: Riverpod (compile-safe, testable, dependency injection built-in) and Bloc (unidirectional data flow, event-driven). Riverpod providers: <code>Provider</code> (sync values), <code>FutureProvider</code> (async), <code>StreamProvider</code>, <code>StateNotifierProvider</code> (mutable state), <code>ChangeNotifierProvider</code>. <code>ref.invalidate()</code> and <code>ref.refresh()</code> control cache. Bloc pattern: events → bloc → states. Bloc uses <code>BlocObserver</code> for global logging. Bloc-to-Bloc communication via <code>StreamSubscription</code>. Both patterns integrate with GoRouter for navigation.",
+   "// Riverpod: Todo app\nimport 'package:flutter_riverpod/flutter_riverpod.dart';\n\n// Data layer\nfinal todoRepositoryProvider = Provider<TodoRepository>((ref) => TodoRepository());\n\n// State with StateNotifier\nclass TodoListNotifier extends StateNotifier<List<Todo>> {\n  final TodoRepository _repo;\n  \n  TodoListNotifier(this._repo) : super([]);\n  \n  Future<void> loadTodos() async {\n    state = await _repo.fetchAll();\n  }\n  \n  void addTodo(String title) {\n    state = [...state, Todo(id: uuid(), title: title)];\n  }\n  \n  void toggleComplete(String id) {\n    state = state.map((t) => t.id == id ? t.copyWith(completed: !t.completed) : t).toList();\n  }\n  \n  void removeTodo(String id) {\n    state = state.where((t) => t.id != id).toList();\n  }\n}\n\nfinal todoListProvider = StateNotifierProvider<TodoListNotifier, List<Todo>>((ref) {\n  return TodoListNotifier(ref.watch(todoRepositoryProvider));\n});\n\n// Derived state (computed)\nfinal pendingTodosProvider = Provider<List<Todo>>((ref) {\n  return ref.watch(todoListProvider).where((t) => !t.completed).toList();\n});\n\n// UI\nclass TodoListWidget extends ConsumerWidget {\n  @override\n  Widget build(BuildContext context, WidgetRef ref) {\n    final todos = ref.watch(todoListProvider);\n    final pending = ref.watch(pendingTodosProvider).length;\n    \n    return Scaffold(\n      appBar: AppBar(title: Text('Todos ($pending pending)')),\n      body: ListView.builder(\n        itemCount: todos.length,\n        itemBuilder: (context, i) => CheckboxListTile(\n          value: todos[i].completed,\n          title: Text(todos[i].title),\n          onChanged: (_) => ref.read(todoListProvider.notifier).toggleComplete(todos[i].id),\n        ),\n      ),\n      floatingActionButton: FloatingActionButton(\n        onPressed: () => ref.read(todoListProvider.notifier).addTodo('New task'),\n        child: Icon(Icons.add),\n      ),\n    );\n  }\n}"
+  ]
+ }
 }

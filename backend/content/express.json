@@ -111,40 +111,50 @@
    "const v1 = express.Router(); const v2 = express.Router(); v1.get('/users', (req, res) => res.json({ version: 'v1' })); v2.get('/users', (req, res) => res.json({ version: 'v2' })); app.use('/api/v1', v1); app.use('/api/v2', v2);"
   ],
   "Documentation": [
-      "API documentation with Swagger/OpenAPI defines endpoints, schemas, and auth. Swagger UI provides interactive documentation. JSDoc comments auto-generate OpenAPI specs.",
-      "const swaggerJsdoc = require('swagger-jsdoc'); const swaggerUi = require('swagger-ui-express'); const specs = swaggerJsdoc({ definition: { openapi: '3.0.0', info: { title: 'My API', version: '1.0.0' } }, apis: ['./routes/*.js'] }); app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));"
-    ]
-  },
-  "WebSockets": {
-    "Socket.io Integration": [
-      "Socket.io enables real-time bidirectional communication between the server and clients. Express apps integrate Socket.io by wrapping the HTTP server and attaching socket handlers with namespace support.",
-      "const http = require('http'); const { Server } = require('socket.io'); const server = http.createServer(app); const io = new Server(server, { cors: { origin: '*' } }); io.on('connection', (socket) => { console.log('User connected'); socket.on('message', (data) => io.emit('message', data)); socket.on('disconnect', () => console.log('Disconnected')); }); server.listen(3000);"
-    ],
-    "ws Library": [
-      "The ws library is a lightweight WebSocket implementation for Express. It attaches to the HTTP server and provides a simple event-based API with support for rooms and binary data.",
-      "const { WebSocketServer } = require('ws'); const server = app.listen(3000); const wss = new WebSocketServer({ server }); wss.on('connection', (ws) => { ws.on('message', (data) => wss.clients.forEach(client => client.send(data))); ws.send('Connected'); });"
-    ],
-    "Broadcasting": [
-      "Socket.io rooms and namespaces organize connections into logical groups for targeted broadcasting. The broadcast flag sends to all clients except the sender, and rooms isolate groups.",
-      "io.on('connection', (socket) => { socket.join('room-' + userId); socket.broadcast.to('room-' + userId).emit('user-online', userId); io.to('room-' + userId).emit('notification', { text: 'New message' }); });"
-    ]
-  },
-  "Security": {
-    "Helmet": [
-      "Helmet secures Express apps by setting various HTTP headers including Content-Security-Policy, X-Frame-Options, X-XSS-Protection, Strict-Transport-Security, and X-Content-Type-Options.",
-      "const helmet = require('helmet'); app.use(helmet()); app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: [\"'self'\"], scriptSrc: [\"'self'\", \"'unsafe-inline'\"] } }));"
-    ],
-    "Rate Limiting": [
-      "express-rate-limit protects against brute-force attacks by limiting repeated requests from the same IP. Rate limits are configurable per window with custom messages and headers.",
-      "const rateLimit = require('express-rate-limit'); const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many requests' } }); app.use('/api/', limiter);"
-    ],
-    "Compression": [
-      "compression middleware reduces response size using gzip/deflate. It automatically compresses JSON, text, and other compressible responses, improving bandwidth usage and load times.",
-      "const compression = require('compression'); app.use(compression({ threshold: 0, level: 6 })); // Skip compression for small SSE or already-compressed responses"
-    ],
-    "Input Validation": [
-      "Input validation libraries like Joi, express-validator, or Zod prevent injection attacks and malformed data. Validation middleware sanitizes and validates request bodies, params, and queries.",
-      "const { body, validationResult } = require('express-validator'); app.post('/user', [ body('email').isEmail().normalizeEmail(), body('age').isInt({ min: 0 }) ], (req, res) => { const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() }); });"
-    ]
-  }
+   "API documentation with Swagger/OpenAPI defines endpoints, schemas, and auth. Swagger UI provides interactive documentation. JSDoc comments auto-generate OpenAPI specs.",
+   "const swaggerJsdoc = require('swagger-jsdoc'); const swaggerUi = require('swagger-ui-express'); const specs = swaggerJsdoc({ definition: { openapi: '3.0.0', info: { title: 'My API', version: '1.0.0' } }, apis: ['./routes/*.js'] }); app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));"
+  ]
+ },
+ "WebSockets": {
+  "Socket.io Integration": [
+   "Socket.io enables real-time bidirectional communication between the server and clients. Express apps integrate Socket.io by wrapping the HTTP server and attaching socket handlers with namespace support.",
+   "const http = require('http'); const { Server } = require('socket.io'); const server = http.createServer(app); const io = new Server(server, { cors: { origin: '*' } }); io.on('connection', (socket) => { console.log('User connected'); socket.on('message', (data) => io.emit('message', data)); socket.on('disconnect', () => console.log('Disconnected')); }); server.listen(3000);"
+  ],
+  "ws Library": [
+   "The ws library is a lightweight WebSocket implementation for Express. It attaches to the HTTP server and provides a simple event-based API with support for rooms and binary data.",
+   "const { WebSocketServer } = require('ws'); const server = app.listen(3000); const wss = new WebSocketServer({ server }); wss.on('connection', (ws) => { ws.on('message', (data) => wss.clients.forEach(client => client.send(data))); ws.send('Connected'); });"
+  ],
+  "Broadcasting": [
+   "Socket.io rooms and namespaces organize connections into logical groups for targeted broadcasting. The broadcast flag sends to all clients except the sender, and rooms isolate groups.",
+   "io.on('connection', (socket) => { socket.join('room-' + userId); socket.broadcast.to('room-' + userId).emit('user-online', userId); io.to('room-' + userId).emit('notification', { text: 'New message' }); });"
+  ]
+ },
+ "Security": {
+  "Helmet": [
+   "Helmet secures Express apps by setting various HTTP headers including Content-Security-Policy, X-Frame-Options, X-XSS-Protection, Strict-Transport-Security, and X-Content-Type-Options.",
+   "const helmet = require('helmet'); app.use(helmet()); app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: [\"'self'\"], scriptSrc: [\"'self'\", \"'unsafe-inline'\"] } }));"
+  ],
+  "Rate Limiting": [
+   "express-rate-limit protects against brute-force attacks by limiting repeated requests from the same IP. Rate limits are configurable per window with custom messages and headers.",
+   "const rateLimit = require('express-rate-limit'); const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many requests' } }); app.use('/api/', limiter);"
+  ],
+  "Compression": [
+   "compression middleware reduces response size using gzip/deflate. It automatically compresses JSON, text, and other compressible responses, improving bandwidth usage and load times.",
+   "const compression = require('compression'); app.use(compression({ threshold: 0, level: 6 })); // Skip compression for small SSE or already-compressed responses"
+  ],
+  "Input Validation": [
+   "Input validation libraries like Joi, express-validator, or Zod prevent injection attacks and malformed data. Validation middleware sanitizes and validates request bodies, params, and queries.",
+   "const { body, validationResult } = require('express-validator'); app.post('/user', [ body('email').isEmail().normalizeEmail(), body('age').isInt({ min: 0 }) ], (req, res) => { const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() }); });"
+  ]
+ },
+ "Express Advanced Patterns": {
+  "Middleware Architecture & Error Handling": [
+   "Express middleware functions execute in order until the chain ends or a response is sent. Middleware patterns: application-level (<code>app.use</code>), router-level (<code>router.use</code>), error-handling (4 args), and built-in (<code>express.json</code>, <code>express.static</code>). Error-handling middleware with 4 parameters <code>(err, req, res, next)</code> catches errors from previous middleware. Async middleware requires explicit error catching via <code>express-async-errors</code> or wrapper functions. Production error handling should never leak stack traces.",
+   "// Express error handling patterns\nimport express from 'express';\nimport 'express-async-errors';\n\nconst app = express();\n\n// Custom error class\nclass AppError extends Error {\n  constructor(public statusCode: number, message: string) {\n    super(message);\n    this.name = 'AppError';\n  }\n}\n\n// Async wrapper (alternative to express-async-errors)\nfunction asyncHandler(fn: Function) {\n  return (req: Request, res: Response, next: NextFunction) => {\n    Promise.resolve(fn(req, res, next)).catch(next);\n  };\n}\n\n// Routes with error handling\napp.get('/api/users/:id', asyncHandler(async (req, res) => {\n  const user = await db.users.findById(req.params.id);\n  if (!user) throw new AppError(404, 'User not found');\n  res.json(user);\n}));\n\n// Centralized error handler (4 params)\napp.use((err: Error, req: Request, res: Response, next: NextFunction) => {\n  // Log error\n  logger.error({\n    message: err.message,\n    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,\n    path: req.path,\n    method: req.method\n  });\n\n  // Determine status code\n  const statusCode = err instanceof AppError ? err.statusCode : 500;\n\n  // Send safe response\n  res.status(statusCode).json({\n    error: process.env.NODE_ENV === 'production' && statusCode === 500\n      ? 'Internal server error'\n      : err.message,\n    code: statusCode >= 500 ? 'INTERNAL_ERROR' : 'VALIDATION_ERROR'\n  });\n});"
+  ],
+  "Express WebSocket & Real-Time": [
+   "Express integrates with WebSocket libraries for real-time communication. <code>ws</code> library attaches a WebSocket server to the HTTP server. <code>socket.io</code> provides fallback transport (long-polling), rooms, namespaces, and auto-reconnection. Use cases: live dashboards, chat applications, real-time notifications, collaborative editing. Socket.IO events: <code>connection</code>, <code>disconnect</code>, custom events with acknowledgment callbacks. Scale horizontally with Redis adapter for Socket.IO. Combine REST API with WebSocket for hybrid architecture.",
+   "// Express + Socket.IO setup\nimport express from 'express';\nimport { createServer } from 'http';\nimport { Server } from 'socket.io';\nimport { createAdapter } from '@socket.io/redis-adapter';\nimport { createClient } from 'redis';\n\nconst app = express();\nconst httpServer = createServer(app);\nconst io = new Server(httpServer, {\n  cors: { origin: process.env.CLIENT_URL, methods: ['GET', 'POST'] },\n  // Production: use Redis adapter for horizontal scaling\n});\n\n// Redis adapter for multi-instance\nconst pubClient = createClient({ url: process.env.REDIS_URL });\nconst subClient = pubClient.duplicate();\nio.adapter(createAdapter(pubClient, subClient));\n\n// Authentication middleware\nio.use(async (socket, next) => {\n  const token = socket.handshake.auth.token;\n  try {\n    const user = await verifyToken(token);\n    socket.data.user = user;\n    next();\n  } catch (err) {\n    next(new Error('Authentication failed'));\n  }\n});\n\nio.on('connection', (socket) => {\n  const userId = socket.data.user.id;\n  console.log(`User ${userId} connected`);\n\n  // Join user-specific room\n  socket.join(`user:${userId}`);\n\n  socket.on('send-message', async ({ to, content }, ack) => {\n    const message = await db.messages.create({\n      from: userId,\n      to,\n      content\n    });\n    // Emit to recipient's room\n    io.to(`user:${to}`).emit('new-message', message);\n    // Acknowledge\n    ack({ status: 'sent', id: message.id });\n  });\n\n  socket.on('typing', ({ to }) => {\n    socket.to(`user:${to}`).emit('user-typing', { userId });\n  });\n\n  // REST endpoint that emits socket event\n  app.post('/api/notifications', (req, res) => {\n    const { userId, notification } = req.body;\n    io.to(`user:${userId}`).emit('notification', notification);\n    res.json({ sent: true });\n  });\n\n  socket.on('disconnect', () => {\n    console.log(`User ${userId} disconnected`);\n  });\n});\n\nhttpServer.listen(3000, () => console.log('Server on :3000'));"
+  ]
+ }
 }

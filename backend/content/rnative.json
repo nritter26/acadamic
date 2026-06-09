@@ -1,66 +1,202 @@
 {
-  "Getting Started": {
-    "JSX": ["JSX is a syntax extension for JavaScript that looks like HTML and is compiled to React.createElement calls. It allows writing UI components declaratively in React Native.", "const element = <Text style={{color: 'blue'}}>Hello World</Text>;"],
-    "Components": ["Components are reusable building blocks in React Native, defined as functions returning JSX. They accept props and manage their own state using hooks.", "const Greeting = ({ name }) => <Text>Hello {name}!</Text>;"],
-    "StyleSheet": ["StyleSheet provides a way to define styles with performance benefits through abstraction. It validates and optimizes style objects, and styles are only sent to native once.", "const styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', alignItems: 'center' }\n});"],
-    "Expo CLI": ["Expo is the recommended framework for building React Native apps. It provides managed workflows, over-the-air updates, and access to native APIs without Xcode or Android Studio.", "npx create-expo-app my-app\ncd my-app\nnpx expo start\n# Press i for iOS, a for Android, w for web"]
-  },
-  "Core Components": {
-    "View": ["View is the fundamental container component supporting flexbox layout, styling, touch handling, and accessibility. It maps to UIView on iOS and View on Android.", "<View style={styles.container}>{children}</View>"],
-    "Text": ["Text is the only component that renders text in React Native. It supports nesting, styling, and event handling like onPress.", "<Text style={{fontSize: 18, fontWeight: 'bold'}}>Hello World</Text>"],
-    "Image": ["Image displays images from local assets, network URLs, or data URIs. It requires explicit dimensions when loading from network sources.", "<Image source={{uri: 'https://example.com/image.png'}} style={{width: 200, height: 200}} />"],
-    "ScrollView": ["ScrollView is a scrolling container for multiple components and views. It loads all content upfront and is best for smaller amounts of content.", "<ScrollView contentContainerStyle={styles.scroll}><Text>Item 1</Text></ScrollView>"],
-    "Pressable": ["Pressable is the modern touch handling component that provides feedback for different press states. Use instead of TouchableOpacity for more control.", "<Pressable onPress={handlePress} style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1 }]}>\n  <Text>Press me</Text>\n</Pressable>"],
-    "Modal & StatusBar": ["Modal presents content on top of the app, useful for alerts and forms. StatusBar controls the device status bar appearance per screen.", "<Modal visible={showModal} animationType='slide'><Text>Modal content</Text></Modal>\n<StatusBar barStyle='dark-content' backgroundColor='white' />"]
-  },
-  "Navigation": {
-    "React Navigation": ["React Navigation is the standard navigation library for React Native apps, providing stack, tab, and drawer navigators with native transitions.", "npm install @react-navigation/native @react-navigation/stack"],
-    "Stack": ["Stack navigator manages a navigation stack where screens are pushed and popped. It provides native-like transitions and header customization.", "const Stack = createStackNavigator();\n<Stack.Navigator><Stack.Screen name=\"Home\" component={HomeScreen} /></Stack.Navigator>"],
-    "Tab": ["Tab navigator provides bottom or top tab navigation with icons and labels. Each tab maintains its own navigation state for independent back stacks.", "const Tab = createBottomTabNavigator();\n<Tab.Navigator><Tab.Screen name=\"Home\" component={HomeScreen} /></Tab.Navigator>"],
-    "Drawer": ["Drawer navigator creates a side menu that slides in from the left, supporting nested navigators and custom drawer content.", "const Drawer = createDrawerNavigator();\n<Drawer.Navigator><Drawer.Screen name=\"Home\" component={HomeScreen} /></Drawer.Navigator>"],
-    "Expo Router": ["Expo Router provides file-based routing similar to Next.js. Files in the app/ directory automatically become routes with support for layout files and deep linking.", "// app/index.tsx\nexport default function Home() {\n  return <Text>Home</Text>;\n}\n\n// app/users/[id].tsx - dynamic route\nexport default function User() {\n  const { id } = useLocalSearchParams();\n  return <Text>User {id}</Text>;\n}"]
-  },
-  "New Architecture": {
-    "Fabric": ["Fabric is the new rendering system that uses JSI (JavaScript Interface) instead of the Bridge. It enables synchronous communication and better performance for UI updates.", "// Fabric is enabled by default in React Native 0.76+\n// Key benefits:\n// - Synchronous layout\n// - Better interop between JS and native\n// - Lower overhead per frame\n// - Shared memory model\n// Enabled via newArchEnabled in gradle.properties"],
-    "TurboModules": ["TurboModules replace the old Native Modules system, allowing lazy loading of native modules and efficient type-safe communication via JSI.", "// Native module with TurboModules\n// ios/MyModule.mm\n#import \"MyModule.h\"\n\nRCT_EXPORT_MODULE()\nRCT_EXPORT_METHOD(doSomething:(NSString *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {\n  resolve(@\"Done\");\n}"],
-    "JSI": ["JavaScript Interface (JSI) enables direct, synchronous communication between JavaScript and native code without the Bridge. It eliminates the serialization overhead of the old architecture.", "// JSI allows native functions to be called directly from JS\n// No JSON serialization needed\n// Synchronous calls possible\n// Shared memory between JS and native\n// Enabled by default in RN 0.76+"]
-  },
-  "State & Data": {
-    "useState": ["useState is a React hook that adds local state to functional components, returning a state variable and a setter function.", "const [count, setCount] = useState(0);\n<Button title=\"Press\" onPress={() => setCount(count + 1)} />"],
-    "AsyncStorage": ["AsyncStorage is an unencrypted, asynchronous key-value storage system for persisting data across app restarts on both iOS and Android.", "import AsyncStorage from '@react-native-async-storage/async-storage';\nawait AsyncStorage.setItem('key', 'value');\nconst value = await AsyncStorage.getItem('key');"],
-    "Zustand": ["Zustand is a minimal state management library with a hook-based API. It works well in React Native for global state without boilerplate.", "import { create } from 'zustand';\nconst useStore = create((set) => ({\n  count: 0,\n  increment: () => set((state) => ({ count: state.count + 1 }))\n}));\n\nfunction Counter() {\n  const count = useStore((state) => state.count);\n  return <Text>{count}</Text>;\n}"],
-    "MMKV Storage": ["MMKV is a fast, synchronous key-value storage by Tencent. It's significantly faster than AsyncStorage and ideal for performance-critical persistence.", "import { MMKV } from 'react-native-mmkv';\nexport const storage = new MMKV();\nstorage.set('theme', 'dark');\nconst theme = storage.getString('theme');\n\n// Zustand + MMKV persistence\nimport { persist } from 'zustand/middleware';\nconst useStore = create(persist(() => ({ count: 0 }), { storage: { getItem: storage.getString, setItem: storage.set } }));"]
-  },
-  "Animations": {
-    "Animated API": ["React Native's built-in Animated API provides declarative animations using Animated.Value and timing/spring configurations. It drives animations natively on the UI thread.", "const fadeAnim = useRef(new Animated.Value(0)).current;\n\nuseEffect(() => {\n  Animated.timing(fadeAnim, {\n    toValue: 1, duration: 1000, useNativeDriver: true\n  }).start();\n}, []);\n\nreturn <Animated.View style={{ opacity: fadeAnim }}><Text>Fading in</Text></Animated.View>;"],
-    "Reanimated": ["Reanimated provides gesture-driven animations that run entirely on the UI thread using worklets. It enables smooth 60fps animations for complex interactions.", "import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';\n\nconst offset = useSharedValue(0);\nconst animatedStyles = useAnimatedStyle(() => ({\n  transform: [{ translateX: withSpring(offset.value * 100) }],\n}));\n\nreturn <Animated.View style={animatedStyles}><Text>Spring animation</Text></Animated.View>;"],
-    "Gesture Handler": ["Gesture Handler replaces PanResponder with native gesture processing. It supports pan, pinch, rotation, tap, long press, and custom gesture compositions.", "import { GestureDetector, Gesture } from 'react-native-gesture-handler';\n\nconst tap = Gesture.Tap().onEnd(() => console.log('Tapped!'));\nconst pan = Gesture.Pan().onUpdate((e) => console.log(e.translationX));\n\nreturn (\n  <GestureDetector gesture={Gesture.Simultaneous(tap, pan)}>\n    <View style={{ flex: 1 }} />\n  </GestureDetector>\n);"]
-  },
-  "Networking": {
-    "fetch": ["The Fetch API provides a native way to make HTTP requests in React Native. It returns promises and supports JSON, text, and binary responses.", "fetch('https://api.example.com/data')\n  .then(res => res.json())\n  .then(data => console.log(data));"],
-    "Axios": ["Axios is a promise-based HTTP client with interceptors, automatic JSON parsing, and request cancellation. It provides a cleaner API than fetch.", "const response = await axios.get('https://api.example.com/users');\nconsole.log(response.data);"],
-    "React Query": ["React Query (TanStack Query) manages server state with automatic caching, refetching, pagination, and optimistic updates.", "import { useQuery } from '@tanstack/react-query';\n\nfunction Users() {\n  const { data, isLoading } = useQuery({\n    queryKey: ['users'],\n    queryFn: () => fetch('/api/users').then(r => r.json()),\n  });\n  \n  if (isLoading) return <ActivityIndicator />;\n  return <FlatList data={data} renderItem={({ item }) => <Text>{item.name}</Text>} />;\n}"],
-    "WebSocket": ["WebSocket enables full-duplex real-time communication over a persistent TCP connection, ideal for chat apps, live updates, and gaming.", "const ws = new WebSocket('ws://example.com/socket');\nws.onmessage = (e) => console.log(e.data);"]
-  },
-  "Device APIs": {
-    "Camera": ["React Native Camera provides device camera access with support for photos, videos, barcode scanning, and custom camera UI.", "import { Camera } from 'react-native-camera';\n<Camera ref={ref => setCamera(ref)} type={Camera.Constants.Type.back} />"],
-    "Location": ["Geolocation APIs provide device location through GPS or network positioning, supporting high-accuracy and background location tracking.", "import Geolocation from '@react-native-community/geolocation';\nGeolocation.getCurrentPosition(pos => console.log(pos.coords.latitude));"],
-    "Push Notifications": ["Push notifications allow sending alerts to user devices even when the app is closed. Firebase Cloud Messaging is the standard solution.", "import messaging from '@react-native-firebase/messaging';\nconst token = await messaging().getToken();"]
-  },
-  "Performance": {
-    "FlatList": ["FlatList efficiently renders large lists by virtualizing rows, recycling components, and rendering only visible items. It supports headers, footers, and pull-to-refresh.", "<FlatList data={data} renderItem={({item}) => <Text>{item.name}</Text>} keyExtractor={item => item.id} />"],
-    "Optimization": ["React Native optimization includes using PureComponent, useMemo, avoiding inline functions in render, and minimizing re-renders with React.memo.", "const ListItem = React.memo(({ title }) => <Text>{title}</Text>);"],
-    "Hermes": ["Hermes is an open-source JavaScript engine optimized for React Native, reducing app startup time, memory usage, and APK/IPA size.", "// Enable in android/app/build.gradle\nproject.ext.react = [enableHermes: true]"],
-    "InteractionManager": ["InteractionManager schedules tasks to run after animations or navigation transitions complete, preventing dropped frames during critical UI updates.", "import { InteractionManager } from 'react-native';\n\nInteractionManager.runAfterInteractions(() => {\n  loadHeavyData();  // Runs after animations settle\n});"]
-  },
-  "Advanced": {
-    "Skia": ["React Native Skia provides a high-performance 2D graphics canvas for custom drawing, image manipulation, and complex animations using the Skia graphics library.", "import { Canvas, Circle, Group } from '@shopify/react-native-skia';\n\n<Canvas style={{ flex: 1 }}>\n  <Circle cx={100} cy={100} r={40} color='blue' />\n</Canvas>"],
-    "CodePush": ["CodePush enables over-the-air JavaScript bundle updates without going through the App Store review process, allowing instant bug fixes and small feature updates.", "import codePush from 'react-native-code-push';\n\nclass App extends Component { }\nexport default codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME })(App);"],
-    "AppState": ["AppState tracks whether the app is in foreground, background, or inactive state. Use it to pause/resume timers, network requests, and animations.", "import { AppState } from 'react-native';\n\nuseEffect(() => {\n  const subscription = AppState.addEventListener('change', (state) => {\n    if (state === 'background') pauseWork();\n    if (state === 'active') resumeWork();\n  });\n  return () => subscription.remove();\n}, []);"]
-  },
-  "Deployment": {
-    "iOS": ["iOS deployment requires an Apple Developer account, Xcode configuration, and provisioning profiles. The app is archived and uploaded via Xcode or Transporter.", "xcodebuild -workspace App.xcworkspace -scheme App -archivePath build/App.xcarchive archive"],
-    "Android": ["Android deployment generates a signed APK or AAB using keystore credentials. The build is created with Gradle and uploaded to the Play Console.", "cd android && ./gradlew bundleRelease"],
-    "EAS Build": ["Expo Application Services (EAS) Build compiles and signs your app in the cloud without requiring Xcode or Android Studio installed locally.", "npm install -g eas-cli\neas login\neas build --platform all\neas submit --platform ios"]
-  }
+ "Getting Started": {
+  "JSX": [
+   "JSX is a syntax extension for JavaScript that looks like HTML and is compiled to React.createElement calls. It allows writing UI components declaratively in React Native.",
+   "const element = <Text style={{color: 'blue'}}>Hello World</Text>;"
+  ],
+  "Components": [
+   "Components are reusable building blocks in React Native, defined as functions returning JSX. They accept props and manage their own state using hooks.",
+   "const Greeting = ({ name }) => <Text>Hello {name}!</Text>;"
+  ],
+  "StyleSheet": [
+   "StyleSheet provides a way to define styles with performance benefits through abstraction. It validates and optimizes style objects, and styles are only sent to native once.",
+   "const styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', alignItems: 'center' }\n});"
+  ],
+  "Expo CLI": [
+   "Expo is the recommended framework for building React Native apps. It provides managed workflows, over-the-air updates, and access to native APIs without Xcode or Android Studio.",
+   "npx create-expo-app my-app\ncd my-app\nnpx expo start\n# Press i for iOS, a for Android, w for web"
+  ]
+ },
+ "Core Components": {
+  "View": [
+   "View is the fundamental container component supporting flexbox layout, styling, touch handling, and accessibility. It maps to UIView on iOS and View on Android.",
+   "<View style={styles.container}>{children}</View>"
+  ],
+  "Text": [
+   "Text is the only component that renders text in React Native. It supports nesting, styling, and event handling like onPress.",
+   "<Text style={{fontSize: 18, fontWeight: 'bold'}}>Hello World</Text>"
+  ],
+  "Image": [
+   "Image displays images from local assets, network URLs, or data URIs. It requires explicit dimensions when loading from network sources.",
+   "<Image source={{uri: 'https://example.com/image.png'}} style={{width: 200, height: 200}} />"
+  ],
+  "ScrollView": [
+   "ScrollView is a scrolling container for multiple components and views. It loads all content upfront and is best for smaller amounts of content.",
+   "<ScrollView contentContainerStyle={styles.scroll}><Text>Item 1</Text></ScrollView>"
+  ],
+  "Pressable": [
+   "Pressable is the modern touch handling component that provides feedback for different press states. Use instead of TouchableOpacity for more control.",
+   "<Pressable onPress={handlePress} style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1 }]}>\n  <Text>Press me</Text>\n</Pressable>"
+  ],
+  "Modal & StatusBar": [
+   "Modal presents content on top of the app, useful for alerts and forms. StatusBar controls the device status bar appearance per screen.",
+   "<Modal visible={showModal} animationType='slide'><Text>Modal content</Text></Modal>\n<StatusBar barStyle='dark-content' backgroundColor='white' />"
+  ]
+ },
+ "Navigation": {
+  "React Navigation": [
+   "React Navigation is the standard navigation library for React Native apps, providing stack, tab, and drawer navigators with native transitions.",
+   "npm install @react-navigation/native @react-navigation/stack"
+  ],
+  "Stack": [
+   "Stack navigator manages a navigation stack where screens are pushed and popped. It provides native-like transitions and header customization.",
+   "const Stack = createStackNavigator();\n<Stack.Navigator><Stack.Screen name=\"Home\" component={HomeScreen} /></Stack.Navigator>"
+  ],
+  "Tab": [
+   "Tab navigator provides bottom or top tab navigation with icons and labels. Each tab maintains its own navigation state for independent back stacks.",
+   "const Tab = createBottomTabNavigator();\n<Tab.Navigator><Tab.Screen name=\"Home\" component={HomeScreen} /></Tab.Navigator>"
+  ],
+  "Drawer": [
+   "Drawer navigator creates a side menu that slides in from the left, supporting nested navigators and custom drawer content.",
+   "const Drawer = createDrawerNavigator();\n<Drawer.Navigator><Drawer.Screen name=\"Home\" component={HomeScreen} /></Drawer.Navigator>"
+  ],
+  "Expo Router": [
+   "Expo Router provides file-based routing similar to Next.js. Files in the app/ directory automatically become routes with support for layout files and deep linking.",
+   "// app/index.tsx\nexport default function Home() {\n  return <Text>Home</Text>;\n}\n\n// app/users/[id].tsx - dynamic route\nexport default function User() {\n  const { id } = useLocalSearchParams();\n  return <Text>User {id}</Text>;\n}"
+  ]
+ },
+ "New Architecture": {
+  "Fabric": [
+   "Fabric is the new rendering system that uses JSI (JavaScript Interface) instead of the Bridge. It enables synchronous communication and better performance for UI updates.",
+   "// Fabric is enabled by default in React Native 0.76+\n// Key benefits:\n// - Synchronous layout\n// - Better interop between JS and native\n// - Lower overhead per frame\n// - Shared memory model\n// Enabled via newArchEnabled in gradle.properties"
+  ],
+  "TurboModules": [
+   "TurboModules replace the old Native Modules system, allowing lazy loading of native modules and efficient type-safe communication via JSI.",
+   "// Native module with TurboModules\n// ios/MyModule.mm\n#import \"MyModule.h\"\n\nRCT_EXPORT_MODULE()\nRCT_EXPORT_METHOD(doSomething:(NSString *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {\n  resolve(@\"Done\");\n}"
+  ],
+  "JSI": [
+   "JavaScript Interface (JSI) enables direct, synchronous communication between JavaScript and native code without the Bridge. It eliminates the serialization overhead of the old architecture.",
+   "// JSI allows native functions to be called directly from JS\n// No JSON serialization needed\n// Synchronous calls possible\n// Shared memory between JS and native\n// Enabled by default in RN 0.76+"
+  ]
+ },
+ "State & Data": {
+  "useState": [
+   "useState is a React hook that adds local state to functional components, returning a state variable and a setter function.",
+   "const [count, setCount] = useState(0);\n<Button title=\"Press\" onPress={() => setCount(count + 1)} />"
+  ],
+  "AsyncStorage": [
+   "AsyncStorage is an unencrypted, asynchronous key-value storage system for persisting data across app restarts on both iOS and Android.",
+   "import AsyncStorage from '@react-native-async-storage/async-storage';\nawait AsyncStorage.setItem('key', 'value');\nconst value = await AsyncStorage.getItem('key');"
+  ],
+  "Zustand": [
+   "Zustand is a minimal state management library with a hook-based API. It works well in React Native for global state without boilerplate.",
+   "import { create } from 'zustand';\nconst useStore = create((set) => ({\n  count: 0,\n  increment: () => set((state) => ({ count: state.count + 1 }))\n}));\n\nfunction Counter() {\n  const count = useStore((state) => state.count);\n  return <Text>{count}</Text>;\n}"
+  ],
+  "MMKV Storage": [
+   "MMKV is a fast, synchronous key-value storage by Tencent. It's significantly faster than AsyncStorage and ideal for performance-critical persistence.",
+   "import { MMKV } from 'react-native-mmkv';\nexport const storage = new MMKV();\nstorage.set('theme', 'dark');\nconst theme = storage.getString('theme');\n\n// Zustand + MMKV persistence\nimport { persist } from 'zustand/middleware';\nconst useStore = create(persist(() => ({ count: 0 }), { storage: { getItem: storage.getString, setItem: storage.set } }));"
+  ]
+ },
+ "Animations": {
+  "Animated API": [
+   "React Native's built-in Animated API provides declarative animations using Animated.Value and timing/spring configurations. It drives animations natively on the UI thread.",
+   "const fadeAnim = useRef(new Animated.Value(0)).current;\n\nuseEffect(() => {\n  Animated.timing(fadeAnim, {\n    toValue: 1, duration: 1000, useNativeDriver: true\n  }).start();\n}, []);\n\nreturn <Animated.View style={{ opacity: fadeAnim }}><Text>Fading in</Text></Animated.View>;"
+  ],
+  "Reanimated": [
+   "Reanimated provides gesture-driven animations that run entirely on the UI thread using worklets. It enables smooth 60fps animations for complex interactions.",
+   "import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';\n\nconst offset = useSharedValue(0);\nconst animatedStyles = useAnimatedStyle(() => ({\n  transform: [{ translateX: withSpring(offset.value * 100) }],\n}));\n\nreturn <Animated.View style={animatedStyles}><Text>Spring animation</Text></Animated.View>;"
+  ],
+  "Gesture Handler": [
+   "Gesture Handler replaces PanResponder with native gesture processing. It supports pan, pinch, rotation, tap, long press, and custom gesture compositions.",
+   "import { GestureDetector, Gesture } from 'react-native-gesture-handler';\n\nconst tap = Gesture.Tap().onEnd(() => console.log('Tapped!'));\nconst pan = Gesture.Pan().onUpdate((e) => console.log(e.translationX));\n\nreturn (\n  <GestureDetector gesture={Gesture.Simultaneous(tap, pan)}>\n    <View style={{ flex: 1 }} />\n  </GestureDetector>\n);"
+  ]
+ },
+ "Networking": {
+  "fetch": [
+   "The Fetch API provides a native way to make HTTP requests in React Native. It returns promises and supports JSON, text, and binary responses.",
+   "fetch('https://api.example.com/data')\n  .then(res => res.json())\n  .then(data => console.log(data));"
+  ],
+  "Axios": [
+   "Axios is a promise-based HTTP client with interceptors, automatic JSON parsing, and request cancellation. It provides a cleaner API than fetch.",
+   "const response = await axios.get('https://api.example.com/users');\nconsole.log(response.data);"
+  ],
+  "React Query": [
+   "React Query (TanStack Query) manages server state with automatic caching, refetching, pagination, and optimistic updates.",
+   "import { useQuery } from '@tanstack/react-query';\n\nfunction Users() {\n  const { data, isLoading } = useQuery({\n    queryKey: ['users'],\n    queryFn: () => fetch('/api/users').then(r => r.json()),\n  });\n  \n  if (isLoading) return <ActivityIndicator />;\n  return <FlatList data={data} renderItem={({ item }) => <Text>{item.name}</Text>} />;\n}"
+  ],
+  "WebSocket": [
+   "WebSocket enables full-duplex real-time communication over a persistent TCP connection, ideal for chat apps, live updates, and gaming.",
+   "const ws = new WebSocket('ws://example.com/socket');\nws.onmessage = (e) => console.log(e.data);"
+  ]
+ },
+ "Device APIs": {
+  "Camera": [
+   "React Native Camera provides device camera access with support for photos, videos, barcode scanning, and custom camera UI.",
+   "import { Camera } from 'react-native-camera';\n<Camera ref={ref => setCamera(ref)} type={Camera.Constants.Type.back} />"
+  ],
+  "Location": [
+   "Geolocation APIs provide device location through GPS or network positioning, supporting high-accuracy and background location tracking.",
+   "import Geolocation from '@react-native-community/geolocation';\nGeolocation.getCurrentPosition(pos => console.log(pos.coords.latitude));"
+  ],
+  "Push Notifications": [
+   "Push notifications allow sending alerts to user devices even when the app is closed. Firebase Cloud Messaging is the standard solution.",
+   "import messaging from '@react-native-firebase/messaging';\nconst token = await messaging().getToken();"
+  ]
+ },
+ "Performance": {
+  "FlatList": [
+   "FlatList efficiently renders large lists by virtualizing rows, recycling components, and rendering only visible items. It supports headers, footers, and pull-to-refresh.",
+   "<FlatList data={data} renderItem={({item}) => <Text>{item.name}</Text>} keyExtractor={item => item.id} />"
+  ],
+  "Optimization": [
+   "React Native optimization includes using PureComponent, useMemo, avoiding inline functions in render, and minimizing re-renders with React.memo.",
+   "const ListItem = React.memo(({ title }) => <Text>{title}</Text>);"
+  ],
+  "Hermes": [
+   "Hermes is an open-source JavaScript engine optimized for React Native, reducing app startup time, memory usage, and APK/IPA size.",
+   "// Enable in android/app/build.gradle\nproject.ext.react = [enableHermes: true]"
+  ],
+  "InteractionManager": [
+   "InteractionManager schedules tasks to run after animations or navigation transitions complete, preventing dropped frames during critical UI updates.",
+   "import { InteractionManager } from 'react-native';\n\nInteractionManager.runAfterInteractions(() => {\n  loadHeavyData();  // Runs after animations settle\n});"
+  ]
+ },
+ "Advanced": {
+  "Skia": [
+   "React Native Skia provides a high-performance 2D graphics canvas for custom drawing, image manipulation, and complex animations using the Skia graphics library.",
+   "import { Canvas, Circle, Group } from '@shopify/react-native-skia';\n\n<Canvas style={{ flex: 1 }}>\n  <Circle cx={100} cy={100} r={40} color='blue' />\n</Canvas>"
+  ],
+  "CodePush": [
+   "CodePush enables over-the-air JavaScript bundle updates without going through the App Store review process, allowing instant bug fixes and small feature updates.",
+   "import codePush from 'react-native-code-push';\n\nclass App extends Component { }\nexport default codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME })(App);"
+  ],
+  "AppState": [
+   "AppState tracks whether the app is in foreground, background, or inactive state. Use it to pause/resume timers, network requests, and animations.",
+   "import { AppState } from 'react-native';\n\nuseEffect(() => {\n  const subscription = AppState.addEventListener('change', (state) => {\n    if (state === 'background') pauseWork();\n    if (state === 'active') resumeWork();\n  });\n  return () => subscription.remove();\n}, []);"
+  ]
+ },
+ "Deployment": {
+  "iOS": [
+   "iOS deployment requires an Apple Developer account, Xcode configuration, and provisioning profiles. The app is archived and uploaded via Xcode or Transporter.",
+   "xcodebuild -workspace App.xcworkspace -scheme App -archivePath build/App.xcarchive archive"
+  ],
+  "Android": [
+   "Android deployment generates a signed APK or AAB using keystore credentials. The build is created with Gradle and uploaded to the Play Console.",
+   "cd android && ./gradlew bundleRelease"
+  ],
+  "EAS Build": [
+   "Expo Application Services (EAS) Build compiles and signs your app in the cloud without requiring Xcode or Android Studio installed locally.",
+   "npm install -g eas-cli\neas login\neas build --platform all\neas submit --platform ios"
+  ]
+ },
+ "React Native Advanced": {
+  "Navigation & Deep Linking": [
+   "React Navigation is the standard navigation library. Stack, Tab, Drawer, and native stack navigators. Deep linking maps URL schemes to screens (<code>myapp://product/123</code> or universal links). Linking configuration registers URL patterns. Push notifications trigger navigation via deep links. <code>NavigationContainer</code> handles linking. <code>useLinkProps</code> creates accessible links. <code>useLinkTo</code> navigates programmatically. Auth flow: conditional navigation based on auth state. Screen tracking for analytics via <code>onStateChange</code>. Screen focus detection with <code>useFocusEffect</code>.",
+   "// React Navigation with deep linking\nimport { NavigationContainer, useNavigation } from '@react-navigation/native';\nimport { createNativeStackNavigator } from '@react-navigation/native-stack';\nimport { createBottomTabNavigator } from '@react-navigation/bottom-tabs';\nimport { Linking, Platform } from 'react-native';\n\nconst Stack = createNativeStackNavigator();\nconst Tab = createBottomTabNavigator();\n\n// Deep linking configuration\nconst linking = {\n  prefixes: ['myapp://', 'https://myapp.com', 'https://*.myapp.com'],\n  config: {\n    screens: {\n      Home: {\n        screens: {\n          Feed: 'feed',\n          Profile: {\n            path: 'profile/:userId',\n            parse: { userId: Number }\n          }\n        }\n      },\n      ProductDetail: {\n        path: 'product/:productId',\n        parse: { productId: (id: string) => id }\n      },\n      Settings: 'settings',\n      NotFound: '*'\n    }\n  },\n  // Handle deep links from push notifications\n  async getInitialURL() {\n    const url = await Linking.getInitialURL();\n    if (url != null) return url;\n    \n    // Check for notification data\n    const notification = await Notifications.getInitialNotification();\n    if (notification) {\n      return `product/${notification.data.productId}`;\n    }\n    return null;\n  }\n};\n\nfunction AppNavigator() {\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n\n  return (\n    <NavigationContainer linking={linking} onStateChange={(state) => {\n      // Screen tracking\n      const route = state.routes[state.index];\n      analytics.trackScreen(route.name);\n    }}>\n      <Stack.Navigator screenOptions={{ headerShown: false }}>\n        {isLoggedIn ? (\n          <Stack.Screen name=\"HomeTabs\" component={HomeTabs} />\n        ) : (\n          <Stack.Screen name=\"Auth\" component={AuthStack} />\n        )}\n        {/* Shared modal screens */}\n        <Stack.Group screenOptions={{ presentation: 'modal' }}>\n          <Stack.Screen name=\"ProductDetail\" component={ProductDetail} />\n          <Stack.Screen name=\"Settings\" component={Settings} />\n        </Stack.Group>\n      </Stack.Navigator>\n    </NavigationContainer>\n  );\n}"
+  ],
+  "React Native Animations & Gestures": [
+   "React Native provides multiple animation systems: <code>Animated</code> (imperative), <code>react-native-reanimated</code> (runs on UI thread for 60fps), <code>react-native-gesture-handler</code> (native gesture processing). Reanimated 3 uses worklets (JS functions that run on the UI thread). Shared values, animations, and gestures compose for smooth interactions. Layout Animations for enter/exit transitions. <code>GestureDetector</code> for pan, pinch, tap, rotation. <code>runOnJS</code> calls JS thread from worklets. Skia (react-native-skia) for custom drawing and animations.",
+   "// Reanimated 3 + Gesture Handler\nimport Animated, {\n  useSharedValue,\n  useAnimatedStyle,\n  withSpring,\n  withTiming,\n  runOnJS,\n  FadeIn,\n  FadeOut,\n  Layout\n} from 'react-native-reanimated';\nimport { Gesture, GestureDetector } from 'react-native-gesture-handler';\n\nfunction SwipeableCard({ item, onSwipe }) {\n  const translateX = useSharedValue(0);\n  const scale = useSharedValue(1);\n  const opacity = useSharedValue(1);\n  const isSwiped = useSharedValue(false);\n\n  // Pan gesture\n  const panGesture = Gesture.Pan()\n    .onUpdate((event) => {\n      if (!isSwiped.value) {\n        translateX.value = event.translationX;\n        scale.value = 1 - Math.min(Math.abs(event.translationX) / 600, 0.2);\n      }\n    })\n    .onEnd((event) => {\n      const threshold = 150;\n      if (Math.abs(event.translationX) > threshold) {\n        // Swipe completed\n        isSwiped.value = true;\n        translateX.value = withSpring(\n          event.translationX > 0 ? 500 : -500,\n          { velocity: event.velocityX },\n          () => runOnJS(onSwipe)(item.id)\n        );\n        opacity.value = withTiming(0);\n      } else {\n        // Snap back\n        translateX.value = withSpring(0);\n        scale.value = withSpring(1);\n      }\n    });\n\n  const animatedStyle = useAnimatedStyle(() => ({\n    transform: [\n      { translateX: translateX.value },\n      { scale: scale.value }\n    ],\n    opacity: opacity.value\n  }));\n\n  return (\n    <Animated.View\n      entering={FadeIn.springify()}\n      exiting={FadeOut.springify()}\n      layout={Layout.springify()}\n    >\n      <GestureDetector gesture={panGesture}>\n        <Animated.View style={[styles.card, animatedStyle]}>\n          <Text style={styles.title}>{item.title}</Text>\n          <Text>{item.description}</Text>\n        </Animated.View>\n      </GestureDetector>\n    </Animated.View>\n  );\n}"
+  ]
+ }
 }

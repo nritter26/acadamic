@@ -111,60 +111,66 @@
    "import { PrismaClient } from '@prisma/client/edge'; const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }); export default async function handler(req) { const users = await prisma.user.findMany(); return new Response(JSON.stringify(users)); }"
   ],
   "Production": [
-      "Production considerations: connection pooling, migration safety, timeouts, error-only logging, environment variables, and graceful shutdown.",
-      "const prisma = new PrismaClient(); async function safeQuery(fn) { try { return await fn(); } catch (error) { if (error.code === 'P2002') throw new Error('Duplicate'); if (error.code === 'P2025') throw new Error('Not found'); throw error; } } process.on('SIGTERM', async () => { await prisma.$disconnect(); process.exit(0); });"
-    ]
-  },
-  "Prisma Accelerate": {
-    "Accelerate Overview": [
-      "Prisma Accelerate is a global cache and connection pooler that sits between your app and database. It caches queries at the edge, reduces connection overhead, and provides real-time analytics.",
-      "import { PrismaClient } from '@prisma/client';\nconst prisma = new PrismaClient({\n  datasourceUrl: process.env.DATABASE_URL\n});\n// Configure Accelerate in Prisma Data Platform dashboard"
-    ],
-    "Caching Strategies": [
-      "Accelerate supports TTL-based caching with swr and ttl options per query. Cached responses serve instantly from the edge while the database is updated asynchronously.",
-      "const users = await prisma.user.findMany({\n  cache: { ttl: 30, swr: 60 }\n});\nconst post = await prisma.post.findUnique({\n  where: { id: 1 },\n  cache: { ttl: 300 }\n});"
-    ],
-    "Connection Pooling": [
-      "Accelerate replaces direct database connections with HTTP-based queries through a global connection pool, eliminating connection limits in serverless environments and cold starts.",
-      "// No direct database connection needed\n// DATABASE_URL points to Accelerate connection string\ndatasource db {\n  provider = 'postgresql'\n  url      = env('DATABASE_URL')  // Accelerate URL\n}"
-    ]
-  },
-  "Prisma Pulse": {
-    "Real-time Changes": [
-      "Prisma Pulse provides real-time database change streaming. It emits events when rows are created, updated, or deleted, enabling reactive UIs without polling or WebSocket boilerplate.",
-      "const stream = await prisma.user.stream({\n  where: { role: 'ADMIN' },\n  create: true, update: true, delete: true\n});\nfor await (const event of stream) {\n  console.log(`${event.action}: ${event.after?.name}`);\n}"
-    ],
-    "Pulse with Accelerate": [
-      "Pulse works with Accelerate to stream changes through the edge network. Combined, they provide cached reads and real-time write propagation for globally distributed applications.",
-      "const prisma = new PrismaClient({\n  datasourceUrl: process.env.DATABASE_URL\n});\n// Enable Pulse in Prisma Data Platform\n// Use stream() to react to database changes in real-time"
-    ]
-  },
-  "MongoDB": {
-    "MongoDB Provider": [
-      "Prisma supports MongoDB as a data source provider with schemas, relations, and embedded documents. MongoDB models use @map and @db attributes for BSON type mapping.",
-      "datasource db {\n  provider = 'mongodb'\n  url      = env('DATABASE_URL')\n}\n\nmodel User {\n  id    String @id @default(auto()) @map('_id') @db.ObjectId\n  name  String\n  posts Post[]\n}"
-    ],
-    "Embedded Documents": [
-      "MongoDB embedded documents are represented as JSON fields with @db.ObjectId for referencing. Prisma supports ObjectId, String, Int, Float, and Boolean BSON types for MongoDB fields.",
-      "model Profile {\n  id     String @id @default(auto()) @map('_id') @db.ObjectId\n  bio    String\n  stats  Json   // Embedded document as JSON\n  userId String @unique @db.ObjectId\n  user   User   @relation(fields: [userId], references: [id])\n}"
-    ],
-    "MongoDB Relations": [
-      "MongoDB relations use ObjectId references with the same relation syntax as SQL databases. However, compound unique constraints are not supported, and referential actions are implemented at the application level.",
-      "model Post {\n  id      String @id @default(auto()) @map('_id') @db.ObjectId\n  title   String\n  content String?\n  authorId String @db.ObjectId\n  author   User  @relation(fields: [authorId], references: [id])\n}"
-    ]
-  },
-  "Referential Actions": {
-    "onDelete": [
-      "Referential actions control what happens to related records when a parent record is deleted. Prisma supports Cascade, Restrict, NoAction, SetNull, and SetDefault for foreign key constraints.",
-      "model User {\n  id    Int    @id @default(autoincrement())\n  posts Post[]\n}\n\nmodel Post {\n  id     Int  @id @default(autoincrement())\n  userId Int\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}"
-    ],
-    "onUpdate": [
-      "onUpdate referential action specifies behavior when a parent's referenced field changes. These actions map to database-level ON UPDATE constraints and are validated during migrations.",
-      "model Profile {\n  id     Int  @id @default(autoincrement())\n  userId Int  @unique\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)\n}"
-    ],
-    "Referential Action Types": [
-      "Cascade propagates delete/update to related records. Restrict prevents delete if relations exist. NoAction defers to the database. SetNull sets foreign keys to NULL. SetDefault uses the default value.",
-      "model Comment {\n  id     Int  @id @default(autoincrement())\n  postId Int?\n  post   Post @relation(fields: [postId], references: [id], onDelete: SetNull, onUpdate: Cascade)\n}"
-    ]
-  }
+   "Production considerations: connection pooling, migration safety, timeouts, error-only logging, environment variables, and graceful shutdown.",
+   "const prisma = new PrismaClient(); async function safeQuery(fn) { try { return await fn(); } catch (error) { if (error.code === 'P2002') throw new Error('Duplicate'); if (error.code === 'P2025') throw new Error('Not found'); throw error; } } process.on('SIGTERM', async () => { await prisma.$disconnect(); process.exit(0); });"
+  ]
+ },
+ "Prisma Accelerate": {
+  "Accelerate Overview": [
+   "Prisma Accelerate is a global cache and connection pooler that sits between your app and database. It caches queries at the edge, reduces connection overhead, and provides real-time analytics.",
+   "import { PrismaClient } from '@prisma/client';\nconst prisma = new PrismaClient({\n  datasourceUrl: process.env.DATABASE_URL\n});\n// Configure Accelerate in Prisma Data Platform dashboard"
+  ],
+  "Caching Strategies": [
+   "Accelerate supports TTL-based caching with swr and ttl options per query. Cached responses serve instantly from the edge while the database is updated asynchronously.",
+   "const users = await prisma.user.findMany({\n  cache: { ttl: 30, swr: 60 }\n});\nconst post = await prisma.post.findUnique({\n  where: { id: 1 },\n  cache: { ttl: 300 }\n});"
+  ],
+  "Connection Pooling": [
+   "Accelerate replaces direct database connections with HTTP-based queries through a global connection pool, eliminating connection limits in serverless environments and cold starts.",
+   "// No direct database connection needed\n// DATABASE_URL points to Accelerate connection string\ndatasource db {\n  provider = 'postgresql'\n  url      = env('DATABASE_URL')  // Accelerate URL\n}"
+  ]
+ },
+ "Prisma Pulse": {
+  "Real-time Changes": [
+   "Prisma Pulse provides real-time database change streaming. It emits events when rows are created, updated, or deleted, enabling reactive UIs without polling or WebSocket boilerplate.",
+   "const stream = await prisma.user.stream({\n  where: { role: 'ADMIN' },\n  create: true, update: true, delete: true\n});\nfor await (const event of stream) {\n  console.log(`${event.action}: ${event.after?.name}`);\n}"
+  ],
+  "Pulse with Accelerate": [
+   "Pulse works with Accelerate to stream changes through the edge network. Combined, they provide cached reads and real-time write propagation for globally distributed applications.",
+   "const prisma = new PrismaClient({\n  datasourceUrl: process.env.DATABASE_URL\n});\n// Enable Pulse in Prisma Data Platform\n// Use stream() to react to database changes in real-time"
+  ]
+ },
+ "MongoDB": {
+  "MongoDB Provider": [
+   "Prisma supports MongoDB as a data source provider with schemas, relations, and embedded documents. MongoDB models use @map and @db attributes for BSON type mapping.",
+   "datasource db {\n  provider = 'mongodb'\n  url      = env('DATABASE_URL')\n}\n\nmodel User {\n  id    String @id @default(auto()) @map('_id') @db.ObjectId\n  name  String\n  posts Post[]\n}"
+  ],
+  "Embedded Documents": [
+   "MongoDB embedded documents are represented as JSON fields with @db.ObjectId for referencing. Prisma supports ObjectId, String, Int, Float, and Boolean BSON types for MongoDB fields.",
+   "model Profile {\n  id     String @id @default(auto()) @map('_id') @db.ObjectId\n  bio    String\n  stats  Json   // Embedded document as JSON\n  userId String @unique @db.ObjectId\n  user   User   @relation(fields: [userId], references: [id])\n}"
+  ],
+  "MongoDB Relations": [
+   "MongoDB relations use ObjectId references with the same relation syntax as SQL databases. However, compound unique constraints are not supported, and referential actions are implemented at the application level.",
+   "model Post {\n  id      String @id @default(auto()) @map('_id') @db.ObjectId\n  title   String\n  content String?\n  authorId String @db.ObjectId\n  author   User  @relation(fields: [authorId], references: [id])\n}"
+  ]
+ },
+ "Referential Actions": {
+  "onDelete": [
+   "Referential actions control what happens to related records when a parent record is deleted. Prisma supports Cascade, Restrict, NoAction, SetNull, and SetDefault for foreign key constraints.",
+   "model User {\n  id    Int    @id @default(autoincrement())\n  posts Post[]\n}\n\nmodel Post {\n  id     Int  @id @default(autoincrement())\n  userId Int\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}"
+  ],
+  "onUpdate": [
+   "onUpdate referential action specifies behavior when a parent's referenced field changes. These actions map to database-level ON UPDATE constraints and are validated during migrations.",
+   "model Profile {\n  id     Int  @id @default(autoincrement())\n  userId Int  @unique\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)\n}"
+  ],
+  "Referential Action Types": [
+   "Cascade propagates delete/update to related records. Restrict prevents delete if relations exist. NoAction defers to the database. SetNull sets foreign keys to NULL. SetDefault uses the default value.",
+   "model Comment {\n  id     Int  @id @default(autoincrement())\n  postId Int?\n  post   Post @relation(fields: [postId], references: [id], onDelete: SetNull, onUpdate: Cascade)\n}"
+  ]
+ },
+ "Prisma Advanced Patterns": {
+  "Prisma Middleware & Extensions": [
+   "Prisma middleware intercepts queries before/after execution. Use cases: soft deletes, audit logging, field encryption, multi-tenancy. <code>prisma.$use()</code> registers middleware. Prisma Client extensions (4.16+) provide type-safe computed fields, custom methods, and model helpers. <code>$extends</code> creates extended clients. Batch operations: <code>createMany</code>, <code>updateMany</code>, <code>deleteMany</code>. Raw queries with <code>$queryRaw</code> for complex SQL. Interactive transactions with <code>$transaction([...])</code>.",
+   "// Prisma middleware for soft delete\nconst prisma = new PrismaClient();\n\nprisma.$use(async (params, next) => {\n  // Soft delete: convert delete to update\n  if (params.action === 'delete') {\n    params.action = 'update';\n    params.args.data = { deletedAt: new Date() };\n  }\n  if (params.action === 'deleteMany') {\n    params.action = 'updateMany';\n    if (params.args.data) params.args.data.deletedAt = new Date();\n    else params.args.data = { deletedAt: new Date() };\n  }\n  // Filter out soft-deleted records\n  if (params.action === 'findUnique' || params.action === 'findFirst') {\n    params.action === 'findFirst';\n    params.args.where = { ...params.args.where, deletedAt: null };\n  }\n  if (params.action === 'findMany') {\n    if (!params.args.where) params.args.where = {};\n    params.args.where.deletedAt = null;\n  }\n  return next(params);\n});\n\n// Prisma Client extension (v4.16+)\nconst extendedPrisma = prisma.$extends({\n  result: {\n    user: {\n      fullName: {\n        needs: { firstName: true, lastName: true },\n        compute(user) {\n          return `${user.firstName} ${user.lastName}`;\n        },\n      },\n      isActive: {\n        needs: { deletedAt: true, verifiedAt: true },\n        compute(user) {\n          return user.deletedAt === null && user.verifiedAt !== null;\n        },\n      },\n    },\n  },\n  model: {\n    user: {\n      async findByEmail(email: string) {\n        return prisma.user.findUnique({ where: { email } });\n      },\n    },\n  },\n});\n\n// Usage\nconst user = await extendedPrisma.user.findFirst();\nconsole.log(user.fullName); // Computed field\nconsole.log(user.isActive);\n\n// Interactive transaction\nconst [order, notification] = await prisma.$transaction(async (tx) => {\n  const order = await tx.order.create({ data: { userId, items } });\n  await tx.inventory.updateMany({\n    where: { id: { in: itemIds } },\n    data: { stock: { decrement: 1 } },\n  });\n  const notification = await tx.notification.create({\n    data: { userId, type: 'order_confirmed', orderId: order.id }\n  });\n  return [order, notification];\n});"
+  ]
+ }
 }
