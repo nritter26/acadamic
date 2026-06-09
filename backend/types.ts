@@ -34,6 +34,32 @@ export interface ExecResult {
   error?: boolean;
 }
 
+export interface HttpTest {
+  method: string;
+  path: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+  expectedStatus: number;
+  expectedBodySubstring?: string;
+  expectedBodyShape?: string[];
+}
+
+export interface HttpTestResult {
+  method: string;
+  path: string;
+  status: number;
+  expectedStatus: number;
+  bodyMatch: boolean;
+  shapeMatch: boolean;
+  passed: boolean;
+  error?: string;
+}
+
+export interface ServerExecResult extends ExecResult {
+  serverResults?: HttpTestResult[];
+  allPassed?: boolean;
+}
+
 // ── Zod Validation Schemas ──
 
 export const ProgressSchema = z.object({
@@ -47,6 +73,16 @@ export const ExecuteSchema = z.object({
   lang: z.string().min(1),
   code: z.string().min(1),
   stdin: z.string().optional(),
+  serverMode: z.boolean().optional(),
+  httpTests: z.array(z.object({
+    method: z.string(),
+    path: z.string(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.any().optional(),
+    expectedStatus: z.number(),
+    expectedBodySubstring: z.string().optional(),
+    expectedBodyShape: z.array(z.string()).optional(),
+  })).optional(),
 });
 export type ExecuteInput = z.infer<typeof ExecuteSchema>;
 
