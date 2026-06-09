@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeCode } from '../services/analyzer';
+import { analyzeCode } from '../backend/services/analyzer';
 
 describe('analyzeCode service', () => {
   it('detects loose equality', () => {

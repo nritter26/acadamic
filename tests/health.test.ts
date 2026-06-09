@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import healthRouter from '../routes/health';
-import { errorHandler } from '../middleware';
+import healthRouter from '../backend/routes/health';
+import { errorHandler } from '../backend/middleware';
 
 const app = express();
 app.use('/api', healthRouter);

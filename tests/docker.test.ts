@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateDockerfiles, isDockerAvailable, getSupportedDockerLangs } from '../services/docker-executor';
+import { generateDockerfiles, isDockerAvailable, getSupportedDockerLangs } from '../backend/services/docker-executor';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';

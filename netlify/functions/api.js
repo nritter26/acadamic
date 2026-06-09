@@ -10,28 +10,28 @@ const { URL } = require('url');
 const ROOT = path.resolve(__dirname, '../..');
 const DATA_DIR = path.join(ROOT, 'data');
 const PROGRESS_FILE = path.join(DATA_DIR, 'progress.json');
-const CONTENT_DIR = path.join(ROOT, 'content');
+const CONTENT_DIR = path.join(ROOT, 'backend/content');
 const ACTIVE_AI_PROVIDER = process.env.AI_PROVIDER || 'hybrid';
 
 // ── Optional TS module imports (require build step to work on Netlify) ──
 let askLLM, learner, codeReview, generateExercise, semanticSearch, getTopicContext, getCurriculumContext;
 let database;
 try {
-  const m = require('../../ai/provider');
+  const m = require('../../backend/ai/provider');
   askLLM = m.askLLM;
 } catch {}
-try { database = require('../../sql/database'); } catch {}
-try { learner = require('../../ai/learner'); } catch {}
+try { database = require('../../backend/sql/database'); } catch {}
+try { learner = require('../../backend/ai/learner'); } catch {}
 try {
-  const r = require('../../ai/reviewer');
+  const r = require('../../backend/ai/reviewer');
   codeReview = r.review;
 } catch {}
 try {
-  const e = require('../../ai/exercises');
+  const e = require('../../backend/ai/exercises');
   generateExercise = e.generateExercise;
 } catch {}
 try {
-  const s = require('../../ai/embeddings');
+  const s = require('../../backend/ai/embeddings');
   semanticSearch = s.search;
   getTopicContext = s.getTopicContext;
   getCurriculumContext = s.getCurriculumContext;
