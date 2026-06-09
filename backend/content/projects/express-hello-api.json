@@ -1,0 +1,66 @@
+{
+  "id": "express-hello-api",
+  "title": "Hello API",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 15,
+  "concepts": ["http", "get", "json-response", "express", "fastapi"],
+  "description": "Build your first API endpoint with health check and greeting routes.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Health check endpoint",
+      "description": "Create a GET /health endpoint that returns JSON with a \"status\" key set to \"ok\".",
+      "hints": [
+        "Use app.get('/health', handler) in Express",
+        "Use res.json({ status: 'ok' }) to send JSON",
+        "In Python: @app.get('/health') then return {'status': 'ok'}"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "status"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Greeting endpoint",
+      "description": "Add a GET /hello endpoint that returns JSON with a \"message\" key set to \"Hello, World!\".",
+      "hints": [
+        "Add a new route: app.get('/hello', handler)",
+        "Return JSON: res.json({ message: 'Hello, World!' })",
+        "Keep the health endpoint from step 1"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.get('/hello', (req, res) => {\n  res.json({ message: 'Hello, World!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.get('/hello', (req: Request, res: Response) => {\n  res.json({ message: 'Hello, World!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.get('/hello')\ndef hello():\n    return {'message': 'Hello, World!'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/hello\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Hello, World!\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/hello",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "message"
+          }
+        ]
+      }
+    }
+  ]
+}
