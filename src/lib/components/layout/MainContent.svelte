@@ -245,10 +245,13 @@
                 <button class="pfilter-btn" class:active={projectDiffFilter === f} onclick={() => projectDiffFilter = f}>{DIFF_LABELS[f]}</button>
               {/each}
             </div>
-            <div class="pfilter-row">
-              {#each LANG_FILTERS as f}
-                <button class="pfilter-btn" class:active={projectLangFilter === f} onclick={() => projectLangFilter = f}>{LANG_LABELS[f]}</button>
-              {/each}
+            <div class="pfilter-select-row">
+              <label class="pfilter-label">Language</label>
+              <select class="pfilter-select" bind:value={projectLangFilter}>
+                {#each LANG_FILTERS as f}
+                  <option value={f}>{LANG_LABELS[f]}</option>
+                {/each}
+              </select>
             </div>
             {#if hasFrameworkProjects}
               <div class="pfilter-row">
@@ -474,6 +477,11 @@
   .pfilter-row { display: flex; gap: 4px; flex-wrap: wrap; }
   .pfilter-btn { padding: 4px 8px; font-size: 10px; font-weight: 700; background: #111827; border: 1px solid #334155; border-radius: 4px; color: #94a3b8; cursor: pointer; text-transform: uppercase; }
   .pfilter-btn.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .pfilter-select-row { display: flex; align-items: center; gap: 6px; }
+  .pfilter-label { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pfilter-select { flex: 1; padding: 5px 8px; font-size: 11px; font-weight: 600; background: #111827; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; cursor: pointer; outline: none; }
+  .pfilter-select:focus { border-color: #6366f1; }
+  .pfilter-select option { background: #111827; color: #e2e8f0; }
 
   .ts-provider-bar { display: flex; gap: 3px; flex-wrap: wrap; padding: 6px; border-bottom: 1px solid #1e293b; }
   .ts-provider-btn { font-size: 9px; font-weight: 700; padding: 3px 7px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #94a3b8; cursor: pointer; white-space: nowrap; }
