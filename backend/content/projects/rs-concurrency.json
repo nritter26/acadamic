@@ -1,0 +1,71 @@
+{
+  "id": "rs-concurrency",
+  "title": "Rust: Concurrency Basics",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "threads", "concurrency", "spawn", "join", "Send", "Sync"],
+  "description": "Spawn threads and use concurrency primitives in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Spawn a Thread",
+      "description": "Use `std::thread::spawn` to create a thread that prints `\"Hello from a thread!\"`. Wait for it with `.join()`. Print `\"Main thread done\"` after.",
+      "hints": ["`let handle = std::thread::spawn(|| { println!(\"Hello from a thread!\"); });`", "`handle.join().unwrap();` waits for the thread.", "The closure runs in a separate OS thread."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello from a thread!') && output.includes('Main')",
+        "successMessage": "Thread spawned and joined!",
+        "failureMessage": "Spawn a thread, print from it, and wait for it to finish."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple Threads",
+      "description": "Spawn 5 threads, each printing `\"Thread N\"` where N is its number. Join all handles and print `\"All threads done\"`.",
+      "hints": ["Use a `for` loop to spawn threads.", "Collect handles in a `Vec`.", "Iterate and `.join()` each handle."],
+      "codeTemplate": { "rust": "use std::thread;\n\nfn main() {\n    let mut handles = vec![];\n    for i in 0..5 {\n        handles.push(thread::spawn(move || {\n            println!(\"Thread {}\", i);\n        }));\n    }\n    for h in handles {\n        h.join().unwrap();\n    }\n    println!(\"All threads done\");\n}" },
+      "verification": {
+        "test": "output.includes('Thread') && output.includes('All threads done')",
+        "successMessage": "Multiple threads spawned!",
+        "failureMessage": "Spawn 5 threads and print from each."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Return Values from Threads",
+      "description": "Spawn a thread that computes `1 + 2 + ... + 100` and returns the result. Capture the return value from `.join()` and print it.",
+      "hints": ["The closure can return a value: `thread::spawn(move || { 42 })`.", "`.join()` returns `Result<T>`.", "Sum 1 to 100 = 5050"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5050')",
+        "successMessage": "Thread return value captured!",
+        "failureMessage": "Compute 1..100 sum in a thread and print 5050."
+      }
+    },
+    {
+      "id": 4,
+      "title": "move Closures",
+      "description": "Create a `String` in main, then spawn a thread that prints it using `move`. Verify the move is needed (try to use the string after the move in comments).",
+      "hints": ["`let msg = String::from(\"hello\");`", "`thread::spawn(move || { println!(\"{}\", msg); });`", "The `move` keyword transfers ownership to the thread."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('hello')",
+        "successMessage": "Move closure works!",
+        "failureMessage": "Move a String into a thread and print it."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Scoped Threads (crossbeam-free)",
+      "description": "Use `thread::scope` to spawn threads that borrow local variables without `move`. Spawn two threads that each print part of a shared Vec.",
+      "hints": ["`std::thread::scope(|s| { s.spawn(|| { ... }); });`", "Scoped threads allow borrowing (no move needed).", "The scope waits for all threads to finish."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('thread') || output.includes('hello')",
+        "successMessage": "Scoped threads work!",
+        "failureMessage": "Use thread::scope to borrow a Vec in spawned threads."
+      }
+    }
+  ]
+}

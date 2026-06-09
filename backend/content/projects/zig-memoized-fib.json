@@ -1,0 +1,16 @@
+{
+  "id": "zig-memoized-fib",
+  "title": "Memoized Fibonacci",
+  "description": "Write a Zig program that computes Fibonacci numbers using memoization (dynamic programming).",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn fibMemo(n: u32, memo: []u64) u64 {\n    if (n <= 1) return n;\n    if (memo[n] != 0) return memo[n];\n    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);\n    return memo[n];\n}\n\npub fn main() !void {\n    var memo = [_]u64{0} ** 50;\n    const n: u32 = 40;\n    const result = fibMemo(n, &memo);\n    std.debug.print(\"fib({}) = {}\\n\", .{n, result});\n}"
+  },
+  "verificationTest": "output.includes('fib(40) = 102334155')",
+  "hints": [
+    "Memoization stores computed values to avoid redundant recursive calls",
+    "Use a `[]u64` slice as a memo table indexed by the input n",
+    "Initialize memo table with `[_]u64{0} ** N` for zero-initialized storage"
+  ]
+}

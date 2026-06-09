@@ -1,0 +1,16 @@
+{
+  "id": "zig-count-vowels",
+  "title": "Count Vowels",
+  "description": "Write a Zig program that counts and prints the number of vowels (a, e, i, o, u) in a given string.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"Hello, Zig World!\";\n    var count: u32 = 0;\n    \n    for (text) |ch| {\n        switch (ch) {\n            'a', 'e', 'i', 'o', 'u',\n            'A', 'E', 'I', 'O', 'U' => count += 1,\n            else => {},\n        }\n    }\n    \n    std.debug.print(\"Vowels: {}\\n\", .{count});\n}"
+  },
+  "verificationTest": "output.includes('Vowels: 4')",
+  "hints": [
+    "Strings in Zig are `[]const u8` and can be iterated with `for`",
+    "Use a `switch` expression to match vowel characters",
+    "Zig's `switch` can match multiple values with commas: `'a', 'e', 'i' => ...`"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-binary-search",
+  "title": "Binary Search",
+  "description": "Write a Zig program that implements binary search to find a target value in a sorted array.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const arr = [_]i32{ 3, 7, 11, 18, 25, 42, 56, 71, 88, 99 };\n    const target: i32 = 42;\n    var left: usize = 0;\n    var right: usize = arr.len - 1;\n    var found: ?usize = null;\n    \n    while (left <= right) {\n        const mid = left + (right - left) / 2;\n        if (arr[mid] == target) {\n            found = mid;\n            break;\n        } else if (arr[mid] < target) {\n            left = mid + 1;\n        } else {\n            right = mid - 1;\n        }\n    }\n    \n    if (found) |idx| {\n        std.debug.print(\"Found {} at index {}\\n\", .{target, idx});\n    } else {\n        std.debug.print(\"{} not found\\n\", .{target});\n    }\n}"
+  },
+  "verificationTest": "output.includes('Found 42 at index 5')",
+  "hints": [
+    "Binary search works on sorted arrays by repeatedly dividing the search range in half",
+    "Use `while (left <= right)` as the main loop",
+    "Calculate mid with `left + (right - left) / 2` to avoid overflow",
+    "Adjust left or right based on comparison with the target"
+  ]
+}

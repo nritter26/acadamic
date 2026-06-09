@@ -1,0 +1,71 @@
+{
+  "id": "rs-data-types",
+  "title": "Rust: Data Types",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "data types", "i32", "f64", "bool", "char", "tuples"],
+  "description": "Explore Rust's primitive data types: integers, floats, booleans, characters, and tuples.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Integer Types",
+      "description": "Declare variables for different integer types: `a: i32 = 42`, `b: u8 = 255`, `c: i64 = -1000`. Print all three.",
+      "hints": ["`i32` is a signed 32-bit integer.", "`u8` is an unsigned 8-bit integer (0-255).", "`i64` is a signed 64-bit integer."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('255') && output.includes('1000')",
+        "successMessage": "Integer types work!",
+        "failureMessage": "Declare i32, u8, and i64 variables and print them."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Float Types",
+      "description": "Declare `pi: f32 = 3.14159` and `e: f64 = 2.718281828459045`. Print both.",
+      "hints": ["`f32` is a 32-bit float (single precision).", "`f64` is a 64-bit float (double precision).", "Rust infers `f64` by default for float literals."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3.14') && output.includes('2.71')",
+        "successMessage": "Float types work!",
+        "failureMessage": "Declare f32 and f64 variables and print them."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Boolean Type",
+      "description": "Declare `is_rust_cool: bool = true` and `is_difficult: bool = false`. Print both with `println!`.",
+      "hints": ["`bool` has two values: `true` and `false`.", "`println!(\"{}\", is_rust_cool)` prints `true`.", "Booleans are used in conditions and assertions."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Boolean type works!",
+        "failureMessage": "Declare two bool variables and print them."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Character Type",
+      "description": "Declare a `letter: char = 'R'`, `emoji: char = '🚀'`, and `digit: char = '7'`. Print all three.",
+      "hints": ["`char` uses single quotes, not double quotes.", "Rust's `char` is 4 bytes and supports Unicode.", "Even emojis are valid chars in Rust!"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('R') && output.includes('7')",
+        "successMessage": "Character type works!",
+        "failureMessage": "Declare char variables and print them."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Tuple Type",
+      "description": "Create a tuple `person: (&str, i32, f64) = (\"Alice\", 30, 5.5)` and print each element using destructuring.",
+      "hints": ["Tuples group values of different types: `let tup = (\"Alice\", 30, 5.5);`", "Destructure: `let (name, age, height) = tup;`", "Or access by index: `tup.0`, `tup.1`, `tup.2`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30') && output.includes('5.5')",
+        "successMessage": "Tuple destructuring works!",
+        "failureMessage": "Create a tuple with 3 elements and print all of them."
+      }
+    }
+  ]
+}

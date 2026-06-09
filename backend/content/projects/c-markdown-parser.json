@@ -1,0 +1,23 @@
+{
+  "id": "c-markdown-parser",
+  "title": "C: Markdown Parser (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "markdown", "parsing", "strings", "HTML"],
+  "description": "Parse simple Markdown syntax (headings, bold, italics) and convert to HTML.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse Headings",
+      "description": "Write a function `void parse_heading(char *line)` that detects Markdown headings (#, ##, ###) and converts them to HTML `<h1>`, `<h2>`, `<h3>`. Test with '# Title', '## Section', '### Subsection'.",
+      "hints": ["Count leading `#` characters.", "Trim whitespace after `#`s.", "Wrap in `<hN>...</hN>` where N is the count."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nvoid parse_heading(char *line) {\n    int level = 0;\n    while (line[level] == '#') level++;\n    if (level > 0 && level <= 3) {\n        char *content = line + level;\n        while (*content == ' ') content++;\n        printf(\"<h%d>%s</h%d>\\n\", level, content, level);\n    } else {\n        printf(\"%s\\n\", line);\n    }\n}\n\nint main() {\n    parse_heading(\"# Title\");\n    parse_heading(\"## Section\");\n    parse_heading(\"### Subsection\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('<h1>Title</h1>') && output.includes('<h2>Section</h2>')",
+        "successMessage": "Markdown heading parser works!",
+        "failureMessage": "Convert #, ##, ### headings to HTML"
+      }
+    }
+  ]
+}

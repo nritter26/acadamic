@@ -1,0 +1,17 @@
+{
+  "id": "zig-rsa-keygen",
+  "title": "RSA Key Generator",
+  "description": "Write a Zig program that demonstrates RSA key generation concepts using small prime numbers.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn isPrime(n: u32) bool {\n    if (n < 2) return false;\n    var i: u32 = 2;\n    while (i * i <= n) {\n        if (@mod(n, i) == 0) return false;\n        i += 1;\n    }\n    return true;\n}\n\nfn gcd(a: u32, b: u32) u32 {\n    return if (b == 0) a else gcd(b, a % b);\n}\n\npub fn main() !void {\n    const p: u32 = 61;\n    const q: u32 = 53;\n    const n = p * q;\n    const phi = (p - 1) * (q - 1);\n    var e: u32 = 3;\n    while (e < phi) {\n        if (gcd(e, phi) == 1) break;\n        e += 2;\n    }\n    \n    std.debug.print(\"p={}\\n\", .{p});\n    std.debug.print(\"q={}\\n\", .{q});\n    std.debug.print(\"n={}\\n\", .{n});\n    std.debug.print(\"phi={}\\n\", .{phi});\n    std.debug.print(\"e={}\\n\", .{e});\n    std.debug.print(\"isPrime(p)={}\\n\", .{isPrime(p)});\n}"
+  },
+  "verificationTest": "output.includes('p=61') && output.includes('q=53') && output.includes('n=3233') && output.includes('phi=3120') && output.includes('e=') && output.includes('isPrime(p)=true')",
+  "hints": [
+    "RSA chooses two large primes p and q, then computes n = p × q",
+    "phi = (p-1)(q-1) is Euler's totient function",
+    "Choose e such that 1 < e < phi and gcd(e, phi) = 1",
+    "Use @mod for modulo operations and gcd from Euclid's algorithm"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-bloom-filter",
+  "title": "Bloom Filter",
+  "description": "Write a Zig program that implements a simple Bloom filter for set membership testing.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst BloomFilter = struct {\n    bits: u64 = 0,\n    \n    fn hash1(self: BloomFilter, s: []const u8) u6 {\n        var h: u64 = 5381;\n        for (s) |ch| h = h *% 33 +% ch;\n        return @truncate(h);\n    }\n    fn hash2(self: BloomFilter, s: []const u8) u6 {\n        var h: u64 = 0;\n        for (s) |ch| h = h *% 65599 +% ch;\n        return @truncate(h);\n    }\n    fn insert(self: *BloomFilter, s: []const u8) void {\n        self.bits |= (@as(u64, 1) << self.hash1(s));\n        self.bits |= (@as(u64, 1) << self.hash2(s));\n    }\n    fn mightContain(self: BloomFilter, s: []const u8) bool {\n        const b1 = self.bits & (@as(u64, 1) << self.hash1(s));\n        const b2 = self.bits & (@as(u64, 1) << self.hash2(s));\n        return b1 != 0 and b2 != 0;\n    }\n};\n\npub fn main() !void {\n    var bf = BloomFilter{};\n    bf.insert(\"apple\");\n    bf.insert(\"banana\");\n    \n    std.debug.print(\"apple: {}\\n\", .{bf.mightContain(\"apple\")});\n    std.debug.print(\"grape: {}\\n\", .{bf.mightContain(\"grape\")});\n}"
+  },
+  "verificationTest": "output.includes('apple: true') && output.includes('grape: false')",
+  "hints": [
+    "A Bloom filter uses multiple hash functions to set bits in a bit array",
+    "`@truncate(u6)` converts a u64 hash to a 6-bit value (0-63)",
+    "`*%` is Zig's wrapping multiplication operator",
+    "`mightContain` returns false when definitely absent, true when possibly present"
+  ]
+}

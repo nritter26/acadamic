@@ -1,0 +1,16 @@
+{
+  "id": "go-nil-slice-map",
+  "title": "Go: Nil Slice & Map",
+  "description": "Write a Go program that demonstrates nil slices and maps and how to safely work with them.",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tvar s []int\n\tvar m map[string]int\n\n\tfmt.Println(\"nil slice len:\", len(s))\n\tfmt.Println(\"nil slice == nil:\", s == nil)\n\tfmt.Println(\"nil map len:\", len(m))\n\tfmt.Println(\"nil map == nil:\", m == nil)\n\n\ts = append(s, 10)\n\tfmt.Println(\"appended slice:\", s)\n\n\tm = make(map[string]int)\n\tm[\"a\"] = 1\n\tfmt.Println(\"map after init:\", m[\"a\"])\n}"
+  },
+  "verificationTest": "output.includes('nil slice len: 0') && output.includes('nil slice == nil: true') && output.includes('appended slice: [10]') && output.includes('map after init: 1')",
+  "hints": [
+    "A nil slice has length 0 and is safe to use with append",
+    "A nil map has length 0 but assigning to a nil map causes a panic",
+    "Use `make()` to initialize a map before adding elements"
+  ]
+}

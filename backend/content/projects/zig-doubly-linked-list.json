@@ -1,0 +1,17 @@
+{
+  "id": "zig-doubly-linked-list",
+  "title": "Doubly Linked List",
+  "description": "Write a Zig program that implements a doubly linked list with forward and backward traversal.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    value: i32,\n    prev: ?*Node,\n    next: ?*Node,\n};\n\npub fn main() !void {\n    var n3 = Node{ .value = 30, .prev = undefined, .next = null };\n    var n2 = Node{ .value = 20, .prev = undefined, .next = &n3 };\n    var n1 = Node{ .value = 10, .prev = null, .next = &n2 };\n    n2.prev = &n1;\n    n3.prev = &n2;\n    \n    std.debug.print(\"Forward: \", .{});\n    var cur: ?*Node = &n1;\n    while (cur) |node| {\n        std.debug.print(\"{} \", .{node.value});\n        cur = node.next;\n    }\n    std.debug.print(\"\\n\", .{});\n    \n    std.debug.print(\"Backward: \", .{});\n    cur = &n3;\n    while (cur) |node| {\n        std.debug.print(\"{} \", .{node.value});\n        cur = node.prev;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Forward: 10 20 30') && output.includes('Backward: 30 20 10')",
+  "hints": [
+    "Each node in a doubly linked list has both `prev` and `next` pointers",
+    "Initialize `prev` and `next` as `?*Node` (optional pointers) for null safety",
+    "Forward traversal follows `next`, backward follows `prev`",
+    "Wire up `prev` links after creating all nodes"
+  ]
+}

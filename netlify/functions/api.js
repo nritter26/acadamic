@@ -140,7 +140,7 @@ Keep it conversational and encourage the student to try it themselves.`;
         const lid = body.learnerId || event.queryStringParameters?.learnerId || 'default';
         const lang = body.lang || event.queryStringParameters?.lang;
         if (lang) {
-          const contentDir = path.join(ROOT, 'content');
+          const contentDir = path.join(ROOT, 'backend', 'content');
           const filePath = path.join(contentDir, `${lang}.json`);
           if (fs.existsSync(filePath)) {
             const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));

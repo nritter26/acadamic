@@ -1,0 +1,71 @@
+{
+  "id": "rs-vowel-counter",
+  "title": "Rust: Vowel Counter",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "strings", "vowels", "filter", "counting"],
+  "description": "Count vowels (a, e, i, o, u) in a string.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Count a Single Vowel",
+      "description": "Write a function `is_vowel(c: char) -> bool` that returns true if c is a vowel. Test with 'a' and 'b'.",
+      "hints": ["Match against 'a', 'e', 'i', 'o', 'u'.", "Use `matches!(c, 'a' | 'e' | 'i' | 'o' | 'u')` for a clean syntax.", "Or use an explicit match."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/gi)?.length >= 1 && output.match(/false/gi)?.length >= 1",
+        "successMessage": "Is vowel check works!",
+        "failureMessage": "Check 'a' (true) and 'b' (false)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Count Vowels in a String",
+      "description": "Write a function `count_vowels(s: &str) -> u32` that counts all vowels. Call with `\"hello world\"` and print.",
+      "hints": ["`.chars().filter(|c| is_vowel(*c)).count()`", "Use the is_vowel function from step 1.", "\"hello world\" has 3 vowels (e, o, o)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Vowel count works!",
+        "failureMessage": "Count vowels in 'hello world' (should be 3)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Case-Insensitive Count",
+      "description": "Make is_vowel case-insensitive and count vowels in `\"Hello World\"`. Print the result.",
+      "hints": ["Convert to lowercase before checking: `c.to_ascii_lowercase()`", "Or check both cases in is_vowel.", "H e l l o   W o r l d → 3 vowels."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Case-insensitive count works!",
+        "failureMessage": "Count vowels in 'Hello World' (should be 3)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Count Each Vowel Separately",
+      "description": "Write a function `count_each_vowel(s: &str)` that prints the count of each vowel (a, e, i, o, u) separately. Test with `\"Rust is awesome!\"`.",
+      "hints": ["Use a tuple or array of 5 counters.", "Match each character against each vowel.", "Rust is awesome! → a=0, e=2, i=1, o=1, u=1"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('e=2') || output.includes('e : 2')",
+        "successMessage": "Per-vowel counting works!",
+        "failureMessage": "Print count of each vowel in 'Rust is awesome!'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Percentage of Vowels",
+      "description": "Write a function `vowel_percentage(s: &str) -> f64` that returns the percentage of vowels. Test with `\"Rust programming\"`.",
+      "hints": ["Count vowels and total letters (alphanumeric).", "Percentage = (vowels as f64 / total as f64) * 100.0", "\"Rust programming\" has 4 vowels, 15 chars ≈ 26.67%"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') || output.includes('26')",
+        "successMessage": "Vowel percentage works!",
+        "failureMessage": "Print the vowel percentage of 'Rust programming'."
+      }
+    }
+  ]
+}

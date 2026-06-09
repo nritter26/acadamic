@@ -1,0 +1,16 @@
+{
+  "id": "zig-run-length",
+  "title": "Run-Length Encoding",
+  "description": "Write a Zig program that compresses a string using run-length encoding (RLE).",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"AAABBBCCCDDDDEE\";\n    var i: usize = 0;\n    \n    while (i < text.len) {\n        const ch = text[i];\n        var count: u32 = 1;\n        while (i + count < text.len and text[i + count] == ch) {\n            count += 1;\n        }\n        std.debug.print(\"{c}{}\", .{ch, count});\n        i += count;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('A3') && output.includes('B3') && output.includes('C3') && output.includes('D4') && output.includes('E2')",
+  "hints": [
+    "Run-length encoding replaces repeated characters with the character and count",
+    "Use a while loop to count consecutive identical characters",
+    "Zig's `and` operator joins conditions in while loops"
+  ]
+}

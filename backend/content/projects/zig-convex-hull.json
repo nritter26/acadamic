@@ -1,0 +1,17 @@
+{
+  "id": "zig-convex-hull",
+  "title": "Convex Hull",
+  "description": "Write a Zig program that computes the convex hull of a set of 2D points using the gift wrapping algorithm.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Point = struct { x: i32, y: i32 };\n\npub fn main() !void {\n    const points = [_]Point{\n        Point{ .x = 0, .y = 3 },\n        Point{ .x = 2, .y = 2 },\n        Point{ .x = 1, .y = 1 },\n        Point{ .x = 2, .y = 1 },\n        Point{ .x = 3, .y = 0 },\n        Point{ .x = 0, .y = 0 },\n        Point{ .x = 3, .y = 3 },\n    };\n    \n    var leftmost: usize = 0;\n    for (1..points.len) |i| {\n        if (points[i].x < points[leftmost].x) leftmost = i;\n    }\n    \n    var hull: [7]Point = undefined;\n    var hull_size: usize = 0;\n    var p = leftmost;\n    \n    while (true) {\n        hull[hull_size] = points[p];\n        hull_size += 1;\n        var q: usize = (p + 1) % points.len;\n        for (0..points.len) |i| {\n            const cross = (points[i].x - points[p].x) * (points[q].y - points[p].y) -\n                          (points[i].y - points[p].y) * (points[q].x - points[p].x);\n            if (cross < 0) q = i;\n        }\n        p = q;\n        if (p == leftmost) break;\n    }\n    \n    for (0..hull_size) |i| std.debug.print(\"({},{}) \", .{hull[i].x, hull[i].y});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('(0,0)') && output.includes('(3,0)') && output.includes('(3,3)') && output.includes('(0,3)')",
+  "hints": [
+    "The gift wrapping (Jarvis march) algorithm finds the convex hull by wrapping a line around the points",
+    "Start with the leftmost point, then find the point with the smallest polar angle",
+    "Use cross product to determine orientation: (B-A) × (C-A)",
+    "The cross product sign tells if C is left (positive) or right (negative) of AB"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-arithmetic",
+  "title": "Rust: Basic Arithmetic",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "arithmetic", "operators", "addition", "subtraction", "multiplication", "division", "modulo"],
+  "description": "Perform basic arithmetic operations with integers and floats in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Addition",
+      "description": "Add `15` and `27`. Store the result in a variable and print it.",
+      "hints": ["`let sum = 15 + 27;`", "The `+` operator adds two numbers.", "Print with `println!(\"{}\", sum);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Addition works!",
+        "failureMessage": "Print the sum of 15 and 27."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Subtraction and Multiplication",
+      "description": "Calculate `(100 - 37) * 2`. Print the result.",
+      "hints": ["Use parentheses to control order of operations.", "`let result = (100 - 37) * 2;`", "The result should be 126."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('126')",
+        "successMessage": "Subtraction and multiplication work!",
+        "failureMessage": "Print the result of (100 - 37) * 2."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Division",
+      "description": "Divide `100` by `3` using integer division (`/`) and print the result. Note what happens to the remainder.",
+      "hints": ["`let result = 100 / 3;`", "Integer division truncates the decimal part.", "100 / 3 = 33 (not 33.33) in integer arithmetic."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('33')",
+        "successMessage": "Integer division understood!",
+        "failureMessage": "Print the result of 100 / 3."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Modulo",
+      "description": "Use the modulo operator `%` to find the remainder of `100 % 3`. Print the result.",
+      "hints": ["`let remainder = 100 % 3;`", "Modulo gives the remainder after division.", "100 % 3 = 1 (since 3*33 = 99, remainder is 1)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "Modulo understood!",
+        "failureMessage": "Print the remainder of 100 divided by 3."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Float Arithmetic",
+      "description": "Calculate `22.0 / 7.0` using `f64` values. Print the result with 4 decimal places using `{:.4}`.",
+      "hints": ["`let pi_approx: f64 = 22.0 / 7.0;`", "Use `println!(\"{:.4}\", pi_approx);` to format 4 decimal places.", "22.0 / 7.0 ≈ 3.1429"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3.14')",
+        "successMessage": "Float arithmetic works!",
+        "failureMessage": "Print 22.0 / 7.0 with 4 decimal places."
+      }
+    }
+  ]
+}

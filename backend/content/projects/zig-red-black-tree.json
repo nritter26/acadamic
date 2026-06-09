@@ -1,0 +1,17 @@
+{
+  "id": "zig-red-black-tree",
+  "title": "Red-Black Tree",
+  "description": "Write a Zig program that implements a Red-Black tree with insertion and color validation.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Color = enum { Red, Black };\n\nconst RBNode = struct {\n    key: i32,\n    color: Color,\n    left: ?*RBNode,\n    right: ?*RBNode,\n};\n\nfn isRed(n: ?*RBNode) bool {\n    return if (n) |node| node.color == Color.Red else false;\n}\n\nfn flipColors(n: *RBNode) void {\n    n.color = Color.Red;\n    if (n.left) |l| l.color = Color.Black;\n    if (n.right) |r| r.color = Color.Black;\n}\n\npub fn main() !void {\n    var n3 = RBNode{ .key = 30, .color = Color.Red, .left = null, .right = null };\n    var n2 = RBNode{ .key = 20, .color = Color.Red, .left = null, .right = null };\n    var n1 = RBNode{ .key = 10, .color = Color.Black, .left = null, .right = &n2 };\n    n2.right = &n3;\n    \n    std.debug.print(\"Root: {} ({s})\\n\", .{n1.key, if (n1.color == Color.Red) \"Red\" else \"Black\"});\n    std.debug.print(\"Right: {} ({s})\\n\", .{n2.key, if (n2.color == Color.Red) \"Red\" else \"Black\"});\n    \n    if (isRed(n2.right)) {\n        std.debug.print(\"Right-right red chain detected\\n\", .{});\n    }\n}"
+  },
+  "verificationTest": "output.includes('Root: 10 (Black)') && output.includes('Right: 20 (Red)') && output.includes('Right-right red chain detected')",
+  "hints": [
+    "Red-Black trees use a color (Red/Black) per node for balancing",
+    "`enum` in Zig can be used to define the Color type",
+    "No red node can have a red child (no red-red chains)",
+    "The root is always black"
+  ]
+}

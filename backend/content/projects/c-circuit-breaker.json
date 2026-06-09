@@ -1,0 +1,23 @@
+{
+  "id": "c-circuit-breaker",
+  "title": "C: Circuit Breaker",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "circuit breaker", "resilience", "state machine", "error handling"],
+  "description": "Implement the Circuit Breaker pattern that prevents repeated calls to a failing operation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Circuit Breaker with Three States",
+      "description": "Define states: CLOSED, OPEN, HALF_OPEN. Implement a circuit breaker that starts CLOSED, transitions to OPEN after 3 failures, tries HALF_OPEN after a reset timeout, and either resets to CLOSED or stays OPEN. Simulate: 2 successes, 3 failures, 1 check.",
+      "hints": ["CLOSED: normal operation, count failures.", "OPEN: reject calls immediately.", "HALF_OPEN: allow one test call.", "Use a counter for failures and a bool for state."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { CLOSED, OPEN, HALF_OPEN } CBState;\n\ntypedef struct {\n    CBState state;\n    int failure_count;\n    int failure_threshold;\n} CircuitBreaker;\n\nvoid cb_init(CircuitBreaker *cb) {\n    cb->state = CLOSED; cb->failure_count = 0; cb->failure_threshold = 3;\n}\n\nint cb_call(CircuitBreaker *cb, int (*fn)()) {\n    if (cb->state == OPEN) { printf(\"Circuit open, rejecting\\n\"); return -1; }\n    int result = fn();\n    if (result < 0) {\n        cb->failure_count++;\n        printf(\"Failure %d/%d\\n\", cb->failure_count, cb->failure_threshold);\n        if (cb->failure_count >= cb->failure_threshold) {\n            cb->state = OPEN;\n            printf(\"Circuit OPEN\\n\");\n        }\n        return result;\n    }\n    cb->failure_count = 0;\n    if (cb->state == HALF_OPEN) {\n        cb->state = CLOSED;\n        printf(\"Circuit CLOSED (reset)\\n\");\n    }\n    return result;\n}\n\nint success() { return 200; }\nint failure() { return -1; }\n\nint main() {\n    CircuitBreaker cb;\n    cb_init(&cb);\n    cb_call(&cb, success); cb_call(&cb, success);\n    cb_call(&cb, failure); cb_call(&cb, failure); cb_call(&cb, failure);\n    cb.state = HALF_OPEN; // simulate timeout\n    printf(\"Half-open attempt\\n\");\n    cb_call(&cb, success);\n    printf(\"State: %d\\n\", cb.state);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('OPEN') && output.includes('CLOSED')",
+        "successMessage": "Circuit breaker works!",
+        "failureMessage": "Simulate circuit breaker transitions"
+      }
+    }
+  ]
+}

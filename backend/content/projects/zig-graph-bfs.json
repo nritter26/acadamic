@@ -1,0 +1,16 @@
+{
+  "id": "zig-graph-bfs",
+  "title": "Graph BFS",
+  "description": "Write a Zig program that implements Breadth-First Search on a graph represented as an adjacency matrix.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const graph = [_][5]u8{\n        [_]u8{ 0, 1, 1, 0, 0 },\n        [_]u8{ 1, 0, 0, 1, 0 },\n        [_]u8{ 1, 0, 0, 1, 1 },\n        [_]u8{ 0, 1, 1, 0, 0 },\n        [_]u8{ 0, 0, 1, 0, 0 },\n    };\n    var visited = [_]bool{false} ** 5;\n    var queue: [5]u8 = undefined;\n    var front: usize = 0;\n    var rear: usize = 0;\n    \n    const start: u8 = 0;\n    visited[start] = true;\n    queue[rear] = start;\n    rear += 1;\n    \n    while (front < rear) {\n        const node = queue[front];\n        front += 1;\n        std.debug.print(\"{} \", .{node});\n        for (0..5) |neighbor| {\n            if (graph[node][neighbor] == 1 and !visited[neighbor]) {\n                visited[neighbor] = true;\n                queue[rear] = @intCast(neighbor);\n                rear += 1;\n            }\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4')",
+  "hints": [
+    "BFS uses a queue to explore neighbors level by level",
+    "Track visited nodes with a boolean array to avoid cycles",
+    "Use `@intCast()` to safely convert usize to u8"
+  ]
+}

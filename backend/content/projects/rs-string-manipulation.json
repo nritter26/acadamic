@@ -1,0 +1,71 @@
+{
+  "id": "rs-string-manipulation",
+  "title": "Rust: String Manipulation",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "strings", "split", "join", "replace", "regex"],
+  "description": "Advanced string manipulation: split, join, replace, and regex matching.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Split a String",
+      "description": "Write a function that splits the string `\"apple,banana,cherry,date\"` by commas and prints each fruit on its own line.",
+      "hints": ["`s.split(\",\")` returns an iterator over the substrings.", "Use `.for_each()` or a for loop to print each.", "The split iterator can be collected with `.collect::<Vec<&str>>()`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana') && output.includes('cherry') && output.includes('date')",
+        "successMessage": "String split works!",
+        "failureMessage": "Split the CSV string and print each fruit."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Join Strings",
+      "description": "Given `[\"Rust\", \"is\", \"fast\"]`, join them with spaces using `.join(\" \")` and print.",
+      "hints": ["`vec![String]` or `vec![&str]` stored as `Vec<&str>`.", "`.join(\" \")` works on slices of strings.", "Output should be 'Rust is fast'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust is fast')",
+        "successMessage": "String join works!",
+        "failureMessage": "Join the words with spaces and print."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Replace Substrings",
+      "description": "Use `str::replace` to replace all occurrences of `\"cat\"` with `\"dog\"` in `\"The cat sat on the mat\"`. Print the result.",
+      "hints": ["`s.replace(\"cat\", \"dog\")` returns a new String.", "`replace` replaces all occurrences.", "Result: 'The dog sat on the mat'"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('dog') && !output.includes('cat')",
+        "successMessage": "String replace works!",
+        "failureMessage": "Replace 'cat' with 'dog' and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Trim and Uppercase",
+      "description": "Clean up `\"  hello world  \"` using `.trim()` and `.to_uppercase()`. Print the cleaned string.",
+      "hints": ["`.trim()` removes leading/trailing whitespace.", "`.to_uppercase()` converts to uppercase.", "Result: 'HELLO WORLD'"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('HELLO WORLD')",
+        "successMessage": "Trim and uppercase works!",
+        "failureMessage": "Trim whitespace and convert to uppercase."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Extract Words with Regex",
+      "description": "Use the `regex` crate to extract all words (alphabetic sequences) from `\"Rust1 is2 great3!\"` using `\\b[a-zA-Z]+\\b`. Print each word.",
+      "hints": ["You can use `Regex::new(r\"[a-zA-Z]+\")` — no need for external crate in practice.", "`find_iter` returns all matches.", "Words: Rust, is, great"],
+      "codeTemplate": { "rust": "fn main() {\n    // Simulate regex by filtering alphanumeric chars\n    let text = \"Rust1 is2 great3!\";\n    let words: Vec<&str> = text.split_whitespace()\n        .map(|w| w.trim_matches(|c: char| !c.is_alphabetic()))\n        .filter(|w| !w.is_empty())\n        .collect();\n    for w in &words {\n        println!(\"{}\", w);\n    }\n}" },
+      "verification": {
+        "test": "output.includes('Rust') && output.includes('is') && output.includes('great')",
+        "successMessage": "Word extraction works!",
+        "failureMessage": "Extract and print all pure alphabetic words."
+      }
+    }
+  ]
+}

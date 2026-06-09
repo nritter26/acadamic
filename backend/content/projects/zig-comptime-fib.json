@@ -1,0 +1,16 @@
+{
+  "id": "zig-comptime-fib",
+  "title": "Comptime Fibonacci",
+  "description": "Write a Zig program that computes Fibonacci numbers at compile time using comptime evaluation.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn fibonacci(comptime n: u32) u32 {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\npub fn main() !void {\n    const fib10 = comptime fibonacci(10);\n    const fib20 = comptime fibonacci(20);\n    const fib30 = comptime fibonacci(30);\n    \n    std.debug.print(\"fib(10) = {}\\n\", .{fib10});\n    std.debug.print(\"fib(20) = {}\\n\", .{fib20});\n    std.debug.print(\"fib(30) = {}\\n\", .{fib30});\n}"
+  },
+  "verificationTest": "output.includes('fib(10) = 55') && output.includes('fib(20) = 6765') && output.includes('fib(30) = 832040')",
+  "hints": [
+    "Use `comptime` keyword to force compile-time evaluation",
+    "The `comptime` parameter in `fn fibonacci(comptime n: u32)` forces all calls to be evaluated at compile time",
+    "Comptime evaluation has no runtime overhead — the result is inlined as a constant"
+  ]
+}

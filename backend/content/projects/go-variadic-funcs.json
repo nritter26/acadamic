@@ -1,0 +1,16 @@
+{
+  "id": "go-variadic-funcs",
+  "title": "Go: Variadic Functions",
+  "description": "Write a Go program that uses variadic functions to sum numbers and concatenate strings.",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\nfunc sum(nums ...int) int {\n\ttotal := 0\n\tfor _, n := range nums {\n\t\ttotal += n\n\t}\n\treturn total\n}\n\nfunc join(sep string, words ...string) string {\n\tresult := \"\"\n\tfor i, w := range words {\n\t\tif i > 0 {\n\t\t\tresult += sep\n\t\t}\n\t\tresult += w\n\t}\n\treturn result\n}\n\nfunc main() {\n\tfmt.Println(\"Sum:\", sum(1, 2, 3, 4, 5))\n\tfmt.Println(join(\", \", \"Go\", \"Rust\", \"Zig\"))\n}"
+  },
+  "verificationTest": "output.includes('Sum: 15') && output.includes('Go, Rust, Zig')",
+  "hints": [
+    "Variadic parameters use `...type` syntax: `func sum(nums ...int)`",
+    "Inside the function, nums is a slice",
+    "Use `range` to iterate over variadic parameters"
+  ]
+}

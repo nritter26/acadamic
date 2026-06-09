@@ -1,0 +1,71 @@
+{
+  "id": "rs-queue",
+  "title": "Rust: Queue (FIFO)",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "queue", "FIFO", "VecDeque", "deque"],
+  "description": "Implement a queue data structure using VecDeque and the FIFO principle.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Queue with VecDeque",
+      "description": "Create a `VecDeque<i32>` and use `.push_back()` to add 1, 2, 3. Print the VecDeque.",
+      "hints": ["`use std::collections::VecDeque;`", "`let mut queue = VecDeque::new();`", "`.push_back(value)` adds to the back."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3')",
+        "successMessage": "Queue created with 3 elements!",
+        "failureMessage": "Create VecDeque, push_back 1,2,3 and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pop from Front",
+      "description": "Pop elements from the front of the queue using `.pop_front()` until empty. Print each value (FIFO order).",
+      "hints": ["`.pop_front()` returns `Option<T>`.", "Use `while let Some(value) = queue.pop_front() { ... }`", "FIFO order: 1, 2, 3"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3')",
+        "successMessage": "FIFO order works!",
+        "failureMessage": "Pop and print from front: 1, 2, 3."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Push Front and Pop Back",
+      "description": "Demonstrate that VecDeque supports both ends: `.push_front(10)`, `.push_back(20)`, `.push_front(5)`. Then pop from back and print.",
+      "hints": ["`.push_front()` adds to the front.", "`.pop_back()` removes from the back.", "Order: push_front(5), push_front(10) → [10, 5] ; push_back(20) → [10, 5, 20]; pop_back = 20"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('20')",
+        "successMessage": "Double-ended operations work!",
+        "failureMessage": "Push front/back and pop back, print the popped value."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Custom Queue Struct",
+      "description": "Define a generic `Queue<T>` struct using VecDeque with methods `enqueue`, `dequeue`, `peek`, `is_empty`, `len`.",
+      "hints": ["`struct Queue<T> { items: VecDeque<T> }`", "`enqueue` = `push_back`, `dequeue` = `pop_front`.", "Add a `new()` associated function too."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2')",
+        "successMessage": "Custom Queue struct works!",
+        "failureMessage": "Enqueue 1,2, dequeue and print both."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Queue vs Stack",
+      "description": "Create both a Queue and a Stack, enqueue/push [1, 2, 3]. Dequeue all from queue and pop all from stack. Show the different order (FIFO vs LIFO).",
+      "hints": ["Use VecDeque for queue (FIFO) and Vec for stack (LIFO).", "Queue dequeue: 1, 2, 3", "Stack pop: 3, 2, 1"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/1.*2.*3/gs) ? true : false",
+        "successMessage": "FIFO vs LIFO demonstrated!",
+        "failureMessage": "Show both queue (1,2,3) and stack (3,2,1) output."
+      }
+    }
+  ]
+}

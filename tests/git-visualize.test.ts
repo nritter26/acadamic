@@ -4,8 +4,8 @@ import vm from 'node:vm';
 
 function loadGitScript() {
   const code = fs.readFileSync('./public/git-visualize.js', 'utf8');
-  const appData = require('../content/app-data.json');
-  const gitData = require('../content/git.json');
+  const appData = require('../backend/content/app-data.json');
+  const gitData = require('../backend/content/git.json');
 
   const elements = new Map<string, any>();
   const topicList = { innerHTML: '' };

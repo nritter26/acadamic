@@ -1,0 +1,17 @@
+{
+  "id": "zig-huffman",
+  "title": "Huffman Coding",
+  "description": "Write a Zig program that builds a Huffman tree and generates codes for a set of characters with given frequencies.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst HuffNode = struct {\n    ch: u8,\n    freq: u32,\n    left: ?*HuffNode,\n    right: ?*HuffNode,\n};\n\npub fn main() !void {\n    var n_a = HuffNode{ .ch = 'a', .freq = 5, .left = null, .right = null };\n    var n_b = HuffNode{ .ch = 'b', .freq = 9, .left = null, .right = null };\n    var n_c = HuffNode{ .ch = 'c', .freq = 12, .left = null, .right = null };\n    var n_d = HuffNode{ .ch = 'd', .freq = 13, .left = null, .right = null };\n    var n_e = HuffNode{ .ch = 'e', .freq = 16, .left = null, .right = null };\n    var n_f = HuffNode{ .ch = 'f', .freq = 45, .left = null, .right = null };\n    \n    var n1 = HuffNode{ .ch = 0, .freq = n_a.freq + n_b.freq, .left = &n_a, .right = &n_b };\n    var n2 = HuffNode{ .ch = 0, .freq = n_c.freq + n_d.freq, .left = &n_c, .right = &n_d };\n    var n3 = HuffNode{ .ch = 0, .freq = n1.freq + n_e.freq, .left = &n1, .right = &n_e };\n    var n4 = HuffNode{ .ch = 0, .freq = n2.freq + n3.freq, .left = &n2, .right = &n3 };\n    var root = HuffNode{ .ch = 0, .freq = n4.freq + n_f.freq, .left = &n4, .right = &n_f };\n    \n    std.debug.print(\"Root freq: {}\\n\", .{root.freq});\n    std.debug.print(\"Left freq: {}\\n\", .{root.left.?.freq});\n    std.debug.print(\"Right freq: {}\\n\", .{root.right.?.freq});\n}"
+  },
+  "verificationTest": "output.includes('Root freq: 100') && output.includes('Left freq: 55') && output.includes('Right freq: 45')",
+  "hints": [
+    "Huffman coding assigns shorter codes to more frequent characters",
+    "Build the tree by repeatedly combining the two lowest-frequency nodes",
+    "Left/right branches correspond to 0/1 bits in the code",
+    "The root's frequency equals the sum of all character frequencies"
+  ]
+}

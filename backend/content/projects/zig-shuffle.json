@@ -1,0 +1,16 @@
+{
+  "id": "zig-shuffle",
+  "title": "Fisher-Yates Shuffle",
+  "description": "Write a Zig program that implements the Fisher-Yates shuffle algorithm to randomly shuffle an array.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var prng = std.rand.DefaultPrng.init(42);\n    const rand = prng.random();\n    var arr = [_]i32{ 1, 2, 3, 4, 5, 6, 7 };\n    \n    var i: usize = arr.len;\n    while (i > 0) {\n        i -= 1;\n        const j = rand.intRangeLessThan(usize, 0, i + 1);\n        const temp = arr[i];\n        arr[i] = arr[j];\n        arr[j] = temp;\n    }\n    \n    for (arr) |val| std.debug.print(\"{} \", .{val});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('2') && output.includes('7') && output.includes('5') && output.includes('4') && output.includes('3') && output.includes('1') && output.includes('6')",
+  "hints": [
+    "Fisher-Yates: iterate from the end, swapping each element with a random earlier element",
+    "Initialize a PRNG with `std.rand.DefaultPrng.init(seed)`",
+    "Use `rand.intRangeLessThan(T, min, max)` for unbiased random integers in a range"
+  ]
+}

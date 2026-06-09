@@ -1,0 +1,16 @@
+{
+  "id": "go-zero-values",
+  "title": "Go: Zero Values",
+  "description": "Write a Go program that demonstrates the zero value initialization for different types.",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tvar i int\n\tvar f float64\n\tvar s string\n\tvar b bool\n\tvar p *int\n\n\tfmt.Printf(\"int: %d\\n\", i)\n\tfmt.Printf(\"float64: %.1f\\n\", f)\n\tfmt.Printf(\"string: %q\\n\", s)\n\tfmt.Printf(\"bool: %t\\n\", b)\n\tfmt.Printf(\"pointer: %v\\n\", p)\n}"
+  },
+  "verificationTest": "output.includes('int: 0') && output.includes('float64: 0.0') && output.includes('string: \"\"') && output.includes('bool: false') && output.includes('pointer: <nil>')",
+  "hints": [
+    "Go initializes all variables to their zero value if no explicit initializer is given",
+    "Zero values: int=0, float64=0.0, string=\"\", bool=false, pointer=nil",
+    "Use `%q` to print strings with quotes, `%v` for default formatting"
+  ]
+}

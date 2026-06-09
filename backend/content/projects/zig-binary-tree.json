@@ -1,0 +1,16 @@
+{
+  "id": "zig-binary-tree",
+  "title": "Binary Tree Traversal",
+  "description": "Write a Zig program that implements in-order traversal of a binary tree.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst TreeNode = struct {\n    value: i32,\n    left: ?*TreeNode,\n    right: ?*TreeNode,\n};\n\nfn inOrder(node: ?*TreeNode) void {\n    if (node) |n| {\n        inOrder(n.left);\n        std.debug.print(\"{} \", .{n.value});\n        inOrder(n.right);\n    }\n}\n\npub fn main() !void {\n    var n3 = TreeNode{ .value = 3, .left = null, .right = null };\n    var n4 = TreeNode{ .value = 4, .left = null, .right = null };\n    var n2 = TreeNode{ .value = 2, .left = &n3, .right = &n4 };\n    var n1 = TreeNode{ .value = 1, .left = null, .right = &n2 };\n    \n    inOrder(&n1);\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('1 2 3 4') || output.includes('1 3 2 4')",
+  "hints": [
+    "In-order traversal: left subtree → root → right subtree",
+    "Use `?*TreeNode` for optional child pointers",
+    "Recursive function takes `?*TreeNode` and uses `if (node) |n|` to unwrap"
+  ]
+}

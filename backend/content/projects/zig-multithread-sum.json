@@ -1,0 +1,17 @@
+{
+  "id": "zig-multithread-sum",
+  "title": "Multithreaded Sum",
+  "description": "Write a Zig program that computes the sum of an array using multiple threads.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn sumRange(arr: []i32, start: usize, end: usize) i32 {\n    var sum: i32 = 0;\n    for (start..end) |i| sum += arr[i];\n    return sum;\n}\n\npub fn main() !void {\n    const arr = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8 };\n    const mid = arr.len / 2;\n    \n    const t1 = try std.Thread.spawn(.{}, sumRange, .{ arr, 0, mid });\n    const t2 = try std.Thread.spawn(.{}, sumRange, .{ arr, mid, arr.len });\n    \n    const r1 = t1.join();\n    const r2 = t2.join();\n    const total = r1 + r2;\n    \n    std.debug.print(\"Sum: {}\\n\", .{total});\n}"
+  },
+  "verificationTest": "output.includes('Sum: 36')",
+  "hints": [
+    "Use `std.Thread.spawn` to create a new thread running a function",
+    "Thread functions receive a context parameter with arguments",
+    "Use `.join()` to wait for a thread to finish and get its return value",
+    "The total sum of 1..8 is 36"
+  ]
+}

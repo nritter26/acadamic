@@ -1,0 +1,71 @@
+{
+  "id": "rs-option-combinators",
+  "title": "Rust: Option Combinators",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "Option", "map", "and_then", "unwrap_or", "combinators"],
+  "description": "Master Rust's Option type with combinators like map, and_then, and unwrap_or.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "map on Option",
+      "description": "Create `Some(5)` and `None`. Use `.map(|x| x * 2)` on both. Print the results.",
+      "hints": ["`Some(5).map(|x| x * 2)` returns `Some(10)`.", "`None.map(|x| x * 2)` returns `None`.", "`.map` transforms the inner value if present."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Some(10)') || output.includes('10')",
+        "successMessage": "Map on Option works!",
+        "failureMessage": "Print map results for Some(5) and None."
+      }
+    },
+    {
+      "id": 2,
+      "title": "and_then (flatMap)",
+      "description": "Write `safe_reciprocal(x: f64) -> Option<f64>` that returns None if x == 0. Use `.and_then()` to chain: `parse(\"2\") → safe_reciprocal`. Print results for \"2\" and \"0\".",
+      "hints": ["`safe_reciprocal(x)` returns `if x == 0.0 { None } else { Some(1.0 / x) }`", "Chain: `Some(2.0).and_then(safe_reciprocal)` returns `Some(0.5)`.", "`Some(0.0).and_then(safe_reciprocal)` returns `None`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0.5') && output.includes('None')",
+        "successMessage": "and_then chaining works!",
+        "failureMessage": "Chain safe_reciprocal after Some(2.0) and Some(0.0)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "unwrap_or and unwrap_or_else",
+      "description": "Use `.unwrap_or(0)` and `.unwrap_or_else(|| { println!(\"computing default...\"); 42 })` on `None` and `Some(10)`. Print the unwrapped values.",
+      "hints": ["`.unwrap_or(default)` returns default if None.", "`.unwrap_or_else(fn)` calls the closure only if None (lazy).", "Demonstrate both."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('42') && output.includes('10')",
+        "successMessage": "Unwrap combinators work!",
+        "failureMessage": "Use unwrap_or and unwrap_or_else to get values from Options."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filter Option",
+      "description": "Create an option `Some(42)`. Use `.filter(|x| *x > 50)` and `.filter(|x| *x < 50)`. Print both results.",
+      "hints": ["`.filter(predicate)` returns `Some(value)` if predicate is true, else `None`.", "`Some(42).filter(|x| *x > 50)` returns `None`.", "`Some(42).filter(|x| *x < 50)` returns `Some(42)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('None')",
+        "successMessage": "filter on Option works!",
+        "failureMessage": "Print both filter results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Chain Multiple Combinators",
+      "description": "Write a function `process(x: f64) -> Option<String>` that formats x as string with 2 decimals, but only if x is positive. Chain: parse string → ensure positive → format. Test with \"3.14159\" and \"-1.0\".",
+      "hints": ["Chain: `s.parse().ok().filter(|x: &f64| *x > 0.0).map(|x| format!(\"{:.2}\", x))`", "`.ok()` converts `Result` to `Option`.", "\"3.14159\" → Some(\"3.14\"), \"-1.0\" → None"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3.14') && output.includes('None')",
+        "successMessage": "Chained combinators work!",
+        "failureMessage": "Chain parse → filter → map and print results."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-t9-keypad",
+  "title": "T9 Keypad",
+  "description": "Write a Zig program that maps letters to T9 keypad digits and encodes a word.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const keys = [_][]const u8{\n        \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"\n    };\n    const word = \"zig\";\n    \n    for (word) |ch| {\n        var digit: u8 = 0;\n        for (keys, 2..) |letters, num| {\n            for (letters) |l| {\n                if (l == ch) digit = @intCast(num);\n            }\n        }\n        if (digit > 0) std.debug.print(\"{}\", .{digit});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('944')",
+  "hints": [
+    "T9 keypad maps letters: 2=abc, 3=def, 4=ghi, 5=jkl, 6=mno, 7=pqrs, 8=tuv, 9=wxyz",
+    "Use parallel arrays: one for the letters string, one for the corresponding digit",
+    "`z`=9, `i`=4, `g`=4, so \"zig\" → \"944\"",
+    "Use `@intCast()` to convert usize to u8"
+  ]
+}

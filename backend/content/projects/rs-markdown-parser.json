@@ -1,0 +1,71 @@
+{
+  "id": "rs-markdown-parser",
+  "title": "Rust: Markdown Parser",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "markdown", "parser", "HTML generation", "text processing"],
+  "description": "Build a parser that converts Markdown to HTML.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse Headers",
+      "description": "Write a function `parse_header(line: &str) -> Option<String>` that converts `# Header` to `<h1>Header</h1>`, `## Header` to `<h2>Header</h2>`, etc. Test with levels 1 to 3.",
+      "hints": ["Count leading `#` characters.", "The number of `#` determines the heading level (1-6).", "Strip the `#` and any following space, wrap in `<hN>` tags."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('<h1>') && output.contains('<h2>')",
+        "successMessage": "Header parsing works!",
+        "failureMessage": "Parse '# Title' and '## Section' and print HTML."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parse Bold and Italic",
+      "description": "Parse inline formatting: `**bold**` → `<strong>bold</strong>`, `*italic*` → `<em>italic</em>`. Replace within a line. Test with `\"This is **bold** and *italic* text\"`.",
+      "hints": ["Use `str::replace` with the patterns.", "Bold uses `**text**` syntax.", "Italic uses `*text*` syntax.", "Order matters: replace bold before italic (since bold uses two asterisks)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('<strong>') && output.contains('<em>')",
+        "successMessage": "Bold/italic parsing works!",
+        "failureMessage": "Parse a line with bold and italic, print HTML."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Parse Lists",
+      "description": "Parse unordered lists: lines starting with `-` or `*` become `<li>` inside `<ul>`. Consecutive list items are grouped. Test with a 3-item list.",
+      "hints": ["Track whether we're inside a list.", "`- Item` → `<li>Item</li>`.", "When a non-list line follows a list, close the `</ul>` tag."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('<ul>') && output.contains('<li>') && output.contains('</ul>')",
+        "successMessage": "List parsing works!",
+        "failureMessage": "Parse a markdown list and print HTML."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Parse Code Blocks",
+      "description": "Parse fenced code blocks: text between ` ``` ` markers becomes `<pre><code>...</code></pre>`. Preserve whitespace. Test with a short code block.",
+      "hints": ["Track `in_code_block` state.", "When ``` is encountered, toggle state.", "Lines inside code block are appended verbatim."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('<pre>') && output.contains('<code>')",
+        "successMessage": "Code block parsing works!",
+        "failureMessage": "Parse a fenced code block and print HTML."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Markdown Renderer",
+      "description": "Combine all parsers into a full `markdown_to_html(md: &str) -> String` function. Test with a complete Markdown document containing headers, bold, lists, and code. Print the generated HTML.",
+      "hints": ["Process line by line.", "Apply each parser in order (list, header, code block, inline).", "Non-matched lines become `<p>paragraph</p>`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('<h1>') && output.contains('<p>') && output.contains('<ul>')",
+        "successMessage": "Full Markdown renderer works!",
+        "failureMessage": "Render a complete Markdown document to HTML and print."
+      }
+    }
+  ]
+}

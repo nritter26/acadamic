@@ -1,0 +1,17 @@
+{
+  "id": "zig-rabin-karp",
+  "title": "Rabin-Karp Search",
+  "description": "Write a Zig program that implements the Rabin-Karp string searching algorithm using rolling hash.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn search(text: []const u8, pattern: []const u8) void {\n    const d: u64 = 256;\n    const q: u64 = 101;\n    const m = pattern.len;\n    const n = text.len;\n    var p: u64 = 0;\n    var t: u64 = 0;\n    var h: u64 = 1;\n    \n    for (0..m - 1) |_| h = (h * d) % q;\n    for (0..m) |i| {\n        p = (d * p + pattern[i]) % q;\n        t = (d * t + text[i]) % q;\n    }\n    \n    for (0..n - m + 1) |i| {\n        if (p == t) {\n            var match = true;\n            for (0..m) |j| {\n                if (text[i + j] != pattern[j]) { match = false; break; }\n            }\n            if (match) std.debug.print(\"Found at {}\\n\", .{i});\n        }\n        if (i < n - m) {\n            t = (d * (t - text[i] * h) + text[i + m]) % q;\n            t +%= q;\n        }\n    }\n}\n\npub fn main() !void {\n    const text = \"ABCCDDAEFG\";\n    const pattern = \"CDD\";\n    search(text, pattern);\n}"
+  },
+  "verificationTest": "output.includes('Found at 3')",
+  "hints": [
+    "Rabin-Karp uses a rolling hash to compare substrings in O(1) time",
+    "The hash is computed as a base-d number modulo q (a prime)",
+    "When hashes match, verify with a character-by-character comparison",
+    "`+%= q` ensures the rolling hash stays non-negative"
+  ]
+}

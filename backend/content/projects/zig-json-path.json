@@ -1,0 +1,16 @@
+{
+  "id": "zig-json-path",
+  "title": "JSON Path Parser",
+  "description": "Write a Zig program that parses a simple JSON path expression and extracts the corresponding value from a nested JSON-like structure.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Value = union(enum) {\n    num: f64,\n    str: []const u8,\n    obj: struct { keys: [][]const u8, vals: []Value },\n};\n\npub fn main() !void {\n    const path = \"person.name\";\n    \n    var parts: [2][]const u8 = undefined;\n    var start: usize = 0;\n    var idx: usize = 0;\n    for (path, 0..) |ch, i| {\n        if (ch == '.') {\n            parts[idx] = path[start..i];\n            idx += 1;\n            start = i + 1;\n        }\n    }\n    parts[idx] = path[start..];\n    \n    std.debug.print(\"Path segments: \", .{});\n    for (0..idx + 1) |i| {\n        std.debug.print(\"{s} \", .{parts[i]});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Path segments: person name')",
+  "hints": [
+    "Split the path string on '.' to get individual segments",
+    "Use `for (path, 0..) |ch, i|` for iteration with index",
+    "Slice the string with `path[start..i]` to extract substrings without allocation"
+  ]
+}

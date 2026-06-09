@@ -1,0 +1,17 @@
+{
+  "id": "zig-sum-avg",
+  "title": "Sum and Average",
+  "description": "Write a Zig program that calculates and prints the sum and average of an array of integers.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const nums = [_]i32{ 10, 20, 30, 40, 50 };\n    var sum: i32 = 0;\n    \n    for (nums) |n| {\n        sum += n;\n    }\n    \n    const avg = @as(f64, @intCast(sum)) / @as(f64, nums.len);\n    \n    std.debug.print(\"Sum: {}\\n\", .{sum});\n    std.debug.print(\"Average: {d:.1}\\n\", .{avg});\n}"
+  },
+  "verificationTest": "output.includes('Sum: 150') && (output.includes('Average: 30') || output.includes('Average: 30.0'))",
+  "hints": [
+    "Use a `for` loop to accumulate the sum",
+    "For division, cast to `f64` using `@intCast` and `@as`",
+    "Use `nums.len` to get the array length",
+    "`{d:.1}` formats a float with 1 decimal place"
+  ]
+}

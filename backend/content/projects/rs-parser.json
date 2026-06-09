@@ -1,0 +1,71 @@
+{
+  "id": "rs-parser",
+  "title": "Rust: Recursive Descent Parser",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 45,
+  "concepts": ["rust", "parser", "AST", "recursive descent", "grammar"],
+  "description": "Build a recursive descent parser that converts tokens into an AST.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define AST Nodes",
+      "description": "Define `ASTNode` enum with variants: `NumberLiteral(f64)`, `BinaryOp(Box<ASTNode>, TokenType, Box<ASTNode>)`, `Let(String, Box<ASTNode>)`, `Print(Box<ASTNode>)`, `Ident(String)`. Print node definitions.",
+      "hints": ["`enum ASTNode { NumberLiteral(f64), Ident(String), BinaryOp { left: Box<ASTNode>, op: TokenType, right: Box<ASTNode> }, ... }`", "AST represents the syntactic structure of the program.", "BinaryOp holds left, operator, right."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('NumberLiteral') && output.contains('BinaryOp')",
+        "successMessage": "AST nodes defined!",
+        "failureMessage": "Print the defined AST node types."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parse Numbers and Identifiers",
+      "description": "Create a `Parser` struct that takes tokens. Implement `parse_primary()` that handles Number and Ident tokens. Test with tokens from `\"42\"` and `\"x\"`.",
+      "hints": ["`struct Parser { tokens: Vec<Token>, pos: usize }`", "`fn parse_primary(&mut self) -> ASTNode { match self.peek().ttype { Number(n) => { self.advance(); ASTNode::NumberLiteral(n) }, ... } }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('NumberLiteral')",
+        "successMessage": "Primary parsing works!",
+        "failureMessage": "Parse a number token and print the AST node."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Parse Binary Expressions",
+      "description": "Implement `parse_expression()` with operator precedence (PEMDAS). Handle `+`, `-`, `*`, `/` with proper associativity. Parse `\"2 + 3 * 4\"` and print the AST.",
+      "hints": ["Use precedence climbing or recursive descent for each level.", "Higher precedence = deeper in the parse tree.", "`2 + 3 * 4` → BinaryOp(2, +, BinaryOp(3, *, 4))"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('2') && output.contains('3') && output.contains('4')",
+        "successMessage": "Expression parsing works!",
+        "failureMessage": "Parse '2 + 3 * 4' and print the AST."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Parse Let and Print Statements",
+      "description": "Add statement parsing: `let x = expr` and `print expr`. Parse `\"let x = 42; print x + 1\"` and print the AST.",
+      "hints": ["`parse_statement`: look at first token type.", "`Let` token → parse LetStatement, then expect Semicolon.", "`Print` token → parse PrintStatement."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Let') && output.contains('Print')",
+        "successMessage": "Statement parsing works!",
+        "failureMessage": "Parse 'let x = 42; print x + 1' and print the full AST."
+      }
+    },
+    {
+      "id": 5,
+      "title": "AST Pretty Printer",
+      "description": "Implement `Display` for ASTNode that renders the tree with indentation. Show the hierarchy: each nesting level gets more indentation. Print the AST for a multi-statement program.",
+      "hints": ["`impl Display for ASTNode { fn fmt(&self, f: &mut Formatter) -> fmt::Result { ... } }`", "BinaryOp: `write!(f, \"({} {} {})\", left, op, right)`", "Add indentation for nested structures."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('(') && output.contains(')') || (output.contains('Let') && output.contains('NumberLiteral'))",
+        "successMessage": "AST pretty printer works!",
+        "failureMessage": "Parse a program and print the formatted AST."
+      }
+    }
+  ]
+}

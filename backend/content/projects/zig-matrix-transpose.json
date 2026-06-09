@@ -1,0 +1,17 @@
+{
+  "id": "zig-matrix-transpose",
+  "title": "Matrix Transpose",
+  "description": "Write a Zig program that transposes a 3x3 matrix and prints both the original and transposed matrices.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var matrix = [_][3]i32{\n        [_]i32{ 1, 2, 3 },\n        [_]i32{ 4, 5, 6 },\n        [_]i32{ 7, 8, 9 },\n    };\n    \n    std.debug.print(\"Original:\\n\", .{});\n    for (matrix) |row| {\n        for (row) |val| std.debug.print(\"{} \", .{val});\n        std.debug.print(\"\\n\", .{});\n    }\n    \n    var transposed: [3][3]i32 = undefined;\n    for (0..3) |i| {\n        for (0..3) |j| {\n            transposed[i][j] = matrix[j][i];\n        }\n    }\n    \n    std.debug.print(\"Transposed:\\n\", .{});\n    for (transposed) |row| {\n        for (row) |val| std.debug.print(\"{} \", .{val});\n        std.debug.print(\"\\n\", .{});\n    }\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('5') && output.includes('9') && output.includes('3') && output.includes('7')",
+  "hints": [
+    "A transpose flips rows and columns: transposed[i][j] = matrix[j][i]",
+    "Define a 2D array with `[rows][cols]Type` syntax",
+    "Use `[_]i32{ ... }` for inner arrays with inferred sizes",
+    "Initialize with `undefined` for the transposed matrix"
+  ]
+}

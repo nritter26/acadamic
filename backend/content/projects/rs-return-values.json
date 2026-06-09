@@ -1,0 +1,71 @@
+{
+  "id": "rs-return-values",
+  "title": "Rust: Return Values",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "return", "return values", "Option", "Result"],
+  "description": "Return values from functions, including multiple return types and Option/Result.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Return a Value",
+      "description": "Write a function `get_forty_two() -> i32` that returns 42. Call and print it.",
+      "hints": ["`fn get_forty_two() -> i32 { 42 }`", "The return type is specified after `->`.", "The value `42` is the last expression (no semicolon, no `return`)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Return value works!",
+        "failureMessage": "Write get_forty_two() that returns 42."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Return Tuple",
+      "description": "Write a function `min_max(arr: &[i32]) -> (i32, i32)` that returns the minimum and maximum of a slice. Call with `[3, 1, 7, 2, 9]`.",
+      "hints": ["Return a tuple: `(min, max)`", "Use `*arr.iter().min().unwrap()` and `*arr.iter().max().unwrap()`", "min_max of [3, 1, 7, 2, 9] = (1, 9)"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('9')",
+        "successMessage": "Tuple return works!",
+        "failureMessage": "Print min and max of [3, 1, 7, 2, 9]."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Return Option",
+      "description": "Write a function `safe_divide(a: f64, b: f64) -> Option<f64>` that returns `None` if b is 0, else `Some(a/b)`. Call and print both cases.",
+      "hints": ["`if b == 0.0 { None } else { Some(a / b) }`", "`Option` represents a value that might be absent.", "Print with `{:?}` to see `Some(...)` or `None`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Some') && output.includes('None')",
+        "successMessage": "Option return works!",
+        "failureMessage": "Return Some for valid division and None for division by zero."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Return Result",
+      "description": "Write a function `parse_int(s: &str) -> Result<i32, String>` that parses a string to i32. Print success or error for `\"42\"` and `\"abc\"`.",
+      "hints": ["`s.parse::<i32>().map_err(|_| format!(\"cannot parse: {}\", s))`", "Return `Ok(value)` on success and `Err(msg)` on failure.", "Print with `{:?}` to see `Ok(...)` or `Err(...)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Ok') && output.includes('Err')",
+        "successMessage": "Result return works!",
+        "failureMessage": "Handle both valid and invalid string parsing."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Return String",
+      "description": "Write a function `greet(name: &str) -> String` that returns a greeting like `\"Hello, NAME!\"`. Call and print.",
+      "hints": ["`format!(\"Hello, {}!\", name)` returns a String.", "The caller owns the returned String.", "`fn greet(name: &str) -> String { format!(\"Hello, {}!\", name) }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello')",
+        "successMessage": "String return works!",
+        "failureMessage": "Write greet() that returns and prints a greeting string."
+      }
+    }
+  ]
+}

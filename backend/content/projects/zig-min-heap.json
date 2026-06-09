@@ -1,0 +1,17 @@
+{
+  "id": "zig-min-heap",
+  "title": "Min-Heap",
+  "description": "Write a Zig program that implements a min-heap with insert and extract-min operations.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst MinHeap = struct {\n    data: [10]i32 = undefined,\n    size: usize = 0,\n    \n    fn insert(self: *MinHeap, val: i32) void {\n        var i = self.size;\n        self.data[i] = val;\n        self.size += 1;\n        while (i > 0) {\n            const parent = (i - 1) / 2;\n            if (self.data[i] >= self.data[parent]) break;\n            const temp = self.data[i]; self.data[i] = self.data[parent]; self.data[parent] = temp;\n            i = parent;\n        }\n    }\n    \n    fn extractMin(self: *MinHeap) ?i32 {\n        if (self.size == 0) return null;\n        const min = self.data[0];\n        self.size -= 1;\n        self.data[0] = self.data[self.size];\n        var i: usize = 0;\n        while (true) {\n            var smallest = i;\n            const left = 2 * i + 1;\n            const right = 2 * i + 2;\n            if (left < self.size and self.data[left] < self.data[smallest]) smallest = left;\n            if (right < self.size and self.data[right] < self.data[smallest]) smallest = right;\n            if (smallest == i) break;\n            const temp = self.data[i]; self.data[i] = self.data[smallest]; self.data[smallest] = temp;\n            i = smallest;\n        }\n        return min;\n    }\n};\n\npub fn main() !void {\n    var heap = MinHeap{};\n    heap.insert(30);\n    heap.insert(10);\n    heap.insert(20);\n    heap.insert(5);\n    \n    while (heap.extractMin()) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('5') && output.includes('10') && output.includes('20') && output.includes('30')",
+  "hints": [
+    "A min-heap is a complete binary tree where parent ≤ children",
+    "Use `parent = (i - 1) / 2` for sift-up during insert",
+    "Use `left = 2*i + 1` and `right = 2*i + 2` for sift-down during extract",
+    "Return `?i32` (optional) from extractMin to handle empty heap"
+  ]
+}

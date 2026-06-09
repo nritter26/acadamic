@@ -1,0 +1,17 @@
+{
+  "id": "zig-fibonacci",
+  "title": "Fibonacci Sequence",
+  "description": "Write a Zig program that prints the first 10 numbers of the Fibonacci sequence.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var a: u32 = 0;\n    var b: u32 = 1;\n    \n    for (0..10) |_| {\n        std.debug.print(\"{} \", .{a});\n        const next = a + b;\n        a = b;\n        b = next;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('34')",
+  "hints": [
+    "Use two variables to track the current and next Fibonacci numbers",
+    "The sequence starts: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34",
+    "Use `_` as the loop variable when you don't need it",
+    "Use `u32` for unsigned integers"
+  ]
+}

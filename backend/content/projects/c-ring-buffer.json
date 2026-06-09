@@ -1,0 +1,23 @@
+{
+  "id": "c-ring-buffer",
+  "title": "C: Ring Buffer",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "ring buffer", "circular buffer", "producer-consumer", "arrays"],
+  "description": "Implement a ring buffer (circular buffer) for a producer-consumer pattern.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Ring Buffer Operations",
+      "description": "Define a `RingBuffer` struct with an int array of size 8, and head/tail indices. Implement `int rb_push(RingBuffer *rb, int val)` (returns 0 if full) and `int rb_pop(RingBuffer *rb, int *val)` (returns 0 if empty). Test with 3 pushes and 2 pops.",
+      "hints": ["Head = where next write goes, Tail = where next read comes from.", "Use modulo for wrap-around: `rb->head = (rb->head + 1) % 8`.", "Full when: `(head + 1) % size == tail`.", "Empty when: `head == tail`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\n#define RB_SIZE 8\n\ntypedef struct { int data[RB_SIZE]; int head, tail; } RingBuffer;\n\nvoid rb_init(RingBuffer *rb) { rb->head = 0; rb->tail = 0; }\n\nint rb_push(RingBuffer *rb, int val) {\n    int next = (rb->head + 1) % RB_SIZE;\n    if (next == rb->tail) return 0;\n    rb->data[rb->head] = val;\n    rb->head = next;\n    return 1;\n}\n\nint rb_pop(RingBuffer *rb, int *val) {\n    if (rb->tail == rb->head) return 0;\n    *val = rb->data[rb->tail];\n    rb->tail = (rb->tail + 1) % RB_SIZE;\n    return 1;\n}\n\nint main() {\n    RingBuffer rb;\n    rb_init(&rb);\n    rb_push(&rb, 10); rb_push(&rb, 20); rb_push(&rb, 30);\n    int val;\n    rb_pop(&rb, &val); printf(\"Popped: %d\\n\", val);\n    rb_pop(&rb, &val); printf(\"Popped: %d\\n\", val);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20')",
+        "successMessage": "Ring buffer works!",
+        "failureMessage": "Push 10, 20, 30 and pop first two"
+      }
+    }
+  ]
+}

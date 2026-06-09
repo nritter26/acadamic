@@ -1,0 +1,23 @@
+{
+  "id": "c-worker-pool",
+  "title": "C: Worker Pool (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "worker pool", "task queue", "concurrency", "simulation"],
+  "description": "Simulate a worker pool where multiple workers pick up and execute tasks from a shared queue.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Worker Pool Simulation",
+      "description": "Define a `Task` struct (id, description). Create a shared array of tasks. Write a `worker_run` function that takes tasks from the queue and prints 'Worker N processing: task description'. Simulate 3 workers processing 5 tasks in round-robin.",
+      "hints": ["Tasks stored in a global array with an index counter.", "Each worker picks the next available task.", "Worker takes: `int task_id = next_task++`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\ntypedef struct { int id; char desc[64]; } Task;\n\nTask tasks[5] = {{1,\"Process data\"},{2,\"Send email\"},{3,\"Generate report\"},{4,\"Backup files\"},{5,\"Clean cache\"}};\nint next_task = 0;\n\nint worker_get_task() {\n    if (next_task < 5) return next_task++;\n    return -1;\n}\n\nvoid worker_run(int worker_id) {\n    while (1) {\n        int t = worker_get_task();\n        if (t == -1) break;\n        printf(\"Worker %d processing: %s\\n\", worker_id, tasks[t].desc);\n    }\n}\n\nint main() {\n    for (int w = 1; w <= 3; w++) worker_run(w);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Worker 1') && output.includes('Worker 3') && output.includes('Process data')",
+        "successMessage": "Worker pool simulation works!",
+        "failureMessage": "Run 3 workers processing all 5 tasks"
+      }
+    }
+  ]
+}

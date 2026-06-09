@@ -1,0 +1,71 @@
+{
+  "id": "rs-query-builder",
+  "title": "Rust: SQL Query Builder",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "SQL", "query builder", "DSL", "builder pattern"],
+  "description": "Build a type-safe SQL query builder using the builder pattern.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "SELECT Builder",
+      "description": "Create a `SelectBuilder` struct with `table: String`, `columns: Vec<String>`. Implement `from(table)` and `column(name)` methods. Build and print `SELECT id, name FROM users`.",
+      "hints": ["`struct SelectBuilder { columns: Vec<String>, table: String, ... }`", "`fn build(&self) -> String { format!(\"SELECT {} FROM {}\", self.columns.join(\", \"), self.table) }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('SELECT') && output.contains('FROM')",
+        "successMessage": "SELECT builder works!",
+        "failureMessage": "Build and print 'SELECT id, name FROM users'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "WHERE Clause",
+      "description": "Add WHERE clause support: `r#where(&mut self, condition: &str) -> &mut Self`. Support chaining multiple conditions with AND. Print `SELECT * FROM users WHERE age > 18 AND status = 'active'`.",
+      "hints": ["Store `conditions: Vec<String>`.", "`r#where` adds to conditions.", "`if !conditions.is_empty() { sql.push_str(&format!(\" WHERE {}\", conditions.join(\" AND \"))); }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('WHERE') && output.contains('AND')",
+        "successMessage": "WHERE clause works!",
+        "failureMessage": "Build a SELECT with WHERE conditions and print."
+      }
+    },
+    {
+      "id": 3,
+      "title": "ORDER BY and LIMIT",
+      "description": "Add `order_by(column, ascending)` and `limit(n)` methods. Print `SELECT * FROM users ORDER BY age DESC LIMIT 10`.",
+      "hints": ["`order_by: Vec<(String, bool)>` (name, ascending).", "`ORDER BY age DESC` if !ascending.", "`LIMIT 10` at the end."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('ORDER BY') && output.contains('LIMIT')",
+        "successMessage": "ORDER BY and LIMIT work!",
+        "failureMessage": "Build query with ordering and limit."
+      }
+    },
+    {
+      "id": 4,
+      "title": "INSERT Builder",
+      "description": "Create an `InsertBuilder` with `into(table)`, `set(column, value)` methods. Build and print `INSERT INTO users (name, age) VALUES ('Alice', 30)`.",
+      "hints": ["`struct InsertBuilder { table: String, columns: Vec<String>, values: Vec<String> }`", "`set(&mut self, col: &str, val: &str) -> &mut Self` pushes to both.", "Build places quotes around string values."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('INSERT INTO') && output.contains('VALUES')",
+        "successMessage": "INSERT builder works!",
+        "failureMessage": "Build and print an INSERT query."
+      }
+    },
+    {
+      "id": 5,
+      "title": "UPDATE and DELETE Builders",
+      "description": "Create `UpdateBuilder` with `table(name)`, `set(col, val)`, `r#where(cond)` and `DeleteBuilder` with `from(table)`, `r#where(cond)`. Build and print an UPDATE and a DELETE query.",
+      "hints": ["UPDATE: `UPDATE users SET name = 'Bob' WHERE id = 1`", "DELETE: `DELETE FROM users WHERE id = 1`", "Both support WHERE clauses like SelectBuilder."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('UPDATE') && output.contains('DELETE')",
+        "successMessage": "UPDATE and DELETE work!",
+        "failureMessage": "Build and print an UPDATE and DELETE query."
+      }
+    }
+  ]
+}

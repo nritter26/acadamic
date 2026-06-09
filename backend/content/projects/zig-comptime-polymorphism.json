@@ -1,0 +1,17 @@
+{
+  "id": "zig-comptime-polymorphism",
+  "title": "Comptime Polymorphism",
+  "description": "Write a Zig program that demonstrates compile-time polymorphism by creating a generic 'Animal' interface using comptime and inline functions.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Dog = struct {\n    name: []const u8,\n    fn speak(self: Dog) void {\n        std.debug.print(\"{s} says Woof!\\n\", .{self.name});\n    }\n};\n\nconst Cat = struct {\n    name: []const u8,\n    fn speak(self: Cat) void {\n        std.debug.print(\"{s} says Meow!\\n\", .{self.name});\n    }\n};\n\nfn makeSpeak(animal: anytype) void {\n    const T = @TypeOf(animal);\n    const info = @typeInfo(T);\n    if (info != .Struct) @compileError(\"Expected a struct\");\n    animal.speak();\n}\n\npub fn main() !void {\n    const dog = Dog{ .name = \"Buddy\" };\n    const cat = Cat{ .name = \"Whiskers\" };\n    makeSpeak(dog);\n    makeSpeak(cat);\n}"
+  },
+  "verificationTest": "output.includes('Buddy says Woof!') && output.includes('Whiskers says Meow!')",
+  "hints": [
+    "`anytype` in function parameters allows accepting any type, with monomorphization at comptime",
+    "Use `@TypeOf()` to get the type of a value at compile time",
+    "`@typeInfo()` returns the compile-time type information for validation",
+    "`@compileError()` creates a compile-time error message"
+  ]
+}

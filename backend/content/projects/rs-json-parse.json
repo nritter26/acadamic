@@ -1,0 +1,71 @@
+{
+  "id": "rs-json-parse",
+  "title": "Rust: JSON Serialization",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "JSON", "serde", "serialization", "deserialization"],
+  "description": "Serialize and deserialize data using JSON with serde.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Serialize Struct to JSON",
+      "description": "Define a struct `Person` with fields name, age, and is_active. Implement manual serialization by printing in JSON format: `{\"name\": \"...\", \"age\": 42, \"is_active\": true}`.",
+      "hints": ["`struct Person { name: String, age: i32, is_active: bool }`", "Use `format!` to produce JSON string.", "Print the JSON string."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('\"name\"') && output.includes('\"age\"')",
+        "successMessage": "Manual JSON serialization works!",
+        "failureMessage": "Print a Person as a JSON string."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parse JSON String",
+      "description": "Manually parse a JSON string `{\"name\":\"Alice\",\"age\":30,\"is_active\":true}` by extracting fields (for learning). Print the extracted name and age.",
+      "hints": ["Use string methods: `.find(\"\\\"name\\\":\\\"\")`, then extract substring.", "This simulates what serde does automatically.", "Extract name: \"Alice\", age: 30"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30')",
+        "successMessage": "Manual JSON parse works!",
+        "failureMessage": "Extract and print name and age from JSON string."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Vec to JSON Array",
+      "description": "Take a `Vec<Person>` with two people and serialize it as a JSON array. Print the result.",
+      "hints": ["Build a string starting with `[` and ending with `]`.", "Join each person's JSON with commas.", "Format: `[{\"name\":\"Alice\",...}, {\"name\":\"Bob\",...}]`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('[') && output.includes(']')",
+        "successMessage": "JSON array serialization works!",
+        "failureMessage": "Serialize a Vec<Person> to a JSON array and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested JSON Objects",
+      "description": "Define an `Address` struct (street, city) and embed it in Person. Serialize a Person with address to JSON and print.",
+      "hints": ["`struct Address { street: String, city: String }`", "Now Person has `address: Address`.", "JSON output: `\"address\": {\"street\": \"...\", \"city\": \"...\"}`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('\"street\"') && output.includes('\"city\"')",
+        "successMessage": "Nested JSON works!",
+        "failureMessage": "Serialize Person with Address and print."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Error Handling in Parsing",
+      "description": "Write a function `safe_parse_json(json_str: &str) -> Result<Person, String>` that attempts to parse JSON. Return an Err for invalid format. Test with valid and invalid JSON.",
+      "hints": ["Check that the JSON starts with `{` and ends with `}`.", "Check that it contains required fields using `.contains()`.", "If any check fails, return `Err(format!(\"invalid JSON: {...}\"))`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('Error')",
+        "successMessage": "Safe JSON parsing works!",
+        "failureMessage": "Parse valid JSON and handle invalid JSON with an error."
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-error-handling",
+  "title": "Rust: Error Handling",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "error handling", "Result", "unwrap", "?", "match"],
+  "description": "Handle errors with Result, Option, match, and the ? operator in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Result Type Basics",
+      "description": "Write a function `safe_divide(a: f64, b: f64) -> Result<f64, String>` that returns an error if b is 0. Call with (10, 2) and (10, 0).",
+      "hints": ["Return `Ok(a / b)` on success.", "Return `Err(\"division by zero\".to_string())` on failure.", "Use `match` to handle both cases when calling."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('Error')",
+        "successMessage": "Result type works!",
+        "failureMessage": "Print Ok(5) for 10/2 and Error for 10/0."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Using unwrap and expect",
+      "description": "Try parsing `\"42\"` and `\"hello\"` as integers using `\"42\".parse::<i32>()`. Use `.unwrap()` on the valid one and `.expect()` on the invalid one (catch the panic if needed).",
+      "hints": ["`\"42\".parse::<i32>().unwrap()` returns 42.", "`\"hello\".parse::<i32>().unwrap()` will panic.", "Use `std::panic::catch_unwind` to safely test the failure."],
+      "codeTemplate": { "rust": "fn main() {\n    // Safe parsing\n    let valid: i32 = \"42\".parse().unwrap();\n    println!(\"Valid: {}\", valid);\n    \n    // Demonstrate panicking safely\n    let result = std::panic::catch_unwind(|| {\n        let _: i32 = \"hello\".parse().unwrap();\n    });\n    if result.is_err() {\n        println!(\"Error: panicked on invalid input\");\n    }\n}" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('Error')",
+        "successMessage": "Unwrap and catch work!",
+        "failureMessage": "Print 42 and catch the panic on invalid input."
+      }
+    },
+    {
+      "id": 3,
+      "title": "The ? Operator",
+      "description": "Write a function `parse_and_add(a: &str, b: &str) -> Result<i32, String>` that parses two strings and returns their sum, using `?` for error propagation.",
+      "hints": ["`let a = a.parse::<i32>().map_err(|_| format!(\"invalid: {}\", a))?;`", "The `?` operator unwraps Ok or returns Err early.", "Call with (\"10\", \"20\") and (\"10\", \"abc\")."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('Error')",
+        "successMessage": "The ? operator works!",
+        "failureMessage": "Print 30 for valid input and Error for invalid."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Option Type",
+      "description": "Write a function `first_element<T>(vec: Vec<T>) -> Option<T>` that returns the first element of a Vec (or None if empty). Test with `[1, 2, 3]` and `[]`.",
+      "hints": ["`vec.into_iter().next()` returns Option.", "Or use `if vec.is_empty() { None } else { Some(vec[0]) }`.", "Print with match to handle both Some and None."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('None')",
+        "successMessage": "Option type works!",
+        "failureMessage": "Return Some(1) for [1,2,3] and None for []."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Combined Error Handling",
+      "description": "Write a function `process_data(input: &str) -> Result<i32, String>` that: splits input by commas, parses each part, and returns the sum. Use `?` and handle all errors. Test with `\"1,2,3\"` and `\"1,x,3\"`.",
+      "hints": ["Split with `input.split(\",\")`.", "Map each part to `part.trim().parse::<i32>()`.", "Collect Results with `.collect::<Result<Vec<_>, _>>()` and use `?`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('6') && output.includes('Error')",
+        "successMessage": "Combined error handling works!",
+        "failureMessage": "Sum 1,2,3 = 6 and handle error for 1,x,3."
+      }
+    }
+  ]
+}

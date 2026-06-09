@@ -1,0 +1,17 @@
+{
+  "id": "zig-queue-ds",
+  "title": "Circular Queue",
+  "description": "Write a Zig program that implements a circular queue with enqueue, dequeue, and display operations.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Queue = struct {\n    data: [5]i32 = undefined,\n    front: usize = 0,\n    rear: usize = 0,\n    count: usize = 0,\n    \n    fn enqueue(self: *Queue, val: i32) bool {\n        if (self.count == self.data.len) return false;\n        self.data[self.rear] = val;\n        self.rear = (self.rear + 1) % self.data.len;\n        self.count += 1;\n        return true;\n    }\n    \n    fn dequeue(self: *Queue) ?i32 {\n        if (self.count == 0) return null;\n        const val = self.data[self.front];\n        self.front = (self.front + 1) % self.data.len;\n        self.count -= 1;\n        return val;\n    }\n};\n\npub fn main() !void {\n    var q = Queue{};\n    _ = q.enqueue(10);\n    _ = q.enqueue(20);\n    _ = q.enqueue(30);\n    while (q.dequeue()) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('10') && output.includes('20') && output.includes('30')",
+  "hints": [
+    "A circular queue reuses array space by wrapping indices with modulo",
+    "Track front, rear, and count separately for empty/full detection",
+    "Use `(index + 1) % capacity` for circular index advancement",
+    "Return `?i32` (optional) from dequeue to handle empty queue"
+  ]
+}

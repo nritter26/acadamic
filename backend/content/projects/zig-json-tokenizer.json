@@ -1,0 +1,17 @@
+{
+  "id": "zig-json-tokenizer",
+  "title": "JSON Tokenizer",
+  "description": "Write a Zig program that tokenizes a simple JSON string into its structural elements (brackets, colons, strings, numbers).",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const json = \"{\\\"name\\\":\\\"Zig\\\",\\\"year\\\":2024}\";\n    var i: usize = 0;\n    \n    while (i < json.len) {\n        switch (json[i]) {\n            '{', '}', ',', ':' => {\n                std.debug.print(\"{c} \", .{json[i]});\n                i += 1;\n            },\n            '\"' => {\n                i += 1;\n                while (i < json.len and json[i] != '\"') { i += 1; }\n                if (i < json.len) i += 1;\n            },\n            else => |_| i += 1,\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('{') && output.includes('}') && output.includes(',') && output.includes(':')",
+  "hints": [
+    "Tokenize by iterating character by character and identifying token types",
+    "Use `switch` with multiple cases and ranges for character matching",
+    "Strings start and end with `'\"'` — skim past their content",
+    "Comptime string escape: `\\\"` in Zig source represents a literal double quote"
+  ]
+}

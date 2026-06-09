@@ -1,0 +1,16 @@
+{
+  "id": "zig-reverse-array",
+  "title": "Reverse an Array",
+  "description": "Write a Zig program that reverses an array of integers in-place and prints the reversed array.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var arr = [_]i32{ 1, 2, 3, 4, 5 };\n    \n    for (0..arr.len / 2) |i| {\n        const j = arr.len - 1 - i;\n        const temp = arr[i];\n        arr[i] = arr[j];\n        arr[j] = temp;\n    }\n    \n    for (arr) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('5') && output.includes('4') && output.includes('3') && output.includes('2') && output.includes('1')",
+  "hints": [
+    "Swap elements from both ends moving toward the center",
+    "Use a temporary variable `temp` to perform the swap",
+    "You only need to iterate through half the array"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-tarjan-scc",
+  "title": "Tarjan's SCC",
+  "description": "Write a Zig program that finds Strongly Connected Components using Tarjan's algorithm.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst SCCContext = struct {\n    graph: [4][4]u8,\n    visited: [4]bool,\n    stack: [4]u8,\n    sp: usize,\n    on_stack: [4]bool,\n    index_counter: u8,\n    indices: [4]u8,\n    lowlink: [4]u8,\n};\n\nfn strongconnect(ctx: *SCCContext, v: u8) void {\n    ctx.visited[v] = true;\n    ctx.indices[v] = ctx.index_counter;\n    ctx.lowlink[v] = ctx.index_counter;\n    ctx.index_counter += 1;\n    ctx.stack[ctx.sp] = v;\n    ctx.sp += 1;\n    ctx.on_stack[v] = true;\n    for (0..4) |w| {\n        if (ctx.graph[v][w] == 1) {\n            if (!ctx.visited[w]) {\n                strongconnect(ctx, @intCast(w));\n                ctx.lowlink[v] = @min(ctx.lowlink[v], ctx.lowlink[w]);\n            } else if (ctx.on_stack[w]) {\n                ctx.lowlink[v] = @min(ctx.lowlink[v], ctx.indices[w]);\n            }\n        }\n    }\n    if (ctx.lowlink[v] == ctx.indices[v]) {\n        while (ctx.sp > 0) {\n            ctx.sp -= 1;\n            const w = ctx.stack[ctx.sp];\n            ctx.on_stack[w] = false;\n            std.debug.print(\"{} \", .{w});\n            if (w == v) break;\n        }\n        std.debug.print(\"\\n\", .{});\n    }\n}\n\npub fn main() !void {\n    var ctx = SCCContext{\n        .graph = [_][4]u8{\n            [_]u8{ 0, 1, 0, 0 },\n            [_]u8{ 0, 0, 1, 0 },\n            [_]u8{ 1, 0, 0, 0 },\n            [_]u8{ 0, 0, 0, 0 },\n        },\n        .visited = [_]bool{false} ** 4,\n        .stack = undefined,\n        .sp = 0,\n        .on_stack = [_]bool{false} ** 4,\n        .index_counter = 0,\n        .indices = [_]u8{ 255, 255, 255, 255 },\n        .lowlink = [_]u8{ 255, 255, 255, 255 },\n    };\n    for (0..4) |v| {\n        if (!ctx.visited[v]) strongconnect(&ctx, @intCast(v));\n    }\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3')",
+  "hints": [
+    "Tarjan's algorithm finds SCCs with a single DFS pass",
+    "Each node gets an index and lowlink value during DFS",
+    "If lowlink == index, the node is the root of an SCC",
+    "Nodes in the same SCC form a cycle in the directed graph"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-tree-serialization",
+  "title": "Tree Serialization",
+  "description": "Write a Zig program that serializes a binary tree into an array and deserializes it back.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    value: i32,\n    left: ?*Node,\n    right: ?*Node,\n};\n\nfn serialize(node: ?*Node, buf: []i32, idx: *usize) void {\n    if (node) |n| {\n        buf[idx.*] = n.value;\n        idx.* += 1;\n        serialize(n.left, buf, idx);\n        serialize(n.right, buf, idx);\n    } else {\n        buf[idx.*] = -1;\n        idx.* += 1;\n    }\n}\n\npub fn main() !void {\n    var n3 = Node{ .value = 3, .left = null, .right = null };\n    var n2 = Node{ .value = 2, .left = null, .right = null };\n    var n1 = Node{ .value = 1, .left = &n2, .right = &n3 };\n    \n    var buf: [7]i32 = undefined;\n    var idx: usize = 0;\n    serialize(&n1, &buf, &idx);\n    \n    for (0..idx) |i| std.debug.print(\"{} \", .{buf[i]});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('-1')",
+  "hints": [
+    "Use pre-order traversal: root, then left, then right",
+    "Use a sentinel value (-1) to represent null children",
+    "Pass idx as `*usize` (pointer) to mutate it in recursive calls",
+    "The serialized array can be used to reconstruct the tree later"
+  ]
+}

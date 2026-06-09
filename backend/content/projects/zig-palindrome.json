@@ -1,0 +1,17 @@
+{
+  "id": "zig-palindrome",
+  "title": "Palindrome Check",
+  "description": "Write a Zig program that checks if the word \"racecar\" is a palindrome (reads the same forward and backward).",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const word = \"racecar\";\n    var is_palindrome = true;\n    \n    for (0..word.len / 2) |i| {\n        if (word[i] != word[word.len - 1 - i]) {\n            is_palindrome = false;\n            break;\n        }\n    }\n    \n    if (is_palindrome) {\n        std.debug.print(\"{} is a palindrome\\n\", .{word});\n    } else {\n        std.debug.print(\"{} is not a palindrome\\n\", .{word});\n    }\n}"
+  },
+  "verificationTest": "output.includes('racecar') && output.includes('palindrome')",
+  "hints": [
+    "Access characters using index notation: `word[i]`",
+    "Compare characters from both ends moving inward",
+    "You only need to check half the string: `word.len / 2`",
+    "Use `break` to exit the loop early if a mismatch is found"
+  ]
+}

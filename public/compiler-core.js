@@ -8,7 +8,7 @@ const COMPILER = (() => {
   'use strict';
 
   const isNodeModule = typeof module !== 'undefined' && typeof module.exports !== 'undefined';
-  const compilerData = isNodeModule ? require('../content/app-data.json') : null;
+  const compilerData = isNodeModule ? require('../backend/content/app-data.json') : null;
 
   const LANG_CONFIG = (typeof globalThis !== 'undefined' && globalThis.LANG_CONFIG) || (compilerData && compilerData.LANG_CONFIG) || {};
   const TOKEN_TYPES = (typeof globalThis !== 'undefined' && globalThis.TOKEN_TYPES) || (compilerData && compilerData.TOKEN_TYPES) || {};

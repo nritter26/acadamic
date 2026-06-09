@@ -1,0 +1,16 @@
+{
+  "id": "py-strings",
+  "title": "Python: String Operations",
+  "description": "Write a Python program that demonstrates common string methods and operations.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "text = \"  Hello, Python World!  \"\nprint(f\"Original: '{text}'\")\nprint(f\"Strip: '{text.strip()}'\")\nprint(f\"Upper: {text.upper().strip()}\")\nprint(f\"Replace: {text.replace('World', 'Universe').strip()}\")\nprint(f\"Split: {text.strip().split(', ')}\")\nprint(f\"Starts with Hello: {text.strip().startswith('Hello')}\")"
+  },
+  "verificationTest": "output.includes(\"Original: '  Hello, Python World!  '\") && output.includes(\"Upper: HELLO, PYTHON WORLD!\") && output.includes(\"Split: ['Hello', 'Python World!']\") && output.includes('Starts with Hello: True')",
+  "hints": [
+    "Strings have many built-in methods: `.strip()`, `.upper()`, `.lower()`, `.replace()`",
+    "`.split(sep)` divides a string into a list using sep as delimiter",
+    "`.startswith()` and `.endswith()` check string boundaries"
+  ]
+}

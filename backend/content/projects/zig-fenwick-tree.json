@@ -1,0 +1,17 @@
+{
+  "id": "zig-fenwick-tree",
+  "title": "Fenwick Tree",
+  "description": "Write a Zig program that implements a Fenwick tree (Binary Indexed Tree) for prefix sum queries.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn update(bit: []i32, idx: usize, delta: i32) void {\n    var i = idx;\n    while (i < bit.len) {\n        bit[i] += delta;\n        i += i & -i;\n    }\n}\n\nfn query(bit: []i32, idx: usize) i32 {\n    var sum: i32 = 0;\n    var i = idx;\n    while (i > 0) {\n        sum += bit[i];\n        i -= i & -i;\n    }\n    return sum;\n}\n\npub fn main() !void {\n    var bit = [_]i32{0} ** 10;\n    const arr = [_]i32{ 3, 2, -1, 6, 5, 4, -3, 3, 7, 2 };\n    \n    for (arr, 1..) |val, i| update(bit, i, val);\n    \n    std.debug.print(\"Sum 1-5: {}\\n\", .{query(bit, 5)});\n    std.debug.print(\"Sum 1-10: {}\\n\", .{query(bit, 10)});\n}"
+  },
+  "verificationTest": "output.includes('Sum 1-5: 15') && output.includes('Sum 1-10: 28')",
+  "hints": [
+    "Fenwick tree uses the least significant set bit: `i & -i`",
+    "`update` adds delta at index i and propagates to ancestors",
+    "`query` sums from index 1 to i by traversing downward",
+    "Use 1-based indexing for Fenwick tree operations"
+  ]
+}

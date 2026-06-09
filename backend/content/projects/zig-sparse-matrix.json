@@ -1,0 +1,17 @@
+{
+  "id": "zig-sparse-matrix",
+  "title": "Sparse Matrix",
+  "description": "Write a Zig program that implements a sparse matrix using coordinate (COO) format.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Entry = struct { row: usize, col: usize, val: i32 };\n\npub fn main() !void {\n    const entries = [_]Entry{\n        Entry{ .row = 0, .col = 0, .val = 10 },\n        Entry{ .row = 0, .col = 3, .val = 20 },\n        Entry{ .row = 2, .col = 1, .val = 30 },\n        Entry{ .row = 3, .col = 4, .val = 40 },\n    };\n    \n    for (entries) |e| {\n        std.debug.print(\"[{},{}] = {}\\n\", .{e.row, e.col, e.val});\n    }\n}"
+  },
+  "verificationTest": "output.includes('[0,0] = 10') && output.includes('[2,1] = 30') && output.includes('[3,4] = 40')",
+  "hints": [
+    "Coordinate (COO) format stores non-zero entries as (row, col, value) triplets",
+    "This is memory-efficient for sparse matrices with few non-zero elements",
+    "Structs with named fields can be initialized with `.field = value` syntax",
+    "Use a fixed-size array of entries for the sparse representation"
+  ]
+}

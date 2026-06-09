@@ -1,0 +1,17 @@
+{
+  "id": "go-atomic-counter",
+  "title": "Go: Atomic Counter",
+  "description": "Write a Go program that uses atomic operations for safe concurrent counting.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n\t\"sync/atomic\"\n)\n\nfunc main() {\n\tvar counter int64\n\tvar wg sync.WaitGroup\n\n\tfor i := 0; i < 100; i++ {\n\t\twg.Add(1)\n\t\tgo func() {\n\t\t\tdefer wg.Done()\n\t\t\tatomic.AddInt64(&counter, 1)\n\t\t}()\n\t}\n\n\twg.Wait()\n\tfmt.Println(\"Counter:\", atomic.LoadInt64(&counter))\n}"
+  },
+  "verificationTest": "output.includes('Counter: 100')",
+  "hints": [
+    "Use `sync/atomic` package for lock-free thread-safe operations",
+    "`atomic.AddInt64(&counter, 1)` atomically increments",
+    "`atomic.LoadInt64(&counter)` safely reads the value",
+    "Use `sync.WaitGroup` to wait for all goroutines"
+  ]
+}

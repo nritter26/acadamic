@@ -1,0 +1,16 @@
+{
+  "id": "zig-bubble-sort",
+  "title": "Bubble Sort",
+  "description": "Write a Zig program that implements bubble sort to sort an array of integers in ascending order.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var arr = [_]i32{ 64, 34, 25, 12, 22, 11, 90 };\n    \n    for (0..arr.len) |_| {\n        var swapped = false;\n        for (0..arr.len - 1) |j| {\n            if (arr[j] > arr[j + 1]) {\n                const temp = arr[j];\n                arr[j] = arr[j + 1];\n                arr[j + 1] = temp;\n                swapped = true;\n            }\n        }\n        if (!swapped) break;\n    }\n    \n    for (arr) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('11') && output.includes('22') && output.includes('25') && output.includes('34') && output.includes('64') && output.includes('90')",
+  "hints": [
+    "Bubble sort repeatedly steps through the list, swapping adjacent elements if they're in the wrong order",
+    "Track whether any swaps occurred each pass with a `swapped` flag",
+    "If no swaps occurred, the array is sorted and you can break early"
+  ]
+}

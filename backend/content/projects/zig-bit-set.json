@@ -1,0 +1,17 @@
+{
+  "id": "zig-bit-set",
+  "title": "Bit Set Operations",
+  "description": "Write a Zig program that implements a fixed-size bit set with union, intersection, and difference operations.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst BitSet = struct {\n    bits: u64 = 0,\n    \n    fn add(self: *BitSet, idx: u6) void { self.bits |= (@as(u64, 1) << idx); }\n    fn remove(self: *BitSet, idx: u6) void { self.bits &= ~(@as(u64, 1) << idx); }\n    fn contains(self: BitSet, idx: u6) bool { return (self.bits & (@as(u64, 1) << idx)) != 0; }\n    fn unionWith(self: BitSet, other: BitSet) BitSet { return BitSet{ .bits = self.bits | other.bits }; }\n    fn intersectWith(self: BitSet, other: BitSet) BitSet { return BitSet{ .bits = self.bits & other.bits }; }\n};\n\npub fn main() !void {\n    var a = BitSet{};\n    var b = BitSet{};\n    a.add(1); a.add(3); a.add(5);\n    b.add(3); b.add(5); b.add(7);\n    \n    const u = a.unionWith(b);\n    const i = a.intersectWith(b);\n    \n    std.debug.print(\"Union has 1: {}\\n\", .{u.contains(1)});\n    std.debug.print(\"Union has 7: {}\\n\", .{u.contains(7)});\n    std.debug.print(\"Inter has 3: {}\\n\", .{i.contains(3)});\n    std.debug.print(\"Inter has 1: {}\\n\", .{i.contains(1)});\n}"
+  },
+  "verificationTest": "output.includes('Union has 1: true') && output.includes('Union has 7: true') && output.includes('Inter has 3: true') && output.includes('Inter has 1: false')",
+  "hints": [
+    "A bit set uses each bit of an integer to represent membership of an element",
+    "Use `@as(u64, 1) << idx` to create a bitmask for index idx",
+    "`|` for union, `&` for intersection, `& ~mask` for removal",
+    "The `~` operator inverts all bits in Zig"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-channels",
+  "title": "Rust: Channels and Message Passing",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "channels", "mpsc", "message passing", "Send"],
+  "description": "Use std::sync::mpsc channels for message passing between threads.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Send and Receive",
+      "description": "Create a channel with `mpsc::channel()`. Spawn a thread that sends a message. Receive it in main and print.",
+      "hints": ["`let (tx, rx) = std::sync::mpsc::channel();`", "Spawn thread, move `tx` in, send a string.", "`rx.recv().unwrap()` blocks until a message arrives."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello') || output.includes('channel')",
+        "successMessage": "Channel send/receive works!",
+        "failureMessage": "Send a message through the channel and print it."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple Messages",
+      "description": "Create a channel. Spawn a thread that sends 5 messages (1 through 5). In main, receive all 5 and print each one.",
+      "hints": ["Send in a loop: `for i in 1..=5 { tx.send(i).unwrap(); }`", "Receive in a loop: `for received in rx { println!(\"{}\", received); }`", "The receiver iterator ends when the sender is dropped."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('5')",
+        "successMessage": "Multiple messages received!",
+        "failureMessage": "Send 5 messages and receive all."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Multiple Senders",
+      "description": "Create multiple sender threads sharing the same receiver. Use `mpsc::Sender` clones. Spawn 3 threads, each sending 3 messages. Receive and print all 9.",
+      "hints": ["Clone the sender for each thread: `let tx2 = tx.clone();`.", "Drop the original sender in main so the receiver knows when to stop.", "Receive in a loop: `for msg in rx { println!(\"{}\", msg); }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.length > 20",
+        "successMessage": "Multiple senders work!",
+        "failureMessage": "Spawn 3 senders, receive all 9 messages."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Worker Pool Pattern",
+      "description": "Implement a worker pool: create a channel of jobs (integers). Spawn 3 worker threads that receive jobs and print `\"Worker N processed job M\"`. Send 10 jobs.",
+      "hints": ["Send job numbers through the channel.", "Each worker loops, receives, and processes.", "Use `Arc<...>` if sharing state, or clone the receiver."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('processed') || output.includes('Worker')",
+        "successMessage": "Worker pool works!",
+        "failureMessage": "Print each worker processing a job."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Bounded Channel (SyncChannel)",
+      "description": "Create a bounded channel with `mpsc::sync_channel(3)` (capacity 3). Spawn a producer that sends 10 items and a consumer that receives them. Demonstrate backpressure by printing when send blocks.",
+      "hints": ["`sync_channel(3)` creates a channel with buffer size 3.", "When the buffer is full, `send()` blocks until the consumer receives.", "Print timing messages to show backpressure."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('sent') && output.includes('received')",
+        "successMessage": "Bounded channel demonstrates backpressure!",
+        "failureMessage": "Send 10 items through a bounded channel of capacity 3."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-stack-allocator",
+  "title": "Stack Allocator",
+  "description": "Write a Zig program that implements a simple fixed-buffer stack allocator for memory management.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst StackAllocator = struct {\n    buffer: []u8,\n    offset: usize = 0,\n    \n    fn alloc(self: *StackAllocator, size: usize) ?[]u8 {\n        if (self.offset + size > self.buffer.len) return null;\n        const result = self.buffer[self.offset..self.offset + size];\n        self.offset += size;\n        return result;\n    }\n    \n    fn reset(self: *StackAllocator) void {\n        self.offset = 0;\n    }\n};\n\npub fn main() !void {\n    var buf: [1024]u8 = undefined;\n    var alloc = StackAllocator{ .buffer = &buf };\n    \n    const a = (alloc.alloc(4) orelse return);\n    const b = (alloc.alloc(8) orelse return);\n    \n    std.debug.print(\"Allocated block sizes: {} and {}\\n\", .{a.len, b.len});\n    std.debug.print(\"Total used: {}/1024 bytes\\n\", .{alloc.offset});\n}"
+  },
+  "verificationTest": "output.includes('Allocated block sizes: 4 and 8') && output.includes('Total used: 12/1024')",
+  "hints": [
+    "A stack allocator increments an offset as memory is allocated",
+    "Use `orelse return` to handle allocation failures",
+    "The buffer is a slice `[]u8` referencing a fixed-size array",
+    "`start..end` slice syntax creates sub-slices of the buffer"
+  ]
+}

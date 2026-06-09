@@ -1,0 +1,71 @@
+{
+  "id": "rs-template-engine",
+  "title": "Rust: Template Engine",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "template engine", "string interpolation", "variables", "conditionals"],
+  "description": "Build a template engine that renders text with variable substitution and conditionals.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Variable Substitution",
+      "description": "Create a `Template` struct that replaces `{{var}}` patterns. Implement `render(&self, context: &HashMap<&str, &str>) -> String`. Test with `\"Hello, {{name}}!\"` and `{\"name\": \"World\"}`.",
+      "hints": ["Iterate over context entries.", "Use `str::replace` for each variable.", "`\"Hello, {{name}}!\"` → `\"Hello, World!\"`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Hello, World!')",
+        "successMessage": "Variable substitution works!",
+        "failureMessage": "Render 'Hello, {{name}}!' with name='World'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parse Template into Tokens",
+      "description": "Parse a template string into tokens: `Text(String)`, `Variable(String)`. `parse(template)` returns `Vec<TemplateToken>`. Render by joining evaluated tokens. Print the tokens for `\"Hello {{name}}, age {{age}}\"`.",
+      "hints": ["`enum TemplateToken { Text(String), Variable(String) }`", "Iterate, splitting on `{{` and `}}`.", "Text between markers → Text, between `{{}}` → Variable."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Text') && output.contains('Variable')",
+        "successMessage": "Template tokenization works!",
+        "failureMessage": "Tokenize the template and print tokens."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Default Values",
+      "description": "Add `{{var:default}}` syntax: if var is not in context, use the default value. Test with `\"Hello {{name:Guest}}!\"` rendering with and without 'name' in context.",
+      "hints": ["Split variable name on `:` to get (name, default).", "If name not in context, use default.", "`{{name:Guest}}` with empty context → `Guest`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Guest') && output.contains('World')",
+        "successMessage": "Default values work!",
+        "failureMessage": "Render template with and without providing the variable."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Conditionals",
+      "description": "Add `{{#if var}}...{{/if}}` blocks. Only render the content if the variable is truthy (non-empty, non-zero). Test with `\"{{#if show}}Visible{{/if}}\"`.",
+      "hints": ["Parse `{{#if var}}` and `{{/if}}` markers.", "Track if we're in an active if block.", "Skip tokens inside the block if condition is false."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Visible')",
+        "successMessage": "Conditionals work!",
+        "failureMessage": "Render 'Visible' when show=true, and empty when show=false."
+      }
+    },
+    {
+      "id": 5,
+      "title": "For Loops",
+      "description": "Add `{{#each items}} {{this}} {{/each}}` loops. `items` is a comma-separated list in context. Render each item. Test with `items` = `\"apple,banana,cherry\"`.",
+      "hints": ["Parse `{{#each var}}` and `{{/each}}`.", "Split context value by comma for items.", "Replace `{{this}}` with each item inside the loop body."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('apple') && output.contains('banana') && output.contains('cherry')",
+        "successMessage": "For loops work!",
+        "failureMessage": "Render each item in an each loop."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-bit-flags",
+  "title": "Bit Flag Operations",
+  "description": "Write a Zig program that demonstrates bit-level operations by setting, clearing, and toggling flags in a permission system.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Permissions = packed struct {\n    read: bool = false,\n    write: bool = false,\n    execute: bool = false,\n    admin: bool = false,\n};\n\npub fn main() !void {\n    var perms = Permissions{ .read = true, .write = true };\n    \n    std.debug.print(\"Initial: {{read: {}, write: {}, exec: {}, admin: {}}}\\n\", \n        .{perms.read, perms.write, perms.execute, perms.admin});\n    \n    perms.execute = true;\n    perms.admin = true;\n    perms.write = false;\n    \n    std.debug.print(\"Final: {{read: {}, write: {}, exec: {}, admin: {}}}\\n\", \n        .{perms.read, perms.write, perms.execute, perms.admin});\n}"
+  },
+  "verificationTest": "output.includes('read: true') && output.includes('write: false') && output.includes('exec: true') && output.includes('admin: true')",
+  "hints": [
+    "Zig's `packed struct` allows struct fields to be packed into contiguous bits",
+    "Packed structs can have boolean fields that use exactly 1 bit each",
+    "Default values can be set in the struct definition with `= false`",
+    "Field access uses dot notation: `perms.read`"
+  ]
+}

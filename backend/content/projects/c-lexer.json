@@ -1,0 +1,23 @@
+{
+  "id": "c-lexer",
+  "title": "C: Lexer/Tokenizer",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "lexer", "tokenizer", "parsing", "strings"],
+  "description": "Build a lexer that tokenizes a simple programming language with keywords, identifiers, numbers, and operators.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Token Types and Lexer",
+      "description": "Define token types as an enum: KEYWORD, IDENTIFIER, NUMBER, OPERATOR, LPAREN, RPAREN, EOF. Write a `Token` struct with type and value. Implement `Token next_token(char **input)` that tokenizes a string. Test with 'let x = 42 + y'.",
+      "hints": ["Skip whitespace.", "Check for keywords ('let', 'if', 'then') first.", "Use `isdigit()` for numbers, `isalpha()` for identifiers.", "Operators: +, -, *, /, =."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n\ntypedef enum { KEYWORD, IDENTIFIER, NUMBER, OPERATOR, LPAREN, RPAREN, EOF_TOKEN } TokenType;\n\ntypedef struct { TokenType type; char value[32]; } Token;\n\nToken next_token(char **input) {\n    Token t = {0};\n    while (**input == ' ') (*input)++;\n    if (**input == '\\0') { t.type = EOF_TOKEN; return t; }\n    if (**input == '(') { t.type = LPAREN; t.value[0]='('; t.value[1]=0; (*input)++; return t; }\n    if (**input == ')') { t.type = RPAREN; t.value[0]=')'; t.value[1]=0; (*input)++; return t; }\n    if (strchr(\"+-*/\", **input)) {\n        t.type = OPERATOR; t.value[0]=*(*input)++; t.value[1]=0; return t;\n    }\n    if (isdigit(**input)) {\n        t.type = NUMBER; int i=0;\n        while (isdigit(**input)) t.value[i++]=*(*input)++;\n        t.value[i]=0; return t;\n    }\n    if (isalpha(**input)) {\n        int i=0;\n        while (isalnum(**input)) t.value[i++]=*(*input)++;\n        t.value[i]=0;\n        t.type = strcmp(t.value,\"let\")==0||strcmp(t.value,\"if\")==0 ? KEYWORD : IDENTIFIER;\n        return t;\n    }\n    return t;\n}\n\nint main() {\n    char input[] = \"let x = 42 + y\";\n    char *p = input;\n    Token t;\n    do {\n        t = next_token(&p);\n        printf(\"Token: type=%d value=%s\\n\", t.type, t.value);\n    } while (t.type != EOF_TOKEN);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('KEYWORD') || (output.includes('4') && output.includes('let'))",
+        "successMessage": "Lexer works!",
+        "failureMessage": "Tokenize 'let x = 42 + y' and print all tokens"
+      }
+    }
+  ]
+}

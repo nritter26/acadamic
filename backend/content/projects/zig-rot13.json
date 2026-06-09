@@ -1,0 +1,16 @@
+{
+  "id": "zig-rot13",
+  "title": "ROT13 Cipher",
+  "description": "Write a Zig program that applies the ROT13 cipher (shift by 13) to a string.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"Hello, Zig!\";\n    std.debug.print(\"Original: {s}\\n\", .{text});\n    std.debug.print(\"ROT13: \", .{});\n    for (text) |ch| {\n        var rotated = ch;\n        if (ch >= 'a' and ch <= 'z') {\n            rotated = ((ch - 'a' + 13) % 26) + 'a';\n        } else if (ch >= 'A' and ch <= 'Z') {\n            rotated = ((ch - 'A' + 13) % 26) + 'A';\n        }\n        std.debug.print(\"{c}\", .{rotated});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Original: Hello, Zig!') && output.includes('ROT13: Uryyb, Mvt!')",
+  "hints": [
+    "ROT13 is a Caesar cipher with shift of 13 — applying twice returns the original",
+    "Use `and` for logical AND in Zig conditions",
+    "Character range check: `ch >= 'A' and ch <= 'Z'`"
+  ]
+}

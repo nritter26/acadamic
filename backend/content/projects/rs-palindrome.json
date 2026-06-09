@@ -1,0 +1,71 @@
+{
+  "id": "rs-palindrome",
+  "title": "Rust: Palindrome Checker",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "strings", "palindrome", "reversal", "chars"],
+  "description": "Check if a string is a palindrome (reads the same forwards and backwards).",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reverse a String",
+      "description": "Write a function `reverse(s: &str) -> String` that returns the reversed string. Call with `\"hello\"` and print.",
+      "hints": ["`s.chars().rev().collect::<String>()`", "`.chars()` gets an iterator over characters.", "`.rev()` reverses the iterator. `hello` → `olleh`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('olleh')",
+        "successMessage": "String reversal works!",
+        "failureMessage": "Reverse 'hello' and print 'olleh'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Simple Palindrome Check",
+      "description": "Write a function `is_palindrome(s: &str) -> bool` that checks if a string equals its reverse. Test with `\"racecar\"` and `\"hello\"`.",
+      "hints": ["`s == s.chars().rev().collect::<String>()`", "If the string equals its reverse, it's a palindrome.", "racecar reversed is racecar (palindrome!), hello is not."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/gi)?.length >= 1 && output.match(/false/gi)?.length >= 1",
+        "successMessage": "Palindrome check works!",
+        "failureMessage": "Check 'racecar' (true) and 'hello' (false)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Case-Insensitive Check",
+      "description": "Modify `is_palindrome` to be case-insensitive. Test with `\"Racecar\"` and print result.",
+      "hints": ["Convert to lowercase first: `s.to_lowercase()`", "Then check the lowercase version against its reverse.", "Racecar → racecar → palindrome!"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') || output.includes('palindrome')",
+        "successMessage": "Case-insensitive check works!",
+        "failureMessage": "Check if 'Racecar' is a palindrome (it is)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Ignore Non-Alphanumeric",
+      "description": "Modify `is_palindrome` to ignore spaces and punctuation. Test with `\"A man a plan a canal panama\"`.",
+      "hints": ["`.chars().filter(|c| c.is_alphanumeric()).collect::<String>()`", "Filter out spaces and punctuation.", "Then convert to lowercase and check."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') || output.includes('palindrome')",
+        "successMessage": "Phrase palindrome works!",
+        "failureMessage": "Check the famous palindrome phrase."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Find Palindromes in Array",
+      "description": "Given `[\"level\", \"world\", \"radar\", \"rust\", \"madam\"]`, find and print all palindromes.",
+      "hints": ["Iterate over the array with a for loop.", "Call is_palindrome on each word.", "Palindromes: level, radar, madam"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('level') && output.includes('radar') && output.includes('madam')",
+        "successMessage": "Palindromes found!",
+        "failureMessage": "Print all palindrome words from the array."
+      }
+    }
+  ]
+}

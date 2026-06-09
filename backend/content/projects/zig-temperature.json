@@ -1,0 +1,16 @@
+{
+  "id": "zig-temperature",
+  "title": "Temperature Converter",
+  "description": "Write a Zig program that converts Celsius to Fahrenheit and prints the results for 0°C, 25°C, and 100°C.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const celsius = [_]f64{ 0.0, 25.0, 100.0 };\n    \n    for (celsius) |c| {\n        const f = c * 9.0 / 5.0 + 32.0;\n        std.debug.print(\"{d}C = {d}F\\n\", .{c, f});\n    }\n}"
+  },
+  "verificationTest": "output.includes('0C') || output.includes('0.0C') || output.includes('32F') || output.includes('32.0F')",
+  "hints": [
+    "Formula: Fahrenheit = Celsius × 9/5 + 32",
+    "Use `f64` for floating-point numbers",
+    "The `{d}` format specifier prints floating-point numbers"
+  ]
+}

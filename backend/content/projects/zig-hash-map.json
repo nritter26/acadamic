@@ -1,0 +1,17 @@
+{
+  "id": "zig-hash-map",
+  "title": "Simple Hash Map",
+  "description": "Write a Zig program that implements a simple hash map with linear probing for collision resolution.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst KV = struct { key: u32, value: u32, occupied: bool };\n\npub fn main() !void {\n    var table = [_]KV{ KV{ .key = 0, .value = 0, .occupied = false } } ** 8;\n    \n    const entries = [_]u32{ 10, 22, 31, 4, 15 };\n    for (entries) |val| {\n        var idx = val % 8;\n        while (table[idx].occupied) {\n            idx = (idx + 1) % 8;\n        }\n        table[idx] = KV{ .key = val, .value = val * 10, .occupied = true };\n    }\n    \n    for (table) |kv| {\n        if (kv.occupied) {\n            std.debug.print(\"{}:{}\\n\", .{kv.key, kv.value});\n        }\n    }\n}"
+  },
+  "verificationTest": "output.includes('10:100') && output.includes('15:150') && output.includes('4:40')",
+  "hints": [
+    "Linear probing: when a collision occurs, check the next slot",
+    "Use `%` (modulo) for the initial hash index",
+    "The while loop with index = (idx + 1) % size handles wrap-around",
+    "Initialize arrays with `[_]KV{ ... } ** N` repeat syntax"
+  ]
+}

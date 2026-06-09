@@ -1,0 +1,17 @@
+{
+  "id": "zig-kth-largest",
+  "title": "Kth Largest Element",
+  "description": "Write a Zig program that finds the 3rd largest element in an unsorted array by sorting it first.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var arr = [_]i32{ 12, 45, 7, 23, 56, 18, 34, 9, 41 };\n    const k: usize = 3;\n    \n    std.sort.block(i32, &arr, {}, struct {\n        fn lessThan(_: void, a: i32, b: i32) bool { return a > b; }\n    }.lessThan);\n    \n    std.debug.print(\"The {}rd largest is {}\\n\", .{k, arr[k - 1]});\n}"
+  },
+  "verificationTest": "output.includes('3rd largest') && output.includes('41')",
+  "hints": [
+    "Zig's standard library provides `std.sort.block` for sorting",
+    "Sort in descending order by passing a custom comparison function",
+    "The comparison function signature: `fn lessThan(void, a: T, b: T) bool`",
+    "Anonymous structs can define inline functions: `struct {}.fnName`"
+  ]
+}

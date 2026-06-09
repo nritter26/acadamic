@@ -1,0 +1,16 @@
+{
+  "id": "zig-determinant",
+  "title": "Matrix Determinant",
+  "description": "Write a Zig program that computes the determinant of a 3x3 matrix.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn det3(m: [3][3]i32) i32 {\n    return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])\n         - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])\n         + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);\n}\n\npub fn main() !void {\n    const m = [3][3]i32{\n        [_]i32{ 6, 1, 1 },\n        [_]i32{ 4, -2, 5 },\n        [_]i32{ 2, 8, 7 },\n    };\n    std.debug.print(\"det = {}\\n\", .{det3(m)});\n}"
+  },
+  "verificationTest": "output.includes('det = -306')",
+  "hints": [
+    "For 3x3 matrix: det = a(ei − fh) − b(di − fg) + c(dh − eg)",
+    "Use a function that accepts `[3][3]i32` for a fixed-size 3x3 matrix",
+    "The answer for the given matrix is -306"
+  ]
+}

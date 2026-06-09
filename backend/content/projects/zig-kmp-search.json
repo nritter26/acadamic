@@ -1,0 +1,17 @@
+{
+  "id": "zig-kmp-search",
+  "title": "KMP String Search",
+  "description": "Write a Zig program that implements the Knuth-Morris-Pratt string searching algorithm.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn buildLPS(pattern: []const u8, lps: []usize) void {\n    var len: usize = 0;\n    var i: usize = 1;\n    while (i < pattern.len) {\n        if (pattern[i] == pattern[len]) {\n            len += 1;\n            lps[i] = len;\n            i += 1;\n        } else if (len != 0) {\n            len = lps[len - 1];\n        } else {\n            lps[i] = 0;\n            i += 1;\n        }\n    }\n}\n\nfn search(text: []const u8, pattern: []const u8) void {\n    var lps: [10]usize = [_]usize{0} ** 10;\n    buildLPS(pattern, lps);\n    var i: usize = 0;\n    var j: usize = 0;\n    while (i < text.len) {\n        if (text[i] == pattern[j]) { i += 1; j += 1; }\n        if (j == pattern.len) {\n            std.debug.print(\"Found at {}\\n\", .{i - j});\n            j = lps[j - 1];\n        } else if (i < text.len and text[i] != pattern[j]) {\n            if (j != 0) j = lps[j - 1] else i += 1;\n        }\n    }\n}\n\npub fn main() !void {\n    const text = \"ABCABCDABABCDABCDABDE\";\n    const pattern = \"ABCDABD\";\n    search(text, pattern);\n}"
+  },
+  "verificationTest": "output.includes('Found at 13')",
+  "hints": [
+    "KMP preprocesses the pattern to build a Longest Prefix Suffix (LPS) array",
+    "LPS allows the algorithm to skip unnecessary character comparisons",
+    "When a mismatch occurs, fall back using lps[j-1] instead of restarting",
+    "The pattern \"ABCDABD\" is found at index 13 in the text"
+  ]
+}

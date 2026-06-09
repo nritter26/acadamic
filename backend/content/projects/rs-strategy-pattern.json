@@ -1,0 +1,71 @@
+{
+  "id": "rs-strategy-pattern",
+  "title": "Rust: Strategy Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "strategy pattern", "dependency injection", "trait objects"],
+  "description": "Implement the strategy pattern using traits and trait objects in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Strategy Trait",
+      "description": "Define a trait `SortStrategy` with method `fn sort(&self, data: &mut [i32])`. Implement `BubbleSort` and `QuickSort` structs that implement the trait.",
+      "hints": ["`trait SortStrategy { fn sort(&self, data: &mut [i32]); }`", "`struct BubbleSort; impl SortStrategy for BubbleSort { ... }`", "Each strategy implements sort differently."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('5') && output.includes('9')",
+        "successMessage": "Sort strategies defined!",
+        "failureMessage": "Sort [5,1,9,3,7] with both strategies and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Context with Strategy",
+      "description": "Create a `Sorter` struct that holds a `Box<dyn SortStrategy>` and has a `sort(&self, data: &mut [i32])` method that delegates to the strategy. Test with BubbleSort.",
+      "hints": ["`struct Sorter { strategy: Box<dyn SortStrategy> }`", "`impl Sorter { fn sort(&self, data: &mut [i32]) { self.strategy.sort(data); } }`", "The Sorter doesn't know which strategy it's using."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('sorted') || output.includes('1')",
+        "successMessage": "Sorter with strategy works!",
+        "failureMessage": "Use Sorter with BubbleSort and print sorted data."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Switch Strategies at Runtime",
+      "description": "Create a Sorter that can switch strategies at runtime via a `set_strategy` method. Sort data first with BubbleSort, then with QuickSort, demonstrating the different strategies.",
+      "hints": ["`fn set_strategy(&mut self, strategy: Box<dyn SortStrategy>)`", "Call sort, change strategy, call sort again.", "Both should produce the same sorted output."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('sorted') || output.includes('1')",
+        "successMessage": "Runtime strategy switching works!",
+        "failureMessage": "Sort data with BubbleSort, then switch to QuickSort and sort again."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filter Strategy",
+      "description": "Define a different strategy: `FilterStrategy` with `fn apply(&self, data: &[i32]) -> Vec<i32>`. Implement `EvenFilter` and `GreaterThanFilter(i32)`. Print the results.",
+      "hints": ["`EvenFilter` keeps even numbers.", "`GreaterThanFilter(threshold)` keeps numbers > threshold.", "Test with [1,2,3,4,5,6] and both strategies."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('4') && output.includes('6')",
+        "successMessage": "Filter strategies work!",
+        "failureMessage": "Apply EvenFilter and GreaterThanFilter(3) to [1,2,3,4,5,6]."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Strategy with Closures",
+      "description": "Instead of trait objects, use closures as strategies. Define a `Transformer` struct that takes a closure `Box<dyn Fn(i32) -> i32>`. Apply `|x| x * 2` and `|x| x + 1` to transform [1, 2, 3].",
+      "hints": ["`struct Transformer { transform: Box<dyn Fn(i32) -> i32> }`", "`fn apply(&self, data: &[i32]) -> Vec<i32> { data.iter().map(|x| (self.transform)(*x)).collect() }`", "Apply both closures and print results."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('4') && output.includes('6')",
+        "successMessage": "Closure-based strategies work!",
+        "failureMessage": "Double and increment [1,2,3] using closure strategies."
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "zig-loops",
+  "title": "Zig: For Loops",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "for loop", "ranges", "iteration"],
+  "description": "Use a for loop over a range to print numbers 1 to 10.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Count with For",
+      "description": "Use a for loop to print numbers 1 to 10, each on a new line. In Zig, use `for (1..11)` syntax for ranges.",
+      "hints": ["`for (1..11) |i| { std.debug.print(\"{}\\n\", .{i}); }`", "Range syntax: start..end (exclusive end).", "Use |i| for the capture variable."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('10')",
+        "successMessage": "For loop works!",
+        "failureMessage": "Print numbers 1 through 10"
+      }
+    }
+  ]
+}

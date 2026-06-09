@@ -1,0 +1,17 @@
+{
+  "id": "zig-quick-sort",
+  "title": "Quick Sort",
+  "description": "Write a Zig program that implements the quicksort algorithm with Lomuto partition scheme.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn partition(arr: []i32, low: usize, high: usize) usize {\n    const pivot = arr[high];\n    var i: usize = low;\n    var j: usize = low;\n    while (j < high) {\n        if (arr[j] < pivot) {\n            const temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;\n            i += 1;\n        }\n        j += 1;\n    }\n    const temp = arr[i]; arr[i] = arr[high]; arr[high] = temp;\n    return i;\n}\n\nfn quickSort(arr: []i32, low: usize, high: usize) void {\n    if (low >= high or high == 0) return;\n    const pi = partition(arr, low, high);\n    if (pi > 0) quickSort(arr, low, pi - 1);\n    if (pi < high) quickSort(arr, pi + 1, high);\n}\n\npub fn main() !void {\n    var arr = [_]i32{ 10, 7, 8, 9, 1, 5 };\n    if (arr.len > 0) quickSort(arr, 0, arr.len - 1);\n    for (arr) |val| std.debug.print(\"{} \", .{val});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('5') && output.includes('7') && output.includes('8') && output.includes('9') && output.includes('10')",
+  "hints": [
+    "QuickSort picks a pivot and partitions the array around it",
+    "After partition, the pivot is in its final sorted position",
+    "Recursively sort elements before and after the pivot",
+    "Use slice notation `[]i32` for flexible array handling"
+  ]
+}

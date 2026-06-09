@@ -1,0 +1,16 @@
+{
+  "id": "zig-max-min",
+  "title": "Find Max and Min",
+  "description": "Write a Zig program that finds and prints the maximum and minimum values from an array of integers.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const nums = [_]i32{ 42, 17, 8, 99, 3, 56, 71, 24 };\n    \n    var max: i32 = nums[0];\n    var min: i32 = nums[0];\n    \n    for (nums) |n| {\n        if (n > max) max = n;\n        if (n < min) min = n;\n    }\n    \n    std.debug.print(\"Max: {}\\n\", .{max});\n    std.debug.print(\"Min: {}\\n\", .{min});\n}"
+  },
+  "verificationTest": "output.includes('Max: 99') && output.includes('Min: 3')",
+  "hints": [
+    "Initialize max and min to the first element of the array",
+    "Use a `for` loop to iterate through the array",
+    "Zig uses `if (condition)` syntax for conditionals"
+  ]
+}

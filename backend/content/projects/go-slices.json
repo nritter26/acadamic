@@ -1,0 +1,16 @@
+{
+  "id": "go-slices",
+  "title": "Go: Slices",
+  "description": "Write a Go program that demonstrates slice creation, reslicing, and append operations.",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tnumbers := []int{1, 2, 3, 4, 5}\n\tfmt.Println(\"Original:\", numbers)\n\n\tsubset := numbers[1:4]\n\tfmt.Println(\"Subset [1:4]:\", subset)\n\n\tnumbers = append(numbers, 6, 7)\n\tfmt.Println(\"After append:\", numbers)\n\n\tfmt.Println(\"Length:\", len(numbers))\n\tfmt.Println(\"Capacity:\", cap(numbers))\n}"
+  },
+  "verificationTest": "output.includes('Original: [1 2 3 4 5]') && output.includes('Subset [1:4]: [2 3 4]') && output.includes('After append: [1 2 3 4 5 6 7]')",
+  "hints": [
+    "Use `slice[start:end]` to create a sub-slice (end is exclusive)",
+    "`append` grows the slice dynamically",
+    "`len()` returns length, `cap()` returns capacity of the underlying array"
+  ]
+}

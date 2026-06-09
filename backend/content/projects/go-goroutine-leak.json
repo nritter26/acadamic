@@ -1,0 +1,17 @@
+{
+  "id": "go-goroutine-leak",
+  "title": "Go: Goroutine Leak Prevention",
+  "description": "Write a Go program that demonstrates proper goroutine cleanup using context cancellation.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc worker(ctx context.Context, id int) {\n\tfor {\n\t\tselect {\n\t\tcase <-ctx.Done():\n\t\t\tfmt.Printf(\"Worker %d stopping\\n\", id)\n\t\t\treturn\n\t\tdefault:\n\t\t\tfmt.Printf(\"Worker %d working\\n\", id)\n\t\t\ttime.Sleep(10 * time.Millisecond)\n\t\t}\n\t}\n}\n\nfunc main() {\n\tctx, cancel := context.WithCancel(context.Background())\n\n\tgo worker(ctx, 1)\n\tgo worker(ctx, 2)\n\n\ttime.Sleep(30 * time.Millisecond)\n\tcancel()\n\ttime.Sleep(10 * time.Millisecond)\n\tfmt.Println(\"Done\")\n}"
+  },
+  "verificationTest": "output.includes('Worker 1 working') || output.includes('Worker 2 working') && output.includes('Done')",
+  "hints": [
+    "Use `context.WithCancel` to create a cancellable context",
+    "Goroutines should check `ctx.Done()` via select to know when to stop",
+    "Call `cancel()` when the goroutine's work is no longer needed",
+    "Always clean up goroutines to prevent memory leaks"
+  ]
+}

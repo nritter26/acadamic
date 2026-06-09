@@ -1,0 +1,17 @@
+{
+  "id": "zig-generics",
+  "title": "Generic Stack",
+  "description": "Write a Zig program that implements a generic (comptime-polymorphic) stack data structure with push, pop, and peek operations.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn Stack(comptime T: type) type {\n    return struct {\n        const Self = @This();\n        items: [100]T = undefined,\n        top: usize = 0,\n        \n        fn push(self: *Self, item: T) void {\n            self.items[self.top] = item;\n            self.top += 1;\n        }\n        fn pop(self: *Self) ?T {\n            if (self.top == 0) return null;\n            self.top -= 1;\n            return self.items[self.top];\n        }\n    };\n}\n\npub fn main() !void {\n    var int_stack = Stack(i32){};\n    int_stack.push(10);\n    int_stack.push(20);\n    int_stack.push(30);\n    \n    while (int_stack.pop()) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('30') && output.includes('20') && output.includes('10')",
+  "hints": [
+    "Zig uses comptime polymorphism: a function returning `type` creates a generic type",
+    "The `Stack(T)` function returns a struct type parameterized by T",
+    "`?T` as the return type of pop makes it an optional, returning null when empty",
+    "Use `Stack(T){}` to instantiate the struct with specific type T"
+  ]
+}

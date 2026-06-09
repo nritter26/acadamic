@@ -1,0 +1,71 @@
+{
+  "id": "rs-module-system",
+  "title": "Rust: Module System",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "modules", "mod", "use", "pub", "visibility"],
+  "description": "Organize code using Rust's module system with visibility and paths.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Module",
+      "description": "Define a module `math` inline with `mod math { ... }` containing an `add(a: i32, b: i32) -> i32` function. Call `math::add(3, 4)` and print the result.",
+      "hints": ["`mod math { pub fn add(a: i32, b: i32) -> i32 { a + b } }`", "Functions are private by default — use `pub` to make them accessible.", "Call with `math::add(3, 4)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('7')",
+        "successMessage": "Module with pub function works!",
+        "failureMessage": "Define a math module with add function and print 3+4=7."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Nested Modules",
+      "description": "Create nested modules: `mod shapes { pub mod circle { pub fn area(r: f64) -> f64 { 3.14159 * r * r } }; pub mod rect { pub fn area(w: f64, h: f64) -> f64 { w * h } } }`. Print area of circle(5) and rect(3,4).",
+      "hints": ["Nested modules use `pub mod inner { ... }`.", "Access: `shapes::circle::area(5.0)`.", "Each module needs `pub` on the module and the function."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('78.5') || output.contains('12')",
+        "successMessage": "Nested modules work!",
+        "failureMessage": "Call area functions in nested modules and print results."
+      }
+    },
+    {
+      "id": 3,
+      "title": "use Keyword",
+      "description": "Use `use` to bring modules into scope: `use shapes::circle::area as circle_area`. Then call `circle_area(5.0)` directly. Print the result.",
+      "hints": ["`use shapes::circle::area;` brings the function into scope.", "`as` creates an alias: `use shapes::rect::area as rect_area;`.", "Without `use`, you must use full paths."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('78.5') || output.contains('circle')",
+        "successMessage": "use keyword works!",
+        "failureMessage": "Import circle area function with use and call it."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Visibility (pub(crate))",
+      "description": "Create a module with different visibility levels: `pub` (public), `pub(crate)` (crate-wide), no pub (private). Demonstrate that private items can't be accessed from outside.",
+      "hints": ["`pub fn public_fn() {}` accessible everywhere.", "`pub(crate) fn crate_fn() {}` accessible within the crate.", "Private: only accessible within the module and submodules."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('public') || output.contains('accessible')",
+        "successMessage": "Visibility levels demonstrated!",
+        "failureMessage": "Show the difference between pub, pub(crate), and private."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Module with Struct",
+      "description": "Create a module `user` with a struct `User { pub name: String, pub age: i32, id: String }`. The `id` field is private. Implement a `new` constructor. Print user's name and age.",
+      "hints": ["`pub struct User { pub name: String, pub age: i32, id: String }`", "`impl User { pub fn new(name: &str, age: i32) -> Self { Self { name: name.into(), age, id: uuid() } } }`", "Accessible fields: name and age. Private: id."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && output.contains('30')",
+        "successMessage": "Module with struct works!",
+        "failureMessage": "Create a User struct in a module and print its public fields."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-comptime-reflection",
+  "title": "Comptime Reflection",
+  "description": "Write a Zig program that uses comptime reflection to print information about a struct's fields at compile time.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst User = struct {\n    id: u32,\n    name: []const u8,\n    age: u8,\n};\n\nfn inspect(comptime T: type) void {\n    const fields = @typeInfo(T).Struct.fields;\n    inline for (fields) |field| {\n        std.debug.print(\"{s}: {s}\\n\", .{field.name, @typeName(field.field_type)});\n    }\n}\n\npub fn main() !void {\n    inspect(User);\n}"
+  },
+  "verificationTest": "output.includes('id: u32') && output.includes('name: []const u8') && output.includes('age: u8')",
+  "hints": [
+    "`@typeInfo(T)` returns a `@import(\"std\").builtin.TypeInfo` union",
+    "Access struct fields with `.Struct.fields`",
+    "`inline for` unrolls the loop at compile time, allowing access to comptime field metadata",
+    "`field.field_type` gives the type, convert to string with `@typeName()`"
+  ]
+}

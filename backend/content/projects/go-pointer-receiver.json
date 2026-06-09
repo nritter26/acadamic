@@ -1,0 +1,16 @@
+{
+  "id": "go-pointer-receiver",
+  "title": "Go: Pointer Receivers",
+  "description": "Write a Go program that uses pointer receivers to modify struct values in methods.",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\ntype Counter struct {\n\tvalue int\n}\n\nfunc (c *Counter) Increment() {\n\tc.value++\n}\n\nfunc (c *Counter) Reset() {\n\tc.value = 0\n}\n\nfunc (c Counter) Value() int {\n\treturn c.value\n}\n\nfunc main() {\n\tc := Counter{value: 10}\n\tfmt.Println(\"Start:\", c.Value())\n\tc.Increment()\n\tc.Increment()\n\tfmt.Println(\"After increment:\", c.Value())\n\tc.Reset()\n\tfmt.Println(\"After reset:\", c.Value())\n}"
+  },
+  "verificationTest": "output.includes('Start: 10') && output.includes('After increment: 12') && output.includes('After reset: 0')",
+  "hints": [
+    "Pointer receivers use `(c *Type)` instead of `(c Type)`",
+    "Methods with pointer receivers can modify the struct's fields",
+    "Value receivers work on a copy and cannot modify the original"
+  ]
+}

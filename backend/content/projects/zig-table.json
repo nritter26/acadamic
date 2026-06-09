@@ -1,0 +1,16 @@
+{
+  "id": "zig-table",
+  "title": "Multiplication Table",
+  "description": "Write a Zig program that prints the multiplication table for 5 (from 1 to 10).",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const num: i32 = 5;\n    \n    for (1..11) |i| {\n        std.debug.print(\"{} x {} = {}\\n\", .{num, i, num * @as(i32, @intCast(i))});\n    }\n}"
+  },
+  "verificationTest": "output.includes('5 x 1 = 5') && output.includes('5 x 10 = 50')",
+  "hints": [
+    "Use `for (1..11)` to iterate from 1 to 10 inclusive",
+    "The range `a..b` excludes `b`, so use `1..11` for 1 through 10",
+    "Cast the loop variable to `i32` with `@intCast`"
+  ]
+}

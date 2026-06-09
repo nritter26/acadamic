@@ -1,0 +1,71 @@
+{
+  "id": "rs-virtual-machine",
+  "title": "Rust: Virtual Machine",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "virtual machine", "bytecode", "interpreter", "execution"],
+  "description": "Build a more complete virtual machine with control flow, functions, and memory.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Control Flow: Jump and JumpIf",
+      "description": "Add `Jump(usize)` and `JumpIfZero(usize)` opcodes. Create a program that loops: push 10, decrement, print, jump if not zero back to start.",
+      "hints": ["`Jump(addr)`: set instruction pointer to addr.", "`JumpIfZero(addr)`: pop top, if zero (or false), jump to addr.", "Add `ip: usize` to VM's state."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('10') && output.contains('1')",
+        "successMessage": "Control flow works!",
+        "failureMessage": "Run a countdown loop from 10 to 1."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Comparison Operations",
+      "description": "Add opcodes: `LessThan`, `GreaterThan`, `Equal`, `Not`. These pop two values and push 1.0 (true) or 0.0 (false). Test with `3 < 5` → 1.0 (true).",
+      "hints": ["`LessThan`: pop b, pop a, push if a < b else 0.", "Comparisons convert bools to 0.0/1.0.", "Test with `Push(3), Push(5), LessThan, Print` → 1"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1')",
+        "successMessage": "Comparison operations work!",
+        "failureMessage": "Compare 3 < 5 and print 1 (true)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Function Call Support",
+      "description": "Add `Call(usize)` and `Return` opcodes. Implement a call stack (`Vec<usize>` for return addresses). Create a simple function that adds two numbers. Call it and print the result.",
+      "hints": ["`Call(addr)`: push current ip+1 onto call stack, set ip to addr.", "`Return`: pop ip from call stack.", "Functions need local variable frames (add `call_stack: Vec<usize>`)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('7')",
+        "successMessage": "Function call support works!",
+        "failureMessage": "Call a function that adds 3+4 and print 7."
+      }
+    },
+    {
+      "id": 4,
+      "title": "VM with Memory",
+      "description": "Add memory operations: `Load(usize)` (load from memory address), `Store(usize)` (store to memory address). Implement a `memory: Vec<f64>` array. Store and retrieve values.",
+      "hints": ["`memory: Vec<f64>` can be a fixed-size array.", "`Load(addr)`: push `self.memory[addr]` onto stack.", "`Store(addr)`: pop value, store at `self.memory[addr]`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42')",
+        "successMessage": "Memory operations work!",
+        "failureMessage": "Store 42 at address 0, load it back, and print."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full VM with Program",
+      "description": "Write a more complex program: compute factorial(5) recursively using the VM. Print the result (120). Show the bytecode and the execution.",
+      "hints": ["Factorial: if n <= 1 return 1, else return n * factorial(n-1).", "Use Call/Return for recursion, comparisons for the base case.", "This demonstrates your VM is Turing-complete!"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('120')",
+        "successMessage": "Full VM computes factorial(5) = 120!",
+        "failureMessage": "Write a factorial program, run it, and print 120."
+      }
+    }
+  ]
+}

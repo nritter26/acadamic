@@ -1,0 +1,16 @@
+{
+  "id": "zig-tower-of-hanoi",
+  "title": "Tower of Hanoi",
+  "description": "Write a Zig program that prints the solution steps for the Tower of Hanoi puzzle with 3 disks.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn hanoi(n: u32, from: u8, to: u8, aux: u8) void {\n    if (n == 0) return;\n    hanoi(n - 1, from, aux, to);\n    std.debug.print(\"Move disk {} from {} to {}\\n\", .{n, from, to});\n    hanoi(n - 1, aux, to, from);\n}\n\npub fn main() !void {\n    hanoi(3, 'A', 'C', 'B');\n}"
+  },
+  "verificationTest": "output.includes('Move disk') && output.includes('A') && output.includes('C') && output.includes('B')",
+  "hints": [
+    "Tower of Hanoi uses recursion: move n-1 disks, then the largest disk, then n-1 disks again",
+    "The base case is when n = 0 (no disks to move)",
+    "Use `u8` for character peg labels"
+  ]
+}

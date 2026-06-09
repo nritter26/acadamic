@@ -1,0 +1,16 @@
+{
+  "id": "go-strings-pkg",
+  "title": "Go: Strings Package",
+  "description": "Write a Go program that uses the strings package for common string operations.",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"fmt\"\n\t\"strings\"\n)\n\nfunc main() {\n\ttext := \"Hello, Go World!\"\n\tfmt.Println(\"Contains 'Go':\", strings.Contains(text, \"Go\"))\n\tfmt.Println(\"HasPrefix 'Hello':\", strings.HasPrefix(text, \"Hello\"))\n\tfmt.Println(\"HasSuffix 'World!':\", strings.HasSuffix(text, \"World!\"))\n\tfmt.Println(\"ToUpper:\", strings.ToUpper(text))\n\tfmt.Println(\"Count 'o':\", strings.Count(text, \"o\"))\n\tfmt.Println(\"Split:\", strings.Split(text, \", \"))\n}"
+  },
+  "verificationTest": "output.includes(\"Contains 'Go': true\") && output.includes(\"ToUpper: HELLO, GO WORLD!\") && output.includes(\"Count 'o': 3\")",
+  "hints": [
+    "Import the strings package with `import \"strings\"`",
+    "Common functions: Contains, HasPrefix, HasSuffix, ToUpper, Count, Split",
+    "Use `strings.Split` to split a string into a slice"
+  ]
+}

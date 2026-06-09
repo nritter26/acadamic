@@ -1,0 +1,16 @@
+{
+  "id": "go-error-types",
+  "title": "Go: Custom Error Types",
+  "description": "Write a Go program that defines and uses custom error types with additional context.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"fmt\"\n)\n\ntype ValidationError struct {\n\tField string\n\tValue interface{}\n\tMsg   string\n}\n\nfunc (e *ValidationError) Error() string {\n\treturn fmt.Sprintf(\"validation failed: %s = %v - %s\", e.Field, e.Value, e.Msg)\n}\n\nfunc validateAge(age int) error {\n\tif age < 0 {\n\t\treturn &ValidationError{\"age\", age, \"must be non-negative\"}\n\t}\n\tif age > 150 {\n\t\treturn &ValidationError{\"age\", age, \"must be <= 150\"}\n\t}\n\treturn nil\n}\n\nfunc main() {\n\terr := validateAge(-5)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t}\n\n\terr = validateAge(200)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t}\n\n\tfmt.Println(\"All validations complete\")\n}"
+  },
+  "verificationTest": "output.includes('must be non-negative') && output.includes('must be <= 150') && output.includes('All validations complete')",
+  "hints": [
+    "Custom error types implement the `Error() string` interface",
+    "Use a struct to carry additional context in error values",
+    "Check errors with `if err != nil { }` pattern"
+  ]
+}

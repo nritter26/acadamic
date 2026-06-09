@@ -1,0 +1,16 @@
+{
+  "id": "zig-factors",
+  "title": "Find Factors",
+  "description": "Write a Zig program that finds and prints all factors of the number 28.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const num: i32 = 28;\n    \n    std.debug.print(\"Factors of {}: \", .{num});\n    \n    for (1..num + 1) |i| {\n        if (@mod(num, @as(i32, @intCast(i))) == 0) {\n            std.debug.print(\"{} \", .{i});\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Factors') && output.includes('1') && output.includes('28') && output.includes('14') && output.includes('7') && output.includes('4') && output.includes('2')",
+  "hints": [
+    "A factor is a number that divides evenly into another number",
+    "Use `@mod(a, b)` to check divisibility",
+    "Iterate from 1 to the number itself"
+  ]
+}

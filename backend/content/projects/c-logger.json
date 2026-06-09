@@ -1,0 +1,23 @@
+{
+  "id": "c-logger",
+  "title": "C: Logger Library",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "logging", "variadic", "macros", "printf"],
+  "description": "Build a simple logging library with log levels (INFO, WARN, ERROR) and formatted output.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Log Levels and Formatting",
+      "description": "Define log levels as an enum: INFO, WARN, ERROR. Implement `void log_msg(int level, char *msg)` that prints `[LEVEL]: msg`. Implement a macro `LOG_ERROR(msg)` that calls log_msg with ERROR level. Test all three levels.",
+      "hints": ["Use `typedef enum { INFO, WARN, ERROR } LogLevel;`.", "`const char* level_str[] = {\"INFO\", \"WARN\", \"ERROR\"};`.", "Macro: `#define LOG_ERROR(msg) log_msg(ERROR, msg)`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { INFO, WARN, ERROR } LogLevel;\nconst char* level_names[] = {\"INFO\", \"WARN\", \"ERROR\"};\n\nvoid log_msg(int level, char *msg) {\n    printf(\"[%s]: %s\\n\", level_names[level], msg);\n}\n\n#define LOG_INFO(msg) log_msg(INFO, msg)\n#define LOG_WARN(msg) log_msg(WARN, msg)\n#define LOG_ERROR(msg) log_msg(ERROR, msg)\n\nint main() {\n    LOG_INFO(\"Application started\");\n    LOG_WARN(\"Low memory\");\n    LOG_ERROR(\"File not found\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('[INFO]') && output.includes('[WARN]') && output.includes('[ERROR]')",
+        "successMessage": "Logger library works!",
+        "failureMessage": "Print messages at all three log levels"
+      }
+    }
+  ]
+}

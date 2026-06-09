@@ -1,0 +1,17 @@
+{
+  "id": "zig-avl-tree",
+  "title": "AVL Tree",
+  "description": "Write a Zig program that implements an AVL tree with rotations for self-balancing.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    key: i32,\n    height: i32,\n    left: ?*Node,\n    right: ?*Node,\n};\n\nfn height(n: ?*Node) i32 { return if (n) |node| node.height else 0; }\nfn max(a: i32, b: i32) i32 { return if (a > b) a else b; }\n\nfn rotateRight(y: *Node) *Node {\n    const x = y.left.?;\n    y.left = x.right;\n    x.right = y;\n    y.height = 1 + max(height(y.left), height(y.right));\n    x.height = 1 + max(height(x.left), height(x.right));\n    return x;\n}\n\nfn rotateLeft(x: *Node) *Node {\n    const y = x.right.?;\n    x.right = y.left;\n    y.left = x;\n    x.height = 1 + max(height(x.left), height(x.right));\n    y.height = 1 + max(height(y.left), height(y.right));\n    return y;\n}\n\npub fn main() !void {\n    var n1 = Node{ .key = 10, .height = 3, .left = undefined, .right = undefined };\n    var n2 = Node{ .key = 20, .height = 2, .left = undefined, .right = undefined };\n    var n3 = Node{ .key = 30, .height = 1, .left = undefined, .right = undefined };\n    n1.right = &n2;\n    n2.right = &n3;\n    \n    var root = &n1;\n    root = rotateLeft(root);\n    \n    std.debug.print(\"Root: {}\\n\", .{root.key});\n    std.debug.print(\"Left: {}\\n\", .{root.left.?.key});\n    std.debug.print(\"Right: {}\\n\", .{root.right.?.key});\n}"
+  },
+  "verificationTest": "output.includes('Root: 20') && output.includes('Left: 10') && output.includes('Right: 30')",
+  "hints": [
+    "AVL trees maintain a balance factor (height difference) of -1, 0, or 1",
+    "Left rotation: makes the right child the new root",
+    "Right rotation: makes the left child the new root",
+    "Update heights after each rotation"
+  ]
+}

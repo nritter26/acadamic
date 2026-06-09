@@ -1,0 +1,17 @@
+{
+  "id": "zig-topological-sort",
+  "title": "Topological Sort",
+  "description": "Write a Zig program that performs topological sorting on a directed acyclic graph.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const graph = [_][5]u8{\n        [_]u8{ 0, 1, 0, 0, 0 },\n        [_]u8{ 0, 0, 1, 1, 0 },\n        [_]u8{ 0, 0, 0, 0, 1 },\n        [_]u8{ 0, 0, 0, 0, 1 },\n        [_]u8{ 0, 0, 0, 0, 0 },\n    };\n    var in_degree = [_]u8{ 0, 0, 0, 0, 0 };\n    \n    for (0..5) |i| {\n        for (0..5) |j| {\n            if (graph[i][j] == 1) in_degree[j] += 1;\n        }\n    }\n    \n    var queue: [5]u8 = undefined;\n    var front: usize = 0;\n    var rear: usize = 0;\n    \n    for (0..5) |i| {\n        if (in_degree[i] == 0) { queue[rear] = @intCast(i); rear += 1; }\n    }\n    \n    var count: usize = 0;\n    while (front < rear) {\n        const node = queue[front]; front += 1;\n        std.debug.print(\"{} \", .{node});\n        count += 1;\n        for (0..5) |j| {\n            if (graph[node][j] == 1) {\n                in_degree[j] -= 1;\n                if (in_degree[j] == 0) { queue[rear] = @intCast(j); rear += 1; }\n            }\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4')",
+  "hints": [
+    "Kahn's algorithm: start with nodes that have in-degree 0",
+    "Reduce in-degree of neighbors when a node is processed",
+    "When a neighbor's in-degree becomes 0, add it to the queue",
+    "Uses `@intCast()` to convert between usize and u8"
+  ]
+}

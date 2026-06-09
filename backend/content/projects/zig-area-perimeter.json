@@ -1,0 +1,16 @@
+{
+  "id": "zig-area-perimeter",
+  "title": "Area and Perimeter",
+  "description": "Write a Zig program that calculates and prints the area and perimeter of a rectangle with width 7 and height 12.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const width: i32 = 7;\n    const height: i32 = 12;\n    \n    const area = width * height;\n    const perimeter = 2 * (width + height);\n    \n    std.debug.print(\"Area: {}\\n\", .{area});\n    std.debug.print(\"Perimeter: {}\\n\", .{perimeter});\n}"
+  },
+  "verificationTest": "output.includes('Area: 84') && output.includes('Perimeter: 38')",
+  "hints": [
+    "Area = width × height",
+    "Perimeter = 2 × (width + height)",
+    "Zig uses `*` for multiplication"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-suffix-array",
+  "title": "Suffix Array",
+  "description": "Write a Zig program that constructs a simple suffix array for a given string.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"banana\";\n    const n = text.len;\n    var suffixes: [6][7]u8 = undefined;\n    var indices: [6]usize = undefined;\n    \n    for (0..n) |i| {\n        indices[i] = i;\n        for (0..n - i) |j| {\n            suffixes[i][j] = text[i + j];\n        }\n        suffixes[i][n - i] = 0;\n    }\n    \n    std.sort.block(usize, indices, {}, struct {\n        fn lessThan(_: void, a: usize, b: usize) bool {\n            var i: usize = 0;\n            while (text[a + i] == text[b + i] and a + i < n and b + i < n) { i += 1; }\n            return if (a + i >= n) true else if (b + i >= n) false else text[a + i] < text[b + i];\n        }\n    }.lessThan);\n    \n    for (indices) |idx| std.debug.print(\"{}: {s}\\n\", .{idx, text[idx..]});\n}"
+  },
+  "verificationTest": "output.includes('5:') && output.includes('3:') && output.includes('1:') && output.includes('0:') && output.includes('4:') && output.includes('2:')",
+  "hints": [
+    "A suffix array lists all suffixes of a string in sorted order",
+    "Each suffix is represented by its starting index in the original string",
+    "Use `std.sort.block` with a custom comparison function",
+    "For \"banana\", sorted suffixes: a(5), ana(3), anana(1), banana(0), na(4), nana(2)"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-caesar-cipher",
+  "title": "Caesar Cipher",
+  "description": "Write a Zig program that encrypts a message using the Caesar cipher with a shift of 3.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const text = \"Hello, Zig!\";\n    const shift: u8 = 3;\n    \n    std.debug.print(\"Original: {s}\\n\", .{text});\n    std.debug.print(\"Encrypted: \", .{});\n    for (text) |ch| {\n        if (ch >= 'a' and ch <= 'z') {\n            std.debug.print(\"{c}\", .{((ch - 'a' + shift) % 26) + 'a'});\n        } else if (ch >= 'A' and ch <= 'Z') {\n            std.debug.print(\"{c}\", .{((ch - 'A' + shift) % 26) + 'A'});\n        } else {\n            std.debug.print(\"{c}\", .{ch});\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Original: Hello, Zig!') && output.includes('Encrypted: Khoor, Zlj!')",
+  "hints": [
+    "Zig uses `and` instead of `&&` for logical AND",
+    "Use character arithmetic: `ch - 'a'` gives 0-based alphabet index",
+    "Only shift letters, leave other characters unchanged",
+    "Use `{c}` format specifier for printing characters"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "go-io-reader",
+  "title": "Go: Custom io.Reader",
+  "description": "Write a Go program that implements the io.Reader interface with a custom reader that transforms data.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"fmt\"\n\t\"io\"\n\t\"strings\"\n)\n\ntype UpperReader struct {\n\tsrc io.Reader\n}\n\nfunc (u *UpperReader) Read(p []byte) (int, error) {\n\tn, err := u.src.Read(p)\n\tif n > 0 {\n\t\tfor i := 0; i < n; i++ {\n\t\t\tif p[i] >= 'a' && p[i] <= 'z' {\n\t\t\t\tp[i] = p[i] - 32\n\t\t\t}\n\t\t}\n\t}\n\treturn n, err\n}\n\nfunc main() {\n\treader := &UpperReader{src: strings.NewReader(\"hello go!\")}\n\tdata := make([]byte, 100)\n\tn, _ := reader.Read(data)\n\tfmt.Println(string(data[:n]))\n}"
+  },
+  "verificationTest": "output.includes('HELLO GO!')",
+  "hints": [
+    "Implement the `Read(p []byte) (int, error)` method",
+    "Read from the underlying reader, then transform the data",
+    "Use `strings.NewReader` to create a reader from a string",
+    "Lowercase letters are in range 'a'-'z' in ASCII"
+  ]
+}

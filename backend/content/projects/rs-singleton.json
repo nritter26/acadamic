@@ -1,0 +1,71 @@
+{
+  "id": "rs-singleton",
+  "title": "Rust: Singleton Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "singleton", "lazy_static", "OnceCell", "global state"],
+  "description": "Implement the singleton pattern using OnceCell and global statics in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Singleton with OnceCell",
+      "description": "Use `std::sync::OnceLock` (Rust 1.70+) to create a thread-safe singleton that stores a `String`. Set it once and read it multiple times.",
+      "hints": ["`static SINGLETON: std::sync::OnceLock<String> = std::sync::OnceLock::new();`", "`SINGLETON.set(\"config\".to_string()).unwrap();`", "`println!(\"{}\", SINGLETON.get().unwrap());`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('config')",
+        "successMessage": "OnceLock singleton works!",
+        "failureMessage": "Set and print the singleton value."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Lazy Initialization",
+      "description": "Use `std::sync::LazyLock` (or `once_cell::sync::Lazy`) for lazy initialization. Create a singleton that initializes on first access. Print the value.",
+      "hints": ["`static CONFIG: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| { println!(\"Initializing...\"); \"app_config\".to_string() });`", "The closure runs only once on first access.", "Access twice: first triggers init, second just reads."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('app_config')",
+        "successMessage": "Lazy singleton works!",
+        "failureMessage": "Access the lazy singleton and print its value."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Mutex Singleton for Mutable State",
+      "description": "Create a mutable singleton using `OnceLock<Mutex<HashMap<String, String>>>`. Provide `set(key, val)` and `get(key)` functions. Test by storing and retrieving values.",
+      "hints": ["`static DB: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();`", "Initialize in a function: `DB.get_or_init(|| Mutex::new(HashMap::new()))`", "Lock to access: `DB.lock().unwrap().insert(key, val)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('value') || output.includes('hello')",
+        "successMessage": "Mutable singleton works!",
+        "failureMessage": "Store and retrieve a value from the singleton HashMap."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Thread-Safe Singleton Access",
+      "description": "Test your mutable singleton with multiple threads. Spawn 5 threads, each setting a different key-value pair. After joining, print all values from the singleton.",
+      "hints": ["Clone the DB reference (but Mutex handles the inner data).", "Each thread: `DB.lock().unwrap().insert(format!(\"key{}\", i), format!(\"val{}\", i))`", "After threads finish, print all entries."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('val0') && output.includes('val4')",
+        "successMessage": "Thread-safe singleton access works!",
+        "failureMessage": "5 threads write to the singleton, verify all values present."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Singleton with Default Config",
+      "description": "Create a `Config` struct with default values and a singleton that loads once. Include fields like `db_url`, `port`, `debug_mode`. Print the config values.",
+      "hints": ["`struct Config { db_url: String, port: u16, debug: bool }`", "`impl Default for Config { ... }`", "`static CONFIG: OnceLock<Config> = OnceLock::new();`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('localhost') || output.includes('db') || output.includes('port')",
+        "successMessage": "Config singleton works!",
+        "failureMessage": "Initialize and print the Config singleton."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "zig-linear-search",
+  "title": "Linear Search",
+  "description": "Write a Zig program that implements linear search to find the index of a target value (42) in an array.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const arr = [_]i32{ 10, 23, 42, 17, 55, 8, 99 };\n    const target: i32 = 42;\n    var found_index: ?usize = null;\n    \n    for (arr, 0..) |val, i| {\n        if (val == target) {\n            found_index = i;\n            break;\n        }\n    }\n    \n    if (found_index) |idx| {\n        std.debug.print(\"Found {} at index {}\\n\", .{target, idx});\n    } else {\n        std.debug.print(\"{} not found\\n\", .{target});\n    }\n}"
+  },
+  "verificationTest": "output.includes('Found 42 at index 2')",
+  "hints": [
+    "Zig supports iteration with index: `for (arr, 0..) |val, i|`",
+    "Use `?usize` for an optional/ nullable index type",
+    "Use `if (optional) |value|` to unwrap an optional",
+    "Break out of the loop once the target is found"
+  ]
+}

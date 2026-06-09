@@ -1,0 +1,16 @@
+{
+  "id": "zig-prime-sieve",
+  "title": "Sieve of Eratosthenes",
+  "description": "Write a Zig program that uses the Sieve of Eratosthenes to find all prime numbers up to 50.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const limit: usize = 50;\n    var is_prime = [_]bool{true} ** (limit + 1);\n    is_prime[0] = false;\n    is_prime[1] = false;\n    \n    var i: usize = 2;\n    while (i * i <= limit) {\n        if (is_prime[i]) {\n            var j = i * i;\n            while (j <= limit) {\n                is_prime[j] = false;\n                j += i;\n            }\n        }\n        i += 1;\n    }\n    \n    for (2..limit + 1) |n| {\n        if (is_prime[n]) std.debug.print(\"{} \", .{n});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('2') && output.includes('47') && !output.includes('49') && output.includes('23') && output.includes('13')",
+  "hints": [
+    "The array repeat operator `[_]bool{true} ** (n)` creates an array of n `true` values",
+    "Start marking from `i * i` for optimization",
+    "Only need to check up to sqrt(limit): `while (i * i <= limit)`"
+  ]
+}

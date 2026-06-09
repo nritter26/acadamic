@@ -59,11 +59,11 @@ export function getCurriculumState() {
       }
       const filename = lang === 'rs' ? 'rust' : lang === 'wasm' ? 'wasm' : lang === 'asm' ? 'asm' : lang;
       try {
-        const r = await fetch(`/content/${filename}.json`);
-        const data = await r.json();
+        const r = await fetch(`/api/content/${filename}`);
+        const res = await r.json();
         if (version !== _loadVersion) return;
         const cd = _topicData || {};
-        cd[lang] = data;
+        cd[lang] = res;
         _topicData = cd;
       } catch (e) {
         console.error('Failed to load curriculum for', lang, e);

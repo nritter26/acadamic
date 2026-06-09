@@ -1,0 +1,16 @@
+{
+  "id": "go-interface-sort",
+  "title": "Go: Sort Interface",
+  "description": "Write a Go program that implements the sort.Interface to sort custom structs by different fields.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"fmt\"\n\t\"sort\"\n)\n\ntype Person struct {\n\tName string\n\tAge  int\n}\n\ntype ByAge []Person\n\nfunc (a ByAge) Len() int           { return len(a) }\nfunc (a ByAge) Less(i, j int) bool { return a[i].Age < a[j].Age }\nfunc (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }\n\nfunc main() {\n\tpeople := []Person{\n\t\t{\"Alice\", 30},\n\t\t{\"Bob\", 25},\n\t\t{\"Charlie\", 35},\n\t}\n\tsort.Sort(ByAge(people))\n\tfmt.Println(\"Sorted by age:\")\n\tfor _, p := range people {\n\t\tfmt.Printf(\"  %s: %d\\n\", p.Name, p.Age)\n\t}\n}"
+  },
+  "verificationTest": "output.includes('Bob: 25') && output.includes('Alice: 30') && output.includes('Charlie: 35')",
+  "hints": [
+    "Implement sort.Interface: Len(), Less(i, j), Swap(i, j)",
+    "Create a named type based on []Person and attach the methods",
+    "Use `sort.Sort(yourType(yourSlice))` to sort"
+  ]
+}

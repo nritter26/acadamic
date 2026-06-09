@@ -43,6 +43,21 @@ router.get('/', (_req: Request, res: Response) => {
   res.json({ files, count: files.length });
 });
 
+// Get a project catalog file
+router.get('/projects/:id', (req: Request, res: Response) => {
+  const projectPath = path.join(CONTENT_DIR, 'projects', `${req.params.id}.json`);
+  if (!fs.existsSync(projectPath)) {
+    res.status(404).json({ error: 'Project not found' });
+    return;
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(projectPath, 'utf-8'));
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: 'Failed to read project file' });
+  }
+});
+
 // Get content for a specific language
 router.get('/:lang', (req: Request, res: Response) => {
   const file = safeLangParam(req.params.lang);

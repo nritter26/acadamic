@@ -1,0 +1,16 @@
+{
+  "id": "zig-grade",
+  "title": "Grade Calculator",
+  "description": "Write a Zig program that takes a score (integer 0-100) and prints the corresponding letter grade: A (90+), B (80-89), C (70-79), D (60-69), F (below 60).",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const score: i32 = 85;\n    \n    const grade = if (score >= 90) 'A'\n        else if (score >= 80) 'B'\n        else if (score >= 70) 'C'\n        else if (score >= 60) 'D'\n        else 'F';\n    \n    std.debug.print(\"Score: {}, Grade: {c}\\n\", .{score, grade});\n}"
+  },
+  "verificationTest": "output.includes('Score: 85') && output.includes('Grade: B')",
+  "hints": [
+    "Zig allows `if`/`else if`/`else` as expressions that return values",
+    "Use `{c}` format specifier to print a character",
+    "Use `const` for the grade variable since it's assigned once by the `if` expression"
+  ]
+}

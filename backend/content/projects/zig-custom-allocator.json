@@ -1,0 +1,17 @@
+{
+  "id": "zig-custom-allocator",
+  "title": "Custom Page Allocator",
+  "description": "Write a Zig program that implements a custom page-based allocator using OS-level memory allocation.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst PageAllocator = struct {\n    pages: [][]u8,\n    page_count: usize,\n    \n    fn alloc(self: *PageAllocator, size: usize) ?[]u8 {\n        const page = std.posix.mmap(\n            null,\n            size,\n            std.posix.PROT.READ | std.posix.PROT.WRITE,\n            .{ .TYPE = .PRIVATE, .ANONYMOUS = true },\n            -1,\n            0,\n        ) catch return null;\n        return page[0..size];\n    }\n    \n    fn dealloc(self: *PageAllocator, ptr: []u8) void {\n        std.posix.munmap(ptr);\n    }\n};\n\npub fn main() !void {\n    var alloc = PageAllocator{ .pages = undefined, .page_count = 0 };\n    const mem = (alloc.alloc(256) orelse return);\n    defer alloc.dealloc(mem);\n    \n    @memcpy(mem, \"Custom allocator works!\");\n    std.debug.print(\"{s}\\n\", .{mem[0..22]});\n}"
+  },
+  "verificationTest": "output.includes('Custom allocator works!')",
+  "hints": [
+    "`std.posix.mmap` allocates memory directly from the OS at page granularity",
+    "Use `PROT.READ | PROT.WRITE` for read-write permissions",
+    "The ANONYMOUS flag creates memory not backed by any file",
+    "`defer` ensures cleanup runs when scope exits"
+  ]
+}

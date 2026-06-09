@@ -1,0 +1,16 @@
+{
+  "id": "zig-graph-dfs",
+  "title": "Graph DFS",
+  "description": "Write a Zig program that implements Depth-First Search on a graph using recursion.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn dfs(graph: [][5]u8, node: u8, visited: []bool) void {\n    visited[node] = true;\n    std.debug.print(\"{} \", .{node});\n    for (0..5) |neighbor| {\n        if (graph[node][neighbor] == 1 and !visited[neighbor]) {\n            dfs(graph, @intCast(neighbor), visited);\n        }\n    }\n}\n\npub fn main() !void {\n    var graph = [_][5]u8{\n        [_]u8{ 0, 1, 1, 0, 0 },\n        [_]u8{ 1, 0, 0, 1, 0 },\n        [_]u8{ 1, 0, 0, 1, 1 },\n        [_]u8{ 0, 1, 1, 0, 0 },\n        [_]u8{ 0, 0, 1, 0, 0 },\n    };\n    var visited = [_]bool{false} ** 5;\n    dfs(&graph, 0, &visited);\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4')",
+  "hints": [
+    "DFS explores as far as possible along each branch before backtracking",
+    "Recursive implementation marks visited and calls dfs on unvisited neighbors",
+    "Use `graph[node][neighbor]` to check adjacency in the matrix"
+  ]
+}

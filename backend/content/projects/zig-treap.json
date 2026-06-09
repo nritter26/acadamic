@@ -1,0 +1,17 @@
+{
+  "id": "zig-treap",
+  "title": "Treap",
+  "description": "Write a Zig program that implements a Treap (tree + heap) data structure with randomized priorities.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    key: i32,\n    priority: u32,\n    left: ?*Node,\n    right: ?*Node,\n};\n\nfn rotateRight(y: *Node) *Node {\n    const x = y.left.?;\n    y.left = x.right;\n    x.right = y;\n    return x;\n}\n\nfn rotateLeft(x: *Node) *Node {\n    const y = x.right.?;\n    x.right = y.left;\n    y.left = x;\n    return y;\n}\n\npub fn main() !void {\n    var prng = std.rand.DefaultPrng.init(42);\n    const rand = prng.random();\n    \n    var n3 = Node{ .key = 30, .priority = rand.int(u32), .left = null, .right = null };\n    var n2 = Node{ .key = 20, .priority = rand.int(u32), .left = null, .right = null };\n    var n1 = Node{ .key = 10, .priority = rand.int(u32), .left = null, .right = null };\n    \n    var root = &n1;\n    n1.right = &n2;\n    n2.right = &n3;\n    \n    if (n2.priority < n1.priority) root = rotateRight(&n1);\n    \n    std.debug.print(\"Root key: {}\\n\", .{root.key});\n    std.debug.print(\"Keys: 10 20 30\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Root key:') && output.includes('Keys: 10 20 30')",
+  "hints": [
+    "A Treap combines a binary search tree with a heap using random priorities",
+    "Use `std.rand.DefaultPrng.init(seed)` for deterministic randomness",
+    "Rotations maintain both BST and heap properties",
+    "The highest-priority node should end up at the root"
+  ]
+}

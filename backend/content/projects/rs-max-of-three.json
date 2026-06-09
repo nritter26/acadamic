@@ -1,0 +1,71 @@
+{
+  "id": "rs-max-of-three",
+  "title": "Rust: Max of Three",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "comparison", "max", "conditionals"],
+  "description": "Find the maximum of three numbers using comparison logic.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Max of Two",
+      "description": "Write a function `max2(a: i32, b: i32) -> i32` that returns the larger of two numbers. Call with 8 and 15, print result.",
+      "hints": ["`if a > b { a } else { b }`", "The if/else expression returns a value.", "max2(8, 15) = 15"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('15')",
+        "successMessage": "Max of two works!",
+        "failureMessage": "Return the larger of 8 and 15."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Max of Three with Nested If",
+      "description": "Write a function `max3(a: i32, b: i32, c: i32) -> i32` using nested if/else. Call with 7, 42, 15 and print.",
+      "hints": ["First compare a and b, then compare the result with c.", "`let max = if a > b { a } else { b };` then compare max with c.", "max3(7, 42, 15) = 42"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Max of three works!",
+        "failureMessage": "Return the largest of 7, 42, 15."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Max with std::cmp::max",
+      "description": "Use `std::cmp::max` to find the max of two numbers, then chain to find max of three: `max(max(a, b), c)`. Call with 100, 50, 75.",
+      "hints": ["`use std::cmp::max;` at the top.", "Then `max(max(100, 50), 75)`", "Result should be 100."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('100')",
+        "successMessage": "std::cmp::max works!",
+        "failureMessage": "Use std::cmp::max to find the maximum of 100, 50, 75."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Max from Array",
+      "description": "Find the maximum value in the array `[33, 78, 12, 99, 45, 67]` using `.iter().max()`. Print the result.",
+      "hints": ["`let max = numbers.iter().max();` returns `Option<&i32>`.", "Use `.unwrap()` to get the value.", ".max() should return 99."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('99')",
+        "successMessage": "Iterator max works!",
+        "failureMessage": "Find and print the maximum in [33, 78, 12, 99, 45, 67]."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Min of Three",
+      "description": "Write a function `min3(a: i32, b: i32, c: i32) -> i32` that returns the smallest of three. Call with 10, 3, 7 and print.",
+      "hints": ["Similar to max, but use `<` instead of `>`.", "`if a < b { a } else { b }` for min of two.", "min3(10, 3, 7) = 3"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Min of three works!",
+        "failureMessage": "Return the smallest of 10, 3, 7."
+      }
+    }
+  ]
+}

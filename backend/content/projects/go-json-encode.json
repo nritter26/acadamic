@@ -1,0 +1,17 @@
+{
+  "id": "go-json-encode",
+  "title": "Go: JSON Encoding",
+  "description": "Write a Go program that encodes and decodes JSON with custom struct tags.",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n)\n\ntype Product struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n\tStock int     `json:\"stock,omitempty\"`\n}\n\nfunc main() {\n\tp := Product{ID: 1, Name: \"Widget\", Price: 9.99, Stock: 100}\n\tjsonBytes, _ := json.Marshal(p)\n\tfmt.Println(\"Encoded:\", string(jsonBytes))\n\n\tjsonStr := `{\"id\":2,\"name\":\"Gadget\",\"price\":24.99}`\n\tvar decoded Product\n\tjson.Unmarshal([]byte(jsonStr), &decoded)\n\tfmt.Printf(\"Decoded: %+v\\n\", decoded)\n}"
+  },
+  "verificationTest": "output.includes('Encoded: {\"id\":1,\"name\":\"Widget\",\"price\":9.99,\"stock\":100}') && output.includes('Decoded: {ID:2 Name:Gadget Price:24.99 Stock:0}')",
+  "hints": [
+    "Use struct tags `json:\"fieldname\"` to control JSON field names",
+    "`json.Marshal` converts structs to JSON bytes",
+    "`json.Unmarshal` parses JSON bytes into structs",
+    "`omitempty` skips zero-value fields in JSON output"
+  ]
+}

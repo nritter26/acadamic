@@ -1,0 +1,16 @@
+{
+  "id": "zig-linked-list",
+  "title": "Singly Linked List",
+  "description": "Write a Zig program that implements a singly linked list with push and print operations.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    value: i32,\n    next: ?*Node,\n};\n\npub fn main() !void {\n    var n3 = Node{ .value = 30, .next = null };\n    var n2 = Node{ .value = 20, .next = &n3 };\n    var n1 = Node{ .value = 10, .next = &n2 };\n\n    var current: ?*Node = &n1;\n    while (current) |node| {\n        std.debug.print(\"{} \", .{node.value});\n        current = node.next;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('10') && output.includes('20') && output.includes('30')",
+  "hints": [
+    "Use `?*Node` for an optional pointer to handle the null terminator",
+    "Zig structs are defined with `const Name = struct { fields };`",
+    "Initialize nodes with `.value = x, .next = &next_node` syntax"
+  ]
+}

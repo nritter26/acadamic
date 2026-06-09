@@ -1,0 +1,16 @@
+{
+  "id": "go-for-range-map",
+  "title": "Go: Range over Map",
+  "description": "Write a Go program that iterates over a map using range and prints key-value pairs.",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "codeTemplate": {
+    "go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tcapitals := map[string]string{\n\t\t\"USA\":    \"Washington DC\",\n\t\t\"India\":  \"New Delhi\",\n\t\t\"France\": \"Paris\",\n\t\t\"Japan\":  \"Tokyo\",\n\t}\n\n\tfmt.Println(\"All capitals:\")\n\tfor country, capital := range capitals {\n\t\tfmt.Printf(\"%s -> %s\\n\", country, capital)\n\t}\n\n\tif cap, ok := capitals[\"India\"]; ok {\n\t\tfmt.Println(\"Found India:\", cap)\n\t}\n\n\tfmt.Println(\"Number of entries:\", len(capitals))\n}"
+  },
+  "verificationTest": "output.includes('USA') && output.includes('Washington DC') && output.includes('Tokyo') && output.includes('Found India: New Delhi') && output.includes('Number of entries: 4')",
+  "hints": [
+    "Use `for key, value := range map { }` to iterate over a map",
+    "The comma-ok idiom: `value, ok := map[key]` checks if a key exists",
+    "Map iteration order is NOT guaranteed in Go"
+  ]
+}

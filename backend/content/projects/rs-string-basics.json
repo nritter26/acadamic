@@ -1,0 +1,71 @@
+{
+  "id": "rs-string-basics",
+  "title": "Rust: String Basics",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "strings", "&str", "String", "concatenation", "format"],
+  "description": "Work with string literals and the String type in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "String Literal (&str)",
+      "description": "Declare a string literal `greeting: &str = \"Hello, Rust!\"` and print it.",
+      "hints": ["`&str` is a string slice (immutable, fixed-size).", "String literals like `\"Hello\"` are type `&str`.", "Print with `println!(\"{}\", greeting);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello, Rust!')",
+        "successMessage": "String literal printed!",
+        "failureMessage": "Declare a &str variable and print it."
+      }
+    },
+    {
+      "id": 2,
+      "title": "String Type",
+      "description": "Create a `String` from a string literal using `to_string()` and print it.",
+      "hints": ["`let message = \"Hello\".to_string();` creates a String.", "`String` is growable and heap-allocated.", "You can also create with `String::from(\"Hello\");`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello')",
+        "successMessage": "String type works!",
+        "failureMessage": "Create a String using to_string() and print it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "String Concatenation",
+      "description": "Concatenate three strings: `\"Rust\"`, `\" is \"`, `\"awesome\"` using `+` or `format!`. Print the result.",
+      "hints": ["`let result = format!(\"{} {} {}\", \"Rust\", \"is\", \"awesome\");`", "The `+` operator works: `String + &str`", "`format!` is usually cleaner for combining multiple strings."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust is awesome')",
+        "successMessage": "String concatenation works!",
+        "failureMessage": "Combine 'Rust', 'is', and 'awesome' into one string and print it."
+      }
+    },
+    {
+      "id": 4,
+      "title": "String Length",
+      "description": "Declare a string `text = \"Hello, 世界\"` and print its length using `.len()`.",
+      "hints": ["`text.len()` returns the number of bytes, not characters.", "For character count, use `text.chars().count()`.", "Print both byte length and character count."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('11') || output.includes('12')",
+        "successMessage": "String length works!",
+        "failureMessage": "Print the byte length of 'Hello, 世界'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "String Interpolation",
+      "description": "Use `format!` to create a string like `\"My name is X and I am Y years old\"` with variables `name` and `age`. Print it.",
+      "hints": ["`let info = format!(\"My name is {} and I am {} years old\", name, age);`", "`format!` works like `println!` but returns a String instead of printing.", "Set `name = \"Rust\"` and `age = 9`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('My name is') && output.includes('years old')",
+        "successMessage": "String interpolation works!",
+        "failureMessage": "Use format! to create and print a formatted string."
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-database-sql",
+  "title": "Rust: Database Operations",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "database", "SQL", "in-memory DB", "CRUD"],
+  "description": "Implement an in-memory database with CRUD operations and querying.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Database Schema",
+      "description": "Define a `Row` struct with `id: i32, name: String, age: i32, email: String`. Create an in-memory `Database` that stores rows in a `HashMap<i32, Row>`. Add 3 sample rows and print them.",
+      "hints": ["`struct Row { id: i32, name: String, age: i32, email: String }`", "`struct Database { rows: HashMap<i32, Row>, next_id: i32 }`", "Insert rows with auto-incrementing IDs."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && output.contains('Bob') && output.contains('Charlie')",
+        "successMessage": "Database schema defined!",
+        "failureMessage": "Create database with 3 sample rows and print them."
+      }
+    },
+    {
+      "id": 2,
+      "title": "CRUD Operations",
+      "description": "Implement `insert`, `select`, `update`, and `delete` methods on Database. Insert a new row, select it by ID, update its name, then delete it. Print results after each operation.",
+      "hints": ["`insert(row: Row) -> i32` inserts and returns new ID.", "`select(id: i32) -> Option<&Row>` retrieves a row.", "`update(id, row)` modifies existing row.", "`delete(id)` removes a row."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('inserted') && output.contains('updated') && output.contains('deleted')",
+        "successMessage": "CRUD operations work!",
+        "failureMessage": "Demonstrate all four CRUD operations and print results."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Query Filtering",
+      "description": "Implement a `query` method that accepts a predicate closure `Fn(&Row) -> bool`. Filter rows where age > 25. Print matching rows.",
+      "hints": ["`fn query<P>(&self, predicate: P) -> Vec<&Row> where P: Fn(&Row) -> bool { self.rows.values().filter(|r| predicate(r)).collect() }`", "`db.query(|r| r.age > 25)` returns rows with age > 25."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Bob') || output.contains('Charlie')",
+        "successMessage": "Query filtering works!",
+        "failureMessage": "Query rows with age > 25 and print them."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Join Tables",
+      "description": "Create a second table `Orders` (order_id, user_id, product, amount). Implement a join operation that combines users with their orders. Print each user with their orders.",
+      "hints": ["`struct Order { order_id: i32, user_id: i32, product: String, amount: f64 }`", "Join: for each user, find orders where order.user_id == user.id.", "Print: `Alice: Widget ($10.99), Gadget ($24.99)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Widget') || output.contains('order')",
+        "successMessage": "Table join works!",
+        "failureMessage": "Join users with orders and print combined results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Transaction Support",
+      "description": "Implement a simple transaction system: `begin_transaction` creates a savepoint, `commit` applies changes, `rollback` reverts to savepoint. Demonstrate a successful transaction and a rolled-back one.",
+      "hints": ["Save database state on `begin_transaction`.", "On `commit`, discard the saved state (changes are permanent).", "On `rollback`, restore the saved state (changes discarded)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('committed') && output.contains('rolled back')",
+        "successMessage": "Transaction support works!",
+        "failureMessage": "Demonstrate both committed and rolled-back transactions."
+      }
+    }
+  ]
+}

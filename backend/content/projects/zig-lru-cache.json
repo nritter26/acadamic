@@ -1,0 +1,17 @@
+{
+  "id": "zig-lru-cache",
+  "title": "LRU Cache",
+  "description": "Write a Zig program that simulates an LRU (Least Recently Used) cache with a fixed capacity.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst CacheEntry = struct {\n    key: u32,\n    value: u32,\n};\n\npub fn main() !void {\n    const capacity: usize = 3;\n    var cache: [3]CacheEntry = undefined;\n    var size: usize = 0;\n    \n    const ops = [_]u32{ 1, 2, 3, 4, 1, 2 };\n    for (ops) |key| {\n        var found = false;\n        for (0..size) |i| {\n            if (cache[i].key == key) {\n                const val = cache[i].value;\n                var j = i;\n                while (j + 1 < size) { cache[j] = cache[j + 1]; j += 1; }\n                cache[size - 1] = CacheEntry{ .key = key, .value = val };\n                found = true;\n                break;\n            }\n        }\n        if (!found) {\n            if (size < capacity) { size += 1; }\n            var k: usize = 0;\n            while (k + 1 < size) { cache[k] = cache[k + 1]; k += 1; }\n            cache[size - 1] = CacheEntry{ .key = key, .value = key * 10 };\n        }\n    }\n    \n    for (0..size) |i| std.debug.print(\"{}:{}\\n\", .{cache[i].key, cache[i].value});\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('10') || output.includes('2') && output.includes('20')",
+  "hints": [
+    "LRU cache evicts the least recently used item when capacity is reached",
+    "Use an array of structs with key-value pairs",
+    "Shift elements when accessing or adding to maintain recency order",
+    "The most recent items should be at the end of the array"
+  ]
+}

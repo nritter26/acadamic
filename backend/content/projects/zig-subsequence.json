@@ -1,0 +1,17 @@
+{
+  "id": "zig-subsequence",
+  "title": "Longest Common Subsequence",
+  "description": "Write a Zig program that finds the length of the longest common subsequence between two strings using dynamic programming.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const s1 = \"ABCDGH\";\n    const s2 = \"AEDFHR\";\n    var dp: [7][7]u32 = [_][7]u32{[_]u32{0} ** 7} ** 7;\n    \n    for (1..s1.len + 1) |i| {\n        for (1..s2.len + 1) |j| {\n            if (s1[i - 1] == s2[j - 1]) {\n                dp[i][j] = dp[i - 1][j - 1] + 1;\n            } else {\n                dp[i][j] = @max(dp[i - 1][j], dp[i][j - 1]);\n            }\n        }\n    }\n    \n    std.debug.print(\"LCS length: {}\\n\", .{dp[s1.len][s2.len]});\n}"
+  },
+  "verificationTest": "output.includes('LCS length: 3')",
+  "hints": [
+    "LCS uses dynamic programming with a 2D table where dp[i][j] = LCS length for prefixes",
+    "If characters match: dp[i][j] = dp[i-1][j-1] + 1",
+    "If characters differ: dp[i][j] = max(dp[i-1][j], dp[i][j-1])",
+    "Use `@max()` built-in for finding the maximum of two values"
+  ]
+}

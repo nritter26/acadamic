@@ -1,0 +1,17 @@
+{
+  "id": "zig-anagram",
+  "title": "Anagram Checker",
+  "description": "Write a Zig program that checks if two strings are anagrams of each other.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const s1 = \"listen\";\n    const s2 = \"silent\";\n    \n    var counts: [26]u8 = [_]u8{0} ** 26;\n    \n    for (s1) |ch| counts[ch - 'a'] += 1;\n    for (s2) |ch| counts[ch - 'a'] -|= 1;\n    \n    var is_anagram = true;\n    for (counts) |c| {\n        if (c != 0) { is_anagram = false; break; }\n    }\n    \n    std.debug.print(\"\\\"{} \\\" and \\\"{} \\\" \", .{s1, s2});\n    if (is_anagram) {\n        std.debug.print(\"are anagrams\\n\", .{});\n    } else {\n        std.debug.print(\"are not anagrams\\n\", .{});\n    }\n}"
+  },
+  "verificationTest": "output.includes('listen') && output.includes('silent') && output.includes('anagram')",
+  "hints": [
+    "Anagrams have the same character frequency",
+    "Use an array of 26 counters for 'a' to 'z'",
+    "The `**` operator repeats an array: `[_]u8{0} ** 26` creates 26 zeros",
+    "Use `-|=` for saturating subtraction to prevent underflow"
+  ]
+}

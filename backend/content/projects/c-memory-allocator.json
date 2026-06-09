@@ -1,0 +1,23 @@
+{
+  "id": "c-memory-allocator",
+  "title": "C: Custom Memory Allocator",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 30,
+  "concepts": ["c", "memory allocator", "free list", "malloc", "linked list"],
+  "description": "Implement a custom memory allocator using a free list to manage heap memory blocks.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Free List Allocator",
+      "description": "Define a `Block` struct with size and next pointer. Write `void my_init(void *mem, int size)` to initialize the free list with one large block. Write `void* my_alloc(int size)` that finds a free block using first-fit and splits it. Write `void my_free(void *ptr)` that returns blocks to the free list (coalescing adjacent).",
+      "hints": ["Block header stores size and points to next free block.", "First-fit: find first block large enough.", "Split: if block is larger than needed, carve off the remainder.", "Coalesce: merge adjacent free blocks."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct Block {\n    int size;\n    struct Block *next;\n} Block;\n\n#define HEADER_SIZE sizeof(Block)\n\nBlock *free_list = NULL;\n\nvoid my_init(void *mem, int size) {\n    free_list = (Block*)mem;\n    free_list->size = size - HEADER_SIZE;\n    free_list->next = NULL;\n}\n\nvoid* my_alloc(int size) {\n    Block **prev = &free_list;\n    Block *cur = free_list;\n    while (cur) {\n        if (cur->size >= size) {\n            if (cur->size > size + HEADER_SIZE + 4) {\n                Block *new_block = (Block*)((char*)cur + HEADER_SIZE + size);\n                new_block->size = cur->size - size - HEADER_SIZE;\n                new_block->next = cur->next;\n                cur->size = size;\n                cur->next = NULL;\n                *prev = new_block;\n            } else {\n                *prev = cur->next;\n            }\n            return (char*)cur + HEADER_SIZE;\n        }\n        prev = &cur->next;\n        cur = cur->next;\n    }\n    return NULL;\n}\n\nvoid my_free(void *ptr) {\n    Block *block = (Block*)((char*)ptr - HEADER_SIZE);\n    block->next = free_list;\n    free_list = block;\n}\n\nint main() {\n    char mem[1024];\n    my_init(mem, 1024);\n    int *a = (int*)my_alloc(10 * sizeof(int));\n    for (int i = 0; i < 10; i++) a[i] = i * 10;\n    for (int i = 0; i < 10; i++) printf(\"%d \", a[i]);\n    printf(\"\\n\");\n    my_free(a);\n    printf(\"Freed successfully\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('0 10 20 30 40 50 60 70 80 90') && output.includes('Freed')",
+        "successMessage": "Custom allocator works!",
+        "failureMessage": "Allocate, print, and free memory"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "py-lists",
+  "title": "Python: Lists",
+  "description": "Write a Python program that demonstrates list creation, indexing, slicing, and common operations.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "nums = [10, 20, 30, 40, 50]\nprint(f\"List: {nums}\")\nprint(f\"First: {nums[0]}, Last: {nums[-1]}\")\nprint(f\"Slice [1:4]: {nums[1:4]}\")\nnums.append(60)\nprint(f\"After append: {nums}\")\nprint(f\"Length: {len(nums)}\")\nprint(f\"Sum: {sum(nums)}\")"
+  },
+  "verificationTest": "output.includes('List: [10, 20, 30, 40, 50]') && output.includes('First: 10, Last: 50') && output.includes('Slice [1:4]: [20, 30, 40]') && output.includes('After append: [10, 20, 30, 40, 50, 60]') && output.includes('Sum: 210')",
+  "hints": [
+    "Lists are mutable sequences created with square brackets `[]`",
+    "Negative indices count from the end: `-1` is the last element",
+    "`list[start:end]` creates a sublist (end is exclusive)",
+    "`append()` adds an element to the end of a list"
+  ]
+}

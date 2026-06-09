@@ -1,10 +1,8 @@
 <script>
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
-  import { getAIState } from '$lib/stores/ai.svelte.js';
 
   let { topic, phase, level = 'beginner', isCollapsed = false } = $props();
   let curr = $derived(getCurriculumState());
-  let ai = $derived(getAIState());
   let isActive = $derived(curr.topic === topic && curr.phase === phase);
 
   const levelColors = { beginner: '#22c55e', intermediate: '#f59e0b', expert: '#ef4444' };
@@ -17,7 +15,7 @@
   class="topic-btn"
   class:active={isActive}
   class:hidden={isCollapsed}
-  onclick={() => { curr.topic = topic; curr.phase = phase; ai.exploreTopic(topic, curr.lang, phase); }}
+  onclick={() => { curr.topic = topic; curr.phase = phase; }}
 >
   <span class="dot" style="background: {levelColors[level] || '#64748b'}"></span>
   <span class="topic-name">{topic}</span>

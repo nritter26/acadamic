@@ -1,0 +1,17 @@
+{
+  "id": "zig-base64",
+  "title": "Base64 Encoding",
+  "description": "Write a Zig program that encodes a simple byte string to Base64 format.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const alphabet = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\";\n    const data = [_]u8{ 0x48, 0x65, 0x6C, 0x6C, 0x6F };\n    \n    var i: usize = 0;\n    while (i < data.len) {\n        const b0 = data[i];\n        const b1 = if (i + 1 < data.len) data[i + 1] else 0;\n        const b2 = if (i + 2 < data.len) data[i + 2] else 0;\n        \n        const idx0 = b0 >> 2;\n        const idx1 = ((b0 & 0x03) << 4) | (b1 >> 4);\n        const idx2 = ((b1 & 0x0F) << 2) | (b2 >> 6);\n        const idx3 = b2 & 0x3F;\n        \n        std.debug.print(\"{c}{c}\", .{alphabet[idx0], alphabet[idx1]});\n        std.debug.print(\"{c}{c}\", .{alphabet[idx2], alphabet[idx3]});\n        i += 3;\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('SGVsbG8') || output.includes('SGVsbG8=') || output.includes('SGVsbG8==')",
+  "hints": [
+    "Base64 encodes 3 bytes into 4 characters using 6 bits each",
+    "Use bit shifting and masking: `>>`, `&`, `|` for bit manipulation",
+    "Pad with null bytes (0) when the input length is not divisible by 3",
+    "The `{c}` format specifier prints a single character from a u8 value"
+  ]
+}

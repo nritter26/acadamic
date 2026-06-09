@@ -1,0 +1,16 @@
+{
+  "id": "zig-morse-code",
+  "title": "Morse Code Encoder",
+  "description": "Write a Zig program that converts a string to Morse code using a lookup table.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const morse = [_][]const u8{\n        \".-\", \"-...\", \"-.-.\", \"-..\", \".\", \"..-.\",\n        \"--.\", \"....\", \"..\", \".---\", \"-.-\", \".-..\",\n        \"--\", \"-.\", \"---\", \".--.\", \"--.-\", \".-.\",\n        \"...\", \"-\", \"..-\", \"...-\", \".--\", \"-..-\",\n        \"-.--\", \"--..\",\n    };\n    \n    const text = \"SOS\";\n    for (text) |ch| {\n        if (ch >= 'A' and ch <= 'Z') {\n            std.debug.print(\"{s} \", .{morse[ch - 'A']});\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('...') && output.includes('---') && output.includes('...')",
+  "hints": [
+    "Use a fixed-size array of strings as a lookup table indexed by `ch - 'A'`",
+    "Zig uses `[]const u8` for string literals",
+    "`and` replaces `&&` in Zig for boolean operations"
+  ]
+}

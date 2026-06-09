@@ -1,0 +1,17 @@
+{
+  "id": "zig-iterator-pattern",
+  "title": "Iterator Pattern",
+  "description": "Write a Zig program that implements a custom iterator for a Fibonacci sequence using the Zig iterator protocol.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst FibonacciIterator = struct {\n    a: u32 = 0,\n    b: u32 = 1,\n    remaining: usize,\n    \n    fn next(self: *FibonacciIterator) ?u32 {\n        if (self.remaining == 0) return null;\n        const result = self.a;\n        const next = self.a + self.b;\n        self.a = self.b;\n        self.b = next;\n        self.remaining -= 1;\n        return result;\n    }\n};\n\npub fn main() !void {\n    var iter = FibonacciIterator{ .remaining = 10 };\n    while (iter.next()) |val| {\n        std.debug.print(\"{} \", .{val});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3') && output.includes('5') && output.includes('8') && output.includes('13') && output.includes('21') && output.includes('34')",
+  "hints": [
+    "Zig's iterator protocol uses a method named `next` that returns an optional value",
+    "Return `null` from `next()` to signal iteration is complete",
+    "Use `while (iter.next()) |val|` to consume the iterator",
+    "The iterator state (a, b) is mutated as `next()` is called"
+  ]
+}

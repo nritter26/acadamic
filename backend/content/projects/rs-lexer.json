@@ -1,0 +1,71 @@
+{
+  "id": "rs-lexer",
+  "title": "Rust: Lexer (Tokenizer)",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "lexer", "tokenizer", "compiler", "token types"],
+  "description": "Build a lexer that tokenizes source code into tokens.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Token Types",
+      "description": "Define a `TokenType` enum with variants: `Number, Plus, Minus, Star, Slash, LParen, RParen, Ident, Keyword, Let, Print, EOF`. Define a `Token` struct with type, value, and position.",
+      "hints": ["`#[derive(Debug, PartialEq)] enum TokenType { ... }`", "`struct Token { ttype: TokenType, value: String, line: usize, col: usize }`", "Tokens represent the smallest meaningful units of code."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Number') && output.contains('Plus')",
+        "successMessage": "Token types defined!",
+        "failureMessage": "Print all defined token types."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Lexer: Tokenize Numbers and Operators",
+      "description": "Create a `Lexer` struct that takes a source string. Implement `next_token() -> Token` that recognizes: digits (numbers), `+`, `-`, `*`, `/`, `(`, `)`, and whitespace skipping. Tokenize `\"12 + 34\"` and print tokens.",
+      "hints": ["`struct Lexer { source: Vec<char>, pos: usize }`", "`peek()` returns current char, `advance()` moves forward.", "Collect consecutive digits for Number tokens."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('12') && output.contains('34') && output.contains('Plus')",
+        "successMessage": "Lexer tokenizes numbers and operators!",
+        "failureMessage": "Tokenize '12 + 34' and print all tokens."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Keywords and Identifiers",
+      "description": "Add identifier tokenization: letters followed by letters/digits. Recognize keywords like `let`, `print`. Tokenize `\"let x = 42\"` and print tokens.",
+      "hints": ["If current char is a letter, collect identifier.", "Check identifier against keyword map.", "`let` → Keyword, `x` → Ident, `42` → Number"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Let') || output.contains('Keyword')",
+        "successMessage": "Keyword and identifier tokenization works!",
+        "failureMessage": "Tokenize 'let x = 42' and print tokens."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Full Tokenization Loop",
+      "description": "Implement `tokenize(&mut self) -> Vec<Token>` that consumes all tokens until EOF. Create a readable `display_tokens` function. Tokenize a simple program like `\"let x = 10; print x * 2\"` and print all tokens.",
+      "hints": ["Loop `while !self.is_eof() { tokens.push(self.next_token()) }`", "Add Semicolon token for `;`.", "Print each token with format `Token(Let, \"let\", 1:1)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Let') && output.contains('Semicolon') && output.contains('Number')",
+        "successMessage": "Full tokenization works!",
+        "failureMessage": "Tokenize 'let x = 10; print x * 2' and print all tokens."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Error Handling in Lexer",
+      "description": "Add error recovery: when encountering unexpected characters (like `@` or `#`), report an error and continue. Create a `LexerResult` with tokens and errors. Test with input containing invalid characters.",
+      "hints": ["`struct LexerResult { tokens: Vec<Token>, errors: Vec<String> }`", "On unexpected char, `errors.push(format!(\"Unexpected char '{}' at {}:{}\", c, line, col))`.", "Continue tokenizing after reporting the error."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('error') || output.contains('unexpected')",
+        "successMessage": "Lexer error handling works!",
+        "failureMessage": "Tokenize input with errors and print both tokens and error messages."
+      }
+    }
+  ]
+}

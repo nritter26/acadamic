@@ -1,0 +1,17 @@
+{
+  "id": "zig-quick-select",
+  "title": "Quick Select",
+  "description": "Write a Zig program that implements the Quick Select algorithm to find the kth smallest element in an unsorted array.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn partition(arr: []i32, low: usize, high: usize) usize {\n    const pivot = arr[high];\n    var i: usize = low;\n    var j: usize = low;\n    while (j < high) {\n        if (arr[j] <= pivot) {\n            const temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;\n            i += 1;\n        }\n        j += 1;\n    }\n    const temp = arr[i]; arr[i] = arr[high]; arr[high] = temp;\n    return i;\n}\n\nfn quickSelect(arr: []i32, low: usize, high: usize, k: usize) i32 {\n    if (low == high) return arr[low];\n    const pi = partition(arr, low, high);\n    if (k == pi) return arr[pi];\n    return if (k < pi) quickSelect(arr, low, pi -| 1, k) else quickSelect(arr, pi + 1, high, k);\n}\n\npub fn main() !void {\n    var arr = [_]i32{ 7, 10, 4, 3, 20, 15 };\n    const k: usize = 3;\n    const result = quickSelect(arr, 0, arr.len - 1, k - 1);\n    std.debug.print(\"The {}rd smallest is {}\\n\", .{k, result});\n}"
+  },
+  "verificationTest": "output.includes('3rd smallest') && output.includes('10')",
+  "hints": [
+    "Quick Select is a selection algorithm based on the partition step of Quick Sort",
+    "After partition, the pivot is in its final sorted position",
+    "Recursively search only the side containing the kth element",
+    "Use `-|` for saturating subtraction to prevent underflow when pi = 0"
+  ]
+}

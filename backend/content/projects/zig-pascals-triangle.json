@@ -1,0 +1,16 @@
+{
+  "id": "zig-pascals-triangle",
+  "title": "Pascal's Triangle",
+  "description": "Write a Zig program that generates and prints Pascal's triangle up to 5 rows.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const rows: usize = 5;\n    var triangle: [5][5]u32 = undefined;\n    \n    for (0..rows) |i| {\n        triangle[i][0] = 1;\n        triangle[i][i] = 1;\n        for (1..i) |j| {\n            triangle[i][j] = triangle[i - 1][j - 1] + triangle[i - 1][j];\n        }\n    }\n    \n    for (0..rows) |i| {\n        for (0..i + 1) |j| {\n            std.debug.print(\"{} \", .{triangle[i][j]});\n        }\n        std.debug.print(\"\\n\", .{});\n    }\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('1 1') && output.includes('1 2 1') && output.includes('1 3 3 1')",
+  "hints": [
+    "Each row starts and ends with 1",
+    "Interior values are the sum of the two values above: `row[i][j] = row[i-1][j-1] + row[i-1][j]`",
+    "Use a 2D fixed-size array initialized with `undefined`"
+  ]
+}

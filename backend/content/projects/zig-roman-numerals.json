@@ -1,0 +1,16 @@
+{
+  "id": "zig-roman-numerals",
+  "title": "Roman Numerals",
+  "description": "Write a Zig program that converts an Arabic number (e.g., 1984) to Roman numerals.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const values = [_]u32{ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };\n    const numerals = [_][]const u8{ \"M\", \"CM\", \"D\", \"CD\", \"C\", \"XC\", \"L\", \"XL\", \"X\", \"IX\", \"V\", \"IV\", \"I\" };\n    var num: u32 = 1984;\n    \n    for (values, numerals) |val, sym| {\n        while (num >= val) {\n            std.debug.print(\"{s}\", .{sym});\n            num -= val;\n        }\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('MCMLXXXIV')",
+  "hints": [
+    "Use parallel arrays for values and their corresponding Roman numeral symbols",
+    "Iterate from largest to smallest value, greedily subtracting from the input number",
+    "Zig's `for (arr1, arr2) |a, b|` iterates two arrays in parallel"
+  ]
+}

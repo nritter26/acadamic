@@ -1,0 +1,15 @@
+{
+  "id": "zig-swap",
+  "title": "Swap Two Variables",
+  "description": "Write a Zig program that swaps the values of two integers and prints them before and after swapping.",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var a: i32 = 10;\n    var b: i32 = 20;\n    \n    std.debug.print(\"Before: {} {}\\n\", .{a, b});\n    \n    // Swap a and b\n    const temp = a;\n    a = b;\n    b = temp;\n    \n    std.debug.print(\"After: {} {}\\n\", .{a, b});\n}"
+  },
+  "verificationTest": "output.includes('Before: 10 20') && output.includes('After: 20 10')",
+  "hints": [
+    "Use a temporary variable to hold one value during the swap",
+    "Zig uses `const` for immutable bindings and `var` for mutable ones"
+  ]
+}

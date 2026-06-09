@@ -1,0 +1,17 @@
+{
+  "id": "zig-arena-allocator",
+  "title": "Arena Allocator",
+  "description": "Write a Zig program that implements a simple arena allocator that allocates memory and frees it all at once.",
+  "difficulty": "advanced",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);\n    defer arena.deinit();\n    \n    const allocator = arena.allocator();\n    \n    const str = try allocator.dupe(u8, \"Hello, Arena!\");\n    const nums = try allocator.alloc(u32, 5);\n    for (0..5) |i| nums[i] = @intCast(i * 10);\n    \n    std.debug.print(\"{s}\\n\", .{str});\n    for (nums) |n| std.debug.print(\"{} \", .{n});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Hello, Arena!') && output.includes('0') && output.includes('10') && output.includes('20') && output.includes('30') && output.includes('40')",
+  "hints": [
+    "`std.heap.ArenaAllocator` allocates from page_allocator and frees all memory at once with `deinit()`",
+    "`defer` ensures cleanup runs when the scope exits, even on errors",
+    "Use `try` with allocator methods since they may return OutOfMemory errors",
+    "`.dupe(u8, \"...\")` creates a heap-allocated copy of a string"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-semver",
+  "title": "Rust: Semantic Versioning",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "semver", "versioning", "parsing", "comparison"],
+  "description": "Implement a semantic version (SemVer) parser and comparator.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse Version String",
+      "description": "Create a `Version` struct with `major: u32, minor: u32, patch: u32`. Write `Version::from_str(\"1.2.3\")` that parses a version string. Print the parsed fields.",
+      "hints": ["`struct Version { major: u32, minor: u32, patch: u32 }`", "Split by '.' and parse each part.", "`\"1.2.3\".split('.').collect::<Vec<&str>>()`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('2') && output.contains('3')",
+        "successMessage": "Version parsing works!",
+        "failureMessage": "Parse '1.2.3' and print major=1, minor=2, patch=3."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Version Comparison",
+      "description": "Implement `PartialOrd` and `Ord` for Version. Compare 2.0.0 > 1.9.9, 1.0.0 == 1.0.0, 1.0.0 < 2.0.0. Print comparison results.",
+      "hints": ["Compare major first, then minor, then patch.", "`fn cmp(&self, other: &Self) -> Ordering { (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch)) }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "Version comparison works!",
+        "failureMessage": "Compare versions and print results."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Pre-release and Build Metadata",
+      "description": "Extend Version with `pre: Option<String>` (e.g., `-alpha.1`) and `build: Option<String>` (e.g., `+build.123`). Parse `\"1.0.0-alpha.1+build.456\"` and print all fields.",
+      "hints": ["Split on `-` for pre-release, then on `+` for build metadata.", "Pre-release has lower precedence than patch but higher than no pre-release.", "`\"1.0.0-alpha.1+build.456\"` → major=1, minor=0, patch=0, pre=\"alpha.1\", build=\"build.456\""],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('alpha') && output.contains('build')",
+        "successMessage": "Pre-release and build metadata works!",
+        "failureMessage": "Parse a version with pre-release and build metadata."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Version Range Parsing",
+      "description": "Parse version ranges like `\">=1.0.0 <2.0.0\"` or `\"^1.2.3\"` (compatible) or `\"~1.2.0\"` (approximately equivalent). Implement `matches(&self, range: &str) -> bool`.",
+      "hints": ["Parse range operators: `>=`, `<=`, `>`, `<`, `=`, `^`, `~`.", "`^1.2.3` → >=1.2.3 <2.0.0 (compatible with minor).", "`~1.2.0` → >=1.2.0 <1.3.0 (approximately)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "Version range matching works!",
+        "failureMessage": "Test if version 1.5.0 matches '^1.2.3' (true) and '^2.0.0' (false)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Sorting Versions",
+      "description": "Create a list of versions: `[\"2.0.0\", \"1.0.0-alpha\", \"1.0.0\", \"2.0.0-rc.1\", \"1.5.0\"]`. Sort them according to SemVer precedence rules. Print the sorted list.",
+      "hints": ["Implement `Ord` respecting pre-release precedence.", "Pre-release versions have lower precedence than the release.", "Sorted: 1.0.0-alpha, 1.0.0, 1.5.0, 2.0.0-rc.1, 2.0.0"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1.0.0-alpha') && output.contains('2.0.0')",
+        "successMessage": "Version sorting works!",
+        "failureMessage": "Sort and print the list of versions."
+      }
+    }
+  ]
+}

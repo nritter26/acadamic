@@ -1,0 +1,17 @@
+{
+  "id": "py-dicts",
+  "title": "Python: Dictionaries",
+  "description": "Write a Python program that creates and manipulates a dictionary of student grades.",
+  "difficulty": "beginner",
+  "languages": ["py"],
+  "codeTemplate": {
+    "py": "grades = {\n    \"Alice\": 92,\n    \"Bob\": 78,\n    \"Charlie\": 85,\n}\n\nprint(f\"Alice's grade: {grades['Alice']}\")\ngrades[\"Diana\"] = 95\nprint(f\"All grades: {grades}\")\nprint(f\"Keys: {list(grades.keys())}\")\nprint(f\"Average: {sum(grades.values()) / len(grades)}\")\n\nif \"Bob\" in grades:\n    print(f\"Bob scored {grades['Bob']}\")"
+  },
+  "verificationTest": "output.includes(\"Alice's grade: 92\") && output.includes('Diana') && output.includes('Average: 87.5') && output.includes('Bob scored 78')",
+  "hints": [
+    "Dictionaries store key-value pairs with `{key: value}` syntax",
+    "Access values with `dict[key]`",
+    "`.keys()` returns keys, `.values()` returns values",
+    "Use `in` to check if a key exists"
+  ]
+}

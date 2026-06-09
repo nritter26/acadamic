@@ -1,0 +1,16 @@
+{
+  "id": "zig-merge-sort",
+  "title": "Merge Sort",
+  "description": "Write a Zig program that implements merge sort to sort an array of integers.",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn mergeSort(arr: []i32) void {\n    if (arr.len <= 1) return;\n    const mid = arr.len / 2;\n    mergeSort(arr[0..mid]);\n    mergeSort(arr[mid..arr.len]);\n\n    var i: usize = 0;\n    var j: usize = mid;\n    var k: usize = 0;\n    var temp: [100]i32 = undefined;\n\n    while (i < mid and j < arr.len) {\n        temp[k] = if (arr[i] < arr[j]) blk: {\n            i += 1;\n            break :blk arr[i - 1];\n        } else blk: {\n            j += 1;\n            break :blk arr[j - 1];\n        };\n        k += 1;\n    }\n    while (i < mid) { temp[k] = arr[i]; i += 1; k += 1; }\n    while (j < arr.len) { temp[k] = arr[j]; j += 1; k += 1; }\n    for (0..k) |idx| arr[idx] = temp[idx];\n}\n\npub fn main() !void {\n    var arr = [_]i32{ 38, 27, 43, 3, 9, 82, 10 };\n    mergeSort(arr);\n    for (arr) |val| std.debug.print(\"{} \", .{val});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('3') && output.includes('9') && output.includes('10') && output.includes('27') && output.includes('38') && output.includes('43') && output.includes('82')",
+  "hints": [
+    "Merge sort uses a divide-and-conquer approach: split, sort recursively, then merge",
+    "The function signature uses `[]i32` slices for flexible sub-array access",
+    "Use `arr[0..mid]` slice syntax to pass sub-arrays recursively"
+  ]
+}

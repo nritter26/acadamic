@@ -1,0 +1,23 @@
+{
+  "id": "c-union-types",
+  "title": "C: Union Types",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "union", "memory", "type punning"],
+  "description": "Use a union to store and interpret the same memory as different types (int, float, and unsigned char bytes).",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Union Type Punning",
+      "description": "Define a union `Data { int i; float f; unsigned char bytes[4]; }`. Store an integer value 0x3F800000 (which also represents 1.0f as float) and print the int, float, and each byte in hex.",
+      "hints": ["All union members share the same memory.", "Write to one member, read from another.", "Use `%02x` format to print hex bytes."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef union { int i; float f; unsigned char bytes[4]; } Data;\n\nint main() {\n    Data d;\n    d.i = 0x3F800000;\n    printf(\"Int: %d\\n\", d.i);\n    printf(\"Float: %f\\n\", d.f);\n    printf(\"Bytes: \");\n    for (int j = 0; j < 4; j++) printf(\"%02x \", d.bytes[j]);\n    printf(\"\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1065353216') && output.includes('1.000000')",
+        "successMessage": "Union type punning works!",
+        "failureMessage": "Print int, float, and bytes interpretation of the same memory"
+      }
+    }
+  ]
+}

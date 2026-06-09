@@ -1,0 +1,17 @@
+{
+  "id": "zig-strassen",
+  "title": "Strassen's Matrix Multiply",
+  "description": "Write a Zig program that demonstrates matrix multiplication using the Strassen algorithm on 2x2 matrices.",
+  "difficulty": "expert",
+  "languages": ["zig"],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn strassen2(A: [2][2]i32, B: [2][2]i32) [2][2]i32 {\n    const a = A[0][0]; const b = A[0][1]; const c = A[1][0]; const d = A[1][1];\n    const e = B[0][0]; const f = B[0][1]; const g = B[1][0]; const h = B[1][1];\n    \n    const p1 = a * (f - h);\n    const p2 = (a + b) * h;\n    const p3 = (c + d) * e;\n    const p4 = d * (g - e);\n    const p5 = (a + d) * (e + h);\n    const p6 = (b - d) * (g + h);\n    const p7 = (a - c) * (e + f);\n    \n    return [2][2]i32{\n        [_]i32{ p5 + p4 - p2 + p6, p1 + p2 },\n        [_]i32{ p3 + p4, p1 + p5 - p3 - p7 },\n    };\n}\n\npub fn main() !void {\n    const A = [2][2]i32{ [_]i32{ 1, 2 }, [_]i32{ 3, 4 } };\n    const B = [2][2]i32{ [_]i32{ 5, 6 }, [_]i32{ 7, 8 } };\n    const C = strassen2(A, B);\n    \n    for (C) |row| {\n        for (row) |val| std.debug.print(\"{} \", .{val});\n        std.debug.print(\"\\n\", .{});\n    }\n}"
+  },
+  "verificationTest": "output.includes('19') && output.includes('22') && output.includes('43') && output.includes('50')",
+  "hints": [
+    "Strassen's algorithm multiplies 2x2 matrices using 7 multiplications instead of 8",
+    "The 7 products (p1-p7) combine sub-expressions of A and B",
+    "Results are computed by adding/subtracting the products",
+    "Check: 1*5+2*7=19, 1*6+2*8=22, 3*5+4*7=43, 3*6+4*8=50"
+  ]
+}

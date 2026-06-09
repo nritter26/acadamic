@@ -1,0 +1,71 @@
+{
+  "id": "rs-event-bus",
+  "title": "Rust: Event Bus / Pub-Sub",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "event bus", "pub-sub", "broadcast", "message broker"],
+  "description": "Implement an event bus with publish/subscribe pattern and message filtering.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Event Bus",
+      "description": "Create an `EventBus` struct that stores subscribers per event type: `HashMap<String, Vec<Box<dyn Fn(&str)>>>`. Implement `on(event, callback)` and `emit(event, data)`. Test with a simple event.",
+      "hints": ["`subscribers: HashMap<String, Vec<Box<dyn Fn(&str)>>>`", "`on` pushes a new callback to the event's subscriber list.", "`emit` iterates subscribers and calls each with data."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('user.created') || output.contains('received')",
+        "successMessage": "Basic event bus works!",
+        "failureMessage": "Register a subscriber and emit an event."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Unsubscribe by ID",
+      "description": "Add unique subscription IDs using an atomic counter. `on` returns a `SubscriptionId`. Add `unsubscribe(id)` to remove a subscriber. Demonstrate subscribing then unsubscribing.",
+      "hints": ["`type SubscriptionId = u64;`", "Store `(SubscriptionId, Box<dyn Fn(&str)>)` instead of just callbacks.", "`unsubscribe` removes by ID from the Vec."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('unsubscribed') || output.contains('removed')",
+        "successMessage": "Unsubscribe works!",
+        "failureMessage": "Subscribe, then unsubscribe and verify no more events received."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Wildcard Events",
+      "description": "Add wildcard support: subscribe to `\"user.*\"` to receive all user events (`\"user.created\"`, `\"user.deleted\"`, etc.). Test with multiple event types.",
+      "hints": ["Check if subscriber pattern matches event using `event.starts_with(pattern.strip_suffix('*'))`", "`\"user.*\"` matches `\"user.created\"` and `\"user.deleted\"`.", "A `\"*\"` subscriber receives all events."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('user.created') && output.contains('user.deleted')",
+        "successMessage": "Wildcard event matching works!",
+        "failureMessage": "Subscribe with 'user.*' and show it receives all user events."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Async Event Bus with Queue",
+      "description": "Add an event queue: events are pushed to a queue and processed asynchronously. Use `std::sync::mpsc::channel` to queue events. Print processing order.",
+      "hints": ["Use a channel to queue (event_type, data) pairs.", "Process queue in a separate thread.", "This enables fire-and-forget event publishing."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('queued') || output.contains('processing')",
+        "successMessage": "Async event queue works!",
+        "failureMessage": "Queue events and show they are processed asynchronously."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Event Stats and Monitoring",
+      "description": "Add metrics: total events emitted, events per type, subscriber count. Print a stats report showing the most active event types.",
+      "hints": ["Track `event_counts: HashMap<String, u64>` incremented on each emit.", "Add a `stats()` method that prints all counters.", "Emit several events of different types and print the report."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('count') || output.contains('stats') || output.contains('events')",
+        "successMessage": "Event stats work!",
+        "failureMessage": "Emit multiple events and print statistics."
+      }
+    }
+  ]
+}
