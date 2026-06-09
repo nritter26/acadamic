@@ -40,7 +40,7 @@
     histIdx = -1;
     linkingState = null;
     positions = {};
-    s.init();
+    if (s.init) s.init();
     addOutput(`✓ Scenario: ${s.name} — ${s.desc}`);
     forceUpdate++;
   }
@@ -102,38 +102,33 @@
     forceUpdate;
     if (dbEngine === 'mongodb') return [];
     const lines = [];
-    const allCards = document.querySelectorAll('.dblab-table-card');
-    const area = vizAreaEl;
-    if (!area || allCards.length === 0) return lines;
-    const areaRect = area.getBoundingClientRect();
-    const fkCols = area.querySelectorAll('.dblab-col-badge.fk');
-    for (const badge of fkCols) {
-      const tableName = badge.dataset.table;
-      const colName = badge.dataset.col;
-      const refTable = badge.dataset.fkTable;
-      const refCol = badge.dataset.fkCol;
-      if (!tableName || !colName || !refTable) continue;
-      const colEl = badge.closest('.dblab-tc-col');
-      if (!colEl) continue;
-      const fromRect = colEl.getBoundingClientRect();
-      const targetCard = area.querySelector(`#dblabCard-${CSS.escape(encodeURIComponent(String(refTable)))}`);
-      if (!targetCard) continue;
-      let targetCol = targetCard.querySelector('.dblab-tc-col.pk-col');
-      if (!targetCol) {
-        const cols = targetCard.querySelectorAll('.dblab-tc-col');
-        for (const c of cols) { if (c.dataset.col === refCol) { targetCol = c; break; } }
+    const state = engine.getState();
+    const names = Object.keys(state.tables).sort();
+    if (names.length === 0) return [];
+    const pos = cardPositions;
+    const HDR = 28;
+    const COL = 22;
+    const CW = 260;
+    for (const name of names) {
+      const tbl = state.tables[name];
+      if (!tbl) continue;
+      for (const col of tbl.columns) {
+        if (!col.fk) continue;
+        const srcP = pos[name];
+        const tgtP = pos[col.fk.table];
+        if (!srcP || !tgtP) continue;
+        const colIdx = tbl.columns.indexOf(col);
+        const x1 = srcP.x + CW;
+        const y1 = srcP.y + HDR + colIdx * COL + COL / 2;
+        const tgtTbl = state.tables[col.fk.table];
+        const tgtColIdx = tgtTbl ? tgtTbl.columns.findIndex(c => c.name === col.fk.column) : -1;
+        const x2 = tgtP.x;
+        const y2 = tgtP.y + HDR + (tgtColIdx >= 0 ? tgtColIdx * COL + COL / 2 : COL / 2);
+        const offset = Math.max(40, Math.abs(x2 - x1) * 0.35);
+        const path = `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`;
+        const color = (ENGINES.find(e => e.id === dbEngine) || {}).color || '#2DD4BF';
+        lines.push({ path, color, x1, y1, x2, y2 });
       }
-      if (!targetCol) continue;
-      const toRect = targetCol.getBoundingClientRect();
-      const x1 = fromRect.right - areaRect.left + area.scrollLeft;
-      const y1 = fromRect.top + fromRect.height / 2 - areaRect.top + area.scrollTop;
-      const x2 = toRect.left - areaRect.left + area.scrollLeft;
-      const y2 = toRect.top + toRect.height / 2 - areaRect.top + area.scrollTop;
-      const midX = (x1 + x2) / 2;
-      const offset = Math.max(40, Math.abs(x2 - x1) * 0.35);
-      const path = `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`;
-      const color = (ENGINES.find(e => e.id === dbEngine) || {}).color || '#2DD4BF';
-      lines.push({ path, color, x1, y1, x2, y2 });
     }
     return lines;
   });
@@ -191,6 +186,8 @@
   });
 
   $effect(() => { if (inputEl) inputEl.focus(); });
+
+
 </script>
 
 <div class="dblab-layout">
