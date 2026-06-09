@@ -6,6 +6,7 @@
   import TutorialQuizOverlay from './TutorialQuizOverlay.svelte';
   import TutorialShortcuts from './TutorialShortcuts.svelte';
   import ExerciseGroup from './ExerciseGroup.svelte';
+  import TutorialHelpButton from './TutorialHelpButton.svelte';
   import { getGamificationState, awardTopicXp, awardPhaseXp, checkStreak } from '$lib/stores/tutorial-gamification.svelte.js';
 
   let tutorial = $derived(getTutorialState());
@@ -184,6 +185,7 @@
         <div class="lesson-explanation">
           <p>{topicData[0]}</p>
         </div>
+        <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} context="I'd like a different explanation of this topic" />
 
         <div class="lesson-code">
           <div class="code-left">
@@ -215,6 +217,8 @@
         </div>
       </div>
 
+      <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} code={editableCode} context="Help me understand this code example" />
+
       {#if showCelebration}
         <div class="celebration" onclick={() => showCelebration = false}>
           <div class="celebration-icon">🎉</div>
@@ -228,6 +232,8 @@
       {#if topicData[2] && topicData[2].length > 0}
         <ExerciseGroup exercises={topicData[2]} />
       {/if}
+
+      <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} />
 
       <div class="lesson-footer">
         <button class="nav-btn" onclick={handlePrevious} disabled={tutorial.state.currentTopic === 0}>

@@ -174,5 +174,28 @@ export function getAIState() {
       save();
       broadcast('messages', _messages);
     },
+
+    requestTopicExplanation(topic, lang, phase, code) {
+      if (_streaming) return;
+      _panelOpen = true;
+      broadcast('panelOpen', true);
+      _addMessage(`Explain "${topic}" in ${lang}`, 'user');
+      _addMessage('', 'bot');
+      _streaming = true;
+      broadcast('streaming', true);
+      let streamed = '';
+      apiStream('/api/tutor/explain-topic', { topic, lang, phase, code, learnerId: 'default' }, (chunk) => {
+        streamed += chunk;
+        _updateLastMessage(streamed);
+      }, () => {
+        _streaming = false;
+        broadcast('streaming', false);
+        _addMessage('Anything else you want to know?', 'bot');
+      }, (error) => {
+        _updateLastMessage(`Error: ${error}`);
+        _streaming = false;
+        broadcast('streaming', false);
+      });
+    },
   };
 }
