@@ -16,9 +16,24 @@
   function getLangBadge(langs) {
     if (!langs) return '<span class="badge badge-js">JS</span>';
     return langs.map(l => {
-      if (l === 'python') return '<span class="badge badge-py"><span class="py-p">P</span><span class="py-y">Y</span></span>';
+      if (l === 'python' || l === 'py') return '<span class="badge badge-py"><span class="py-p">P</span><span class="py-y">Y</span></span>';
       if (l === 'go') return '<span class="badge badge-go">GO</span>';
-      if (l === 'typescript') return '<span class="badge badge-ts">TS</span>';
+      if (l === 'typescript' || l === 'ts') return '<span class="badge badge-ts">TS</span>';
+      if (l === 'java') return '<span class="badge badge-java">JV</span>';
+      if (l === 'cs') return '<span class="badge badge-cs">C#</span>';
+      if (l === 'ruby' || l === 'rb') return '<span class="badge badge-rb">RB</span>';
+      if (l === 'php') return '<span class="badge badge-php">PHP</span>';
+      if (l === 'rust' || l === 'rs') return '<span class="badge badge-rs">RS</span>';
+      if (l === 'cpp') return '<span class="badge badge-cpp">C++</span>';
+      if (l === 'c') return '<span class="badge badge-c">C</span>';
+      if (l === 'zig') return '<span class="badge badge-zig">ZIG</span>';
+      if (l === 'kt' || l === 'kotlin') return '<span class="badge badge-kt">KT</span>';
+      if (l === 'lua') return '<span class="badge badge-lua">LUA</span>';
+      if (l === 'swift') return '<span class="badge badge-swift">SW</span>';
+      if (l === 'scala') return '<span class="badge badge-scala">SCA</span>';
+      if (l === 'bash' || l === 'shell') return '<span class="badge badge-bash">SH</span>';
+      if (l === 'asm' || l === 'assembly') return '<span class="badge badge-asm">ASM</span>';
+      if (l === 'wasm') return '<span class="badge badge-wasm">WASM</span>';
       return '<span class="badge badge-js">JS</span>';
     }).join(' ');
   }
@@ -26,8 +41,23 @@
   function getAccent(langs) {
     if (!langs) return '#eab308';
     if (langs.includes('go')) return '#06b6d4';
-    if (langs.includes('python')) return '#eab308';
-    if (langs.includes('typescript')) return '#3b82f6';
+    if (langs.includes('python') || langs.includes('py')) return '#eab308';
+    if (langs.includes('typescript') || langs.includes('ts')) return '#3b82f6';
+    if (langs.includes('java')) return '#ef4444';
+    if (langs.includes('cs')) return '#68a063';
+    if (langs.includes('ruby') || langs.includes('rb')) return '#cc342d';
+    if (langs.includes('php')) return '#777bb4';
+    if (langs.includes('rust') || langs.includes('rs')) return '#dea584';
+    if (langs.includes('cpp')) return '#00599c';
+    if (langs.includes('c')) return '#555555';
+    if (langs.includes('zig')) return '#f7a41d';
+    if (langs.includes('kt') || langs.includes('kotlin')) return '#7f52ff';
+    if (langs.includes('lua')) return '#000080';
+    if (langs.includes('swift')) return '#f05138';
+    if (langs.includes('scala')) return '#dc322f';
+    if (langs.includes('bash') || langs.includes('shell')) return '#4eaa25';
+    if (langs.includes('asm') || langs.includes('assembly')) return '#6e4c13';
+    if (langs.includes('wasm')) return '#654ff0';
     return '#eab308';
   }
 
@@ -78,7 +108,7 @@
           </div>
           <div class="card-desc">{(project.description || '').substring(0, 60)}...</div>
           <div class="card-meta">
-            <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['javascript','typescript','python','go'].includes(l)) : (project.languages || ['javascript']))}</span>
+            <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['js','ts','py','go','java','cs','rb','php','kt','scala'].includes(l)) : (project.languages || ['javascript']))}</span>
             {#if project.serverMode}
               <span class="proj-badge badge-api">API</span>
             {/if}
@@ -141,6 +171,21 @@
   .badge-py { background: #eab308; color: #000; padding: 0 2px; }
   .badge-go { background: #06b6d4; color: #000; }
   .badge-api { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; display: inline-block; }
+  .badge-java { background: #ef4444; color: #fff; }
+  .badge-cs { background: #68a063; color: #fff; }
+  .badge-rb { background: #cc342d; color: #fff; }
+  .badge-php { background: #777bb4; color: #fff; }
+  .badge-rs { background: #dea584; color: #000; }
+  .badge-cpp { background: #00599c; color: #fff; }
+  .badge-c { background: #555555; color: #fff; }
+  .badge-zig { background: #f7a41d; color: #000; }
+  .badge-kt { background: #7f52ff; color: #fff; }
+  .badge-lua { background: #000080; color: #fff; }
+  .badge-swift { background: #f05138; color: #fff; }
+  .badge-scala { background: #dc322f; color: #fff; }
+  .badge-bash { background: #4eaa25; color: #000; }
+  .badge-asm { background: #6e4c13; color: #fff; }
+  .badge-wasm { background: #654ff0; color: #fff; }
   .py-p { color: #2563eb; font-weight: 800; }
   .py-y { color: #eab308; font-weight: 800; }
 

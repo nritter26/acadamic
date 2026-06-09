@@ -138,9 +138,9 @@
     }
   });
 
-  const LANG_FILTERS = ['all', 'javascript', 'typescript', 'python', 'go'];
+  const LANG_FILTERS = ['all', 'javascript', 'typescript', 'python', 'java', 'cs', 'rb', 'php', 'go', 'rust', 'cpp', 'c', 'zig', 'kt', 'lua', 'swift', 'scala', 'bash', 'asm', 'wasm'];
   const DIFF_FILTERS = ['all', 'beginner', 'intermediate', 'advanced', 'expert'];
-  const LANG_LABELS = { all: 'All', javascript: 'JS', typescript: 'TS', python: 'PY', go: 'GO' };
+  const LANG_LABELS = { all: 'All', javascript: 'JS', typescript: 'TS', python: 'PY', java: 'Java', cs: 'C#', rb: 'Ruby', php: 'PHP', go: 'GO', rust: 'Rust', cpp: 'C++', c: 'C', zig: 'Zig', kt: 'KT', lua: 'Lua', swift: 'Swift', scala: 'Scala', bash: 'Bash', asm: 'ASM', wasm: 'WASM' };
   const DIFF_LABELS = { all: 'All', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' };
 
   $effect(() => {
@@ -471,7 +471,7 @@
   .projects-sidebar { width: 300px; min-width: 300px; overflow-y: auto; border-right: 1px solid #1e293b; background: #0f172a; display: flex; flex-direction: column; }
   .projects-main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
   .pfilters { padding: 8px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid #1e293b; }
-  .pfilter-row { display: flex; gap: 4px; }
+  .pfilter-row { display: flex; gap: 4px; flex-wrap: wrap; }
   .pfilter-btn { padding: 4px 8px; font-size: 10px; font-weight: 700; background: #111827; border: 1px solid #334155; border-radius: 4px; color: #94a3b8; cursor: pointer; text-transform: uppercase; }
   .pfilter-btn.active { background: #6366f1; border-color: #6366f1; color: #fff; }
 
