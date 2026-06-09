@@ -37,6 +37,23 @@ export const PROJECT_IDS = [
   'go-testing-framework','go-diff-engine','go-markdown-parser','go-semver-system','go-crdt-counter',
   'go-distributed-lock','go-circuit-breaker','go-feature-flags','go-task-orchestrator','go-api-gateway',
   'react-counter','react-todo','react-api-fetcher','vue-counter','vue-todo','vue-api-fetcher',
+  // Backend API projects
+  'express-hello-api', 'express-notes-crud', 'express-task-manager', 'express-blog-api',
+  'express-ecommerce-api', 'express-social-api', 'express-hateoas',
+  'express-auth-apikey', 'express-auth-basic', 'express-auth-jwt', 'express-auth-rbac',
+  'express-rate-limiting', 'express-oauth2-sim', 'express-multi-auth',
+  'express-db-sqlite', 'express-db-migrations', 'express-db-relations', 'express-db-search',
+  'express-db-transactions', 'express-db-pooling', 'express-db-sharding',
+  'express-upload-single', 'express-upload-metadata', 'express-upload-multi',
+  'express-upload-image', 'express-upload-stream', 'express-upload-chunked', 'express-upload-cdn',
+  'express-ws-echo', 'express-ws-chat', 'express-ws-notify', 'express-ws-collab',
+  'express-ws-game', 'express-ws-hybrid',
+  'express-test-validation', 'express-test-integration', 'express-test-swagger',
+  'express-test-contract', 'express-test-property', 'express-test-e2e',
+  'express-ms-two-service', 'express-ms-discovery', 'express-ms-http',
+  'express-ms-queue', 'express-ms-circuit', 'express-ms-tracing',
+  'express-gql-hello', 'express-gql-relations', 'express-gql-mutations',
+  'express-gql-pagination', 'express-gql-subscriptions', 'express-gql-dataloader', 'express-gql-federation',
 ];
 
 export const PROJECT_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'];
@@ -58,7 +75,7 @@ export async function loadProjectCatalog(fetcher = fetch) {
   const loaded = [];
   await Promise.all(PROJECT_IDS.map(async (id) => {
     try {
-      const response = await fetcher(`/content/projects/${id}.json`);
+      const response = await fetcher(`/api/content/projects/${id}`);
       if (response.ok === false) return;
       loaded.push(await response.json());
     } catch {
