@@ -62,10 +62,10 @@ describe('tutorial helpers', () => {
 });
 
 describe('legacy compatibility app', () => {
-  test('ships the full legacy web entrypoint and required script assets', () => {
+  test('ships legacy web entrypoint and required script assets', () => {
     expect(existsSync(path.join(process.cwd(), 'static/legacy.html'))).toBe(true);
-    expect(existsSync(path.join(process.cwd(), 'static/public/game.js'))).toBe(true);
-    expect(existsSync(path.join(process.cwd(), 'static/public/tutorial.js'))).toBe(true);
-    expect(existsSync(path.join(process.cwd(), 'static/browser-build/core-typescript/app-layout.js'))).toBe(true);
+    expect(existsSync(path.join(process.cwd(), 'public/game.js'))).toBe(true);
+    expect(existsSync(path.join(process.cwd(), 'public/tutorial.js'))).toBe(true);
+    expect(existsSync(path.join(process.cwd(), 'index.html'))).toBe(true);
   });
 });

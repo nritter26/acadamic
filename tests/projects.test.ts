@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import authRouter from '../routes/auth';
-import projectsRouter from '../routes/projects';
-import { errorHandler } from '../middleware';
+import authRouter from '../backend/routes/auth';
+import projectsRouter from '../backend/routes/projects';
+import { errorHandler } from '../backend/middleware';
 
 const TEST_EMAIL = `proj_${Date.now()}@test.com`;
 let token = '';

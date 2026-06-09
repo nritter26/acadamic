@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import analyzeRouter from '../routes/analyze';
-import { errorHandler } from '../middleware';
+import analyzeRouter from '../backend/routes/analyze';
+import { errorHandler } from '../backend/middleware';
 
 const app = express();
 app.use(express.json());

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { openapiHandler, swaggerUIHandler } from '../services/openapi';
+import { openapiHandler, swaggerUIHandler } from '../backend/services/openapi';
 
 const app = express();
 app.get('/api/openapi.json', openapiHandler);

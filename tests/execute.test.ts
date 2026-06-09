@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { executeCode } from '../services/executor';
-import * as database from '../sql/database';
+import { executeCode } from '../backend/services/executor';
+import * as database from '../backend/sql/database';
 
 beforeAll(() => {
   database.initAll();

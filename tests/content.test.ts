@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import contentRouter from '../routes/content';
-import authRouter from '../routes/auth';
-import { errorHandler } from '../middleware';
+import contentRouter from '../backend/routes/content';
+import authRouter from '../backend/routes/auth';
+import { errorHandler } from '../backend/middleware';
 
 const app = express();
 app.use(express.json());
