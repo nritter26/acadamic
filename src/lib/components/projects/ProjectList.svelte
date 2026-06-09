@@ -78,7 +78,7 @@
           </div>
           <div class="card-desc">{(project.description || '').substring(0, 60)}...</div>
           <div class="card-meta">
-            <span class="card-badges">{@html getLangBadge(project.languages || ['javascript'])}</span>
+            <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['javascript','typescript','python','go'].includes(l)) : (project.languages || ['javascript']))}</span>
             <span class="card-steps">
               <span class="steps-dot" style="background:{accent}"></span>
               {done}/{total} steps

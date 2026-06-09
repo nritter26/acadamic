@@ -22,6 +22,11 @@
   let completedCount = $derived(stepStates.filter(s => s === 'completed').length);
   let progressPct = $derived(totalSteps > 0 ? Math.round(completedCount / totalSteps * 100) : 0);
   let isComplete = $derived(totalSteps > 0 && completedCount === totalSteps);
+  let availableLanguages = $derived(
+    project?.serverMode
+      ? (project.languages || []).filter(l => ['javascript', 'typescript', 'python', 'go'].includes(l))
+      : (project.languages || [])
+  );
 
   function getLearnerId() {
     if (typeof localStorage === 'undefined') return 'default';
