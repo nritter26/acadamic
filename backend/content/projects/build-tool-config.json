@@ -1,0 +1,113 @@
+{
+  "id": "build-tool-config",
+  "title": "Build Tool Configuration",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 45,
+  "concepts": ["build-tools", "webpack", "bundling", "configuration", "loaders", "plugins"],
+  "description": "Learn how build tools work by building a mini module bundler from scratch. Understand dependency graphs, bundling, loaders, and plugins.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Dependency graph builder",
+      "description": "Write a `buildGraph(entryFile)` function that simulates building a dependency graph. Given an entry module ID, recursively resolve dependencies by reading a fake module registry. Return an array of module objects `{ id, code, deps }`. Log the graph to verify.",
+      "hints": [
+        "Use a simple in-memory module registry: { 'moduleA': { code: '...', deps: ['moduleB'] } }",
+        "Use a Set to track visited modules and avoid circular dependencies",
+        "BFS or DFS traversal — start from the entry module"
+      ],
+      "codeTemplate": {
+        "javascript": "// In-memory module registry (simulates file system)\nconst MODULE_REGISTRY = {\n  'entry.js': {\n    code: \"const { greet } = require('./utils');\\nconsole.log(greet('World'));\",\n    deps: ['./utils']\n  },\n  './utils': {\n    code: \"function greet(name) { return 'Hello, ' + name + '!'; }\\nmodule.exports = { greet };\",\n    deps: []\n  }\n};\n\nfunction buildGraph(entryId) {\n  const modules = [];\n  const visited = new Set();\n\n  function traverse(moduleId) {\n    if (visited.has(moduleId)) return;\n    visited.add(moduleId);\n    const mod = MODULE_REGISTRY[moduleId];\n    if (!mod) return;\n    modules.push({ id: moduleId, code: mod.code, deps: mod.deps });\n    for (const dep of mod.deps) {\n      traverse(dep);\n    }\n  }\n\n  traverse(entryId);\n  return modules;\n}\n\nconst graph = buildGraph('entry.js');\nconsole.log(JSON.stringify(graph, null, 2));\n",
+        "typescript": "interface Module {\n  id: string;\n  code: string;\n  deps: string[];\n}\n\ninterface ModuleRegistry {\n  [key: string]: Module;\n}\n\nconst MODULE_REGISTRY: ModuleRegistry = {\n  'entry.js': {\n    code: \"const { greet } = require('./utils');\\nconsole.log(greet('World'));\",\n    deps: ['./utils']\n  },\n  './utils': {\n    code: \"function greet(name) { return 'Hello, ' + name + '!'; }\\nmodule.exports = { greet };\",\n    deps: []\n  }\n};\n\nfunction buildGraph(entryId: string): Module[] {\n  const modules: Module[] = [];\n  const visited = new Set<string>();\n\n  function traverse(moduleId: string) {\n    if (visited.has(moduleId)) return;\n    visited.add(moduleId);\n    const mod = MODULE_REGISTRY[moduleId];\n    if (!mod) return;\n    modules.push({ id: moduleId, code: mod.code, deps: mod.deps });\n    for (const dep of mod.deps) {\n      traverse(dep);\n    }\n  }\n\n  traverse(entryId);\n  return modules;\n}\n\nconst graph = buildGraph('entry.js');\nconsole.log(JSON.stringify(graph, null, 2));\n",
+        "python": "import json\n\nMODULE_REGISTRY = {\n    'entry.py': {\n        'code': \"from utils import greet\\nprint(greet('World'))\",\n        'deps': ['utils']\n    },\n    'utils': {\n        'code': \"def greet(name):\\n    return 'Hello, ' + name + '!'\",\n        'deps': []\n    }\n}\n\ndef build_graph(entry_id):\n    modules = []\n    visited = set()\n\n    def traverse(module_id):\n        if module_id in visited:\n            return\n        visited.add(module_id)\n        mod = MODULE_REGISTRY.get(module_id)\n        if not mod:\n            return\n        modules.append({'id': module_id, 'code': mod['code'], 'deps': mod['deps']})\n        for dep in mod['deps']:\n            traverse(dep)\n\n    traverse(entry_id)\n    return modules\n\n\ngraph = build_graph('entry.py')\nprint(json.dumps(graph, indent=2))\n"
+      },
+      "verification": {
+        "test": "output.includes('entry') && output.includes('utils')",
+        "successMessage": "Dependency graph includes entry and all dependencies!",
+        "failureMessage": "Build the graph from 'entry.js' and include both the entry and its utils dependency."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Module bundler",
+      "description": "Create a `bundle(entryId)` function that takes the dependency graph and produces a single bundle string. The bundle should wrap each module in a function that receives `require`, `module`, and `exports`. Use an IIFE pattern to scope modules.",
+      "hints": [
+        "Build the graph first using buildGraph from step 1",
+        "Each module becomes: function(require, module, exports) { ...code... }",
+        "The bundle maps module IDs to their factory functions",
+        "The entry point is called first with a local require function"
+      ],
+      "codeTemplate": {
+        "javascript": "const MODULE_REGISTRY = {\n  'entry.js': {\n    code: \"const { greet } = require('./utils');\\nconsole.log(greet('World'));\",\n    deps: ['./utils']\n  },\n  './utils': {\n    code: \"function greet(name) { return 'Hello, ' + name + '!'; }\\nmodule.exports = { greet };\",\n    deps: []\n  }\n};\n\nfunction buildGraph(entryId) {\n  const modules = [];\n  const visited = new Set();\n  function traverse(moduleId) {\n    if (visited.has(moduleId)) return;\n    visited.add(moduleId);\n    const mod = MODULE_REGISTRY[moduleId];\n    if (!mod) return;\n    modules.push({ id: moduleId, code: mod.code, deps: mod.deps });\n    for (const dep of mod.deps) traverse(dep);\n  }\n  traverse(entryId);\n  return modules;\n}\n\nfunction bundle(entryId) {\n  const modules = buildGraph(entryId);\n  let moduleMap = '{';\n  for (const mod of modules) {\n    moduleMap += `\"${mod.id}\": function(require, module, exports) {\\n${mod.code}\\n},`;\n  }\n  moduleMap += '}';\n\n  const result = `(function() {\n    const modules = ${moduleMap};\n    const cache = {};\n    function require(id) {\n      if (cache[id]) return cache[id].exports;\n      const module = { exports: {} };\n      modules[id](require, module, module.exports);\n      cache[id] = module;\n      return module.exports;\n    }\n    require(\"${entryId}\");\n  })();`;\n\n  return result;\n}\n\nconst bundled = bundle('entry.js');\nconsole.log(bundled.substring(0, 400) + '...');\n",
+        "typescript": "interface Module {\n  id: string;\n  code: string;\n  deps: string[];\n}\n\nconst MODULE_REGISTRY: Record<string, Module> = {\n  'entry.js': {\n    code: \"const { greet } = require('./utils');\\nconsole.log(greet('World'));\",\n    deps: ['./utils']\n  },\n  './utils': {\n    code: \"function greet(name) { return 'Hello, ' + name + '!'; }\\nmodule.exports = { greet };\",\n    deps: []\n  }\n};\n\nfunction buildGraph(entryId: string): Module[] {\n  const modules: Module[] = [];\n  const visited = new Set<string>();\n  function traverse(moduleId: string) {\n    if (visited.has(moduleId)) return;\n    visited.add(moduleId);\n    const mod = MODULE_REGISTRY[moduleId];\n    if (!mod) return;\n    modules.push({ id: moduleId, code: mod.code, deps: mod.deps });\n    for (const dep of mod.deps) traverse(dep);\n  }\n  traverse(entryId);\n  return modules;\n}\n\nfunction bundle(entryId: string): string {\n  const modules = buildGraph(entryId);\n  let moduleMap = '{';\n  for (const mod of modules) {\n    moduleMap += `\"${mod.id}\": function(require, module, exports) {\\n${mod.code}\\n},`;\n  }\n  moduleMap += '}';\n\n  return `(function() {\n    const modules = ${moduleMap};\n    const cache = {};\n    function require(id) {\n      if (cache[id]) return cache[id].exports;\n      const module = { exports: {} };\n      modules[id](require, module, module.exports);\n      cache[id] = module;\n      return module.exports;\n    }\n    require(\"${entryId}\");\n  })();`;\n}\n\nconst bundled = bundle('entry.js');\nconsole.log(bundled.substring(0, 400) + '...');\n",
+        "python": "import json\n\nMODULE_REGISTRY = {\n    'entry.py': {\n        'code': \"from utils import greet\\nprint(greet('World'))\",\n        'deps': ['utils']\n    },\n    'utils': {\n        'code': \"def greet(name):\\n    return 'Hello, ' + name + '!'\",\n        'deps': []\n    }\n}\n\ndef build_graph(entry_id):\n    modules = []\n    visited = set()\n    def traverse(module_id):\n        if module_id in visited:\n            return\n        visited.add(module_id)\n        mod = MODULE_REGISTRY.get(module_id)\n        if not mod:\n            return\n        modules.append({'id': module_id, 'code': mod['code'], 'deps': mod['deps']})\n        for dep in mod['deps']:\n            traverse(dep)\n    traverse(entry_id)\n    return modules\n\ndef bundle(entry_id):\n    modules = build_graph(entry_id)\n    module_map = '{'\n    for mod in modules:\n        module_map += f'\"{mod[\"id\"]}\": lambda require, module, exports: exec({json.dumps(mod[\"code\"])}, {{\"require\": require, \"module\": module, \"exports\": exports}}),'\n    module_map += '}'\n    return f'def bundle_exec():\\n    modules = {module_map}\\n    cache = {{}}\\n    def require(id):\\n        if id in cache:\\n            return cache[id][\"exports\"]\\n        mod = {{\"exports\": {{}}}}\\n        modules[id](require, mod, mod[\"exports\"])\\n        cache[id] = mod\\n        return mod[\"exports\"]\\n    require(\"{entry_id}\")\\nbundle_exec()'\n\nprint(bundle('entry.py'))\n"
+      },
+      "verification": {
+        "test": "output.includes('function') || output.includes('require') || output.includes('modules')",
+        "successMessage": "Bundle wraps modules in factory functions with a custom require system!",
+        "failureMessage": "The bundle should include factory functions for each module and a require mechanism."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Simple minifier",
+      "description": "Write a `minify(code)` function that performs basic minification: remove single-line comments (`//...`), remove multi-line comments (`/*...*/`), collapse whitespace, and remove unnecessary semicolons before closing braces. Print the original and minified code.",
+      "hints": [
+        "Use regex to remove // comments: .replace(/\\/\\/.*$/gm, '')",
+        "Remove /* */ comments: .replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')",
+        "Collapse multiple spaces: .replace(/\\s+/g, ' ')",
+        "Remove semicolons before }: .replace(/;\\s*}/g, '}')"
+      ],
+      "codeTemplate": {
+        "javascript": "function minify(code) {\n  let min = code\n    .replace(/\\/\\/.*$/gm, '')\n    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')\n    .replace(/\\n\\s+/g, '\\n')\n    .replace(/\\s+\\n/g, '\\n')\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/;\\s*}/g, '}')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim();\n  return min;\n}\n\nconst original = `\nfunction hello(name) {\n  // Greet the user\n  const msg = \"Hello, \" + name + \"!\";\n  /* Format and return */\n  return msg;\n}\n`;\n\nconst minified = minify(original);\nconsole.log('Original chars:', original.length);\nconsole.log('Minified chars:', minified.length);\nconsole.log('Savings:', ((1 - minified.length / original.length) * 100).toFixed(1) + '%');\nconsole.log('---');\nconsole.log(minified);\n",
+        "typescript": "function minify(code: string): string {\n  return code\n    .replace(/\\/\\/.*$/gm, '')\n    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')\n    .replace(/\\n\\s+/g, '\\n')\n    .replace(/\\s+\\n/g, '\\n')\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/;\\s*}/g, '}')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim();\n}\n\nconst original = `\nfunction hello(name) {\n  // Greet the user\n  const msg = \"Hello, \" + name + \"!\";\n  /* Format and return */\n  return msg;\n}\n`;\n\nconst minified = minify(original);\nconsole.log('Original chars:', original.length);\nconsole.log('Minified chars:', minified.length);\nconsole.log('Savings:', ((1 - minified.length / original.length) * 100).toFixed(1) + '%');\nconsole.log('---');\nconsole.log(minified);\n",
+        "python": "import re\n\ndef minify(code):\n    code = re.sub(r'#.*$', '', code, flags=re.MULTILINE)\n    code = re.sub(r\"'''[\\s\\S]*?'''\", '', code)\n    code = re.sub(r'\"\"\"[\\s\\S]*?\"\"\"', '', code)\n    code = re.sub(r'\\n\\s+', '\\n', code)\n    code = re.sub(r'\\s+\\n', '\\n', code)\n    code = re.sub(r'[ \\t]+', ' ', code)\n    code = re.sub(r'\\n{3,}', '\\n\\n', code)\n    return code.strip()\n\noriginal = '''\ndef hello(name):\n    # Greet the user\n    msg = \"Hello, \" + name + \"!\"\n    return msg\n'''\n\nminified_code = minify(original)\nprint('Original chars:', len(original))\nprint('Minified chars:', len(minified_code))\nprint('Savings:', round((1 - len(minified_code) / len(original)) * 100, 1), '%')\nprint('---')\nprint(minified_code)\n"
+      },
+      "verification": {
+        "test": "output.includes('%') && output.includes('Original') && output.includes('Minified')",
+        "successMessage": "Minifier reduces code size!",
+        "failureMessage": "Show the character count before and after minification with the percentage saved."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Source map generator",
+      "description": "Create a simple source map that maps minified output positions back to original source positions. Implement `generateSourceMap(original, minified)` that finds corresponding line numbers. Print the mapping as JSON with `{ mappings: [{ originalLine, originalCol, generatedLine, generatedCol }] }`.",
+      "hints": [
+        "Split both original and minified into lines",
+        "For each minified line, find which original line(s) it came from",
+        "Use a simple algorithm: track character offset and map back to line numbers"
+      ],
+      "codeTemplate": {
+        "javascript": "function generateSourceMap(original, minified) {\n  const originalLines = original.split('\\n');\n  const minifiedLines = minified.split('\\n');\n  const mappings = [];\n\n  let origChar = 0;\n  let origLine = 0;\n\n  for (let genLine = 0; genLine < minifiedLines.length; genLine++) {\n    // Find which original segment this minified line maps to\n    const genText = minifiedLines[genLine];\n    if (genText.trim()) {\n      mappings.push({\n        generatedLine: genLine,\n        generatedCol: 0,\n        originalLine: origLine,\n        originalCol: 0\n      });\n    }\n    // Advance through original lines\n    while (origLine < originalLines.length && origChar >= originalLines[origLine].length) {\n      origChar = 0;\n      origLine++;\n    }\n  }\n\n  return { version: 3, mappings };\n}\n\nconst original = `function greet(name) {\n  const msg = 'Hello';\n  console.log(msg);\n}`;\nconst minified = `function greet(name){const msg='Hello';console.log(msg);}`;\n\nconsole.log(JSON.stringify(generateSourceMap(original, minified), null, 2));\n",
+        "typescript": "interface SourceMap {\n  version: number;\n  mappings: Array<{\n    generatedLine: number;\n    generatedCol: number;\n    originalLine: number;\n    originalCol: number;\n  }>;\n}\n\nfunction generateSourceMap(original: string, minified: string): SourceMap {\n  const originalLines = original.split('\\n');\n  const minifiedLines = minified.split('\\n');\n  const mappings: SourceMap['mappings'] = [];\n  let origLine = 0;\n\n  for (let genLine = 0; genLine < minifiedLines.length; genLine++) {\n    if (minifiedLines[genLine].trim()) {\n      mappings.push({\n        generatedLine: genLine,\n        generatedCol: 0,\n        originalLine: origLine,\n        originalCol: 0\n      });\n    }\n    if (origLine < originalLines.length - 1) origLine++;\n  }\n\n  return { version: 3, mappings };\n}\n\nconst original = `function greet(name) {\n  const msg = 'Hello';\n  console.log(msg);\n}`;\nconst minified = `function greet(name){const msg='Hello';console.log(msg);}`;\n\nconsole.log(JSON.stringify(generateSourceMap(original, minified), null, 2));\n",
+        "python": "import json\n\ndef generate_source_map(original, minified):\n    original_lines = original.split('\\n')\n    minified_lines = minified.split('\\n')\n    mappings = []\n    orig_line = 0\n\n    for gen_line, gen_text in enumerate(minified_lines):\n        if gen_text.strip():\n            mappings.append({\n                'generatedLine': gen_line,\n                'generatedCol': 0,\n                'originalLine': orig_line,\n                'originalCol': 0\n            })\n        if orig_line < len(original_lines) - 1:\n            orig_line += 1\n\n    return {'version': 3, 'mappings': mappings}\n\noriginal = '''function greet(name) {\n  const msg = 'Hello';\n  console.log(msg);\n}'''\nminified_code = '''function greet(name){const msg='Hello';console.log(msg);}'''\n\nprint(json.dumps(generate_source_map(original, minified_code), indent=2))\n"
+      },
+      "verification": {
+        "test": "output.includes('version') && output.includes('mappings') && output.includes('generatedLine')",
+        "successMessage": "Source map maps minified lines back to originals!",
+        "failureMessage": "The source map should include mappings array with line number correspondences."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Plugin-style transform pipeline",
+      "description": "Create a `TransformPipeline` class that accepts an array of plugins. Each plugin is a function `(code) => transformedCode`. Implement `pipeline.process(code)` that runs code through each plugin in order. Create two plugins: `stripLogs` (removes console.log calls) and `addStrict` (adds 'use strict'). Print the result through each stage.",
+      "hints": [
+        "pipeline.process should reduce over the plugins: plugins.reduce((code, plugin) => plugin(code), code)",
+        "stripLogs: .replace(/console\\.log\\([^)]*\\);?/g, '')",
+        "addStrict: return \"'use strict';\\n\" + code"
+      ],
+      "codeTemplate": {
+        "javascript": "class TransformPipeline {\n  constructor(plugins) {\n    this.plugins = plugins;\n  }\n\n  process(code) {\n    let result = code;\n    for (const plugin of this.plugins) {\n      result = plugin(result);\n      console.log('After plugin:', result.substring(0, 60) + '...');\n    }\n    return result;\n  }\n}\n\nconst stripLogs = (code) => code.replace(/console\\.log\\([^)]*\\);?/g, '// log removed');\nconst addStrict = (code) => \"'use strict';\\n\" + code;\nconst removeComments = (code) => code.replace(/\\/\\/.*$/gm, '').replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');\n\nconst pipeline = new TransformPipeline([addStrict, stripLogs, removeComments]);\n\nconst input = `\nfunction hello() {\n  // Print greeting\n  console.log(\"Hello, world!\");\n  return 42;\n}\n`;\n\nconsole.log('--- Input ---');\nconsole.log(input);\nconsole.log('--- Final Output ---');\nconsole.log(pipeline.process(input));\n",
+        "typescript":\ntype TransformPlugin = (code: string) => string;\n\nclass TransformPipeline {\n  plugins: TransformPlugin[];\n\n  constructor(plugins: TransformPlugin[]) {\n    this.plugins = plugins;\n  }\n\n  process(code: string): string {\n    let result = code;\n    for (const plugin of this.plugins) {\n      result = plugin(result);\n      console.log('After plugin:', result.substring(0, 60) + '...');\n    }\n    return result;\n  }\n}\n\nconst stripLogs: TransformPlugin = (code) => code.replace(/console\\.log\\([^)]*\\);?/g, '// log removed');\nconst addStrict: TransformPlugin = (code) => \"'use strict';\\n\" + code;\nconst removeComments: TransformPlugin = (code) => code.replace(/\\/\\/.*$/gm, '').replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');\n\nconst pipeline = new TransformPipeline([addStrict, stripLogs, removeComments]);\n\nconst input = `\nfunction hello() {\n  // Print greeting\n  console.log(\"Hello, world!\");\n  return 42;\n}\n`;\n\nconsole.log('--- Input ---');\nconsole.log(input);\nconsole.log('--- Final Output ---');\nconsole.log(pipeline.process(input));\n",
+        "python": "import re\n\nclass TransformPipeline:\n    def __init__(self, plugins):\n        self.plugins = plugins\n\n    def process(self, code):\n        result = code\n        for plugin in self.plugins:\n            result = plugin(result)\n            print('After plugin:', result[:60] + '...')\n        return result\n\n\ndef strip_logs(code):\n    return re.sub(r'print\\([^)]*\\);?', '# log removed', code)\n\ndef add_strict(code):\n    return '\"use strict\";\\n' + code\n\ndef remove_comments(code):\n    return re.sub(r'#.*$', '', code, flags=re.MULTILINE)\n\n\npipeline = TransformPipeline([add_strict, strip_logs, remove_comments])\n\ninput_code = '''\ndef hello():\n    # Print greeting\n    print(\"Hello, world!\")\n    return 42\n'''\n\nprint('--- Input ---')\nprint(input_code)\nprint('--- Final Output ---')\nprint(pipeline.process(input_code))\n"
+      },
+      "verification": {
+        "test": "output.includes('After plugin:') && output.includes('Final Output')",
+        "successMessage": "Plugin pipeline processes code through each transform stage!",
+        "failureMessage": "Print the code after each plugin transformation and the final output."
+      }
+    }
+  ]
+}

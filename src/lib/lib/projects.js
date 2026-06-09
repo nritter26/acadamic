@@ -54,6 +54,8 @@ export const PROJECT_IDS = [
   'express-ms-queue', 'express-ms-circuit', 'express-ms-tracing',
   'express-gql-hello', 'express-gql-relations', 'express-gql-mutations',
   'express-gql-pagination', 'express-gql-subscriptions', 'express-gql-dataloader', 'express-gql-federation',
+  // New advanced/expert projects
+  'build-tool-config', 'deployment-pipeline', 'advanced-react-patterns',
 ];
 
 export const PROJECT_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'];
