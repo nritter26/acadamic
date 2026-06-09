@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { askLLM } from '../ai/provider';
+import { askLLM, LLMMessage } from '../ai/provider';
 import { createSession, transitionState, getSession } from '../services/teaching-session';
 import { searchWithSources } from '../ai/embeddings';
 import { getConceptMastery } from '../ai/learner';
@@ -111,15 +111,12 @@ Keep it conversational and encourage the student to try it themselves.`;
   };
 
   try {
-    await askLLM(
-      [
-        { role: 'system', content: fullSystemPrompt },
-        ...(code ? [{ role: 'user', content: `I have this code:\n\`\`\`\n${code}\n\`\`\`` }] : []),
-        { role: 'user', content: `Explain "${topic}" in ${useLang} and help me understand it.` },
-      ],
-      sseSend,
-      { lang: useLang, topic },
-    );
+    const messages: LLMMessage[] = [
+      { role: 'system', content: fullSystemPrompt },
+      ...(code ? [{ role: 'user' as const, content: `I have this code:\n\`\`\`\n${code}\n\`\`\`` }] : []),
+      { role: 'user', content: `Explain "${topic}" in ${useLang} and help me understand it.` },
+    ];
+    await askLLM(messages, sseSend, { lang: useLang, topic });
   } catch (e) {
     if (!sseDoneCalled) {
       sseDoneCalled = true;
