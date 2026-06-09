@@ -14,6 +14,7 @@
   let activeTab = $state('code');
   let verifyResult = $state('');
   let verifyResultColor = $state('');
+  let verifyResults = $state(null);
   let previewKey = $state(0);
 
   let activeStep = $derived(project?.steps?.[stepIndex]);
@@ -203,10 +204,42 @@
 
   async function verifyStep() {
     saveCurrentCode();
+    verifyResults = null;
     const code = editor.code?.trim();
     if (!code) {
       verifyResult = 'Write some code first!';
       verifyResultColor = '#f59e0b';
+      return;
+    }
+
+    if (activeStep?.verification?.mode === 'http' && activeStep.verification.tests?.length > 0) {
+      try {
+        const res = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lang: language === 'typescript' ? 'ts' : language === 'python' ? 'py' : language,
+            code,
+            serverMode: true,
+            httpTests: activeStep.verification.tests,
+          }),
+        });
+        const data = await res.json();
+        verifyResults = data.serverResults || [];
+        stepOutput[stepIndex] = data.output || '(no output)';
+        if (data.allPassed) {
+          verifyResult = activeStep.verification.successMessage || 'All tests passed!';
+          verifyResultColor = '#22c55e';
+          markStepComplete();
+        } else {
+          verifyResult = activeStep.verification.failureMessage || 'Some tests failed';
+          verifyResultColor = '#ef4444';
+        }
+      } catch (err) {
+        verifyResult = 'Error: ' + err.message;
+        verifyResultColor = '#ef4444';
+      }
+      previewKey++;
       return;
     }
 
@@ -403,6 +436,23 @@
             {/if}
           </div>
 
+          {#if verifyResults?.length > 0}
+            <div class="test-results">
+              {#each verifyResults as tr}
+                <div class="test-result" class:test-pass={tr.passed} class:test-fail={!tr.passed}>
+                  <span class="test-icon">{tr.passed ? '✓' : '✗'}</span>
+                  <span class="test-label">{tr.method} {tr.path}</span>
+                  <span class="test-detail">
+                    {tr.passed ? `${tr.status}` : `expected ${tr.expectedStatus}, got ${tr.status}`}
+                  </span>
+                  {#if tr.error}
+                    <span class="test-error">{tr.error}</span>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {/if}
+
           {#if stepOutput[stepIndex]}
             <pre class="inline-output">{stepOutput[stepIndex]}</pre>
           {/if}
@@ -487,6 +537,14 @@
   .verify-btn { padding: 6px 14px; font-size: 11px; font-weight: 700; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #22c55e; cursor: pointer; }
   .verify-btn:hover { background: #334155; }
   .verify-result { font-size: 11px; font-weight: 600; }
+  .test-results { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .test-result { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 8px; border-radius: 4px; }
+  .test-result.test-pass { background: rgba(34,197,94,0.08); color: #86efac; }
+  .test-result.test-fail { background: rgba(239,68,68,0.08); color: #fca5a5; }
+  .test-icon { font-weight: 700; width: 14px; }
+  .test-label { font-weight: 600; }
+  .test-detail { color: #64748b; font-size: 10px; }
+  .test-error { color: #ef4444; font-size: 10px; margin-left: auto; }
 
   .inline-output { margin: 0; padding: 8px; background: #0a0f1e; border: 1px solid #1e293b; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #94a3b8; white-space: pre-wrap; max-height: 120px; overflow: auto; }
 
