@@ -37,12 +37,12 @@ An interactive multi-language programming textbook, code playground, and compile
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-topic curriculum** | 69+ content files covering 20+ programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), HTML/CSS, and compiler design — 4,000+ indexed topics across 800+ phases |
+| **Multi-topic curriculum** | 71+ content files covering 20+ programming languages, 10 databases, 11 cloud/DevOps tools, 14 frontend frameworks, 17 backend/tech tools, 4 testing/infra tools, CI/CD, gamedev (3 engines), mobile (Android + iOS), AI/ML, HTML/CSS, and compiler design — 5,500+ indexed topics across 800+ phases |
 | **Live code execution** | JavaScript, TypeScript, Python, Go, Rust, C, C++, C#, Kotlin, Scala, Swift, Zig, Bash, PHP, WebAssembly, Assembly via system compilers/interpreters. Sandboxed with `ulimit`, concurrent execution queue, and 30s timeout. Docker sandbox also available for isolated execution. |
 | **SQL database lab** | Execute SQL queries against a seeded in-memory SQLite database (20+ tables, 7 schemas). Optional PostgreSQL/MySQL via env vars. Results formatted as ASCII tables. |
 | **Schema designer** | Full visual database schema designer with Design and ERD views, drag tables, FK click-to-link, column constraints (PK, NOT NULL, UNIQUE, DEFAULT), index management, multi-dialect SQL generation (PostgreSQL, MySQL, SQLite), SQL import/export, JSON export/import, undo/redo (Ctrl+Z/Y), version history, auto-layout, and auto-updating SQL preview. |
 | **Compiler pipeline explorer** | Client-side tokenizer, recursive-descent AST parser, and code statistics engine for any supported language. Step-through pipeline: source → tokens → AST → stats. |
-| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 64 content files. Optional LLM backends: OpenAI, Anthropic, Google Gemini, local Ollama/LM Studio with SSE streaming. |
+| **AI tutor** | Hybrid keyword + tiny-LLM tutor by default, with 52+ curated responses + 24 topic-specific tutored responses + language-aware conversation context + TF-IDF curriculum search across all 71 content files. Optional LLM backends: OpenAI, Anthropic, Google Gemini, local Ollama/LM Studio with SSE streaming. |
 | **Quiz mode** | Per-language multiple-choice quizzes with instant feedback and progress tracking (35 languages, 3 difficulty levels each, 300+ questions per language). |
 | **Code challenges** | 6,400+ bug-fixing and implementation challenges across 21 languages (JavaScript, Python, Go, TypeScript, Rust, Swift, Java, C, C++, C#, Kotlin, Zig, PHP, Bash, Ruby, Scala, HTML, CSS, Lua, SQL, Backend) — each with test expressions and solution code. |
 | **Projects tab** | 54 hands-on projects across beginner to advanced levels (hello-world, calculator, todo-list, weather-dashboard, chat app, chess validator, etc.) with step-by-step instructions, built-in code editor, preview pane, and progress tracking. |
@@ -827,7 +827,7 @@ Profiles are stored as JSON in `data/learners/` with fallback to `/tmp/kodex-lab
 
 ## Course Data Format
 
-Course files in `content/` are 69+ JSON files with topics organized by phase:
+Course files in `content/` are 71+ JSON files with topics organized by phase (now includes AI/ML curriculum):
 
 ```json
 {
