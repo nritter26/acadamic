@@ -14,12 +14,12 @@ export const LANG_NAMES = {
   challenge: 'Challenge', projects: 'Projects',
   tutorial: 'Tutorial', techstack: 'Tech Stack',
   styling: 'Styling Grounds', schema: 'Schema Designer',
-  backend: 'Backend', cicd: 'CI/CD', mobile: 'Mobile',
+  ai: 'AI', backend: 'Backend', cicd: 'CI/CD', mobile: 'Mobile',
   api: 'API Client',
 };
 
 export const MODE_SPECIAL = new Set([
   'compiler','game','quiz','challenge','dblab','projects','git',
   'styling','schema','tutorial','techstack','backend','mobile',
-  'api','cicd','gamedev',
+  'api','cicd','gamedev','ai',
 ]);

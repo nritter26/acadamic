@@ -11,6 +11,7 @@
   const STANDALONE_ROUTES = new Set(['tutorial', 'game', 'git', 'legacy']);
 
   const EXTRA_TABS = [
+    { id: 'ai', label: 'AI', color: '#22d3ee' },
     { id: 'backend', label: 'Backend', color: '#6366F1' },
     { id: 'cicd', label: 'CI/CD', color: '#e24329' },
     { id: 'challenge', label: 'Code Lab', color: '#a855f7' },
