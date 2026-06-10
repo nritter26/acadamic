@@ -42,7 +42,7 @@ const generators = {
   sql: (count) => generateSql(count),
   wasm: (count) => generateWasm(count),
   asm: (count) => generateAsm(count),
-};
+}
 
 // ── Shuffle helper ──
 function shuffle(arr) {
