@@ -1,80 +1,294 @@
 {
   "Getting Started": {
-    "REPL": ["The Node.js REPL (Read-Eval-Print-Loop) provides an interactive shell to execute JavaScript expressions in real time. It's useful for quick prototyping, debugging, and testing code snippets without creating a file.", "node\n> console.log('Hello World')\nHello World\n> 2 + 2\n4\n> .help"],
-    "Modules": ["Node.js uses the CommonJS module system by default, where each file is treated as a separate module. Modules are loaded using `require()` and exports are defined via `module.exports` or `exports`.", "// greet.js\nconst greet = (name) => `Hello, ${name}!`;\nmodule.exports = greet;\n\n// app.js\nconst greet = require('./greet');\nconsole.log(greet('World'));"],
-    "NPM": ["NPM is the default package manager for Node.js, used to install, manage, and publish packages. It reads `package.json` to resolve dependencies and supports semantic versioning for version control.", "npm init -y\nnpm install express\nnpm install --save-dev nodemon\nnpm uninstall express"],
-    "ES Modules": ["Node.js supports ES modules (import/export) alongside CommonJS. Use .mjs extension or set \"type\": \"module\" in package.json. ES modules support top-level await and static analysis for tree-shaking.", "// package.json: { \"type\": \"module\" }\nimport fs from 'fs/promises';\nexport async function readConfig() {\n  const data = await fs.readFile('./config.json', 'utf-8');\n  return JSON.parse(data);\n}"],
-    "Global Objects": ["Node.js provides global objects like __dirname, __filename, process, Buffer, and console that are available without importing. Each module has its own __dirname and __filename scoped to that file.", "console.log(__dirname);\nconsole.log(__filename);\nconsole.log(globalThis);"]
+    "Node Introduction": {
+      "exp": "<p>Introduction to Node and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "REPL": [
+      "The Node.js REPL (Read-Eval-Print-Loop) provides an interactive shell to execute JavaScript expressions in real time. It's useful for quick prototyping, debugging, and testing code snippets without creating a file.",
+      "node\n> console.log('Hello World')\nHello World\n> 2 + 2\n4\n> .help"
+    ],
+    "Modules": [
+      "Node.js uses the CommonJS module system by default, where each file is treated as a separate module. Modules are loaded using `require()` and exports are defined via `module.exports` or `exports`.",
+      "// greet.js\nconst greet = (name) => `Hello, ${name}!`;\nmodule.exports = greet;\n\n// app.js\nconst greet = require('./greet');\nconsole.log(greet('World'));"
+    ],
+    "NPM": [
+      "NPM is the default package manager for Node.js, used to install, manage, and publish packages. It reads `package.json` to resolve dependencies and supports semantic versioning for version control.",
+      "npm init -y\nnpm install express\nnpm install --save-dev nodemon\nnpm uninstall express"
+    ],
+    "ES Modules": [
+      "Node.js supports ES modules (import/export) alongside CommonJS. Use .mjs extension or set \"type\": \"module\" in package.json. ES modules support top-level await and static analysis for tree-shaking.",
+      "// package.json: { \"type\": \"module\" }\nimport fs from 'fs/promises';\nexport async function readConfig() {\n  const data = await fs.readFile('./config.json', 'utf-8');\n  return JSON.parse(data);\n}"
+    ],
+    "Global Objects": [
+      "Node.js provides global objects like __dirname, __filename, process, Buffer, and console that are available without importing. Each module has its own __dirname and __filename scoped to that file.",
+      "console.log(__dirname);\nconsole.log(__filename);\nconsole.log(globalThis);"
+    ]
+  },
+  "Core Concepts": {
+    "Node Core Features": {
+      "exp": "<p>Essential Node concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Node Components": {
+      "exp": "<p>Building user interfaces with Node.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Node Routing": {
+      "exp": "<p>Navigation and routing in Node.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Node State": {
+      "exp": "<p>Managing application state in Node.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Node Data": {
+      "exp": "<p>Working with data and APIs in Node.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Node Testing": {
+      "exp": "<p>Testing strategies for Node.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Assert": [
+      "Node's built-in assert module provides basic assertion testing. While minimal, it is useful for simple checks and can be used with the built-in test runner.",
+      "const assert = require('assert');\nassert.strictEqual(1 + 1, 2);\nassert.deepStrictEqual({ a: 1 }, { a: 1 });\nassert.throws(() => { throw new Error('err'); });\n\nconst test = require('node:test');\ntest('addition works', (t) => {\n  assert.strictEqual(1 + 1, 2);\n});"
+    ],
+    "Jest": [
+      "Jest is the most popular testing framework for Node.js with zero-config setup, built-in mocking, code coverage, snapshot testing, and watch mode.",
+      "const sum = require('./sum');\ntest('adds 1 + 2 to equal 3', () => {\n  expect(sum(1, 2)).toBe(3);\n});\n\ntest('mock function', () => {\n  const mock = jest.fn(() => 'mocked');\n  expect(mock()).toBe('mocked');\n  expect(mock).toHaveBeenCalledTimes(1);\n});"
+    ],
+    "Mocha & Chai": [
+      "Mocha is a flexible test framework paired with Chai for assertions. It supports BDD/TDD interfaces, async testing, and extensive plugin ecosystems.",
+      "const { expect } = require('chai');\ndescribe('Calculator', () => {\n  it('should add numbers', () => {\n    expect(sum(2, 3)).to.equal(5);\n  });\n  \n  it('should handle async', async () => {\n    const result = await fetchData();\n    expect(result).to.have.property('status', 'ok');\n  });\n});"
+    ],
+    "Node Test Runner": [
+      "Node 18+ includes a built-in test runner (node:test) with assertion library (node:assert). It supports mocking, code coverage, and runs tests in parallel without external dependencies.",
+      "const { describe, it, mock } = require('node:test');\nconst assert = require('node:assert');\n\ndescribe('math', () => {\n  it('should add correctly', () => {\n    assert.strictEqual(2 + 2, 4);\n  });\n  \n  it('should mock functions', (t) => {\n    const fn = mock.fn(() => 42);\n    assert.strictEqual(fn(), 42);\n    assert.strictEqual(fn.mock.calls.length, 1);\n  });\n});\n// Run: node --test math.test.js"
+    ]
+  },
+  "Deployment": {
+    "Node Deployment": {
+      "exp": "<p>Deploying Node applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Node Best Practices": {
+      "exp": "<p>Best practices for Node development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Node Advanced": {
+      "exp": "<p>Advanced Node topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "File System": {
-    "fs module": ["The `fs` module provides both synchronous and asynchronous methods to interact with the file system. The promise-based API (`fs/promises`) is preferred for modern async code.", "const fs = require('fs/promises');\n\nasync function readFile() {\n  const data = await fs.readFile('./file.txt', 'utf-8');\n  console.log(data);\n}"],
-    "Path": ["The `path` module provides utilities for working with file and directory paths. It handles path normalization, joining segments, and extracting file extension or directory components.", "const path = require('path');\n\nconst fullPath = path.join(__dirname, 'files', 'data.json');\nconst ext = path.extname('index.html');\nconst base = path.basename('/foo/bar/baz.txt');"],
-    "Streams": ["Streams allow processing data piece by piece without loading entire files into memory. They are ideal for handling large files or real-time data like video and HTTP responses.", "const fs = require('fs');\nconst readStream = fs.createReadStream('./large.txt', 'utf-8');\nreadStream.on('data', (chunk) => console.log('Received chunk:', chunk.length));\nreadStream.on('end', () => console.log('Finished reading'));"],
-    "File Watching": ["Node can watch files or directories for changes using fs.watch or fs.watchFile. Useful for live reload, build tools, and monitoring config file changes without restarting the process.", "const fs = require('fs');\nfs.watch('./config.json', (event, filename) => {\n  console.log(`${filename} changed: ${event}`);\n  reloadConfig();\n});"]
+    "fs module": [
+      "The `fs` module provides both synchronous and asynchronous methods to interact with the file system. The promise-based API (`fs/promises`) is preferred for modern async code.",
+      "const fs = require('fs/promises');\n\nasync function readFile() {\n  const data = await fs.readFile('./file.txt', 'utf-8');\n  console.log(data);\n}"
+    ],
+    "Path": [
+      "The `path` module provides utilities for working with file and directory paths. It handles path normalization, joining segments, and extracting file extension or directory components.",
+      "const path = require('path');\n\nconst fullPath = path.join(__dirname, 'files', 'data.json');\nconst ext = path.extname('index.html');\nconst base = path.basename('/foo/bar/baz.txt');"
+    ],
+    "Streams": [
+      "Streams allow processing data piece by piece without loading entire files into memory. They are ideal for handling large files or real-time data like video and HTTP responses.",
+      "const fs = require('fs');\nconst readStream = fs.createReadStream('./large.txt', 'utf-8');\nreadStream.on('data', (chunk) => console.log('Received chunk:', chunk.length));\nreadStream.on('end', () => console.log('Finished reading'));"
+    ],
+    "File Watching": [
+      "Node can watch files or directories for changes using fs.watch or fs.watchFile. Useful for live reload, build tools, and monitoring config file changes without restarting the process.",
+      "const fs = require('fs');\nfs.watch('./config.json', (event, filename) => {\n  console.log(`${filename} changed: ${event}`);\n  reloadConfig();\n});"
+    ]
   },
   "Async Programming": {
-    "Callbacks": ["Callbacks are functions passed as arguments to be executed after an async operation completes. They form the foundation of async programming in Node but can lead to deeply nested 'callback hell'.", "fs.readFile('./file.txt', 'utf-8', (err, data) => {\n  if (err) throw err;\n  console.log(data);\n});"],
-    "Promises": ["Promises represent the eventual completion or failure of an async operation, providing a cleaner chaining mechanism than callbacks. A promise exists in one of three states: pending, fulfilled, or rejected.", "const readFile = (path) => {\n  return new Promise((resolve, reject) => {\n    fs.readFile(path, 'utf-8', (err, data) => {\n      if (err) reject(err);\n      else resolve(data);\n    });\n  });\n};\nreadFile('./file.txt').then(console.log).catch(console.error);"],
-    "async/await": ["async/await is syntactic sugar over Promises that makes asynchronous code read like synchronous code. Functions declared with `async` always return a Promise, and `await` pauses execution until the Promise settles.", "async function processFile() {\n  try {\n    const data = await fs.readFile('./file.txt', 'utf-8');\n    const cleaned = data.trim().toUpperCase();\n    await fs.writeFile('./output.txt', cleaned);\n    console.log('Done');\n  } catch (err) {\n    console.error('Error:', err);\n  }\n}"],
-    "Event Loop": ["The event loop is the core mechanism that enables Node's non-blocking I/O. It processes callbacks through phases: timers, pending callbacks, idle/prepare, poll, check, and close callbacks, all in a single thread.", "console.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nconsole.log('4');\n// Output: 1, 4, 3, 2"]
+    "Callbacks": [
+      "Callbacks are functions passed as arguments to be executed after an async operation completes. They form the foundation of async programming in Node but can lead to deeply nested 'callback hell'.",
+      "fs.readFile('./file.txt', 'utf-8', (err, data) => {\n  if (err) throw err;\n  console.log(data);\n});"
+    ],
+    "Promises": [
+      "Promises represent the eventual completion or failure of an async operation, providing a cleaner chaining mechanism than callbacks. A promise exists in one of three states: pending, fulfilled, or rejected.",
+      "const readFile = (path) => {\n  return new Promise((resolve, reject) => {\n    fs.readFile(path, 'utf-8', (err, data) => {\n      if (err) reject(err);\n      else resolve(data);\n    });\n  });\n};\nreadFile('./file.txt').then(console.log).catch(console.error);"
+    ],
+    "async/await": [
+      "async/await is syntactic sugar over Promises that makes asynchronous code read like synchronous code. Functions declared with `async` always return a Promise, and `await` pauses execution until the Promise settles.",
+      "async function processFile() {\n  try {\n    const data = await fs.readFile('./file.txt', 'utf-8');\n    const cleaned = data.trim().toUpperCase();\n    await fs.writeFile('./output.txt', cleaned);\n    console.log('Done');\n  } catch (err) {\n    console.error('Error:', err);\n  }\n}"
+    ],
+    "Event Loop": [
+      "The event loop is the core mechanism that enables Node's non-blocking I/O. It processes callbacks through phases: timers, pending callbacks, idle/prepare, poll, check, and close callbacks, all in a single thread.",
+      "console.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nconsole.log('4');\n// Output: 1, 4, 3, 2"
+    ]
   },
   "HTTP": {
-    "HTTP Module": ["The `http` module allows creating HTTP servers and clients without external dependencies. It handles low-level networking, request parsing, and response writing with a stream-based API.", "const http = require('http');\nconst server = http.createServer((req, res) => {\n  res.writeHead(200, { 'Content-Type': 'text/plain' });\n  res.end('Hello World\\n');\n});\nserver.listen(3000, () => console.log('Server on :3000'));"],
-    "Server": ["Building an HTTP server involves handling requests and sending responses. Each request receives an IncomingMessage object and a ServerResponse object for controlling the response data and headers.", "const server = http.createServer((req, res) => {\n  if (req.url === '/api' && req.method === 'GET') {\n    res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ message: 'OK' }));\n  } else {\n    res.writeHead(404);\n    res.end('Not Found');\n  }\n});"],
-    "Request Handling": ["Node.js processes requests via event emitters on the request stream. You can listen for 'data' and 'end' events to read request bodies, parse headers via `req.headers`, and inspect the URL and method.", "const server = http.createServer((req, res) => {\n  let body = '';\n  req.on('data', chunk => body += chunk);\n  req.on('end', () => {\n    const parsed = JSON.parse(body);\n    res.end(`Received: ${parsed.name}`);\n  });\n});"
+    "HTTP Module": [
+      "The `http` module allows creating HTTP servers and clients without external dependencies. It handles low-level networking, request parsing, and response writing with a stream-based API.",
+      "const http = require('http');\nconst server = http.createServer((req, res) => {\n  res.writeHead(200, { 'Content-Type': 'text/plain' });\n  res.end('Hello World\\n');\n});\nserver.listen(3000, () => console.log('Server on :3000'));"
+    ],
+    "Server": [
+      "Building an HTTP server involves handling requests and sending responses. Each request receives an IncomingMessage object and a ServerResponse object for controlling the response data and headers.",
+      "const server = http.createServer((req, res) => {\n  if (req.url === '/api' && req.method === 'GET') {\n    res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ message: 'OK' }));\n  } else {\n    res.writeHead(404);\n    res.end('Not Found');\n  }\n});"
+    ],
+    "Request Handling": [
+      "Node.js processes requests via event emitters on the request stream. You can listen for 'data' and 'end' events to read request bodies, parse headers via `req.headers`, and inspect the URL and method.",
+      "const server = http.createServer((req, res) => {\n  let body = '';\n  req.on('data', chunk => body += chunk);\n  req.on('end', () => {\n    const parsed = JSON.parse(body);\n    res.end(`Received: ${parsed.name}`);\n  });\n});"
     ]
   },
   "NPM": {
-    "Package Management": ["NPM manages project dependencies defined in `package.json`. The `node_modules` folder stores installed packages, and `package-lock.json` ensures reproducible installs across environments.", "npm init -y\nnpm install lodash\nnpm install --save-dev jest\nnpm ci\nnpm outdated\nnpm update"],
-    "Scripts": ["The `scripts` field in `package.json` defines aliases for commands that can be run via `npm run`. Pre/post hooks allow automatic script chaining, and scripts have access to `node_modules/.bin`.", "\"scripts\": {\n  \"start\": \"node server.js\",\n  \"dev\": \"nodemon server.js\",\n  \"test\": \"jest --coverage\",\n  \"build\": \"tsc\"\n}"],
-    "Publishing": ["Publishing packages to the npm registry requires an npm account, a unique package name, and proper versioning via `npm version`. Packages should include a README, license, and main entry point.", "npm login\nnpm version patch\nnpm publish\nnpm version minor && npm publish\nnpm unpublish package@1.0.0"],
-    "Workspaces": ["NPM workspaces allow managing multiple packages in a single monorepo. Dependencies are hoisted to the root node_modules, and scripts can run across all workspaces concurrently.", "// package.json\n{\n  \"workspaces\": [\"packages/*\"],\n  \"scripts\": {\n    \"test\": \"npm run test --workspaces\",\n    \"build\": \"npm run build -w @myorg/core\"\n  }\n}"],
-    "NPX": ["NPX runs npm packages without installing them globally. It's useful for one-off commands like scaffolding tools, linters, or any CLI tool that you don't need permanently.", "npx create-react-app my-app\nnpx prisma generate\nnpx http-server .\nnpx -p node@20 node --version"]
+    "Package Management": [
+      "NPM manages project dependencies defined in `package.json`. The `node_modules` folder stores installed packages, and `package-lock.json` ensures reproducible installs across environments.",
+      "npm init -y\nnpm install lodash\nnpm install --save-dev jest\nnpm ci\nnpm outdated\nnpm update"
+    ],
+    "Scripts": [
+      "The `scripts` field in `package.json` defines aliases for commands that can be run via `npm run`. Pre/post hooks allow automatic script chaining, and scripts have access to `node_modules/.bin`.",
+      "\"scripts\": {\n  \"start\": \"node server.js\",\n  \"dev\": \"nodemon server.js\",\n  \"test\": \"jest --coverage\",\n  \"build\": \"tsc\"\n}"
+    ],
+    "Publishing": [
+      "Publishing packages to the npm registry requires an npm account, a unique package name, and proper versioning via `npm version`. Packages should include a README, license, and main entry point.",
+      "npm login\nnpm version patch\nnpm publish\nnpm version minor && npm publish\nnpm unpublish package@1.0.0"
+    ],
+    "Workspaces": [
+      "NPM workspaces allow managing multiple packages in a single monorepo. Dependencies are hoisted to the root node_modules, and scripts can run across all workspaces concurrently.",
+      "// package.json\n{\n  \"workspaces\": [\"packages/*\"],\n  \"scripts\": {\n    \"test\": \"npm run test --workspaces\",\n    \"build\": \"npm run build -w @myorg/core\"\n  }\n}"
+    ],
+    "NPX": [
+      "NPX runs npm packages without installing them globally. It's useful for one-off commands like scaffolding tools, linters, or any CLI tool that you don't need permanently.",
+      "npx create-react-app my-app\nnpx prisma generate\nnpx http-server .\nnpx -p node@20 node --version"
+    ]
   },
   "Buffers & Streams": {
-    "Buffer": ["Buffer provides a way to work with binary data directly in Node.js. It is a fixed-size chunk of memory allocated outside the V8 heap, useful for handling raw data from files, networks, or crypto operations.", "const buf = Buffer.from('Hello', 'utf-8');\nconsole.log(buf);\nconsole.log(buf.toString());\nconsole.log(buf.length);\nconst combined = Buffer.concat([buf, Buffer.from(' World')]);"],
-    "Readable/Writable": ["Streams are classified into Readable, Writable, Duplex, and Transform types. Readable streams produce data that can be consumed via `data` events or piped to Writable streams.", "const { Readable, Writable } = require('stream');\nconst readable = Readable.from(['one', 'two', 'three']);\nreadable.on('data', chunk => console.log(chunk));\n\nconst writable = new Writable({\n  write(chunk, encoding, callback) {\n    console.log('Writing:', chunk.toString());\n    callback();\n  }\n});\nreadable.pipe(writable);"],
-    "Transform": ["Transform streams are Duplex streams that can modify data during read/write operations. They are commonly used for compression, encryption, and data format conversion.", "const { Transform } = require('stream');\nconst upperCase = new Transform({\n  transform(chunk, encoding, callback) {\n    this.push(chunk.toString().toUpperCase());\n    callback();\n  }\n});\nprocess.stdin.pipe(upperCase).pipe(process.stdout);\n"],
-    "Pipeline & Finished": ["stream.pipeline handles piping streams with automatic cleanup and error propagation. stream.finished provides a callback when a stream is no longer readable or writable.", "const { pipeline } = require('stream/promises');\n\nasync function run() {\n  await pipeline(\n    fs.createReadStream('input.txt'),\n    zlib.createGzip(),\n    fs.createWriteStream('input.txt.gz')\n  );\n  console.log('Pipeline completed');\n}"]
+    "Buffer": [
+      "Buffer provides a way to work with binary data directly in Node.js. It is a fixed-size chunk of memory allocated outside the V8 heap, useful for handling raw data from files, networks, or crypto operations.",
+      "const buf = Buffer.from('Hello', 'utf-8');\nconsole.log(buf);\nconsole.log(buf.toString());\nconsole.log(buf.length);\nconst combined = Buffer.concat([buf, Buffer.from(' World')]);"
+    ],
+    "Readable/Writable": [
+      "Streams are classified into Readable, Writable, Duplex, and Transform types. Readable streams produce data that can be consumed via `data` events or piped to Writable streams.",
+      "const { Readable, Writable } = require('stream');\nconst readable = Readable.from(['one', 'two', 'three']);\nreadable.on('data', chunk => console.log(chunk));\n\nconst writable = new Writable({\n  write(chunk, encoding, callback) {\n    console.log('Writing:', chunk.toString());\n    callback();\n  }\n});\nreadable.pipe(writable);"
+    ],
+    "Transform": [
+      "Transform streams are Duplex streams that can modify data during read/write operations. They are commonly used for compression, encryption, and data format conversion.",
+      "const { Transform } = require('stream');\nconst upperCase = new Transform({\n  transform(chunk, encoding, callback) {\n    this.push(chunk.toString().toUpperCase());\n    callback();\n  }\n});\nprocess.stdin.pipe(upperCase).pipe(process.stdout);\n"
+    ],
+    "Pipeline & Finished": [
+      "stream.pipeline handles piping streams with automatic cleanup and error propagation. stream.finished provides a callback when a stream is no longer readable or writable.",
+      "const { pipeline } = require('stream/promises');\n\nasync function run() {\n  await pipeline(\n    fs.createReadStream('input.txt'),\n    zlib.createGzip(),\n    fs.createWriteStream('input.txt.gz')\n  );\n  console.log('Pipeline completed');\n}"
+    ]
   },
   "Child Processes": {
-    "spawn": ["spawn launches a new process with streaming I/O. It returns a ChildProcess object with stdin, stdout, and stderr streams, ideal for long-running processes with large output.", "const { spawn } = require('child_process');\nconst ls = spawn('ls', ['-lh', '/usr']);\nls.stdout.on('data', (data) => console.log(`Output: ${data}`));\nls.stderr.on('data', (data) => console.error(`Error: ${data}`));\nls.on('close', (code) => console.log(`Exit code: ${code}`));"],
-    "exec": ["exec spawns a shell and runs a command, buffering the output. It's simpler than spawn for short commands but has a 1MB output buffer limit and higher risk of shell injection.", "const { exec } = require('child_process');\nexec('ls -lh /usr', (error, stdout, stderr) => {\n  if (error) return console.error(`Error: ${error.message}`);\n  console.log(`Output:\\n${stdout}`);\n});"],
-    "fork": ["fork creates a new Node.js process with an IPC channel for message passing. It is designed for offloading CPU-intensive work to separate processes while keeping communication easy.", "// parent.js\nconst { fork } = require('child_process');\nconst child = fork('./worker.js');\nchild.send({ task: 'compute', data: [1, 2, 3] });\nchild.on('message', (result) => console.log('Result:', result));\n\n// worker.js\nprocess.on('message', (msg) => {\n  const result = msg.data.reduce((a, b) => a + b, 0);\n  process.send({ result });\n});"],
-    "execFile": ["execFile is similar to exec but spawns the command directly without a shell, making it more secure. It is suitable for running binary executables with arguments and no shell interpretation.", "const { execFile } = require('child_process');\nexecFile('node', ['--version'], (error, stdout) => {\n  if (error) throw error;\n  console.log(`Node version: ${stdout}`);\n});"]
+    "spawn": [
+      "spawn launches a new process with streaming I/O. It returns a ChildProcess object with stdin, stdout, and stderr streams, ideal for long-running processes with large output.",
+      "const { spawn } = require('child_process');\nconst ls = spawn('ls', ['-lh', '/usr']);\nls.stdout.on('data', (data) => console.log(`Output: ${data}`));\nls.stderr.on('data', (data) => console.error(`Error: ${data}`));\nls.on('close', (code) => console.log(`Exit code: ${code}`));"
+    ],
+    "exec": [
+      "exec spawns a shell and runs a command, buffering the output. It's simpler than spawn for short commands but has a 1MB output buffer limit and higher risk of shell injection.",
+      "const { exec } = require('child_process');\nexec('ls -lh /usr', (error, stdout, stderr) => {\n  if (error) return console.error(`Error: ${error.message}`);\n  console.log(`Output:\\n${stdout}`);\n});"
+    ],
+    "fork": [
+      "fork creates a new Node.js process with an IPC channel for message passing. It is designed for offloading CPU-intensive work to separate processes while keeping communication easy.",
+      "// parent.js\nconst { fork } = require('child_process');\nconst child = fork('./worker.js');\nchild.send({ task: 'compute', data: [1, 2, 3] });\nchild.on('message', (result) => console.log('Result:', result));\n\n// worker.js\nprocess.on('message', (msg) => {\n  const result = msg.data.reduce((a, b) => a + b, 0);\n  process.send({ result });\n});"
+    ],
+    "execFile": [
+      "execFile is similar to exec but spawns the command directly without a shell, making it more secure. It is suitable for running binary executables with arguments and no shell interpretation.",
+      "const { execFile } = require('child_process');\nexecFile('node', ['--version'], (error, stdout) => {\n  if (error) throw error;\n  console.log(`Node version: ${stdout}`);\n});"
+    ]
   },
   "Events & Emitters": {
-    "EventEmitter": ["EventEmitter is a core Node.js pattern for handling asynchronous events. Objects emit named events that trigger registered listener functions, enabling decoupled communication between components.", "const EventEmitter = require('events');\nclass MyEmitter extends EventEmitter {}\nconst myEmitter = new MyEmitter();\n\nmyEmitter.on('event', (arg) => console.log('Event fired:', arg));\nmyEmitter.emit('event', 'hello');\n\nmyEmitter.once('oneTime', () => console.log('Runs once'));\nmyEmitter.on('error', (err) => console.error('Error:', err));"],
-    "Custom Events": ["Custom events allow building event-driven architectures. Use event names as constants to avoid typos, and leverage EventEmitter for pub/sub patterns throughout your application.", "const EventEmitter = require('events');\nconst EVENTS = { USER_LOGIN: 'user:login', ORDER_CREATED: 'order:created' };\n\nclass OrderSystem extends EventEmitter {\n  createOrder(order) {\n    this.emit(EVENTS.ORDER_CREATED, order);\n  }\n}\n\nconst system = new OrderSystem();\nsystem.on(EVENTS.ORDER_CREATED, (order) => {\n  sendEmail(order.userId);\n  updateInventory(order.items);\n});"],
-    "Max Listeners": ["EventEmitter warns about memory leaks when more than 10 listeners are attached. Use setMaxListeners to increase the limit, but first investigate if listeners are being properly removed.", "const emitter = new EventEmitter();\nemitter.setMaxListeners(50);\nconsole.log(emitter.listenerCount('event'));\nemitter.off('event', handler);\nemitter.removeAllListeners('event');"]
+    "EventEmitter": [
+      "EventEmitter is a core Node.js pattern for handling asynchronous events. Objects emit named events that trigger registered listener functions, enabling decoupled communication between components.",
+      "const EventEmitter = require('events');\nclass MyEmitter extends EventEmitter {}\nconst myEmitter = new MyEmitter();\n\nmyEmitter.on('event', (arg) => console.log('Event fired:', arg));\nmyEmitter.emit('event', 'hello');\n\nmyEmitter.once('oneTime', () => console.log('Runs once'));\nmyEmitter.on('error', (err) => console.error('Error:', err));"
+    ],
+    "Custom Events": [
+      "Custom events allow building event-driven architectures. Use event names as constants to avoid typos, and leverage EventEmitter for pub/sub patterns throughout your application.",
+      "const EventEmitter = require('events');\nconst EVENTS = { USER_LOGIN: 'user:login', ORDER_CREATED: 'order:created' };\n\nclass OrderSystem extends EventEmitter {\n  createOrder(order) {\n    this.emit(EVENTS.ORDER_CREATED, order);\n  }\n}\n\nconst system = new OrderSystem();\nsystem.on(EVENTS.ORDER_CREATED, (order) => {\n  sendEmail(order.userId);\n  updateInventory(order.items);\n});"
+    ],
+    "Max Listeners": [
+      "EventEmitter warns about memory leaks when more than 10 listeners are attached. Use setMaxListeners to increase the limit, but first investigate if listeners are being properly removed.",
+      "const emitter = new EventEmitter();\nemitter.setMaxListeners(50);\nconsole.log(emitter.listenerCount('event'));\nemitter.off('event', handler);\nemitter.removeAllListeners('event');"
+    ]
   },
   "Errors & Debugging": {
-    "Error Handling": ["Node.js uses the standard Error class and supports custom error types. Unhandled promise rejections and uncaught exceptions should be caught globally to prevent process crashes.", "process.on('uncaughtException', (err) => {\n  console.error('Uncaught:', err);\n  process.exit(1);\n});\n\nprocess.on('unhandledRejection', (reason) => {\n  console.error('Unhandled Rejection:', reason);\n});\n\nclass ValidationError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = 'ValidationError';\n  }\n}"],
-    "Debugger": ["Node.js includes a built-in debugger accessible via `--inspect` flag, which opens a Chrome DevTools-compatible interface. The `debugger` statement creates breakpoints, and `node inspect` provides a CLI debugger.", "node --inspect-brk server.js\n\nfunction calculate(a, b) {\n  debugger;\n  return a + b;\n}\n\n// CLI: node inspect server.js\n// Commands: n (next), c (continue), repl (inspect variables)"],
-    "Process": ["The `process` object provides information about the current Node.js process, including environment variables, command-line arguments, memory usage, and exit control. It is available globally everywhere.", "console.log(process.argv);\nconsole.log(process.env.NODE_ENV);\nconsole.log(process.memoryUsage());\nconsole.log(process.cwd());\nprocess.exit(0);\nprocess.on('SIGINT', () => { console.log('Shutting down...'); process.exit(0); });"],
-    "Profiling": ["Node.js built-in profiler and V8 inspector help identify performance bottlenecks. Use --prof for CPU profiling and the inspector for flame graphs and heap snapshots.", "node --prof app.js\nnode --prof-process isolated-*-v8.log > processed.txt\nnode --inspect app.js\n# Open chrome://inspect in Chrome"],
-    "Console Methods": ["The console module provides debugging utilities beyond console.log: console.table for arrays, console.time for timing, console.trace for stack traces, and console.group for nested output.", "console.time('request');\nconsole.table([{ name: 'Alice' }], ['name']);\nconsole.trace('Trace log');\nconsole.group('Details');\nconsole.log('Data');\nconsole.groupEnd();\nconsole.timeEnd('request');"]
-  },
-  "Testing": {
-    "Assert": ["Node's built-in assert module provides basic assertion testing. While minimal, it is useful for simple checks and can be used with the built-in test runner.", "const assert = require('assert');\nassert.strictEqual(1 + 1, 2);\nassert.deepStrictEqual({ a: 1 }, { a: 1 });\nassert.throws(() => { throw new Error('err'); });\n\nconst test = require('node:test');\ntest('addition works', (t) => {\n  assert.strictEqual(1 + 1, 2);\n});"],
-    "Jest": ["Jest is the most popular testing framework for Node.js with zero-config setup, built-in mocking, code coverage, snapshot testing, and watch mode.", "const sum = require('./sum');\ntest('adds 1 + 2 to equal 3', () => {\n  expect(sum(1, 2)).toBe(3);\n});\n\ntest('mock function', () => {\n  const mock = jest.fn(() => 'mocked');\n  expect(mock()).toBe('mocked');\n  expect(mock).toHaveBeenCalledTimes(1);\n});"],
-    "Mocha & Chai": ["Mocha is a flexible test framework paired with Chai for assertions. It supports BDD/TDD interfaces, async testing, and extensive plugin ecosystems.", "const { expect } = require('chai');\ndescribe('Calculator', () => {\n  it('should add numbers', () => {\n    expect(sum(2, 3)).to.equal(5);\n  });\n  \n  it('should handle async', async () => {\n    const result = await fetchData();\n    expect(result).to.have.property('status', 'ok');\n  });\n});"],
-    "Node Test Runner": ["Node 18+ includes a built-in test runner (node:test) with assertion library (node:assert). It supports mocking, code coverage, and runs tests in parallel without external dependencies.", "const { describe, it, mock } = require('node:test');\nconst assert = require('node:assert');\n\ndescribe('math', () => {\n  it('should add correctly', () => {\n    assert.strictEqual(2 + 2, 4);\n  });\n  \n  it('should mock functions', (t) => {\n    const fn = mock.fn(() => 42);\n    assert.strictEqual(fn(), 42);\n    assert.strictEqual(fn.mock.calls.length, 1);\n  });\n});\n// Run: node --test math.test.js"]
+    "Error Handling": [
+      "Node.js uses the standard Error class and supports custom error types. Unhandled promise rejections and uncaught exceptions should be caught globally to prevent process crashes.",
+      "process.on('uncaughtException', (err) => {\n  console.error('Uncaught:', err);\n  process.exit(1);\n});\n\nprocess.on('unhandledRejection', (reason) => {\n  console.error('Unhandled Rejection:', reason);\n});\n\nclass ValidationError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = 'ValidationError';\n  }\n}"
+    ],
+    "Debugger": [
+      "Node.js includes a built-in debugger accessible via `--inspect` flag, which opens a Chrome DevTools-compatible interface. The `debugger` statement creates breakpoints, and `node inspect` provides a CLI debugger.",
+      "node --inspect-brk server.js\n\nfunction calculate(a, b) {\n  debugger;\n  return a + b;\n}\n\n// CLI: node inspect server.js\n// Commands: n (next), c (continue), repl (inspect variables)"
+    ],
+    "Process": [
+      "The `process` object provides information about the current Node.js process, including environment variables, command-line arguments, memory usage, and exit control. It is available globally everywhere.",
+      "console.log(process.argv);\nconsole.log(process.env.NODE_ENV);\nconsole.log(process.memoryUsage());\nconsole.log(process.cwd());\nprocess.exit(0);\nprocess.on('SIGINT', () => { console.log('Shutting down...'); process.exit(0); });"
+    ],
+    "Profiling": [
+      "Node.js built-in profiler and V8 inspector help identify performance bottlenecks. Use --prof for CPU profiling and the inspector for flame graphs and heap snapshots.",
+      "node --prof app.js\nnode --prof-process isolated-*-v8.log > processed.txt\nnode --inspect app.js\n# Open chrome://inspect in Chrome"
+    ],
+    "Console Methods": [
+      "The console module provides debugging utilities beyond console.log: console.table for arrays, console.time for timing, console.trace for stack traces, and console.group for nested output.",
+      "console.time('request');\nconsole.table([{ name: 'Alice' }], ['name']);\nconsole.trace('Trace log');\nconsole.group('Details');\nconsole.log('Data');\nconsole.groupEnd();\nconsole.timeEnd('request');"
+    ]
   },
   "Process Management": {
-    "PM2": ["PM2 is a production process manager for Node.js with load balancing, auto-restart, log management, monitoring dashboard, and zero-downtime deployments.", "npm install -g pm2\npm2 start app.js -i 4 --name my-app\npm2 list\npm2 logs my-app\npm2 monit\npm2 restart my-app\n\n// ecosystem.config.js\nmodule.exports = {\n  apps: [{\n    name: 'my-app',\n    script: './server.js',\n    instances: 'max',\n    exec_mode: 'cluster',\n    env: { NODE_ENV: 'production' }\n  }]\n};"],
-    "Environment Variables": ["Environment variables configure Node.js apps across environments without code changes. Use dotenv for local development and process.env for runtime access.", "require('dotenv').config();\nconst port = process.env.PORT || 3000;\n\nconst { cleanEnv, str, port } = require('envalid');\nconst env = cleanEnv(process.env, {\n  NODE_ENV: str({ choices: ['dev', 'prod'] }),\n  PORT: port({ default: 3000 }),\n});"],
-    "Graceful Shutdown": ["Production Node.js apps must handle SIGTERM gracefully, closing connections and completing in-flight requests before exiting.", "const server = http.createServer(handler);\n\nasync function shutdown(signal) {\n  console.log(`Received ${signal}, shutting down...`);\n  server.close(() => {\n    db.close();\n    process.exit(0);\n  });\n  setTimeout(() => process.exit(1), 30000);\n}\n\nprocess.on('SIGTERM', () => shutdown('SIGTERM'));\nprocess.on('SIGINT', () => shutdown('SIGINT'));\nserver.listen(3000);"]
+    "PM2": [
+      "PM2 is a production process manager for Node.js with load balancing, auto-restart, log management, monitoring dashboard, and zero-downtime deployments.",
+      "npm install -g pm2\npm2 start app.js -i 4 --name my-app\npm2 list\npm2 logs my-app\npm2 monit\npm2 restart my-app\n\n// ecosystem.config.js\nmodule.exports = {\n  apps: [{\n    name: 'my-app',\n    script: './server.js',\n    instances: 'max',\n    exec_mode: 'cluster',\n    env: { NODE_ENV: 'production' }\n  }]\n};"
+    ],
+    "Environment Variables": [
+      "Environment variables configure Node.js apps across environments without code changes. Use dotenv for local development and process.env for runtime access.",
+      "require('dotenv').config();\nconst port = process.env.PORT || 3000;\n\nconst { cleanEnv, str, port } = require('envalid');\nconst env = cleanEnv(process.env, {\n  NODE_ENV: str({ choices: ['dev', 'prod'] }),\n  PORT: port({ default: 3000 }),\n});"
+    ],
+    "Graceful Shutdown": [
+      "Production Node.js apps must handle SIGTERM gracefully, closing connections and completing in-flight requests before exiting.",
+      "const server = http.createServer(handler);\n\nasync function shutdown(signal) {\n  console.log(`Received ${signal}, shutting down...`);\n  server.close(() => {\n    db.close();\n    process.exit(0);\n  });\n  setTimeout(() => process.exit(1), 30000);\n}\n\nprocess.on('SIGTERM', () => shutdown('SIGTERM'));\nprocess.on('SIGINT', () => shutdown('SIGINT'));\nserver.listen(3000);"
+    ]
   },
   "Security": {
-    "Helmet": ["Helmet secures Express apps by setting HTTP headers: Content-Security-Policy, X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, and more.", "const helmet = require('helmet');\napp.use(helmet());\n\napp.use(helmet.contentSecurityPolicy({\n  directives: {\n    defaultSrc: [\"'self'\"],\n    scriptSrc: [\"'self'\", \"'unsafe-inline'\"],\n  }\n}));"],
-    "Input Validation": ["Validate and sanitize all user input to prevent injection attacks. Use libraries like Joi, Zod, or express-validator for schema validation.", "const Joi = require('joi');\nconst schema = Joi.object({\n  email: Joi.string().email().required(),\n  password: Joi.string().min(8).required(),\n});\nconst { error, value } = schema.validate(req.body);\nif (error) return res.status(400).json({ error: error.details[0].message });"],
-    "CORS": ["Cross-Origin Resource Sharing must be configured to control which domains can access your API. Restrict origins, methods, and headers to the minimum needed.", "const cors = require('cors');\napp.use(cors({\n  origin: 'https://myapp.com',\n  methods: ['GET', 'POST'],\n  allowedHeaders: ['Content-Type', 'Authorization'],\n  credentials: true,\n}));"]
+    "Helmet": [
+      "Helmet secures Express apps by setting HTTP headers: Content-Security-Policy, X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, and more.",
+      "const helmet = require('helmet');\napp.use(helmet());\n\napp.use(helmet.contentSecurityPolicy({\n  directives: {\n    defaultSrc: [\"'self'\"],\n    scriptSrc: [\"'self'\", \"'unsafe-inline'\"],\n  }\n}));"
+    ],
+    "Input Validation": [
+      "Validate and sanitize all user input to prevent injection attacks. Use libraries like Joi, Zod, or express-validator for schema validation.",
+      "const Joi = require('joi');\nconst schema = Joi.object({\n  email: Joi.string().email().required(),\n  password: Joi.string().min(8).required(),\n});\nconst { error, value } = schema.validate(req.body);\nif (error) return res.status(400).json({ error: error.details[0].message });"
+    ],
+    "CORS": [
+      "Cross-Origin Resource Sharing must be configured to control which domains can access your API. Restrict origins, methods, and headers to the minimum needed.",
+      "const cors = require('cors');\napp.use(cors({\n  origin: 'https://myapp.com',\n  methods: ['GET', 'POST'],\n  allowedHeaders: ['Content-Type', 'Authorization'],\n  credentials: true,\n}));"
+    ]
   },
   "Advanced": {
-    "Worker Threads": ["Worker threads enable true multi-threading in Node.js for CPU-intensive tasks. Each worker runs in its own V8 context with isolated memory, communicating via message passing.", "const { Worker, isMainThread, parentPort } = require('worker_threads');\n\nif (isMainThread) {\n  const worker = new Worker(__filename);\n  worker.on('message', msg => console.log('From worker:', msg));\n  worker.postMessage('Hello');\n} else {\n  parentPort.on('message', msg => {\n    parentPort.postMessage(msg + ' from worker');\n  });\n}"],
-    "Cluster": ["The cluster module allows forking multiple Node.js processes to share server load across CPU cores. The master process distributes incoming connections to worker processes via round-robin scheduling.", "const cluster = require('cluster');\nconst http = require('http');\nconst numCPUs = require('os').cpus().length;\n\nif (cluster.isMaster) {\n  console.log(`Master ${process.pid} running`);\n  for (let i = 0; i < numCPUs; i++) cluster.fork();\n  cluster.on('exit', (worker) => cluster.fork());\n} else {\n  http.createServer((req, res) => {\n    res.end(`Worker ${process.pid} handled request`);\n  }).listen(8000);\n}"],
-    "Performance Hooks": ["The perf_hooks module provides performance measurement APIs similar to the Web Performance API. Use PerformanceObserver to collect timing data for monitoring and optimization.", "const { performance, PerformanceObserver } = require('perf_hooks');\n\nperformance.mark('start-query');\nawait db.query('SELECT * FROM users');\nperformance.mark('end-query');\nperformance.measure('query', 'start-query', 'end-query');\n\nconst obs = new PerformanceObserver((items) => {\n  console.log(items.getEntries()[0].duration);\n});\nobs.observe({ entryTypes: ['measure'] });"
+    "Worker Threads": [
+      "Worker threads enable true multi-threading in Node.js for CPU-intensive tasks. Each worker runs in its own V8 context with isolated memory, communicating via message passing.",
+      "const { Worker, isMainThread, parentPort } = require('worker_threads');\n\nif (isMainThread) {\n  const worker = new Worker(__filename);\n  worker.on('message', msg => console.log('From worker:', msg));\n  worker.postMessage('Hello');\n} else {\n  parentPort.on('message', msg => {\n    parentPort.postMessage(msg + ' from worker');\n  });\n}"
+    ],
+    "Cluster": [
+      "The cluster module allows forking multiple Node.js processes to share server load across CPU cores. The master process distributes incoming connections to worker processes via round-robin scheduling.",
+      "const cluster = require('cluster');\nconst http = require('http');\nconst numCPUs = require('os').cpus().length;\n\nif (cluster.isMaster) {\n  console.log(`Master ${process.pid} running`);\n  for (let i = 0; i < numCPUs; i++) cluster.fork();\n  cluster.on('exit', (worker) => cluster.fork());\n} else {\n  http.createServer((req, res) => {\n    res.end(`Worker ${process.pid} handled request`);\n  }).listen(8000);\n}"
+    ],
+    "Performance Hooks": [
+      "The perf_hooks module provides performance measurement APIs similar to the Web Performance API. Use PerformanceObserver to collect timing data for monitoring and optimization.",
+      "const { performance, PerformanceObserver } = require('perf_hooks');\n\nperformance.mark('start-query');\nawait db.query('SELECT * FROM users');\nperformance.mark('end-query');\nperformance.measure('query', 'start-query', 'end-query');\n\nconst obs = new PerformanceObserver((items) => {\n  console.log(items.getEntries()[0].duration);\n});\nobs.observe({ entryTypes: ['measure'] });"
     ]
   }
 }

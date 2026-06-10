@@ -1,9 +1,77 @@
 {
   "Getting Started": {
+    "Unreal Introduction": {
+      "exp": "<p>Introduction to Unreal and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Hello Unreal": [
       "Unreal Engine uses C++ and Blueprints for game logic. The primary gameplay class is AActor, which represents any object that can be placed in the world. The BeginPlay() method runs when the actor enters play, and Tick() runs every frame.\n\nCreate a C++ class inheriting from AActor, override BeginPlay(), and use UE_LOG to print to the Output Log. Compile and place your actor in the level to see the output.",
       "#include \"CoreMinimal.h\"\n#include \"GameFramework/Actor.h\"\n#include \"HelloUnreal.generated.h\"\n\nUCLASS()\nclass AHelloUnreal : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    // Sets default values for this actor's properties\n    AHelloUnreal()\n    {\n        PrimaryActorTick.bCanEverTick = true;\n    }\n\nprotected:\n    // Called when the game starts or when spawned\n    virtual void BeginPlay() override\n    {\n        Super::BeginPlay();\n        UE_LOG(LogTemp, Warning, TEXT(\"Hello, Unreal!\"));\n        UE_LOG(LogTemp, Warning, TEXT(\"Welcome to game development!\"));\n    }\n\npublic:\n    // Called every frame\n    virtual void Tick(float DeltaTime) override\n    {\n        Super::Tick(DeltaTime);\n        // Game logic runs here each frame\n    }\n};"
     ]
+  },
+  "Core Concepts": {
+    "Unreal Core Features": {
+      "exp": "<p>Essential Unreal concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Unreal Components": {
+      "exp": "<p>Building user interfaces with Unreal.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Unreal Routing": {
+      "exp": "<p>Navigation and routing in Unreal.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Unreal State": {
+      "exp": "<p>Managing application state in Unreal.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Unreal Data": {
+      "exp": "<p>Working with data and APIs in Unreal.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Unreal Testing": {
+      "exp": "<p>Testing strategies for Unreal.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Unreal Deployment": {
+      "exp": "<p>Deploying Unreal applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Unreal Best Practices": {
+      "exp": "<p>Best practices for Unreal development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Unreal Advanced": {
+      "exp": "<p>Advanced Unreal topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Actors & Components": {
     "Actor Lifecycle": [
