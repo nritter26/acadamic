@@ -21,7 +21,7 @@ mod middleware_auth;
 use middleware_auth::{auth_middleware, init_jwt_secret};
 
 mod rate_limiter;
-use rate_limiter::{RateLimiter, RateLimitStats, rate_limit_middleware};
+use rate_limiter::{RateLimiter, RateLimitStats, rate_limit_middleware, init_rate_limiter};
 
 mod ollama;
 use ollama::{detect_ollama, OllamaProbe};
@@ -58,11 +58,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let rate_limiter = Arc::new(RateLimiter::new());
+    init_rate_limiter(rate_limiter.clone());
 
     let state = AppState {
         config,
         db,
-        rate_limiter: rate_limiter.clone(),
+        rate_limiter,
         ollama_endpoint,
     };
 
@@ -78,6 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/api/health", get(health_check))
         .route("/api/ollama/status", get(ollama_status))
         .route("/api/rate-limit/stats", get(rate_limit_stats))
+        .layer(middleware::from_fn(rate_limit_middleware))
         .layer(middleware::from_fn(rate_limit_middleware))
         .layer(middleware::from_fn(auth_middleware))
         .layer(middleware::from_fn(request_logger))

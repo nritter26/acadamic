@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
 use axum::{
-    extract::{ConnectInfo, Request},
+    extract::Request,
     middleware::Next,
     response::{IntoResponse, Response},
     Json,
@@ -14,8 +14,16 @@ use tokio::sync::Mutex;
 use kodex_core::config::{RATE_MAX, RATE_WINDOW_MS};
 use kodex_core::error::ApiError;
 
-/// Paths that bypass rate limiting.
-const SKIP_PATHS: &[&str] = &["/api/health", "/api/auth/", "/api/rate-limit/stats"];
+static GLOBAL_RATE_LIMITER: OnceLock<Arc<RateLimiter>> = OnceLock::new();
+
+/// Initialize the global rate limiter (called at server startup).
+pub fn init_rate_limiter(limiter: Arc<RateLimiter>) {
+    let _ = GLOBAL_RATE_LIMITER.set(limiter);
+}
+
+fn get_rate_limiter() -> &'static Arc<RateLimiter> {
+    GLOBAL_RATE_LIMITER.get().expect("RateLimiter not initialized")
+}
 
 #[derive(Debug, Clone)]
 struct RateEntry {
@@ -88,30 +96,25 @@ pub struct RateLimitStats {
     pub window_ms: u64,
 }
 
+/// Paths that bypass rate limiting.
+const SKIP_PATHS: &[&str] = &["/api/health", "/api/auth/", "/api/rate-limit/stats"];
+
 /// Axum middleware for rate limiting based on peer IP.
 pub async fn rate_limit_middleware(
     req: Request,
     next: Next,
 ) -> Result<Response, Response> {
-    // Skip rate limiting for health, auth, and status endpoints
     let path = req.uri().path();
     if SKIP_PATHS.iter().any(|p| path == *p || path.starts_with(p)) {
         return Ok(next.run(req).await);
     }
 
-    let rate_limiter = req
-        .extensions()
-        .get::<Arc<RateLimiter>>()
-        .cloned()
-        .unwrap_or_else(|| Arc::new(RateLimiter::new()));
-
-    // Extract peer IP from ConnectInfo extension
     let addr = req
         .extensions()
-        .get::<ConnectInfo<SocketAddr>>()
+        .get::<axum::extract::ConnectInfo<SocketAddr>>()
         .map(|c| c.0)
         .unwrap_or_else(|| "127.0.0.1:0".parse().unwrap());
 
-    rate_limiter.check_rate(addr).await?;
+    get_rate_limiter().check_rate(addr).await?;
     Ok(next.run(req).await)
 }
