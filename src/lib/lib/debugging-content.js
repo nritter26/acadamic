@@ -3072,7 +3072,280 @@ func main() {
     fmt.Println("    run: go test -race -count=1 ./...")
     fmt.Println("    timeout: 10m")
 }`
+    },
+
+    "Built-in Printing & Formatter Verbs": {
+      exp: "Go's <code>fmt.Printf</code> formatting verbs are essential for debugging. <code>%+v</code> prints structs with field names, <code>%#v</code> prints Go-syntax representation (reusable in code), <code>%T</code> prints type, <code>%x</code>/<code>%X</code> for hex dumps, and <code>%q</code> for safe quoted strings. The <code>fmt</code> package also provides <code>fmt.Println</code> with spaces and <code>fmt.Sprintf</code> for string building. For complex debugging, use <code>spew</code> or <code>pretty</code> packages.",
+      code: `// Built-in Printing & Formatter Verbs
+package main
+
+import "fmt"
+
+type Config struct {
+    Host     string
+    Port     int
+    Timeout  float64
+    Enabled  bool
+    Tags     []string
+}
+
+func main() {
+    cfg := Config{
+        Host:    "localhost",
+        Port:    8080,
+        Timeout: 30.5,
+        Enabled: true,
+        Tags:    []string{"production", "us-east"},
     }
+
+    // Basic printing
+    fmt.Println("=== Print Debugging ===")
+    fmt.Print("No newline")
+    fmt.Printf("Formatted: %s:%d\\n", cfg.Host, cfg.Port)
+
+    // Verbose verbs for struct debugging
+    fmt.Println("\\n=== %+v (struct with field names) ===")
+    fmt.Printf("  %+v\\n", cfg)
+
+    // Go-syntax representation
+    fmt.Println("\\n=== %#v (Go syntax) ===")
+    fmt.Printf("  %#v\\n", cfg)
+
+    // Type inspection
+    fmt.Println("\\n=== %T (type) ===")
+    fmt.Printf("  cfg: %T\\n", cfg)
+    fmt.Printf("  Tags: %T\\n", cfg.Tags)
+    fmt.Printf("  Port: %T\\n", cfg.Port)
+
+    // Pointer representation
+    x := 42
+    p := &x
+    fmt.Println("\\n=== Pointer verbs ===")
+    fmt.Printf("  value: %v, type: %T, address: %p\\n", p, p, p)
+
+    // String and byte formatting
+    data := []byte("hello\\x00world")
+    fmt.Println("\\n=== String/byte verbs ===")
+    fmt.Printf("  %%s: %s\\n", data)
+    fmt.Printf("  %%q: %q\\n", data)     // Safe quoted
+    fmt.Printf("  %%x: %x\\n", data)     // Hex
+    fmt.Printf("  %%X: %X\\n", data)     // Upper hex
+    fmt.Printf("  %%d: %d\\n", data)     // Decimal bytes
+
+    // Width and precision
+    pi := 3.1415926535
+    fmt.Println("\\n=== Width/Precision ===")
+    fmt.Printf("  %%f:    %f\\n", pi)
+    fmt.Printf("  %%.2f:  %.2f\\n", pi)
+    fmt.Printf("  %%10.2f: %10.2f\\n", pi)
+    fmt.Printf("  %%-10.2f: %-10.2f\\n", pi)
+
+    // Boolean and special
+    fmt.Println("\\n=== Bool and special ===")
+    fmt.Printf("  %%t: %t\\n", cfg.Enabled)   // bool
+    fmt.Printf("  %%p: %p\\n", &cfg)         // pointer
+
+    // spew deep pretty-print (install: go get github.com/davecgh/go-spew/spew)
+    // spew.Dump(cfg)
+
+    // pretty package (go get github.com/kr/pretty)
+    // fmt.Printf("%# v\\n", pretty.Formatter(cfg))
+
+    fmt.Println("\\nKey debugging verbs:")
+    fmt.Println("  %+v - Struct with field names")
+    fmt.Println("  %#v - Go-syntax representation")
+    fmt.Println("  %T  - Type of value")
+    fmt.Println("  %q  - Safe quoted string")
+    fmt.Println("  %x  - Hex dump")
+    fmt.Println("  %p  - Pointer address")
+}`
+    },
+
+    "GDB for Go Debugging": {
+      exp: "GDB can debug Go programs as a fallback when Delve is unavailable (older systems, ARM, limited environments). Build Go programs with <code>-gcflags='all=-N -l'</code> to disable optimization and inlining. GDB commands like <code>break</code>, <code>next</code>, <code>step</code>, <code>print</code>, and <code>backtrace</code> work but with limitations: Go runtime internals are visible, goroutines appear as threads, and variable names may be mangled. GDB 7.1+ includes Go support with <code>goroutine</code> commands and pretty-printers for slices and maps. For full debugging experience, prefer Delve.",
+      code: `// GDB for Go Debugging
+// Build with no optimization for GDB compatibility:
+// go build -gcflags='all=-N -l' -o app main.go
+
+// Then debug with:
+// gdb ./app
+// (gdb) break main.main
+// (gdb) run
+// (gdb) next
+// (gdb) print variable
+// (gdb) info goroutines
+// (gdb) goroutine 1 backtrace
+// (gdb) goroutine 1 info locals
+
+package main
+
+import "fmt"
+
+type User struct {
+    ID    int
+    Name  string
+    Email string
+}
+
+func processUser(u User) string {
+    // GDB: break processUser
+    // GDB: print u
+    // GDB: print u.Name
+    return fmt.Sprintf("Processed: %s (%d)", u.Name, u.ID)
+}
+
+func main() {
+    // GDB: break main.main
+    user := User{ID: 1, Name: "Alice", Email: "alice@example.com"}
+    result := processUser(user)
+    fmt.Println(result)
+
+    // Debugging GDB vs Delve:
+    fmt.Println("\\nGDB limitations with Go:")
+    fmt.Println("1. Optimized variables may be unavailable")
+    fmt.Println("2. Goroutines appear as OS threads")
+    fmt.Println("3. Variable names may be mangled (e.g., p->Name != p.Name)")
+    fmt.Println("4. No native channel/goroutine inspection")
+    fmt.Println("5. Must build with -gcflags='all=-N -l'")
+    fmt.Println("\\nUse Delve (dlv) when possible for better Go debugging")
+}`
+    },
+
+    "Conditional Breakpoints & Watchpoints in Delve": {
+      exp: "Delve supports conditional breakpoints that pause only when a condition is true, and watchpoints that pause when a variable's value changes. Use <code>condition</code> to set breakpoint conditions, <code>trace</code> for non-breaking logpoints, and <code>watch</code> for variable change detection. Delve also supports <code>breakpoint set</code> with predicates and <code>on</code> for executing commands on breakpoint hits.",
+      code: `// Conditional Breakpoints & Watchpoints in Delve
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+type Transaction struct {
+    ID     int
+    Amount float64
+    Status string
+}
+
+func processTransaction(tx Transaction) {
+    // Conditional breakpoint: break main.go:XX if tx.Amount > 1000
+    // dlv> condition 1 tx.Amount > 1000 && tx.Status == "failed"
+    // dlv> break processTransaction
+    // dlv> condition 1 tx.Status == "failed" && tx.Amount > 500
+
+    fmt.Printf("Processing tx %d: $%.2f [%s]\\n", tx.ID, tx.Amount, tx.Status)
+
+    // Watchpoint: break when variable changes
+    var statusChanged string
+    if tx.Amount > 0 {
+        statusChanged = "validated"
+    }
+    _ = statusChanged
+    // dlv> watch statusChanged  (pauses when statusChanged changes)
+}
+
+func main() {
+    transactions := []Transaction{
+        {ID: 1, Amount: 50.00, Status: "completed"},
+        {ID: 2, Amount: 1500.00, Status: "pending"},
+        {ID: 3, Amount: 200.00, Status: "failed"},
+        {ID: 4, Amount: 5000.00, Status: "failed"},
+    }
+
+    for _, tx := range transactions {
+        processTransaction(tx)
+    }
+
+    // Logpoints (trace) - log without pausing:
+    // dlv> trace processTransaction "Processing: {tx.ID}, {tx.Amount}"
+
+    // On hit commands:
+    // dlv> break processTransaction
+    // dlv> on 1 print tx.ID
+    // dlv> on 1 print tx.Amount
+
+    fmt.Println("\\nDelve conditional debugging commands:")
+    fmt.Println("  dlv> condition <bp#> <expression>")
+    fmt.Println("  dlv> trace <func> <format-string>")
+    fmt.Println("  dlv> watch <variable>")
+    fmt.Println("  dlv> on <bp#> <command>")
+    fmt.Println("Example: condition 1 tx.Amount > 1000 && tx.Status == \"failed\"")
+}`
+
+    },
+
+    "Variable, Expression & Pointer Evaluation in Delve": {
+      exp: "Delve provides rich expression evaluation at breakpoints. Use <code>print</code> for expressions, <code>whatis</code> for type information, <code>locals</code> for all local variables, <code>vars</code> for package variables, and <code>regs</code> for CPU registers. Delve supports pointer dereferencing, array/slice indexing, struct field access, type conversions, and calling functions. The <code>expr</code> command evaluates arbitrary Go expressions within the debugged program's context.",
+      code: `// Variable, Expression & Pointer Evaluation in Delve
+package main
+
+import (
+    "fmt"
+    "unsafe"
+)
+
+type Employee struct {
+    ID     int
+    Name   string
+    Salary float64
+    Skills []string
+    Meta   map[string]interface{}
+}
+
+func calculateBonus(emp *Employee, performance float64) float64 {
+    // SET BREAKPOINT here: break main.go:XX
+    // dlv> print emp            - Show pointer
+    // dlv> print *emp           - Dereference pointer
+    // dlv> print emp.Name       - Struct field access
+    // dlv> print emp.Skills[0]  - Slice indexing
+    // dlv> print len(emp.Skills) - Built-in call
+    // dlv> print emp.Salary * performance  - Expression eval
+
+    baseBonus := emp.Salary * 0.1
+    perfBonus := emp.Salary * (performance * 0.2)
+    totalBonus := baseBonus + perfBonus
+    return totalBonus
+}
+
+func main() {
+    emp := &Employee{
+        ID:     101,
+        Name:   "Alice Smith",
+        Salary: 85000.00,
+        Skills: []string{"Go", "Python", "Kubernetes"},
+        Meta: map[string]interface{}{
+            "department": "Engineering",
+            "level":     "Senior",
+        },
+    }
+
+    // Expression evaluation examples (in delve):
+    // dlv> print emp.Salary / 12          - Monthly salary
+    // dlv> print emp.Meta["department"]   - Map access
+    // dlv> print unsafe.Sizeof(*emp)      - Size calculation
+    // dlv> print fmt.Sprintf("Name: %s", emp.Name)  - Function call
+    // dlv> whatis emp                     - Type information
+    // dlv> whatis emp.Salary              - Field type
+    // dlv> locals                         - All locals
+    // dlv> vars main                      - Package vars
+    // dlv> regs                           - CPU registers
+
+    bonus := calculateBonus(emp, 1.5)
+    fmt.Printf("Bonus: $%.2f\\n", bonus)
+
+    // Type conversions:
+    // dlv> print float64(emp.ID)
+    // dlv> print string([]byte{72, 105})
+
+    fmt.Println("\\nExpression evaluation commands:")
+    fmt.Println("  dlv> print <expression>   - Evaluate expression")
+    fmt.Println("  dlv> whatis <variable>    - Show type")
+    fmt.Println("  dlv> locals               - All local vars")
+    fmt.Println("  dlv> vars <pkg>           - Package variables")
+    fmt.Println("  dlv> regs                 - CPU registers")
+    fmt.Println("  dlv> call <func>(<args>)  - Call function")
+}`
+    },
 
   }
 };
