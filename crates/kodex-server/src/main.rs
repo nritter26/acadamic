@@ -16,6 +16,7 @@ use kodex_core::types::{HealthResponse, DatabaseStatus};
 use kodex_sql::connection::DbManager;
 
 mod middleware_auth;
+use middleware_auth::auth_middleware;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -49,6 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/api/health", get(health_check))
+        .layer(middleware::from_fn(auth_middleware))
         .layer(middleware::from_fn(request_logger))
         .layer(TraceLayer::new_for_http())
         .layer(cors)

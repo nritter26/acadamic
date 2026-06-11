@@ -1,17 +1,29 @@
 use axum::{
     extract::Request,
     middleware::Next,
-    response::Response,
+    response::{Response, IntoResponse},
+    Json,
 };
+use kodex_core::auth::verify_token;
+use kodex_core::error::ApiError;
 
+/// JWT authentication middleware.
+///
+/// Skips auth for `/api/health` and `/api/auth/*` endpoints.
+/// Extracts Bearer token from Authorization header, validates it,
+/// and injects the `AuthPayload` into request extensions.
 pub async fn auth_middleware(
-    req: Request,
+    mut req: Request,
     next: Next,
-) -> Result<Response, axum::response::Response> {
+) -> Result<Response, Response> {
     let path = req.uri().path();
 
     // Skip auth for health endpoint and auth routes
-    if path == "/api/health" || path.starts_with("/api/auth/") {
+    if path == "/api/health"
+        || path.starts_with("/api/auth/")
+        || path.starts_with("/api/openapi.json")
+        || path == "/api/docs"
+    {
         return Ok(next.run(req).await);
     }
 
@@ -23,11 +35,32 @@ pub async fn auth_middleware(
         .and_then(|v| v.strip_prefix("Bearer "))
         .map(|s| s.to_string());
 
-    // TODO: Implement proper JWT validation
-    // For now, pass through with a placeholder user_id in extensions
-    if let Some(_token) = auth_header {
-        // validate and set user_id
-    }
+    let token = match auth_header {
+        Some(t) => t,
+        None => {
+            return Err((
+                axum::http::StatusCode::UNAUTHORIZED,
+                Json(ApiError::new(401, "Missing Authorization header")),
+            )
+                .into_response());
+        }
+    };
 
-    Ok(next.run(req).await)
+    // Secret is stored in app state — need to extract from extensions
+    // or use a global. For now, use the default secret.
+    // In production, the secret should be injected via app state.
+    let secret = "kodex-dev-secret-change-in-production";
+
+    match verify_token(&token, secret) {
+        Ok(payload) => {
+            // Inject AuthPayload into request extensions for downstream handlers
+            req.extensions_mut().insert(payload);
+            Ok(next.run(req).await)
+        }
+        Err(_) => Err((
+            axum::http::StatusCode::UNAUTHORIZED,
+            Json(ApiError::new(401, "Invalid or expired token")),
+        )
+            .into_response()),
+    }
 }
