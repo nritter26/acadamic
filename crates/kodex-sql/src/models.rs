@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use rusqlite::params;
 use tokio::sync::RwLock;
-use kodex_core::types::AuthPayload;
 
 /// User operations on the auth database
 pub struct AuthDb {
