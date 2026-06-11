@@ -1530,6 +1530,182 @@ print("  sys.getsizeof(x) - object shallow size")
 print("  objgraph.show_refs(x) - visual ref graph")`
     },
 
+    "C-Extensions & Native Code Debugging": {
+      exp: "Debugging Python C extensions (Cython, CFFI, pybind11) requires crossing the Python/C boundary. Use <code>gdb</code> or <code>lldb</code> with Python debugging extensions (<code>python3-dbg</code> package on Debian, <code>python-dbg</code> on Fedora). Build extensions with <code>-g -O0</code> flags for debug symbols. Set <code>PYTHONDUMPREFS=1</code> for reference count debugging. Use <code>faulthandler</code> to dump C tracebacks on segfaults. GDB has Python scripting for pretty-printing Python objects (<code>py-bt</code>, <code>py-list</code>, <code>py-locals</code> commands).",
+      code: `# C-Extensions & Native Code Debugging
+
+# 1. Build extension with debug symbols
+# setup.py
+from setuptools import setup, Extension
+ext = Extension(
+    "my_module",
+    sources=["src/my_module.c"],
+    extra_compile_args=["-g", "-O0"],   # Debug symbols, no optimizations
+    extra_link_args=["-g"],
+)
+
+# 2. GDB with Python support
+# Install: apt-get install python3-dbg gdb python3-gdb
+# Run: gdb --args python3 script.py
+# (gdb) run
+# (gdb) bt               - C backtrace
+# (gdb) py-bt            - Python backtrace (gdb python extension)
+# (gdb) py-list          - Show current Python line
+# (gdb) py-locals        - Show Python local variables
+# (gdb) py-print x       - Print Python variable x
+# (gdb) frame 3          - Switch to frame 3
+# (gdb) info threads     - List all threads
+# (gdb) thread 2         - Switch to thread 2
+
+# 3. LLDB with Python support (macOS)
+# lldb -- python3 script.py
+# (lldb) run
+# (lldb) bt
+# (lldb) frame variable
+
+# 4. Python faulthandler - dump C tracebacks on crash
+import faulthandler
+import signal
+
+faulthandler.enable()  # Dump tracebacks on segfault
+faulthandler.register(signal.SIGUSR1)  # Dump on signal
+
+# 5. Reference count debugging
+import sys
+
+# PYTHONDUMPREFS=1 environment variable prints all refs on exit
+# Can also check specific objects:
+x = []
+print(f"Reference count of x: {sys.getrefcount(x) - 1}")
+
+# 6. CFFI/pybind11 debugging
+# For pybind11: add -DCMAKE_BUILD_TYPE=Debug
+# For CFFI: set_source("cffi_module", source, extra_compile_args=["-g", "-O0"])
+
+# 7. Valgrind for memory issues in C extensions
+# valgrind --tool=memcheck --suppressions=python.supp python3 script.py
+
+# Helper: check if extension was built with debug
+def check_debug_build(module_name):
+    try:
+        mod = __import__(module_name)
+        if hasattr(mod, "__file__"):
+            import subprocess
+            result = subprocess.run(
+                ["objdump", "-h", mod.__file__],
+                capture_output=True, text=True
+            )
+            has_debug = ".debug_info" in result.stdout or ".debug_line" in result.stdout
+            print(f"Module {module_name}: {'DEBUG' if has_debug else 'RELEASE'} build")
+    except Exception as e:
+        print(f"Could not check: {e}")
+
+print("\\nC extension debugging commands:")
+print("  gdb --args python3 script.py - GDB debugging")
+print("  PYTHONDUMPREFS=1           - Dump refs on exit")
+print("  faulthandler.enable()      - Traceback on crash")
+print("  valgrind python3 script.py  - Memory checking")
+print("  Build with -g -O0 for debug symbols")`
+    },
+
+    "Garbage Collector Inspection": {
+      exp: "Python's <code>gc</code> module provides full control over the garbage collector. Track cyclic references, inspect unreachable objects, and monitor collection frequency. Generational GC (generations 0, 1, 2) collects young objects more frequently. Use <code>gc.set_debug()</code> flags to log collection details. <code>gc.DEBUG_SAVEALL</code> preserves unreachable objects in <code>gc.garbage</code> for inspection. The <code>gc.get_stats()</code> method provides per-generation collection counters.",
+      code: `# Garbage Collector Inspection
+import gc
+import sys
+
+# 1. GC status and configuration
+print("=== GC Configuration ===")
+print(f"Enabled: {gc.isenabled()}")
+print(f"Generation thresholds: {gc.get_threshold()}")  # (700, 10, 10)
+print(f"Object count: {len(gc.get_objects())}")
+print(f"Garbage count: {len(gc.garbage)}")
+
+# 2. Create cyclic reference (leak)
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.next = None
+
+    def __repr__(self):
+        return f"Node({self.name})"
+
+# Create a cycle
+a = Node("A")
+b = Node("B")
+a.next = b
+b.next = a  # Cycle!
+
+# Delete references - cycle remains
+del a, b
+
+# 3. Manual collection with debugging
+gc.set_debug(gc.DEBUG_SAVEALL | gc.DEBUG_STATS | gc.DEBUG_LEAK)
+collected = gc.collect()
+print(f"\\n=== Collection Results ===")
+print(f"Collected: {collected} objects")
+print(f"Unreachable (in gc.garbage): {len(gc.garbage)}")
+
+# Inspect garbage
+for i, obj in enumerate(gc.garbage[:5]):
+    print(f"  Garbage #{i}: {type(obj).__name__}: {obj!r}")
+
+gc.set_debug(0)  # Reset debug flags
+
+# 4. Per-generation stats
+print("\\n=== Generation Stats ===")
+for i, gen_stats in enumerate(gc.get_stats()):
+    print(f" Generation {i}:")
+    print(f"   Collections: {gen_stats['collections']}")
+    print(f"   Collected: {gen_stats['collected']}")
+    print(f"   Uncollectable: {gen_stats['uncollectable']}")
+
+# 5. Find objects by type
+print("\\n=== Instance Finder ===")
+class MyClass:
+    def __init__(self, value):
+        self.value = value
+
+instances = [MyClass(i) for i in range(5)]
+
+all_my_instances = [obj for obj in gc.get_objects() if isinstance(obj, MyClass)]
+print(f"Found {len(all_my_instances)} MyClass instances")
+
+# 6. Reference tracking
+obj = [1, 2, 3]
+print(f"\\n=== Reference Tracking for {id(obj)} ===")
+print(f"Referrers: {len(gc.get_referrers(obj))}")
+for ref in gc.get_referrers(obj):
+    print(f"  {type(ref).__name__}: {ref!r:.60}")
+
+# 7. GC callbacks (Python 3.3+)
+def gc_callback(phase, info):
+    if phase == "start":
+        print(f"GC started: gen={info['generation']}")
+    elif phase == "stop":
+        print(f"GC finished: collected={info['collected']}")
+
+gc.callbacks.append(gc_callback)
+# Trigger a collection to see the callback
+gc.collect(0)
+
+# 8. Track specific object
+gc.set_debug(gc.DEBUG_SAVEALL)
+tracked = []
+for i in range(100):
+    tracked.append({"index": i, "data": [0] * 100})
+
+# del tracked  # Would create collectable garbage
+
+print("\\nGC debugging tips:")
+print("  gc.set_debug(gc.DEBUG_LEAK) - Find leak sources")
+print("  gc.get_referrers(x) - Find what holds references")
+print("  gc.get_referents(x) - Find what x references")
+print("  gc.DEBUG_SAVEALL - Preserve unreachable objects")
+print("  gc.callbacks - Monitor collection events")
+print("  PYTHONGC=0 - Disable GC (use with caution)")`
+    },
+
   },
 
   "TypeScript Debugging": {
