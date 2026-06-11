@@ -3347,5 +3347,236 @@ func main() {
 }`
     },
 
+    "Block & Mutex Contention Profiling": {
+      exp: "Go's <code>runtime.SetBlockProfileRate()</code> and <code>runtime.SetMutexProfileFraction()</code> enable profiling of blocking events and mutex contention. Block profiling captures goroutine blocking on channels, mutexes, and network operations. Mutex profiling captures contended mutex acquisitions. View profiles via <code>net/http/pprof</code> endpoints or <code>go tool pprof</code>. Use <code>pprof -http=:8080</code> for visual flame graphs of contention. Contention profiling is essential for debugging concurrency bottlenecks and identifying hot locks in concurrent Go programs.",
+      code: `// Block & Mutex Contention Profiling
+package main
+
+import (
+    "fmt"
+    "net/http"
+    _ "net/http/pprof"
+    "os"
+    "runtime"
+    "runtime/pprof"
+    "sync"
+    "time"
+)
+
+type SafeCache struct {
+    mu    sync.Mutex
+    items map[string]string
+}
+
+func (c *SafeCache) Get(key string) string {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    // Simulate slow operation
+    time.Sleep(time.Millisecond)
+    return c.items[key]
+}
+
+func (c *SafeCache) Set(key, value string) {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    time.Sleep(time.Millisecond)
+    c.items[key] = value
+}
+
+func main() {
+    // Enable block profiling (rate = 1 means every blocking event)
+    runtime.SetBlockProfileRate(1)
+
+    // Enable mutex profiling (rate = 1 means every mutex event)
+    runtime.SetMutexProfileFraction(1)
+
+    cache := &SafeCache{items: make(map[string]string)}
+    var wg sync.WaitGroup
+
+    // Simulate contention
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go func(id int) {
+            defer wg.Done()
+            for j := 0; j < 50; j++ {
+                key := fmt.Sprintf("key-%d", j)
+                if j%2 == 0 {
+                    cache.Set(key, fmt.Sprintf("value-%d-%d", id, j))
+                } else {
+                    _ = cache.Get(key)
+                }
+            }
+        }(i)
+    }
+
+    wg.Wait()
+
+    // Save block profile
+    f, _ := os.Create("block.pprof")
+    pprof.Lookup("block").WriteTo(f, 0)
+    f.Close()
+
+    // Save mutex profile
+    f, _ = os.Create("mutex.pprof")
+    pprof.Lookup("mutex").WriteTo(f, 0)
+    f.Close()
+
+    // Start HTTP server for live profiling
+    go func() {
+        fmt.Println("Profiling at http://localhost:6060/debug/pprof/")
+        http.ListenAndServe("localhost:6060", nil)
+    }()
+
+    fmt.Println("Profiles saved:")
+    fmt.Println("  block.pprof - Blocking events")
+    fmt.Println("  mutex.pprof - Mutex contention")
+
+    // Analyze with:
+    // go tool pprof -http=:8080 block.pprof
+    // go tool pprof -http=:8080 mutex.pprof
+
+    // In pprof interactive mode:
+    // (pprof) top10
+    // (pprof) list <function>
+    // (pprof) web
+
+    fmt.Println("\\nAnalysis commands:")
+    fmt.Println("  go tool pprof -http=:8080 mutex.pprof")
+    fmt.Println("  go tool pprof -http=:8080 block.pprof")
+    fmt.Println("  http://localhost:6060/debug/pprof/block")
+    fmt.Println("  http://localhost:6060/debug/pprof/mutex")`
+    },
+
+    "Compiler Optimization Inlining Overrides": {
+      exp: "Go's compiler aggressively inlines functions for performance, which can hide stack frames during debugging. Use <code>-gcflags='all=-N -l'</code> to disable all optimizations and inlining (<code>-N</code> disables optimization, <code>-l</code> disables inlining). For selective control, use <code>//go:noinline</code> directive on specific functions, <code>-gcflags='-l'</code> for package-level inlining control, and <code>-gcflags='-m'</code> to print optimization decisions. The <code>-l</code> flag accepts multiple levels: <code>-l</code> (basic), <code>-ll</code> (more), <code>-lll</code> (aggressive).",
+      code: `// Compiler Optimization Inlining Overrides
+package main
+
+import (
+    "fmt"
+    "runtime"
+)
+
+//go:noinline  // Prevent inlining of this function
+func debugFunction(x int) int {
+    // Without //go:noinline, this function would be inlined
+    // Making it invisible in stack traces and Delve
+    result := x * x + x
+    return result
+}
+
+// Inline directive (rarely used)
+//go:inline
+func smallFunction(x int) int {
+    return x + 1
+}
+
+func main() {
+    // Build with optimization tracing:
+    // go build -gcflags='-m' main.go 2>&1 | grep "inlined"
+
+    // Build with no optimizations for debugging:
+    // go build -gcflags='all=-N -l' -o debug-app main.go
+
+    // Selective optimization control:
+    // go build -gcflags='-N -l' -o debug-app main.go
+    // go build -gcflags='mypackage=-N -l' main.go  // Per-package
+
+    // Check if function was inlined
+    callerFunc := runtime.FuncForPC(reflect.ValueOf(debugFunction).Pointer())
+    // In go 1.12+, entry line indicates inlining
+    file, line := callerFunc.FileLine(0)
+    fmt.Printf("Function debugFunction at %s:%d\\n", file, line)
+
+    result := debugFunction(42)
+    fmt.Printf("Result: %d\\n", result)
+
+    // Check optimization settings at runtime
+    fmt.Println("\\nBuild flags for debugging:")
+    fmt.Println("  -gcflags='all=-N -l'  - No opt, no inline")
+    fmt.Println("  -gcflags='-m'         - Print opt decisions")
+    fmt.Println("  //go:noinline         - Per-function control")
+    fmt.Println("\\nInlining complicates debugging because:")
+    fmt.Println("1. Inlined functions disappear from stack traces")
+    fmt.Println("2. Local variables may be optimized away")
+    fmt.Println("3. Step-over/step-into behavior changes")
+    fmt.Println("4. Delve shows 'optimized function' warnings")
+}`
+    },
+
+    "Core Dump Generation & Post-Mortem Analysis": {
+      exp: "Go core dumps capture the full process state for post-mortem debugging. Set <code>GOTRACEBACK=crash</code> to generate a core dump on panic, or <code>GOTRACEBACK=all</code> for all goroutine stacks on panic. Use <code>dlv core</code> to analyze core dumps with Delve, or <code>gdb</code> for legacy analysis. Core dumps include all goroutine states, memory, and variable values at the crash point. For fine-grained control, use <code>runtime/debug.WriteHeapDump()</code> for heap-only snapshots. Core dump files can be large; compress and limit to production issues only.",
+      code: `// Core Dump Generation & Post-Mortem Analysis
+package main
+
+import (
+    "fmt"
+    "os"
+    "runtime"
+    "runtime/debug"
+)
+
+func crashFunction(data map[string]int, key string) int {
+    // Simulates nil pointer dereference
+    var nilMap map[string]int
+    return nilMap[key] // This would panic
+}
+
+func main() {
+    // Method 1: Environment variables for automatic dumps
+    // GOTRACEBACK=crash ./program    (core dump + crash on panic)
+    // GOTRACEBACK=all  ./program    (stack trace + continue)
+    // GOTRACEBACK=system ./program  (include runtime frames)
+
+    // Method 2: runtime/debug.WriteHeapDump
+    f, _ := os.Create("heap.dump")
+    debug.WriteHeapDump(f)
+    f.Close()
+    fmt.Println("Heap dump saved to heap.dump")
+
+    // Method 3: runtime.GOMAXPROCS and debug.SetPanicOnFault
+    debug.SetPanicOnFault(true) // Make memory faults recoverable
+
+    // Method 4: Signal-based core dumps
+    // kill -SIGQUIT <pid>    (on Unix: prints stacks + continues)
+    // kill -SIGABRT <pid>    (on Unix: core dump with GOTRACEBACK=crash)
+
+    // Analyze core dumps with Delve:
+    // dlv core ./program core
+    // (dlv) goroutines
+    // (dlv) goroutine 1
+    // (dlv) stack
+    // (dlv) locals
+    // (dlv) print <variable>
+
+    // Analyze with GDB:
+    // gdb ./program core
+    // (gdb) bt
+    // (gdb) info goroutines
+    // (gdb) goroutine 1 bt
+
+    // Method 5: Graceful crash with stack
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Printf("Panic: %v\\n", r)
+            debug.PrintStack()
+            // Write goroutine stacks
+            buf := make([]byte, 1<<20)
+            n := runtime.Stack(buf, true)
+            os.WriteFile("goroutine_dump.txt", buf[:n], 0644)
+        }
+    }()
+
+    fmt.Println("\\nCore dump methods:")
+    fmt.Println("  GOTRACEBACK=crash     - Core dump on panic")
+    fmt.Println("  GOTRACEBACK=all       - All stacks on panic")
+    fmt.Println("  dlv core ./prog ./core - Post-mortem analysis")
+    fmt.Println("  debug.WriteHeapDump()  - Heap snapshot")
+    fmt.Println("  runtime.Stack()       - Programmatic stacks")
+    fmt.Println("\\nAnalyze: dlv core ./program ./core")
+}`
+
+    },
+
   }
 };
