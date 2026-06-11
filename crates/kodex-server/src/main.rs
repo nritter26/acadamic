@@ -3,7 +3,6 @@ use std::net::SocketAddr;
 use axum::{
     Router,
     routing::get,
-    middleware,
     response::Json,
 };
 use tower_http::cors::{CorsLayer, Any};
@@ -16,7 +15,6 @@ use kodex_core::types::{HealthResponse, DatabaseStatus};
 use kodex_sql::connection::DbManager;
 
 mod middleware_auth;
-use middleware_auth::auth_middleware;
 
 #[derive(Clone)]
 pub struct AppState {
