@@ -4,6 +4,7 @@ use axum::{
     Router,
     routing::get,
     response::Json,
+    middleware,
 };
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::trace::TraceLayer;
@@ -48,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/api/health", get(health_check))
+        .layer(middleware::from_fn(request_logger))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state);
@@ -60,6 +62,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     Ok(())
+}
+
+async fn request_logger(
+    req: axum::extract::Request,
+    next: middleware::Next,
+) -> Result<axum::response::Response, axum::response::Response> {
+    let start = std::time::Instant::now();
+    let method = req.method().clone();
+    let uri = req.uri().to_string();
+    let response = next.run(req).await;
+    let duration = start.elapsed();
+    let status = response.status();
+    tracing::info!("{} {} -> {} ({:?})", method, uri, status, duration);
+    Ok(response)
 }
 
 async fn health_check(
