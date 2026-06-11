@@ -189,6 +189,18 @@ pub struct WeakArea {
     pub mastery: f64,
 }
 
+// ── Health ──
+
+#[derive(Debug, Clone, Serialize)]
+pub struct HealthResponse {
+    pub status: String,
+    pub version: String,
+    pub db: DatabaseStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ollama: Option<String>,
+    pub config_ok: bool,
+}
+
 // ── Rate Limit ──
 
 #[derive(Debug, Clone, Serialize)]
