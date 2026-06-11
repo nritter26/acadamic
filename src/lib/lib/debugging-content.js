@@ -1438,6 +1438,61 @@ console.log("Key services: Sentry (sentry-cli), Datadog (datadog-ci), Bugsnag (b
 console.log("Always strip source maps from production static assets");`
     },
 
+    "Linter Rule Exception Debugging": {
+      exp: "TypeScript-aware ESLint rules catch type errors, unused variables, and common pitfalls. Debugging linter issues requires understanding parser options (parser, parserOptions.project for typed linting), rule configuration, and using diagnostic commands like <code>eslint --debug</code> and <code>--print-config</code>. Common issues: parser project resolution failures, incompatible rule configurations between TS and JS, and performance bottlenecks from typed linting. Use <code>parserOptions.project</code> for type-aware rules like <code>@typescript-eslint/no-floating-promises</code>, <code>@typescript-eslint/strict-boolean-expressions</code>, and <code>@typescript-eslint/no-unnecessary-condition</code>.",
+      code: `// Linter Rule Exception Debugging
+// ESLint configuration for TypeScript
+// .eslintrc.json
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": "./tsconfig.json",        // Required for type-aware rules
+    "tsconfigRootDir": "."
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/no-unnecessary-condition": "warn",
+    "@typescript-eslint/prefer-nullish-coalescing": "error"
+  }
+}
+
+// Debug commands:
+// npx eslint --debug src/               - Show verbose debugging output
+// npx eslint --print-config src/file.ts  - Print resolved config
+// npx eslint --rulesdir src/file.ts      - Show which rules apply
+// npx eslint --format unix src/          - Unix-style format
+
+// Diagnose parser issues:
+// npx tsc --noEmit --generateTrace trace
+// Check: project resolution, tsconfig paths, module resolution
+
+// Performance debugging:
+// TIMING=1 npx eslint src/              - Show per-rule timing
+// npx eslint --cache src/               - Cache results
+
+// Common linter error diagnostics:
+// "Parsing error: Cannot find module 'typescript'" -> Install typescript
+// "The file must be included in at least one of the projects provided"
+//   -> Ensure file is in tsconfig.json include array
+// "ESLint couldn't determine the tsconfig" -> Check parserOptions.project
+
+// Suppression strategies:
+// // eslint-disable-next-line @typescript-eslint/no-floating-promises
+// // @ts-expect-error - for expected type errors
+// /* eslint-disable @typescript-eslint/no-unused-vars */
+
+console.log("Linter debugging commands:");
+console.log("  eslint --debug         - Verbose logs");
+console.log("  eslint --print-config  - Resolved rules");
+console.log("  TIMING=1 eslint       - Per-rule timing");
+console.log("  eslint --cache         - Faster re-runs");`
+    },
+
   },
 
   "Go Debugging": {
