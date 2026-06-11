@@ -1,6 +1,9 @@
 use std::fmt;
 use serde::Serialize;
 
+use axum::response::{IntoResponse, Response};
+use axum::Json;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ApiError {
     pub error: String,
@@ -82,5 +85,14 @@ impl AppError {
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.error)
+    }
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        let api_error = self.to_api_error();
+        let status = axum::http::StatusCode::from_u16(self.status_code())
+            .unwrap_or(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
+        (status, Json(api_error)).into_response()
     }
 }
