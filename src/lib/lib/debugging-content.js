@@ -1361,6 +1361,175 @@ print("  logger.handlers - List attached handlers")
 print("  logger.propagate - Parent forwarding flag")`
     },
 
+    "Variable Scope Inspection": {
+      exp: "Python's <code>locals()</code>, <code>globals()</code>, <code>dir()</code>, and <code>vars()</code> provide runtime access to variable scopes. The <code>inspect</code> module gives deeper introspection: stack frames (<code>inspect.stack()</code>), source code (<code>inspect.getsource()</code>), and signature (<code>inspect.signature()</code>). Use <code>gc.get_referrers()</code> to find what holds a reference. In pdb, <code>p locals()</code> shows all local variables and <code>p globals()</code> shows globals.",
+      code: `# Variable Scope Inspection
+import sys
+import inspect
+import gc
+
+# 1. locals() and globals()
+global_var = "I am global"
+
+def outer_function(x):
+    outer_var = "outer"
+    y = 42
+
+    def inner_function(z):
+        inner_var = "inner"
+        # Inspect all scopes from deepest frame
+        print("=== Locals (inner) ===")
+        for k, v in locals().items():
+            print(f"  {k} = {v!r}")
+
+        print("\\n=== Globals ===")
+        for k in list(globals().keys())[-5:]:  # Last 5 globals
+            print(f"  {k} = {globals()[k]!r}")
+
+        return inner_var
+
+    # dir() shows all names accessible in current scope
+    print("\\n=== dir() in outer ===")
+    print([n for n in dir() if not n.startswith("_")])
+
+    # vars() returns __dict__ of an object
+    print("\\n=== vars(sys) sample ===")
+    sys_vars = vars(sys)
+    print(list(sys_vars.keys())[:5])
+
+    return inner_function
+
+result = outer_function(10)("test")
+
+# 2. inspect module - stack frame inspection
+def deep_stack():
+    frame = inspect.currentframe()
+    print("\\n=== Stack Frames ===")
+    for i, frame_info in enumerate(inspect.stack()):
+        print(f"  [{i}] {frame_info.function} at {frame_info.filename}:{frame_info.lineno}")
+
+def middle():
+    deep_stack()
+
+def top_level():
+    middle()
+
+top_level()
+
+# 3. Get source code of a function
+def my_function(a, b):
+    """Add two numbers."""
+    return a + b
+
+print("\\n=== Source Code ===")
+print(inspect.getsource(my_function))
+print("\\n=== Signature ===")
+print(inspect.signature(my_function))
+
+# 4. Find who holds a reference
+class Demo:
+    pass
+
+obj = Demo()
+container = [obj, obj]
+refs = gc.get_referrers(obj)
+print(f"\\n=== References to obj: {len(refs)} ===")
+for ref in refs:
+    print(f"  {type(ref).__name__}: {ref!r:.80}")
+
+# 5. Debug scope leakage
+leaked = "I should not be global"
+# Check: did this end up in globals?
+if "leaked" in globals():
+    print("\\nWARNING: 'leaked' is in global scope!")
+
+print("\\nScope inspection commands:")
+print("  locals()  - Local variables in current scope")
+print("  globals() - Global namespace dictionary")
+print("  dir()     - Names accessible in current scope")
+print("  vars(x)   - __dict__ of object x")
+print("  inspect.currentframe() - Current stack frame")
+print("  gc.get_referrers(x)    - Find reference holders")`
+    },
+
+    "Memory Profiling Tools": {
+      exp: "Python memory profiling tools track allocation and detect leaks. <code>tracemalloc</code> (built-in, Python 3.4+) traces memory allocations with stack traces. <code>memory_profiler</code> provides line-by-line memory usage. <code>objgraph</code> visualizes object references to find leaks. For production, use <code>gc.get_objects()</code> to count instances and <code>sys.getsizeof()</code> for object sizes. Always combine with heap snapshots for effective leak detection.",
+      code: `# Memory Profiling Tools
+import sys
+import gc
+
+# 1. sys.getsizeof() - shallow object size
+print("=== Shallow Sizes ===")
+print(f"int: {sys.getsizeof(42)} bytes")
+print(f"list (empty): {sys.getsizeof([])} bytes")
+print(f"list (10 items): {sys.getsizeof([1]*10)} bytes")
+print(f"dict (empty): {sys.getsizeof({})} bytes")
+print(f"str: {sys.getsizeof('hello world')} bytes")
+
+# 2. tracemalloc - trace memory allocations
+import tracemalloc
+
+tracemalloc.start()
+
+# Allocate some memory
+data = [bytearray(1000) for _ in range(100)]
+more_data = {str(i): i for i in range(1000)}
+
+snapshot = tracemalloc.take_snapshot()
+top_stats = snapshot.statistics('lineno')
+
+print("\\n=== Top 10 Memory Allocations (tracemalloc) ===")
+for i, stat in enumerate(top_stats[:10], 1):
+    print(f"  #{i}: {stat.size / 1024:.1f} KiB at {stat.count} allocations")
+    for frame in stat.traceback[:2]:
+        print(f"    {frame.filename}:{frame.lineno}")
+
+current, peak = tracemalloc.get_traced_memory()
+print(f"\\nCurrent: {current / 1024:.1f} KiB, Peak: {peak / 1024:.1f} KiB")
+
+# 3. gc module - garbage collector inspection
+print("\\n=== GC Object Counts (Top Types) ===")
+type_counts = {}
+for obj in gc.get_objects():
+    t = type(obj).__name__
+    type_counts[t] = type_counts.get(t, 0) + 1
+
+sorted_types = sorted(type_counts.items(), key=lambda x: -x[1])
+for t, count in sorted_types[:10]:
+    print(f"  {t}: {count}")
+
+# 4. Find cyclic garbage
+gc.set_debug(gc.DEBUG_SAVEALL)
+gc.collect()
+if gc.garbage:
+    print(f"\\n=== {len(gc.garbage)} cyclic garbage objects ===")
+    for obj in gc.garbage[:5]:
+        print(f"  {type(obj).__name__}: {obj!r:.60}")
+
+# 5. Object reference graph
+# pip install objgraph
+# import objgraph
+# objgraph.show_refs([my_object], filename='refs.png')
+# objgraph.show_backrefs(my_object, max_depth=5)
+# objgraph.by_type('MyClass')  # Find all instances of a class
+
+# 6. memory_profiler usage (run with: python -m memory_profiler script.py)
+# @profile decorator shows per-line memory usage
+# from memory_profiler import profile
+# @profile
+# def my_func():
+#     a = [1] * 100000
+#     b = [2] * 100000
+#     return a, b
+
+print("\\nMemory profiling commands:")
+print("  python -m memory_profiler script.py")
+print("  tracemalloc.start() / take_snapshot()")
+print("  gc.get_objects() - all tracked objects")
+print("  sys.getsizeof(x) - object shallow size")
+print("  objgraph.show_refs(x) - visual ref graph")`
+    },
+
   },
 
   "TypeScript Debugging": {
