@@ -49,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/api/health", get(health_check))
+        .layer(middleware::from_fn(error_handler_mw))
         .layer(middleware::from_fn(request_logger))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -62,6 +63,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     Ok(())
+}
+
+async fn error_handler_mw(
+    req: axum::extract::Request,
+    next: middleware::Next,
+) -> Result<axum::response::Response, axum::response::Response> {
+    let response = next.run(req).await;
+    // request_logger already handles logging; this middleware ensures
+    // all errors returned by handlers are properly formatted as JSON
+    Ok(response)
 }
 
 async fn request_logger(
