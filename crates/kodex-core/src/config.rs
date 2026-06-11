@@ -35,7 +35,9 @@ impl std::str::FromStr for AiProvider {
 
 #[derive(Debug, Clone)]
 pub struct AppConfig {
+    pub host: String,
     pub port: u16,
+    pub data_dir: std::path::PathBuf,
     pub jwt_secret: String,
     pub log_level: String,
     pub ai_provider: AiProvider,
@@ -61,11 +63,17 @@ impl AppConfig {
             .parse()
             .unwrap_or(1024);
 
+        let data_dir = std::path::PathBuf::from(
+            env::var("DATA_DIR").unwrap_or_else(|_| "data".into())
+        );
+
         Self {
+            host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".into()),
             port: env::var("PORT")
                 .unwrap_or_else(|_| "3000".into())
                 .parse()
                 .unwrap_or(3000),
+            data_dir,
             jwt_secret: env::var("JWT_SECRET")
                 .unwrap_or_else(|_| "kodex-dev-secret-change-in-production".into()),
             log_level: env::var("LOG_LEVEL").unwrap_or_else(|_| "info".into()),
