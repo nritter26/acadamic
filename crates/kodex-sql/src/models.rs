@@ -1,19 +1,19 @@
 use std::sync::Arc;
 use rusqlite::params;
-use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 
 /// User operations on the auth database
 pub struct AuthDb {
-    conn: Arc<RwLock<rusqlite::Connection>>,
+    conn: Arc<Mutex<rusqlite::Connection>>,
 }
 
 impl AuthDb {
-    pub fn new(conn: Arc<RwLock<rusqlite::Connection>>) -> Self {
+    pub fn new(conn: Arc<Mutex<rusqlite::Connection>>) -> Self {
         Self { conn }
     }
 
     pub async fn create_user(&self, id: &str, email: &str, password_hash: &str, name: &str) -> Result<(), String> {
-        let conn = self.conn.write().await;
+        let conn = self.conn.lock().await;
         conn.execute(
             "INSERT INTO users (id, email, password_hash, name) VALUES (?1, ?2, ?3, ?4)",
             params![id, email, password_hash, name],
@@ -22,7 +22,7 @@ impl AuthDb {
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<UserRecord>, String> {
-        let conn = self.conn.read().await;
+        let conn = self.conn.lock().await;
         let mut stmt = conn.prepare(
             "SELECT id, email, password_hash, name, created_at FROM users WHERE email = ?1"
         ).map_err(|e| format!("Query prepare failed: {e}"))?;
@@ -43,7 +43,7 @@ impl AuthDb {
     }
 
     pub async fn get_user_by_id(&self, user_id: &str) -> Result<Option<UserPublicRecord>, String> {
-        let conn = self.conn.read().await;
+        let conn = self.conn.lock().await;
         let mut stmt = conn.prepare(
             "SELECT id, email, name, created_at FROM users WHERE id = ?1"
         ).map_err(|e| format!("Query prepare failed: {e}"))?;
@@ -63,7 +63,7 @@ impl AuthDb {
     }
 
     pub async fn email_exists(&self, email: &str) -> Result<bool, String> {
-        let conn = self.conn.read().await;
+        let conn = self.conn.lock().await;
         let count: i64 = conn.query_row(
             "SELECT COUNT(*) FROM users WHERE email = ?1",
             params![email],
@@ -92,7 +92,7 @@ pub struct UserPublicRecord {
 
 /// Project operations on the projects database
 pub struct ProjectDb {
-    conn: Arc<RwLock<rusqlite::Connection>>,
+    conn: Arc<Mutex<rusqlite::Connection>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -118,12 +118,12 @@ pub struct ProjectSummary {
 }
 
 impl ProjectDb {
-    pub fn new(conn: Arc<RwLock<rusqlite::Connection>>) -> Self {
+    pub fn new(conn: Arc<Mutex<rusqlite::Connection>>) -> Self {
         Self { conn }
     }
 
     pub async fn list_projects(&self, user_id: &str) -> Result<Vec<ProjectSummary>, String> {
-        let conn = self.conn.read().await;
+        let conn = self.conn.lock().await;
         let mut stmt = conn.prepare(
             "SELECT id, name, language, description, created_at, updated_at \
              FROM projects WHERE user_id = ?1 ORDER BY updated_at DESC"
@@ -148,7 +148,7 @@ impl ProjectDb {
     }
 
     pub async fn get_project(&self, id: &str, user_id: &str) -> Result<Option<ProjectRecord>, String> {
-        let conn = self.conn.read().await;
+        let conn = self.conn.lock().await;
         let mut stmt = conn.prepare(
             "SELECT * FROM projects WHERE id = ?1 AND user_id = ?2"
         ).map_err(|e| format!("Query prepare failed: {e}"))?;
@@ -172,7 +172,7 @@ impl ProjectDb {
     }
 
     pub async fn create_project(&self, id: &str, user_id: &str, name: &str, language: &str, description: &str) -> Result<(), String> {
-        let conn = self.conn.write().await;
+        let conn = self.conn.lock().await;
         conn.execute(
             "INSERT INTO projects (id, user_id, name, language, description) VALUES (?1, ?2, ?3, ?4, ?5)",
             params![id, user_id, name, language, description],
@@ -184,7 +184,7 @@ impl ProjectDb {
         if fields.is_empty() {
             return Ok(());
         }
-        let conn = self.conn.write().await;
+        let conn = self.conn.lock().await;
 
         let mut sql = String::from("UPDATE projects SET ");
         for (i, (k, _)) in fields.iter().enumerate() {
@@ -207,7 +207,7 @@ impl ProjectDb {
     }
 
     pub async fn delete_project(&self, id: &str, user_id: &str) -> Result<bool, String> {
-        let conn = self.conn.write().await;
+        let conn = self.conn.lock().await;
         let affected = conn.execute(
             "DELETE FROM projects WHERE id = ?1 AND user_id = ?2",
             params![id, user_id],

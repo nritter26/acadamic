@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use rusqlite::Connection;
-use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 use tracing::info;
 
 /// Manages three SQLite databases:
@@ -13,9 +13,9 @@ pub struct DbManager {
     /// Main curriculum database (in-memory, r2d2 pooled)
     pub curriculum: r2d2::Pool<r2d2_sqlite::SqliteConnectionManager>,
     /// Auth database (file-based, single connection)
-    pub auth: Arc<RwLock<Connection>>,
+    pub auth: Arc<Mutex<Connection>>,
     /// Projects database (file-based, single connection)
-    pub projects: Arc<RwLock<Connection>>,
+    pub projects: Arc<Mutex<Connection>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -85,8 +85,8 @@ impl DbManager {
 
         Ok(Self {
             curriculum: pool,
-            auth: Arc::new(RwLock::new(auth_conn)),
-            projects: Arc::new(RwLock::new(projects_conn)),
+            auth: Arc::new(Mutex::new(auth_conn)),
+            projects: Arc::new(Mutex::new(projects_conn)),
         })
     }
 
