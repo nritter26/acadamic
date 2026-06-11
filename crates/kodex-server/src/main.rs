@@ -21,17 +21,17 @@ mod middleware_auth;
 use middleware_auth::{auth_middleware, init_jwt_secret};
 
 mod rate_limiter;
-use rate_limiter::{RateLimiter, rate_limit_middleware};
+use rate_limiter::{RateLimiter, RateLimitStats, rate_limit_middleware};
 
 mod ollama;
-use ollama::{detect_ollama, check_ollama_status};
+use ollama::{detect_ollama, OllamaProbe};
 
 #[derive(Clone)]
 pub struct AppState {
     pub config: AppConfig,
     pub db: &'static DbManager,
     pub rate_limiter: Arc<RateLimiter>,
-    pub ollama_endpoint: Option<String>,
+    pub ollama_endpoint: Option<Arc<OllamaProbe>>,
 }
 
 #[tokio::main]
@@ -48,8 +48,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize global JWT secret
     init_jwt_secret(config.jwt_secret.clone());
 
-    // Auto-detect Ollama
-    let ollama_endpoint = detect_ollama(&config.local.endpoint).await;
+    // Auto-detect Ollama (non-blocking, 4s timeout)
+    let ollama_endpoint = tokio::select! {
+        result = detect_ollama(&config.local.endpoint) => result,
+        _ = tokio::time::sleep(std::time::Duration::from_secs(4)) => {
+            tracing::warn!("Ollama detection timed out, proceeding without it");
+            None
+        }
+    };
 
     let rate_limiter = Arc::new(RateLimiter::new());
 
@@ -71,6 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/api/health", get(health_check))
         .route("/api/ollama/status", get(ollama_status))
+        .route("/api/rate-limit/stats", get(rate_limit_stats))
         .layer(middleware::from_fn(rate_limit_middleware))
         .layer(middleware::from_fn(auth_middleware))
         .layer(middleware::from_fn(request_logger))
@@ -83,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Listening on {}", addr);
 
-    axum::serve(listener, app)
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())
         .await?;
 
@@ -114,7 +121,7 @@ async fn health_check(
     let db_status = state.db.get_status();
 
     let ollama_status = match &state.ollama_endpoint {
-        Some(ep) => Some(check_ollama_status(ep).await),
+        Some(probe) => Some(probe.get_cached_status().await),
         None => None,
     };
 
@@ -131,14 +138,20 @@ async fn ollama_status(
     axum::extract::State(state): axum::extract::State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let status = match &state.ollama_endpoint {
-        Some(ep) => check_ollama_status(ep).await,
+        Some(probe) => probe.get_cached_status().await,
         None => "not_configured".to_string(),
     };
 
     Ok(Json(serde_json::json!({
         "status": status,
-        "endpoint": state.ollama_endpoint,
     })))
+}
+
+async fn rate_limit_stats(
+    axum::extract::State(state): axum::extract::State<AppState>,
+) -> Result<Json<RateLimitStats>, AppError> {
+    let stats = state.rate_limiter.get_stats().await;
+    Ok(Json(stats))
 }
 
 // ── Shutdown ──

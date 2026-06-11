@@ -14,6 +14,9 @@ use tokio::sync::Mutex;
 use kodex_core::config::{RATE_MAX, RATE_WINDOW_MS};
 use kodex_core::error::ApiError;
 
+/// Paths that bypass rate limiting.
+const SKIP_PATHS: &[&str] = &["/api/health", "/api/auth/", "/api/rate-limit/stats"];
+
 #[derive(Debug, Clone)]
 struct RateEntry {
     count: u32,
@@ -90,6 +93,12 @@ pub async fn rate_limit_middleware(
     req: Request,
     next: Next,
 ) -> Result<Response, Response> {
+    // Skip rate limiting for health, auth, and status endpoints
+    let path = req.uri().path();
+    if SKIP_PATHS.iter().any(|p| path == *p || path.starts_with(p)) {
+        return Ok(next.run(req).await);
+    }
+
     let rate_limiter = req
         .extensions()
         .get::<Arc<RateLimiter>>()
