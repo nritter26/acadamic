@@ -1061,7 +1061,133 @@ signal.signal(signal.SIGINT, lambda s, f: (
     print(f"Signal {s} at {f.f_code.co_name}"), sys.exit(1)
 ))
 print("Custom exception hooks active")`
-    }
+    },
+
+    "print() Function & f-strings Formatting": {
+      exp: "Python's <code>print()</code> is the simplest debugging tool. Modern f-strings support <code>f\"{var=}\"</code> syntax for inline variable printing, format specifiers like <code>:.2f</code> for precision, and custom <code>__str__</code>/<code>__repr__</code> for object representation. Use <code>pprint</code> for pretty-printing complex data structures and <code>textwrap.dedent</code> for clean indentation.",
+      code: `# Print debugging with f-strings
+name = "Alice"
+age = 30
+price = 49.99
+
+# Basic f-string debugging
+print(f"name={name}, age={age}")
+
+# Python 3.8+ f-string = syntax (prints expression + value)
+print(f"{name=}, {age=}")
+
+# Format specifiers
+print(f"{price=:.2f}")        # 49.99
+print(f"{price=:>10.2f}")     # Right-aligned in 10 chars: "     49.99"
+print(f"{price=:010.2f}")     # Zero-padded: "000049.99"
+
+# Custom __str__ and __repr__ for debugging
+class User:
+    def __init__(self, id, name, email):
+        self.id = id
+        self.name = name
+        self.email = email
+
+    def __repr__(self):
+        return f"User(id={self.id}, name='{self.name}', email='{self.email}')"
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"
+
+user = User(1, "Alice", "alice@example.com")
+print(repr(user))  # Calls __repr__
+print(user)        # Calls __str__
+
+# Pretty-print complex structures
+import pprint
+data = {
+    "users": [
+        {"name": "Alice", "scores": [85, 92, 78]},
+        {"name": "Bob", "scores": [73, 88, 91]},
+    ],
+    "metadata": {"version": 2, "last_updated": "2024-01-15"}
+}
+pprint.pprint(data, indent=2, width=80)
+
+# Conditional debugging with __debug__
+DEBUG = True
+if DEBUG:
+    print(f"{len(data['users'])=}")
+
+# Using inspect for debug output
+import inspect
+frame = inspect.currentframe()
+print(f"{frame.f_lineno=}, {frame.f_code.co_name=}")
+
+# Print with file and flush for real-time output
+print("Debug: processing item", file=__import__('sys').stderr, flush=True)
+
+print("\\nPrint debugging best practices:")
+print("1. Use f\"{var=}\" for quick variable inspection")
+print("2. Define __repr__ on custom classes")
+print("3. Use pprint for nested structures")
+print("4. Print to stderr to separate from stdout output")
+print("5. Use logging module for production debugging")`
+    },
+
+    "Built-in Interactive Debugger (pdb / breakpoint)": {
+      exp: "Python's built-in <code>pdb</code> module provides a full interactive debugger. The <code>breakpoint()</code> function (Python 3.7+) drops into the debugger at that line. IPython's <code>ipdb</code> offers tab completion, syntax highlighting, and better UX. Key commands: <code>l</code> (list source), <code>n</code> (next), <code>s</code> (step into), <code>c</code> (continue), <code>p</code> (print expression), <code>pp</code> (pretty-print), <code>w</code> (where/show stack), <code>u</code>/<code>d</code> (up/down stack), <code>h</code> (help), <code>q</code> (quit). Set environment variable <code>PYTHONBREAKPOINT=0</code> to disable all breakpoints.",
+      code: `# Built-in Interactive Debugger (pdb / breakpoint)
+
+def calculate_discount(price, category, is_member):
+    # breakpoint() drops into pdb here
+    base_discount = 0.1 if category == "electronics" else 0.05
+    member_discount = 0.15 if is_member else 0.0
+    # pdb commands when paused here:
+    # (Pdb) l        - List source code around current line
+    # (Pdb) p price  - Print variable value
+    # (Pdb) pp vars()- Pretty-print all locals
+    # (Pdb) w        - Show call stack
+    # (Pdb) n        - Execute next line
+    # (Pdb) s        - Step into function call
+    # (Pdb) c        - Continue execution
+    # (Pdb) u        - Move up call stack frame
+    total_discount = base_discount + member_discount
+    final_price = price * (1 - total_discount)
+    return round(final_price, 2)
+
+breakpoint()  # Debugger stops here
+result = calculate_discount(100, "electronics", True)
+print(f"Result: {result}")
+
+# Post-mortem debugging after an exception
+def faulty_division(a, b):
+    return a / b
+
+try:
+    faulty_division(10, 0)
+except ZeroDivisionError:
+    import pdb
+    pdb.post_mortem()  # Inspect state at the crash point
+
+# Using ipdb (install: pip install ipdb)
+# import ipdb; ipdb.set_trace()
+# IPython debugger has tab completion and syntax highlighting
+
+# Conditional breakpoint pattern
+def process_items(items):
+    for i, item in enumerate(items):
+        if item.get("value", 0) > 1000:
+            # Only break for high-value items
+            breakpoint()
+        print(f"Processing item {i}: {item}")
+
+process_items([{"value": 100}, {"value": 2000}])
+
+# Debugging utilities
+print("\\npdb configuration:")
+print("PYTHONBREAKPOINT=0      - Disable all breakpoints")
+print("PYTHONBREAKPOINT=pdb.set_trace  - Use pdb explicitly")
+print("\\nIf breakpoint() doesn't work:")
+print("  Check: PYTHONBREAKPOINT environment variable")
+print("  Use: import pdb; pdb.set_trace() as fallback")
+print("  Use: import ipdb; ipdb.set_trace() (needs pip install ipdb)")`
+    },
 
   },
 
