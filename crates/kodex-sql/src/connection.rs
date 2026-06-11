@@ -5,6 +5,8 @@ use rusqlite::Connection;
 use tokio::sync::Mutex;
 use tracing::info;
 
+use kodex_core::types::DatabaseStatus;
+
 /// Manages three SQLite databases:
 /// 1. In-memory curriculum DB (seeded from seed.sql)
 /// 2. File-based auth.db (users)
@@ -23,6 +25,16 @@ pub struct DbInitStatus {
     pub sqlite: kodex_core::types::DbInitStatus,
     pub pg: kodex_core::types::DbInitStatus,
     pub mysql: kodex_core::types::DbInitStatus,
+}
+
+impl From<DbInitStatus> for DatabaseStatus {
+    fn from(s: DbInitStatus) -> Self {
+        DatabaseStatus {
+            sqlite: s.sqlite,
+            pg: s.pg,
+            mysql: s.mysql,
+        }
+    }
 }
 
 impl DbManager {

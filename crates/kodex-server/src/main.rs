@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 use axum::{
     Router,
@@ -13,15 +14,24 @@ use tracing::info;
 use kodex_core::config::AppConfig;
 use kodex_core::error::AppError;
 use kodex_core::types::{HealthResponse, DatabaseStatus};
+
 use kodex_sql::connection::DbManager;
 
 mod middleware_auth;
 use middleware_auth::{auth_middleware, init_jwt_secret};
 
+mod rate_limiter;
+use rate_limiter::{RateLimiter, rate_limit_middleware};
+
+mod ollama;
+use ollama::{detect_ollama, check_ollama_status};
+
 #[derive(Clone)]
 pub struct AppState {
     pub config: AppConfig,
     pub db: &'static DbManager,
+    pub rate_limiter: Arc<RateLimiter>,
+    pub ollama_endpoint: Option<String>,
 }
 
 #[tokio::main]
@@ -29,18 +39,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     let config = AppConfig::from_env();
-    let data_dir = &config.data_dir;
+    let data_dir = config.data_dir.clone();
 
-    let db = Box::leak(Box::new(DbManager::new(data_dir)?));
+    let db = Box::leak(Box::new(DbManager::new(&data_dir)?));
 
     info!("Server starting on {}:{}", config.host, config.port);
 
-    // Initialize global JWT secret before creating state (config is moved)
+    // Initialize global JWT secret
     init_jwt_secret(config.jwt_secret.clone());
+
+    // Auto-detect Ollama
+    let ollama_endpoint = detect_ollama(&config.local.endpoint).await;
+
+    let rate_limiter = Arc::new(RateLimiter::new());
 
     let state = AppState {
         config,
         db,
+        rate_limiter: rate_limiter.clone(),
+        ollama_endpoint,
     };
 
     let cors = CorsLayer::new()
@@ -53,6 +70,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/api/health", get(health_check))
+        .route("/api/ollama/status", get(ollama_status))
+        .layer(middleware::from_fn(rate_limit_middleware))
         .layer(middleware::from_fn(auth_middleware))
         .layer(middleware::from_fn(request_logger))
         .layer(TraceLayer::new_for_http())
@@ -62,12 +81,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr: SocketAddr = format!("{}:{}", host, port).parse()?;
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
+    info!("Listening on {}", addr);
+
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
 
     Ok(())
 }
+
+// ── Middleware ──
 
 async fn request_logger(
     req: axum::extract::Request,
@@ -83,34 +106,42 @@ async fn request_logger(
     Ok(response)
 }
 
+// ── Handlers ──
+
 async fn health_check(
     axum::extract::State(state): axum::extract::State<AppState>,
 ) -> Result<Json<HealthResponse>, AppError> {
     let db_status = state.db.get_status();
+
+    let ollama_status = match &state.ollama_endpoint {
+        Some(ep) => Some(check_ollama_status(ep).await),
+        None => None,
+    };
+
     Ok(Json(HealthResponse {
         status: "ok".into(),
         version: env!("CARGO_PKG_VERSION").into(),
-        db: DatabaseStatus {
-            sqlite: kodex_core::types::DbInitStatus {
-                available: db_status.sqlite.available,
-                reason: db_status.sqlite.reason,
-                error: db_status.sqlite.error,
-            },
-            pg: kodex_core::types::DbInitStatus {
-                available: db_status.pg.available,
-                reason: db_status.pg.reason,
-                error: db_status.pg.error,
-            },
-            mysql: kodex_core::types::DbInitStatus {
-                available: db_status.mysql.available,
-                reason: db_status.mysql.reason,
-                error: db_status.mysql.error,
-            },
-        },
-        ollama: None,
+        db: DatabaseStatus::from(db_status),
+        ollama: ollama_status,
         config_ok: true,
     }))
 }
+
+async fn ollama_status(
+    axum::extract::State(state): axum::extract::State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let status = match &state.ollama_endpoint {
+        Some(ep) => check_ollama_status(ep).await,
+        None => "not_configured".to_string(),
+    };
+
+    Ok(Json(serde_json::json!({
+        "status": status,
+        "endpoint": state.ollama_endpoint,
+    })))
+}
+
+// ── Shutdown ──
 
 async fn shutdown_signal() {
     let ctrl_c = async {
