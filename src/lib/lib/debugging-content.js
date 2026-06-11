@@ -1189,6 +1189,178 @@ print("  Use: import pdb; pdb.set_trace() as fallback")
 print("  Use: import ipdb; ipdb.set_trace() (needs pip install ipdb)")`
     },
 
+    "Exception Handling & Hooking": {
+      exp: "Python's exception handling uses <code>try/except/else/finally</code> blocks. The <code>sys.excepthook</code> intercepts uncaught exceptions globally, <code>sys.unraisablehook</code> handles unraisable exceptions (like <code>__del__</code> failures), and <code>threading.excepthook</code> catches thread exceptions. Custom hooks enable structured logging, notification, and graceful degradation. The <code>warnings</code> module intercepts non-fatal warnings as a debugging aid.",
+      code: `# Exception Handling & Hooking
+import sys
+import traceback
+import threading
+
+# 1. Basic try/except/else/finally
+def safe_divide(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError as e:
+        print(f"Caught: {e}")
+        return float('inf')
+    except TypeError as e:
+        print(f"Type error: {e}")
+        return None
+    else:
+        print(f"Division succeeded: {result}")
+        return result
+    finally:
+        print("Cleanup: always runs")
+
+print(safe_divide(10, 2))
+print(safe_divide(10, 0))
+
+# 2. Global exception hook
+def global_exception_handler(exc_type, exc_value, exc_traceback):
+    print("=== GLOBAL EXCEPTION ===")
+    print(f"Type: {exc_type.__name__}")
+    print(f"Value: {exc_value}")
+    print("Traceback:")
+    traceback.print_tb(exc_traceback)
+    # Log to file
+    with open("errors.log", "a") as f:
+        f.write(f"{exc_type.__name__}: {exc_value}\\n")
+        traceback.print_tb(exc_traceback, file=f)
+
+sys.excepthook = global_exception_handler
+
+# Test: raise uncaught exception
+# raise RuntimeError("Test uncaught exception")
+
+# 3. Unraisable hook (for __del__ failures)
+def unraisable_hook(unraisable):
+    print(f"Unraisable error: {unraisable.exc_type.__name__}: {unraisable.exc_value}")
+    print(f"  Object: {unraisable.object}")
+
+sys.unraisablehook = unraisable_hook
+
+class Broken:
+    def __del__(self):
+        raise RuntimeError("Del method failed")
+
+# b = Broken()
+# del b  # Triggers unraisablehook
+
+# 4. Thread exception hook
+def thread_exception_handler(args):
+    print(f"Thread exception: {args.exc_type.__name__}: {args.exc_value}")
+    print(f"  Thread: {args.thread.name}")
+
+threading.excepthook = thread_exception_handler
+
+# 5. Warning interception
+import warnings
+warnings.filterwarnings("error")  # Turn warnings into errors
+try:
+    warnings.warn("This becomes an error", DeprecationWarning)
+except DeprecationWarning as e:
+    print(f"Warning caught as error: {e}")
+
+print("\\nException hook debugging:")
+print("1. sys.excepthook - global uncaught exceptions")
+print("2. sys.unraisablehook - __del__ and finalizer errors")
+print("3. threading.excepthook - exceptions in threads")
+print("4. warnings.filterwarnings - intercept warnings")
+print("5. Log everything to file for production debugging")`
+    },
+
+    "Logging Module Configuration": {
+      exp: "Python's <code>logging</code> module provides hierarchical loggers, multiple handlers (Stream, File, Rotating, Syslog, SMTP), formatters, and configurable levels (DEBUG, INFO, WARNING, ERROR, CRITICAL). Debug by inspecting logger hierarchy, checking propagation, verifying handler attachments, and using <code>logging_tree</code> for visualization. Configure via <code>basicConfig()</code>, dictConfig, or fileConfig for production setups.",
+      code: `# Logging Module Configuration
+import logging
+import logging.handlers
+import sys
+
+# 1. Basic configuration
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    stream=sys.stdout,
+)
+
+# 2. Logger hierarchy - child loggers propagate to parents
+parent_logger = logging.getLogger("app")
+child_logger = logging.getLogger("app.service")
+deep_logger = logging.getLogger("app.service.db")
+
+parent_logger.setLevel(logging.WARNING)
+child_logger.setLevel(logging.DEBUG)
+deep_logger.setLevel(logging.INFO)
+
+parent_logger.debug("Parent debug - won't show")       # Filtered by level
+child_logger.debug("Child debug - shows")               # Shows via child
+deep_logger.info("Deep info - shows")                   # Shows via deep
+
+# 3. Multiple handlers with different levels/formats
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(logging.Formatter(
+    "%(levelname)s: %(message)s"
+))
+
+file_handler = logging.handlers.RotatingFileHandler(
+    "app.log", maxBytes=1024*1024, backupCount=3
+)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+))
+
+error_handler = logging.handlers.SMTPHandler(
+    mailhost=("smtp.example.com", 587),
+    fromaddr="app@example.com",
+    toaddrs=["dev@example.com"],
+    subject="App Error Alert",
+    credentials=("user", "pass"),
+    secure=(),
+)
+error_handler.setLevel(logging.ERROR)
+
+root_logger = logging.getLogger()
+root_logger.addHandler(console_handler)
+root_logger.addHandler(file_handler)
+root_logger.addHandler(error_handler)
+
+# 4. Logger isolation debugging
+print("\\n=== Logger Debug Info ===")
+print(f"Root handlers: {logging.getLogger().handlers}")
+print(f"Child effective level: {child_logger.getEffectiveLevel()}")
+print(f"Child propagate: {child_logger.propagate}")
+
+# Check if a handler will process a record
+record = child_logger.makeRecord(
+    child_logger.name, logging.WARNING,
+    __file__, 42, "Test message", (), None
+)
+for handler in child_logger.handlers:
+    print(f"Handler {handler}: level={handler.level}")
+    print(f"  Would handle: {handler.filter(record)}")
+
+# 5. Third-party logger configuration
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
+
+# Diagnostic tools:
+# pip install logging_tree
+# import logging_tree; print(logging_tree.format.build_description())
+
+# Debug: temporarily increase logging
+logging.getLogger().setLevel(logging.DEBUG)
+logging.debug("Debug mode active")
+
+print("\\nLogging debugging commands:")
+print("  logging_tree - Print logger hierarchy")
+print("  getEffectiveLevel() - Resolved level")
+print("  logger.handlers - List attached handlers")
+print("  logger.propagate - Parent forwarding flag")`
+    },
+
   },
 
   "TypeScript Debugging": {
