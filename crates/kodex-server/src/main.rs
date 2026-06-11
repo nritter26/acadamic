@@ -12,7 +12,7 @@ use tracing::info;
 
 use kodex_core::config::AppConfig;
 use kodex_core::error::AppError;
-use kodex_core::types::HealthResponse;
+use kodex_core::types::{HealthResponse, DatabaseStatus};
 use kodex_sql::connection::DbManager;
 
 mod middleware_auth;
@@ -28,10 +28,10 @@ pub struct AppState {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let config = AppConfig::from_env()?;
-    let data_dir = config.data_dir.clone();
+    let config = AppConfig::from_env();
+    let data_dir = &config.data_dir;
 
-    let db = Box::leak(Box::new(DbManager::new(&data_dir)?));
+    let db = Box::leak(Box::new(DbManager::new(data_dir)?));
 
     info!("Server starting on {}:{}", config.host, config.port);
 
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(cors)
         .with_state(state);
 
-    let addr: SocketAddr = format!("{}:{}", &state.config.host, state.config.port).parse()?;
+    let addr: SocketAddr = format!("{}:{}", state.config.host, state.config.port).parse()?;
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
     axum::serve(listener, app)
@@ -68,7 +68,24 @@ async fn health_check(
     Ok(Json(HealthResponse {
         status: "ok".into(),
         version: env!("CARGO_PKG_VERSION").into(),
-        db: db_status,
+        db: DatabaseStatus {
+            sqlite: kodex_core::types::DbInitStatus {
+                available: db_status.sqlite.available,
+                reason: db_status.sqlite.reason,
+                error: db_status.sqlite.error,
+            },
+            pg: kodex_core::types::DbInitStatus {
+                available: db_status.pg.available,
+                reason: db_status.pg.reason,
+                error: db_status.pg.error,
+            },
+            mysql: kodex_core::types::DbInitStatus {
+                available: db_status.mysql.available,
+                reason: db_status.mysql.reason,
+                error: db_status.mysql.error,
+            },
+        },
+        ollama: None,
         config_ok: true,
     }))
 }
