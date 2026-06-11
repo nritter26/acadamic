@@ -43,13 +43,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_methods(Any)
         .allow_headers(Any);
 
+    let host = state.config.host.clone();
+    let port = state.config.port;
+
     let app = Router::new()
         .route("/api/health", get(health_check))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state);
 
-    let addr: SocketAddr = format!("{}:{}", state.config.host, state.config.port).parse()?;
+    let addr: SocketAddr = format!("{}:{}", host, port).parse()?;
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
     axum::serve(listener, app)
