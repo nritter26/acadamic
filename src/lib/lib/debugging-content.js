@@ -1493,6 +1493,84 @@ console.log("  TIMING=1 eslint       - Per-rule timing");
 console.log("  eslint --cache         - Faster re-runs");`
     },
 
+    "TS-Aware Test Runner Debugging": {
+      exp: "Modern test runners include TypeScript support for debugging. Vitest runs tests with Vite's transform pipeline and supports <code>--inspect</code> for breakpoints. Jest with <code>ts-jest</code> uses source maps for .ts debugging. Playwright and Cypress enable debugging TypeScript end-to-end tests by configuring <code>tsconfig</code> paths and using source maps. Debug strategies: set breakpoints directly in <code>.test.ts</code> files, use the <code>debugger</code> statement, attach a Node.js inspector, and use watch mode with <code>--repl</code> for interactive debugging.",
+      code: `// TS-Aware Test Runner Debugging
+
+// Vitest - fastest TS test runner
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: "node",
+    include: ["src/**/*.test.ts"],
+    // TypeScript is handled automatically by Vite
+  },
+});
+
+// Debug Vitest with inspector:
+// node --inspect-brk node_modules/.bin/vitest --run
+// Or: npx vitest --inspect-brk --pool forks --poolOptions.forks.singleFork
+
+// Jest with ts-jest
+// jest.config.js
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  transform: {
+    "^.+\\\\.ts$": ["ts-jest", { tsconfig: "tsconfig.test.json" }],
+  },
+  // Debug: npx jest --inspect-brk --no-cache
+};
+
+// Playwright TypeScript debugging
+// playwright.config.ts
+import { defineConfig } from "@playwright/test";
+export default defineConfig({
+  testDir: "./e2e",
+  fullyParallel: true,
+  use: { trace: "on-first-retry" },
+});
+// Debug: npx playwright test --debug
+// Opens Playwright Inspector with pause on each test step
+
+// Cypress with TypeScript
+// cypress.config.ts
+import { defineConfig } from "cypress";
+export default defineConfig({
+  e2e: { supportFile: "cypress/support/e2e.ts" },
+});
+// Debug: npx cypress open --e2e --browser chrome
+// Use cy.pause() for step-by-step debugging
+
+// Example test with breakpoint debugging
+import { describe, it, expect } from "vitest";
+
+function calculateDiscount(price: number, code?: string): number {
+  let discount = 0;
+  if (code === "SAVE10") discount = 0.1;
+  if (code === "SAVE20") discount = 0.2;
+  // SET BREAKPOINT HERE - inspect price and discount
+  return price * (1 - discount);
+}
+
+describe("calculateDiscount", () => {
+  it("applies correct discount", () => {
+    expect(calculateDiscount(100, "SAVE10")).toBe(90);
+    expect(calculateDiscount(100, "SAVE20")).toBe(80);
+    expect(calculateDiscount(100)).toBe(100);
+  });
+});
+
+// Debugging commands cheat-sheet:
+console.log("Vitest:    npx vitest --inspect-brk");
+console.log("Jest:      npx jest --inspect-brk --no-cache");
+console.log("Playwright: npx playwright test --debug");
+console.log("Cypress:   npx cypress open --e2e");
+console.log("All support breakpoints in .ts and .test.ts files");`
+    },
+
   },
 
   "Go Debugging": {
