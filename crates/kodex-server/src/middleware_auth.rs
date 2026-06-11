@@ -4,8 +4,21 @@ use axum::{
     response::{Response, IntoResponse},
     Json,
 };
+use std::sync::OnceLock;
+
 use kodex_core::auth::verify_token;
 use kodex_core::error::ApiError;
+
+static JWT_SECRET: OnceLock<String> = OnceLock::new();
+
+/// Initialize the JWT secret globally (called at server startup).
+pub fn init_jwt_secret(secret: String) {
+    let _ = JWT_SECRET.set(secret);
+}
+
+fn get_jwt_secret() -> &'static str {
+    JWT_SECRET.get().map(|s| s.as_str()).unwrap_or("kodex-dev-secret-change-in-production")
+}
 
 /// JWT authentication middleware.
 ///
@@ -46,12 +59,7 @@ pub async fn auth_middleware(
         }
     };
 
-    // Secret is stored in app state — need to extract from extensions
-    // or use a global. For now, use the default secret.
-    // In production, the secret should be injected via app state.
-    let secret = "kodex-dev-secret-change-in-production";
-
-    match verify_token(&token, secret) {
+    match verify_token(&token, get_jwt_secret()) {
         Ok(payload) => {
             // Inject AuthPayload into request extensions for downstream handlers
             req.extensions_mut().insert(payload);

@@ -16,7 +16,7 @@ use kodex_core::types::{HealthResponse, DatabaseStatus};
 use kodex_sql::connection::DbManager;
 
 mod middleware_auth;
-use middleware_auth::auth_middleware;
+use middleware_auth::{auth_middleware, init_jwt_secret};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -34,6 +34,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = Box::leak(Box::new(DbManager::new(data_dir)?));
 
     info!("Server starting on {}:{}", config.host, config.port);
+
+    // Initialize global JWT secret before creating state (config is moved)
+    init_jwt_secret(config.jwt_secret.clone());
 
     let state = AppState {
         config,
