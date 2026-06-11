@@ -1571,6 +1571,83 @@ console.log("Cypress:   npx cypress open --e2e");
 console.log("All support breakpoints in .ts and .test.ts files");`
     },
 
+    "Decorators & Metadata Reflection Debugging": {
+      exp: "TypeScript decorators (enabled via <code>experimentalDecorators</code>) wrap classes, methods, properties, and parameters. <code>emitDecoratorMetadata</code> generates type metadata via the <code>reflect-metadata</code> shim. Debugging decorators involves understanding execution order: parameter decorators first, then method/property/accessor, then class. Metadata reflection stores design-time types accessible via <code>Reflect.getMetadata</code>. Common issues: incorrect decorator application order, missing <code>reflect-metadata</code> import, and type resolution failures in emitted metadata. Use source maps to debug transpiled decorator code.",
+      code: `// Decorators & Metadata Reflection Debugging
+// tsconfig.json - enable decorators
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true
+  }
+}
+
+// reflect-metadata is required for emitDecoratorMetadata
+import "reflect-metadata";
+
+// Debugging: decorator execution order
+function ClassDecorator(): ClassDecorator {
+  console.log("1. Class decorator factory");
+  return (target) => {
+    console.log("2. Class decorator applied");
+  };
+}
+
+function MethodDecorator(): MethodDecorator {
+  console.log("3. Method decorator factory");
+  return (target, key, descriptor) => {
+    console.log("4. Method decorator applied to:", key);
+    const original = descriptor.value!;
+    descriptor.value = function (...args: any[]) {
+      console.log("5. Method intercepted:", key);
+      return original.apply(this, args);
+    };
+  };
+}
+
+function ParamDecorator(target: Object, key: string | symbol, index: number) {
+  console.log("6. Parameter decorator:", key, "index:", index);
+}
+
+@ClassDecorator()
+class Service {
+  @MethodDecorator()
+  process(@ParamDecorator data: string): string {
+    console.log("7. Original method executing");
+    return \`Processed: \${data}\`;
+  }
+}
+
+// Metadata reflection
+const metadataKeys = Reflect.getMetadataKeys(Service.prototype, "process");
+console.log("Metadata keys:", metadataKeys);
+
+// Design-time types from emitDecoratorMetadata
+const designType = Reflect.getMetadata("design:type", Service.prototype, "process");
+const paramTypes = Reflect.getMetadata("design:paramtypes", Service.prototype, "process");
+const returnType = Reflect.getMetadata("design:returntype", Service.prototype, "process");
+console.log("Design type:", designType?.name);
+console.log("Param types:", paramTypes?.map((t: any) => t.name));
+console.log("Return type:", returnType?.name);
+
+// Custom metadata
+Reflect.defineMetadata("route", "/api/data", Service.prototype, "process");
+const route = Reflect.getMetadata("route", Service.prototype, "process");
+console.log("Custom metadata:", route);
+
+const service = new Service();
+service.process("test");
+
+// Debugging decorators:
+console.log("\\nDecorator debugging tips:");
+console.log("1. Check reflect-metadata is imported first");
+console.log("2. Debug with source maps to see decorated code");
+console.log("3. Execution order: param -> method/property -> class");
+console.log("4. SET BREAKPOINT inside decorator factory function");
+console.log("5. Use Reflect.getMetadataKeys to inspect all metadata");`
+    },
+
   },
 
   "Go Debugging": {
