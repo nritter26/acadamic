@@ -1,0 +1,23 @@
+{
+  "id": "c-merge-sort",
+  "title": "C: Merge Sort",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "merge sort", "divide and conquer", "recursion"],
+  "description": "Implement the merge sort algorithm using divide-and-conquer with a merge function.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Merge Sort Implementation",
+      "description": "Implement `void merge_sort(int arr[], int l, int r)` and `void merge(int arr[], int l, int m, int r)`. Test with `{12, 11, 13, 5, 6, 7}`.",
+      "hints": ["Divide: find middle index.", "Conquer: recursively sort left and right halves.", "Combine: merge the two sorted halves."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid merge(int arr[], int l, int m, int r) {\n    int n1 = m - l + 1, n2 = r - m;\n    int *L = malloc(n1 * sizeof(int));\n    int *R = malloc(n2 * sizeof(int));\n    for (int i = 0; i < n1; i++) L[i] = arr[l + i];\n    for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];\n    int i = 0, j = 0, k = l;\n    while (i < n1 && j < n2) arr[k++] = (L[i] <= R[j]) ? L[i++] : R[j++];\n    while (i < n1) arr[k++] = L[i++];\n    while (j < n2) arr[k++] = R[j++];\n    free(L); free(R);\n}\n\nvoid merge_sort(int arr[], int l, int r) {\n    if (l < r) {\n        int m = l + (r - l) / 2;\n        merge_sort(arr, l, m);\n        merge_sort(arr, m + 1, r);\n        merge(arr, l, m, r);\n    }\n}\n\nint main() {\n    int arr[] = {12, 11, 13, 5, 6, 7};\n    int n = sizeof(arr)/sizeof(arr[0]);\n    merge_sort(arr, 0, n-1);\n    for (int i = 0; i < n; i++) printf(\"%d \", arr[i]);\n    printf(\"\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('5 6 7 11 12 13')",
+        "successMessage": "Merge sort works!",
+        "failureMessage": "Sort and print the array"
+      }
+    }
+  ]
+}

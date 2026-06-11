@@ -1,0 +1,71 @@
+{
+  "id": "rs-structs",
+  "title": "Rust: Structs and Records",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "structs", "methods", "impl", "associated functions"],
+  "description": "Define and use structs with methods in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define a Struct",
+      "description": "Define a struct `Book` with fields: `title: String`, `author: String`, `pages: u32`. Create an instance and print its fields.",
+      "hints": ["`struct Book { title: String, author: String, pages: u32 }`", "Create with `let book = Book { title: \"...\", ... };`", "Access with `book.title`, `book.author`, `book.pages`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust') && output.includes('pages')",
+        "successMessage": "Struct defined!",
+        "failureMessage": "Create and print a Book struct."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Struct Methods",
+      "description": "Add an `impl` block with methods: `summary(&self) -> String` that returns `\"title by author\"`, and `is_long(&self) -> bool` that returns true if pages > 300.",
+      "hints": ["`impl Book { fn summary(&self) -> String { format!(\"{} by {}\", ...) } }`", "Methods take `&self` as first parameter.", "Call: `book.summary()` not `Book::summary(&book)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('by') && (output.includes('true') || output.includes('false'))",
+        "successMessage": "Methods work!",
+        "failureMessage": "Call summary() and is_long() on the book."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Associated Functions",
+      "description": "Add an associated function `new(title: &str, author: &str, pages: u32) -> Book` that creates a new Book instance. Also add a `default()` function.",
+      "hints": ["Associated functions don't take `self`.", "Call with `Book::new(\"title\", \"author\", 100)`.", "`default()` can return a hardcoded default book."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust') && output.includes('default')",
+        "successMessage": "Associated functions work!",
+        "failureMessage": "Create books using Book::new and Book::default."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Tuple Structs",
+      "description": "Define a tuple struct `RGB(i32, i32, i32)` and a function `mix(a: RGB, b: RGB) -> RGB` that averages each channel. Test with RGB(255, 0, 0) and RGB(0, 0, 255).",
+      "hints": ["`struct RGB(i32, i32, i32);`", "Access fields with `.0`, `.1`, `.2`.", "RGB(255,0,0) + RGB(0,0,255) → RGB(127, 0, 127)"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('127') || output.includes('128')",
+        "successMessage": "Tuple structs work!",
+        "failureMessage": "Mix red and blue to get purple (127, 0, 127)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Struct Update Syntax",
+      "description": "Create a Book `b1`, then create `b2` using struct update syntax to copy most fields from `b1` but change `pages`. Print both.",
+      "hints": ["`let b2 = Book { pages: 500, ..b1 };`", "The `..b1` copies remaining fields from b1.", "Note: this moves String fields from b1 (b1 may no longer be valid)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('500')",
+        "successMessage": "Struct update syntax works!",
+        "failureMessage": "Create b2 with 500 pages using ..b1 update syntax."
+      }
+    }
+  ]
+}

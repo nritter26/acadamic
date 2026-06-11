@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Remix Introduction": {
+      "exp": "<p>Introduction to Remix and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Routing": [
       "Remix uses a file-based routing system in the app/routes directory. Each file represents a route segment, with dot and folder conventions creating nested URL structures automatically.",
       "// app/routes/posts.$id.tsx\n// Creates /posts/:id"
@@ -12,6 +17,85 @@
       "Layout routes use the special app/root.tsx file and route-specific layout.tsx files. Layouts wrap child routes and persist across navigation, preventing full page re-renders.",
       "// app/routes/posts.layout.tsx\nexport default function Layout({ children }) {\n  return <div className='posts-layout'>{children}</div>;\n}"
     ]
+  },
+  "Core Concepts": {
+    "Remix Core Features": {
+      "exp": "<p>Essential Remix concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Remix Components": {
+      "exp": "<p>Building user interfaces with Remix.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Remix Routing": {
+      "exp": "<p>Navigation and routing in Remix.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Remix State": {
+      "exp": "<p>Managing application state in Remix.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Remix Data": {
+      "exp": "<p>Working with data and APIs in Remix.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Remix Testing": {
+      "exp": "<p>Testing strategies for Remix.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Remix Deployment": {
+      "exp": "<p>Deploying Remix applications.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Fly.io": [
+      "Fly.io is the recommended deployment target for Remix, offering global edge regions and effortless scaling. Remix apps deploy as Docker containers running close to users worldwide.",
+      "// Dockerfile and fly.toml\n# fly.toml\n[build]\n  builder = \"heroku/buildpacks:20\""
+    ],
+    "Vercel": [
+      "Vercel supports Remix via the @remix-run/vercel adapter. It automatically optimizes serverless functions and delivers assets through Vercel's edge network.",
+      "npm install @remix-run/vercel\n// remix.config.js\nmodule.exports = { server: '@remix-run/vercel' };"
+    ],
+    "Netlify": [
+      "Netlify deploys Remix apps using the Netlify adapter, providing serverless functions for the Remix server and global CDN for static assets via Netlify Edge.",
+      "npm install @remix-run/netlify\n// remix.config.js\nmodule.exports = { server: '@remix-run/netlify' };"
+    ],
+    "Cloudflare": [
+      "The Cloudflare Workers adapter runs Remix on Cloudflare's edge network. It uses Workers KV for sessions and Durable Objects for real-time state.",
+      "npm install @remix-run/cloudflare-pages\n// remix.config.js\nmodule.exports = { server: '@remix-run/cloudflare-pages' };"
+    ]
+  },
+  "Best Practices": {
+    "Remix Best Practices": {
+      "exp": "<p>Best practices for Remix development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Remix Advanced": {
+      "exp": "<p>Advanced Remix topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Data Loading": {
     "loader": [
@@ -79,24 +163,6 @@
       "/* app/tailwind.css */\n@tailwind base;\n@tailwind components;\n@tailwind utilities;"
     ]
   },
-  "Deployment": {
-    "Fly.io": [
-      "Fly.io is the recommended deployment target for Remix, offering global edge regions and effortless scaling. Remix apps deploy as Docker containers running close to users worldwide.",
-      "// Dockerfile and fly.toml\n# fly.toml\n[build]\n  builder = \"heroku/buildpacks:20\""
-    ],
-    "Vercel": [
-      "Vercel supports Remix via the @remix-run/vercel adapter. It automatically optimizes serverless functions and delivers assets through Vercel's edge network.",
-      "npm install @remix-run/vercel\n// remix.config.js\nmodule.exports = { server: '@remix-run/vercel' };"
-    ],
-    "Netlify": [
-      "Netlify deploys Remix apps using the Netlify adapter, providing serverless functions for the Remix server and global CDN for static assets via Netlify Edge.",
-      "npm install @remix-run/netlify\n// remix.config.js\nmodule.exports = { server: '@remix-run/netlify' };"
-    ],
-    "Cloudflare": [
-      "The Cloudflare Workers adapter runs Remix on Cloudflare's edge network. It uses Workers KV for sessions and Durable Objects for real-time state.",
-      "npm install @remix-run/cloudflare-pages\n// remix.config.js\nmodule.exports = { server: '@remix-run/cloudflare-pages' };"
-    ]
-  },
   "Advanced": {
     "Resource Routes": [
       "Resource Routes return non-HTML content such as JSON, images, PDFs, or sitemaps. They handle requests without rendering a component, functioning as pure API endpoints within the routes system.",
@@ -151,6 +217,16 @@
     "serialize Type": [
       "Remix's SerializeFrom type unwraps Promise and Response types from loaders, providing a cleaner type for client-side hooks when the loader uses async patterns.",
       "import type { SerializeFrom } from '@remix-run/node';\nimport type { loader } from './route';\n\ntype LoaderData = SerializeFrom<typeof loader>;\n// Removes Promise/Response wrappers for client consumption"
+    ]
+  },
+  "Remix Advanced Patterns": {
+    "Nested Routes & Layouts": [
+      "Remix provides nested routing with shared layouts. Files in <code>app/routes/</code> follow directory-based routing. <code>app/root.tsx</code> is the root layout. <code>_layout.tsx</code> files create shared layouts. Outlets render child routes. Nested routes load data in parallel via <code>loader</code> functions. <code>useLoaderData</code>, <code>useRouteLoaderData</code>, and <code>useMatches</code> access data from any route. <code>shouldRevalidate</code> optimizes data reloads. Error boundaries per route (<code>ErrorBoundary</code>). Pending UI with <code>useNavigation</code>. Optimistic UI with <code>useFetcher</code> form submissions.",
+      "// Remix nested routes structure\n// app/routes/products._layout.tsx (shared layout for /products)\nimport { Outlet, NavLink } from '@remix-run/react';\n\nexport default function ProductsLayout() {\n  return (\n    <div className=\"flex gap-8\">\n      <nav className=\"w-48 space-y-2\">\n        <NavLink to=\"/products\" end className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          All Products\n        </NavLink>\n        <NavLink to=\"/products/new\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          New Product\n        </NavLink>\n        <NavLink to=\"/products/categories\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          Categories\n        </NavLink>\n      </nav>\n      <main className=\"flex-1\">\n        <Outlet />\n      </main>\n    </div>\n  );\n}\n\n// app/routes/products.$productId.tsx\nimport { json, type LoaderFunctionArgs } from '@remix-run/node';\nimport { useLoaderData, useNavigate } from '@remix-run/react';\n\nexport async function loader({ params, context }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.productId },\n    include: { reviews: true }\n  });\n  \n  if (!product) {\n    throw new Response('Not Found', { status: 404 });\n  }\n  \n  return json({ product });\n}\n\nexport function ErrorBoundary() {\n  return <div className=\"error\">Failed to load product</div>;\n}\n\nexport default function ProductDetail() {\n  const { product } = useLoaderData<typeof loader>();\n  const navigate = useNavigate();\n  \n  return (\n    <div>\n      <button onClick={() => navigate(-1)}>Back</button>\n      <h1>{product.name}</h1>\n      <p>{product.description}</p>\n    </div>\n  );\n}"
+    ],
+    "Remix Resource Routes & Webhooks": [
+      "Remix resource routes return non-HTML responses: JSON APIs, files, redirects, and webhooks. Resource routes don't render components — they only export <code>loader</code> (GET) and <code>action</code> (POST/PUT/DELETE). <code>app/routes/api.products.$id.tsx</code> becomes <code>/api/products/:id</code>. Webhook handlers verify signatures and process events. File uploads with <code>unstable_parseMultipartFormData</code>. RSS feeds, sitemaps, and PDF generation. <code>response</code> helpers: <code>json</code>, <code>redirect</code>, <code>defer</code> (streaming). CORS headers for public API routes.",
+      "// Remix resource routes\n// app/routes/api.products.$id.tsx\nimport { json } from '@remix-run/node';\nimport type { LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/node';\n\nexport async function loader({ params, request }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.id }\n  });\n  \n  if (!product) {\n    return json({ error: 'Not found' }, { status: 404 });\n  }\n  \n  return json(product, {\n    headers: {\n      'Cache-Control': 'public, max-age=300'\n    }\n  });\n}\n\nexport async function action({ params, request }: ActionFunctionArgs) {\n  switch (request.method) {\n    case 'PUT': {\n      const body = await request.json();\n      const product = await db.product.update({\n        where: { id: params.id },\n        data: body\n      });\n      return json(product);\n    }\n    case 'DELETE': {\n      await db.product.delete({ where: { id: params.id } });\n      return json({ success: true }, { status: 200 });\n    }\n    default:\n      return json({ error: 'Method not allowed' }, { status: 405 });\n  }\n}\n\n// Webhook handler\n// app/routes/api.webhooks.stripe.tsx\nexport async function action({ request }: ActionFunctionArgs) {\n  const sig = request.headers.get('stripe-signature');\n  const body = await request.text();\n  \n  try {\n    const event = stripe.webhooks.constructEvent(body, sig!, process.env.STRIPE_WEBHOOK_SECRET);\n    \n    switch (event.type) {\n      case 'checkout.session.completed':\n        await handleCheckoutComplete(event.data.object);\n        break;\n      case 'customer.subscription.updated':\n        await handleSubscriptionUpdate(event.data.object);\n        break;\n    }\n    \n    return json({ received: true });\n  } catch (err) {\n    return json({ error: 'Invalid signature' }, { status: 400 });\n  }\n}"
     ]
   }
 }

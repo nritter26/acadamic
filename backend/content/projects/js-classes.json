@@ -1,0 +1,116 @@
+{
+  "id": "js-classes",
+  "title": "JavaScript: ES6 Classes",
+  "description": "Write a JavaScript program that uses ES6 class syntax with inheritance and static methods.",
+  "difficulty": "intermediate",
+  "languages": [
+    "js"
+  ],
+  "codeTemplate": {
+    "js": "class Vehicle {\n  constructor(type, speed) {\n    this.type = type;\n    this.speed = speed;\n  }\n  \n  move() {\n    return `${this.type} moves at ${this.speed} km/h`;\n  }\n  \n  static info() {\n    return 'Vehicles transport people and goods';\n  }\n}\n\nclass Car extends Vehicle {\n  constructor(brand, speed) {\n    super('Car', speed);\n    this.brand = brand;\n  }\n  \n  honk() {\n    return `${this.brand} goes Beep!`;\n  }\n}\n\nconst car = new Car('Tesla', 200);\nconsole.log(car.move());\nconsole.log(car.honk());\nconsole.log(Vehicle.info());\nconsole.log(`Car is Vehicle: ${car instanceof Vehicle}`);"
+  },
+  "verificationTest": "output.includes('Car moves at 200 km/h') && output.includes('Tesla goes Beep!') && output.includes('Vehicles transport people and goods') && output.includes('Car is Vehicle: true')",
+  "hints": [
+    "Use `class` keyword for ES6 class syntax",
+    "`constructor()` initializes new instances",
+    "`extends` sets up inheritance, `super()` calls parent constructor",
+    "Static methods are called on the class, not instances"
+  ],
+  "estimatedMinutes": 25,
+  "concepts": [
+    "general",
+    "js"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the JavaScript: ES6 Classes project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for JavaScript: ES6 Classes",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "js": "// Step 1: Set up the JavaScript: ES6 Classes project\n// Your code here\n\nconsole.log(\"Testing JavaScript: ES6 Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for JavaScript: ES6 Classes",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "js": "// Step 2: Implement the core logic for JavaScript: ES6 Classes\n// Your code here\n\nconsole.log(\"Testing JavaScript: ES6 Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "js": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing JavaScript: ES6 Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "js": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing JavaScript: ES6 Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "js": "// Step 5: Test with sample inputs\n// Your code here\n\nconsole.log(\"Testing JavaScript: ES6 Classes...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

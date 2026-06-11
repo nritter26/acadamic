@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Next Introduction": {
+      "exp": "<p>Introduction to Next and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Pages": [
       "The Pages Router is the original routing system in Next.js. Pages in the pages directory automatically become routes based on their file name, with index.js mapping to the root and nested folders creating nested paths.",
       "export default function Home() { return <h1>Hello World</h1>; }"
@@ -12,6 +17,81 @@
       "The App Router (app directory) is the modern routing system using React Server Components by default. Routes are defined by folders with page.js files, and layouts can be nested via layout.js.",
       "// app/layout.js\nexport default function RootLayout({ children }) {\n  return <html><body>{children}</body></html>;\n}"
     ]
+  },
+  "Core Concepts": {
+    "Next Core Features": {
+      "exp": "<p>Essential Next concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Next Components": {
+      "exp": "<p>Building user interfaces with Next.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Next Routing": {
+      "exp": "<p>Navigation and routing in Next.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Next State": {
+      "exp": "<p>Managing application state in Next.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Next Data": {
+      "exp": "<p>Working with data and APIs in Next.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Next Testing": {
+      "exp": "<p>Testing strategies for Next.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Next Deployment": {
+      "exp": "<p>Deploying Next applications.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Vercel": [
+      "Vercel is the official deployment platform for Next.js, offering zero-config deploys from Git, automatic HTTPS, edge functions, and preview deployments for every pull request.",
+      "// vercel.json\n{ \"framework\": \"nextjs\", \"buildCommand\": \"next build\", \"outputDirectory\": \".next\" }"
+    ],
+    "Docker": [
+      "Next.js apps can be containerized with Docker for deployment on any container orchestration platform. A multi-stage Dockerfile optimizes for build speed and image size.",
+      "FROM node:18-alpine AS base\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\nEXPOSE 3000\nCMD [\"npm\", \"start\"]"
+    ],
+    "Self-hosted": [
+      "Next.js supports self-hosting on any Node.js server using the standalone output mode. The standalone folder includes only production dependencies, minimizing deployment size.",
+      "// next.config.js\nmodule.exports = { output: 'standalone' };\n# Run: node .next/standalone/server.js"
+    ]
+  },
+  "Best Practices": {
+    "Next Best Practices": {
+      "exp": "<p>Best practices for Next development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Next Advanced": {
+      "exp": "<p>Advanced Next topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Data Fetching": {
     "getServerSideProps": [
@@ -101,20 +181,6 @@
       "// next.config.js\nconst withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: true });\nmodule.exports = withBundleAnalyzer({});"
     ]
   },
-  "Deployment": {
-    "Vercel": [
-      "Vercel is the official deployment platform for Next.js, offering zero-config deploys from Git, automatic HTTPS, edge functions, and preview deployments for every pull request.",
-      "// vercel.json\n{ \"framework\": \"nextjs\", \"buildCommand\": \"next build\", \"outputDirectory\": \".next\" }"
-    ],
-    "Docker": [
-      "Next.js apps can be containerized with Docker for deployment on any container orchestration platform. A multi-stage Dockerfile optimizes for build speed and image size.",
-      "FROM node:18-alpine AS base\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\nEXPOSE 3000\nCMD [\"npm\", \"start\"]"
-    ],
-    "Self-hosted": [
-      "Next.js supports self-hosting on any Node.js server using the standalone output mode. The standalone folder includes only production dependencies, minimizing deployment size.",
-      "// next.config.js\nmodule.exports = { output: 'standalone' };\n# Run: node .next/standalone/server.js"
-    ]
-  },
   "App Router Advanced": {
     "Route Groups": [
       "Route groups organize routes without affecting URL paths by wrapping folder names in parentheses. They are useful for separating marketing, admin, and auth sections with different layouts.",
@@ -155,6 +221,16 @@
     "Instrumentation": [
       "Instrumentation hooks allow running code on server startup. The register() function in instrumentation.ts is useful for OpenTelemetry tracing, metrics setup, and infrastructure initialization.",
       "// instrumentation.ts\nexport async function register() {\n  await initializeTracing();\n  await connectToDatabase();\n}"
+    ]
+  },
+  "Next.js Advanced Patterns": {
+    "Middleware, i18n & Redirects": [
+      "Next.js Middleware runs before every request, enabling redirects, rewrites, geolocation-based routing, and authentication checks. Middleware uses the Edge Runtime (fast, global). Internationalization (i18n) with <code>next-intl</code> or built-in middleware-based routing. Redirects in <code>next.config.js</code> handle legacy URLs. Rewrites proxy requests to external APIs without CORS issues. Middleware uses <code>NextRequest</code> and <code>NextResponse</code>. Avoid heavy computation in middleware — it runs on every request.",
+      "// middleware.ts\nimport { NextResponse } from 'next/server';\nimport type { NextRequest } from 'next/server';\n\nexport function middleware(request: NextRequest) {\n  const { pathname, searchParams } = request.nextUrl;\n  \n  // Example: Geo-based redirect\n  const country = request.geo?.country || 'US';\n  const locale = request.headers.get('accept-language')?.split(',')[0]?.split('-')[0] || 'en';\n  \n  // Redirect to locale-specific path\n  if (!pathname.startsWith('/en') && !pathname.startsWith('/es') && !pathname.startsWith('/fr')) {\n    const locale = country === 'MX' ? 'es' : country === 'FR' ? 'fr' : 'en';\n    return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));\n  }\n  \n  // Auth check\n  const token = request.cookies.get('session-token');\n  if (pathname.startsWith('/dashboard') && !token) {\n    return NextResponse.redirect(new URL('/login', request.url));\n  }\n  \n  // Security headers\n  const response = NextResponse.next();\n  response.headers.set('X-Frame-Options', 'DENY');\n  response.headers.set('X-Content-Type-Options', 'nosniff');\n  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');\n  \n  return response;\n}\n\nexport const config = {\n  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],\n};\n\n// next.config.js\nmodule.exports = {\n  async redirects() {\n    return [\n      { source: '/old-blog/:slug', destination: '/blog/:slug', permanent: true },\n      { source: '/products', destination: '/shop', permanent: false },\n    ]\n  },\n  async rewrites() {\n    return [\n      { source: '/api/external/:path*', destination: 'https://api.external.com/:path*' },\n    ]\n  }\n}"
+    ],
+    "Next.js Caching & Performance": [
+      "Next.js provides multi-layered caching: Full Route Cache (static HTML cached at edge), Data Cache (fetch results cached with <code>next.revalidate</code>), Router Cache (client-side cache for 30s), and React Cache (server component deduplication). <code>revalidatePath</code> and <code>revalidateTag</code> purge caches on-demand. <code>generateStaticParams</code> pre-builds pages at build time. ISR (Incremental Static Regeneration) updates static pages after build. <code>loading.tsx</code> provides per-route loading states. The <code>next/image</code> component optimizes images with lazy loading and WebP/AVIF conversion.",
+      "// Caching strategies\n// app/page.tsx\n\n// Option 1: Time-based revalidation\nexport default async function Page() {\n  const data = await fetch('https://api.example.com/data', {\n    next: { revalidate: 3600 } // Revalidate every hour\n  });\n  \n  const posts = await fetch('https://api.example.com/posts', {\n    next: { tags: ['posts'] } // Tag-based invalidation\n  });\n  \n  return <PostList data={data} posts={posts} />;\n}\n\n// On-demand revalidation (e.g., webhook)\n// app/api/revalidate/route.ts\nexport async function POST(request: Request) {\n  const { tag, path } = await request.json();\n  \n  if (tag) revalidateTag(tag);\n  if (path) revalidatePath(path);\n  \n  return Response.json({ revalidated: true });\n}\n\n// ISR with on-demand revalidation\n// When a product is updated via CMS webhook:\n// fetch('/api/revalidate', { method: 'POST', body: JSON.stringify({ path: '/products' }) })\n\n// Image optimization\nimport Image from 'next/image';\n\n<Image\n  src={product.image}\n  alt={product.name}\n  width={400}\n  height={300}\n  priority={isAboveFold}\n  placeholder=\"blur\"\n  blurDataURL=\"/placeholder.webp\"\n  sizes=\"(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw\"\n/>"
     ]
   }
 }

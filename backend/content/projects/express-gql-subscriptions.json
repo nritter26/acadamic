@@ -1,0 +1,137 @@
+{
+  "id": "express-gql-subscriptions",
+  "title": "GraphQL Subscriptions",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["graphql", "subscriptions", "real-time", "pubsub", "websocket", "express", "fastapi"],
+  "description": "Implement GraphQL subscriptions with pub/sub, triggering on mutations, multiple subscribers, and unsubscribe support.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Subscription endpoint",
+      "description": "Create a subscription endpoint that supports GraphQL subscriptions. A subscription { postAdded { title } } should be accepted.",
+      "hints": [
+        "Use graphql-subscriptions with PubSub and SubscriptionServer", "Define a Subscription type in the schema", "Create a postAdded subscription field"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { createServer } = require('http');\nconst { SubscriptionServer } = require('subscriptions-transport-ws');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\nconst { PubSub } = require('graphql-subscriptions');\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n  }\n\n  type Subscription {\n    postAdded: Post\n  }\n\n  type Query {\n    _: String\n  }\n`);\n\nconst root = {};\n\nconst app = express();\nconst server = createServer(app);\n\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\n\nSubscriptionServer.create(\n  { schema, execute: require('graphql').execute, subscribe: require('graphql').subscribe },\n  { server, path: '/subscriptions' }\n);\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "typescript": "import express from 'express';\nimport { createServer } from 'http';\nimport { SubscriptionServer } from 'subscriptions-transport-ws';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema, execute, subscribe } from 'graphql';\nimport { PubSub } from 'graphql-subscriptions';\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n  }\n\n  type Subscription {\n    postAdded: Post\n  }\n\n  type Query {\n    _: String\n  }\n`);\n\nconst app = express();\nconst server = createServer(app);\n\napp.use('/graphql', graphqlHTTP({ schema, rootValue: {}, graphiql: false }));\n\nSubscriptionServer.create(\n  { schema, execute, subscribe },\n  { server, path: '/subscriptions' }\n);\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, Field, Schema\nfrom fastapi_gql import GQL\nimport asyncio\n\napp = FastAPI()\n\nclass Post(ObjectType):\n    id = Int()\n    title = String()\n\nclass Query(ObjectType):\n    _ = String()\n\nschema = Schema(query=Query)\nGQL(app, schema=schema)\n\n# Note: Subscriptions require WebSocket support via fastapi-gql or similar\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"data\": map[string]string{\"message\": \"subscription stub\"}})\n\t})\n\tfmt.Println(\"Server on :3000\")\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "data"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Trigger subscription via mutation",
+      "description": "When a post is created via mutation, the subscription is triggered and subscribers receive the new post. Store results for verification.",
+      "hints": [
+        "Add a createPost mutation that publishes to POST_ADDED", "Use pubsub.publish(POST_ADDED, { postAdded: post })", "Subscribers to postAdded receive the new post"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { createServer } = require('http');\nconst { SubscriptionServer } = require('subscriptions-transport-ws');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\nconst { PubSub, withFilter } = require('graphql-subscriptions');\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nlet posts = [];\nlet nextId = 1;\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n  }\n\n  type Subscription {\n    postAdded: Post\n  }\n\n  type Mutation {\n    createPost(title: String!): Post\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  posts: () => posts,\n  createPost: ({ title }) => {\n    const post = { id: nextId++, title };\n    posts.push(post);\n    pubsub.publish(POST_ADDED, { postAdded: post });\n    return post;\n  }\n};\n\nconst app = express();\nconst server = createServer(app);\n\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\n\nSubscriptionServer.create(\n  {\n    schema,\n    execute: require('graphql').execute,\n    subscribe: require('graphql').subscribe,\n    onConnect: () => ({ pubsub })\n  },\n  { server, path: '/subscriptions' }\n);\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "typescript": "import express from 'express';\nimport { createServer } from 'http';\nimport { SubscriptionServer } from 'subscriptions-transport-ws';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema, execute, subscribe } from 'graphql';\nimport { PubSub } from 'graphql-subscriptions';\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nlet posts: { id: number; title: string }[] = [];\nlet nextId = 1;\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n  }\n\n  type Subscription {\n    postAdded: Post\n  }\n\n  type Mutation {\n    createPost(title: String!): Post\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  posts: () => posts,\n  createPost: ({ title }: { title: string }) => {\n    const post = { id: nextId++, title };\n    posts.push(post);\n    pubsub.publish(POST_ADDED, { postAdded: post });\n    return post;\n  }\n};\n\nconst app = express();\nconst server = createServer(app);\n\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\n\nSubscriptionServer.create(\n  { schema, execute, subscribe, onConnect: () => ({ pubsub }) },\n  { server, path: '/subscriptions' }\n);\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field, Mutation\nfrom fastapi_gql import GQL\n\nposts_data = []\nnext_id = 1\n\nclass Post(ObjectType):\n    id = Int()\n    title = String()\n\nclass CreatePost(Mutation):\n    class Arguments:\n        title = String(required=True)\n    Output = Post\n\n    def mutate(self, info, title):\n        global next_id\n        post = {'id': next_id, 'title': title}\n        posts_data.append(post)\n        next_id += 1\n        return Post(**post)\n\nclass Query(ObjectType):\n    posts = List(Post)\n\n    def resolve_posts(self, info):\n        return [Post(**p) for p in posts_data]\n\nschema = Schema(query=Query, mutation=CreatePost)\napp = FastAPI()\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n)\n\nvar posts []map[string]interface{}\nvar nextID = 1\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct {\n\t\t\tQuery     string                 `json:\"query\"`\n\t\t\tVariables map[string]interface{} `json:\"variables\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\n\t\tpost := map[string]interface{}{\"id\": nextID, \"title\": \"New Post\"}\n\t\tnextID++\n\t\tposts = append(posts, post)\n\n\t\tresult := map[string]interface{}{\n\t\t\t\"data\": map[string]interface{}{\n\t\t\t\t\"createPost\": post,\n\t\t\t},\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\tfmt.Println(\"Server on :3000\")\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "createPost"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Get subscription status",
+      "description": "Create GET /subscriptions/:id that returns the current status of a subscription connection.",
+      "hints": [
+        "Track active subscriptions in a map with IDs", "Each subscription has an ID and status (active/completed)", "Return the subscription status details"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { createServer } = require('http');\nconst { v4: uuidv4 } = require('uuid');\n\nconst app = express();\nconst server = createServer(app);\n\nconst subscriptions = {};\n\napp.get('/subscriptions/:id', (req, res) => {\n  const sub = subscriptions[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Subscription not found' });\n  res.json(sub);\n});\n\n// Track subscriptions\nfunction trackSubscription(id) {\n  subscriptions[id] = { id, status: 'active', createdAt: new Date() };\n}\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport { createServer } from 'http';\nimport { v4 as uuidv4 } from 'uuid';\n\ninterface Subscription {\n  id: string;\n  status: string;\n  createdAt: Date;\n}\n\nconst app = express();\nconst server = createServer(app);\n\nconst subscriptions: Record<string, Subscription> = {};\n\napp.get('/subscriptions/:id', (req: Request, res: Response) => {\n  const sub = subscriptions[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Subscription not found' });\n  res.json(sub);\n});\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "python": "from fastapi import FastAPI\nfrom datetime import datetime\nimport uuid\n\napp = FastAPI()\nport = 3000\n\nsubscriptions = {}\n\n@app.get('/subscriptions/{sub_id}')\ndef get_subscription(sub_id: str):\n    sub = subscriptions.get(sub_id)\n    if not sub:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=404, content={'error': 'Subscription not found'})\n    return sub\n\ndef track_subscription():\n    sub_id = str(uuid.uuid4())\n    subscriptions[sub_id] = {'id': sub_id, 'status': 'active', 'createdAt': datetime.now().isoformat()}\n    return sub_id\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"time\"\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n)\n\nvar subscriptions = make(map[string]map[string]interface{})\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/subscriptions/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tid := strings.TrimPrefix(r.URL.Path, \"/subscriptions/\")\n\t\tsub, ok := subscriptions[id]\n\t\tif !ok {\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Subscription not found\"})\n\t\t\treturn\n\t\t}\n\t\tjson.NewEncoder(w).Encode(sub)\n\t})\n\n\tfmt.Println(\"Server on :\" + port)\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/subscriptions/test123",
+            "expectedStatus": 404,
+            "expectedBodySubstring": "not found"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multiple subscribers",
+      "description": "Multiple subscribers to the same subscription each receive the notification when a mutation triggers it.",
+      "hints": [
+        "pubsub.publish broadcasts to all subscribers", "Each subscriber gets a separate connection", "Store received events per subscriber for verification"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { createServer } = require('http');\nconst { PubSub } = require('graphql-subscriptions');\nconst { v4: uuidv4 } = require('uuid');\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nconst app = express();\nconst server = createServer(app);\n\nconst subscribers = {};\n\n// Track which subscribers received what\napp.get('/subscribers/:id/received', (req, res) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  res.json({ received: sub.received });\n});\n\n// Subscribe\napp.post('/subscribe', (req, res) => {\n  const id = uuidv4();\n  subscribers[id] = { id, received: [] };\n  const unsub = pubsub.subscribe(POST_ADDED, (payload) => {\n    subscribers[id].received.push(payload);\n  });\n  res.json({ subscriptionId: id });\n});\n\napp.listen(3000, () => console.log('Server on 3000'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport { createServer } from 'http';\nimport { PubSub } from 'graphql-subscriptions';\nimport { v4 as uuidv4 } from 'uuid';\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nconst app = express();\nconst server = createServer(app);\n\napp.use(express.json());\n\ninterface Subscriber {\n  id: string;\n  received: any[];\n}\n\nconst subscribers: Record<string, Subscriber> = {};\n\napp.get('/subscribers/:id/received', (req: Request, res: Response) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  res.json({ received: sub.received });\n});\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const id = uuidv4();\n  subscribers[id] = { id, received: [] };\n  const unsub = pubsub.subscribe(POST_ADDED, (payload: any) => {\n    subscribers[id].received.push(payload);\n  });\n  res.json({ subscriptionId: id });\n});\n\nserver.listen(3000, () => console.log('Server on 3000'));\n",
+        "python": "from fastapi import FastAPI\nfrom datetime import datetime\nimport uuid\n\napp = FastAPI()\nport = 3000\napp.use([{}])\n\nsubscribers = {}\n\n@app.get('/subscribers/{sub_id}/received')\ndef get_received(sub_id: str):\n    sub = subscribers.get(sub_id)\n    if not sub:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=404, content={'error': 'Not found'})\n    return {'received': sub['received']}\n\n@app.post('/subscribe')\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'id': sub_id, 'received': []}\n    return {'subscriptionId': sub_id}\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n\t\"strings\"\n)\n\nvar subscribers = make(map[string]map[string]interface{})\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tid := generateID()\n\t\tsubscribers[id] = map[string]interface{}{\"id\": id, \"received\": []interface{}{}}\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subscriptionId\": id})\n\t})\n\n\thttp.HandleFunc(\"/subscribers/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/subscribers/\")\n\t\tparts := strings.Split(path, \"/\")\n\t\tif len(parts) == 2 && parts[1] == \"received\" {\n\t\t\tsub, ok := subscribers[parts[0]]\n\t\t\tif !ok {\n\t\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"received\": sub[\"received\"]})\n\t\t}\n\t})\n\n\tfmt.Println(\"Server on :3000\")\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/subscribe",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "subscriptionId"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Unsubscribe",
+      "description": "Allow subscribers to unsubscribe. After unsubscribing, they no longer receive updates when new posts are created.",
+      "hints": [
+        "Create POST /unsubscribe/:id to remove a subscriber", "Use pubsub.unsubscribe to remove the listener", "Verify by checking received count after a mutation"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { PubSub } = require('graphql-subscriptions');\nconst { v4: uuidv4 } = require('uuid');\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nconst app = express();\n\napp.use(express.json());\n\nconst subscribers = {};\n\napp.post('/subscribe', (req, res) => {\n  const id = uuidv4();\n  const subId = pubsub.subscribe(POST_ADDED, (payload) => {\n    if (subscribers[id]) subscribers[id].received.push(payload);\n  });\n  subscribers[id] = { id, subId, received: [] };\n  res.json({ subscriptionId: id });\n});\n\napp.post('/unsubscribe/:id', (req, res) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  pubsub.unsubscribe(sub.subId);\n  delete subscribers[req.params.id];\n  res.json({ message: 'Unsubscribed' });\n});\n\napp.get('/subscribers/:id/received', (req, res) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  res.json({ received: sub.received });\n});\n\napp.listen(3000, () => console.log('Server on 3000'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport { PubSub } from 'graphql-subscriptions';\nimport { v4 as uuidv4 } from 'uuid';\n\nconst pubsub = new PubSub();\nconst POST_ADDED = 'POST_ADDED';\nconst app = express();\n\napp.use(express.json());\n\ninterface Subscriber {\n  id: string;\n  subId: number;\n  received: any[];\n}\n\nconst subscribers: Record<string, Subscriber> = {};\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const id = uuidv4();\n  const subId = pubsub.subscribe(POST_ADDED, (payload: any) => {\n    if (subscribers[id]) subscribers[id].received.push(payload);\n  });\n  subscribers[id] = { id, subId, received: [] };\n  res.json({ subscriptionId: id });\n});\n\napp.post('/unsubscribe/:id', (req: Request, res: Response) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  pubsub.unsubscribe(sub.subId);\n  delete subscribers[req.params.id];\n  res.json({ message: 'Unsubscribed' });\n});\n\napp.get('/subscribers/:id/received', (req: Request, res: Response) => {\n  const sub = subscribers[req.params.id];\n  if (!sub) return res.status(404).json({ error: 'Not found' });\n  res.json({ received: sub.received });\n});\n\napp.listen(3000, () => console.log('Server on 3000'));\n",
+        "python": "from fastapi import FastAPI\nimport uuid\n\napp = FastAPI()\nport = 3000\n\nsubscribers = {}\n\n@app.post('/subscribe')\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'id': sub_id, 'received': []}\n    return {'subscriptionId': sub_id}\n\n@app.post('/unsubscribe/{sub_id}')\ndef unsubscribe(sub_id: str):\n    sub = subscribers.pop(sub_id, None)\n    if not sub:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=404, content={'error': 'Not found'})\n    return {'message': 'Unsubscribed'}\n\n@app.get('/subscribers/{sub_id}/received')\ndef get_received(sub_id: str):\n    sub = subscribers.get(sub_id)\n    if not sub:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=404, content={'error': 'Not found'})\n    return {'received': sub['received']}\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n\t\"strings\"\n)\n\nvar subscribers = make(map[string]map[string]interface{})\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tid := generateID()\n\t\tsubscribers[id] = map[string]interface{}{\"id\": id, \"received\": []interface{}{}}\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subscriptionId\": id})\n\t})\n\n\thttp.HandleFunc(\"/unsubscribe/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tid := strings.TrimPrefix(r.URL.Path, \"/unsubscribe/\")\n\t\tif _, ok := subscribers[id]; ok {\n\t\t\tdelete(subscribers, id)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Unsubscribed\"})\n\t\t} else {\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t\t}\n\t})\n\n\tfmt.Println(\"Server on :3000\")\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/unsubscribe/nonexistent",
+            "expectedStatus": 404,
+            "expectedBodySubstring": "not found"
+          }
+        ]
+      }
+    }
+  ]
+}

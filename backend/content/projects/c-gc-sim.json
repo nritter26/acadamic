@@ -1,0 +1,23 @@
+{
+  "id": "c-gc-sim",
+  "title": "C: GC (Simulated Mark-Sweep)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 30,
+  "concepts": ["c", "garbage collection", "mark-sweep", "memory management", "pointers"],
+  "description": "Simulate a mark-and-sweep garbage collector using a simple object model with reference tracking.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Object Model and Allocation",
+      "description": "Define an `Object` struct with a marked flag, and pointers to up to 3 child objects. Write `Object* obj_new()` that allocates and registers an object. Track all objects in a global list.",
+      "hints": ["Object: `int marked; struct Object *children[3];`.", "Global array `Object *heap[1024]; int heap_count;`.", "obj_new: `heap[heap_count++] = malloc(sizeof(Object));`"],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Object {\n    int marked;\n    struct Object *children[3];\n} Object;\n\nObject *heap[1024];\nint heap_count = 0;\n\nObject* obj_new() {\n    Object *o = (Object*)calloc(1, sizeof(Object));\n    heap[heap_count++] = o;\n    return o;\n}\n\nvoid mark(Object *o) {\n    if (!o || o->marked) return;\n    o->marked = 1;\n    for (int i = 0; i < 3; i++) mark(o->children[i]);\n}\n\nvoid sweep() {\n    int alive = 0;\n    for (int i = 0; i < heap_count; i++) {\n        if (heap[i]->marked) {\n            heap[i]->marked = 0;\n            heap[alive++] = heap[i];\n        } else {\n            free(heap[i]);\n        }\n    }\n    heap_count = alive;\n}\n\nint main() {\n    Object *root = obj_new();\n    root->children[0] = obj_new();\n    root->children[1] = obj_new();\n    obj_new(); // orphan!\n    mark(root);\n    int before = heap_count;\n    sweep();\n    printf(\"Before: %d, After: %d\\n\", before, heap_count);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('3') && output.includes('2')",
+        "successMessage": "GC simulation works!",
+        "failureMessage": "Before GC: 3 objects, After GC: 2 (orphan freed)"
+      }
+    }
+  ]
+}

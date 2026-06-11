@@ -1,0 +1,71 @@
+{
+  "id": "rs-csv-reader",
+  "title": "Rust: CSV Data Processing",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "CSV", "parsing", "string processing", "data analysis"],
+  "description": "Parse and analyze CSV data in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse CSV Row",
+      "description": "Write a function `parse_csv_row(row: &str) -> Vec<&str>` that splits a CSV row by commas. Test with `\"Alice,30,Engineer\"`.",
+      "hints": ["`row.split(\",\").collect()`", "Trim whitespace from each field: `.map(|s| s.trim())`.", "Print each field on its own line."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('Engineer')",
+        "successMessage": "CSV row parsed!",
+        "failureMessage": "Parse and print fields from the CSV row."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Parse Multi-Row CSV",
+      "description": "Write a function `parse_csv(data: &str) -> Vec<Vec<&str>>` that parses a full CSV string (multiple rows). Test with:\n`\"Name,Age,City\\nAlice,30,NYC\\nBob,25,LA\\nCharlie,35,Chicago\"`",
+      "hints": ["Split the data by newlines: `.lines()`.", "Skip the header line or include it.", "Return a Vec of Vecs."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('Bob') && output.includes('Charlie')",
+        "successMessage": "Multi-row CSV parsed!",
+        "failureMessage": "Parse and print all 3 data rows."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Extract Column",
+      "description": "Write a function `get_column(csv: &str, col_index: usize) -> Vec<&str>` that extracts a column by index. Print the Age column (index 1) from the CSV above.",
+      "hints": ["Parse the CSV first, then skip the header.", "For each row, get `row[col_index]`.", "Age column: 30, 25, 35"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('25') && output.includes('35')",
+        "successMessage": "Column extraction works!",
+        "failureMessage": "Extract and print the Age column."
+      }
+    },
+    {
+      "id": 4,
+      "title": "CSV to Struct",
+      "description": "Define a struct `Person { name: String, age: i32, city: String }`. Write `rows_to_persons(rows: Vec<Vec<&str>>) -> Vec<Person>`. Parse and print the people.",
+      "hints": ["Iterate over rows, skipping the header.", "Parse age with `.parse::<i32>()`.", "Print each person with `println!(\"{}, {}, {}\", p.name, p.age, p.city)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30') && output.includes('NYC')",
+        "successMessage": "CSV to struct conversion works!",
+        "failureMessage": "Convert CSV rows to Person structs and print."
+      }
+    },
+    {
+      "id": 5,
+      "title": "CSV Statistics",
+      "description": "Given a CSV of sales data: `\"Product,Price,Quantity\\nWidget,10.99,5\\nGadget,24.99,3\\nDoohickey,5.99,8\"`, calculate total revenue (sum of Price * Quantity). Print each product's revenue and the total.",
+      "hints": ["Parse each row into a struct with price and quantity.", "Revenue = price * quantity.", "Total revenue: 10.99*5 + 24.99*3 + 5.99*8 = 54.95 + 74.97 + 47.92 = 177.84"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('54.95') || output.includes('54.9') || output.includes('177.84') || output.includes('177.8')",
+        "successMessage": "CSV statistics calculated!",
+        "failureMessage": "Print each product's revenue and the total."
+      }
+    }
+  ]
+}

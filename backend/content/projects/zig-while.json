@@ -1,0 +1,23 @@
+{
+  "id": "zig-while",
+  "title": "Zig: While Loops",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "while loop", "iteration"],
+  "description": "Use a while loop to print even numbers from 2 to 20.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "While Loop",
+      "description": "Use a while loop to print even numbers 2, 4, 6, ..., 20 each on a new line.",
+      "hints": ["`var i: i32 = 2; while (i <= 20) { std.debug.print(\"{}\\n\", .{i}); i += 2; }`", "Declare var (not const) since we mutate i."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('20') && !output.includes('19')",
+        "successMessage": "While loop works!",
+        "failureMessage": "Print even numbers 2 to 20"
+      }
+    }
+  ]
+}

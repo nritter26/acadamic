@@ -1,0 +1,23 @@
+{
+  "id": "c-function-pointers",
+  "title": "C: Function Pointers",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "function pointers", "callbacks", "printf"],
+  "description": "Use function pointers to implement a simple calculator that can switch between different operations at runtime.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Calculator with Function Pointers",
+      "description": "Define a function pointer type `typedef int (*op_fn)(int, int)`. Implement add, subtract, multiply, and divide functions. Write `int calculate(op_fn op, int a, int b)` that calls the function through the pointer. Test all four operations.",
+      "hints": ["Define `typedef int (*op_fn)(int, int);`.", "Function names are pointers: `add`, `subtract` etc.", "Call through pointer: `op(a, b)`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef int (*op_fn)(int, int);\n\nint add(int a, int b) { return a + b; }\nint sub(int a, int b) { return a - b; }\nint mul(int a, int b) { return a * b; }\nint divide(int a, int b) { return b ? a / b : 0; }\n\nint calculate(op_fn op, int a, int b) {\n    \n}\n\nint main() {\n    op_fn ops[] = {add, sub, mul, divide};\n    char *names[] = {\"Add\", \"Sub\", \"Mul\", \"Div\"};\n    for (int i = 0; i < 4; i++)\n        printf(\"%s: %d\\n\", names[i], calculate(ops[i], 20, 4));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('24') && output.includes('16') && output.includes('80') && output.includes('5')",
+        "successMessage": "Function pointer calculator works!",
+        "failureMessage": "Print results of all four operations"
+      }
+    }
+  ]
+}

@@ -1,53 +1,191 @@
 {
   "Getting Started": {
-    "HCL Syntax": ["HCL is Terraform's declarative language for defining infrastructure. Blocks define resources, providers, and variables in a human-readable format.", "resource \"aws_instance\" \"web\" {\n  ami           = \"ami-0c55b159cbfafe1f0\"\n  instance_type = \"t2.micro\"\n}"],
-    "Terraform Init/Plan/Apply": ["The core workflow is init (download providers), plan (preview changes), and apply (execute changes). Destroy tears down managed resources.", "terraform init\nterraform plan -out=tfplan\nterraform apply tfplan\nterraform destroy"],
-    "Providers": ["Providers are plugins that interact with cloud APIs. Terraform downloads provider binaries during init based on the required_providers block.", "terraform {\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"~> 5.0\"\n    }\n  }\n}\n\nprovider \"aws\" {\n  region = \"us-east-1\"\n}"],
-    "Files & Layout": ["Terraform configurations follow a standard file layout. main.tf for resources, variables.tf for inputs, outputs.tf for results, and terraform.tfvars for values.", "# Recommended layout:\n# main.tf        - Resources and data sources\n# variables.tf   - Input variable declarations\n# outputs.tf     - Output value declarations\n# terraform.tfvars - Variable values (not committed)\n# versions.tf    - Provider and Terraform version constraints"]
+    "Terraform Introduction": {
+      "exp": "<p>Introduction to terraform and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "HCL Syntax": [
+      "HCL is Terraform's declarative language for defining infrastructure. Blocks define resources, providers, and variables in a human-readable format.",
+      "resource \"aws_instance\" \"web\" {\n  ami           = \"ami-0c55b159cbfafe1f0\"\n  instance_type = \"t2.micro\"\n}"
+    ],
+    "Terraform Init/Plan/Apply": [
+      "The core workflow is init (download providers), plan (preview changes), and apply (execute changes). Destroy tears down managed resources.",
+      "terraform init\nterraform plan -out=tfplan\nterraform apply tfplan\nterraform destroy"
+    ],
+    "Providers": [
+      "Providers are plugins that interact with cloud APIs. Terraform downloads provider binaries during init based on the required_providers block.",
+      "terraform {\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"~> 5.0\"\n    }\n  }\n}\n\nprovider \"aws\" {\n  region = \"us-east-1\"\n}"
+    ],
+    "Files & Layout": [
+      "Terraform configurations follow a standard file layout. main.tf for resources, variables.tf for inputs, outputs.tf for results, and terraform.tfvars for values.",
+      "# Recommended layout:\n# main.tf        - Resources and data sources\n# variables.tf   - Input variable declarations\n# outputs.tf     - Output value declarations\n# terraform.tfvars - Variable values (not committed)\n# versions.tf    - Provider and Terraform version constraints"
+    ]
+  },
+  "Core Concepts": {
+    "Terraform Basics": {
+      "exp": "<p>Core terraform concepts.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Configuration": {
+    "Terraform Config": {
+      "exp": "<p>Configuring terraform for your project.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Terraform Best Practices": {
+      "exp": "<p>Best practices for using terraform.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Usage": {
+    "Terraform Advanced": {
+      "exp": "<p>Advanced terraform techniques and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Resources & Data": {
-    "Resource Blocks": ["Resources are the primary objects Terraform manages, with a type and local name. Arguments configure the resource, and attributes are exported for reference.", "resource \"aws_s3_bucket\" \"data\" {\n  bucket = \"my-app-data-bucket\"\n  acl    = \"private\"\n  tags = { Name = \"Data Bucket\" }\n}"],
-    "Data Sources": ["Data sources fetch or compute information from providers without creating resources. They import existing infrastructure attributes for use in config.", "data \"aws_ami\" \"ubuntu\" {\n  most_recent = true\n  filter {\n    name   = \"name\"\n    values = [\"ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*\"]\n  }\n}"],
-    "Dependencies": ["Terraform automatically creates implicit dependencies from resource references. Explicit depends_on forces ordering when implicit references are insufficient.", "resource \"aws_eip\" \"ip\" {\n  instance = aws_instance.web.id\n  depends_on = [aws_instance.web]\n}"]
+    "Resource Blocks": [
+      "Resources are the primary objects Terraform manages, with a type and local name. Arguments configure the resource, and attributes are exported for reference.",
+      "resource \"aws_s3_bucket\" \"data\" {\n  bucket = \"my-app-data-bucket\"\n  acl    = \"private\"\n  tags = { Name = \"Data Bucket\" }\n}"
+    ],
+    "Data Sources": [
+      "Data sources fetch or compute information from providers without creating resources. They import existing infrastructure attributes for use in config.",
+      "data \"aws_ami\" \"ubuntu\" {\n  most_recent = true\n  filter {\n    name   = \"name\"\n    values = [\"ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*\"]\n  }\n}"
+    ],
+    "Dependencies": [
+      "Terraform automatically creates implicit dependencies from resource references. Explicit depends_on forces ordering when implicit references are insufficient.",
+      "resource \"aws_eip\" \"ip\" {\n  instance = aws_instance.web.id\n  depends_on = [aws_instance.web]\n}"
+    ]
   },
   "Variables & Expressions": {
-    "Input Variables": ["Input variables parameterize configurations for reuse across environments. They support type constraints, defaults, and validation blocks.", "variable \"instance_type\" {\n  description = \"EC2 instance type\"\n  type        = string\n  default     = \"t3.micro\"\n  validation {\n    condition     = contains([\"t3.micro\", \"t3.small\"], var.instance_type)\n    error_message = \"Instance type must be t3.micro or t3.small.\"\n  }\n}"],
-    "Outputs": ["Outputs expose resource attributes for use in other configurations or display after apply. They are essential for sharing data between modules.", "output \"instance_ip\" {\n  description = \"Public IP of web instance\"\n  value       = aws_instance.web.public_ip\n}"],
-    "Locals": ["Local values assign names to expressions for reuse. They reduce duplication and improve readability without being user-configurable.", "locals {\n  name_prefix = \"${var.environment}-web\"\n  common_tags = { Environment = var.environment, Project = \"MyApp\" }\n}"],
-    "Dynamic Blocks": ["Dynamic blocks generate nested configuration blocks from collections. They reduce duplication when creating multiple similar blocks.", "resource \"aws_security_group\" \"main\" {\n  name = \"web-sg\"\n\n  dynamic \"ingress\" {\n    for_each = var.allowed_ports\n    content {\n      from_port   = ingress.value\n      to_port     = ingress.value\n      protocol    = \"tcp\"\n      cidr_blocks = [\"0.0.0.0/0\"]\n    }\n  }\n}\n\nvariable \"allowed_ports\" {\n  default = [80, 443, 8080]\n}"],
-    "for_each & count": ["for_each creates multiple resources from a map or set of strings. count creates resources from a numeric index. for_each is preferred when keys matter.", "variable \"users\" {\n  default = {\n    alice = { role = \"admin\" }\n    bob   = { role = \"viewer\" }\n  }\n}\n\nresource \"aws_iam_user\" \"this\" {\n  for_each = var.users\n  name     = each.key\n  tags     = { role = each.value.role }\n}\n\n# count example\nresource \"aws_subnet\" \"public\" {\n  count             = length(var.availability_zones)\n  vpc_id            = aws_vpc.main.id\n  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index)\n  availability_zone = var.availability_zones[count.index]\n}"],
-    "Splat & Conditionals": ["Splat expressions extract attributes from resource lists. Conditionals enable if-then-else logic inline in resource configurations.", "# Splat expressions\noutput \"public_ips\" {\n  value = aws_instance.web[*].public_ip\n}\n\n# Conditional expressions\nresource \"aws_instance\" \"web\" {\n  instance_type = var.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n  associate_public_ip_address = var.create_eip ? true : false\n}\n\n# for expressions\noutput \"uppercase_names\" {\n  value = [for name in var.names : upper(name)]\n}"
-  ]},
+    "Input Variables": [
+      "Input variables parameterize configurations for reuse across environments. They support type constraints, defaults, and validation blocks.",
+      "variable \"instance_type\" {\n  description = \"EC2 instance type\"\n  type        = string\n  default     = \"t3.micro\"\n  validation {\n    condition     = contains([\"t3.micro\", \"t3.small\"], var.instance_type)\n    error_message = \"Instance type must be t3.micro or t3.small.\"\n  }\n}"
+    ],
+    "Outputs": [
+      "Outputs expose resource attributes for use in other configurations or display after apply. They are essential for sharing data between modules.",
+      "output \"instance_ip\" {\n  description = \"Public IP of web instance\"\n  value       = aws_instance.web.public_ip\n}"
+    ],
+    "Locals": [
+      "Local values assign names to expressions for reuse. They reduce duplication and improve readability without being user-configurable.",
+      "locals {\n  name_prefix = \"${var.environment}-web\"\n  common_tags = { Environment = var.environment, Project = \"MyApp\" }\n}"
+    ],
+    "Dynamic Blocks": [
+      "Dynamic blocks generate nested configuration blocks from collections. They reduce duplication when creating multiple similar blocks.",
+      "resource \"aws_security_group\" \"main\" {\n  name = \"web-sg\"\n\n  dynamic \"ingress\" {\n    for_each = var.allowed_ports\n    content {\n      from_port   = ingress.value\n      to_port     = ingress.value\n      protocol    = \"tcp\"\n      cidr_blocks = [\"0.0.0.0/0\"]\n    }\n  }\n}\n\nvariable \"allowed_ports\" {\n  default = [80, 443, 8080]\n}"
+    ],
+    "for_each & count": [
+      "for_each creates multiple resources from a map or set of strings. count creates resources from a numeric index. for_each is preferred when keys matter.",
+      "variable \"users\" {\n  default = {\n    alice = { role = \"admin\" }\n    bob   = { role = \"viewer\" }\n  }\n}\n\nresource \"aws_iam_user\" \"this\" {\n  for_each = var.users\n  name     = each.key\n  tags     = { role = each.value.role }\n}\n\n# count example\nresource \"aws_subnet\" \"public\" {\n  count             = length(var.availability_zones)\n  vpc_id            = aws_vpc.main.id\n  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index)\n  availability_zone = var.availability_zones[count.index]\n}"
+    ],
+    "Splat & Conditionals": [
+      "Splat expressions extract attributes from resource lists. Conditionals enable if-then-else logic inline in resource configurations.",
+      "# Splat expressions\noutput \"public_ips\" {\n  value = aws_instance.web[*].public_ip\n}\n\n# Conditional expressions\nresource \"aws_instance\" \"web\" {\n  instance_type = var.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n  associate_public_ip_address = var.create_eip ? true : false\n}\n\n# for expressions\noutput \"uppercase_names\" {\n  value = [for name in var.names : upper(name)]\n}"
+    ]
+  },
   "State": {
-    "Local State": ["Terraform state maps real-world resources to configuration, storing IDs, attributes, and metadata in a JSON state file.", "terraform state list\nterraform state show aws_instance.web"],
-    "Remote State": ["Remote state stores state files in shared backends like S3, Azure Storage, or Terraform Cloud, enabling team collaboration and locking.", "terraform {\n  backend \"s3\" {\n    bucket         = \"my-terraform-state\"\n    key            = \"prod/terraform.tfstate\"\n    region         = \"us-east-1\"\n    dynamodb_table = \"terraform-locks\"\n  }\n}"],
-    "State Locking": ["State locking prevents concurrent modifications to state files. DynamoDB (for S3) or native backend locking ensures consistency.", "resource \"aws_dynamodb_table\" \"terraform_locks\" {\n  name         = \"terraform-locks\"\n  billing_mode = \"PAY_PER_REQUEST\"\n  hash_key     = \"LockID\"\n  attribute {\n    name = \"LockID\"\n    type = \"S\"\n  }\n}"],
-    "State Migration": ["State can be migrated between backends using terraform init -migrate-state. This is needed when switching from local to remote state.", "terraform init -migrate-state\n# Terraform copies existing state to the new backend\n\n# Import existing resources\nterraform import aws_instance.web i-0abcd1234efgh5678"]
+    "Local State": [
+      "Terraform state maps real-world resources to configuration, storing IDs, attributes, and metadata in a JSON state file.",
+      "terraform state list\nterraform state show aws_instance.web"
+    ],
+    "Remote State": [
+      "Remote state stores state files in shared backends like S3, Azure Storage, or Terraform Cloud, enabling team collaboration and locking.",
+      "terraform {\n  backend \"s3\" {\n    bucket         = \"my-terraform-state\"\n    key            = \"prod/terraform.tfstate\"\n    region         = \"us-east-1\"\n    dynamodb_table = \"terraform-locks\"\n  }\n}"
+    ],
+    "State Locking": [
+      "State locking prevents concurrent modifications to state files. DynamoDB (for S3) or native backend locking ensures consistency.",
+      "resource \"aws_dynamodb_table\" \"terraform_locks\" {\n  name         = \"terraform-locks\"\n  billing_mode = \"PAY_PER_REQUEST\"\n  hash_key     = \"LockID\"\n  attribute {\n    name = \"LockID\"\n    type = \"S\"\n  }\n}"
+    ],
+    "State Migration": [
+      "State can be migrated between backends using terraform init -migrate-state. This is needed when switching from local to remote state.",
+      "terraform init -migrate-state\n# Terraform copies existing state to the new backend\n\n# Import existing resources\nterraform import aws_instance.web i-0abcd1234efgh5678"
+    ]
   },
   "Modules": {
-    "Root Module": ["The root module is the directory containing main.tf where terraform is executed. It can call child modules to organize infrastructure.", "# root main.tf\nmodule \"networking\" {\n  source = \"./modules/networking\"\n}\n\nmodule \"compute\" {\n  source = \"./modules/compute\"\n}"],
-    "Child Modules": ["Child modules are reusable configurations called with source argument, accepting input variables and exposing outputs for composition.", "# modules/networking/main.tf\nvariable \"vpc_cidr\" {}\nresource \"aws_vpc\" \"main\" {\n  cidr_block = var.vpc_cidr\n}\noutput \"vpc_id\" {\n  value = aws_vpc.main.id\n}"],
-    "Module Registry": ["The Terraform Registry hosts thousands of pre-built public modules for AWS, Azure, GCP, and other providers, versioned with semantic tags.", "module \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"5.0.0\"\n  name    = \"my-vpc\"\n  cidr    = \"10.0.0.0/16\"\n}"],
-    "Module Composition": ["Multiple modules can be composed together, passing outputs from one module as inputs to another for building complete infrastructure stacks.", "module \"network\" {\n  source = \"terraform-aws-modules/vpc/aws\"\n  cidr   = \"10.0.0.0/16\"\n}\n\nmodule \"app\" {\n  source     = \"./modules/app\"\n  vpc_id     = module.network.vpc_id\n  subnet_ids = module.network.public_subnets\n}\n\nmodule \"database\" {\n  source  = \"terraform-aws-modules/rds/aws\"\n  vpc_id  = module.network.vpc_id\n  db_name = \"myapp\"\n}"]
+    "Root Module": [
+      "The root module is the directory containing main.tf where terraform is executed. It can call child modules to organize infrastructure.",
+      "# root main.tf\nmodule \"networking\" {\n  source = \"./modules/networking\"\n}\n\nmodule \"compute\" {\n  source = \"./modules/compute\"\n}"
+    ],
+    "Child Modules": [
+      "Child modules are reusable configurations called with source argument, accepting input variables and exposing outputs for composition.",
+      "# modules/networking/main.tf\nvariable \"vpc_cidr\" {}\nresource \"aws_vpc\" \"main\" {\n  cidr_block = var.vpc_cidr\n}\noutput \"vpc_id\" {\n  value = aws_vpc.main.id\n}"
+    ],
+    "Module Registry": [
+      "The Terraform Registry hosts thousands of pre-built public modules for AWS, Azure, GCP, and other providers, versioned with semantic tags.",
+      "module \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"5.0.0\"\n  name    = \"my-vpc\"\n  cidr    = \"10.0.0.0/16\"\n}"
+    ],
+    "Module Composition": [
+      "Multiple modules can be composed together, passing outputs from one module as inputs to another for building complete infrastructure stacks.",
+      "module \"network\" {\n  source = \"terraform-aws-modules/vpc/aws\"\n  cidr   = \"10.0.0.0/16\"\n}\n\nmodule \"app\" {\n  source     = \"./modules/app\"\n  vpc_id     = module.network.vpc_id\n  subnet_ids = module.network.public_subnets\n}\n\nmodule \"database\" {\n  source  = \"terraform-aws-modules/rds/aws\"\n  vpc_id  = module.network.vpc_id\n  db_name = \"myapp\"\n}"
+    ]
   },
   "CI/CD & Automation": {
-    "Terraform Cloud": ["Terraform Cloud provides remote state storage, VCS integration, plan/apply workflows, cost estimation, and Sentinel policy enforcement.", "# terraform cloud config\nterraform {\n  cloud {\n    organization = \"myorg\"\n    workspaces {\n      name = \"myapp-prod\"\n    }\n  }\n}\n\n# VCS-driven workflow:\n# 1. Push PR -> Terraform Cloud runs plan\n# 2. Comment results on PR\n# 3. Merge -> Triggers apply"],
-    "CI/CD Integration": ["Terraform in CI/CD requires a backend for state storage, environment-specific variable files, and approval gates for production applies.", "# GitHub Actions example\njobs:\n  terraform:\n    steps:\n    - uses: hashicorp/setup-terraform@v3\n    - run: terraform init\n    - run: terraform validate\n    - run: terraform plan -var-file=env/prod.tfvars\n    - run: terraform apply -auto-approve\n      # Add manual approval step for production"],
-    "Testing": ["Terraform testing includes syntax validation, plan validation with custom rules, and integration testing with Terratest.", "# Validate syntax\nterraform validate\n\n# Plan validation with sentinel (Terraform Cloud)\nimport \"tfplan\"\nmain = rule { all tfplan.resources.aws_instance as _, i {\n  i.applied.instance_type != \"t2.micro\"\n}}\n\n# Terratest (Go-based integration testing)\n// Test code in test/ directory\n// Deploys real infrastructure, validates, then destroys"]
+    "Terraform Cloud": [
+      "Terraform Cloud provides remote state storage, VCS integration, plan/apply workflows, cost estimation, and Sentinel policy enforcement.",
+      "# terraform cloud config\nterraform {\n  cloud {\n    organization = \"myorg\"\n    workspaces {\n      name = \"myapp-prod\"\n    }\n  }\n}\n\n# VCS-driven workflow:\n# 1. Push PR -> Terraform Cloud runs plan\n# 2. Comment results on PR\n# 3. Merge -> Triggers apply"
+    ],
+    "CI/CD Integration": [
+      "Terraform in CI/CD requires a backend for state storage, environment-specific variable files, and approval gates for production applies.",
+      "# GitHub Actions example\njobs:\n  terraform:\n    steps:\n    - uses: hashicorp/setup-terraform@v3\n    - run: terraform init\n    - run: terraform validate\n    - run: terraform plan -var-file=env/prod.tfvars\n    - run: terraform apply -auto-approve\n      # Add manual approval step for production"
+    ],
+    "Testing": [
+      "Terraform testing includes syntax validation, plan validation with custom rules, and integration testing with Terratest.",
+      "# Validate syntax\nterraform validate\n\n# Plan validation with sentinel (Terraform Cloud)\nimport \"tfplan\"\nmain = rule { all tfplan.resources.aws_instance as _, i {\n  i.applied.instance_type != \"t2.micro\"\n}}\n\n# Terratest (Go-based integration testing)\n// Test code in test/ directory\n// Deploys real infrastructure, validates, then destroys"
+    ]
   },
   "Provisioners": {
-    "file": ["The file provisioner copies files or directories to the remote resource using SSH or WinRM after resource creation.", "resource \"aws_instance\" \"web\" {\n  provisioner \"file\" {\n    source      = \"app.conf\"\n    destination = \"/etc/app/app.conf\"\n  }\n}"],
-    "remote-exec": ["remote-exec runs inline scripts or scripts from files on the remote resource. It is commonly used for initial software installation.", "provisioner \"remote-exec\" {\n  inline = [\n    \"sudo apt update\",\n    \"sudo apt install -y nginx\",\n    \"sudo systemctl start nginx\"\n  ]\n}"],
-    "local-exec": ["local-exec runs commands on the machine executing Terraform, useful for triggering external tools or registration scripts.", "provisioner \"local-exec\" {\n  command = \"echo ${self.private_ip} >> inventory.txt\"\n}"],
-    "Best Practices": ["Provisioners are a last resort. Prefer user_data scripts, configuration management tools, or pre-baked AMIs for idempotent and reliable setup.", "resource \"aws_instance\" \"web\" {\n  user_data = <<-EOF\n    #!/bin/bash\n    apt update && apt install -y nginx\n  EOF\n}"]
+    "file": [
+      "The file provisioner copies files or directories to the remote resource using SSH or WinRM after resource creation.",
+      "resource \"aws_instance\" \"web\" {\n  provisioner \"file\" {\n    source      = \"app.conf\"\n    destination = \"/etc/app/app.conf\"\n  }\n}"
+    ],
+    "remote-exec": [
+      "remote-exec runs inline scripts or scripts from files on the remote resource. It is commonly used for initial software installation.",
+      "provisioner \"remote-exec\" {\n  inline = [\n    \"sudo apt update\",\n    \"sudo apt install -y nginx\",\n    \"sudo systemctl start nginx\"\n  ]\n}"
+    ],
+    "local-exec": [
+      "local-exec runs commands on the machine executing Terraform, useful for triggering external tools or registration scripts.",
+      "provisioner \"local-exec\" {\n  command = \"echo ${self.private_ip} >> inventory.txt\"\n}"
+    ],
+    "Best Practices": [
+      "Provisioners are a last resort. Prefer user_data scripts, configuration management tools, or pre-baked AMIs for idempotent and reliable setup.",
+      "resource \"aws_instance\" \"web\" {\n  user_data = <<-EOF\n    #!/bin/bash\n    apt update && apt install -y nginx\n  EOF\n}"
+    ]
   },
   "Workspaces": {
-    "Workspace Strategy": ["Workspaces manage multiple environment states within the same configuration. Each workspace has its own state file for environment isolation.", "terraform workspace new staging\nterraform workspace select production\nterraform workspace list"],
-    "Environment Separation": ["Environments use workspace names in naming conventions, variable overrides, and module configuration to isolate infrastructure.", "locals {\n  env = terraform.workspace\n  name = \"${local.env}-app\"\n}\n\nresource \"aws_instance\" \"web\" {\n  instance_type = local.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n}"]
+    "Workspace Strategy": [
+      "Workspaces manage multiple environment states within the same configuration. Each workspace has its own state file for environment isolation.",
+      "terraform workspace new staging\nterraform workspace select production\nterraform workspace list"
+    ],
+    "Environment Separation": [
+      "Environments use workspace names in naming conventions, variable overrides, and module configuration to isolate infrastructure.",
+      "locals {\n  env = terraform.workspace\n  name = \"${local.env}-app\"\n}\n\nresource \"aws_instance\" \"web\" {\n  instance_type = local.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n}"
+    ]
   },
   "Advanced": {
-    "Sensitive Values": ["Sensitive variables and outputs mask values in logs and CLI output. Terraform still stores sensitive values in state plaintext, so state must be secured.", "variable \"db_password\" {\n  type      = string\n  sensitive = true\n}\n\noutput \"password\" {\n  value     = var.db_password\n  sensitive = true\n}"],
-    "Moved Blocks": ["Moved blocks refactor resource addresses without destroying and recreating resources. They map old addresses to new ones in state.", "moved {\n  from = aws_instance.web\n  to   = aws_instance.app_server\n}"],
-    "Import": ["terraform import brings existing infrastructure under Terraform management by mapping real-world resources to configuration.", "terraform import aws_instance.web i-0abcd1234efgh5678\n\nresource \"aws_instance\" \"web\" {\n  ami           = \"ami-0c55b159cbfafe1f0\"\n  instance_type = \"t2.micro\"\n}"]
+    "Sensitive Values": [
+      "Sensitive variables and outputs mask values in logs and CLI output. Terraform still stores sensitive values in state plaintext, so state must be secured.",
+      "variable \"db_password\" {\n  type      = string\n  sensitive = true\n}\n\noutput \"password\" {\n  value     = var.db_password\n  sensitive = true\n}"
+    ],
+    "Moved Blocks": [
+      "Moved blocks refactor resource addresses without destroying and recreating resources. They map old addresses to new ones in state.",
+      "moved {\n  from = aws_instance.web\n  to   = aws_instance.app_server\n}"
+    ],
+    "Import": [
+      "terraform import brings existing infrastructure under Terraform management by mapping real-world resources to configuration.",
+      "terraform import aws_instance.web i-0abcd1234efgh5678\n\nresource \"aws_instance\" \"web\" {\n  ami           = \"ami-0c55b159cbfafe1f0\"\n  instance_type = \"t2.micro\"\n}"
+    ]
+  },
+  "Terraform Advanced & State Management": {
+    "Remote State & Modules": [
+      "Terraform state stores resource metadata. Remote backends (S3, AzureRM, GCS) enable team collaboration with state locking. DynamoDB for state locking with S3. Terraform modules encapsulate reusable infrastructure. Module registry (public or private) publishes modules. Version constraints: <code>~> 1.0</code>, <code>>= 1.2, < 2.0</code>. Terraform Cloud/Enterprise provides remote execution, workspace management, and policy enforcement (Sentinel). Workspaces manage multiple environments (dev/staging/prod) with shared modules. State commands: <code>terraform state list</code>, <code>terraform state show</code>, <code>terraform state mv</code>.",
+      "# Remote state with S3 + DynamoDB\nterraform {\n  backend \"s3\" {\n    bucket         = \"my-company-terraform-state\"\n    key            = \"production/network/terraform.tfstate\"\n    region         = \"us-east-1\"\n    encrypt        = true\n    dynamodb_table = \"terraform-state-lock\"\n  }\n  \n  required_version = \"~> 1.7\"\n}\n\n# VPC module from registry\nmodule \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"~> 5.0\"\n\n  name = \"myapp-vpc\"\n  cidr = \"10.0.0.0/16\"\n\n  azs             = [\"us-east-1a\", \"us-east-1b\", \"us-east-1c\"]\n  private_subnets = [\"10.0.1.0/24\", \"10.0.2.0/24\", \"10.0.3.0/24\"]\n  public_subnets  = [\"10.0.101.0/24\", \"10.0.102.0/24\", \"10.0.103.0/24\"]\n\n  enable_nat_gateway     = true\n  enable_vpn_gateway     = false\n  enable_dns_hostnames   = true\n\n  tags = { Environment = \"production\", ManagedBy = \"terraform\" }\n}\n\n# Workspaces for environment separation\n# terraform workspace new staging\n# terraform workspace select staging\n\nvariable \"environment\" {\n  description = \"Deployment environment\"\n  type        = string\n  default     = \"development\"\n}\n\nresource \"aws_instance\" \"app\" {\n  ami           = var.environment == \"production\" ? data.aws_ami.ubuntu_prod.id : data.aws_ami.ubuntu_dev.id\n  instance_type = var.environment == \"production\" ? \"t3.medium\" : \"t3.micro\"\n  subnet_id     = module.vpc.private_subnets[0]\n  \n  tags = { Name = \"app-${var.environment}\" }\n}"
+    ]
   }
 }

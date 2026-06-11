@@ -1,0 +1,71 @@
+{
+  "id": "rs-ffi-simulation",
+  "title": "Rust: FFI and Unsafe Code",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "unsafe", "FFI", "raw pointers", "extern", "ABI"],
+  "description": "Work with unsafe Rust and simulate Foreign Function Interface (FFI) patterns.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Unsafe Block",
+      "description": "Create a raw pointer from a reference and dereference it inside an `unsafe` block. Print the value through the raw pointer.",
+      "hints": ["`let x = 42; let raw = &x as *const i32;`", "`unsafe { println!(\"{}\", *raw); }`", "Dereferencing raw pointers is unsafe."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42')",
+        "successMessage": "Unsafe dereference works!",
+        "failureMessage": "Create a raw pointer and print its value."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Mutable Raw Pointer",
+      "description": "Create a mutable raw pointer and modify the value through it. Print the value before and after the unsafe modification.",
+      "hints": ["`let mut x = 10; let raw = &mut x as *mut i32;`", "`unsafe { *raw = 20; }`", "Print x after unsafe modification."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('20')",
+        "successMessage": "Mutable raw pointer works!",
+        "failureMessage": "Modify a value through a mutable raw pointer."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Calling a C Function (Simulated)",
+      "description": "Use `extern \"C\"` block to declare a function (simulated by actually implementing it). Call the function and print the result. Use `unsafe` to call it.",
+      "hints": ["`extern \"C\" fn add_c(a: i32, b: i32) -> i32 { a + b }`", "Call via function pointer: `let f: extern \"C\" fn(i32, i32) -> i32 = add_c;`", "`unsafe { println!(\"{}\", f(3, 4)); }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('7')",
+        "successMessage": "FFI function call works!",
+        "failureMessage": "Define and call a C-ABI function that adds two numbers."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Union and Transmute",
+      "description": "Use `std::mem::transmute` to convert between types: transmute a `u32` to `f32` and print the result. Also demonstrate unsafe union access.",
+      "hints": ["`let bits: u32 = 0x40490FDB; // Pi in IEEE 754`", "`let pi: f32 = unsafe { std::mem::transmute(bits) };`", "Print pi ≈ 3.14159"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('3.14')",
+        "successMessage": "Transmute works!",
+        "failureMessage": "Transmute u32 bits to f32 and print Pi."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Safe FFI Wrapper",
+      "description": "Create a safe wrapper around an unsafe C-like API. Define an opaque handle type, a create/destroy pair, and safe Rust functions that wrap unsafe calls.",
+      "hints": ["`struct Handle(*mut std::ffi::c_void);`", "`impl Handle { fn new() -> Self { unsafe { Handle(create()) } } }`", "`impl Drop for Handle { fn drop(&mut self) { unsafe { destroy(self.0) } } }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('handle') || output.contains('wrapped')",
+        "successMessage": "Safe FFI wrapper works!",
+        "failureMessage": "Create a safe wrapper around an unsafe API and use it."
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "id": "zig-tree-serialization",
+  "title": "Tree Serialization",
+  "description": "Write a Zig program that serializes a binary tree into an array and deserializes it back.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Node = struct {\n    value: i32,\n    left: ?*Node,\n    right: ?*Node,\n};\n\nfn serialize(node: ?*Node, buf: []i32, idx: *usize) void {\n    if (node) |n| {\n        buf[idx.*] = n.value;\n        idx.* += 1;\n        serialize(n.left, buf, idx);\n        serialize(n.right, buf, idx);\n    } else {\n        buf[idx.*] = -1;\n        idx.* += 1;\n    }\n}\n\npub fn main() !void {\n    var n3 = Node{ .value = 3, .left = null, .right = null };\n    var n2 = Node{ .value = 2, .left = null, .right = null };\n    var n1 = Node{ .value = 1, .left = &n2, .right = &n3 };\n    \n    var buf: [7]i32 = undefined;\n    var idx: usize = 0;\n    serialize(&n1, &buf, &idx);\n    \n    for (0..idx) |i| std.debug.print(\"{} \", .{buf[i]});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('-1')",
+  "hints": [
+    "Use pre-order traversal: root, then left, then right",
+    "Use a sentinel value (-1) to represent null children",
+    "Pass idx as `*usize` (pointer) to mutate it in recursive calls",
+    "The serialized array can be used to reconstruct the tree later"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "binary tree",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Tree Serialization project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Tree Serialization",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Tree Serialization project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Tree Serialization...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Tree Serialization",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Tree Serialization\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Tree Serialization...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Tree Serialization...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Tree Serialization...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Tree Serialization...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

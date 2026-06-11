@@ -46,10 +46,11 @@ export function formatDiff(diff) {
   return html || '<div style="color:#64748b;font-size:10px;">No differences found</div>';
 }
 
-export const CHALLENGE_LANGS = ['js','py','go','ts','rs','swift','java','backend','c','cpp','cs','kt','zig','php','bash','rb','scala','html','css'];
+export const CHALLENGE_LANGS = ['js','py','go','ts','rs','swift','java','backend','c','cpp','cs','kt','zig','php','bash','rb','scala','html','css','lua','sql','wasm','asm'];
 
 export const CHALLENGE_LANG_NAMES = {
   js:'JavaScript', py:'Python', go:'Go', ts:'TypeScript', rs:'Rust', swift:'Swift',
   java:'Java', backend:'Backend', c:'C', cpp:'C++', cs:'C#', kt:'Kotlin',
-  zig:'Zig', php:'PHP', bash:'Bash', rb:'Ruby', scala:'Scala', html:'HTML', css:'CSS'
+  zig:'Zig', php:'PHP', bash:'Bash', rb:'Ruby', scala:'Scala', html:'HTML', css:'CSS',
+  lua:'Lua', sql:'SQL', wasm:'WebAssembly', asm:'Assembly'
 };

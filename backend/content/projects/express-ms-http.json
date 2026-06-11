@@ -1,0 +1,120 @@
+{
+  "id": "express-ms-http",
+  "title": "HTTP Communication Between Services",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["microservices", "http-client", "inter-service", "error-propagation", "timeout", "express", "fastapi"],
+  "description": "Make one microservice communicate with another via HTTP, handle errors, and manage timeouts.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Service A calls Service B",
+      "description": "Service A receives a request at GET /aggregate, calls Service B at http://localhost:3002/data, and returns the combined result.",
+      "hints": [
+        "Use axios or built-in http module in Node to call Service B",
+        "Service A listens on port 3001, Service B on port 3002",
+        "Combine Service B's response with Service A's own data and return as one response"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst http = require('http');\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB() {\n  return new Promise((resolve, reject) => {\n    http.get('http://localhost:3002/data', (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    }).on('error', reject);\n  });\n}\n\napp.get('/aggregate', async (req, res) => {\n  try {\n    const dataB = await callServiceB();\n    res.json({ service: 'A', message: 'Hello from A', dataFromB: dataB });\n  } catch (err) {\n    res.status(502).json({ error: 'Bad Gateway', details: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB(): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get('http://localhost:3002/data', (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    }).on('error', reject);\n  });\n}\n\napp.get('/aggregate', async (req: Request, res: Response) => {\n  try {\n    const dataB = await callServiceB();\n    res.json({ service: 'A', message: 'Hello from A', dataFromB: dataB });\n  } catch (err: any) {\n    res.status(502).json({ error: 'Bad Gateway', details: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport httpx\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3001))\n\n@app.get('/aggregate')\ndef aggregate():\n    try:\n        with httpx.Client() as client:\n            resp = client.get('http://localhost:3002/data')\n            data_b = resp.json()\n        return {'service': 'A', 'message': 'Hello from A', 'dataFromB': data_b}\n    except Exception as e:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=502, content={'error': 'Bad Gateway', 'details': str(e)})\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3001\"\n\t}\n\n\thttp.HandleFunc(\"/aggregate\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tresp, err := http.Get(\"http://localhost:3002/data\")\n\t\tif err != nil {\n\t\t\tw.WriteHeader(http.StatusBadGateway)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Bad Gateway\", \"details\": err.Error()})\n\t\t\treturn\n\t\t}\n\t\tdefer resp.Body.Close()\n\t\tbody, _ := io.ReadAll(resp.Body)\n\t\tvar dataB interface{}\n\t\tjson.Unmarshal(body, &dataB)\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"service\":   \"A\",\n\t\t\t\"message\":   \"Hello from A\",\n\t\t\t\"dataFromB\": dataB,\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/aggregate",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "service"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Service B endpoint",
+      "description": "Create Service B with a GET /data endpoint that returns some data. This is the downstream service that Service A calls.",
+      "hints": [
+        "Service B listens on port 3002",
+        "Return JSON data with some sample content",
+        "Use app.get('/data', handler) returning a simple object"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = 3002;\n\napp.get('/data', (req, res) => {\n  res.json({ service: 'B', items: ['foo', 'bar', 'baz'], timestamp: new Date() });\n});\n\napp.listen(port, () => console.log(`Service B on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = 3002;\n\napp.get('/data', (req: Request, res: Response) => {\n  res.json({ service: 'B', items: ['foo', 'bar', 'baz'], timestamp: new Date() });\n});\n\napp.listen(port, () => console.log(`Service B on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom datetime import datetime\nimport uvicorn\n\napp = FastAPI()\nport = 3002\n\n@app.get('/data')\ndef get_data():\n    return {'service': 'B', 'items': ['foo', 'bar', 'baz'], 'timestamp': datetime.now().isoformat()}\n\nif __name__ == '__main__':\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"time\"\n)\n\nfunc main() {\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"service\":   \"B\",\n\t\t\t\"items\":     []string{\"foo\", \"bar\", \"baz\"},\n\t\t\t\"timestamp\": time.Now(),\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":3002\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/data",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "items"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Error propagation",
+      "description": "When Service B returns an error (e.g., GET /error), Service A should propagate it as a 502 Bad Gateway.",
+      "hints": [
+        "Service B should have a /error endpoint returning 500",
+        "Service A catches the error from its downstream call",
+        "Service A returns 502 with the error details"
+      ],
+      "codeTemplate": {
+        "javascript": "// Service A\nconst express = require('express');\nconst http = require('http');\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB(path) {\n  return new Promise((resolve, reject) => {\n    http.get(`http://localhost:3002${path}`, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => {\n        if (res.statusCode >= 400) {\n          reject(new Error(`Service B returned ${res.statusCode}`));\n        } else {\n          resolve(JSON.parse(data));\n        }\n      });\n    }).on('error', reject);\n  });\n}\n\napp.get('/proxy', async (req, res) => {\n  try {\n    const data = await callServiceB('/error');\n    res.json(data);\n  } catch (err) {\n    res.status(502).json({ error: 'Bad Gateway', details: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Service B\nconst appB = express();\nappB.get('/data', (req, res) => res.json({ status: 'ok' }));\nappB.get('/error', (req, res) => res.status(500).json({ error: 'Internal error' }));\nappB.listen(3002, () => console.log('Service B on 3002'));\n",
+        "typescript": "// Service A\nimport express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB(path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get(`http://localhost:3002${path}`, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => {\n        if (res.statusCode >= 400) {\n          reject(new Error(`Service B returned ${res.statusCode}`));\n        } else {\n          resolve(JSON.parse(data));\n        }\n      });\n    }).on('error', reject);\n  });\n}\n\napp.get('/proxy', async (req: Request, res: Response) => {\n  try {\n    const data = await callServiceB('/error');\n    res.json(data);\n  } catch (err: any) {\n    res.status(502).json({ error: 'Bad Gateway', details: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Service B\nconst appB = express();\nappB.get('/data', (req: Request, res: Response) => res.json({ status: 'ok' }));\nappB.get('/error', (req: Request, res: Response) => res.status(500).json({ error: 'Internal error' }));\nappB.listen(3002, () => console.log('Service B on 3002'));\n",
+        "python": "from fastapi import FastAPI, HTTPException\nimport httpx\nimport uvicorn\nimport threading\n\n# Service A\napp_a = FastAPI()\n\n@app_a.get('/proxy')\ndef proxy():\n    try:\n        with httpx.Client() as client:\n            resp = client.get('http://localhost:3002/error')\n            if resp.status_code >= 400:\n                raise HTTPException(status_code=502, detail=f'Service B returned {resp.status_code}')\n            return resp.json()\n    except httpx.ConnectError as e:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=502, content={'error': 'Bad Gateway', 'details': str(e)})\n\n# Service B\napp_b = FastAPI()\n\n@app_b.get('/data')\ndef data():\n    return {'status': 'ok'}\n\n@app_b.get('/error')\ndef error():\n    raise HTTPException(status_code=500, detail='Internal error')\n\ndef run_b():\n    uvicorn.run(app_b, port=3002)\n\nthreading.Thread(target=run_b).start()\n\nif __name__ == '__main__':\n    uvicorn.run(app_a, port=3001)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3001\"\n\t}\n\n\t// Service A\n\thttp.HandleFunc(\"/proxy\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tresp, err := http.Get(\"http://localhost:3002/error\")\n\t\tif err != nil {\n\t\t\tw.WriteHeader(http.StatusBadGateway)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Bad Gateway\", \"details\": err.Error()})\n\t\t\treturn\n\t\t}\n\t\tdefer resp.Body.Close()\n\t\tif resp.StatusCode >= 400 {\n\t\t\tbody, _ := io.ReadAll(resp.Body)\n\t\t\tw.WriteHeader(http.StatusBadGateway)\n\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\t\"error\":   \"Bad Gateway\",\n\t\t\t\t\"details\": string(body),\n\t\t\t})\n\t\t\treturn\n\t\t}\n\t\tbody, _ := io.ReadAll(resp.Body)\n\t\tvar result interface{}\n\t\tjson.Unmarshal(body, &result)\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\t// Service B\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/error\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusInternalServerError)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Internal error\"})\n\t})\n\n\thttp.ListenAndServe(\":3002\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/proxy",
+            "expectedStatus": 502,
+            "expectedBodySubstring": "Bad Gateway"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Timeout handling",
+      "description": "Add a timeout to Service A's call to Service B. If Service B takes longer than 2 seconds, Service A returns 504 Gateway Timeout.",
+      "hints": [
+        "Use AbortController in Node or a timeout option in HTTP clients",
+        "Service B should have a /slow endpoint that delays by 5 seconds",
+        "Set the timeout to 2 seconds on the client side"
+      ],
+      "codeTemplate": {
+        "javascript": "// Service A\nconst express = require('express');\nconst http = require('http');\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB(path, timeout = 2000) {\n  return new Promise((resolve, reject) => {\n    const req = http.get(`http://localhost:3002${path}`, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    });\n    req.setTimeout(timeout, () => {\n      req.destroy();\n      reject(new Error('Timeout'));\n    });\n    req.on('error', reject);\n  });\n}\n\napp.get('/proxy', async (req, res) => {\n  try {\n    const data = await callServiceB('/slow');\n    res.json(data);\n  } catch (err) {\n    if (err.message === 'Timeout') {\n      res.status(504).json({ error: 'Gateway Timeout' });\n    } else {\n      res.status(502).json({ error: 'Bad Gateway', details: err.message });\n    }\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Service B\nconst appB = express();\nappB.get('/data', (req, res) => res.json({ status: 'ok' }));\nappB.get('/slow', (req, res) => setTimeout(() => res.json({ status: 'slow' }), 5000));\nappB.listen(3002, () => console.log('Service B on 3002'));\n",
+        "typescript": "// Service A\nimport express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = process.env.PORT || 3001;\n\nfunction callServiceB(path: string, timeout = 2000): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const req = http.get(`http://localhost:3002${path}`, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    });\n    req.setTimeout(timeout, () => {\n      req.destroy();\n      reject(new Error('Timeout'));\n    });\n    req.on('error', reject);\n  });\n}\n\napp.get('/proxy', async (req: Request, res: Response) => {\n  try {\n    const data = await callServiceB('/slow');\n    res.json(data);\n  } catch (err: any) {\n    if (err.message === 'Timeout') {\n      res.status(504).json({ error: 'Gateway Timeout' });\n    } else {\n      res.status(502).json({ error: 'Bad Gateway', details: err.message });\n    }\n  }\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Service B\nconst appB = express();\nappB.get('/data', (req: Request, res: Response) => res.json({ status: 'ok' }));\nappB.get('/slow', (req: Request, res: Response) => setTimeout(() => res.json({ status: 'slow' }), 5000));\nappB.listen(3002, () => console.log('Service B on 3002'));\n",
+        "python": "from fastapi import FastAPI, HTTPException\nimport httpx\nimport uvicorn\nimport threading\nimport asyncio\n\n# Service A\napp_a = FastAPI()\n\n@app_a.get('/proxy')\ndef proxy():\n    try:\n        with httpx.Client(timeout=2.0) as client:\n            resp = client.get('http://localhost:3002/slow')\n            return resp.json()\n    except httpx.TimeoutException:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=504, content={'error': 'Gateway Timeout'})\n    except Exception as e:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=502, content={'error': 'Bad Gateway', 'details': str(e)})\n\n# Service B\napp_b = FastAPI()\n\n@app_b.get('/data')\ndef data():\n    return {'status': 'ok'}\n\n@app_b.get('/slow')\nasync def slow():\n    await asyncio.sleep(5)\n    return {'status': 'slow'}\n\ndef run_b():\n    uvicorn.run(app_b, port=3002)\n\nthreading.Thread(target=run_b).start()\n\nif __name__ == '__main__':\n    uvicorn.run(app_a, port=3001)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3001\"\n\t}\n\n\t// Service A\n\thttp.HandleFunc(\"/proxy\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tclient := &http.Client{Timeout: 2 * time.Second}\n\t\tresp, err := client.Get(\"http://localhost:3002/slow\")\n\t\tif err != nil {\n\t\t\tif os.IsTimeout(err) {\n\t\t\t\tw.WriteHeader(http.StatusGatewayTimeout)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Gateway Timeout\"})\n\t\t\t} else {\n\t\t\t\tw.WriteHeader(http.StatusBadGateway)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Bad Gateway\", \"details\": err.Error()})\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tdefer resp.Body.Close()\n\t\tbody, _ := io.ReadAll(resp.Body)\n\t\tvar result interface{}\n\t\tjson.Unmarshal(body, &result)\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\t// Service B\n\thttp.HandleFunc(\"/data\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/slow\", func(w http.ResponseWriter, r *http.Request) {\n\t\ttime.Sleep(5 * time.Second)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"slow\"})\n\t})\n\n\thttp.ListenAndServe(\":3002\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/proxy",
+            "expectedStatus": 504,
+            "expectedBodySubstring": "Timeout"
+          }
+        ]
+      }
+    }
+  ]
+}

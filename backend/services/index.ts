@@ -1,6 +1,7 @@
 export { addMessage, getHistory, clearConversation, pruneOldConversations } from './conversation';
 export { checkCompilers, getCompileHint, getCompilerList } from './compiler';
 export { executeCode } from './executor';
+export { executeServerCode } from './server-executor';
 export { analyzeCode, analyzeUserCode } from './analyzer';
 export { handleTutorMessage, buildLLMMessages } from './tutor';
 export { detectOllama, getOllamaStatus } from './ollama';

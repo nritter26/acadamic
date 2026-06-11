@@ -1,0 +1,120 @@
+{
+  "id": "express-test-swagger",
+  "title": "Swagger API Documentation Testing",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["swagger", "openapi", "api-docs", "documentation", "testing"],
+  "serverMode": true,
+  "description": "Build a Swagger-documented API with JSON and HTML docs, ensuring every route is properly documented with schemas.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "JSON API docs endpoint",
+      "description": "Create a GET /api-docs.json endpoint that returns the OpenAPI/Swagger specification as JSON.",
+      "hints": [
+        "Use swagger-jsdoc or build the OpenAPI spec object manually",
+        "Define basic info: title, version, description",
+        "Return the spec object as JSON"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst swaggerJsdoc = require('swagger-jsdoc');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst options = {\n  definition: {\n    openapi: '3.0.0',\n    info: { title: 'Test API', version: '1.0.0', description: 'API with Swagger docs' },\n  },\n  apis: [],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req, res) => {\n  res.json(specs);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport swaggerJsdoc from 'swagger-jsdoc';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst options: swaggerJsdoc.Options = {\n  definition: {\n    openapi: '3.0.0',\n    info: { title: 'Test API', version: '1.0.0', description: 'API with Swagger docs' },\n  },\n  apis: [],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req: Request, res: Response) => {\n  res.json(specs);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom fastapi.openapi.utils import get_openapi\nimport os\n\napp = FastAPI(title='Test API', version='1.0.0', description='API with Swagger docs')\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/api-docs.json')\ndef get_openapi_json():\n    return get_openapi(title='Test API', version='1.0.0', routes=app.routes)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tspec := map[string]interface{}{\n\t\t\"openapi\": \"3.0.0\",\n\t\t\"info\": map[string]string{\n\t\t\t\"title\":       \"Test API\",\n\t\t\t\"version\":     \"1.0.0\",\n\t\t\t\"description\": \"API with Swagger docs\",\n\t\t},\n\t\t\"paths\": map[string]interface{}{},\n\t}\n\n\thttp.HandleFunc(\"/api-docs.json\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(spec)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api-docs.json",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "openapi"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "HTML API docs endpoint",
+      "description": "Add a GET /api-docs endpoint that renders Swagger UI HTML page.",
+      "hints": [
+        "Use swagger-ui-express to serve Swagger UI",
+        "Serve the HTML page at /api-docs",
+        "Point the UI to the /api-docs.json spec URL"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst swaggerJsdoc = require('swagger-jsdoc');\nconst swaggerUi = require('swagger-ui-express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req, res) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport swaggerJsdoc from 'swagger-jsdoc';\nimport swaggerUi from 'swagger-ui-express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst options: swaggerJsdoc.Options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req: Request, res: Response) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI(title='Test API', version='1.0.0')\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/api-docs.json')\nasync def get_openapi_json():\n    return app.openapi()\n\n# FastAPI auto-serves /docs for Swagger UI\n@app.get('/api-docs')\nasync def api_docs():\n    return {'message': 'Swagger UI available at /docs'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nconst swaggerHTML = `<!DOCTYPE html><html><head><title>API Docs</title><link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui.css\"></head><body><div id=\"swagger-ui\"></div><script src=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js\"></script><script>SwaggerUIBundle({url:\"/api-docs.json\",dom_id:\"#swagger-ui\"})</script></body></html>`\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\tspec := map[string]interface{}{\n\t\t\"openapi\": \"3.0.0\",\n\t\t\"info\": map[string]string{\"title\": \"Test API\", \"version\": \"1.0.0\"},\n\t\t\"paths\": map[string]interface{}{},\n\t}\n\n\thttp.HandleFunc(\"/api-docs.json\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(spec)\n\t})\n\n\thttp.HandleFunc(\"/api-docs\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t\tw.Write([]byte(swaggerHTML))\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api-docs",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "swagger"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Document all routes in Swagger",
+      "description": "Ensure the /api-docs.json contains paths for all documented routes.",
+      "hints": [
+        "Add route annotations using JSDoc or inline OpenAPI spec",
+        "Verify /api-docs.json has a non-empty paths object",
+        "Check that each route appears in the paths"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst swaggerJsdoc = require('swagger-jsdoc');\nconst swaggerUi = require('swagger-ui-express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\n/**\n * @openapi\n * /items:\n *   get:\n *     summary: List items\n *     responses:\n *       200:\n *         description: Array of items\n */\napp.get('/items', (req, res) => res.json([]));\n\nconst options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [__filename],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req, res) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport swaggerJsdoc from 'swagger-jsdoc';\nimport swaggerUi from 'swagger-ui-express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\n/**\n * @openapi\n * /items:\n *   get:\n *     summary: List items\n *     responses:\n *       200:\n *         description: Array of items\n */\napp.get('/items', (req: Request, res: Response) => res.json([]));\n\nconst options: swaggerJsdoc.Options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [__filename],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req: Request, res: Response) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI(title='Test API', version='1.0.0')\nport = int(os.getenv('PORT', 3000))\n\nclass Item(BaseModel):\n    id: int\n    name: str\n\nitems = []\n\n@app.get('/items')\ndef list_items():\n    \"\"\"List items\"\"\"\n    return items\n\n@app.get('/api-docs.json')\nasync def get_openapi_json():\n    return app.openapi()\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nconst swaggerHTML = `<!DOCTYPE html><html><head><title>API Docs</title><link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui.css\"></head><body><div id=\"swagger-ui\"></div><script src=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js\"></script><script>SwaggerUIBundle({url:\"/api-docs.json\",dom_id:\"#swagger-ui\"})</script></body></html>`\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\tspec := map[string]interface{}{\n\t\t\"openapi\": \"3.0.0\",\n\t\t\"info\":    map[string]string{\"title\": \"Test API\", \"version\": \"1.0.0\"},\n\t\t\"paths\": map[string]interface{}{\n\t\t\t\"/items\": map[string]interface{}{\n\t\t\t\t\"get\": map[string]interface{}{\n\t\t\t\t\t\"summary\":     \"List items\",\n\t\t\t\t\t\"responses\": map[string]interface{}{\n\t\t\t\t\t\t\"200\": map[string]string{\"description\": \"Array of items\"},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t},\n\t\t},\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode([]interface{}{})\n\t})\n\n\thttp.HandleFunc(\"/api-docs.json\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(spec)\n\t})\n\n\thttp.HandleFunc(\"/api-docs\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t\tw.Write([]byte(swaggerHTML))\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api-docs.json",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "paths"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "POST route with request body schema",
+      "description": "Ensure the API docs include a POST route with a request body schema defined.",
+      "hints": [
+        "Add a POST route documented in OpenAPI with requestBody",
+        "Include application/json content type with schema",
+        "Verify the schema appears in /api-docs.json"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst swaggerJsdoc = require('swagger-jsdoc');\nconst swaggerUi = require('swagger-ui-express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\n/**\n * @openapi\n * /items:\n *   get:\n *     summary: List items\n *     responses:\n *       200:\n *         description: OK\n *   post:\n *     summary: Create item\n *     requestBody:\n *       required: true\n *       content:\n *         application/json:\n *           schema:\n *             type: object\n *             properties:\n *               name:\n *                 type: string\n *     responses:\n *       201:\n *         description: Created\n */\nlet items = [];\nlet nextId = 1;\napp.get('/items', (req, res) => res.json([]));\napp.post('/items', (req, res) => {\n  const item = { id: nextId++, name: req.body.name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\nconst options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [__filename],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req, res) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport swaggerJsdoc from 'swagger-jsdoc';\nimport swaggerUi from 'swagger-ui-express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\n/**\n * @openapi\n * /items:\n *   get:\n *     summary: List items\n *     responses:\n *       200:\n *         description: OK\n *   post:\n *     summary: Create item\n *     requestBody:\n *       required: true\n *       content:\n *         application/json:\n *           schema:\n *             type: object\n *             properties:\n *               name:\n *                 type: string\n *     responses:\n *       201:\n *         description: Created\n */\ninterface Item { id: number; name: string; }\nlet items: Item[] = [];\nlet nextId = 1;\napp.get('/items', (req: Request, res: Response) => res.json([]));\napp.post('/items', (req: Request, res: Response) => {\n  const item: Item = { id: nextId++, name: req.body.name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\nconst options: swaggerJsdoc.Options = {\n  definition: { openapi: '3.0.0', info: { title: 'Test API', version: '1.0.0' } },\n  apis: [__filename],\n};\nconst specs = swaggerJsdoc(options);\n\napp.get('/api-docs.json', (req: Request, res: Response) => res.json(specs));\napp.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI(title='Test API', version='1.0.0')\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n\nclass Item(BaseModel):\n    id: int\n    name: str\n\nitems = []\nnext_id = 1\n\n@app.get('/items')\ndef list_items():\n    return items\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = Item(id=next_id, name=item.name)\n    next_id += 1\n    items.append(new_item)\n    return new_item\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Item struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nconst swaggerHTML = `<!DOCTYPE html><html><head><title>API Docs</title><link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui.css\"></head><body><div id=\"swagger-ui\"></div><script src=\"https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js\"></script><script>SwaggerUIBundle({url:\"/api-docs.json\",dom_id:\"#swagger-ui\"})</script></body></html>`\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\tspec := map[string]interface{}{\n\t\t\"openapi\": \"3.0.0\",\n\t\t\"info\":    map[string]string{\"title\": \"Test API\", \"version\": \"1.0.0\"},\n\t\t\"paths\": map[string]interface{}{\n\t\t\t\"/items\": map[string]interface{}{\n\t\t\t\t\"get\": map[string]interface{}{\n\t\t\t\t\t\"summary\": \"List items\",\n\t\t\t\t\t\"responses\": map[string]interface{}{\n\t\t\t\t\t\t\"200\": map[string]string{\"description\": \"OK\"},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t\t\"post\": map[string]interface{}{\n\t\t\t\t\t\"summary\": \"Create item\",\n\t\t\t\t\t\"requestBody\": map[string]interface{}{\n\t\t\t\t\t\t\"required\": true,\n\t\t\t\t\t\t\"content\": map[string]interface{}{\n\t\t\t\t\t\t\t\"application/json\": map[string]interface{}{\n\t\t\t\t\t\t\t\t\"schema\": map[string]interface{}{\n\t\t\t\t\t\t\t\t\t\"type\": \"object\",\n\t\t\t\t\t\t\t\t\t\"properties\": map[string]interface{}{\n\t\t\t\t\t\t\t\t\t\t\"name\": map[string]string{\"type\": \"string\"},\n\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t},\n\t\t\t\t\t},\n\t\t\t\t\t\"responses\": map[string]interface{}{\n\t\t\t\t\t\t\"201\": map[string]string{\"description\": \"Created\"},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t},\n\t\t},\n\t}\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method == \"GET\" {\n\t\t\tjson.NewEncoder(w).Encode(items)\n\t\t} else if r.Method == \"POST\" {\n\t\t\tvar body struct{ Name string `json:\"name\"` }\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\titem := Item{ID: nextID, Name: body.Name}\n\t\t\tnextID++\n\t\t\titems = append(items, item)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(item)\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/api-docs.json\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(spec)\n\t})\n\n\thttp.HandleFunc(\"/api-docs\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t\tw.Write([]byte(swaggerHTML))\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Sveltekit Introduction": {
+      "exp": "<p>Introduction to Sveltekit and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Project Setup": [
       "Create a new SvelteKit project with the CLI, choosing from demo app, skeleton project, or minimal setup. The project includes Vite, TypeScript, ESLint, and Prettier out of the box.",
       "npx sv create my-app && cd my-app && npm install"
@@ -12,6 +17,85 @@
       "Layout components wrap child routes with shared UI like headers and footers. Nested layouts inherit from parent layouts, and +layout.js can run data loading for an entire route segment.",
       "<nav><a href=\"/\">Home</a></nav>\n<slot />"
     ]
+  },
+  "Core Concepts": {
+    "Sveltekit Core Features": {
+      "exp": "<p>Essential Sveltekit concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Sveltekit Components": {
+      "exp": "<p>Building user interfaces with Sveltekit.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Sveltekit Routing": {
+      "exp": "<p>Navigation and routing in Sveltekit.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Sveltekit State": {
+      "exp": "<p>Managing application state in Sveltekit.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Sveltekit Data": {
+      "exp": "<p>Working with data and APIs in Sveltekit.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Sveltekit Testing": {
+      "exp": "<p>Testing strategies for Sveltekit.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Sveltekit Deployment": {
+      "exp": "<p>Deploying Sveltekit applications.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Adapters": [
+      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
+      "npm install --save-dev @sveltejs/adapter-node"
+    ],
+    "Vercel": [
+      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
+      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Netlify": [
+      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
+      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Node": [
+      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
+      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
+    ]
+  },
+  "Best Practices": {
+    "Sveltekit Best Practices": {
+      "exp": "<p>Best practices for Sveltekit development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Sveltekit Advanced": {
+      "exp": "<p>Advanced Sveltekit topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Data Loading": {
     "load": [
@@ -73,24 +157,6 @@
       "export async function GET({ cookies, url, locals }) {\n  const code = url.searchParams.get('code');\n  const { tokens } = await githubAuth.validateAuthorizationCode(code);\n  locals.user = await createUserFromGithub(tokens);\n  return new Response(null, { status: 302, headers: { location: '/' } });\n}"
     ]
   },
-  "Deployment": {
-    "Adapters": [
-      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
-      "npm install --save-dev @sveltejs/adapter-node"
-    ],
-    "Vercel": [
-      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
-      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
-    ],
-    "Netlify": [
-      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
-      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
-    ],
-    "Node": [
-      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
-      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
-    ]
-  },
   "Advanced": {
     "Hooks": [
       "Hooks are server-side middleware that intercept every request in handle, or module-level functions like handleError and handleFetch. They enable session management, redirects, and error tracking.",
@@ -145,6 +211,16 @@
     "data-sveltekit-keepfocus": [
       "data-sveltekit-keepfocus preserves the currently focused element across navigation, improving accessibility for keyboard users on single-page applications.",
       "<a href=\"/next\" data-sveltekit-keepfocus>Next Step</a>"
+    ]
+  },
+  "SvelteKit Advanced Patterns": {
+    "Form Actions & Progressive Enhancement": [
+      "SvelteKit form actions handle form submissions without JavaScript. Forms use <code>method=\"POST\"</code> (or PUT/DELETE) and the <code>use:enhance</code> action for progressive enhancement. Server-side <code>load</code> functions receive form data via <code>request.formData()</code>. Actions return <code>{success: true}</code> or <code>{error: string}</code>. <code>use:enhance</code> gracefully upgrades to JS: forms work without JS (full page reload) and enhance with JS (AJAX, loading states). <code>superforms</code> library adds validation. <code>fail()</code> function returns validation errors with preserved form data.",
+      "// SvelteKit form action\n// src/routes/contact/+page.server.ts\nimport { fail } from '@sveltejs/kit';\nimport type { Actions, PageServerLoad } from './$types';\n\nexport const load: PageServerLoad = async () => {\n  return { title: 'Contact Us' };\n};\n\nexport const actions: Actions = {\n  default: async ({ request, locals }) => {\n    const data = await request.formData();\n    const name = data.get('name') as string;\n    const email = data.get('email') as string;\n    const message = data.get('message') as string;\n\n    // Validation\n    const errors: Record<string, string> = {};\n    if (!name || name.length < 2) errors.name = 'Name must be at least 2 characters';\n    if (!email || !/^[^@]+@[^@]+$/.test(email)) errors.email = 'Invalid email address';\n    if (!message || message.length < 10) errors.message = 'Message must be at least 10 characters';\n\n    if (Object.keys(errors).length > 0) {\n      return fail(400, { errors, name, email, message });\n    }\n\n    // Process form\n    await sendEmail({ name, email, message });\n    return { success: true };\n  }\n};\n\n<!-- src/routes/contact/+page.svelte -->\n<script lang=\"ts\">\n  import { enhance } from '$app/forms';\n  \n  let { form, data } = $props();\n  let submitting = $state(false);\n</script>\n\n<h1>{data.title}</h1>\n\n<form method=\"POST\" use:enhance={() => {\n  submitting = true;\n  return async ({ result }) => {\n    submitting = false;\n    if (result.type === 'success') {\n      // Show success toast\n    }\n  };\n}}>\n  <input name=\"name\" value={form?.name ?? ''} placeholder=\"Name\" />\n  {#if form?.errors?.name}<p class=\"error\">{form.errors.name}</p>{/if}\n  \n  <input name=\"email\" value={form?.email ?? ''} placeholder=\"Email\" />\n  {#if form?.errors?.email}<p class=\"error\">{form.errors.email}</p>{/if}\n  \n  <textarea name=\"message\">{form?.message ?? ''}</textarea>\n  {#if form?.errors?.message}<p class=\"error\">{form.errors.message}</p>{/if}\n  \n  <button disabled={submitting}>\n    {submitting ? 'Sending...' : 'Send Message'}\n  </button>\n</form>\n\n{#if form?.success}\n  <p class=\"success\">Message sent! We'll get back to you soon.</p>\n{/if}"
+    ],
+    "SvelteKit Data Loading & Cache": [
+      "SvelteKit provides powerful data loading: <code>load</code> functions run on server for initial renders and client for navigation. <code>+page.server.ts</code> runs only on server, <code>+page.ts</code> runs on both. <code>+layout.server.ts</code> loads data for all child routes. <code>invalidate()</code> and <code>invalidateAll()</code> re-run load functions. <code>invalid</code> and <code>depends</code> control cache invalidation. Stream promises in load functions for progressive rendering. <code>entries</code> function generates static pages at build time (SSG). HTTP caching headers (<code>Cache-Control</code>, <code>ETag</code>) can be set in load functions.",
+      "// SvelteKit advanced data loading\n// src/routes/products/[slug]/+page.server.ts\nimport { error } from '@sveltejs/kit';\nimport type { PageServerLoad, EntryGenerator } from './$types';\n\nexport const load: PageServerLoad = async ({ params, locals, setHeaders, depends }) => {\n  depends('app:product');\n\n  const product = await db.product.findUnique({\n    where: { slug: params.slug },\n    include: {\n      reviews: { take: 10, orderBy: { createdAt: 'desc' } },\n      relatedProducts: { take: 4 }\n    }\n  });\n\n  if (!product) throw error(404, 'Product not found');\n\n  // Set HTTP caching headers\n  setHeaders({\n    'Cache-Control': 'public, max-age=60, s-maxage=300'\n  });\n\n  // Stream reviews (slow query)\n  const reviewsPromise = loadMoreReviews(product.id);\n\n  return {\n    product,\n    streamed: {\n      reviews: reviewsPromise\n    }\n  };\n};\n\n// Static generation for products (SSG)\nexport const entries: EntryGenerator = async () => {\n  const products = await db.product.findMany({\n    select: { slug: true }\n  });\n  return products.map(p => ({ slug: p.slug }));\n};\n\n// Client-side invalidation\n<script>\n  import { invalidate } from '$app/navigation';\n  \n  function refreshProduct() {\n    invalidate('app:product'); // Re-runs dependant load functions\n  }\n</script>"
     ]
   }
 }

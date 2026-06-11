@@ -1,0 +1,138 @@
+{
+  "id": "express-db-search",
+  "title": "Database Search and Filtering",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["search", "filtering", "sql-like", "full-text-search", "query-parameters"],
+  "description": "Implement search endpoints using SQL LIKE, parameterized queries, and filtered search with multiple criteria.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Seed data on startup",
+      "description": "On server startup, create a products table and seed it with sample data including name, description, category, and price fields.",
+      "hints": [
+        "Create table: id, name, description, category, price",
+        "Insert 5-10 sample products with varied categories",
+        "Return 200 from GET /health"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS products (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    description TEXT,\n    category TEXT,\n    price REAL\n  )\n`);\n\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', seeded: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\n\ndb.exec(`\n  CREATE TABLE IF NOT EXISTS products (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    description TEXT,\n    category TEXT,\n    price REAL\n  )\n`);\n\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', seeded: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''\n  CREATE TABLE IF NOT EXISTS products (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    description TEXT,\n    category TEXT,\n    price REAL\n  )\n''')\n\nseed_data = [\n    ('Laptop', 'High performance laptop', 'Electronics', 999.99),\n    ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99),\n    ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99),\n    ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99),\n    ('Notebook', '200 page spiral notebook', 'Stationery', 4.99),\n]\ndb.executemany('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)', seed_data)\ndb.commit()\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'seeded': True}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`)\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Laptop', 'High performance laptop', 'Electronics', 999.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"status\": \"ok\", \"seeded\": true})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "seeded"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Basic search endpoint",
+      "description": "Implement GET /search?q=term that searches product names using SQL LIKE and returns matching results sorted by name.",
+      "hints": [
+        "Use LIKE with % wildcards around the query term",
+        "Parameterize the query to prevent SQL injection",
+        "Return empty array if no matches"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req, res) => {\n  const { q } = req.query;\n  if (!q) return res.json([]);\n  const results = db.prepare('SELECT * FROM products WHERE name LIKE ? ORDER BY name').all(`%${q}%`);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req: Request, res: Response) => {\n  const q = req.query.q as string;\n  if (!q) return res.json([]);\n  const results = db.prepare('SELECT * FROM products WHERE name LIKE ? ORDER BY name').all(`%${q}%`);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)''')\nseed_data = [('Laptop', 'High performance laptop', 'Electronics', 999.99), ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99), ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99), ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99), ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)]\ndb.executemany('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)', seed_data)\ndb.commit()\n\n@app.get('/search')\ndef search(q: str = ''):\n    if not q:\n        return []\n    cursor = db.execute('SELECT * FROM products WHERE name LIKE ? ORDER BY name', (f'%{q}%',))\n    rows = cursor.fetchall()\n    return [{'id': r[0], 'name': r[1], 'description': r[2], 'category': r[3], 'price': r[4]} for r in rows]\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`)\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Laptop', 'High performance laptop', 'Electronics', 999.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)\")\n\n\thttp.HandleFunc(\"/search\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tq := r.URL.Query().Get(\"q\")\n\t\tif q == \"\" {\n\t\t\tjson.NewEncoder(w).Encode([]interface{}{})\n\t\t\treturn\n\t\t}\n\t\trows, _ := db.Query(\"SELECT id, name, description, category, price FROM products WHERE name LIKE ? ORDER BY name\", \"%\"+q+\"%\")\n\t\tvar products []map[string]interface{}\n\t\tfor rows.Next() {\n\t\t\tvar id int\n\t\t\tvar name, desc, cat string\n\t\t\tvar price float64\n\t\t\trows.Scan(&id, &name, &desc, &cat, &price)\n\t\t\tproducts = append(products, map[string]interface{}{\"id\": id, \"name\": name, \"description\": desc, \"category\": cat, \"price\": price})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(products)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/search?q=Laptop",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Laptop"
+          },
+          {
+            "method": "GET",
+            "path": "/search?q=nonexistent",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "[]"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Full-text search across fields",
+      "description": "Extend the search to match across name AND description fields using SQL LIKE with OR. Return results ordered by relevance (name matches first).",
+      "hints": [
+        "Use WHERE name LIKE ? OR description LIKE ?",
+        "Order by CASE WHEN name LIKE ? THEN 0 ELSE 1 END",
+        "Parameterize all user inputs"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req, res) => {\n  const { q } = req.query;\n  if (!q) return res.json([]);\n  const pattern = `%${q}%`;\n  const results = db.prepare(`\n    SELECT * FROM products \n    WHERE name LIKE ? OR description LIKE ?\n    ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, name\n  `).all(pattern, pattern, pattern);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req: Request, res: Response) => {\n  const q = req.query.q as string;\n  if (!q) return res.json([]);\n  const pattern = `%${q}%`;\n  const results = db.prepare(`\n    SELECT * FROM products \n    WHERE name LIKE ? OR description LIKE ?\n    ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, name\n  `).all(pattern, pattern, pattern);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)''')\nseed_data = [('Laptop', 'High performance laptop', 'Electronics', 999.99), ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99), ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99), ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99), ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)]\ndb.executemany('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)', seed_data)\ndb.commit()\n\n@app.get('/search')\ndef search(q: str = ''):\n    if not q:\n        return []\n    pattern = f'%{q}%'\n    cursor = db.execute('''\n        SELECT * FROM products\n        WHERE name LIKE ? OR description LIKE ?\n        ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, name\n    ''', (pattern, pattern, pattern))\n    rows = cursor.fetchall()\n    return [{'id': r[0], 'name': r[1], 'description': r[2], 'category': r[3], 'price': r[4]} for r in rows]\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`)\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Laptop', 'High performance laptop', 'Electronics', 999.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)\")\n\n\thttp.HandleFunc(\"/search\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tq := r.URL.Query().Get(\"q\")\n\t\tif q == \"\" {\n\t\t\tjson.NewEncoder(w).Encode([]interface{}{})\n\t\t\treturn\n\t\t}\n\t\tpattern := \"%\" + q + \"%\"\n\t\trows, _ := db.Query(\"SELECT id, name, description, category, price FROM products WHERE name LIKE ? OR description LIKE ? ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, name\", pattern, pattern, pattern)\n\t\tvar products []map[string]interface{}\n\t\tfor rows.Next() {\n\t\t\tvar id int\n\t\t\tvar name, desc, cat string\n\t\t\tvar price float64\n\t\t\trows.Scan(&id, &name, &desc, &cat, &price)\n\t\t\tproducts = append(products, map[string]interface{}{\"id\": id, \"name\": name, \"description\": desc, \"category\": cat, \"price\": price})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(products)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/search?q=performance",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Laptop"
+          },
+          {
+            "method": "GET",
+            "path": "/search?q=coffee",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Coffee"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filtered search with category",
+      "description": "Implement a filtered search endpoint that supports both a text query (q) and a category filter. Only return products matching both criteria.",
+      "hints": [
+        "Accept q and category as query parameters",
+        "Build the WHERE clause dynamically with both conditions",
+        "Return 200 with matching results array"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req, res) => {\n  const { q, category } = req.query;\n  let sql = 'SELECT * FROM products WHERE 1=1';\n  const params = [];\n  if (q) {\n    sql += ' AND (name LIKE ? OR description LIKE ?)';\n    const p = `%${q}%`;\n    params.push(p, p);\n  }\n  if (category) {\n    sql += ' AND category = ?';\n    params.push(category);\n  }\n  sql += ' ORDER BY name';\n  const results = db.prepare(sql).all(...params);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`);\nconst seed = db.prepare('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)');\nseed.run('Laptop', 'High performance laptop', 'Electronics', 999.99);\nseed.run('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99);\nseed.run('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99);\nseed.run('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99);\nseed.run('Notebook', '200 page spiral notebook', 'Stationery', 4.99);\n\napp.get('/search', (req: Request, res: Response) => {\n  const q = req.query.q as string | undefined;\n  const category = req.query.category as string | undefined;\n  let sql = 'SELECT * FROM products WHERE 1=1';\n  const params: string[] = [];\n  if (q) {\n    sql += ' AND (name LIKE ? OR description LIKE ?)';\n    const p = `%${q}%`;\n    params.push(p, p);\n  }\n  if (category) {\n    sql += ' AND category = ?';\n    params.push(category);\n  }\n  sql += ' ORDER BY name';\n  const results = db.prepare(sql).all(...params);\n  res.json(results);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('''CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)''')\nseed_data = [('Laptop', 'High performance laptop', 'Electronics', 999.99), ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99), ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99), ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99), ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)]\ndb.executemany('INSERT INTO products (name, description, category, price) VALUES (?, ?, ?, ?)', seed_data)\ndb.commit()\n\n@app.get('/search')\ndef search(q: str = '', category: str = ''):\n    sql = 'SELECT * FROM products WHERE 1=1'\n    params = []\n    if q:\n        sql += ' AND (name LIKE ? OR description LIKE ?)'\n        p = f'%{q}%'\n        params.extend([p, p])\n    if category:\n        sql += ' AND category = ?'\n        params.append(category)\n    sql += ' ORDER BY name'\n    cursor = db.execute(sql, params)\n    rows = cursor.fetchall()\n    return [{'id': r[0], 'name': r[1], 'description': r[2], 'category': r[3], 'price': r[4]} for r in rows]\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, category TEXT, price REAL)`)\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Laptop', 'High performance laptop', 'Electronics', 999.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Desk Chair', 'Ergonomic office chair', 'Furniture', 299.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Coffee Maker', 'Automatic drip coffee maker', 'Appliances', 49.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Headphones', 'Wireless noise-cancelling', 'Electronics', 199.99)\")\n\tdb.Exec(\"INSERT INTO products (name, description, category, price) VALUES ('Notebook', '200 page spiral notebook', 'Stationery', 4.99)\")\n\n\thttp.HandleFunc(\"/search\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tq := r.URL.Query().Get(\"q\")\n\t\tcategory := r.URL.Query().Get(\"category\")\n\n\t\tconditions := []string{}\n\t\targs := []interface{}{}\n\t\tif q != \"\" {\n\t\t\tconditions = append(conditions, \"(name LIKE ? OR description LIKE ?)\")\n\t\t\tp := \"%\" + q + \"%\"\n\t\t\targs = append(args, p, p)\n\t\t}\n\t\tif category != \"\" {\n\t\t\tconditions = append(conditions, \"category = ?\")\n\t\t\targs = append(args, category)\n\t\t}\n\t\tsql := \"SELECT id, name, description, category, price FROM products\"\n\t\tif len(conditions) > 0 {\n\t\t\tsql += \" WHERE \" + strings.Join(conditions, \" AND \")\n\t\t}\n\t\tsql += \" ORDER BY name\"\n\n\t\trows, _ := db.Query(sql, args...)\n\t\tvar products []map[string]interface{}\n\t\tfor rows.Next() {\n\t\t\tvar id int\n\t\t\tvar name, desc, cat string\n\t\t\tvar price float64\n\t\t\trows.Scan(&id, &name, &desc, &cat, &price)\n\t\t\tproducts = append(products, map[string]interface{}{\"id\": id, \"name\": name, \"description\": desc, \"category\": cat, \"price\": price})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(products)\n\t\t_ = fmt.Sprintf(\"%s\", \"\")\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/search?q=lap&category=Electronics",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Laptop"
+          },
+          {
+            "method": "GET",
+            "path": "/search?category=Stationery",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Notebook"
+          }
+        ]
+      }
+    }
+  ]
+}

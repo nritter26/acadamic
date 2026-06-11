@@ -1,0 +1,71 @@
+{
+  "id": "rs-custom-errors",
+  "title": "Rust: Custom Error Types",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "custom errors", "thiserror", "Display", "Debug"],
+  "description": "Define custom error types with the Error trait for better error handling.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define a Custom Error Enum",
+      "description": "Define an enum `AppError` with variants `NotFound`, `InvalidInput`, and `PermissionDenied`. Implement `Display` and `Debug` for it. Print each variant.",
+      "hints": ["`#[derive(Debug)]` for Debug impl.", "Implement `Display` manually with `fmt::Display`.", "Print with `println!(\"{}\", error)` and `println!(\"{:?}\", error)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Not Found') || output.includes('NotFound')",
+        "successMessage": "Custom error type works!",
+        "failureMessage": "Define AppError and print each variant."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Custom Error in Result",
+      "description": "Write a function `validate_age(age: i32) -> Result<i32, AppError>` that returns `InvalidInput` if age < 0 or age > 150, else `Ok(age)`. Test with 25, -5, and 200.",
+      "hints": ["`if age < 0 || age > 150 { return Err(AppError::InvalidInput); }`", "Use match to handle the Result.", "Return the result and print appropriate messages."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('25')",
+        "successMessage": "Custom error validation works!",
+        "failureMessage": "Validate ages and print results."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement Error Trait",
+      "description": "Implement `std::error::Error` for your `AppError` type (needed for `?` operator compatibility). Demonstrate using it with the `?` operator in a function.",
+      "hints": ["`impl std::error::Error for AppError {}` — the std::error::Error trait for simple enums.", "This enables `?` in functions returning `Result<_, AppError>`.", "The `source()` method defaults to None."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('age') || output.includes('valid')",
+        "successMessage": "Error trait implemented!",
+        "failureMessage": "Use the ? operator with AppError and print results."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Wrapping External Errors",
+      "description": "Extend `AppError` with a `ParseError(String)` variant that wraps parsing errors. Write a function `parse_config(s: &str) -> Result<i32, AppError>` that parses an i32.",
+      "hints": ["`AppError::ParseError(format!(\"failed to parse: {}\", s))`", "Map parse errors: `s.parse().map_err(|e| AppError::ParseError(format!(\"{}\", e)))`", "This pattern wraps external errors in your custom type."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('Error')",
+        "successMessage": "Error wrapping works!",
+        "failureMessage": "Parse '42' successfully and show error for 'abc'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Multi-Level Error Propagation",
+      "description": "Write nested functions: `read_config()`, `parse_config()`, `validate_config()` that each return `Result<_, AppError>` and use `?` to propagate errors up. Print the final result or error chain.",
+      "hints": ["`read_config` returns a string (to simulate).", "`parse_config` calls `read_config` then parses with `?`.", "`validate_config` calls `parse_config` then validates with `?`.", "The `?` operator propagates through the entire chain."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('config') || output.includes('42')",
+        "successMessage": "Multi-level error propagation works!",
+        "failureMessage": "Chain read→parse→validate with ? propagation."
+      }
+    }
+  ]
+}

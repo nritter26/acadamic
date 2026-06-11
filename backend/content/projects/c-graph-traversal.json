@@ -1,0 +1,23 @@
+{
+  "id": "c-graph-traversal",
+  "title": "C: Graph Traversal (BFS/DFS)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "graphs", "BFS", "DFS", "algorithms", "queues"],
+  "description": "Implement a simple graph using adjacency lists and traverse it with BFS and DFS.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Graph with DFS",
+      "description": "Define a graph with up to 6 nodes and edges. Implement DFS (recursive) that prints nodes in visitation order. Test with a small graph.",
+      "hints": ["Graph: adjacency matrix `int adj[6][6]`.", "DFS: `void dfs(int node, int visited[])`.", "Mark visited, print node, recurse on neighbors."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\n#define N 6\n\nint graph[N][N] = {\n    {0,1,1,0,0,0},\n    {1,0,0,1,1,0},\n    {1,0,0,0,0,1},\n    {0,1,0,0,0,0},\n    {0,1,0,0,0,0},\n    {0,0,1,0,0,0}\n};\n\nvoid dfs(int node, int visited[]) {\n    visited[node] = 1;\n    printf(\"%d \", node);\n    for (int i = 0; i < N; i++)\n        if (graph[node][i] && !visited[i]) dfs(i, visited);\n}\n\nvoid bfs(int start) {\n    int visited[N] = {0};\n    int queue[N], front = 0, rear = 0;\n    visited[start] = 1;\n    queue[rear++] = start;\n    while (front < rear) {\n        int node = queue[front++];\n        printf(\"%d \", node);\n        for (int i = 0; i < N; i++)\n            if (graph[node][i] && !visited[i]) {\n                visited[i] = 1;\n                queue[rear++] = i;\n            }\n    }\n}\n\nint main() {\n    int visited[N] = {0};\n    printf(\"DFS: \"); dfs(0, visited); printf(\"\\n\");\n    printf(\"BFS: \"); bfs(0); printf(\"\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('DFS') && output.includes('BFS')",
+        "successMessage": "Graph traversal works!",
+        "failureMessage": "Print DFS and BFS traversals starting from node 0"
+      }
+    }
+  ]
+}

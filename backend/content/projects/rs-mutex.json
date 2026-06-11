@@ -1,0 +1,71 @@
+{
+  "id": "rs-mutex",
+  "title": "Rust: Mutex and Shared State",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "Mutex", "Arc", "shared state", "thread safety"],
+  "description": "Use Mutex and Arc for thread-safe shared state in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Mutex",
+      "description": "Create a `Mutex<i32>` with value 0. Lock it, increment to 42, and print the value.",
+      "hints": ["`let counter = std::sync::Mutex::new(0);`", "`*counter.lock().unwrap() = 42;`", "`println!(\"{}\", *counter.lock().unwrap());`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Mutex lock works!",
+        "failureMessage": "Lock Mutex, set to 42, and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Shared Counter with Arc",
+      "description": "Create an `Arc<Mutex<i32>>` and share it across 10 threads. Each thread increments the counter 100 times. Print the final value (should be 1000).",
+      "hints": ["`let counter = std::sync::Arc::new(std::sync::Mutex::new(0));`", "Clone Arc before each thread: `let c = Arc::clone(&counter);`.", "10 threads × 100 increments = 1000."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1000')",
+        "successMessage": "Arc<Mutex> shared counter works!",
+        "failureMessage": "10 threads each increment 100 times, final value 1000."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Mutex with Complex Data",
+      "description": "Share a `Vec<i32>` protected by a Mutex across 5 threads. Each thread pushes its ID to the Vec. After joining, print the Vec.",
+      "hints": ["`Arc<Mutex<Vec<i32>>>`", "Each thread locks, pushes, and drops.", "Threads may interleave, so order varies."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('4')",
+        "successMessage": "Mutex with Vec works!",
+        "failureMessage": "5 threads each push their ID, print the Vec."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Poisoned Mutex",
+      "description": "Demonstrate a poisoned mutex: spawn a thread that locks a Mutex and panics. In main, try to lock the Mutex and handle `PoisonError`.",
+      "hints": ["When a thread panics while holding a Mutex, it becomes poisoned.", "`.lock().unwrap_or_else(|poisoned| poisoned.into_inner())`", "You can recover the value from the poison error."],
+      "codeTemplate": { "rust": "use std::sync::{Arc, Mutex};\n\nfn main() {\n    let data = Arc::new(Mutex::new(42));\n    let d = Arc::clone(&data);\n    let handle = std::thread::spawn(move || {\n        let _guard = d.lock().unwrap();\n        panic!(\"Thread panic!\");\n    });\n    let _ = handle.join();\n    // Mutex is poisoned, recover the value\n    match data.lock() {\n        Ok(val) => println!(\"Value: {}\", *val),\n        Err(poisoned) => {\n            let val = poisoned.into_inner();\n            println!(\"Recovered: {}\", val);\n        }\n    }\n}" },
+      "verification": {
+        "test": "output.includes('Recovered') || output.includes('42')",
+        "successMessage": "Poison error handled!",
+        "failureMessage": "Recover value from poisoned mutex."
+      }
+    },
+    {
+      "id": 5,
+      "title": "RwLock (Read-Write Lock)",
+      "description": "Use `RwLock` instead of Mutex. Spawn 3 reader threads and 1 writer thread. Readers call `.read()`, writer calls `.write()`. Print read values.",
+      "hints": ["`Arc<RwLock<i32>>`", "`.read()` allows multiple concurrent readers.", "`.write()` blocks until all readers finish.", "RwLock is more efficient than Mutex for read-heavy workloads."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('read') || output.includes('1')",
+        "successMessage": "RwLock works with multiple readers!",
+        "failureMessage": "Demonstrate RwLock with readers and writer."
+      }
+    }
+  ]
+}

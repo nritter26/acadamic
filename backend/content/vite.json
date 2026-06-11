@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Vite Introduction": {
+      "exp": "<p>Introduction to Vite and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Project Setup": [
       "Vite scaffolds projects using create-vite with templates for vanilla JS/TS, React, Vue, Svelte, Lit, and more. The setup process installs dependencies and configures the build tool in seconds.",
       "npm create vite@latest my-app -- --template react\ncd my-app\nnpm install\nnpm run dev"
@@ -12,6 +17,69 @@
       "Vite's dev server uses native ES modules and esbuild pre-bundling for instant startup. Hot Module Replacement updates modules without full page reloads, preserving application state during development.",
       "// vite.config.js\nexport default defineConfig({\n  server: { port: 3000, open: true, proxy: { '/api': 'http://localhost:8080' } }\n});"
     ]
+  },
+  "Core Concepts": {
+    "Vite Core Features": {
+      "exp": "<p>Essential Vite concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Vite Components": {
+      "exp": "<p>Building user interfaces with Vite.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Vite Routing": {
+      "exp": "<p>Navigation and routing in Vite.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Vite State": {
+      "exp": "<p>Managing application state in Vite.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Vite Data": {
+      "exp": "<p>Working with data and APIs in Vite.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Vite Testing": {
+      "exp": "<p>Testing strategies for Vite.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Vite Deployment": {
+      "exp": "<p>Deploying Vite applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Vite Best Practices": {
+      "exp": "<p>Best practices for Vite development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Vite Advanced": {
+      "exp": "<p>Advanced Vite topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Configuration": {
     "vite.config.js": [
@@ -123,6 +191,16 @@
     "Glob Imports": [
       "Glob imports with import.meta.glob load multiple modules from the filesystem dynamically, supporting eager loading, pattern matching, and import assertions for Markdown or JSON files.",
       "const pages = import.meta.glob('./pages/*.md', { eager: true, as: 'raw' });\nconst modules = import.meta.glob('./locales/*.json', { query: '?raw', import: 'default' });\n// Returns { './pages/about.md': '<markdown content>' }"
+    ]
+  },
+  "Vite Production Builds & Performance": {
+    "Build Optimization & Code Splitting": [
+      "Vite uses Rollup for production builds with optimized defaults: CSS code splitting, async chunk loading, and automatic dependency pre-bundling. Configure <code>build.rollupOptions</code> for manual chunk splitting. <code>manualChunks</code> separates vendor code from app code. <code>build.target</code> sets ES target. <code>build.minify</code> uses esbuild (fast) or terser (more options). <code>build.cssMinify</code> for CSS minification. <code>chunkSizeWarningLimit</code> controls size warnings. Dynamic imports with <code>import()</code> create automatic split points. Visualize bundle with <code>rollup-plugin-visualizer</code>. Analyze with <code>vite-bundle-visualizer</code>.",
+      "// vite.config.js\nimport { defineConfig } from 'vite';\nimport { visualizer } from 'rollup-plugin-visualizer';\n\nexport default defineConfig({\n  build: {\n    target: 'es2020',\n    minify: 'esbuild',\n    cssMinify: 'lightningcss',\n    sourcemap: false,\n    chunkSizeWarningLimit: 500,\n    rollupOptions: {\n      output: {\n        manualChunks: {\n          vendor: ['react', 'react-dom', 'react-router-dom'],\n          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],\n          charts: ['recharts', 'd3-scale'],\n        },\n        // Consistent chunk naming\n        entryFileNames: 'assets/[name]-[hash].js',\n        chunkFileNames: 'assets/[name]-[hash].js',\n        assetFileNames: 'assets/[name]-[hash][extname]',\n      },\n    },\n    // Output directory\n    outDir: 'dist',\n    // Clear before build\n    emptyOutDir: true,\n  },\n  plugins: [\n    // Bundle analysis\n    visualizer({\n      filename: 'dist/stats.html',\n      open: true,\n      gzipSize: true,\n      brotliSize: true,\n    }),\n  ],\n});\n\n// Dynamic imports for code splitting\nconst AdminPanel = () => import('./pages/AdminPanel.vue');\nconst Dashboard = () => import('./pages/Dashboard.vue');"
+    ],
+    "Vite SSR & Library Mode": [
+      "Vite supports Server-Side Rendering (SSR) for frameworks like Vue and React. SSR builds produce server and client entry points. <code>vite-plugin-ssr</code> and <code>vite-node</code> provide SSR tooling. Library mode (<code>build.lib</code>) packages components/libraries as ES modules, CommonJS, or UMD. Library entries: <code>entry</code> (main), <code>name</code> (global variable), <code>formats</code> (['es', 'cjs', 'umd']). <code>dts</code> plugin generates TypeScript declarations. <code>vite-plugin-dts</code> for library type generation. <code>external</code> marks peer dependencies as not bundled. CSS in libraries should use CSS modules or inline styles.",
+      "// Library mode configuration\n// vite.config.js (for component library)\nexport default defineConfig({\n  build: {\n    lib: {\n      entry: 'src/index.ts',\n      name: 'MyComponentLib',\n      formats: ['es', 'cjs', 'umd'],\n      fileName: (format) => `my-lib.${format}.js`,\n    },\n    rollupOptions: {\n      // Mark peer dependencies as external\n      external: ['react', 'react-dom', 'react/jsx-runtime'],\n      output: {\n        globals: {\n          react: 'React',\n          'react-dom': 'ReactDOM',\n        },\n      },\n    },\n  },\n  plugins: [\n    dts({ insertTypesEntry: true }),\n  ],\n});\n\n// SSR setup (basic example)\n// server.js\nimport express from 'express';\nimport { createServer as createViteServer } from 'vite';\n\nasync function startServer() {\n  const app = express();\n  const vite = await createViteServer({\n    server: { middlewareMode: true },\n    appType: 'custom'\n  });\n\n  app.use(vite.middlewares);\n\n  app.use('*', async (req, res) => {\n    const url = req.originalUrl;\n    \n    try {\n      const { render } = await vite.ssrLoadModule('/src/entry-server.ts');\n      const { html, head } = await render(url);\n      \n      res.status(200).set({ 'Content-Type': 'text/html' }).end(`\n        <!DOCTYPE html>\n        <html>\n          <head>${head}</head>\n          <body><div id=\"app\">${html}</div></body>\n        </html>\n      `);\n    } catch (e) {\n      vite.ssrFixStacktrace(e);\n      res.status(500).end(e.message);\n    }\n  });\n\n  app.listen(5173);\n}"
     ]
   }
 }

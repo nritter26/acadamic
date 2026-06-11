@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Tailwind Introduction": {
+      "exp": "<p>Introduction to Tailwind and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Utility-First": [
       "Tailwind's utility-first approach uses small, composable classes for styling directly in HTML. Instead of writing custom CSS, you combine utilities like flex, text-center, and p-4 to build designs.",
       "<div class='flex items-center justify-between p-4 bg-gray-100 rounded-lg'>\n  <h1 class='text-xl font-bold text-gray-800'>Hello</h1>\n</div>"
@@ -12,6 +17,69 @@
       "The tailwind.config.js file controls content paths, theme extensions, variants, and plugins. Custom values can extend the default theme without overriding the complete design system.",
       "module.exports = {\n  content: ['./src/**/*.{html,js}'],\n  theme: { extend: { colors: { brand: '#ff7849' } } },\n  plugins: [],\n};"
     ]
+  },
+  "Core Concepts": {
+    "Tailwind Core Features": {
+      "exp": "<p>Essential Tailwind concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Tailwind Components": {
+      "exp": "<p>Building user interfaces with Tailwind.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Tailwind Routing": {
+      "exp": "<p>Navigation and routing in Tailwind.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Tailwind State": {
+      "exp": "<p>Managing application state in Tailwind.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Tailwind Data": {
+      "exp": "<p>Working with data and APIs in Tailwind.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Tailwind Testing": {
+      "exp": "<p>Testing strategies for Tailwind.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Tailwind Deployment": {
+      "exp": "<p>Deploying Tailwind applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Tailwind Best Practices": {
+      "exp": "<p>Best practices for Tailwind development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Tailwind Advanced": {
+      "exp": "<p>Advanced Tailwind topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Layout": {
     "Flexbox": [
@@ -121,6 +189,16 @@
     "Bundle Size": [
       "Tailwind's production builds typically result in CSS files under 10KB after purging. The built-in minification and tree-shaking ensure only the utilities you actually use end up in the final bundle.",
       "# Check bundle size\nnpx tailwindcss -i ./src/input.css -o ./dist/output.css --minify\n# Typical result: 3-10KB"
+    ]
+  },
+  "Tailwind CSS Advanced": {
+    "Custom Design Systems & Plugins": [
+      "Tailwind CSS is highly customizable via <code>tailwind.config.js</code>. Extend the default theme with custom colors, fonts, spacing, breakpoints, and animations. <code>@apply</code> directive extracts repeated utility patterns into custom CSS. Plugins add new utilities, components, or base styles. <code>plugin()</code> function in config creates reusable plugin packages. Dark mode with <code>dark:</code> variant. Arbitrary values (<code>top-[117px]</code>) for one-off measurements. <code>theme()</code> function references design tokens in CSS. Presets share config across projects. <code>safelist</code> prevents purging of dynamically-constructed classes.",
+      "// tailwind.config.js\nconst colors = require('tailwindcss/colors');\n\nmodule.exports = {\n  content: ['./src/**/*.{html,js,svelte,ts,jsx,tsx}'],\n  darkMode: 'class',\n  theme: {\n    extend: {\n      colors: {\n        brand: {\n          50: '#eff6ff',\n          100: '#dbeafe',\n          200: '#bfdbfe',\n          500: '#3b82f6',\n          600: '#2563eb',\n          700: '#1d4ed8',\n          900: '#1e3a5f',\n        },\n        surface: {\n          DEFAULT: '#ffffff',\n          dark: '#0f172a',\n        }\n      },\n      fontFamily: {\n        display: ['Inter', 'system-ui', 'sans-serif'],\n        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],\n      },\n      spacing: {\n        '18': '4.5rem',\n        '88': '22rem',\n      },\n      animation: {\n        'fade-in': 'fadeIn 0.5s ease-in-out',\n        'slide-up': 'slideUp 0.3s ease-out',\n      },\n      keyframes: {\n        fadeIn: {\n          '0%': { opacity: '0' },\n          '100%': { opacity: '1' },\n        },\n        slideUp: {\n          '0%': { transform: 'translateY(10px)', opacity: '0' },\n          '100%': { transform: 'translateY(0)', opacity: '1' },\n        },\n      },\n    },\n  },\n  plugins: [\n    // Custom plugin for scrollbar styling\n    plugin(function({ addUtilities, addComponents, theme }) {\n      addUtilities({\n        '.scrollbar-thin': {\n          scrollbarWidth: 'thin',\n          '&::-webkit-scrollbar': { width: '6px' },\n          '&::-webkit-scrollbar-track': { background: 'transparent' },\n          '&::-webkit-scrollbar-thumb': {\n            background: theme('colors.gray.400'),\n            borderRadius: '3px',\n          },\n        },\n        '.text-gradient': {\n          backgroundClip: 'text',\n          '-webkit-background-clip': 'text',\n          '-webkit-text-fill-color': 'transparent',\n          backgroundImage: 'linear-gradient(to right, var(--tw-gradient-stops))',\n        },\n      });\n    }),\n  ],\n};\n\n// Usage in components\n{/* <div class=\"dark:bg-surface-dark bg-surface p-8 rounded-2xl shadow-lg animate-fade-in\">\n  <h1 class=\"font-display text-3xl text-gradient from-brand-500 to-brand-700\">\n    Custom Design System\n  </h1>\n  <div class=\"scrollbar-thin overflow-auto h-88 mt-4\">\n    <p class=\"text-gray-600 dark:text-gray-300\">Content with custom scrollbar...</p>\n  </div>\n</div> */}"
+    ],
+    "Responsive & Adaptive Layouts": [
+      "Tailwind's responsive prefixes: <code>sm:</code> (640px), <code>md:</code> (768px), <code>lg:</code> (1024px), <code>xl:</code> (1280px), <code>2xl:</code> (1536px). Mobile-first: start with base styles for small screens, add breakpoint overrides. Container queries with <code>@container</code> and <code>@lg</code>/<code>@md</code>. Grid layouts: <code>grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4</code>. Flexbox wrapping. <code>min-h-screen</code> for full-height layouts. Group selectors (<code>group</code>, <code>group-hover:</code>) for parent-state styling. <code>peer</code> for sibling-state. Modern CSS features: <code>aspect-ratio</code>, <code>container-type</code>, <code>overscroll-behavior</code>.",
+      "<div class=\"container mx-auto px-4 lg:px-8\">\n  <!-- Header: responsive typography -->\n  <header class=\"py-8 lg:py-12\">\n    <h1 class=\"text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold\">\n      Responsive Title\n    </h1>\n  </header>\n\n  <!-- Grid: 1 col on mobile, 2 on tablet, 3 on desktop, 4 on wide -->\n  <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6\">\n    {#each items as item}\n      <article class=\"group relative overflow-hidden rounded-xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300\">\n        <img src={item.image} alt={item.title}\n          class=\"aspect-video object-cover transition-transform duration-300 group-hover:scale-105\"\n        />\n        <div class=\"p-4\">\n          <h3 class=\"font-semibold group-hover:text-brand-600 transition-colors\">{item.title}</h3>\n          <p class=\"mt-2 text-sm text-gray-600 line-clamp-2\">{item.description}</p>\n        </div>\n      </article>\n    {/each}\n  </div>\n\n  <!-- Container queries (modern CSS) -->\n  <div class=\"@container mt-12\">\n    <div class=\"@lg:grid-cols-3 @md:grid-cols-2 grid grid-cols-1 gap-4\">\n      <!-- Container query responsive grid -->\n    </div>\n  </div>\n</div>"
     ]
   }
 }

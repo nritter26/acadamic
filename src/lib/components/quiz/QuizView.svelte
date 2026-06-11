@@ -4,7 +4,7 @@
     go:'Go', rs:'Rust', kt:'Kotlin', swift:'Swift', java:'Java', zig:'Zig',
     scala:'Scala', php:'PHP', rb:'Ruby', bash:'Bash', wasm:'Wasm', asm:'ASM',
     html:'HTML', css:'CSS', git:'Git', pg:'PostgreSQL', mysql:'MySQL',
-    sqlite:'SQLite', mongodb:'MongoDB', dk:'Docker', firebase:'Firebase',
+    sqlite:'SQLite', sql:'SQL', mongodb:'MongoDB', dk:'Docker', firebase:'Firebase',
     gamedev:'GameDev', cloud:'Cloud', aws:'AWS', azure:'Azure', gcp:'GCP',
     backend:'Backend',
   };

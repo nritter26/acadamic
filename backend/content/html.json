@@ -1,4 +1,111 @@
 {
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "<p>Introduction to HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "<p>Variables and data types in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "<p>Operators in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "<p>Control flow statements in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "<p>Functions in HTML.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "<p>Working with collections in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "<p>String manipulation in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "<p>Key-value data structures in HTML.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "<p>OOP concepts in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "<p>Inheritance patterns in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "<p>Interfaces and contracts in HTML.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "<p>Exception handling in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "<p>Debugging HTML code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "<p>File I/O in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "<p>Input and output operations in HTML.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "<p>Concurrency in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "<p>Modular programming in HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "<p>Best practices for HTML.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "<p>Optimizing HTML code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
   "HTML Fundamentals": {
     "What is HTML?": [
       "<p>HTML (HyperText Markup Language) is the standard language for creating web pages. It uses <strong>tags</strong> to structure content. HTML documents form the backbone of every website.</p><p>An HTML document starts with a <code>DOCTYPE</code> declaration, followed by <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code> elements.</p>",
@@ -207,6 +314,40 @@
     "HTML Validation": [
       "<p>Always validate HTML using the W3C Validator. Common issues: unclosed tags, duplicate IDs, improper nesting, missing <code>alt</code> attributes, deprecated elements like <code>&lt;center&gt;</code> or <code>&lt;font&gt;</code>.</p>",
       "<!-- Common validation errors to avoid -->\n<!-- BAD: duplicate IDs -->\n<div id=\"content\">...</div>\n<div id=\"content\">...</div>  <!-- WRONG -->\n\n<!-- BAD: deprecated tags -->\n<font color=\"red\">Text</font>  <!-- Use CSS instead -->\n\n<!-- GOOD: valid structure -->\n<section id=\"content\">\n    <h2>Valid Section</h2>\n    <p>Properly nested and accessible.</p>\n</section>"
+    ]
+  },
+  "Semantic HTML5": {
+    "Semantic Elements Overview": [
+      "Semantic HTML5 elements describe their meaning clearly to both the browser and developer. Elements like <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, and <code>&lt;footer&gt;</code> replace generic <code>&lt;div&gt;</code>s. Benefits include improved accessibility (screen readers navigate semantic landmarks), better SEO (search engines understand page structure), and cleaner code. Use semantic elements to create a logical document outline.",
+      "<!-- Non-semantic (div soup) -->\n<div class=\"header\">\n  <div class=\"nav\"><a href=\"/\">Home</a></div>\n</div>\n<div class=\"main\">\n  <div class=\"article\">\n    <div class=\"section\">Content</div>\n  </div>\n</div>\n\n<!-- Semantic HTML5 -->\n<header>\n  <nav><a href=\"/\">Home</a></nav>\n</header>\n<main>\n  <article>\n    <section>\n      <h2>Content</h2>\n      <p>This is a semantic document.</p>\n    </section>\n  </article>\n  <aside>Related links</aside>\n</main>\n<footer>&copy; 2026</footer>"
+    ],
+    "Accessible HTML (ARIA)": [
+      "Accessible Rich Internet Applications (ARIA) attributes supplement HTML semantics for dynamic content and complex UI components. Key ARIA attributes: <code>role</code> (defines element purpose), <code>aria-label</code> (provides an accessible name), <code>aria-labelledby</code> (references another element as label), <code>aria-describedby</code> (references description), <code>aria-hidden</code> (hides from assistive tech), <code>aria-expanded</code> (indicates expandable state), and <code>aria-live</code> (announces dynamic updates). First rule of ARIA: don't use ARIA if you can use native HTML semantics. Use landmark roles like <code>role=\"navigation\"</code> only when the HTML5 equivalent isn't available. Test with screen readers like NVDA, VoiceOver, or JAWS.",
+      "<!-- ARIA examples -->\n<button aria-label=\"Close dialog\" onclick=\"closeDialog()\">X</button>\n\n<div role=\"tablist\">\n  <button role=\"tab\" aria-selected=\"true\" aria-controls=\"panel1\">Tab 1</button>\n  <button role=\"tab\" aria-selected=\"false\" aria-controls=\"panel2\">Tab 2</button>\n</div>\n<div role=\"tabpanel\" id=\"panel1\" aria-labelledby=\"tab1\">\n  Content for Tab 1\n</div>\n\n<!-- Live region for dynamic updates -->\n<div aria-live=\"polite\" aria-atomic=\"true\">\n  Cart: 3 items\n</div>\n\n<!-- Skip navigation link -->\n<a href=\"#main-content\" class=\"skip-link\">Skip to main content</a>"
+    ],
+    "HTML Forms Deep Dive": [
+      "HTML forms collect user input. Essential elements: <code>&lt;form&gt;</code> (container with action/method), <code>&lt;input&gt;</code> (text, email, password, number, date, file, range, color, etc.), <code>&lt;select&gt;</code> and <code>&lt;option&gt;</code> (dropdowns), <code>&lt;textarea&gt;</code> (multi-line text), <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code> (grouping), <code>&lt;label&gt;</code> (accessibility). Form validation: <code>required</code>, <code>pattern</code>, <code>min</code>/<code>max</code>, <code>minlength</code>/<code>maxlength</code>. <code>novalidate</code> disables browser validation for custom JS validation. Use <code>FormData</code> API for easy data collection. Progressive enhancement: start with a working form, then enhance with JS.",
+      "<form id=\"signup\" action=\"/api/users\" method=\"POST\" novalidate>\n  <fieldset>\n    <legend>Personal Information</legend>\n    \n    <label for=\"name\">Full Name *</label>\n    <input type=\"text\" id=\"name\" name=\"name\" required minlength=\"2\" \n           placeholder=\"John Doe\" autocomplete=\"name\">\n    \n    <label for=\"email\">Email *</label>\n    <input type=\"email\" id=\"email\" name=\"email\" required \n           placeholder=\"john@example.com\" autocomplete=\"email\">\n    \n    <label for=\"password\">Password *</label>\n    <input type=\"password\" id=\"password\" name=\"password\" \n           required minlength=\"8\" \n           pattern=\"(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}\"\n           title=\"Must contain uppercase, lowercase, and number\">\n    \n    <label for=\"country\">Country</label>\n    <select id=\"country\" name=\"country\">\n      <option value=\"\">Select...</option>\n      <option value=\"US\">United States</option>\n      <option value=\"UK\">United Kingdom</option>\n      <option value=\"JP\">Japan</option>\n    </select>\n    \n    <label>\n      <input type=\"checkbox\" name=\"terms\" required>\n      I agree to the terms and conditions\n    </label>\n  </fieldset>\n  \n  <button type=\"submit\">Sign Up</button>\n</form>\n\n<script>\ndocument.getElementById('signup').addEventListener('submit', async (e) => {\n  e.preventDefault();\n  const data = new FormData(e.target);\n  const json = Object.fromEntries(data.entries());\n  const resp = await fetch(e.target.action, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify(json)\n  });\n  if (resp.ok) window.location.href = '/welcome';\n});\n</script>"
+    ],
+    "HTML Multimedia & Embeds": [
+      "HTML5 provides native multimedia elements: <code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code>, and <code>&lt;picture&gt;</code>. The <code>&lt;video&gt;</code> element supports multiple codecs (MP4/H.264, WebM/VP9, Ogg/Theora) via <code>&lt;source&gt;</code> elements. Attributes: <code>controls</code>, <code>autoplay</code>, <code>loop</code>, <code>muted</code>, <code>poster</code>. The <code>&lt;picture&gt;</code> element enables responsive images with <code>&lt;source media=\"(...)\" srcset=\"...\"&gt;</code> for art direction and resolution switching. <code>&lt;iframe&gt;</code> embeds external content (maps, videos, widgets). Use <code>sandbox</code> for security when embedding untrusted content. The <code>&lt;canvas&gt;</code> element provides bitmap drawing via JavaScript.",
+      "<!-- Video with multiple sources -->\n<video controls width=\"640\" poster=\"thumbnail.jpg\">\n  <source src=\"video.mp4\" type=\"video/mp4\">\n  <source src=\"video.webm\" type=\"video/webm\">\n  <track kind=\"subtitles\" src=\"subtitles.vtt\" srclang=\"en\" label=\"English\">\n  <p>Your browser doesn't support video. <a href=\"video.mp4\">Download</a></p>\n</video>\n\n<!-- Responsive images with picture -->\n<picture>\n  <source media=\"(min-width: 1024px)\" srcset=\"hero-large.jpg, hero-large@2x.jpg 2x\">\n  <source media=\"(min-width: 640px)\" srcset=\"hero-medium.jpg\">\n  <img src=\"hero-small.jpg\" alt=\"Hero banner\" loading=\"lazy\" \n       width=\"400\" height=\"300\">\n</picture>\n\n<!-- Safe iframe embed -->\n<iframe src=\"https://maps.google.com/...\" \n        width=\"600\" height=\"450\" \n        loading=\"lazy\"\n        sandbox=\"allow-scripts allow-same-origin\"></iframe>"
+    ]
+  },
+  "HTML Performance & SEO": {
+    "Critical Rendering Path": [
+      "The critical rendering path is the sequence of steps the browser takes to render a page: HTML parsing (DOM), CSS parsing (CSSOM), JavaScript execution (blocking), render tree construction, layout, and paint. Optimize by: deferring non-critical CSS/JS, inlining critical CSS in <code>&lt;head&gt;</code>, using <code>&lt;link rel=\"preload\"&gt;</code> for important resources, and minimizing render-blocking resources. First Contentful Paint (FCP) and Largest Contentful Paint (LCP) measure perceived load speed.",
+      "<!-- Critical rendering path optimizations -->\n<head>\n  <!-- Inline critical CSS -->\n  <style>\n    body { font-family: system-ui; margin: 0; }\n    .hero { display: flex; min-height: 50vh; }\n  </style>\n  \n  <!-- Preload key resources -->\n  <link rel=\"preload\" href=\"font.woff2\" as=\"font\" crossorigin>\n  <link rel=\"preload\" href=\"hero.jpg\" as=\"image\">\n  \n  <!-- Defer non-critical CSS -->\n  <link rel=\"preload\" href=\"styles.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">\n  \n  <!-- Defer JavaScript -->\n  <script src=\"app.js\" defer></script>\n  \n  <!-- Optimize Largest Contentful Paint -->\n  <link rel=\"preload\" href=\"LCP-image.jpg\" as=\"image\" fetchpriority=\"high\">\n</head>"
+    ],
+    "SEO Meta Tags & Structured Data": [
+      "SEO metadata helps search engines understand and rank your content. Essential meta tags: <code>&lt;title&gt;</code> (unique per page, 50-60 chars), <code>&lt;meta name=\"description\"&gt;</code> (150-160 chars), Open Graph tags (Facebook, LinkedIn: <code>og:title</code>, <code>og:description</code>, <code>og:image</code>, <code>og:url</code>), Twitter Cards (<code>twitter:card</code>, <code>twitter:site</code>). Structured data using JSON-LD (Schema.org) enhances search results with rich snippets (reviews, recipes, events, FAQs, breadcrumbs). Use Google's Rich Results Test to validate structured data.",
+      "<head>\n  <!-- Basic SEO -->\n  <title>Learn HTML - Complete Tutorial with Examples | Kodex</title>\n  <meta name=\"description\" content=\"Master HTML5 with our comprehensive tutorial covering semantic elements, forms, multimedia, SEO, and best practices. Perfect for beginners and intermediate developers.\">\n  <link rel=\"canonical\" href=\"https://kodex.dev/html\">\n  \n  <!-- Open Graph -->\n  <meta property=\"og:title\" content=\"Learn HTML - Complete Tutorial\">\n  <meta property=\"og:description\" content=\"Master HTML5 with comprehensive tutorials\">\n  <meta property=\"og:image\" content=\"https://kodex.dev/og-html.png\">\n  <meta property=\"og:type\" content=\"website\">\n  \n  <!-- Twitter Card -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\">\n  <meta name=\"twitter:site\" content=\"@kodex\">\n  \n  <!-- JSON-LD Structured Data -->\n  <script type=\"application/ld+json\">\n  {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Article\",\n    \"headline\": \"Learn HTML - Complete Tutorial\",\n    \"description\": \"Master HTML5 with our comprehensive tutorial\",\n    \"author\": {\n      \"@type\": \"Organization\",\n      \"name\": \"Kodex\"\n    },\n    \"datePublished\": \"2026-06-10\",\n    \"educationalLevel\": \"Beginner\"\n  }\n  </script>\n</head>"
+    ]
+  },
+  "HTML Templates & Web Components": {
+    "HTML Templates & Slots": [
+      "The <code>&lt;template&gt;</code> element holds HTML that is not rendered until cloned into the DOM via JavaScript. The <code>&lt;slot&gt;</code> element is used inside web components for content projection — it acts as a placeholder where the parent's light DOM content is inserted. Named slots (<code>slot=\"name\"</code>) allow multiple insertion points. Templates are the foundation of reusable web components and are supported in all modern browsers.",
+      "<!-- HTML Template -->\n<template id=\"user-card\">\n  <style>\n    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }\n    .name { font-weight: bold; font-size: 1.2em; }\n  </style>\n  <div class=\"card\">\n    <div class=\"name\"><slot name=\"name\">User</slot></div>\n    <div class=\"email\"><slot name=\"email\">email@example.com</slot></div>\n    <slot></slot>\n  </div>\n</template>\n\n<!-- Using the template -->\n<user-card>\n  <span slot=\"name\">John Doe</span>\n  <span slot=\"email\">john@example.com</span>\n  <p>Additional content in default slot</p>\n</user-card>\n\n<script>\nclass UserCard extends HTMLElement {\n  constructor() {\n    super();\n    const template = document.getElementById('user-card');\n    const shadow = this.attachShadow({ mode: 'open' });\n    shadow.appendChild(template.content.cloneNode(true));\n  }\n}\ncustomElements.define('user-card', UserCard);\n</script>"
     ]
   }
 }

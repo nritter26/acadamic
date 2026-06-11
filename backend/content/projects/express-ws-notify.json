@@ -1,0 +1,119 @@
+{
+  "id": "express-ws-notify",
+  "title": "WebSocket Notification Server",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["websocket", "notifications", "pub-sub", "real-time", "express-ws"],
+  "serverMode": true,
+  "description": "Build a notification server with subscription management, REST endpoints for sending notifications, and a WebSocket for real-time delivery.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Subscribe for notifications",
+      "description": "Create a POST /subscribe endpoint that registers a subscriber and returns 201 with a subId.",
+      "hints": [
+        "Generate a unique subscription id using crypto or uuid",
+        "Store subscriber info in an in-memory object",
+        "Return res.status(201).json({ subId })"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet subscribers = {};\n\napp.post('/subscribe', (req, res) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Subscriber {\n  notifications: string[];\n}\n\nlet subscribers: Record<string, Subscriber> = {};\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nsubscribers = {}\n\n@app.post('/subscribe', status_code=201)\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'notifications': []}\n    return {'subId': sub_id}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t\"github.com/google/uuid\"\n)\n\ntype Subscriber struct {\n\tNotifications []string `json:\"notifications\"`\n}\n\nvar subscribers = make(map[string]*Subscriber)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := uuid.New().String()\n\t\tsubscribers[subID] = &Subscriber{Notifications: []string{}}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subId\": subID})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/subscribe",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "subId"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Send notification to all subscribers",
+      "description": "Create a POST /notify endpoint that accepts a message and adds it to all subscribers' pending notifications.",
+      "hints": [
+        "Accept JSON body with a message field",
+        "Iterate over all subscribers and push the message to each",
+        "Return 200 with count of notified subscribers"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet subscribers = {};\n\napp.post('/subscribe', (req, res) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req, res) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Subscriber {\n  notifications: string[];\n}\n\nlet subscribers: Record<string, Subscriber> = {};\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req: Request, res: Response) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass Notification(BaseModel):\n    message: str\n\nsubscribers = {}\n\n@app.post('/subscribe', status_code=201)\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'notifications': []}\n    return {'subId': sub_id}\n\n@app.post('/notify')\ndef notify(notif: Notification):\n    for sub in subscribers.values():\n        sub['notifications'].append(notif.message)\n    return {'notified': len(subscribers)}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t\"github.com/google/uuid\"\n)\n\ntype Subscriber struct {\n\tNotifications []string `json:\"notifications\"`\n}\n\nvar subscribers = make(map[string]*Subscriber)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := uuid.New().String()\n\t\tsubscribers[subID] = &Subscriber{Notifications: []string{}}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subId\": subID})\n\t})\n\n\thttp.HandleFunc(\"/notify\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tMessage string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tfor _, sub := range subscribers {\n\t\t\tsub.Notifications = append(sub.Notifications, body.Message)\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]int{\"notified\": len(subscribers)})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/notify",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "notified"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Retrieve pending notifications",
+      "description": "Add a GET /notifications/:subId endpoint that returns pending notifications for a subscriber.",
+      "hints": [
+        "Use app.get('/notifications/:subId', handler)",
+        "Look up subscriber by subId from the params",
+        "Return 404 if subId not found, otherwise return the notifications array"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet subscribers = {};\n\napp.post('/subscribe', (req, res) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req, res) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.get('/notifications/:subId', (req, res) => {\n  const sub = subscribers[req.params.subId];\n  if (!sub) return res.status(404).json({ error: 'Subscriber not found' });\n  res.json({ notifications: sub.notifications });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Subscriber {\n  notifications: string[];\n}\n\nlet subscribers: Record<string, Subscriber> = {};\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req: Request, res: Response) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.get('/notifications/:subId', (req: Request, res: Response) => {\n  const sub = subscribers[req.params.subId];\n  if (!sub) return res.status(404).json({ error: 'Subscriber not found' });\n  res.json({ notifications: sub.notifications });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass Notification(BaseModel):\n    message: str\n\nsubscribers = {}\n\n@app.post('/subscribe', status_code=201)\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'notifications': []}\n    return {'subId': sub_id}\n\n@app.post('/notify')\ndef notify(notif: Notification):\n    for sub in subscribers.values():\n        sub['notifications'].append(notif.message)\n    return {'notified': len(subscribers)}\n\n@app.get('/notifications/{sub_id}')\ndef get_notifications(sub_id: str):\n    sub = subscribers.get(sub_id)\n    if not sub:\n        return {'error': 'Subscriber not found'}\n    return {'notifications': sub['notifications']}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\n\t\"github.com/google/uuid\"\n)\n\ntype Subscriber struct {\n\tNotifications []string `json:\"notifications\"`\n}\n\nvar subscribers = make(map[string]*Subscriber)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := uuid.New().String()\n\t\tsubscribers[subID] = &Subscriber{Notifications: []string{}}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subId\": subID})\n\t})\n\n\thttp.HandleFunc(\"/notify\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tMessage string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tfor _, sub := range subscribers {\n\t\t\tsub.Notifications = append(sub.Notifications, body.Message)\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]int{\"notified\": len(subscribers)})\n\t})\n\n\thttp.HandleFunc(\"/notifications/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := strings.TrimPrefix(r.URL.Path, \"/notifications/\")\n\t\tsub, ok := subscribers[subID]\n\t\tif !ok {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Subscriber not found\"})\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"notifications\": sub.Notifications})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/notifications/test-id",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "notifications"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "WebSocket for real-time notifications",
+      "description": "Add a WS /ws endpoint that sends real-time notifications to connected WebSocket clients.",
+      "hints": [
+        "Use express-ws or similar library to handle WebSocket connections",
+        "Track connected WebSocket clients",
+        "When a notification is posted, send it to all connected WebSocket clients"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet subscribers = {};\nlet wsClients = new Set();\n\napp.post('/subscribe', (req, res) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req, res) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  wsClients.forEach(ws => ws.send(JSON.stringify({ type: 'notification', message })));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.get('/notifications/:subId', (req, res) => {\n  const sub = subscribers[req.params.subId];\n  if (!sub) return res.status(404).json({ error: 'Subscriber not found' });\n  res.json({ notifications: sub.notifications });\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Subscriber {\n  notifications: string[];\n}\n\nlet subscribers: Record<string, Subscriber> = {};\nlet wsClients = new Set<WebSocket>();\n\napp.post('/subscribe', (req: Request, res: Response) => {\n  const subId = crypto.randomUUID();\n  subscribers[subId] = { notifications: [] };\n  res.status(201).json({ subId });\n});\n\napp.post('/notify', (req: Request, res: Response) => {\n  const { message } = req.body;\n  Object.values(subscribers).forEach(sub => sub.notifications.push(message));\n  wsClients.forEach(ws => ws.send(JSON.stringify({ type: 'notification', message })));\n  res.json({ notified: Object.keys(subscribers).length });\n});\n\napp.get('/notifications/:subId', (req: Request, res: Response) => {\n  const sub = subscribers[req.params.subId];\n  if (!sub) return res.status(404).json({ error: 'Subscriber not found' });\n  res.json({ notifications: sub.notifications });\n});\n\napp.ws('/ws', (ws, req) => {\n  wsClients.add(ws);\n  ws.on('close', () => wsClients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nfrom pydantic import BaseModel\nimport uuid\nfrom typing import List\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass Notification(BaseModel):\n    message: str\n\nsubscribers = {}\nactive_connections: List[WebSocket] = []\n\n@app.post('/subscribe', status_code=201)\ndef subscribe():\n    sub_id = str(uuid.uuid4())\n    subscribers[sub_id] = {'notifications': []}\n    return {'subId': sub_id}\n\n@app.post('/notify')\ndef notify(notif: Notification):\n    for sub in subscribers.values():\n        sub['notifications'].append(notif.message)\n    for conn in active_connections:\n        await conn.send_json({'type': 'notification', 'message': notif.message})\n    return {'notified': len(subscribers)}\n\n@app.get('/notifications/{sub_id}')\ndef get_notifications(sub_id: str):\n    sub = subscribers.get(sub_id)\n    if not sub:\n        return {'error': 'Subscriber not found'}\n    return {'notifications': sub['notifications']}\n\n@app.websocket('/ws')\nasync def websocket_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    active_connections.append(websocket)\n    try:\n        while True:\n            await websocket.receive_text()\n    except:\n        active_connections.remove(websocket)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"sync\"\n\n\t\"github.com/google/uuid\"\n\t\"github.com/gorilla/websocket\"\n)\n\ntype Subscriber struct {\n\tNotifications []string `json:\"notifications\"`\n}\n\nvar (\n\tsubscribers = make(map[string]*Subscriber)\n\twsClients   = make(map[*websocket.Conn]bool)\n\tmu          sync.Mutex\n\tupgrader    = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/subscribe\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := uuid.New().String()\n\t\tsubscribers[subID] = &Subscriber{Notifications: []string{}}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"subId\": subID})\n\t})\n\n\thttp.HandleFunc(\"/notify\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tMessage string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tfor _, sub := range subscribers {\n\t\t\tsub.Notifications = append(sub.Notifications, body.Message)\n\t\t}\n\t\tmu.Lock()\n\t\tfor conn := range wsClients {\n\t\t\tdata, _ := json.Marshal(map[string]string{\"type\": \"notification\", \"message\": body.Message})\n\t\t\tconn.WriteMessage(websocket.TextMessage, data)\n\t\t}\n\t\tmu.Unlock()\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]int{\"notified\": len(subscribers)})\n\t})\n\n\thttp.HandleFunc(\"/notifications/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tsubID := strings.TrimPrefix(r.URL.Path, \"/notifications/\")\n\t\tsub, ok := subscribers[subID]\n\t\tif !ok {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Subscriber not found\"})\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"notifications\": sub.Notifications})\n\t})\n\n\thttp.HandleFunc(\"/ws\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tmu.Lock()\n\t\twsClients[conn] = true\n\t\tmu.Unlock()\n\t\tdefer func() {\n\t\t\tmu.Lock()\n\t\t\tdelete(wsClients, conn)\n\t\t\tmu.Unlock()\n\t\t\tconn.Close()\n\t\t}()\n\t\tfor {\n\t\t\t_, _, _ = conn.ReadMessage()\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/ws",
+            "expectedStatus": 101
+          }
+        ]
+      }
+    }
+  ]
+}

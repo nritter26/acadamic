@@ -1,0 +1,23 @@
+{
+  "id": "c-variadic-functions",
+  "title": "C: Variadic Functions",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "variadic", "va_list", "stdarg", "printf"],
+  "description": "Write a variadic function that sums an arbitrary number of integers using stdarg.h.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Variadic Sum",
+      "description": "Write a function `int sum(int count, ...)` that takes a count followed by that many integers, and returns their sum. Call with 5 numbers (10, 20, 30, 40, 50) and print the result.",
+      "hints": ["Use `va_list`, `va_start`, `va_arg`, `va_end` from <stdarg.h>.", "`va_arg(ap, int)` to get each int.", "Loop from 0 to count-1."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdarg.h>\n\nint sum(int count, ...) {\n    \n}\n\nint main() {\n    printf(\"Sum: %d\\n\", sum(5, 10, 20, 30, 40, 50));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('150')",
+        "successMessage": "Variadic sum works!",
+        "failureMessage": "Sum 10+20+30+40+50 and print 150"
+      }
+    }
+  ]
+}

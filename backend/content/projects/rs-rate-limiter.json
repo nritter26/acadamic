@@ -1,0 +1,71 @@
+{
+  "id": "rs-rate-limiter",
+  "title": "Rust: Token Bucket Rate Limiter",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "rate limiting", "token bucket", "algorithms"],
+  "description": "Implement a token bucket rate limiter in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Periodic Refill",
+      "description": "Implement a `TokenBucket` struct with `capacity` and `tokens`. Add a `try_consume(&mut self) -> bool` method. Create a bucket with capacity 5, consume 3 tokens successfully, then try to consume more.",
+      "hints": ["`struct TokenBucket { capacity: usize, tokens: usize }`", "`try_consume` checks if tokens > 0, decrements if so.", "Consume 3 from 5 → 2 left, then consume 3 more fails on the 3rd."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Token consumption works!",
+        "failureMessage": "Print true when tokens available, false when exhausted."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Periodic Refill",
+      "description": "Add a `refill(&mut self, count: usize)` method. Create a bucket with capacity 3, consume 3, refill 2, consume 2 more. Print each result.",
+      "hints": ["Refill adds tokens up to capacity.", "`fn refill(&mut self, count: usize) { self.tokens = (self.tokens + count).min(self.capacity); }`", "Consume 3 → empty, refill 2 → consume 2 success, consume 1 fails."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Refill works!",
+        "failureMessage": "Consume until empty, refill, consume again."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Time-Based Refill",
+      "description": "Add time-based refill: track `last_refill_time`. Every `refill_interval_ms`, add `refill_amount` tokens. Simulate by advancing time manually.",
+      "hints": ["Track `last_refill: Instant` in the struct.", "Before consuming, call a `check_refill()` that checks if enough time has passed.", "`if last_refill.elapsed() >= refill_interval { refill(); }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('refill')",
+        "successMessage": "Time-based refill works!",
+        "failureMessage": "Print true after waiting for refill."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Thread-Safe Rate Limiter",
+      "description": "Wrap TokenBucket in `Arc<Mutex<>>` and test with 5 concurrent threads attempting to consume 1 token each from a bucket with 3 capacity. Count successful vs blocked attempts.",
+      "hints": ["Share `Arc<Mutex<TokenBucket>>` across threads.", "Each thread calls `try_consume` inside a lock.", "Count successes and print: '3 succeeded, 2 blocked'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('succeed') || output.includes('3')",
+        "successMessage": "Thread-safe rate limiter works!",
+        "failureMessage": "5 threads try to consume from 3-token bucket."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Multi-Key Rate Limiter",
+      "description": "Extend the rate limiter to support multiple keys (e.g., per-user). Use a `HashMap<String, TokenBucket>`. Test with two users each having their own rate limits.",
+      "hints": ["`struct RateLimiter { buckets: HashMap<String, TokenBucket>, capacity: usize, ... }`", "`fn check(&mut self, key: &str) -> bool` gets or creates bucket for key.", "User A and User B operate independently."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('user') || output.includes('true')",
+        "successMessage": "Multi-key rate limiter works!",
+        "failureMessage": "Test rate limiting with two independent users."
+      }
+    }
+  ]
+}

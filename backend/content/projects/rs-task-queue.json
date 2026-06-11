@@ -1,0 +1,71 @@
+{
+  "id": "rs-task-queue",
+  "title": "Rust: Task Queue / Job Scheduler",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "task queue", "job scheduler", "worker pool", "priority"],
+  "description": "Build a task queue with job scheduling, priorities, and worker pools.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Job and Queue",
+      "description": "Define a `Job` struct with `id: u64`, `name: String`, `priority: u8`. Create a `JobQueue` using `VecDeque<Job>`. Implement `enqueue`, `dequeue`, and `peek`.",
+      "hints": ["`struct Job { id: u64, name: String, priority: u8 }`", "`struct JobQueue { jobs: VecDeque<Job>, next_id: u64 }`", "Enqueue adds, dequeue pops from front (FIFO)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Job') && output.contains('enqueue')",
+        "successMessage": "Job and queue defined!",
+        "failureMessage": "Create and enqueue jobs, then dequeue and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Priority Queue",
+      "description": "Convert to a priority queue using a `BinaryHeap<Job>` (where Job implements Ord by priority). Higher priority jobs are dequeued first. Test by enqueuing jobs with different priorities.",
+      "hints": ["`impl Ord for Job { fn cmp(&a, &b) -> Ordering { a.priority.cmp(&b.priority) } }`", "`BinaryHeap` pops the highest priority item.", "Higher number = higher priority."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('high') && output.contains('low')",
+        "successMessage": "Priority queue works!",
+        "failureMessage": "Enqueue low-pri and high-pri jobs, print dequeue order (high first)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Worker Pool",
+      "description": "Create a `WorkerPool` that spawns `num_workers` threads. Workers pull jobs from a shared queue and execute them. Use `Arc<Mutex<JobQueue>>`. Print when each worker processes a job.",
+      "hints": ["Share queue via `Arc<Mutex<JobQueue>>`.", "Each worker loops, locks queue, pops job, processes.", "Print: `Worker 3 processing Job 1 (\"build\")`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Worker') && output.contains('processing')",
+        "successMessage": "Worker pool works!",
+        "failureMessage": "Submit 5 jobs to 3 workers and print processing messages."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Job with Status Tracking",
+      "description": "Track job status: `Pending`, `Running`, `Completed`, `Failed`. Create a `JobTracker` that stores job statuses. Update status as jobs move through the queue. Print final status report.",
+      "hints": ["`enum JobStatus { Pending, Running, Completed, Failed }`", "`struct JobTracker { statuses: HashMap<u64, JobStatus> }`", "Print: `Job 1: Completed, Job 2: Failed, ...`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Completed') && output.contains('Pending')",
+        "successMessage": "Job status tracking works!",
+        "failureMessage": "Run several jobs and print their final statuses."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Scheduled Jobs",
+      "description": "Add scheduled execution: jobs can have a `run_at: Option<Instant>`. The queue only returns scheduled jobs after their time has passed. Test with immediate and delayed jobs.",
+      "hints": ["Add `run_at: Option<std::time::Instant>` to Job.", "Dequeue only returns jobs where run_at is None or run_at <= now.", "Simulate delayed jobs by creating them with `Instant::now() + Duration::from_millis(10)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('scheduled') || output.contains('delayed')",
+        "successMessage": "Job scheduling works!",
+        "failureMessage": "Schedule immediate and delayed jobs and show they execute at the right time."
+      }
+    }
+  ]
+}

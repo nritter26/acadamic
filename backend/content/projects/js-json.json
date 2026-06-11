@@ -1,0 +1,51 @@
+{
+  "id": "js-json",
+  "title": "JavaScript: Json",
+  "description": "Practice json in JavaScript.",
+  "difficulty": "advanced",
+  "languages": [
+    "js"
+  ],
+  "codeTemplate": {
+    "js": "console.log('Advanced JavaScript practice')"
+  },
+  "verificationTest": "output.includes('name') && output.includes('age')",
+  "hints": [
+    "Practice json in JavaScript"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse JSON string",
+      "description": "Parse the JSON string {\"name\": \"Alice\", \"age\": 30} into an object and print the name.",
+      "hints": [
+        "JSON.parse(jsonString)",
+        "Access property: obj.name"
+      ],
+      "codeTemplate": {
+        "javascript": "const jsonString = '{\"name\": \"Alice\", \"age\": 30}';\nconst obj = ; // parse JSON\n\nconsole.log(obj.name);\nconsole.log(obj.age);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Alice\") && output.includes(\"30\")",
+        "successMessage": "JSON parsing works!",
+        "failureMessage": "Use JSON.parse() to convert string to object."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Stringify to JSON",
+      "description": "Convert the object {title: \"Book\", price: 19.99} to a JSON string and print it.",
+      "hints": [
+        "JSON.stringify(obj)"
+      ],
+      "codeTemplate": {
+        "javascript": "const book = {title: \"Book\", price: 19.99};\nconst json = ; // stringify\n\nconsole.log(json);\nconsole.log(typeof json);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"title\") && output.includes(\"price\")",
+        "successMessage": "JSON stringify works!",
+        "failureMessage": "Convert object to JSON string."
+      }
+    }
+  ]
+}

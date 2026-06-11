@@ -1,0 +1,97 @@
+{
+  "id": "ts-interfaces",
+  "title": "TypeScript: Interfaces",
+  "description": "Write a TypeScript program that defines and implements interfaces with optional properties.",
+  "difficulty": "beginner",
+  "languages": [
+    "ts"
+  ],
+  "codeTemplate": {
+    "ts": "interface Person {\n  name: string;\n  age: number;\n  email?: string;\n}\n\nfunction greet(person: Person): string {\n  if (person.email) {\n    return `Hello ${person.name}, email: ${person.email}`;\n  }\n  return `Hello ${person.name}`;\n}\n\nconst alice: Person = { name: 'Alice', age: 30 };\nconst bob: Person = { name: 'Bob', age: 25, email: 'bob@test.com' };\n\nconsole.log(greet(alice));\nconsole.log(greet(bob));"
+  },
+  "verificationTest": "output.includes('Hello Alice') && output.includes('Hello Bob, email: bob@test.com')",
+  "hints": [
+    "Define interfaces with `interface Name { ... }`",
+    "Optional properties use `?:` syntax",
+    "Functions can specify parameter and return types"
+  ],
+  "estimatedMinutes": 15,
+  "concepts": [
+    "general",
+    "ts"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the TypeScript: Interfaces project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for TypeScript: Interfaces",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 1: Set up the TypeScript: Interfaces project\n// Your code here\n\nconsole.log(\"Testing TypeScript: Interfaces...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for TypeScript: Interfaces",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 2: Implement the core logic for TypeScript: Interfaces\n// Your code here\n\nconsole.log(\"Testing TypeScript: Interfaces...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing TypeScript: Interfaces...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "ts": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing TypeScript: Interfaces...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
+  ]
+}

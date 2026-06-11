@@ -1,0 +1,71 @@
+{
+  "id": "rs-testing-framework",
+  "title": "Rust: Simple Testing Framework",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "testing", "assertions", "test runner", "macros"],
+  "description": "Build a simple testing framework with assertions and test runner.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Assertion Macros",
+      "description": "Write functions `assert_eq<T: Display + PartialEq>(left: T, right: T, msg: &str)` and `assert_true(value: bool, msg: &str)`. Each prints a colored pass/fail message.",
+      "hints": ["On pass: `println!(\"  ✓ {}\", msg)`.", "On fail: `println!(\"  ✗ {}\", msg); println!(\"    expected: {}, got: {}\", right, left)`", "These are like Rust's assert_eq! but with custom formatting."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('✓') || output.contains('OK')",
+        "successMessage": "Assertion functions work!",
+        "failureMessage": "Run assert_eq(1, 1, \"one equals one\") and print the result."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Test Function Runner",
+      "description": "Create a `TestSuite` that holds test functions: `Vec<Box<dyn Fn()>>`. Add a `run()` method that executes all tests and prints a summary (passed, failed, total).",
+      "hints": ["`struct TestSuite { tests: Vec<(String, Box<dyn Fn()>)>, failures: usize, passes: usize }`", "Wrap each test in `std::panic::catch_unwind` to capture panics.", "Print `\"3/3 tests passed\"` at the end."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('passed') && output.contains('tests')",
+        "successMessage": "Test runner works!",
+        "failureMessage": "Run a TestSuite with passing tests and print summary."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Test Setup and Teardown",
+      "description": "Add setup/teardown support: `before_each: Option<Box<dyn Fn()>>` and `after_each: Option<Box<dyn Fn()>>`. The setup runs before each test, teardown after. Print setup/teardown messages.",
+      "hints": ["In `run()`, call `setup()` before each test, `teardown()` after.", "Useful for initializing shared state.", "Print: `[setup] Running 'test name'`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('setup') && output.contains('teardown')",
+        "successMessage": "Setup/teardown works!",
+        "failureMessage": "Run tests with setup and teardown, print messages."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Test Grouping",
+      "description": "Add test grouping: create a `TestGroup` with a name and child tests. Support nested groups. Print an indented hierarchy when running tests.",
+      "hints": ["`struct TestGroup { name: String, tests: Vec<Box<dyn Testable>>, groups: Vec<TestGroup> }`", "Implement `Testable` trait for both tests and groups.", "Print with indentation: `  Group: math\n    ✓ test_add\n    ✓ test_sub`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Group') || output.contains('indent')",
+        "successMessage": "Test grouping works!",
+        "failureMessage": "Define and run nested test groups."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Timing and Performance Tests",
+      "description": "Add test timing: measure and print the duration of each test. Add a `should_complete_under(duration: Duration)` assertion that fails if the test takes too long.",
+      "hints": ["Record `Instant::now()` before and after each test.", "Print: `✓ test_add (1.2ms)`", "`assert_completes_under(threshold, || { /* code */ })` returns Err if too slow."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('ms') || output.contains('µs')",
+        "successMessage": "Test timing works!",
+        "failureMessage": "Run tests with timing information and print durations."
+      }
+    }
+  ]
+}

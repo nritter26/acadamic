@@ -3,9 +3,9 @@
   "title": "Go: API Gateway",
   "difficulty": "expert",
   "languages": ["go"],
-  "estimatedMinutes": 75,
-  "concepts": ["go", "API gateway", "routing", "caching", "rate limiting", "aggregation"],
-  "description": "Build an API gateway with route matching, path parameters, request transformation, service aggregation, caching, and rate limiting.",
+  "estimatedMinutes": 90,
+  "concepts": ["go", "API gateway", "routing", "caching", "rate limiting", "aggregation", "circuit breaker"],
+  "description": "Build an API gateway with route matching, path parameters, request transformation, service aggregation, caching, rate limiting, circuit breaker, and response composition.",
   "steps": [
     {
       "id": 1,
@@ -89,6 +89,18 @@
         "test": "output.includes('services') && output.includes('status')",
         "successMessage": "Response composition produces valid JSON.",
         "failureMessage": "Composed response should include all service results in a JSON structure."
+      }
+    },
+    {
+      "id": 8,
+      "title": "Add circuit breaker pattern",
+      "description": "Implement a circuit breaker for downstream service calls. Define states: `Closed` (normal), `Open` (failing — reject immediately), `HalfOpen` (testing). Track failure count, threshold (3 failures), and timeout (5 seconds before half-open). Add `CircuitBreaker` struct with `call(routeID string, fn func() (int, string)) (int, string)`. Print `\"circuit open\"` when rejecting, `\"circuit half-open\"` when testing, and `\"circuit closed\"` when recovered.",
+      "hints": ["Use `sync.Mutex` for thread safety on circuit state changes.", "Track consecutive failures — after threshold, transition to Open.", "After timeout in Open state, transition to HalfOpen — allow one request. If it succeeds, transition to Closed.", "If the HalfOpen probe fails, go back to Open."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('circuit closed') || output.includes('circuit open') || output.includes('half-open')",
+        "successMessage": "Circuit breaker correctly transitions between Closed, Open, and Half-Open states!",
+        "failureMessage": "Print the circuit state transitions: 'circuit closed' when healthy, 'circuit open' when failing, and 'circuit half-open' when testing recovery."
       }
     }
   ]

@@ -1,0 +1,71 @@
+{
+  "id": "rs-even-or-odd",
+  "title": "Rust: Even or Odd",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 10,
+  "concepts": ["rust", "modulo", "even", "odd", "conditionals"],
+  "description": "Check if a number is even or odd using the modulo operator.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Check if Even",
+      "description": "Write a function `is_even(n: i32) -> bool` that returns true if n is even. Call with 4 and 7, print both results.",
+      "hints": ["`n % 2 == 0` means n is even.", "The modulo operator `%` returns the remainder.", "4 is even, 7 is odd."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/gi)?.length >= 1 && output.match(/false/gi)?.length >= 1",
+        "successMessage": "Even check works!",
+        "failureMessage": "Check if 4 is even (true) and 7 is even (false)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Print Even or Odd",
+      "description": "Write a program that checks if `n = 15` is even or odd and prints `\"Even\"` or `\"Odd\"`.",
+      "hints": ["Use `if n % 2 == 0 { println!(\"Even\"); } else { println!(\"Odd\"); }`", "15 % 2 = 1, so 15 is odd.", "Print the word 'Even' or 'Odd'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Odd') || output.includes('odd')",
+        "successMessage": "Even/odd determination works!",
+        "failureMessage": "Print whether 15 is Even or Odd."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Check Multiple Numbers",
+      "description": "Write a loop that checks numbers 1 through 10 and prints whether each is even or odd.",
+      "hints": ["Use `for i in 1..=10 { ... }`", "Inside the loop, check `if i % 2 == 0`", "Print like `println!(\"{} is {}\", i, if i%2==0{\"even\"}else{\"odd\"});`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1 is odd') || output.includes('2 is even')",
+        "successMessage": "Multiple checks work!",
+        "failureMessage": "Print whether each number 1-10 is even or odd."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Count Evens and Odds",
+      "description": "From `[4, 7, 2, 9, 10, 15, 22]`, count how many are even and how many are odd. Print both counts.",
+      "hints": ["Initialize `even_count = 0` and `odd_count = 0`.", "Loop through the array, increment the appropriate counter.", "Evens: 4, 2, 10, 22 (4), Odds: 7, 9, 15 (3)"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('4') && output.includes('3')",
+        "successMessage": "Counting works! 4 evens, 3 odds.",
+        "failureMessage": "Print the count of evens (4) and odds (3)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Ternary-Style Return",
+      "description": "Write a function `even_or_odd(n: i32) -> &'static str` that returns `\"even\"` or `\"odd\"`. Call with 42 and print the result.",
+      "hints": ["`if n % 2 == 0 { \"even\" } else { \"odd\" }` this is an expression!", "The return type is `&'static str` (string literal).", "42 is even."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('even')",
+        "successMessage": "Function returns correct string!",
+        "failureMessage": "Write even_or_odd(42) and print 'even'."
+      }
+    }
+  ]
+}

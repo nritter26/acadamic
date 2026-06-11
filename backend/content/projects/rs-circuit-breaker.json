@@ -1,0 +1,71 @@
+{
+  "id": "rs-circuit-breaker",
+  "title": "Rust: Circuit Breaker Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "circuit breaker", "resilience", "fault tolerance"],
+  "description": "Implement the circuit breaker pattern for fault-tolerant systems.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Circuit States",
+      "description": "Define an enum `CircuitState` with variants `Closed`, `Open`, `HalfOpen`. Create a `CircuitBreaker` struct with `failure_count`, `failure_threshold`, and `state`. Print the initial state.",
+      "hints": ["`enum CircuitState { Closed, Open, HalfOpen }`", "Circuit starts in `Closed` state.", "Track failures to trigger state transitions."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Closed')",
+        "successMessage": "Circuit breaker states defined!",
+        "failureMessage": "Create a CircuitBreaker and print its initial state."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Failure Tracking",
+      "description": "Add a `record_failure(&mut self)` method that increments failure_count. When failure_count >= threshold, transition to Open. Add a `record_success(&mut self)` to reset failures. Test triggering open state.",
+      "hints": ["`fn record_failure(&mut self) { self.failure_count += 1; if self.failure_count >= self.threshold { self.state = CircuitState::Open; } }`", "Threshold = 3, record 3 failures to trip.", "Print state after each failure."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Closed') && output.contains('Open')",
+        "successMessage": "Failure tracking transitions to Open!",
+        "failureMessage": "Record 3 failures to trip the circuit breaker and print states."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Call Protection",
+      "description": "Add a `call<F, T>(&mut self, f: F) -> Result<T, String>` method. If state is Open, return without calling f. If Closed, call f, handle success/failure. Test with a function that sometimes fails.",
+      "hints": ["`if matches!(self.state, CircuitState::Open) { return Err(\"circuit open\".into()); }`", "Call f, on success record success and return Ok, on failure record failure.", "After threshold failures, subsequent calls are blocked."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('circuit open') || output.contains('blocked')",
+        "successMessage": "Call protection works!",
+        "failureMessage": "Trip the circuit breaker and show that calls are blocked."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Half-Open Reset",
+      "description": "Add a `reset_timeout: Duration`. After being Open for the timeout duration, transition to HalfOpen. In HalfOpen, allow one trial call. On success, transition to Closed. On failure, back to Open.",
+      "hints": ["Track `last_failure_time: Instant`.", "In `call`, if state is Open and timeout passed, transition to HalfOpen.", "In HalfOpen, make the trial call. Success → Closed, Failure → Open."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('HalfOpen') || output.contains('Closed')",
+        "successMessage": "Half-Open reset works!",
+        "failureMessage": "Demonstrate the Open → HalfOpen → Closed transition."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Circuit Breaker Demo",
+      "description": "Simulate a complete scenario: 5 calls to an unstable service (first 3 fail, then 2 succeed after reset). Print the state and result of each call.",
+      "hints": ["Alternate between success and failure calls.", "Show: 2 OK → 3 fails → circuit opens → timeout → 1 trial OK → circuit closes → 2 more OK.", "Print state after each call."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Closed') && output.contains('Open') && output.contains('success')",
+        "successMessage": "Full circuit breaker demo works!",
+        "failureMessage": "Run the scenario and print all states and results."
+      }
+    }
+  ]
+}

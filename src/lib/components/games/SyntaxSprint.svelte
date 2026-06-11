@@ -5,37 +5,36 @@
 
   let selected = $state(null);
   let timeLeft = $state(15);
-  let timerId = $state(null);
   let timeUp = $state(false);
   let challengeKey = $state('');
+  let timerId = null; // plain var, not $state — avoids reactive loop with $effect
 
-  function resetTimer() {
+  function startTimer() {
     selected = null;
     timeLeft = 15;
     timeUp = false;
-    if (timerId) clearInterval(timerId);
+    clearExistingTimer();
     timerId = setInterval(() => {
       timeLeft = Math.max(0, timeLeft - 1);
       if (timeLeft === 0) timeUp = true;
     }, 1000);
   }
 
+  function clearExistingTimer() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+
   $effect(() => {
     ctrl.transitioning;
-    if (!ctrl.transitioning) {
-      resetTimer();
-    }
-    return () => { if (timerId) clearInterval(timerId); };
+    if (!ctrl.transitioning) startTimer();
+    return () => clearExistingTimer();
   });
 
   function pick(choice) {
     if (ctrl.feedbackType === 'ok') return;
     selected = choice;
     ctrl.submit(choice);
-    if (ctrl.feedbackType === 'ok') {
-      if (timerId) clearInterval(timerId);
-      timerId = null;
-    }
+    if (ctrl.feedbackType === 'ok') clearExistingTimer();
   }
 
   let timerPct = $derived((timeLeft / 15) * 100);
@@ -46,7 +45,7 @@
 <div class="game-ss" class:transitioning={ctrl.transitioning}>
   <div class="g-top">
     <span class="g-badge">syntax-sprint</span>
-    <span class="g-progress">{ctrl.progress.current}/{ctrl.progress.total}</span>
+    <span class="g-progress">{ctrl.progress.current}{#if ctrl.progress.total}/{ctrl.progress.total}{:else} ∞{/if}</span>
   </div>
   <div class="ss-timer" class:ss-danger={timeLeft <= 4}>
     <div class="ss-timer-track"><div class="ss-timer-fill" style="width:{timerPct}%; background:{timerColor}"></div></div>

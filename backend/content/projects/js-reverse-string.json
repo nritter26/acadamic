@@ -1,0 +1,53 @@
+{
+  "id": "js-reverse-string",
+  "title": "JavaScript: Reverse String",
+  "description": "Practice reverse string in JavaScript.",
+  "difficulty": "beginner",
+  "languages": [
+    "js"
+  ],
+  "codeTemplate": {
+    "js": "console.log('Hello -> olleH')"
+  },
+  "verificationTest": "output.includes('hello -> olleh')",
+  "hints": [
+    "Practice reverse string in JavaScript"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reverse with split/reverse/join",
+      "description": "Write a function reverseString(str) that returns the string reversed using array methods.",
+      "hints": [
+        "str.split(\"\") splits into characters",
+        ".reverse() reverses the array",
+        ".join(\"\") joins back to string"
+      ],
+      "codeTemplate": {
+        "javascript": "function reverseString(str) {\n  // split, reverse, join\n}\n\nconsole.log(reverseString(\"hello\"));\nconsole.log(reverseString(\"JavaScript\"));\nconsole.log(reverseString(\"racecar\"));\n"
+      },
+      "verification": {
+        "test": "output.includes(\"olleh\") && output.includes(\"tpircSavaJ\")",
+        "successMessage": "String reversal works!",
+        "failureMessage": "Use split().reverse().join() to reverse the string."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Check palindrome",
+      "description": "Write isPalindrome(str) that returns true if a string reads the same forwards and backwards.",
+      "hints": [
+        "Reuse reverseString()",
+        "Compare original to reversed"
+      ],
+      "codeTemplate": {
+        "javascript": "function isPalindrome(str) {\n\n}\n\nconsole.log(isPalindrome(\"racecar\"));\nconsole.log(isPalindrome(\"hello\"));\nconsole.log(isPalindrome(\"madam\"));\nconsole.log(isPalindrome(\"Python\"));\n"
+      },
+      "verification": {
+        "test": "output.includes(\"true\") && output.includes(\"false\")",
+        "successMessage": "Palindrome detection works!",
+        "failureMessage": "Return original === reversed."
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "zig-slices",
+  "title": "Zig: Slices",
+  "difficulty": "intermediate",
+  "languages": ["zig"],
+  "estimatedMinutes": 15,
+  "concepts": ["zig", "slices", "arrays", "memory"],
+  "description": "Work with slices in Zig — dynamically-sized views into arrays.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Slice Basics",
+      "description": "Declare an array of 5 integers. Create a slice that references elements 1..4 (indices 1, 2, 3). Print the slice elements and its length.",
+      "hints": ["`const arr = [_]i32{ 10, 20, 30, 40, 50 };`", "`const slice = arr[1..4]; // 20, 30, 40`", "`slice.len` gives the length, iterate with for loop."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('20') && output.includes('30') && output.includes('40')",
+        "successMessage": "Slice operations work!",
+        "failureMessage": "Print the slice elements 20, 30, 40"
+      }
+    }
+  ]
+}

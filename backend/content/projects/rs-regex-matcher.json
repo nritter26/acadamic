@@ -1,0 +1,71 @@
+{
+  "id": "rs-regex-matcher",
+  "title": "Rust: Pattern Matching with Regex",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "regex", "pattern matching", "string extraction"],
+  "description": "Use and simulate regular expressions for pattern matching and text extraction in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Check if String Contains Pattern",
+      "description": "Write a function `contains_digit(s: &str) -> bool` that returns true if the string contains any digit (0-9). Test with `\"hello123\"` and `\"hello\"`.",
+      "hints": ["`s.chars().any(|c| c.is_ascii_digit())`", "`.any()` checks if any character satisfies the predicate.", "Or use `s.contains(char::is_numeric)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Digit detection works!",
+        "failureMessage": "Print true for 'hello123' and false for 'hello'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Match Email Pattern",
+      "description": "Write a function `is_valid_email(s: &str) -> bool` that checks if a string looks like an email (contains '@' and '.' after '@'). Test with `\"user@example.com\"` and `\"notanemail\"`.",
+      "hints": ["Check if `s.contains('@')`.", "Split by '@', verify the second part contains '.'.", "Also check there's text before and after '@'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Email validation works!",
+        "failureMessage": "Print true for valid email and false for invalid."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Extract Phone Numbers",
+      "description": "Write a function `extract_phone_numbers(text: &str) -> Vec<&str>` that finds patterns like `\"(123) 456-7890\"` or `\"555-1234\"`. Test with `\"Call (555) 123-4567 or 800-555-0199 for help\"`.",
+      "hints": ["Look for patterns: optional area code in parens, then digits.", "Extract digit groups: filter for sequences of 3-4 digits with separators.", "This simulates regex matching without the regex crate."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('555') || output.includes('123')",
+        "successMessage": "Phone number extraction works!",
+        "failureMessage": "Extract and print phone numbers from the text."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Replace Patterns",
+      "description": "Write a function `censor_bad_words(text: &str) -> String` that replaces words like \"bad\", \"terrible\", \"awful\" with \"****\". Test with `\"This is a bad and terrible idea!\"`.",
+      "hints": ["Use `str::replace` sequentially for each word.", "Or split by whitespace, check each word, and join.", "Result: 'This is a **** and **** idea!'"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('****') && !output.includes('bad')",
+        "successMessage": "Pattern replacement works!",
+        "failureMessage": "Censor bad words and print the result."
+      }
+    },
+    {
+      "id": 5,
+      "title": "URL Parser",
+      "description": "Write a function `parse_url(url: &str) -> Option<(String, String, u16, String)>` that extracts protocol, host, port, and path from a URL like `\"https://example.com:8080/path/to/page\"`.",
+      "hints": ["Split by \"://\" to get protocol and rest.", "Split rest by \"/\" for host (with port) and path.", "Split host by \":\" to separate host and port."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('https') && output.includes('example.com') && output.includes('8080')",
+        "successMessage": "URL parsing works!",
+        "failureMessage": "Parse and print the URL components."
+      }
+    }
+  ]
+}

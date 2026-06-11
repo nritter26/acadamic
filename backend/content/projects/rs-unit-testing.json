@@ -1,0 +1,71 @@
+{
+  "id": "rs-unit-testing",
+  "title": "Rust: Unit Tests",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "testing", "#[test]", "assert!", "assert_eq!", "cargo test"],
+  "description": "Write unit tests using Rust's built-in testing framework.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Test Function",
+      "description": "Write a function `add(a: i32, b: i32) -> i32` and a test `#[test] fn test_add()` that asserts `add(2, 3) == 5`. Print \"Tests passed!\" in main.",
+      "hints": ["`#[test] fn test_add() { assert_eq!(add(2, 3), 5); }`", "Run tests with the test runner concept.", "In a normal project, `cargo test` would run these."],
+      "codeTemplate": { "rust": "fn add(a: i32, b: i32) -> i32 { a + b }\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n}\n\nfn main() {\n    println!(\"add(2, 3) = {}\", add(2, 3));\n}" },
+      "verification": {
+        "test": "output.contains('5')",
+        "successMessage": "Test function defined!",
+        "failureMessage": "Define a test for add(2,3) and print the result."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple Test Cases",
+      "description": "Write a function `factorial(n: u32) -> u32` with multiple tests: test(0)=1, test(1)=1, test(5)=120. Print all results.",
+      "hints": ["Add several tests in the tests module.", "`#[test] fn test_factorial_0() { assert_eq!(factorial(0), 1); }`", "factorial(5) = 120."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('120') && output.contains('factorial')",
+        "successMessage": "Multiple test cases work!",
+        "failureMessage": "Test factorial for 0, 1, and 5."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Test-Driven Development (TDD)",
+      "description": "Practice TDD: write a test first for a function `is_even(n: i32) -> bool` (test even gets true, odd gets false), then implement the function to pass the tests.",
+      "hints": ["Write tests first: `assert!(is_even(2)); assert!(!is_even(3));`", "Then implement: `fn is_even(n: i32) -> bool { n % 2 == 0 }`", "Run tests to verify they pass."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') || output.contains('even')",
+        "successMessage": "TDD cycle completed!",
+        "failureMessage": "Write a failing test first, then implement is_even."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Test with Expected Panic",
+      "description": "Write a function `divide(a: f64, b: f64) -> f64` that panics on division by zero. Write a test `#[test] #[should_panic(expected = \"division by zero\")]`.",
+      "hints": ["`if b == 0.0 { panic!(\"division by zero\"); }`", "`#[should_panic(expected = \"division by zero\")]` catches the panic.", "Test both valid division and panic case."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('5') && output.contains('panic')",
+        "successMessage": "Should-panic test works!",
+        "failureMessage": "Test division by zero panics and valid division works."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test Organization",
+      "description": "Organize tests into submodules: `mod tests { mod math_tests { ... } mod string_tests { ... } }`. Write tests for math functions and string functions in separate modules.",
+      "hints": ["Group related tests into submodules.", "`mod math_tests { use super::*; #[test] fn test_add() { ... } }`", "This mirrors how real Rust projects organize tests."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('test') && output.contains('pass')",
+        "successMessage": "Tests organized into submodules!",
+        "failureMessage": "Create math_tests and string_tests submodules with tests."
+      }
+    }
+  ]
+}

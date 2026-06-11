@@ -1,0 +1,71 @@
+{
+  "id": "rs-jwt-auth",
+  "title": "Rust: JWT Authentication (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "JWT", "authentication", "tokens", "HMAC", "base64"],
+  "description": "Simulate JWT token generation and verification in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Base64 Encoding",
+      "description": "Write a function `base64_encode(data: &[u8]) -> String` that encodes bytes to base64 (using a simple implementation). Encode `\"hello\"` and print.",
+      "hints": ["Use the base64 crate or implement a simple version.", "`use base64::{encode, decode};` is available.", "Encode `\"hello\"` → base64 string."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('aGVsbG8') || output.contains('hello')",
+        "successMessage": "Base64 encoding works!",
+        "failureMessage": "Encode 'hello' to base64 and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create JWT Header and Payload",
+      "description": "Create a JWT header JSON `{\"alg\": \"HS256\", \"typ\": \"JWT\"}` and payload JSON `{\"sub\": \"123\", \"name\": \"Alice\", \"iat\": 1516239022}`. Base64url-encode both and print the encoded parts.",
+      "hints": ["Create JSON strings manually.", "Base64url is base64 with `+`→`-`, `/`→`_`, no padding.", "Join with `.`: `header.payload`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('eyJ') || output.contains('base64')",
+        "successMessage": "JWT header and payload created!",
+        "failureMessage": "Create and base64url-encode the JWT header and payload."
+      }
+    },
+    {
+      "id": 3,
+      "title": "HMAC-SHA256 Signature (Simulated)",
+      "description": "Implement a simple HMAC-like signature using a hash function. Create `sign(data: &str, secret: &str) -> String`. Sign the header.payload string and append the signature.",
+      "hints": ["Simple signature: hash data + secret (simulating HMAC).", "`let combined = format!(\"{}{}\", data, secret);`", "Hash and encode: `base64_encode(&hash)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('.') && output.length > 20",
+        "successMessage": "JWT signature created!",
+        "failureMessage": "Create the full JWT: header.payload.signature."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Verify JWT Token",
+      "description": "Write a `verify(token: &str, secret: &str) -> bool` function that extracts the signature, recomputes it, and checks if it matches. Test with valid and invalid tokens.",
+      "hints": ["Split token by `.` to get parts.", "Recompute signature from header.payload and secret.", "Compare computed signature with provided signature."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "JWT verification works!",
+        "failureMessage": "Verify a valid token (true) and tampered token (false)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Auth Flow",
+      "description": "Create a complete authentication flow: generate a token for user Alice, verify it, then simulate a protected endpoint that checks the token and returns user data.",
+      "hints": ["Create a function `login(username) -> String` that generates a JWT.", "Create `protect(token) -> Result<User, String>` that verifies and extracts data.", "This simulates how real JWT auth works in web frameworks."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && output.contains('authenticated')",
+        "successMessage": "Full JWT auth flow works!",
+        "failureMessage": "Login, get token, access protected endpoint, and print user data."
+      }
+    }
+  ]
+}

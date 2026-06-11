@@ -1,0 +1,23 @@
+{
+  "id": "c-feature-flags",
+  "title": "C: Feature Flags",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "feature flags", "configuration", "hash table", "runtime control"],
+  "description": "Implement a feature flag system with a hash table that stores boolean toggles for named features.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Feature Flag System",
+      "description": "Define a simple feature flag store: a fixed-size array of (name, enabled) pairs. Write `void ff_set(char *name, int val)` to set a flag, `int ff_get(char *name)` to check if a flag is enabled, and `void ff_list()` to print all flags. Test with 3 flags.",
+      "hints": ["Use a simple linear search through the flag array.", "Max 20 flags, each with a name and int (0/1).", "ff_list prints all flags and their status."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\n#define MAX_FLAGS 20\n\ntypedef struct { char name[32]; int enabled; } Flag;\n\nFlag flags[MAX_FLAGS];\nint flag_count = 0;\n\nvoid ff_set(char *name, int val) {\n    for (int i = 0; i < flag_count; i++) {\n        if (strcmp(flags[i].name, name) == 0) { flags[i].enabled = val; return; }\n    }\n    if (flag_count < MAX_FLAGS) {\n        strcpy(flags[flag_count].name, name);\n        flags[flag_count].enabled = val;\n        flag_count++;\n    }\n}\n\nint ff_get(char *name) {\n    for (int i = 0; i < flag_count; i++)\n        if (strcmp(flags[i].name, name) == 0) return flags[i].enabled;\n    return 0;\n}\n\nvoid ff_list() {\n    for (int i = 0; i < flag_count; i++)\n        printf(\"%s: %s\\n\", flags[i].name, flags[i].enabled ? \"ON\" : \"OFF\");\n}\n\nint main() {\n    ff_set(\"dark_mode\", 1);\n    ff_set(\"beta_api\", 0);\n    ff_set(\"debug_logs\", 1);\n    printf(\"dark_mode: %s\\n\", ff_get(\"dark_mode\") ? \"ON\" : \"OFF\");\n    printf(\"beta_api: %s\\n\", ff_get(\"beta_api\") ? \"ON\" : \"OFF\");\n    printf(\"All flags:\\n\");\n    ff_list();\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('ON') && output.includes('OFF') && output.includes('dark_mode')",
+        "successMessage": "Feature flag system works!",
+        "failureMessage": "Set flags and list them with their status"
+      }
+    }
+  ]
+}

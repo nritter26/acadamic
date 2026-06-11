@@ -2,7 +2,7 @@ export const TUTORIAL_COURSES = [
   {
     "id": "js",
     "title": "JavaScript",
-    "summary": "Learn JavaScript from the ground up — fundamentals, variables & types, operators, and more.",
+    "summary": "Learn JavaScript from the ground up — fundamentals, strings & numbers, arrays & collections, and more.",
     "lang": "js",
     "icon": "/public/logos/js.svg",
     "phases": [
@@ -10,11 +10,166 @@ export const TUTORIAL_COURSES = [
         "id": "fundamentals",
         "title": "Fundamentals",
         "topics": [
+          "Variables",
+          "Data Types",
+          "Operators",
+          "Control Flow",
+          "Loops",
+          "Functions",
+          "Comments",
+          "Strict Mode",
           "What is JavaScript",
           "Syntax & Comments",
-          "Strict Mode",
           "Statements & Blocks",
           "JavaScript Engines"
+        ]
+      },
+      {
+        "id": "strings-and-numbers",
+        "title": "Strings & Numbers",
+        "topics": [
+          "String Methods",
+          "Template Literals",
+          "Number Methods",
+          "Math Object",
+          "Type Conversion",
+          "Number Precision"
+        ]
+      },
+      {
+        "id": "arrays-and-collections",
+        "title": "Arrays & Collections",
+        "topics": [
+          "Array Methods",
+          "Array Iteration",
+          "Sets",
+          "Maps",
+          "Destructuring",
+          "Spread Operator",
+          "JSON Methods",
+          "Arrays",
+          "Map & Set",
+          "WeakMap & WeakSet",
+          "Iterators & Generators"
+        ]
+      },
+      {
+        "id": "objects-and-oop",
+        "title": "Objects & OOP",
+        "topics": [
+          "Object Basics",
+          "Prototypes",
+          "Classes",
+          "Getters & Setters",
+          "this Keyword",
+          "Bind Call Apply",
+          "Static Methods",
+          "Private Fields"
+        ]
+      },
+      {
+        "id": "functions-deep-dive",
+        "title": "Functions Deep Dive",
+        "topics": [
+          "Arrow Functions",
+          "Closures",
+          "Higher-Order Functions",
+          "Recursion",
+          "Default Parameters",
+          "Rest Parameters",
+          "IIFE",
+          "Callbacks"
+        ]
+      },
+      {
+        "id": "asynchronous-javascript",
+        "title": "Asynchronous JavaScript",
+        "topics": [
+          "Promises",
+          "Async Await",
+          "Error Handling",
+          "Event Loop",
+          "Microtasks",
+          "Fetch API",
+          "Web Workers",
+          "Service Workers"
+        ]
+      },
+      {
+        "id": "dom-and-browser-apis",
+        "title": "DOM & Browser APIs",
+        "topics": [
+          "DOM Selection",
+          "DOM Manipulation",
+          "Events",
+          "Event Bubbling",
+          "Event Delegation",
+          "LocalStorage",
+          "SessionStorage",
+          "Canvas API",
+          "Geolocation API",
+          "History API",
+          "Forms & Validation",
+          "Fetch API",
+          "Local Storage",
+          "Timers",
+          "Web APIs (File, Drag, Clipboard)"
+        ]
+      },
+      {
+        "id": "error-handling-and-debugging",
+        "title": "Error Handling & Debugging",
+        "topics": [
+          "Try Catch",
+          "Custom Errors",
+          "Debugging Tools",
+          "Console Methods",
+          "Source Maps",
+          "Error Boundary"
+        ]
+      },
+      {
+        "id": "modules-and-tooling",
+        "title": "Modules & Tooling",
+        "topics": [
+          "ES Modules",
+          "Dynamic Import",
+          "npm Packages",
+          "Bundlers",
+          "Transpilers",
+          "Linters",
+          "Formatters",
+          "Testing Frameworks"
+        ]
+      },
+      {
+        "id": "modern-javascript-features",
+        "title": "Modern JavaScript Features",
+        "topics": [
+          "Optional Chaining",
+          "Nullish Coalescing",
+          "Logical Assignment",
+          "BigInt",
+          "Symbol",
+          "SharedArrayBuffer",
+          "WeakRef",
+          "Atomics",
+          "Temporal API"
+        ]
+      },
+      {
+        "id": "performance-and-optimization",
+        "title": "Performance & Optimization",
+        "topics": [
+          "Memory Management",
+          "Garbage Collection",
+          "Memory Leaks",
+          "Debouncing",
+          "Throttling",
+          "Caching Strategies",
+          "Code Splitting",
+          "Tree Shaking",
+          "Lazy Loading"
         ]
       },
       {
@@ -79,31 +234,6 @@ export const TUTORIAL_COURSES = [
           "Classes",
           "Inheritance",
           "Getters & Setters"
-        ]
-      },
-      {
-        "id": "arrays-and-collections",
-        "title": "Arrays & Collections",
-        "topics": [
-          "Arrays",
-          "Array Methods",
-          "Destructuring",
-          "Map & Set",
-          "WeakMap & WeakSet",
-          "Iterators & Generators"
-        ]
-      },
-      {
-        "id": "dom-and-browser-apis",
-        "title": "DOM & Browser APIs",
-        "topics": [
-          "DOM Manipulation",
-          "Events",
-          "Forms & Validation",
-          "Fetch API",
-          "Local Storage",
-          "Timers",
-          "Web APIs (File, Drag, Clipboard)"
         ]
       },
       {
@@ -219,7 +349,7 @@ export const TUTORIAL_COURSES = [
   {
     "id": "ts",
     "title": "TypeScript",
-    "summary": "Learn TypeScript from the ground up — fundamentals, type system, type guards & narrowing, and more.",
+    "summary": "Learn TypeScript from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "ts",
     "icon": "/public/logos/ts.svg",
     "phases": [
@@ -227,6 +357,11 @@ export const TUTORIAL_COURSES = [
         "id": "fundamentals",
         "title": "Fundamentals",
         "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions",
           "What is TypeScript",
           "Type Annotations",
           "Basic Types",
@@ -235,6 +370,56 @@ export const TUTORIAL_COURSES = [
           "Type Inference",
           "Literal Types",
           "Strict Mode"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Typed Error Classes",
+          "Try/Catch with unknown",
+          "Result Types",
+          "Definite Assignment Assertions",
+          "Null Checks",
+          "Result Pattern & Discriminated Unions"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
         ]
       },
       {
@@ -386,18 +571,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Typed Error Classes",
-          "Try/Catch with unknown",
-          "Result Types",
-          "Definite Assignment Assertions",
-          "Null Checks",
-          "Result Pattern & Discriminated Unions"
-        ]
-      },
-      {
         "id": "ecosystem",
         "title": "Ecosystem",
         "topics": [
@@ -441,10 +614,131 @@ export const TUTORIAL_COURSES = [
   {
     "id": "py",
     "title": "Python",
-    "summary": "Learn Python from the ground up — getting started, operators, control flow, and more.",
+    "summary": "Learn Python from the ground up — python fundamentals, control flow, functions, and more.",
     "lang": "py",
     "icon": "/public/logos/py.svg",
     "phases": [
+      {
+        "id": "python-fundamentals",
+        "title": "Python Fundamentals",
+        "topics": [
+          "Variables & Types",
+          "Numbers & Math",
+          "Strings",
+          "String Formatting",
+          "Lists",
+          "Tuples",
+          "Dictionaries",
+          "Sets",
+          "Booleans & Comparisons",
+          "Type Conversion"
+        ]
+      },
+      {
+        "id": "control-flow",
+        "title": "Control Flow",
+        "topics": [
+          "If Statements",
+          "For Loops",
+          "While Loops",
+          "Break & Continue",
+          "Match Statement",
+          "List Comprehensions",
+          "Dict Comprehensions",
+          "Generator Expressions",
+          "Ternary Operator",
+          "if-elif-else",
+          "match statement",
+          "for & range()",
+          "while statement",
+          "break, continue & else"
+        ]
+      },
+      {
+        "id": "functions",
+        "title": "Functions",
+        "topics": [
+          "Function Basics",
+          "Parameters & Arguments",
+          "Lambda Functions",
+          "Decorators",
+          "Generators",
+          "Iterators",
+          "Definitions & Scopes",
+          "Argument Logic",
+          "Lambda Expressions",
+          "Recursion",
+          "Docstrings",
+          "Type Hints in Functions"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Try Except",
+          "Custom Exceptions",
+          "Exception Hierarchy",
+          "Assertions",
+          "Context Managers",
+          "Raising Exceptions"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Polymorphism",
+          "Encapsulation",
+          "Properties",
+          "Magic Methods",
+          "Class Methods",
+          "Static Methods",
+          "Abstract Classes",
+          "Dataclasses"
+        ]
+      },
+      {
+        "id": "modules-and-packages",
+        "title": "Modules & Packages",
+        "topics": [
+          "Import System",
+          "Package Structure",
+          "Standard Library",
+          "Virtual Environments",
+          "pip",
+          "Requirements Files"
+        ]
+      },
+      {
+        "id": "file-i-o",
+        "title": "File I/O",
+        "topics": [
+          "Reading Files",
+          "Writing Files",
+          "File Modes",
+          "CSV Files",
+          "JSON Files",
+          "Binary Files",
+          "Path Operations"
+        ]
+      },
+      {
+        "id": "advanced-python",
+        "title": "Advanced Python",
+        "topics": [
+          "Itertools",
+          "Functools",
+          "Collections",
+          "Concurrency",
+          "Async/Await",
+          "Type Hints",
+          "Metaclasses",
+          "Descriptors"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -469,17 +763,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "control-flow",
-        "title": "Control Flow",
-        "topics": [
-          "if-elif-else",
-          "match statement",
-          "for & range()",
-          "while statement",
-          "break, continue & else"
-        ]
-      },
-      {
         "id": "data-structures",
         "title": "Data Structures",
         "topics": [
@@ -500,18 +783,6 @@ export const TUTORIAL_COURSES = [
           "Dict & Set Comprehensions",
           "Generator Expressions",
           "Nested Comprehensions"
-        ]
-      },
-      {
-        "id": "functions",
-        "title": "Functions",
-        "topics": [
-          "Definitions & Scopes",
-          "Argument Logic",
-          "Lambda Expressions",
-          "Recursion",
-          "Docstrings",
-          "Type Hints in Functions"
         ]
       },
       {
@@ -794,10 +1065,72 @@ export const TUTORIAL_COURSES = [
   {
     "id": "go",
     "title": "Go",
-    "summary": "Learn Go from the ground up — getting started, variables & types, operators, and more.",
+    "summary": "Learn Go from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "go",
     "icon": "/public/logos/go.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Error Interface",
+          "Error Checking",
+          "Custom Error Types",
+          "Sentinel Errors",
+          "Error Wrapping",
+          "errors.Is and errors.As",
+          "Panic & Recover"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -910,19 +1243,6 @@ export const TUTORIAL_COURSES = [
           "Interface Composition",
           "Interface Values & Nil",
           "Best Practices (Accept interfaces, return structs)"
-        ]
-      },
-      {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Error Interface",
-          "Error Checking",
-          "Custom Error Types",
-          "Sentinel Errors",
-          "Error Wrapping",
-          "errors.Is and errors.As",
-          "Panic & Recover"
         ]
       },
       {
@@ -1090,10 +1410,73 @@ export const TUTORIAL_COURSES = [
   {
     "id": "rust",
     "title": "Rust",
-    "summary": "Learn Rust from the ground up — getting started, control flow, ownership & borrowing, and more.",
+    "summary": "Learn Rust from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "rust",
     "icon": "/public/logos/rs.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Result & Option",
+          "The ? Operator",
+          "Panic & Unrecoverable Errors",
+          "Custom Error Types",
+          "thiserror Crate",
+          "anyhow / eyre Crates",
+          "Error Chaining",
+          "Result Combinators"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -1177,20 +1560,6 @@ export const TUTORIAL_COURSES = [
           "Associated Types",
           "Blanket Implementations",
           "Trait Bounds & where Clauses"
-        ]
-      },
-      {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Result & Option",
-          "The ? Operator",
-          "Panic & Unrecoverable Errors",
-          "Custom Error Types",
-          "thiserror Crate",
-          "anyhow / eyre Crates",
-          "Error Chaining",
-          "Result Combinators"
         ]
       },
       {
@@ -1320,10 +1689,77 @@ export const TUTORIAL_COURSES = [
   {
     "id": "java",
     "title": "Java",
-    "summary": "Learn Java from the ground up — java basics, object-oriented programming, functional programming, and more.",
+    "summary": "Learn Java from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "java",
     "icon": "/public/logos/java.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces",
+          "Constructors",
+          "Access Modifiers",
+          "Static Keyword",
+          "Encapsulation",
+          "Polymorphism",
+          "Anonymous Classes",
+          "Abstraction",
+          "Enums",
+          "Nested & Inner Classes",
+          "Object Methods (equals/hashCode/toString)",
+          "Composition Over Inheritance",
+          "Records"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "java-basics",
         "title": "Java Basics",
@@ -1346,27 +1782,6 @@ export const TUTORIAL_COURSES = [
           "Try-With-Resources Deep",
           "Exception Handling",
           "Exception Patterns & Best Practices"
-        ]
-      },
-      {
-        "id": "object-oriented-programming",
-        "title": "Object-Oriented Programming",
-        "topics": [
-          "Classes & Objects",
-          "Constructors",
-          "Access Modifiers",
-          "Static Keyword",
-          "Inheritance",
-          "Encapsulation",
-          "Polymorphism",
-          "Anonymous Classes",
-          "Abstraction",
-          "Interfaces",
-          "Enums",
-          "Nested & Inner Classes",
-          "Object Methods (equals/hashCode/toString)",
-          "Composition Over Inheritance",
-          "Records"
         ]
       },
       {
@@ -1514,10 +1929,65 @@ export const TUTORIAL_COURSES = [
   {
     "id": "kt",
     "title": "Kotlin",
-    "summary": "Learn Kotlin from the ground up — getting started, control flow, functions, and more.",
+    "summary": "Learn Kotlin from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "kt",
     "icon": "/public/logos/kt.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -2534,16 +3004,96 @@ export const TUTORIAL_COURSES = [
           "Process Management",
           "Pipes & IPC"
         ]
+      },
+      {
+        "id": "memory-management",
+        "title": "Memory Management",
+        "topics": [
+          "malloc/free Basics",
+          "Memory Layout (Stack vs Heap)",
+          "Memory Leaks & Valgrind",
+          "Custom Allocators (Arena)"
+        ]
+      },
+      {
+        "id": "concurrency",
+        "title": "Concurrency",
+        "topics": [
+          "POSIX Threads (pthreads)",
+          "Mutexes & Condition Variables",
+          "Atomic Operations",
+          "Thread Pool Pattern"
+        ]
       }
     ]
   },
   {
     "id": "rb",
     "title": "Ruby",
-    "summary": "Learn Ruby from the ground up — getting started, variables & types, operators, and more.",
+    "summary": "Learn Ruby from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "rb",
     "icon": "/public/logos/rb.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Exception Hierarchy",
+          "begin/rescue/ensure",
+          "Custom Exceptions",
+          "ensure & retry",
+          "raise vs throw"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -2651,17 +3201,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Exception Hierarchy",
-          "begin/rescue/ensure",
-          "Custom Exceptions",
-          "ensure & retry",
-          "raise vs throw"
-        ]
-      },
-      {
         "id": "modules-and-packages",
         "title": "Modules & Packages",
         "topics": [
@@ -2759,10 +3298,69 @@ export const TUTORIAL_COURSES = [
   {
     "id": "php",
     "title": "PHP",
-    "summary": "Learn PHP from the ground up — getting started, control flow, functions, and more.",
+    "summary": "Learn PHP from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "php",
     "icon": "/public/logos/php.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Error Reporting",
+          "Multiple Catch & Finally",
+          "Shutdown & Error Handler Functions",
+          "Custom Exception Classes"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -2865,17 +3463,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Exceptions",
-          "Error Reporting",
-          "Multiple Catch & Finally",
-          "Shutdown & Error Handler Functions",
-          "Custom Exception Classes"
-        ]
-      },
-      {
         "id": "variables-and-types",
         "title": "Variables & Types",
         "topics": [
@@ -2948,10 +3535,73 @@ export const TUTORIAL_COURSES = [
   {
     "id": "swift",
     "title": "Swift",
-    "summary": "Learn Swift from the ground up — getting started, variables & types, control flow, and more.",
+    "summary": "Learn Swift from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "swift",
     "icon": "/public/logos/swift.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "do / try / catch",
+          "try? & try! Deep",
+          "Result Type",
+          "Throwing Properties",
+          "Throwing Subscripts",
+          "rethrowing",
+          "Defer",
+          "Custom Errors"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -3074,20 +3724,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "do / try / catch",
-          "try? & try! Deep",
-          "Result Type",
-          "Throwing Properties",
-          "Throwing Subscripts",
-          "rethrowing",
-          "Defer",
-          "Custom Errors"
-        ]
-      },
-      {
         "id": "generics",
         "title": "Generics",
         "topics": [
@@ -3200,10 +3836,69 @@ export const TUTORIAL_COURSES = [
   {
     "id": "scala",
     "title": "Scala",
-    "summary": "Learn Scala from the ground up — getting started, control flow, functions, and more.",
+    "summary": "Learn Scala from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "scala",
     "icon": "/public/logos/scala.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Try & Recovery",
+          "Either & Validated",
+          "Custom Exceptions & Error ADTs",
+          "Resource Management"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -3352,16 +4047,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Try & Recovery",
-          "Either & Validated",
-          "Custom Exceptions & Error ADTs",
-          "Resource Management"
-        ]
-      },
-      {
         "id": "strings-and-text-processing",
         "title": "Strings & Text Processing",
         "topics": [
@@ -3420,16 +4105,100 @@ export const TUTORIAL_COURSES = [
           "Calling Java from Scala",
           "Scala from Java"
         ]
+      },
+      {
+        "id": "functional-programming-deep-dive",
+        "title": "Functional Programming Deep Dive",
+        "topics": [
+          "Immutability & Pure Functions",
+          "Higher-Order Functions",
+          "Pattern Matching & Case Classes",
+          "Monads & For-Comprehensions"
+        ]
+      },
+      {
+        "id": "scala-type-system",
+        "title": "Scala Type System",
+        "topics": [
+          "Type Classes & Implicits",
+          "Covariance, Contravariance, Invariance",
+          "Advanced Types (Path, Dependent, Higher-Kinded)"
+        ]
       }
     ]
   },
   {
     "id": "lua",
     "title": "Lua",
-    "summary": "Learn Lua from the ground up — getting started, variables & types, operators, and more.",
+    "summary": "Learn Lua from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "lua",
     "icon": "/public/logos/lua.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "pcall",
+          "xpcall",
+          "error",
+          "assert"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance",
+          "Weak Tables",
+          "Garbage Collection",
+          "Environment (_ENV)",
+          "Debug Library",
+          "C API Overview",
+          "LuaJIT & Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -3572,16 +4341,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "pcall",
-          "xpcall",
-          "error",
-          "assert"
-        ]
-      },
-      {
         "id": "standard-libraries",
         "title": "Standard Libraries",
         "topics": [
@@ -3592,28 +4351,78 @@ export const TUTORIAL_COURSES = [
           "bit32",
           "Testing with Busted"
         ]
-      },
-      {
-        "id": "advanced-topics",
-        "title": "Advanced Topics",
-        "topics": [
-          "Weak Tables",
-          "Garbage Collection",
-          "Environment (_ENV)",
-          "Debug Library",
-          "C API Overview",
-          "LuaJIT & Performance"
-        ]
       }
     ]
   },
   {
     "id": "zig",
     "title": "Zig",
-    "summary": "Learn Zig from the ground up — getting started, types, variables & constants, and more.",
+    "summary": "Learn Zig from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "zig",
     "icon": "/public/logos/zig.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging",
+          "Error Sets",
+          "Error Union Inference",
+          "Merge Error Sets",
+          "catch / unreachable",
+          "try Keyword",
+          "Global Error Set",
+          "Custom Error Sets"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "getting-started",
         "title": "Getting Started",
@@ -3700,19 +4509,6 @@ export const TUTORIAL_COURSES = [
         ]
       },
       {
-        "id": "error-handling",
-        "title": "Error Handling",
-        "topics": [
-          "Error Sets",
-          "Error Union Inference",
-          "Merge Error Sets",
-          "catch / unreachable",
-          "try Keyword",
-          "Global Error Set",
-          "Custom Error Sets"
-        ]
-      },
-      {
         "id": "optionals",
         "title": "Optionals",
         "topics": [
@@ -3787,16 +4583,89 @@ export const TUTORIAL_COURSES = [
           "Debugging Zig Programs",
           "Package Management"
         ]
+      },
+      {
+        "id": "memory-management-in-zig",
+        "title": "Memory Management in Zig",
+        "topics": [
+          "Allocators Deep Dive",
+          "Custom Allocators",
+          "Zig Pointers & Slices",
+          "Comptime Memory & Types"
+        ]
+      },
+      {
+        "id": "zig-standard-library",
+        "title": "Zig Standard Library",
+        "topics": [
+          "File I/O & OS Operations",
+          "Networking & HTTP"
+        ]
       }
     ]
   },
   {
     "id": "asm",
     "title": "Assembly",
-    "summary": "Learn Assembly from the ground up — number systems and data representation, getting started with assembly, x64 architecture and registers, and more.",
+    "summary": "Learn Assembly from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "asm",
     "icon": "/public/logos/asm.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "number-systems-and-data-representation",
         "title": "Number Systems and Data Representation",
@@ -3960,16 +4829,89 @@ export const TUTORIAL_COURSES = [
           "Process Creation & Syscalls",
           "Shared Memory & IPC"
         ]
+      },
+      {
+        "id": "x86-64-architecture-deep-dive",
+        "title": "x86-64 Architecture Deep Dive",
+        "topics": [
+          "Registers & Calling Conventions",
+          "Condition Codes & Control Flow",
+          "Stack Frames & Function Prologues",
+          "SIMD & Vector Instructions"
+        ]
+      },
+      {
+        "id": "arm64-assembly",
+        "title": "ARM64 Assembly",
+        "topics": [
+          "ARM64 vs x86-64 Comparison",
+          "ARM64 NEON SIMD"
+        ]
       }
     ]
   },
   {
     "id": "htmlcss",
     "title": "HTML & CSS",
-    "summary": "Learn HTML & CSS from the ground up — html fundamentals, html media & embedded content, html forms & interactivity, and more.",
+    "summary": "Learn HTML & CSS from the ground up — fundamentals, data structures, object-oriented programming, and more.",
     "lang": "htmlcss",
     "icon": "/public/logos/htmlcss.svg",
     "phases": [
+      {
+        "id": "fundamentals",
+        "title": "Fundamentals",
+        "topics": [
+          "Introduction",
+          "Variables & Types",
+          "Operators",
+          "Control Flow",
+          "Functions"
+        ]
+      },
+      {
+        "id": "data-structures",
+        "title": "Data Structures",
+        "topics": [
+          "Arrays & Collections",
+          "Strings",
+          "Maps & Dictionaries"
+        ]
+      },
+      {
+        "id": "object-oriented-programming",
+        "title": "Object-Oriented Programming",
+        "topics": [
+          "Classes & Objects",
+          "Inheritance",
+          "Interfaces"
+        ]
+      },
+      {
+        "id": "error-handling",
+        "title": "Error Handling",
+        "topics": [
+          "Exceptions",
+          "Debugging"
+        ]
+      },
+      {
+        "id": "i-o-and-file-system",
+        "title": "I/O & File System",
+        "topics": [
+          "File Operations",
+          "Input/Output"
+        ]
+      },
+      {
+        "id": "advanced-topics",
+        "title": "Advanced Topics",
+        "topics": [
+          "Concurrency",
+          "Modules",
+          "Best Practices",
+          "Performance"
+        ]
+      },
       {
         "id": "html-fundamentals",
         "title": "HTML Fundamentals",
@@ -4137,7 +5079,7 @@ export const TUTORIAL_COURSES = [
 export const TUTORIAL_QUIZZES = {
   "js:fundamentals": [
     {
-      "question": "Which of these best describes \"What is JavaScript\" in JavaScript?",
+      "question": "Which of these best describes \"Variables\" in JavaScript?",
       "options": [
         "A core concept covered in Fundamentals",
         "An advanced feature not yet available",
@@ -4145,10 +5087,10 @@ export const TUTORIAL_QUIZZES = {
         "A third-party library function"
       ],
       "answer": 0,
-      "explanation": "\"What is JavaScript\" is one of the fundamental topics covered in the Fundamentals section of JavaScript."
+      "explanation": "\"Variables\" is one of the fundamental topics covered in the Fundamentals section of JavaScript."
     },
     {
-      "question": "In JavaScript, what is the purpose of \"Syntax & Comments\"?",
+      "question": "In JavaScript, what is the purpose of \"Data Types\"?",
       "options": [
         "To define application configuration",
         "To handle a specific programming concern in fundamentals",
@@ -4156,7 +5098,247 @@ export const TUTORIAL_QUIZZES = {
         "To manage package dependencies"
       ],
       "answer": 1,
-      "explanation": "\"Syntax & Comments\" is a key concept in JavaScript's Fundamentals domain."
+      "explanation": "\"Data Types\" is a key concept in JavaScript's Fundamentals domain."
+    }
+  ],
+  "js:strings-and-numbers": [
+    {
+      "question": "Which of these best describes \"String Methods\" in JavaScript?",
+      "options": [
+        "A core concept covered in Strings & Numbers",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"String Methods\" is one of the fundamental topics covered in the Strings & Numbers section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Template Literals\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in strings & numbers",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Template Literals\" is a key concept in JavaScript's Strings & Numbers domain."
+    }
+  ],
+  "js:arrays-and-collections": [
+    {
+      "question": "Which of these best describes \"Array Methods\" in JavaScript?",
+      "options": [
+        "A core concept covered in Arrays & Collections",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Array Methods\" is one of the fundamental topics covered in the Arrays & Collections section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Array Iteration\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in arrays & collections",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Array Iteration\" is a key concept in JavaScript's Arrays & Collections domain."
+    }
+  ],
+  "js:objects-and-oop": [
+    {
+      "question": "Which of these best describes \"Object Basics\" in JavaScript?",
+      "options": [
+        "A core concept covered in Objects & OOP",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Object Basics\" is one of the fundamental topics covered in the Objects & OOP section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Prototypes\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in objects & oop",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Prototypes\" is a key concept in JavaScript's Objects & OOP domain."
+    }
+  ],
+  "js:functions-deep-dive": [
+    {
+      "question": "Which of these best describes \"Arrow Functions\" in JavaScript?",
+      "options": [
+        "A core concept covered in Functions Deep Dive",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrow Functions\" is one of the fundamental topics covered in the Functions Deep Dive section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Closures\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in functions deep dive",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Closures\" is a key concept in JavaScript's Functions Deep Dive domain."
+    }
+  ],
+  "js:asynchronous-javascript": [
+    {
+      "question": "Which of these best describes \"Promises\" in JavaScript?",
+      "options": [
+        "A core concept covered in Asynchronous JavaScript",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Promises\" is one of the fundamental topics covered in the Asynchronous JavaScript section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Async Await\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in asynchronous javascript",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Async Await\" is a key concept in JavaScript's Asynchronous JavaScript domain."
+    }
+  ],
+  "js:dom-and-browser-apis": [
+    {
+      "question": "Which of these best describes \"DOM Selection\" in JavaScript?",
+      "options": [
+        "A core concept covered in DOM & Browser APIs",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"DOM Selection\" is one of the fundamental topics covered in the DOM & Browser APIs section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"DOM Manipulation\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in dom & browser apis",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"DOM Manipulation\" is a key concept in JavaScript's DOM & Browser APIs domain."
+    }
+  ],
+  "js:error-handling-and-debugging": [
+    {
+      "question": "Which of these best describes \"Try Catch\" in JavaScript?",
+      "options": [
+        "A core concept covered in Error Handling & Debugging",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Try Catch\" is one of the fundamental topics covered in the Error Handling & Debugging section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Custom Errors\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling & debugging",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Custom Errors\" is a key concept in JavaScript's Error Handling & Debugging domain."
+    }
+  ],
+  "js:modules-and-tooling": [
+    {
+      "question": "Which of these best describes \"ES Modules\" in JavaScript?",
+      "options": [
+        "A core concept covered in Modules & Tooling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"ES Modules\" is one of the fundamental topics covered in the Modules & Tooling section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Dynamic Import\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in modules & tooling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Dynamic Import\" is a key concept in JavaScript's Modules & Tooling domain."
+    }
+  ],
+  "js:modern-javascript-features": [
+    {
+      "question": "Which of these best describes \"Optional Chaining\" in JavaScript?",
+      "options": [
+        "A core concept covered in Modern JavaScript Features",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Optional Chaining\" is one of the fundamental topics covered in the Modern JavaScript Features section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Nullish Coalescing\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in modern javascript features",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Nullish Coalescing\" is a key concept in JavaScript's Modern JavaScript Features domain."
+    }
+  ],
+  "js:performance-and-optimization": [
+    {
+      "question": "Which of these best describes \"Memory Management\" in JavaScript?",
+      "options": [
+        "A core concept covered in Performance & Optimization",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Memory Management\" is one of the fundamental topics covered in the Performance & Optimization section of JavaScript."
+    },
+    {
+      "question": "In JavaScript, what is the purpose of \"Garbage Collection\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in performance & optimization",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Garbage Collection\" is a key concept in JavaScript's Performance & Optimization domain."
     }
   ],
   "js:variables-and-types": [
@@ -4277,54 +5459,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"This Keyword\" is a key concept in JavaScript's Objects & Classes domain."
-    }
-  ],
-  "js:arrays-and-collections": [
-    {
-      "question": "Which of these best describes \"Arrays\" in JavaScript?",
-      "options": [
-        "A core concept covered in Arrays & Collections",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Arrays\" is one of the fundamental topics covered in the Arrays & Collections section of JavaScript."
-    },
-    {
-      "question": "In JavaScript, what is the purpose of \"Array Methods\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in arrays & collections",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Array Methods\" is a key concept in JavaScript's Arrays & Collections domain."
-    }
-  ],
-  "js:dom-and-browser-apis": [
-    {
-      "question": "Which of these best describes \"DOM Manipulation\" in JavaScript?",
-      "options": [
-        "A core concept covered in DOM & Browser APIs",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"DOM Manipulation\" is one of the fundamental topics covered in the DOM & Browser APIs section of JavaScript."
-    },
-    {
-      "question": "In JavaScript, what is the purpose of \"Events\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in dom & browser apis",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Events\" is a key concept in JavaScript's DOM & Browser APIs domain."
     }
   ],
   "js:async-javascript": [
@@ -4569,7 +5703,7 @@ export const TUTORIAL_QUIZZES = {
   ],
   "ts:fundamentals": [
     {
-      "question": "Which of these best describes \"What is TypeScript\" in TypeScript?",
+      "question": "Which of these best describes \"Introduction\" in TypeScript?",
       "options": [
         "A core concept covered in Fundamentals",
         "An advanced feature not yet available",
@@ -4577,10 +5711,10 @@ export const TUTORIAL_QUIZZES = {
         "A third-party library function"
       ],
       "answer": 0,
-      "explanation": "\"What is TypeScript\" is one of the fundamental topics covered in the Fundamentals section of TypeScript."
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of TypeScript."
     },
     {
-      "question": "In TypeScript, what is the purpose of \"Type Annotations\"?",
+      "question": "In TypeScript, what is the purpose of \"Variables & Types\"?",
       "options": [
         "To define application configuration",
         "To handle a specific programming concern in fundamentals",
@@ -4588,7 +5722,127 @@ export const TUTORIAL_QUIZZES = {
         "To manage package dependencies"
       ],
       "answer": 1,
-      "explanation": "\"Type Annotations\" is a key concept in TypeScript's Fundamentals domain."
+      "explanation": "\"Variables & Types\" is a key concept in TypeScript's Fundamentals domain."
+    }
+  ],
+  "ts:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in TypeScript?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of TypeScript."
+    },
+    {
+      "question": "In TypeScript, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in TypeScript's Data Structures domain."
+    }
+  ],
+  "ts:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in TypeScript?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of TypeScript."
+    },
+    {
+      "question": "In TypeScript, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in TypeScript's Object-Oriented Programming domain."
+    }
+  ],
+  "ts:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in TypeScript?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of TypeScript."
+    },
+    {
+      "question": "In TypeScript, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in TypeScript's Error Handling domain."
+    }
+  ],
+  "ts:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in TypeScript?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of TypeScript."
+    },
+    {
+      "question": "In TypeScript, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in TypeScript's I/O & File System domain."
+    }
+  ],
+  "ts:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in TypeScript?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of TypeScript."
+    },
+    {
+      "question": "In TypeScript, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in TypeScript's Advanced Topics domain."
     }
   ],
   "ts:type-system": [
@@ -4855,30 +6109,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Event Typing\" is a key concept in TypeScript's DOM & TypeScript domain."
     }
   ],
-  "ts:error-handling": [
-    {
-      "question": "Which of these best describes \"Typed Error Classes\" in TypeScript?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Typed Error Classes\" is one of the fundamental topics covered in the Error Handling section of TypeScript."
-    },
-    {
-      "question": "In TypeScript, what is the purpose of \"Try/Catch with unknown\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Try/Catch with unknown\" is a key concept in TypeScript's Error Handling domain."
-    }
-  ],
   "ts:ecosystem": [
     {
       "question": "Which of these best describes \"Formatting (Prettier)\" in TypeScript?",
@@ -4951,6 +6181,198 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"LangChain.js\" is a key concept in TypeScript's AI & LLMs in TypeScript domain."
     }
   ],
+  "py:python-fundamentals": [
+    {
+      "question": "Which of these best describes \"Variables & Types\" in Python?",
+      "options": [
+        "A core concept covered in Python Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Variables & Types\" is one of the fundamental topics covered in the Python Fundamentals section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Numbers & Math\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in python fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Numbers & Math\" is a key concept in Python's Python Fundamentals domain."
+    }
+  ],
+  "py:control-flow": [
+    {
+      "question": "Which of these best describes \"If Statements\" in Python?",
+      "options": [
+        "A core concept covered in Control Flow",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"If Statements\" is one of the fundamental topics covered in the Control Flow section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"For Loops\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in control flow",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"For Loops\" is a key concept in Python's Control Flow domain."
+    }
+  ],
+  "py:functions": [
+    {
+      "question": "Which of these best describes \"Function Basics\" in Python?",
+      "options": [
+        "A core concept covered in Functions",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Function Basics\" is one of the fundamental topics covered in the Functions section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Parameters & Arguments\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in functions",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Parameters & Arguments\" is a key concept in Python's Functions domain."
+    }
+  ],
+  "py:error-handling": [
+    {
+      "question": "Which of these best describes \"Try Except\" in Python?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Try Except\" is one of the fundamental topics covered in the Error Handling section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Custom Exceptions\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Custom Exceptions\" is a key concept in Python's Error Handling domain."
+    }
+  ],
+  "py:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Python?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Python's Object-Oriented Programming domain."
+    }
+  ],
+  "py:modules-and-packages": [
+    {
+      "question": "Which of these best describes \"Import System\" in Python?",
+      "options": [
+        "A core concept covered in Modules & Packages",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Import System\" is one of the fundamental topics covered in the Modules & Packages section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Package Structure\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in modules & packages",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Package Structure\" is a key concept in Python's Modules & Packages domain."
+    }
+  ],
+  "py:file-i-o": [
+    {
+      "question": "Which of these best describes \"Reading Files\" in Python?",
+      "options": [
+        "A core concept covered in File I/O",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Reading Files\" is one of the fundamental topics covered in the File I/O section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Writing Files\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in file i/o",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Writing Files\" is a key concept in Python's File I/O domain."
+    }
+  ],
+  "py:advanced-python": [
+    {
+      "question": "Which of these best describes \"Itertools\" in Python?",
+      "options": [
+        "A core concept covered in Advanced Python",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Itertools\" is one of the fundamental topics covered in the Advanced Python section of Python."
+    },
+    {
+      "question": "In Python, what is the purpose of \"Functools\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced python",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Functools\" is a key concept in Python's Advanced Python domain."
+    }
+  ],
   "py:getting-started": [
     {
       "question": "Which of these best describes \"What is Python\" in Python?",
@@ -4999,30 +6421,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Bitwise\" is a key concept in Python's Operators domain."
     }
   ],
-  "py:control-flow": [
-    {
-      "question": "Which of these best describes \"if-elif-else\" in Python?",
-      "options": [
-        "A core concept covered in Control Flow",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"if-elif-else\" is one of the fundamental topics covered in the Control Flow section of Python."
-    },
-    {
-      "question": "In Python, what is the purpose of \"match statement\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in control flow",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"match statement\" is a key concept in Python's Control Flow domain."
-    }
-  ],
   "py:data-structures": [
     {
       "question": "Which of these best describes \"Lists\" in Python?",
@@ -5069,30 +6467,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Dict & Set Comprehensions\" is a key concept in Python's Comprehensions domain."
-    }
-  ],
-  "py:functions": [
-    {
-      "question": "Which of these best describes \"Definitions & Scopes\" in Python?",
-      "options": [
-        "A core concept covered in Functions",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Definitions & Scopes\" is one of the fundamental topics covered in the Functions section of Python."
-    },
-    {
-      "question": "In Python, what is the purpose of \"Argument Logic\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in functions",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Argument Logic\" is a key concept in Python's Functions domain."
     }
   ],
   "py:classes": [
@@ -5623,6 +6997,150 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"LangChain & LlamaIndex\" is a key concept in Python's AI Engineering Pro domain."
     }
   ],
+  "go:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Go?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Go's Fundamentals domain."
+    }
+  ],
+  "go:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Go?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Go's Data Structures domain."
+    }
+  ],
+  "go:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Go?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Go's Object-Oriented Programming domain."
+    }
+  ],
+  "go:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Go?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Go's Error Handling domain."
+    }
+  ],
+  "go:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Go?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Go's I/O & File System domain."
+    }
+  ],
+  "go:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Go?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Go."
+    },
+    {
+      "question": "In Go, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Go's Advanced Topics domain."
+    }
+  ],
   "go:getting-started": [
     {
       "question": "Which of these best describes \"What is Go\" in Go?",
@@ -5837,30 +7355,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Implicit Implementation\" is a key concept in Go's Interfaces domain."
-    }
-  ],
-  "go:error-handling": [
-    {
-      "question": "Which of these best describes \"Error Interface\" in Go?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Error Interface\" is one of the fundamental topics covered in the Error Handling section of Go."
-    },
-    {
-      "question": "In Go, what is the purpose of \"Error Checking\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Error Checking\" is a key concept in Go's Error Handling domain."
     }
   ],
   "go:concurrency": [
@@ -6151,6 +7645,150 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Kubernetes Deployment\" is a key concept in Go's Deployment & DevOps domain."
     }
   ],
+  "rust:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Rust?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Rust's Fundamentals domain."
+    }
+  ],
+  "rust:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Rust?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Rust's Data Structures domain."
+    }
+  ],
+  "rust:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Rust?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Rust's Object-Oriented Programming domain."
+    }
+  ],
+  "rust:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Rust?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Rust's Error Handling domain."
+    }
+  ],
+  "rust:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Rust?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Rust's I/O & File System domain."
+    }
+  ],
+  "rust:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Rust?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Rust."
+    },
+    {
+      "question": "In Rust, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Rust's Advanced Topics domain."
+    }
+  ],
   "rust:getting-started": [
     {
       "question": "Which of these best describes \"What is Rust\" in Rust?",
@@ -6293,30 +7931,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Traits\" is a key concept in Rust's Traits & Generics domain."
-    }
-  ],
-  "rust:error-handling": [
-    {
-      "question": "Which of these best describes \"Result & Option\" in Rust?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Result & Option\" is one of the fundamental topics covered in the Error Handling section of Rust."
-    },
-    {
-      "question": "In Rust, what is the purpose of \"The ? Operator\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"The ? Operator\" is a key concept in Rust's Error Handling domain."
     }
   ],
   "rust:collections": [
@@ -6535,6 +8149,150 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Macro Patterns & Designators\" is a key concept in Rust's Macros domain."
     }
   ],
+  "java:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Java?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Java's Fundamentals domain."
+    }
+  ],
+  "java:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Java?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Java's Data Structures domain."
+    }
+  ],
+  "java:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Java?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Java's Object-Oriented Programming domain."
+    }
+  ],
+  "java:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Java?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Java's Error Handling domain."
+    }
+  ],
+  "java:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Java?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Java's I/O & File System domain."
+    }
+  ],
+  "java:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Java?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Java."
+    },
+    {
+      "question": "In Java, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Java's Advanced Topics domain."
+    }
+  ],
   "java:java-basics": [
     {
       "question": "Which of these best describes \"What is Java\" in Java?",
@@ -6557,30 +8315,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"JDK vs JRE vs JVM\" is a key concept in Java's Java Basics domain."
-    }
-  ],
-  "java:object-oriented-programming": [
-    {
-      "question": "Which of these best describes \"Classes & Objects\" in Java?",
-      "options": [
-        "A core concept covered in Object-Oriented Programming",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Java."
-    },
-    {
-      "question": "In Java, what is the purpose of \"Constructors\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in object-oriented programming",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Constructors\" is a key concept in Java's Object-Oriented Programming domain."
     }
   ],
   "java:functional-programming": [
@@ -6893,6 +8627,150 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Date & Time API\" is a key concept in Java's Java Platform Features domain."
+    }
+  ],
+  "kt:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Kotlin?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Kotlin's Fundamentals domain."
+    }
+  ],
+  "kt:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Kotlin?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Kotlin's Data Structures domain."
+    }
+  ],
+  "kt:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Kotlin?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Kotlin's Object-Oriented Programming domain."
+    }
+  ],
+  "kt:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Kotlin?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Kotlin's Error Handling domain."
+    }
+  ],
+  "kt:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Kotlin?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Kotlin's I/O & File System domain."
+    }
+  ],
+  "kt:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Kotlin?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Kotlin."
+    },
+    {
+      "question": "In Kotlin, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Kotlin's Advanced Topics domain."
     }
   ],
   "kt:getting-started": [
@@ -8815,6 +10693,198 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Pipes & IPC\" is a key concept in C's POSIX & System Programming domain."
     }
   ],
+  "c:memory-management": [
+    {
+      "question": "Which of these best describes \"malloc/free Basics\" in C?",
+      "options": [
+        "A core concept covered in Memory Management",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"malloc/free Basics\" is one of the fundamental topics covered in the Memory Management section of C."
+    },
+    {
+      "question": "In C, what is the purpose of \"Memory Layout (Stack vs Heap)\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in memory management",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Memory Layout (Stack vs Heap)\" is a key concept in C's Memory Management domain."
+    }
+  ],
+  "c:concurrency": [
+    {
+      "question": "Which of these best describes \"POSIX Threads (pthreads)\" in C?",
+      "options": [
+        "A core concept covered in Concurrency",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"POSIX Threads (pthreads)\" is one of the fundamental topics covered in the Concurrency section of C."
+    },
+    {
+      "question": "In C, what is the purpose of \"Mutexes & Condition Variables\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in concurrency",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Mutexes & Condition Variables\" is a key concept in C's Concurrency domain."
+    }
+  ],
+  "rb:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Ruby?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Ruby's Fundamentals domain."
+    }
+  ],
+  "rb:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Ruby?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Ruby's Data Structures domain."
+    }
+  ],
+  "rb:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Ruby?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Ruby's Object-Oriented Programming domain."
+    }
+  ],
+  "rb:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Ruby?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Ruby's Error Handling domain."
+    }
+  ],
+  "rb:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Ruby?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Ruby's I/O & File System domain."
+    }
+  ],
+  "rb:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Ruby?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Ruby."
+    },
+    {
+      "question": "In Ruby, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Ruby's Advanced Topics domain."
+    }
+  ],
   "rb:getting-started": [
     {
       "question": "Which of these best describes \"Time, Date & DateTime\" in Ruby?",
@@ -9029,30 +11099,6 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Classes & Objects\" is a key concept in Ruby's Classes & OOP domain."
-    }
-  ],
-  "rb:error-handling": [
-    {
-      "question": "Which of these best describes \"Exception Hierarchy\" in Ruby?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Exception Hierarchy\" is one of the fundamental topics covered in the Error Handling section of Ruby."
-    },
-    {
-      "question": "In Ruby, what is the purpose of \"begin/rescue/ensure\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"begin/rescue/ensure\" is a key concept in Ruby's Error Handling domain."
     }
   ],
   "rb:modules-and-packages": [
@@ -9293,6 +11339,150 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Rake Tasks\" is a key concept in Ruby's Advanced Ruby domain."
     }
   ],
+  "php:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in PHP?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in PHP's Fundamentals domain."
+    }
+  ],
+  "php:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in PHP?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in PHP's Data Structures domain."
+    }
+  ],
+  "php:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in PHP?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in PHP's Object-Oriented Programming domain."
+    }
+  ],
+  "php:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in PHP?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in PHP's Error Handling domain."
+    }
+  ],
+  "php:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in PHP?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in PHP's I/O & File System domain."
+    }
+  ],
+  "php:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in PHP?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of PHP."
+    },
+    {
+      "question": "In PHP, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in PHP's Advanced Topics domain."
+    }
+  ],
   "php:getting-started": [
     {
       "question": "Which of these best describes \"What is PHP\" in PHP?",
@@ -9485,30 +11675,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Prepared Statements\" is a key concept in PHP's Databases domain."
     }
   ],
-  "php:error-handling": [
-    {
-      "question": "Which of these best describes \"Exceptions\" in PHP?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of PHP."
-    },
-    {
-      "question": "In PHP, what is the purpose of \"Error Reporting\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Error Reporting\" is a key concept in PHP's Error Handling domain."
-    }
-  ],
   "php:variables-and-types": [
     {
       "question": "Which of these best describes \"Type Declarations & Coercion\" in PHP?",
@@ -9675,6 +11841,150 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"PSR Standards\" is a key concept in PHP's Modern PHP & Ecosystem domain."
+    }
+  ],
+  "swift:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Swift?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Swift's Fundamentals domain."
+    }
+  ],
+  "swift:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Swift?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Swift's Data Structures domain."
+    }
+  ],
+  "swift:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Swift?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Swift's Object-Oriented Programming domain."
+    }
+  ],
+  "swift:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Swift?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Swift's Error Handling domain."
+    }
+  ],
+  "swift:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Swift?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Swift's I/O & File System domain."
+    }
+  ],
+  "swift:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Swift?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Swift."
+    },
+    {
+      "question": "In Swift, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Swift's Advanced Topics domain."
     }
   ],
   "swift:getting-started": [
@@ -9893,30 +12203,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Associated Values\" is a key concept in Swift's Enums domain."
     }
   ],
-  "swift:error-handling": [
-    {
-      "question": "Which of these best describes \"do / try / catch\" in Swift?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"do / try / catch\" is one of the fundamental topics covered in the Error Handling section of Swift."
-    },
-    {
-      "question": "In Swift, what is the purpose of \"try? & try! Deep\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"try? & try! Deep\" is a key concept in Swift's Error Handling domain."
-    }
-  ],
   "swift:generics": [
     {
       "question": "Which of these best describes \"Generic Functions\" in Swift?",
@@ -10107,6 +12393,150 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Modifiers\" is a key concept in Swift's SwiftUI Basics domain."
+    }
+  ],
+  "scala:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Scala?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Scala's Fundamentals domain."
+    }
+  ],
+  "scala:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Scala?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Scala's Data Structures domain."
+    }
+  ],
+  "scala:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Scala?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Scala's Object-Oriented Programming domain."
+    }
+  ],
+  "scala:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Scala?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Scala's Error Handling domain."
+    }
+  ],
+  "scala:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Scala?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Scala's I/O & File System domain."
+    }
+  ],
+  "scala:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Scala?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Scala's Advanced Topics domain."
     }
   ],
   "scala:getting-started": [
@@ -10397,30 +12827,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Numeric Types & Conversions\" is a key concept in Scala's Variables & Data Types domain."
     }
   ],
-  "scala:error-handling": [
-    {
-      "question": "Which of these best describes \"Try & Recovery\" in Scala?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Try & Recovery\" is one of the fundamental topics covered in the Error Handling section of Scala."
-    },
-    {
-      "question": "In Scala, what is the purpose of \"Either & Validated\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Either & Validated\" is a key concept in Scala's Error Handling domain."
-    }
-  ],
   "scala:strings-and-text-processing": [
     {
       "question": "Which of these best describes \"String Operations\" in Scala?",
@@ -10587,6 +12993,198 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Scala from Java\" is a key concept in Scala's Java Interoperability domain."
+    }
+  ],
+  "scala:functional-programming-deep-dive": [
+    {
+      "question": "Which of these best describes \"Immutability & Pure Functions\" in Scala?",
+      "options": [
+        "A core concept covered in Functional Programming Deep Dive",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Immutability & Pure Functions\" is one of the fundamental topics covered in the Functional Programming Deep Dive section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Higher-Order Functions\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in functional programming deep dive",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Higher-Order Functions\" is a key concept in Scala's Functional Programming Deep Dive domain."
+    }
+  ],
+  "scala:scala-type-system": [
+    {
+      "question": "Which of these best describes \"Type Classes & Implicits\" in Scala?",
+      "options": [
+        "A core concept covered in Scala Type System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Type Classes & Implicits\" is one of the fundamental topics covered in the Scala Type System section of Scala."
+    },
+    {
+      "question": "In Scala, what is the purpose of \"Covariance, Contravariance, Invariance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in scala type system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Covariance, Contravariance, Invariance\" is a key concept in Scala's Scala Type System domain."
+    }
+  ],
+  "lua:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Lua?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Lua's Fundamentals domain."
+    }
+  ],
+  "lua:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Lua?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Lua's Data Structures domain."
+    }
+  ],
+  "lua:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Lua?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Lua's Object-Oriented Programming domain."
+    }
+  ],
+  "lua:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Lua?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Lua's Error Handling domain."
+    }
+  ],
+  "lua:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Lua?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Lua's I/O & File System domain."
+    }
+  ],
+  "lua:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Lua?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Lua."
+    },
+    {
+      "question": "In Lua, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Lua's Advanced Topics domain."
     }
   ],
   "lua:getting-started": [
@@ -10877,30 +13475,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"coroutine.status\" is a key concept in Lua's Coroutines domain."
     }
   ],
-  "lua:error-handling": [
-    {
-      "question": "Which of these best describes \"pcall\" in Lua?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"pcall\" is one of the fundamental topics covered in the Error Handling section of Lua."
-    },
-    {
-      "question": "In Lua, what is the purpose of \"xpcall\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"xpcall\" is a key concept in Lua's Error Handling domain."
-    }
-  ],
   "lua:standard-libraries": [
     {
       "question": "Which of these best describes \"math\" in Lua?",
@@ -10925,9 +13499,129 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"os\" is a key concept in Lua's Standard Libraries domain."
     }
   ],
-  "lua:advanced-topics": [
+  "zig:fundamentals": [
     {
-      "question": "Which of these best describes \"Weak Tables\" in Lua?",
+      "question": "Which of these best describes \"Introduction\" in Zig?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Zig's Fundamentals domain."
+    }
+  ],
+  "zig:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Zig?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Zig's Data Structures domain."
+    }
+  ],
+  "zig:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Zig?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Zig's Object-Oriented Programming domain."
+    }
+  ],
+  "zig:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Zig?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Zig's Error Handling domain."
+    }
+  ],
+  "zig:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Zig?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Zig's I/O & File System domain."
+    }
+  ],
+  "zig:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Zig?",
       "options": [
         "A core concept covered in Advanced Topics",
         "An advanced feature not yet available",
@@ -10935,10 +13629,10 @@ export const TUTORIAL_QUIZZES = {
         "A third-party library function"
       ],
       "answer": 0,
-      "explanation": "\"Weak Tables\" is one of the fundamental topics covered in the Advanced Topics section of Lua."
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Zig."
     },
     {
-      "question": "In Lua, what is the purpose of \"Garbage Collection\"?",
+      "question": "In Zig, what is the purpose of \"Modules\"?",
       "options": [
         "To define application configuration",
         "To handle a specific programming concern in advanced topics",
@@ -10946,7 +13640,7 @@ export const TUTORIAL_QUIZZES = {
         "To manage package dependencies"
       ],
       "answer": 1,
-      "explanation": "\"Garbage Collection\" is a key concept in Lua's Advanced Topics domain."
+      "explanation": "\"Modules\" is a key concept in Zig's Advanced Topics domain."
     }
   ],
   "zig:getting-started": [
@@ -11117,30 +13811,6 @@ export const TUTORIAL_QUIZZES = {
       "explanation": "\"Pointer Alignment\" is a key concept in Zig's Pointers & Memory domain."
     }
   ],
-  "zig:error-handling": [
-    {
-      "question": "Which of these best describes \"Error Sets\" in Zig?",
-      "options": [
-        "A core concept covered in Error Handling",
-        "An advanced feature not yet available",
-        "A deprecated syntax pattern",
-        "A third-party library function"
-      ],
-      "answer": 0,
-      "explanation": "\"Error Sets\" is one of the fundamental topics covered in the Error Handling section of Zig."
-    },
-    {
-      "question": "In Zig, what is the purpose of \"Error Union Inference\"?",
-      "options": [
-        "To define application configuration",
-        "To handle a specific programming concern in error handling",
-        "To optimize network requests",
-        "To manage package dependencies"
-      ],
-      "answer": 1,
-      "explanation": "\"Error Union Inference\" is a key concept in Zig's Error Handling domain."
-    }
-  ],
   "zig:optionals": [
     {
       "question": "Which of these best describes \"orelse & Unwrap\" in Zig?",
@@ -11283,6 +13953,198 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"build.zig.zon Package Manager\" is a key concept in Zig's Zig in Practice (ziglang.org/learn) domain."
+    }
+  ],
+  "zig:memory-management-in-zig": [
+    {
+      "question": "Which of these best describes \"Allocators Deep Dive\" in Zig?",
+      "options": [
+        "A core concept covered in Memory Management in Zig",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Allocators Deep Dive\" is one of the fundamental topics covered in the Memory Management in Zig section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Custom Allocators\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in memory management in zig",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Custom Allocators\" is a key concept in Zig's Memory Management in Zig domain."
+    }
+  ],
+  "zig:zig-standard-library": [
+    {
+      "question": "Which of these best describes \"File I/O & OS Operations\" in Zig?",
+      "options": [
+        "A core concept covered in Zig Standard Library",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File I/O & OS Operations\" is one of the fundamental topics covered in the Zig Standard Library section of Zig."
+    },
+    {
+      "question": "In Zig, what is the purpose of \"Networking & HTTP\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in zig standard library",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Networking & HTTP\" is a key concept in Zig's Zig Standard Library domain."
+    }
+  ],
+  "asm:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in Assembly?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in Assembly's Fundamentals domain."
+    }
+  ],
+  "asm:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in Assembly?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in Assembly's Data Structures domain."
+    }
+  ],
+  "asm:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in Assembly?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in Assembly's Object-Oriented Programming domain."
+    }
+  ],
+  "asm:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in Assembly?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in Assembly's Error Handling domain."
+    }
+  ],
+  "asm:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in Assembly?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in Assembly's I/O & File System domain."
+    }
+  ],
+  "asm:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in Assembly?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in Assembly's Advanced Topics domain."
     }
   ],
   "asm:number-systems-and-data-representation": [
@@ -11619,6 +14481,198 @@ export const TUTORIAL_QUIZZES = {
       ],
       "answer": 1,
       "explanation": "\"Process Creation & Syscalls\" is a key concept in Assembly's System Programming domain."
+    }
+  ],
+  "asm:x86-64-architecture-deep-dive": [
+    {
+      "question": "Which of these best describes \"Registers & Calling Conventions\" in Assembly?",
+      "options": [
+        "A core concept covered in x86-64 Architecture Deep Dive",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Registers & Calling Conventions\" is one of the fundamental topics covered in the x86-64 Architecture Deep Dive section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"Condition Codes & Control Flow\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in x86-64 architecture deep dive",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Condition Codes & Control Flow\" is a key concept in Assembly's x86-64 Architecture Deep Dive domain."
+    }
+  ],
+  "asm:arm64-assembly": [
+    {
+      "question": "Which of these best describes \"ARM64 vs x86-64 Comparison\" in Assembly?",
+      "options": [
+        "A core concept covered in ARM64 Assembly",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"ARM64 vs x86-64 Comparison\" is one of the fundamental topics covered in the ARM64 Assembly section of Assembly."
+    },
+    {
+      "question": "In Assembly, what is the purpose of \"ARM64 NEON SIMD\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in arm64 assembly",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"ARM64 NEON SIMD\" is a key concept in Assembly's ARM64 Assembly domain."
+    }
+  ],
+  "htmlcss:fundamentals": [
+    {
+      "question": "Which of these best describes \"Introduction\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in Fundamentals",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Introduction\" is one of the fundamental topics covered in the Fundamentals section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Variables & Types\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in fundamentals",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Variables & Types\" is a key concept in HTML & CSS's Fundamentals domain."
+    }
+  ],
+  "htmlcss:data-structures": [
+    {
+      "question": "Which of these best describes \"Arrays & Collections\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in Data Structures",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Arrays & Collections\" is one of the fundamental topics covered in the Data Structures section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Strings\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in data structures",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Strings\" is a key concept in HTML & CSS's Data Structures domain."
+    }
+  ],
+  "htmlcss:object-oriented-programming": [
+    {
+      "question": "Which of these best describes \"Classes & Objects\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in Object-Oriented Programming",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Classes & Objects\" is one of the fundamental topics covered in the Object-Oriented Programming section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Inheritance\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in object-oriented programming",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Inheritance\" is a key concept in HTML & CSS's Object-Oriented Programming domain."
+    }
+  ],
+  "htmlcss:error-handling": [
+    {
+      "question": "Which of these best describes \"Exceptions\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in Error Handling",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Exceptions\" is one of the fundamental topics covered in the Error Handling section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Debugging\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in error handling",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Debugging\" is a key concept in HTML & CSS's Error Handling domain."
+    }
+  ],
+  "htmlcss:i-o-and-file-system": [
+    {
+      "question": "Which of these best describes \"File Operations\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in I/O & File System",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"File Operations\" is one of the fundamental topics covered in the I/O & File System section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Input/Output\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in i/o & file system",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Input/Output\" is a key concept in HTML & CSS's I/O & File System domain."
+    }
+  ],
+  "htmlcss:advanced-topics": [
+    {
+      "question": "Which of these best describes \"Concurrency\" in HTML & CSS?",
+      "options": [
+        "A core concept covered in Advanced Topics",
+        "An advanced feature not yet available",
+        "A deprecated syntax pattern",
+        "A third-party library function"
+      ],
+      "answer": 0,
+      "explanation": "\"Concurrency\" is one of the fundamental topics covered in the Advanced Topics section of HTML & CSS."
+    },
+    {
+      "question": "In HTML & CSS, what is the purpose of \"Modules\"?",
+      "options": [
+        "To define application configuration",
+        "To handle a specific programming concern in advanced topics",
+        "To optimize network requests",
+        "To manage package dependencies"
+      ],
+      "answer": 1,
+      "explanation": "\"Modules\" is a key concept in HTML & CSS's Advanced Topics domain."
     }
   ],
   "htmlcss:html-fundamentals": [

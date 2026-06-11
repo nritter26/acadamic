@@ -43,6 +43,63 @@ router.get('/', (_req: Request, res: Response) => {
   res.json({ files, count: files.length });
 });
 
+// List all projects (bulk)
+router.get('/projects', (_req: Request, res: Response) => {
+  const projectsDir = path.join(CONTENT_DIR, 'projects');
+  if (!fs.existsSync(projectsDir)) {
+    res.json([]);
+    return;
+  }
+  try {
+    const files = fs.readdirSync(projectsDir).filter(f => f.endsWith('.json')).sort();
+    const total = files.length;
+
+    // Support NDJSON streaming for lazy loading
+    const acceptsStream = _req.headers.accept === 'application/x-ndjson';
+    if (acceptsStream) {
+      res.setHeader('Content-Type', 'application/x-ndjson');
+      res.setHeader('X-Total-Projects', String(total));
+      for (const f of files) {
+        try {
+          const data = JSON.parse(fs.readFileSync(path.join(projectsDir, f), 'utf-8'));
+          res.write(JSON.stringify(data) + '\n');
+        } catch {
+          // Skip corrupt files
+        }
+      }
+      res.end();
+      return;
+    }
+
+    // Default: return all projects as JSON array
+    const projects = files.map(f => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(projectsDir, f), 'utf-8'));
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+    res.json(projects);
+  } catch {
+    res.status(500).json({ error: 'Failed to read projects directory' });
+  }
+});
+
+// Get a single project catalog file
+router.get('/projects/:id', (req: Request, res: Response) => {
+  const projectPath = path.join(CONTENT_DIR, 'projects', `${req.params.id}.json`);
+  if (!fs.existsSync(projectPath)) {
+    res.status(404).json({ error: 'Project not found' });
+    return;
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(projectPath, 'utf-8'));
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: 'Failed to read project file' });
+  }
+});
+
 // Get content for a specific language
 router.get('/:lang', (req: Request, res: Response) => {
   const file = safeLangParam(req.params.lang);

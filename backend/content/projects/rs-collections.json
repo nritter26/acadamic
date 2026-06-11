@@ -1,0 +1,71 @@
+{
+  "id": "rs-collections",
+  "title": "Rust: HashMap and HashSet",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "HashMap", "HashSet", "collections", "hash maps"],
+  "description": "Use Rust's HashMap, HashSet, and Vec collections for data storage and lookup.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create and Populate HashMap",
+      "description": "Create a `HashMap<&str, i32>` mapping fruits to their prices: apple=1, banana=2, cherry=3. Print the map using `{:?}`.",
+      "hints": ["`use std::collections::HashMap;`", "`let mut prices = HashMap::new(); prices.insert(\"apple\", 1);`", "Or use `HashMap::from([(\"apple\", 1), ...])`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('1')",
+        "successMessage": "HashMap created!",
+        "failureMessage": "Create and print a fruit→price HashMap."
+      }
+    },
+    {
+      "id": 2,
+      "title": "HashMap Get and Insert",
+      "description": "Write a function `get_or_insert(map: &mut HashMap<String, i32>, key: String, value: i32) -> i32` that returns existing value or inserts and returns the default.",
+      "hints": ["`map.entry(key).or_insert(value)` — returns a mutable reference.", "`.entry()` API provides elegant get-or-insert logic.", "Print the returned value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "Entry API works!",
+        "failureMessage": "Demonstrate get_or_insert behavior."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Word Count with HashMap",
+      "description": "Count word frequencies in the sentence `\"the cat in the hat\"` using a HashMap. Print each word and its count.",
+      "hints": ["Split by spaces: `s.split_whitespace()`.", "Use `*map.entry(word).or_insert(0) += 1;`", "Iterate with `for (word, count) in &map { println!(\"{}: {}\", word, count); }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('the: 2') || output.includes('cat: 1')",
+        "successMessage": "Word count works!",
+        "failureMessage": "Count and print word frequencies."
+      }
+    },
+    {
+      "id": 4,
+      "title": "HashSet for Unique Values",
+      "description": "Given `[1, 2, 3, 2, 1, 4, 5, 4]`, use a `HashSet` to find unique numbers. Print them sorted.",
+      "hints": ["`use std::collections::HashSet;`", "`let unique: HashSet<i32> = numbers.into_iter().collect();`", "Convert to Vec, sort, and print."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('5') && !output.includes('2,1,2')",
+        "successMessage": "HashSet deduplication works!",
+        "failureMessage": "Print unique sorted numbers from [1,2,3,2,1,4,5,4]."
+      }
+    },
+    {
+      "id": 5,
+      "title": "HashSet Union and Intersection",
+      "description": "Create two HashSets: `set_a = [1, 2, 3, 4, 5]` and `set_b = [4, 5, 6, 7, 8]`. Print their union and intersection.",
+      "hints": ["`union` and `intersection` are methods on HashSet.", "Both return iterators: collect into Vec for printing.", "Union: [1,2,3,4,5,6,7,8], Intersection: [4,5]"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('8') && output.includes('4')",
+        "successMessage": "Set operations work!",
+        "failureMessage": "Print union and intersection of the two sets."
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "c-interpreter",
+  "title": "C: Simple Interpreter (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 30,
+  "concepts": ["c", "interpreter", "AST", "evaluation", "recursion"],
+  "description": "Build a simple expression interpreter that parses and evaluates arithmetic expressions with +, -, *, /, and parentheses.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Expression Parser (Recursive Descent)",
+      "description": "Write a recursive descent parser for expressions: `int expr(char **p)` parses addition/subtraction, `int term(char **p)` parses multiplication/division, `int factor(char **p)` parses numbers and parentheses. Parse and evaluate '3+4*2'.",
+      "hints": ["Grammar: expr = term (('+'|'-') term)*", "term = factor (('*'|'/') factor)*", "factor = NUMBER | '(' expr ')'", "Use `strtol` to parse numbers."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <ctype.h>\n\nint factor(char **p) {\n    if (**p == '(') { (*p)++; int v = expr(p); if (**p == ')') (*p)++; return v; }\n    return strtol(*p, p, 10);\n}\n\nint term(char **p) {\n    int v = factor(p);\n    while (**p == '*' || **p == '/') {\n        char op = *(*p)++;\n        int r = factor(p);\n        v = (op == '*') ? v * r : v / r;\n    }\n    return v;\n}\n\nint expr(char **p) {\n    int v = term(p);\n    while (**p == '+' || **p == '-') {\n        char op = *(*p)++;\n        int r = term(p);\n        v = (op == '+') ? v + r : v - r;\n    }\n    return v;\n}\n\nint main() {\n    char input[] = \"3+4*2\";\n    char *p = input;\n    printf(\"Result: %d\\n\", expr(&p));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('11')",
+        "successMessage": "Expression interpreter works!",
+        "failureMessage": "Evaluate 3+4*2 = 11"
+      }
+    }
+  ]
+}

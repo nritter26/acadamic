@@ -1,5 +1,10 @@
 {
   "Getting Started": {
+    "Svelte Introduction": {
+      "exp": "<p>Introduction to Svelte and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Reactivity": [
       "Svelte's reactivity is compiler-driven: assignments to variables automatically trigger DOM updates without a virtual DOM or manual state management. The compiler instruments variable assignments to invalidate dependencies.",
       "let count = 0;\nfunction increment() { count += 1; }"
@@ -12,6 +17,77 @@
       "Svelte provides logic blocks ({#if}, {:else if}, {:else}) and loops ({#each}, {:else}) within templates. Loops support destructuring and index tracking without special directives.",
       "{#if user.loggedIn}\n  <p>Welcome back!</p>\n{:else}\n  <p>Please log in</p>\n{/if}"
     ]
+  },
+  "Core Concepts": {
+    "Svelte Core Features": {
+      "exp": "<p>Essential Svelte concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Svelte Components": {
+      "exp": "<p>Building user interfaces with Svelte.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Svelte Routing": {
+      "exp": "<p>Navigation and routing in Svelte.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Svelte State": {
+      "exp": "<p>Managing application state in Svelte.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Svelte Data": {
+      "exp": "<p>Working with data and APIs in Svelte.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Svelte Testing": {
+      "exp": "<p>Testing strategies for Svelte.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Vitest": [
+      "Vitest integrates seamlessly with SvelteKit projects for fast unit and integration testing with Vite-powered HMR, Jest-compatible API, and native ESM support.",
+      "import { describe, it, expect } from 'vitest';\nimport { render } from '@testing-library/svelte';\n\nit('renders', () => {\n  const { getByText } = render(MyComponent, { props: { name: 'World' } });\n  expect(getByText('Hello World')).toBeTruthy();\n});"
+    ],
+    "Playwright": [
+      "Playwright is the recommended E2E testing framework for SvelteKit, providing cross-browser automation, network interception, and component testing across Chromium, Firefox, and WebKit.",
+      "test('home page loads', async ({ page }) => {\n  await page.goto('/');\n  await expect(page.locator('h1')).toContainText('Welcome');\n});"
+    ]
+  },
+  "Deployment": {
+    "Svelte Deployment": {
+      "exp": "<p>Deploying Svelte applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Svelte Best Practices": {
+      "exp": "<p>Best practices for Svelte development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Svelte Advanced": {
+      "exp": "<p>Advanced Svelte topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Components": {
     "Props": [
@@ -105,36 +181,14 @@
       "export const ssr = false;"
     ]
   },
-  "Testing": {
-    "Vitest": [
-      "Vitest integrates seamlessly with SvelteKit projects for fast unit and integration testing with Vite-powered HMR, Jest-compatible API, and native ESM support.",
-      "import { describe, it, expect } from 'vitest';\nimport { render } from '@testing-library/svelte';\n\nit('renders', () => {\n  const { getByText } = render(MyComponent, { props: { name: 'World' } });\n  expect(getByText('Hello World')).toBeTruthy();\n});"
-    ],
-    "Playwright": [
-      "Playwright is the recommended E2E testing framework for SvelteKit, providing cross-browser automation, network interception, and component testing across Chromium, Firefox, and WebKit.",
-      "test('home page loads', async ({ page }) => {\n  await page.goto('/');\n  await expect(page.locator('h1')).toContainText('Welcome');\n});"
-    ]
-  },
   "Svelte 5 Runes": {
-    "$state": [
-      "Svelte 5 introduces runes, explicit reactivity markers prefixed with $. $state replaces let-based reactivity and works outside .svelte files, making .svelte.ts files possible for shared state.",
-      "<script>\n  let count = $state(0);\n  function increment() { count++; }\n</script>\n<button onclick={increment}>{count}</button>"
+    "Runes: $state, $derived, $effect": [
+      "Svelte 5 introduces runes — explicit reactive primitives that replace the Svelte 4 <code>let</code> / <code>export let</code> / <code>$:</code> magic. <code>$state()</code> creates reactive state. <code>$derived()</code> creates derived values that update automatically. <code>$effect()</code> runs side effects when tracked dependencies change. <code>$props()</code> explicitly declares component props. Runes work both in <code>.svelte</code> files and <code>.svelte.js</code>/<code>.svelte.ts</code> modules, enabling shared reactive logic outside components. <code>$bindable()</code> creates two-way bindable props. Runes make reactivity explicit and TypeScript-friendly.",
+      "<script>\n  // Svelte 5 runes\n  let count = $state(0);\n  let doubled = $derived(count * 2);\n  let items = $state([1, 2, 3]);\n  \n  // Props\n  let { name, initialCount = 0 } = $props();\n  \n  // Effects\n  $effect(() => {\n    console.log(`Count changed to ${count}`);\n    \n    // Return cleanup function\n    return () => {\n      console.log('Effect cleaning up');\n    };\n  });\n  \n  function increment() {\n    count += 1;\n  }\n  \n  function addItem() {\n    items.push(items.length + 1);\n  }\n</script>\n\n<h1>Hello {name}!</h1>\n<p>Count: {count}</p>\n<p>Doubled: {doubled}</p>\n\n<button onclick={increment}>+</button>\n<button onclick={() => count--}>-</button>\n<button onclick={addItem}>Add Item</button>\n\n<ul>\n  {#each items as item, i}\n    <li>{i}: {item}</li>\n  {/each}\n</ul>"
     ],
-    "$derived": [
-      "$derived computes values from $state dependencies and updates automatically. Unlike the store-based derived, it works in any .svelte or .svelte.ts file with no setup wrapper.",
-      "let name = $state('Alice');\nlet age = $state(30);\nlet greeting = $derived(`Hello, ${name}! You are ${age}.`);"
-    ],
-    "$effect": [
-      "$effect runs a callback whenever its reactive dependencies change, consolidating lifecycle and reactivity into one primitive. The returned teardown function handles cleanup on re-run or destroy.",
-      "$effect(() => {\n  localStorage.setItem('count', String(count));\n  return () => console.log('Cleanup');\n});"
-    ],
-    "$props": [
-      "$props replaces the export let pattern for component props in Svelte 5. It accepts a default object and returns reactive bindings that update when the parent re-renders.",
-      "let { title, count = 0, onAction }: {\n  title: string;\n  count?: number;\n  onAction?: () => void;\n} = $props();"
-    ],
-    "$bindable": [
-      "$bindable marks a prop as eligible for two-way binding using bind: in the parent. It provides a default value and enables the parent-child sync pattern without manual event dispatching.",
-      "let { value = $bindable('') } = $props();\n// Usage: <MyInput bind:value={name} />"
+    "Svelte 5 Snippets & Event Handling": [
+      "Svelte 5 introduces snippets (<code>{#snippet}</code>) for reusable template fragments, replacing slots in many cases. Event handlers use callbacks (<code>onclick={handler}</code>) instead of <code>on:click</code>. Event modifiers are attached with function calls. Cross-component state uses runes in <code>.svelte.ts</code> files. <code>onMount</code>/<code>onDestroy</code> lifecycle functions are now imported. <code>bind:value</code> works with <code>$bindable()</code> for two-way bindings. <code>class</code> and <code>style</code> attributes support objects and arrays.",
+      "<script>\n  import { onMount } from 'svelte';\n  \n  let items = $state(['Apple', 'Banana', 'Cherry']);\n  let selected = $state<string | null>(null);\n  let search = $state('');\n  \n  let filtered = $derived(\n    items.filter(i => i.toLowerCase().includes(search.toLowerCase()))\n  );\n  \n  function handleItemClick(item: string) {\n    selected = item;\n  }\n  \n  onMount(() => {\n    console.log('Component mounted');\n  });\n</script>\n\n<!-- Two-way binding with $bindable prop -->\n<input bind:value={search} placeholder=\"Search...\" />\n\n<!-- Event handler with callback syntax -->\n{#snippet item(item: string, index: number)}\n  <button\n    class:active={selected === item}\n    onclick={() => handleItemClick(item)}\n  >\n    {index + 1}. {item}\n  </button>\n{/snippet}\n\n{#each filtered as item, i}\n  {@render item(item, i)}\n{:else}\n  <p>No items match \"{search}\"</p>\n{/each}\n\n<!-- Reactive shared state from .svelte.ts -->\n<script>\n  // shared-state.svelte.ts\n  export const counter = $state({ value: 0 });\n</script>"
     ]
   },
   "Snippets": {

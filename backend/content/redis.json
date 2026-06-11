@@ -1,50 +1,157 @@
 {
   "Getting Started": {
-    "Installation": ["Redis can be installed via package managers, compiled from source, or run via Docker. The default configuration listens on port 6379 and stores data in memory with optional persistence to disk.", "# Install on Ubuntu/Debian\nsudo apt-get install redis-server\n\n# Run via Docker\ndocker run --name my-redis -p 6379:6379 -d redis\n\n# Verify installation\nredis-server --version\nredis-cli ping\n# Output: PONG"],
-    "Data Types": ["Redis supports Strings, Lists, Sets, Sorted Sets, Hashes, Bitmaps, HyperLogLogs, Streams, and Geospatial indexes. Each type has optimized commands for specific use cases and data access patterns.", "SET stringkey \"hello\"\nLPUSH listkey \"a\" \"b\" \"c\"\nSADD setkey \"member1\" \"member2\"\nZADD zsetkey 1 \"one\" 2 \"two\"\nHSET hashkey field1 \"value1\" field2 \"value2\"\nTYPE stringkey\n# Output: string"],
-    "CLI": ["The `redis-cli` command-line interface connects to Redis servers for interactive or scripted use. It supports command execution, monitoring, slow log analysis, and server administration with built-in help.", "redis-cli\n127.0.0.1:6379> SET user:1 \"Alice\"\nOK\n127.0.0.1:6379> GET user:1\n\"Alice\"\n127.0.0.1:6379> INFO server\n127.0.0.1:6379> MONITOR\n127.0.0.1:6379> SLOWLOG GET 10"]
+    "Redis Introduction": {
+      "exp": "<p>Introduction to redis and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Installation": [
+      "Redis can be installed via package managers, compiled from source, or run via Docker. The default configuration listens on port 6379 and stores data in memory with optional persistence to disk.",
+      "# Install on Ubuntu/Debian\nsudo apt-get install redis-server\n\n# Run via Docker\ndocker run --name my-redis -p 6379:6379 -d redis\n\n# Verify installation\nredis-server --version\nredis-cli ping\n# Output: PONG"
+    ],
+    "Data Types": [
+      "Redis supports Strings, Lists, Sets, Sorted Sets, Hashes, Bitmaps, HyperLogLogs, Streams, and Geospatial indexes. Each type has optimized commands for specific use cases and data access patterns.",
+      "SET stringkey \"hello\"\nLPUSH listkey \"a\" \"b\" \"c\"\nSADD setkey \"member1\" \"member2\"\nZADD zsetkey 1 \"one\" 2 \"two\"\nHSET hashkey field1 \"value1\" field2 \"value2\"\nTYPE stringkey\n# Output: string"
+    ],
+    "CLI": [
+      "The `redis-cli` command-line interface connects to Redis servers for interactive or scripted use. It supports command execution, monitoring, slow log analysis, and server administration with built-in help.",
+      "redis-cli\n127.0.0.1:6379> SET user:1 \"Alice\"\nOK\n127.0.0.1:6379> GET user:1\n\"Alice\"\n127.0.0.1:6379> INFO server\n127.0.0.1:6379> MONITOR\n127.0.0.1:6379> SLOWLOG GET 10"
+    ]
+  },
+  "Core Concepts": {
+    "Redis Basics": {
+      "exp": "<p>Core redis concepts.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Configuration": {
+    "Redis Config": {
+      "exp": "<p>Configuring redis for your project.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Redis Best Practices": {
+      "exp": "<p>Best practices for using redis.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Usage": {
+    "Redis Advanced": {
+      "exp": "<p>Advanced redis techniques and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Strings & Numbers": {
-    "SET/GET": ["Strings are the most fundamental Redis data type, capable of storing text, numbers, or binary data up to 512MB. SET stores a key-value pair, GET retrieves it, and commands like `SETNX` help with distributed locks.", "SET welcome \"Hello Redis\"\nGET welcome\n# Output: \"Hello Redis\"\n\nSETNX lock:resource \"locked\"\n# Output: (integer) 1 - key was set\n\nSETEX session:token \"abc123\" 3600\n# Sets with 1 hour TTL\n\nMSET key1 \"val1\" key2 \"val2\"\nMGET key1 key2"],
-    "INCR": ["Redis provides atomic increment/decrement operations that are essential for counters, rate limiting, and real-time analytics. Commands like `INCR`, `DECR`, `INCRBY`, and `INCRBYFLOAT` operate on string values holding numbers.", "SET counter 0\nINCR counter\n# Output: (integer) 1\nINCRBY counter 5\n# Output: (integer) 6\nDECR counter\n# Output: (integer) 5\nGET counter\n# Output: \"5\"\n\nINCRBYFLOAT price 10.50"],
-    "Expiry": ["TTL (Time To Live) automatically removes keys after a specified duration. `EXPIRE`, `TTL`, and `PERSIST` manage key lifetimes. Expiry is crucial for caching, temporary tokens, and session management.", "SET cache:page \"/home\" \nEXPIRE cache:page 60\n# Or set with expiry inline:\nSETEX cache:api 300 \"{\\\"data\\\": []}\"\n\nTTL cache:page\n# Output: (integer) 58 - seconds remaining\n\nPERSIST cache:page\n# Remove TTL\n\nSET key \"value\" EX 10 NX\n# Set if not exists with 10 second expiry"
+    "SET/GET": [
+      "Strings are the most fundamental Redis data type, capable of storing text, numbers, or binary data up to 512MB. SET stores a key-value pair, GET retrieves it, and commands like `SETNX` help with distributed locks.",
+      "SET welcome \"Hello Redis\"\nGET welcome\n# Output: \"Hello Redis\"\n\nSETNX lock:resource \"locked\"\n# Output: (integer) 1 - key was set\n\nSETEX session:token \"abc123\" 3600\n# Sets with 1 hour TTL\n\nMSET key1 \"val1\" key2 \"val2\"\nMGET key1 key2"
+    ],
+    "INCR": [
+      "Redis provides atomic increment/decrement operations that are essential for counters, rate limiting, and real-time analytics. Commands like `INCR`, `DECR`, `INCRBY`, and `INCRBYFLOAT` operate on string values holding numbers.",
+      "SET counter 0\nINCR counter\n# Output: (integer) 1\nINCRBY counter 5\n# Output: (integer) 6\nDECR counter\n# Output: (integer) 5\nGET counter\n# Output: \"5\"\n\nINCRBYFLOAT price 10.50"
+    ],
+    "Expiry": [
+      "TTL (Time To Live) automatically removes keys after a specified duration. `EXPIRE`, `TTL`, and `PERSIST` manage key lifetimes. Expiry is crucial for caching, temporary tokens, and session management.",
+      "SET cache:page \"/home\" \nEXPIRE cache:page 60\n# Or set with expiry inline:\nSETEX cache:api 300 \"{\\\"data\\\": []}\"\n\nTTL cache:page\n# Output: (integer) 58 - seconds remaining\n\nPERSIST cache:page\n# Remove TTL\n\nSET key \"value\" EX 10 NX\n# Set if not exists with 10 second expiry"
     ]
   },
   "Lists & Sets": {
-    "LPUSH/LPOP": ["Lists are ordered sequences of strings, efficient for queue and stack implementations. LPUSH adds to the left, RPUSH adds to the right; LPOP and RPOP remove and return elements from either end.", "LPUSH queue \"task3\" \"task2\" \"task1\"\n# List: task1, task2, task3\n\nRPUSH queue \"task4\"\n# List: task1, task2, task3, task4\n\nLPOP queue\n# Output: \"task1\" - removes from left\n\nLLEN queue\n# Output: (integer) 3\n\nLRANGE queue 0 -1\n# Output: \"task2\", \"task3\", \"task4\"\n\nBRPOP queue 0\n# Blocking pop - waits indefinitely"],
-    "SADD": ["Sets are unordered collections of unique strings. SADD adds members, SREM removes them, SMEMBERS returns all members, and SISMEMBER checks existence. Sets are ideal for tagging, deduplication, and relations.", "SADD tags:post:1 \"javascript\" \"node\" \"redis\"\nSADD tags:post:2 \"python\" \"redis\" \"database\"\n\nSMEMBERS tags:post:1\n# Output: \"javascript\", \"node\", \"redis\"\n\nSISMEMBER tags:post:1 \"redis\"\n# Output: (integer) 1\n\nSCARD tags:post:1\n# Output: (integer) 3 - set cardinality\n\nSPOP tags:post:1 1\n# Remove and return 1 random member"],
-    "Union/Intersect": ["Set operations enable powerful data analysis: SUNION combines sets, SINTER finds common elements, and SDIFF finds differences. These are used for recommendations, permissions, and social features.", "SUNION tags:post:1 tags:post:2\n# Output: \"javascript\", \"node\", \"redis\", \"python\", \"database\"\n\nSINTER tags:post:1 tags:post:2\n# Output: \"redis\" (common tag)\n\nSDIFF tags:post:1 tags:post:2\n# Output: \"javascript\", \"node\"\n\nSINTERSTORE common:tags tags:post:1 tags:post:2\n# Store intersection in new set"
+    "LPUSH/LPOP": [
+      "Lists are ordered sequences of strings, efficient for queue and stack implementations. LPUSH adds to the left, RPUSH adds to the right; LPOP and RPOP remove and return elements from either end.",
+      "LPUSH queue \"task3\" \"task2\" \"task1\"\n# List: task1, task2, task3\n\nRPUSH queue \"task4\"\n# List: task1, task2, task3, task4\n\nLPOP queue\n# Output: \"task1\" - removes from left\n\nLLEN queue\n# Output: (integer) 3\n\nLRANGE queue 0 -1\n# Output: \"task2\", \"task3\", \"task4\"\n\nBRPOP queue 0\n# Blocking pop - waits indefinitely"
+    ],
+    "SADD": [
+      "Sets are unordered collections of unique strings. SADD adds members, SREM removes them, SMEMBERS returns all members, and SISMEMBER checks existence. Sets are ideal for tagging, deduplication, and relations.",
+      "SADD tags:post:1 \"javascript\" \"node\" \"redis\"\nSADD tags:post:2 \"python\" \"redis\" \"database\"\n\nSMEMBERS tags:post:1\n# Output: \"javascript\", \"node\", \"redis\"\n\nSISMEMBER tags:post:1 \"redis\"\n# Output: (integer) 1\n\nSCARD tags:post:1\n# Output: (integer) 3 - set cardinality\n\nSPOP tags:post:1 1\n# Remove and return 1 random member"
+    ],
+    "Union/Intersect": [
+      "Set operations enable powerful data analysis: SUNION combines sets, SINTER finds common elements, and SDIFF finds differences. These are used for recommendations, permissions, and social features.",
+      "SUNION tags:post:1 tags:post:2\n# Output: \"javascript\", \"node\", \"redis\", \"python\", \"database\"\n\nSINTER tags:post:1 tags:post:2\n# Output: \"redis\" (common tag)\n\nSDIFF tags:post:1 tags:post:2\n# Output: \"javascript\", \"node\"\n\nSINTERSTORE common:tags tags:post:1 tags:post:2\n# Store intersection in new set"
     ]
   },
   "Hashes & Sorted Sets": {
-    "HSET": ["Hashes store field-value pairs within a single key, ideal for representing objects. They provide memory-efficient storage with commands for individual field CRUD, bulk operations, and field counting.", "HSET user:100 name \"Alice\" email \"alice@example.com\" age 30\n\nHGET user:100 name\n# Output: \"Alice\"\n\nHGETALL user:100\n# Output: name, Alice, email, alice@example.com, age, 30\n\nHMSET user:101 name \"Bob\" email \"bob@example.com\"\nHEXISTS user:100 age\n# Output: (integer) 1\n\nHINCRBY user:100 age 1\n# Output: (integer) 31\n\nHDEL user:100 age"],
-    "ZADD": ["Sorted Sets associate each member with a numeric score, maintaining order by score. ZADD adds or updates members, ZRANGE retrieves by rank, and ZRANK gets position. Perfect for leaderboards and priority queues.", "ZADD leaderboard 100 \"Alice\" 85 \"Bob\" 95 \"Charlie\"\n\nZRANGE leaderboard 0 -1 WITHSCORES\n# Output: Bob(85), Charlie(95), Alice(100)\n\nZREVRANGE leaderboard 0 2 WITHSCORES\n# Output: Alice(100), Charlie(95), Bob(85) - top 3\n\nZSCORE leaderboard \"Alice\"\n# Output: 100\n\nZRANK leaderboard \"Alice\"\n# Output: (integer) 2 - 0-indexed rank\n\nZINCRBY leaderboard 10 \"Bob\"\n# Output: 95"],
-    "Ranking": ["Sorted Sets excel at real-time leaderboards with atomic score updates, range queries, and pagination. Combined with aggregation commands like ZCOUNT and ZREMRANGEBYSCORE, they handle ranking systems efficiently.", "ZREVRANGE leaderboard 0 9 WITHSCORES\n# Top 10 players\n\nZCOUNT leaderboard 80 100\n# Count players with scores between 80-100\n\nZREVRANK leaderboard \"Alice\"\n# Rank from high to low\n\nZREMRANGEBYRANK leaderboard 0 -11\n# Keep only top 10, remove rest\n\nZUNIONSTORE weekly 2 week:1 week:2 WEIGHTS 0.5 0.5\n# Combine two weeks' scores with weighting"
+    "HSET": [
+      "Hashes store field-value pairs within a single key, ideal for representing objects. They provide memory-efficient storage with commands for individual field CRUD, bulk operations, and field counting.",
+      "HSET user:100 name \"Alice\" email \"alice@example.com\" age 30\n\nHGET user:100 name\n# Output: \"Alice\"\n\nHGETALL user:100\n# Output: name, Alice, email, alice@example.com, age, 30\n\nHMSET user:101 name \"Bob\" email \"bob@example.com\"\nHEXISTS user:100 age\n# Output: (integer) 1\n\nHINCRBY user:100 age 1\n# Output: (integer) 31\n\nHDEL user:100 age"
+    ],
+    "ZADD": [
+      "Sorted Sets associate each member with a numeric score, maintaining order by score. ZADD adds or updates members, ZRANGE retrieves by rank, and ZRANK gets position. Perfect for leaderboards and priority queues.",
+      "ZADD leaderboard 100 \"Alice\" 85 \"Bob\" 95 \"Charlie\"\n\nZRANGE leaderboard 0 -1 WITHSCORES\n# Output: Bob(85), Charlie(95), Alice(100)\n\nZREVRANGE leaderboard 0 2 WITHSCORES\n# Output: Alice(100), Charlie(95), Bob(85) - top 3\n\nZSCORE leaderboard \"Alice\"\n# Output: 100\n\nZRANK leaderboard \"Alice\"\n# Output: (integer) 2 - 0-indexed rank\n\nZINCRBY leaderboard 10 \"Bob\"\n# Output: 95"
+    ],
+    "Ranking": [
+      "Sorted Sets excel at real-time leaderboards with atomic score updates, range queries, and pagination. Combined with aggregation commands like ZCOUNT and ZREMRANGEBYSCORE, they handle ranking systems efficiently.",
+      "ZREVRANGE leaderboard 0 9 WITHSCORES\n# Top 10 players\n\nZCOUNT leaderboard 80 100\n# Count players with scores between 80-100\n\nZREVRANK leaderboard \"Alice\"\n# Rank from high to low\n\nZREMRANGEBYRANK leaderboard 0 -11\n# Keep only top 10, remove rest\n\nZUNIONSTORE weekly 2 week:1 week:2 WEIGHTS 0.5 0.5\n# Combine two weeks' scores with weighting"
     ]
   },
   "Persistence": {
-    "RDB": ["RDB (Redis Database) performs point-in-time snapshots at configurable intervals. It creates compact single-file backups, ideal for disaster recovery, but may lose data written between snapshots.", "# redis.conf\nsave 900 1          # Snapshot if ≥1 key changed in 900s\nsave 300 10         # Snapshot if ≥10 keys changed in 300s\nsave 60 10000       # Snapshot if ≥10000 keys changed in 60s\n\n# Manual snapshot\nredis-cli SAVE\nredis-cli BGSAVE\n\n# RDB file location\ndir /var/lib/redis\ndbfilename dump.rdb"],
-    "AOF": ["Append-Only File (AOF) logs every write operation for durability. It provides finer-grained persistence than RDB with fsync policies (every write, every second, or OS-controlled) and can be rewritten to compact.", "# redis.conf\nappendonly yes\nappendfsync everysec     # fsync once per second\nauto-aof-rewrite-percentage 100\nauto-aof-rewrite-min-size 64mb\n\n# Manual rewrite\nredis-cli BGREWRITEAOF\n\n# Check AOF status\nINFO persistence"],
-    "Backup/Restore": ["Redis backup involves copying RDB/AOF files, or using `redis-cli --rdb` for live snapshots. Restore requires stopping the server, placing the backup file correctly, and restarting. SLAVEOF enables replication-based recovery.", "# Backup\nredis-cli --rdb /backups/dump-$(date +%Y%m%d).rdb\n\n# Or copy from data directory\ncp /var/lib/redis/dump.rdb /backups/\n\n# Restore\nsystemctl stop redis\ncp /backups/dump.rdb /var/lib/redis/\nchown redis:redis /var/lib/redis/dump.rdb\nsystemctl start redis\n\n# Restore from AOF\nredis-cli --aof /backups/appendonly.aof"
+    "RDB": [
+      "RDB (Redis Database) performs point-in-time snapshots at configurable intervals. It creates compact single-file backups, ideal for disaster recovery, but may lose data written between snapshots.",
+      "# redis.conf\nsave 900 1          # Snapshot if ≥1 key changed in 900s\nsave 300 10         # Snapshot if ≥10 keys changed in 300s\nsave 60 10000       # Snapshot if ≥10000 keys changed in 60s\n\n# Manual snapshot\nredis-cli SAVE\nredis-cli BGSAVE\n\n# RDB file location\ndir /var/lib/redis\ndbfilename dump.rdb"
+    ],
+    "AOF": [
+      "Append-Only File (AOF) logs every write operation for durability. It provides finer-grained persistence than RDB with fsync policies (every write, every second, or OS-controlled) and can be rewritten to compact.",
+      "# redis.conf\nappendonly yes\nappendfsync everysec     # fsync once per second\nauto-aof-rewrite-percentage 100\nauto-aof-rewrite-min-size 64mb\n\n# Manual rewrite\nredis-cli BGREWRITEAOF\n\n# Check AOF status\nINFO persistence"
+    ],
+    "Backup/Restore": [
+      "Redis backup involves copying RDB/AOF files, or using `redis-cli --rdb` for live snapshots. Restore requires stopping the server, placing the backup file correctly, and restarting. SLAVEOF enables replication-based recovery.",
+      "# Backup\nredis-cli --rdb /backups/dump-$(date +%Y%m%d).rdb\n\n# Or copy from data directory\ncp /var/lib/redis/dump.rdb /backups/\n\n# Restore\nsystemctl stop redis\ncp /backups/dump.rdb /var/lib/redis/\nchown redis:redis /var/lib/redis/dump.rdb\nsystemctl start redis\n\n# Restore from AOF\nredis-cli --aof /backups/appendonly.aof"
     ]
   },
   "Pub/Sub": {
-    "Channels": ["Pub/Sub implements the publish-subscribe messaging pattern where publishers send messages to channels without knowledge of subscribers. SUBSCRIBE listens on channels, PUBLISH sends messages, and UNSUBSCRIBE stops listening.", "# Terminal 1 - Subscriber\nredis-cli\nSUBSCRIBE notifications\n# Waiting for messages...\n\n# Terminal 2 - Publisher\nredis-cli\nPUBLISH notifications \"New user registered\"\nPUBLISH notifications \"Order #1234 shipped\"\n\n# Terminal 1 receives:\n# 1) \"message\"\n# 2) \"notifications\"\n# 3) \"New user registered\""],
-    "Pattern Subscribe": ["PSUBSCRIBE enables subscription to channels matching a glob-style pattern. This allows listening to multiple related channels (e.g., `user:*`, `orders:*`) with a single subscription for efficient message routing.", "# Subscribe to all order-related channels\nPSUBSCRIBE orders:*\n\n# Subscribe to user events\nPSUBSCRIBE user:* event:*\n\n# Publisher\nPUBLISH orders:created \"{id: 123, total: 99.99}\"\nPUBLISH orders:shipped \"{id: 123, tracking: '1Z999AA10123456784'}\"\nPUBLISH user:registered \"{id: 456, name: 'Charlie'}\"\n\n# Pattern matching: orders:* matches both orders:created and orders:shipped\n\nPUNSUBSCRIBE orders:*"],
-    "Messaging": ["Redis Pub/Sub is fire-and-forget with no message persistence; subscribers only receive messages sent after subscription. For reliable messaging, use Redis Streams which support consumer groups, acknowledgment, and message history.", "// Node.js with ioredis\nconst Redis = require('ioredis');\nconst publisher = new Redis();\nconst subscriber = new Redis();\n\nsubscriber.subscribe('chat:general', (err, count) => {\n  console.log(`Subscribed to ${count} channels`);\n});\n\nsubscriber.on('message', (channel, message) => {\n  console.log(`[${channel}] ${message}`);\n});\n\npublisher.publish('chat:general', 'Hello everyone!');\n\nsetInterval(() => {\n  publisher.publish('metrics:requests', Math.floor(Math.random() * 100));\n}, 1000);"
+    "Channels": [
+      "Pub/Sub implements the publish-subscribe messaging pattern where publishers send messages to channels without knowledge of subscribers. SUBSCRIBE listens on channels, PUBLISH sends messages, and UNSUBSCRIBE stops listening.",
+      "# Terminal 1 - Subscriber\nredis-cli\nSUBSCRIBE notifications\n# Waiting for messages...\n\n# Terminal 2 - Publisher\nredis-cli\nPUBLISH notifications \"New user registered\"\nPUBLISH notifications \"Order #1234 shipped\"\n\n# Terminal 1 receives:\n# 1) \"message\"\n# 2) \"notifications\"\n# 3) \"New user registered\""
+    ],
+    "Pattern Subscribe": [
+      "PSUBSCRIBE enables subscription to channels matching a glob-style pattern. This allows listening to multiple related channels (e.g., `user:*`, `orders:*`) with a single subscription for efficient message routing.",
+      "# Subscribe to all order-related channels\nPSUBSCRIBE orders:*\n\n# Subscribe to user events\nPSUBSCRIBE user:* event:*\n\n# Publisher\nPUBLISH orders:created \"{id: 123, total: 99.99}\"\nPUBLISH orders:shipped \"{id: 123, tracking: '1Z999AA10123456784'}\"\nPUBLISH user:registered \"{id: 456, name: 'Charlie'}\"\n\n# Pattern matching: orders:* matches both orders:created and orders:shipped\n\nPUNSUBSCRIBE orders:*"
+    ],
+    "Messaging": [
+      "Redis Pub/Sub is fire-and-forget with no message persistence; subscribers only receive messages sent after subscription. For reliable messaging, use Redis Streams which support consumer groups, acknowledgment, and message history.",
+      "// Node.js with ioredis\nconst Redis = require('ioredis');\nconst publisher = new Redis();\nconst subscriber = new Redis();\n\nsubscriber.subscribe('chat:general', (err, count) => {\n  console.log(`Subscribed to ${count} channels`);\n});\n\nsubscriber.on('message', (channel, message) => {\n  console.log(`[${channel}] ${message}`);\n});\n\npublisher.publish('chat:general', 'Hello everyone!');\n\nsetInterval(() => {\n  publisher.publish('metrics:requests', Math.floor(Math.random() * 100));\n}, 1000);"
     ]
   },
   "Clustering": {
-    "Sentinel": ["Redis Sentinel provides high availability through automatic failover, monitoring, notifications, and service discovery. A Sentinel cluster monitors master/replica instances and promotes a replica when the master fails.", "# sentinel.conf\nsentinel monitor mymaster 127.0.0.1 6379 2\nsentinel auth-pass mymaster yourpassword\nsentinel down-after-milliseconds mymaster 5000\nsentinel failover-timeout mymaster 60000\n\n# Start sentinel\nredis-sentinel /etc/redis/sentinel.conf\n\n# Check status\nredis-cli -p 26379 SENTINEL masters\nredis-cli -p 26379 SENTINEL replicas mymaster"],
-    "Cluster Mode": ["Redis Cluster automatically shards data across multiple nodes using hash slots (0-16383). Each node handles a subset of slots, providing horizontal scalability and automatic rebalancing when nodes are added or removed.", "# Create cluster with 6 nodes (3 masters, 3 replicas)\nredis-cli --cluster create \\\n  127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 \\\n  127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 \\\n  --cluster-replicas 1\n\n# Connect to cluster\nredis-cli -c -p 7000\n\n# Check cluster info\nCLUSTER INFO\nCLUSTER NODES\nCLUSTER KEYSLOT \"mykey\""],
-    "Sharding": ["Hash slots distribute keys deterministically: `HASH_SLOT = CRC16(key) mod 16384`. Client-side sharding is also possible for simpler setups, but Redis Cluster handles routing transparently with MOVED redirections.", "// Node.js with ioredis cluster\nconst Redis = require('ioredis');\n\nconst cluster = new Redis.Cluster([\n  { host: '127.0.0.1', port: 7000 },\n  { host: '127.0.0.1', port: 7001 },\n  { host: '127.0.0.1', port: 7002 }\n], {\n  redisOptions: { password: 'clusterpass' },\n  scaleReads: 'slave',  // Read from replicas\n  enableReadyCheck: true\n});\n\nawait cluster.set('foo', 'bar');\nconst value = await cluster.get('foo');\nconsole.log(value); // 'bar'\n\n// Keys are automatically routed to the correct node"
+    "Sentinel": [
+      "Redis Sentinel provides high availability through automatic failover, monitoring, notifications, and service discovery. A Sentinel cluster monitors master/replica instances and promotes a replica when the master fails.",
+      "# sentinel.conf\nsentinel monitor mymaster 127.0.0.1 6379 2\nsentinel auth-pass mymaster yourpassword\nsentinel down-after-milliseconds mymaster 5000\nsentinel failover-timeout mymaster 60000\n\n# Start sentinel\nredis-sentinel /etc/redis/sentinel.conf\n\n# Check status\nredis-cli -p 26379 SENTINEL masters\nredis-cli -p 26379 SENTINEL replicas mymaster"
+    ],
+    "Cluster Mode": [
+      "Redis Cluster automatically shards data across multiple nodes using hash slots (0-16383). Each node handles a subset of slots, providing horizontal scalability and automatic rebalancing when nodes are added or removed.",
+      "# Create cluster with 6 nodes (3 masters, 3 replicas)\nredis-cli --cluster create \\\n  127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 \\\n  127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 \\\n  --cluster-replicas 1\n\n# Connect to cluster\nredis-cli -c -p 7000\n\n# Check cluster info\nCLUSTER INFO\nCLUSTER NODES\nCLUSTER KEYSLOT \"mykey\""
+    ],
+    "Sharding": [
+      "Hash slots distribute keys deterministically: `HASH_SLOT = CRC16(key) mod 16384`. Client-side sharding is also possible for simpler setups, but Redis Cluster handles routing transparently with MOVED redirections.",
+      "// Node.js with ioredis cluster\nconst Redis = require('ioredis');\n\nconst cluster = new Redis.Cluster([\n  { host: '127.0.0.1', port: 7000 },\n  { host: '127.0.0.1', port: 7001 },\n  { host: '127.0.0.1', port: 7002 }\n], {\n  redisOptions: { password: 'clusterpass' },\n  scaleReads: 'slave',  // Read from replicas\n  enableReadyCheck: true\n});\n\nawait cluster.set('foo', 'bar');\nconst value = await cluster.get('foo');\nconsole.log(value); // 'bar'\n\n// Keys are automatically routed to the correct node"
     ]
   },
   "Use Cases": {
-    "Caching": ["Redis caching improves application performance by storing frequently accessed data in memory. Common patterns include cache-aside (lazy loading), write-through, and TTL-based expiry with automatic cache invalidation.", "// Cache-aside pattern with Node.js\nconst cache = async (key, ttl, fetchFn) => {\n  const cached = await redis.get(key);\n  if (cached) return JSON.parse(cached);\n  \n  const data = await fetchFn();\n  await redis.setex(key, ttl, JSON.stringify(data));\n  return data;\n};\n\n// Usage\napp.get('/api/products', async (req, res) => {\n  const products = await cache('products:all', 300, () =>\n    Product.find({ active: true }).lean()\n  );\n  res.json(products);\n});\n\n// Invalidate on update\napp.post('/api/products', async (req, res) => {\n  await Product.create(req.body);\n  await redis.del('products:all');  // Invalidate cache\n  res.status(201).end();\n});"],
-    "Rate Limiting": ["Redis enables efficient distributed rate limiting using INCR with TTL. The sliding window algorithm tracks request counts per time window, and the token bucket algorithm offers more flexible rate control.", "// Sliding window rate limiter\nconst rateLimit = async (ip, limit = 100, window = 60) => {\n  const key = `ratelimit:${ip}:${Math.floor(Date.now() / 1000 / window)}`;\n  const count = await redis.incr(key);\n  if (count === 1) await redis.expire(key, window);\n  \n  return count <= limit;\n};\n\n// Express middleware\napp.use(async (req, res, next) => {\n  const allowed = await rateLimit(req.ip, 100, 60);\n  if (!allowed) {\n    return res.status(429).json({ error: 'Too many requests' });\n  }\n  next();\n});\n\n// More precise: sliding window with sorted sets\nconst preciseRateLimit = async (userId, maxRequests, windowMs) => {\n  const now = Date.now();\n  const key = `ratelimit:precise:${userId}`;\n  \n  await redis.zadd(key, now, `${now}`);\n  await redis.zremrangebyscore(key, 0, now - windowMs);\n  \n  const count = await redis.zcard(key);\n  await redis.expire(key, Math.ceil(windowMs / 1000));\n  \n  return count <= maxRequests;\n};"],
-    "Session Store": ["Redis is an ideal session store for distributed applications because of its speed, built-in TTL, and atomic operations. `connect-redis` or `ioredis-session` replace the default in-memory session store for persistence across restarts.", "const session = require('express-session');\nconst RedisStore = require('connect-redis')(session);\n\napp.use(session({\n  store: new RedisStore({ \n    client: redisClient,\n    prefix: 'sess:',\n    ttl: 86400  // 24 hours\n  }),\n  secret: process.env.SESSION_SECRET,\n  name: 'app.sid',\n  resave: false,\n  saveUninitialized: false,\n  cookie: {\n    httpOnly: true,\n    secure: process.env.NODE_ENV === 'production',\n    maxAge: 24 * 60 * 60 * 1000\n  }\n}));\n\n// Sessions are automatically persisted to Redis\napp.post('/login', (req, res) => {\n  req.session.user = { id: 1, name: 'Alice' };\n  res.json({ message: 'Logged in' });\n});"],
-    "Queues": ["Redis Lists provide the foundation for lightweight job queues. `LPUSH` + `BRPOP` implement reliable FIFO queues with blocking pops. Bull and Kue are popular Node.js queue libraries built on Redis.", "// Simple queue using Redis Lists\nconst addToQueue = async (queue, job) => {\n  await redis.lpush(queue, JSON.stringify(job));\n};\n\nconst processQueue = async (queue) => {\n  while (true) {\n    const result = await redis.brpop(queue, 0);\n    const job = JSON.parse(result[1]);\n    try {\n      console.log('Processing:', job);\n      await handleJob(job);\n      console.log('Completed:', job.id);\n    } catch (err) {\n      console.error('Failed:', job.id, err.message);\n      // Re-queue to dead letter queue\n      await redis.lpush(`${queue}:failed`, JSON.stringify({ ...job, error: err.message }));\n    }\n  }\n};\n\n// Bull queue example\nconst Queue = require('bull');\nconst emailQueue = new Queue('email', 'redis://127.0.0.1:6379');\n\nemailQueue.process(async (job) => {\n  await sendEmail(job.data.to, job.data.subject, job.data.body);\n});\n\nemailQueue.add({ to: 'user@example.com', subject: 'Welcome', body: '...' }, {\n  attempts: 3,\n  backoff: { type: 'exponential', delay: 2000 }\n});"
+    "Caching": [
+      "Redis caching improves application performance by storing frequently accessed data in memory. Common patterns include cache-aside (lazy loading), write-through, and TTL-based expiry with automatic cache invalidation.",
+      "// Cache-aside pattern with Node.js\nconst cache = async (key, ttl, fetchFn) => {\n  const cached = await redis.get(key);\n  if (cached) return JSON.parse(cached);\n  \n  const data = await fetchFn();\n  await redis.setex(key, ttl, JSON.stringify(data));\n  return data;\n};\n\n// Usage\napp.get('/api/products', async (req, res) => {\n  const products = await cache('products:all', 300, () =>\n    Product.find({ active: true }).lean()\n  );\n  res.json(products);\n});\n\n// Invalidate on update\napp.post('/api/products', async (req, res) => {\n  await Product.create(req.body);\n  await redis.del('products:all');  // Invalidate cache\n  res.status(201).end();\n});"
+    ],
+    "Rate Limiting": [
+      "Redis enables efficient distributed rate limiting using INCR with TTL. The sliding window algorithm tracks request counts per time window, and the token bucket algorithm offers more flexible rate control.",
+      "// Sliding window rate limiter\nconst rateLimit = async (ip, limit = 100, window = 60) => {\n  const key = `ratelimit:${ip}:${Math.floor(Date.now() / 1000 / window)}`;\n  const count = await redis.incr(key);\n  if (count === 1) await redis.expire(key, window);\n  \n  return count <= limit;\n};\n\n// Express middleware\napp.use(async (req, res, next) => {\n  const allowed = await rateLimit(req.ip, 100, 60);\n  if (!allowed) {\n    return res.status(429).json({ error: 'Too many requests' });\n  }\n  next();\n});\n\n// More precise: sliding window with sorted sets\nconst preciseRateLimit = async (userId, maxRequests, windowMs) => {\n  const now = Date.now();\n  const key = `ratelimit:precise:${userId}`;\n  \n  await redis.zadd(key, now, `${now}`);\n  await redis.zremrangebyscore(key, 0, now - windowMs);\n  \n  const count = await redis.zcard(key);\n  await redis.expire(key, Math.ceil(windowMs / 1000));\n  \n  return count <= maxRequests;\n};"
+    ],
+    "Session Store": [
+      "Redis is an ideal session store for distributed applications because of its speed, built-in TTL, and atomic operations. `connect-redis` or `ioredis-session` replace the default in-memory session store for persistence across restarts.",
+      "const session = require('express-session');\nconst RedisStore = require('connect-redis')(session);\n\napp.use(session({\n  store: new RedisStore({ \n    client: redisClient,\n    prefix: 'sess:',\n    ttl: 86400  // 24 hours\n  }),\n  secret: process.env.SESSION_SECRET,\n  name: 'app.sid',\n  resave: false,\n  saveUninitialized: false,\n  cookie: {\n    httpOnly: true,\n    secure: process.env.NODE_ENV === 'production',\n    maxAge: 24 * 60 * 60 * 1000\n  }\n}));\n\n// Sessions are automatically persisted to Redis\napp.post('/login', (req, res) => {\n  req.session.user = { id: 1, name: 'Alice' };\n  res.json({ message: 'Logged in' });\n});"
+    ],
+    "Queues": [
+      "Redis Lists provide the foundation for lightweight job queues. `LPUSH` + `BRPOP` implement reliable FIFO queues with blocking pops. Bull and Kue are popular Node.js queue libraries built on Redis.",
+      "// Simple queue using Redis Lists\nconst addToQueue = async (queue, job) => {\n  await redis.lpush(queue, JSON.stringify(job));\n};\n\nconst processQueue = async (queue) => {\n  while (true) {\n    const result = await redis.brpop(queue, 0);\n    const job = JSON.parse(result[1]);\n    try {\n      console.log('Processing:', job);\n      await handleJob(job);\n      console.log('Completed:', job.id);\n    } catch (err) {\n      console.error('Failed:', job.id, err.message);\n      // Re-queue to dead letter queue\n      await redis.lpush(`${queue}:failed`, JSON.stringify({ ...job, error: err.message }));\n    }\n  }\n};\n\n// Bull queue example\nconst Queue = require('bull');\nconst emailQueue = new Queue('email', 'redis://127.0.0.1:6379');\n\nemailQueue.process(async (job) => {\n  await sendEmail(job.data.to, job.data.subject, job.data.body);\n});\n\nemailQueue.add({ to: 'user@example.com', subject: 'Welcome', body: '...' }, {\n  attempts: 3,\n  backoff: { type: 'exponential', delay: 2000 }\n});"
+    ]
+  },
+  "Redis Advanced Use Cases": {
+    "Redis Pub/Sub & Streams": [
+      "Redis Pub/Sub enables real-time messaging with fire-and-forget semantics. Channels are created on first publish. Subscribe with SUBSCRIBE command. Redis Streams (5.0+) provide persistent, ack-based messaging with consumer groups. Stream entries are identified by IDs (timestamp-sequence). Consumer groups enable load-balanced processing with message acknowledgment. Stream features: <code>XREAD</code> for reading, <code>XADD</code> for adding, <code>XREADGROUP</code> for group reads, <code>XACK</code> for acknowledgment. Streams support blocking reads and message delivery guarantees.",
+      "// Redis Pub/Sub\nconst publisher = redis.createClient();\nconst subscriber = redis.createClient();\n\nsubscriber.subscribe('notifications', (message, channel) => {\n  console.log(`Received on ${channel}: ${message}`);\n});\n\nsetInterval(() => {\n  publisher.publish('notifications', JSON.stringify({\n    type: 'alert',\n    message: 'Server status: OK',\n    timestamp: Date.now()\n  }));\n}, 5000);\n\n// Redis Streams for event sourcing\nconst stream = 'order-events';\n\n// Producer\nawait redis.xAdd(stream, '*', {\n  type: 'OrderCreated',\n  orderId: 'ord-123',\n  userId: 'user-456',\n  amount: '99.99',\n  timestamp: new Date().toISOString()\n});\n\n// Consumer group\nawait redis.xGroupCreate(stream, 'order-processors', '0', { mkStream: true });\n\n// Consumer\nasync function processOrders() {\n  while (true) {\n    const results = await redis.xReadGroup(\n      'order-processors', 'processor-1',\n      [{ key: stream, id: '>' }],\n      { count: 10, block: 5000 }\n    );\n    \n    if (results) {\n      for (const message of results[0].messages) {\n        await processEvent(message.message);\n        await redis.xAck(stream, 'order-processors', message.id);\n      }\n    }\n  }\n}\n\n// Redis as session store with TTL\nawait redis.setEx(`session:${userId}`, 3600, JSON.stringify({\n  userId, role: 'user', lastAccess: Date.now()\n}));\n\n// Rate limiting with sorted sets\nasync function checkRateLimit(ip, limit = 100, window = 60) {\n  const key = `ratelimit:${ip}`;\n  const now = Date.now();\n  const windowStart = now - window * 1000;\n  \n  // Remove old entries\n  await redis.zRemRangeByScore(key, 0, windowStart);\n  \n  // Count current window entries\n  const count = await redis.zCard(key);\n  \n  if (count >= limit) {\n    return { allowed: false, retryAfter: '1min' };\n  }\n  \n  await redis.zAdd(key, { score: now, value: `${now}-${Math.random()}` });\n  await redis.expire(key, window);\n  return { allowed: true, remaining: limit - count - 1 };\n}"
     ]
   }
 }

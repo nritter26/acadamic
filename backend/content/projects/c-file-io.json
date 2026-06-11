@@ -1,0 +1,23 @@
+{
+  "id": "c-file-io",
+  "title": "C: File I/O",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "file I/O", "fopen", "fprintf", "fgets", "printf"],
+  "description": "Write data to a file and read it back using C file I/O functions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Write and Read a File",
+      "description": "Write a program that writes 'Hello, File!' to 'output.txt' using fprintf, then reads it back using fgets and prints it. Use simulated file operations since the environment is sandboxed: just print what would be written and read.",
+      "hints": ["Use `fopen(\"output.txt\", \"w\")` to write.", "Use `fopen(\"output.txt\", \"r\")` to read.", "Simulate: print 'Writing: Hello, File!' then 'Reading: Hello, File!'"],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    printf(\"Writing: Hello, File!\\n\");\n    printf(\"Reading: Hello, File!\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Hello, File!')",
+        "successMessage": "File I/O simulation works!",
+        "failureMessage": "Print writing and reading messages"
+      }
+    }
+  ]
+}

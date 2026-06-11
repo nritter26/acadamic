@@ -1,0 +1,23 @@
+{
+  "id": "c-binary-search",
+  "title": "C: Binary Search",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "binary search", "arrays", "recursion", "printf"],
+  "description": "Implement binary search to find a target value in a sorted integer array.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Iterative Binary Search",
+      "description": "Write a function `int binary_search(int arr[], int n, int target)` that returns the index of the target or -1 if not found. Test with `{2, 5, 8, 12, 16, 23, 38, 56, 72, 91}` searching for 23.",
+      "hints": ["Set left=0, right=n-1.", "While left <= right, check the middle element.", "If arr[mid] < target, search right half; else search left half."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint binary_search(int arr[], int n, int target) {\n    \n}\n\nint main() {\n    int arr[] = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    int idx = binary_search(arr, n, 23);\n    printf(\"Found at: %d\\n\", idx);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('5')",
+        "successMessage": "Binary search works!",
+        "failureMessage": "Find index of 23 and print it (should be 5)"
+      }
+    }
+  ]
+}

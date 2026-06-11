@@ -6,6 +6,7 @@
     selectedId = '',
     language = 'all',
     progress = {},
+    loading = { active: false, loaded: 0, total: 0 },
     onselect = () => {},
     onlanguagechange = () => {},
   } = $props();
@@ -16,19 +17,49 @@
   function getLangBadge(langs) {
     if (!langs) return '<span class="badge badge-js">JS</span>';
     return langs.map(l => {
-      if (l === 'python') return '<span class="badge badge-py"><span class="py-p">P</span><span class="py-y">Y</span></span>';
+      if (l === 'python' || l === 'py') return '<span class="badge badge-py"><span class="py-p">P</span><span class="py-y">Y</span></span>';
       if (l === 'go') return '<span class="badge badge-go">GO</span>';
-      if (l === 'typescript') return '<span class="badge badge-ts">TS</span>';
+      if (l === 'typescript' || l === 'ts') return '<span class="badge badge-ts">TS</span>';
+      if (l === 'java') return '<span class="badge badge-java">JV</span>';
+      if (l === 'cs') return '<span class="badge badge-cs">C#</span>';
+      if (l === 'ruby' || l === 'rb') return '<span class="badge badge-rb">RB</span>';
+      if (l === 'php') return '<span class="badge badge-php">PHP</span>';
+      if (l === 'rust' || l === 'rs') return '<span class="badge badge-rs">RS</span>';
+      if (l === 'cpp') return '<span class="badge badge-cpp">C++</span>';
+      if (l === 'c') return '<span class="badge badge-c">C</span>';
+      if (l === 'zig') return '<span class="badge badge-zig">ZIG</span>';
+      if (l === 'kt' || l === 'kotlin') return '<span class="badge badge-kt">KT</span>';
+      if (l === 'lua') return '<span class="badge badge-lua">LUA</span>';
+      if (l === 'swift') return '<span class="badge badge-swift">SW</span>';
+      if (l === 'scala') return '<span class="badge badge-scala">SCA</span>';
+      if (l === 'bash' || l === 'shell') return '<span class="badge badge-bash">SH</span>';
+      if (l === 'asm' || l === 'assembly') return '<span class="badge badge-asm">ASM</span>';
+      if (l === 'wasm') return '<span class="badge badge-wasm">WASM</span>';
       return '<span class="badge badge-js">JS</span>';
     }).join(' ');
   }
 
   function getAccent(langs) {
-    if (!langs) return '#eab308';
-    if (langs.includes('go')) return '#06b6d4';
-    if (langs.includes('python')) return '#eab308';
-    if (langs.includes('typescript')) return '#3b82f6';
-    return '#eab308';
+    if (!langs) return '#f1e05a';
+    if (langs.includes('go')) return '#00add8';
+    if (langs.includes('python') || langs.includes('py')) return '#3572A5';
+    if (langs.includes('typescript') || langs.includes('ts')) return '#3178c6';
+    if (langs.includes('java')) return '#b07219';
+    if (langs.includes('cs')) return '#178600';
+    if (langs.includes('ruby') || langs.includes('rb')) return '#701516';
+    if (langs.includes('php')) return '#4F5D95';
+    if (langs.includes('rust') || langs.includes('rs')) return '#dea584';
+    if (langs.includes('cpp')) return '#f34b7d';
+    if (langs.includes('c')) return '#555555';
+    if (langs.includes('zig')) return '#ec915c';
+    if (langs.includes('kt') || langs.includes('kotlin')) return '#A97BFF';
+    if (langs.includes('lua')) return '#000080';
+    if (langs.includes('swift')) return '#F05138';
+    if (langs.includes('scala')) return '#c22d40';
+    if (langs.includes('bash') || langs.includes('shell')) return '#89e051';
+    if (langs.includes('asm') || langs.includes('assembly')) return '#6E4C13';
+    if (langs.includes('wasm')) return '#04133b';
+    return '#f1e05a';
   }
 
   function projectStatus(p) {
@@ -78,7 +109,10 @@
           </div>
           <div class="card-desc">{(project.description || '').substring(0, 60)}...</div>
           <div class="card-meta">
-            <span class="card-badges">{@html getLangBadge(project.languages || ['javascript'])}</span>
+            <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['js','ts','py','go','java','cs','rb','php','kt','scala'].includes(l)) : (project.languages || ['javascript']))}</span>
+            {#if project.serverMode}
+              <span class="proj-badge badge-api">API</span>
+            {/if}
             <span class="card-steps">
               <span class="steps-dot" style="background:{accent}"></span>
               {done}/{total} steps
@@ -91,6 +125,15 @@
       {/each}
     {/if}
   {/each}
+  {#if loading.active}
+    <div class="loading-bar">
+      <div class="loading-bar-fill" style="width: {loading.total > 0 ? (loading.loaded / loading.total * 100) : 0}%"></div>
+    </div>
+    <div class="loading-text">
+      <span class="loading-spinner"></span>
+      Loading {loading.loaded}{#if loading.total > 0}/{loading.total}{/if} projects…
+    </div>
+  {/if}
 </div>
 
 <div class="lang-toggle">
@@ -133,12 +176,34 @@
   .card-bar { height: 3px; background: #1e293b; border-radius: 999px; overflow: hidden; }
   .card-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); transition: width 0.3s; border-radius: 999px; }
   .badge { display: inline-block; padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; }
-  .badge-js { background: #eab308; color: #000; }
-  .badge-ts { background: #3b82f6; color: #fff; }
-  .badge-py { background: #eab308; color: #000; padding: 0 2px; }
-  .badge-go { background: #06b6d4; color: #000; }
-  .py-p { color: #2563eb; font-weight: 800; }
-  .py-y { color: #eab308; font-weight: 800; }
+  .badge-js { background: #f1e05a; color: #000; }
+  .badge-ts { background: #3178c6; color: #fff; }
+  .badge-py { background: #3572A5; color: #fff; padding: 0 2px; }
+  .badge-go { background: #00add8; color: #000; }
+  .badge-api { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; display: inline-block; }
+  .badge-java { background: #b07219; color: #fff; }
+  .badge-cs { background: #178600; color: #fff; }
+  .badge-rb { background: #701516; color: #fff; }
+  .badge-php { background: #4F5D95; color: #fff; }
+  .badge-rs { background: #dea584; color: #000; }
+  .badge-cpp { background: #f34b7d; color: #fff; }
+  .badge-c { background: #555555; color: #fff; }
+  .badge-zig { background: #ec915c; color: #000; }
+  .badge-kt { background: #A97BFF; color: #000; }
+  .badge-lua { background: #000080; color: #fff; }
+  .badge-swift { background: #F05138; color: #fff; }
+  .badge-scala { background: #c22d40; color: #fff; }
+  .badge-bash { background: #89e051; color: #000; }
+  .badge-asm { background: #6E4C13; color: #fff; }
+  .badge-wasm { background: #04133b; color: #fff; }
+  .py-p { color: #FFD43B; font-weight: 800; }
+  .py-y { color: #FFD43B; font-weight: 800; }
+
+  .loading-bar { height: 2px; background: #1e293b; margin: 0 8px 4px; border-radius: 999px; overflow: hidden; }
+  .loading-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); transition: width 0.2s; border-radius: 999px; }
+  .loading-text { display: flex; align-items: center; gap: 5px; padding: 2px 8px 6px; font-size: 9px; color: #64748b; }
+  .loading-spinner { width: 8px; height: 8px; border: 1.5px solid #334155; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .lang-toggle { display: flex; align-items: center; gap: 4px; padding: 8px; border-top: 1px solid #1e293b; background: #0f172a; }
   .lang-toggle-label { font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-right: 2px; }

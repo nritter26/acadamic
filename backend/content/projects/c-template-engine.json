@@ -1,0 +1,23 @@
+{
+  "id": "c-template-engine",
+  "title": "C: Template Engine (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "templates", "string replacement", "parsing", "printf"],
+  "description": "Build a simple template engine that replaces {{placeholders}} with values.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Template Replacement",
+      "description": "Write a function `void render(char *template, char *key, char *val)` that finds `{{key}}` in the template string and replaces it with the value. Test: 'Hello, {{name}}!' with key=name, val=World.",
+      "hints": ["Use `strstr` to find `{{` and `}}`.", "Copy text before, insert value, copy text after.", "Print the rendered result."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nvoid render(char *template, char *key, char *val) {\n    char result[256];\n    char placeholder[64];\n    sprintf(placeholder, \"{{%s}}\", key);\n    char *pos = strstr(template, placeholder);\n    if (pos) {\n        int prefix_len = pos - template;\n        int key_len = strlen(placeholder);\n        sprintf(result, \"%.*s%s%s\", prefix_len, template, val, pos + key_len);\n        printf(\"%s\\n\", result);\n    } else {\n        printf(\"%s\\n\", template);\n    }\n}\n\nint main() {\n    render(\"Hello, {{name}}!\", \"name\", \"World\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Hello, World!')",
+        "successMessage": "Template engine works!",
+        "failureMessage": "Replace {{name}} with World"
+      }
+    }
+  ]
+}

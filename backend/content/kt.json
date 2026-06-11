@@ -1,450 +1,557 @@
 {
- "Getting Started": {
-  "What is Kotlin": [
-   "Kotlin is a modern, statically-typed language that runs on the JVM, JS, and Native targets. It's concise, safe, and fully interoperable with Java.",
-   "fun main() {\n    println(\"Hello, Kotlin!\")\n}"
-  ],
-  "Kotlin Syntax": [
-   "Kotlin omits semicolons and uses `fun` for functions, `val` for read-only references, and `var` for mutable ones. Types come after colons.",
-   "val name: String = \"Doge\"\nvar age = 5\nfun greet() = \"Hello\"\nprintln(\"$name is $age\")"
-  ],
-  "Variables & Types": [
-   "Kotlin infers types. `val` (immutable like final) and `var` (mutable). Basic types: String, Int, Long, Double, Float, Boolean, Char, Byte, Short.",
-   "val pi = 3.14159\nvar counter = 0\nval visible: Boolean = true\nval items = listOf(1, 2, 3)\nprintln(pi::class.simpleName)"
-  ],
-  "Null Safety": [
-   "Kotlin eliminates null pointer exceptions with nullable types (`?`), safe calls (`?.`), Elvis operator (`?:`), and the not-null assertion (`!!`).",
-   "var name: String? = null\nprintln(name?.length)\nprintln(name ?: \"Default\")\nname = \"Doge\"\nprintln(name!!.length)"
-  ],
-  "Kotlin Playground": [
-   "The Kotlin Playground is an online IDE to experiment with Kotlin code. It supports multiplatform targets, embedded snippets, and sharing via URLs.",
-   "// https://play.kotlinlang.org\nfun main() {\n    val msg = \"Try Kotlin\"\n    println(\"$msg \u2014 online!\")\n}"
-  ],
-  "Multiplatform Overview": [
-   "Kotlin Multiplatform shares business logic across JVM, JS, iOS, Android, and Native. Write once in shared modules; platform code in target modules.",
-   "plugins { kotlin(\"multiplatform\") }\n\nkotlin {\n    jvm()\n    js()\n    iosX64()\n    sourceSets.commonMain.dependencies {\n        implementation(kotlin(\"stdlib-common\"))\n    }\n}"
-  ],
-  "Project Structure": [
-   "Standard Kotlin projects use Gradle with `src/main/kotlin` and `src/test/kotlin`. Multiplatform adds `commonMain`, `jvmMain`, `iosMain` source sets.",
-   "Project/\n \u251c\u2500\u2500 build.gradle.kts\n \u251c\u2500\u2500 settings.gradle.kts\n \u2514\u2500\u2500 src/\n    \u251c\u2500\u2500 main/kotlin/\n    \u2502   \u2514\u2500\u2500 Main.kt\n    \u2514\u2500\u2500 test/kotlin/\n        \u2514\u2500\u2500 MainTest.kt"
-  ],
-  "Kotlin/Native & WASM": [
-   "Kotlin/Native compiles to native binaries (no JVM required) via LLVM. Targets: Windows (Mingw), Linux, macOS, iOS, Android NDK, WebAssembly. Use `konanTargets` in Gradle. Kotlin/Wasm targets WebAssembly with Kotlin/Wasm compiler. Native supports Kotlin's standard library subset, including coroutines and serialization.",
-   "plugins {\n    kotlin(\"multiplatform\") version \"1.9.22\"\n}\n\nkotlin {\n    val hostOs = System.getProperty(\"os.name\")\n    val isMingwX64 = hostOs.startsWith(\"Windows\")\n    val nativeTarget = when {\n        hostOs == \"Mac OS X\" -> macosX64(\"native\")\n        hostOs == \"Linux\" -> linuxX64(\"native\")\n        isMingwX64 -> mingwX64(\"native\")\n        else -> throw GradleException(\"Host OS $hostOs is not supported\")\n    }\n    \n    nativeTarget.apply {\n        binaries {\n            executable {\n                entryPoint = \"main\"\n            }\n        }\n    }\n    \n    js { browser { } }\n    wasmJs { browser { } }\n}"
-  ]
- },
- "Control Flow": {
-  "If & When expressions": [
-   "`if` and `when` are expressions that return values. `when` replaces Java's switch and supports smart casts, ranges, and arbitrary conditions.",
-   "val score = 85\nval grade = when {\n    score >= 90 -> 'A'\n    score >= 80 -> 'B'\n    else -> 'F'\n}\nval max = if (a > b) a else b\nprintln(grade)"
-  ],
-  "for & while Loops": [
-   "`for` iterates over ranges, collections, or anything with an iterator. `while` and `do..while` work as expected. Ranges use `..`, `until`, `downTo`, `step`.",
-   "for (i in 1..5) print(i)\nfor (i in 5 downTo 1 step 2) print(i)\nfor ((index, value) in listOf('a','b').withIndex())\n    println(\"$index: $value\")"
-  ],
-  "Range & Progression": [
-   "Ranges (`1..10`) define intervals. Progressions control step direction. Use `in` to check membership, `until` for exclusive end.",
-   "val closed = 1..5\nval half = 1 until 5\nval descending = 5 downTo 1\nval step = 0..10 step 2\nprintln(3 in closed)\nprintln(3 in half)"
-  ],
-  "Equality Checks": [
-   "`==` calls `equals()` (structural equality). `===` checks referential identity. `!=` and `!==` are the negated forms.",
-   "val a = listOf(1, 2)\nval b = listOf(1, 2)\nval c = a\nprintln(a == b)   // true \u2014 structural\nprintln(a === b)  // false \u2014 different references\nprintln(a === c)  // true \u2014 same reference"
-  ],
-  "Exception Handling": [
-   "Use `try-catch-finally`. Kotlin has no checked exceptions. `catch` blocks can filter by exception type, and `finally` always executes.",
-   "fun divide(a: Int, b: Int): Int {\n    return try {\n        a / b\n    } catch (e: ArithmeticException) {\n        println(\"Cannot divide by zero\")\n        0\n    } finally {\n        println(\"Division attempted\")\n    }\n}"
-  ],
-  "try as Expression": [
-   "`try` is an expression in Kotlin. It returns the last expression in the `try` block or the matching `catch` block. Use `finally` for side effects.",
-   "val input = \"42\"\nval parsed: Int? = try {\n    input.toInt()\n} catch (e: NumberFormatException) {\n    null\n}\nprintln(parsed ?: \"Invalid number\")"
-  ],
-  "Ranges & Progressions": [
-   "Ranges: `a..b` (inclusive), `a..<b` (exclusive, Kotlin 1.9+), `a downTo b`, `a..b step c`. Check containment with `in` operator. Progressions: IntProgression, LongProgression, CharProgression. Empty ranges: `10..1` (empty). `until` extension: `0 until 10` = `0..9`. Indices of collections. Iterate over ranges with for loops.",
-   "fun main() {\n    // Inclusive range\n    for (i in 1..5) print(\"$i \")  // 1 2 3 4 5\n    println()\n    \n    // Exclusive (Kotlin 1.9+)\n    // for (i in 1..<5) print(i)  // 1 2 3 4\n    \n    // Until\n    for (i in 0 until 5) print(\"$i \")  // 0 1 2 3 4\n    println()\n    \n    // Down to\n    for (i in 5 downTo 1) print(\"$i \")  // 5 4 3 2 1\n    println()\n    \n    // With step\n    for (i in 0..10 step 2) print(\"$i \")  // 0 2 4 6 8 10\n    println()\n    \n    // Character ranges\n    for (c in 'a'..'f') print(c)  // abcdef\n    println()\n    \n    // Containment check\n    val x = 7\n    println(x in 1..10)  // true\n    println(x !in 5..6)  // false\n    \n    // Iterating over indices\n    val list = listOf(\"a\", \"b\", \"c\")\n    for (i in list.indices) println(\"$i: ${list[i]}\")\n    \n    // Progressions are Iterable\n    val range: IntRange = 1..10\n    println(range.toList())\n}"
-  ]
- },
- "Functions": {
-  "Function Declaration": [
-   "Functions use `fun` with explicit return types. Expression bodies omit braces. Single-expression functions infer the return type automatically.",
-   "fun sum(a: Int, b: Int): Int = a + b\nfun greet(name: String) = \"Hello $name\"\nfun printSum(a: Int, b: Int): Unit { println(a + b) }"
-  ],
-  "Default & Named Args": [
-   "Parameters can have default values. Named arguments allow skipping or reordering parameters, improving readability for functions with many parameters.",
-   "fun createUser(name: String, age: Int = 18, active: Boolean = true) {}\ncreateUser(\"Alice\")\ncreateUser(\"Bob\", active = false)\ncreateUser(age = 25, name = \"Charlie\")"
-  ],
-  "Lambda & Higher-Order": [
-   "Lambdas are function literals. Higher-order functions take or return functions. Trailing lambda syntax removes parentheses for clean DSL-like code.",
-   "val numbers = listOf(1, 2, 3, 4, 5)\nval doubled = numbers.map { it * 2 }\nval sum = numbers.reduce { acc, n -> acc + n }\nnumbers.filter { it > 2 }.forEach { println(it) }"
-  ],
-  "Extension Functions": [
-   "Add new functions to existing classes without inheritance. Extensions are resolved statically \u2014 they don't actually modify the class.",
-   "fun String.isEmail() = this.contains('@') && this.contains('.')\nfun List<Int>.product() = fold(1) { acc, i -> acc * i }\n\nprintln(\"test@example.com\".isEmail())\nprintln(listOf(2, 3, 4).product())"
-  ],
-  "Infix Functions": [
-   "Infix functions are called without dot or parens. Single-parameter member or extension functions marked with `infix`. Common in DSLs.",
-   "infix fun Int.times(str: String) = str.repeat(this)\nprintln(3 times \"Ha \")  // Ha Ha Ha\n\n// Built-in: to\nval map = mapOf(1 to \"one\", 2 to \"two\")"
-  ],
-  "Operator Overloading": [
-   "Kotlin allows overloading operators like `+`, `-`, `*`, `[]`, `()` via functions named `plus`, `minus`, `times`, `get`, `invoke`.",
-   "data class Vector(val x: Int, val y: Int) {\n    operator fun plus(other: Vector) = Vector(x + other.x, y + other.y)\n    operator fun get(index: Int) = if (index == 0) x else y\n}\nval v1 = Vector(1, 2)\nval v2 = Vector(3, 4)\nprintln(v1 + v2)  // Vector(x=4, y=6)"
-  ],
-  "tailrec": [
-   "`tailrec` optimises recursive functions into iterative loops when the recursive call is in tail position. No stack overflow risk.",
-   "tailrec fun factorial(n: Int, acc: Int = 1): Int {\n    return if (n <= 1) acc else factorial(n - 1, n * acc)\n}\n\nprintln(factorial(5))  // 120\nprintln(factorial(10000))  // no stack overflow"
-  ],
-  "Inline Functions": [
-   "`inline` inlines the function body at call sites, avoiding lambda object allocation. Use for higher-order functions with lambda parameters.",
-   "inline fun <T> measure(block: () -> T): T {\n    val start = System.nanoTime()\n    val result = block()\n    val end = System.nanoTime()\n    println(\"Took ${end - start} ns\")\n    return result\n}\n\nmeasure { Thread.sleep(10); 42 }"
-  ],
-  "Destructuring Declarations": [
-   "Destructuring decomposes an object into variables: val (name, age) = person. Works for data classes, Pair, Triple, Map.Entry, and classes with componentN() operators. Use _ for unused components. In lambdas: map.forEach { (key, value) -> }. Destructuring in for loops: for ((k, v) in map). ComponentN is an operator function: operator fun component1(): Type.",
-   "data class Person(val name: String, val age: Int)\n\nfun main() {\n    val person = Person(\"John\", 30)\n    val (name, age) = person\n    println(\"$name, $age\")\n\n    val pair = \"key\" to \"value\"\n    val (k, v) = pair\n\n    val map = mapOf(\"a\" to 1, \"b\" to 2)\n    for ((key, value) in map) {\n        println(\"$key = $value\")\n    }\n\n    val list = listOf(1 to \"one\", 2 to \"two\")\n    list.forEach { (num, word) ->\n        println(\"$num = $word\")\n    }\n\n    val arr = intArrayOf(1, 2, 3)\n    val (x, y, z) = arr\n    println(\"$x, $y, $z\")\n\n    println(person.component1())\n    println(person.component2())\n}"
-  ]
- },
- "Collections": {
-  "Lists & Arrays": [
-   "`listOf` creates read-only lists, `mutableListOf` for mutable. `arrayOf` for arrays. Lists are covariant; arrays are invariant.",
-   "val readOnly = listOf(\"a\", \"b\", \"c\")\nval mutable = mutableListOf(\"a\", \"b\")\nmutable.add(\"d\")\nval arr = arrayOf(1, 2, 3)\nprintln(readOnly[1])\nprintln(mutable)"
-  ],
-  "Maps & Sets": [
-   "`mapOf`/`mutableMapOf` for key-value pairs. `setOf`/`mutableSetOf` for unique elements. Immutable by default.",
-   "val map = mapOf(\"key1\" to 1, \"key2\" to 2)\nval set = setOf(1, 2, 3, 2, 1)\nval mutableMap = mutableMapOf<String, Int>()\nmutableMap[\"Doge\"] = 5\nprintln(map[\"key1\"])\nprintln(set)"
-  ],
-  "Sequences": [
-   "Sequences provide lazy evaluation for collection chains. Use `asSequence()` for large datasets to avoid intermediate list allocations.",
-   "val result = (1..1_000_000)\n    .asSequence()\n    .filter { it % 2 == 0 }\n    .map { it * 3 }\n    .take(5)\n    .toList()\nprintln(result)"
-  ],
-  "Functional Operations": [
-   "Kotlin provides rich functional APIs: map, filter, reduce, fold, flatMap, sortedBy, distinct, zip, unzip, associate, and more.",
-   "val nums = listOf(1, 2, 3, 4, 5)\nprintln(nums.map { it * 2 })\nprintln(nums.filter { it % 2 == 0 })\nprintln(nums.fold(0) { acc, i -> acc + i })\nprintln(nums.flatMap { listOf(it, -it) })\nprintln(nums.associateWith { it * it })"
-  ],
-  "Grouping & Partitioning": [
-   "`groupBy` groups elements by a key selector. `partition` splits into two lists based on a predicate. `groupingBy` for eager grouping.",
-   "val words = listOf(\"apple\", \"bat\", \"cat\", \"a\", \"bb\")\nprintln(words.groupBy { it.length })\nprintln(words.partition { it.length > 2 })\n// groupBy: {1=[a], 2=[bat, bb], 3=[cat], 5=[apple]}\n// partition: ([apple, bat, cat], [a, bb])"
-  ],
-  "Windowed & Chunked": [
-   "`chunked(size)` splits collection into fixed-size lists. `windowed(size)` creates sliding windows. Both support partial windows and steps.",
-   "val nums = (1..8).toList()\nprintln(nums.chunked(3))       // [[1,2,3], [4,5,6], [7,8]]\nprintln(nums.windowed(3))      // [[1,2,3], [2,3,4], ... [6,7,8]]\nprintln(nums.windowed(3, 2))   // [[1,2,3], [3,4,5], [5,6,7]]"
-  ],
-  "Element Operations": [
-   "`first`, `last`, `single`, `elementAt`, `firstOrNull`, `minOrNull`, `maxOrNull`, `take`, `drop`, `slice` for element selection.",
-   "val nums = listOf(1, 2, 3, 2, 1)\nprintln(nums.first { it > 1 })    // 2\nprintln(nums.singleOrNull { it > 5 }) // null\nprintln(nums.take(2))             // [1, 2]\nprintln(nums.drop(2))             // [3, 2, 1]\nprintln(nums.distinct())          // [1, 2, 3]"
-  ],
-  "Sequences vs Iterables": [
-   "Sequences (Sequence<T>) provide lazy evaluation: intermediate operations don't execute until terminal operation. Collections are eager. Use `.asSequence()` for chains of `map/filter/take` to avoid intermediate collections. Sequences are ideal for large datasets, infinite series, and chaining many operations. Generate with `sequence { yield() }`, `generateSequence`, `asSequence`.",
-   "fun main() {\n    val data = (1..100).toList()\n    \n    // Eager (collections) \u2014 creates intermediate lists\n    val eager = data\n        .filter { println(\"filter $it\"); it % 2 == 0 }\n        .map { println(\"map $it\"); it * 2 }\n        .take(3)\n    println(\"Eager result: $eager\")\n    \n    // Lazy (sequences) \u2014 one element at a time\n    val lazy_result = data.asSequence()\n        .filter { println(\"seq filter $it\"); it % 2 == 0 }\n        .map { println(\"seq map $it\"); it * 2 }\n        .take(3)\n        .toList()\n    println(\"Lazy result: $lazy_result\")\n    \n    // Infinite sequence\n    val fib = sequence {\n        var a = 0L; var b = 1L\n        while (true) {\n            yield(a)\n            val tmp = a + b\n            a = b; b = tmp\n        }\n    }\n    println(fib.take(10).toList())\n    \n    // generateSequence\n    val powers = generateSequence(1) { it * 2 }\n    println(powers.take(10).toList())\n    \n    // When to use Sequences:\n    // - Multiple transformations on large collections\n    // - Infinite or very large data sets\n    // - Early termination (take, first)\n    // When to use Collections:\n    // - Small collections\n    // - Need indexed access\n    // - Few operations"
-  ]
- },
- "Classes & OOP": {
-  "Class Basics": [
-   "Classes use `class` with a primary constructor in the header. Properties declared in the constructor are automatically generated with getters/setters.",
-   "class Person(val name: String, var age: Int)\nval p = Person(\"Alice\", 30)\nprintln(p.name)\np.age = 31"
-  ],
-  "Inheritance & Interfaces": [
-   "Classes are final by default \u2014 use `open` to allow inheritance. Override methods with `override`. Interfaces can have abstract and default implementations.",
-   "open class Animal(open val name: String) {\n    open fun speak() = println(\"$name makes a sound\")\n}\ninterface Pet {\n    fun play() = println(\"Playing\")\n}\nclass Dog(override val name: String) : Animal(name), Pet {\n    override fun speak() = println(\"$name barks\")\n}"
-  ],
-  "Data Classes": [
-   "`data class` automatically generates equals(), hashCode(), toString(), copy(), and componentN() functions. Perfect for DTOs and value objects.",
-   "data class User(val id: Int, val name: String)\nval u1 = User(1, \"Alice\")\nval u2 = u1.copy(name = \"Bob\")\nprintln(u1)\nprintln(u1 == User(1, \"Alice\"))\nval (id, name) = u1  // destructuring"
-  ],
-  "Sealed Classes & Interfaces": [
-   "Sealed types restrict hierarchies to a fixed set of subclasses defined in the same file. Perfect for representing states or algebraic data types.",
-   "sealed class Result {\n    data class Success(val data: String) : Result()\n    data class Error(val msg: String) : Result()\n    object Loading : Result()\n}\nfun handle(r: Result) = when (r) {\n    is Result.Success -> println(r.data)\n    is Result.Error -> println(\"Error: ${r.msg}\")\n    Result.Loading -> println(\"Loading...\")\n}"
-  ],
-  "Object & Companion": [
-   "`object` declares a singleton. `companion object` defines static-like members inside a class. Objects can also implement interfaces as anonymous instances.",
-   "object Config {\n    const val BASE_URL = \"https://api.example.com\"\n}\nclass App {\n    companion object {\n        fun create() = App()\n    }\n}\nprintln(Config.BASE_URL)"
-  ],
-  "Value & Inline Classes": [
-   "`value class` wraps a single value without heap allocation overhead. Use `@JvmInline` for JVM interop. Prevents primitive boxing in many cases.",
-   "@JvmInline\nvalue class Password(val value: String) {\n    init {\n        require(value.length >= 8) { \"Too short\" }\n    }\n}\nval pwd = Password(\"secure123\")\nprintln(pwd.value)\n// No extra object at runtime \u2014 inlined to String"
-  ],
-  "Type Aliases": [
-   "Type aliases provide alternative names for existing types, improving readability without introducing new types. Useful for function types and complex generics.",
-   "typealias UserMap = Map<Int, User>\ntypealias Predicate<T> = (T) -> Boolean\ntypealias Callback = (Result) -> Unit\n\nval users: UserMap = mapOf(1 to User(1, \"Alice\"))\nval isAdult: Predicate<Int> = { it >= 18 }"
-  ],
-  "Delegation": [
-   "`by` delegates interface implementation to another object. `by lazy` for lazy initialization. Delegated properties via `observable`, `vetoable`, or custom delegates.",
-   "interface Sound { fun makeSound(): String }\nclass Bark : Sound { override fun makeSound() = \"Woof\" }\nclass Dog(sound: Sound) : Sound by sound\n\nval dog = Dog(Bark())\nprintln(dog.makeSound())  // Woof\n\nval lazyVal: String by lazy { \"Computed once\" }"
-  ],
-  "Abstract Classes & Nested": [
-   "Abstract classes can have constructors, state, and both abstract and concrete methods. Nested/inner classes differ by whether they hold an outer reference.",
-   "abstract class Shape {\n    abstract fun area(): Double\n}\nclass Circle(val r: Double) : Shape() {\n    override fun area() = Math.PI * r * r\n}\nclass Outer {\n    class Nested {}\n    inner class Inner { fun ref() = this@Outer }\n}\nprintln(Circle(3.0).area())"
-  ],
-  "Value Classes (Inline)": [
-   "Value classes wrap a single value with minimal overhead (no heap allocation in most cases). Declare with `@JvmInline value class`. Can have methods and computed properties but no backing fields, no `init` blocks, no class delegation. Inline classes replace primitive wrapper types with type safety. Also useful for type-safe IDs, units, domain primitives.",
-   "@JvmInline\nvalue class UserId(val id: String) {\n    init {\n        require(id.isNotBlank())\n    }\n    val isValid get() = id.length == 36  // UUID\n    fun display() = \"User#$id\"\n}\n\n@JvmInline\nvalue class Email(val value: String) {\n    val domain get() = value.substringAfter('@')\n}\n\nfun findUser(id: UserId): String = \"Found ${id.display()}\"\n\nfun main() {\n    val uid = UserId(\"abc-123\")\n    println(findUser(uid))\n    \n    // Type safety: can't mix up UserId and Email\n    // findUser(Email(\"x@y.com\"))  // won't compile\n    \n    // Runtime: UserId is just String (no wrapper allocation)\n    val id: UserId = UserId(\"uuid-here\")\n    val str: String = id.id  // unboxing\n    \n    // With multiple inline classes wrapping the same type\n    @JvmInline value class Meters(val v: Double)\n    @JvmInline value class Seconds(val v: Double)\n    \n    fun speed(dist: Meters, time: Seconds): Double =\n        dist.v / time.v  // must unwrap explicitly\n    \n    println(speed(Meters(100.0), Seconds(9.58)))\n}"
-  ]
- },
- "Generics": {
-  "Generic Functions & Classes": [
-   "Generics enable type-safe code with type parameters. Functions and classes can be parameterised with one or more type parameters.",
-   "class Box<T>(val value: T)\nfun <T> List<T>.secondOrNull(): T? = if (size >= 2) this[1] else null\n\nval intBox = Box(42)\nval strBox = Box(\"Hello\")\nprintln(listOf(1, 2, 3).secondOrNull())"
-  ],
-  "Variance \u2014 out & in": [
-   "`out T` makes a type covariant (producer). `in T` makes it contravariant (consumer). Declaration-site variance avoids wildcards.",
-   "interface Producer<out T> { fun produce(): T }\ninterface Consumer<in T> { fun consume(item: T) }\n\nclass StringProducer : Producer<String> {\n    override fun produce() = \"Hello\"\n}\nval p: Producer<Any> = StringProducer()  // OK: out\nprintln(p.produce())"
-  ],
-  "Reified Type Parameters": [
-   "Reified type parameters (inline fun <reified T>) preserve generic type information at runtime. Works only with inline functions. Enables `T::class`, `is T`, `as T`. Bypasses JVM type erasure of generics. Common use: type-safe Gson/Jackson deserialization, type checks, `instanceof`-style pattern matching.",
-   "import kotlin.reflect.KClass\n\n// Without reified \u2014 can't access T::class\nfun <T> fromJson1(json: String, klass: KClass<T>): T = TODO()\n\n// With reified \u2014 type is preserved inline fun <reified T> fromJson(json: String): T {\n    return kotlinx.serialization.json.Json.decodeFromString(json)\n}\n\ninline fun <reified T> typeName(): String = T::class.simpleName ?: \"unknown\"\n\ninline fun <reified T> isInstance(x: Any): Boolean = x is T\n\ninline fun <reified T> cast(x: Any): T = x as T\n\ninline fun <reified T> List<*>.filterIsInstance(): List<T> =\n    this.filterIsInstance<T>()\n\nfun main() {\n    println(typeName<String>())  // String\n    println(typeName<List<Int>>())  // List\n    \n    println(isInstance<String>(\"hello\"))  // true\n    println(isInstance<Int>(\"hello\"))      // false\n    \n    val mixed: List<Any> = listOf(1, \"a\", 2, \"b\", 3)\n    val ints: List<Int> = mixed.filterIsInstance<Int>()\n    println(ints)  // [1, 2, 3]\n    \n    // Type-safe JSON (with kotlinx.serialization)\n    // val user: User = fromJson(json)\n}"
-  ],
-  "Star Projections": [
-   "`*` for unknown type arguments. `MutableList<*>` is a mutable list of unknown type \u2014 safe to read as `Any?`, but not to write.",
-   "fun printSize(list: List<*>) = println(list.size)\nfun printFirst(list: MutableList<*>) {\n    val item: Any? = list.first()\n    // list.add(1)  // ERROR: cannot write to `*`\n    println(item)\n}\nprintSize(listOf(1, 2, 3))"
-  ],
-  "Type Bounds & Where": [
-   "`T : UpperBound` constrains type parameters. Multiple bounds use `where` clause. Use `Nothing` for impossible values.",
-   "fun <T : Comparable<T>> maxOf(a: T, b: T) = if (a > b) a else b\n\ninterface Serializable\nfun <T> copy(value: T): T where T : Comparable<T>, T : Serializable\n    = value\n\nprintln(maxOf(3, 7))"
-  ]
- },
- "Coroutines": {
-  "Launch & Async": [
-   "`launch` fires a fire-and-forget coroutine. `async` starts a coroutine that returns a `Deferred` result via `await()`. Both are non-blocking.",
-   "import kotlinx.coroutines.*\n\nrunBlocking {\n    val job = launch { delay(1000); println(\"Done\") }\n    val deferred = async { delay(500); 42 }\n    println(\"Result: ${deferred.await()}\")\n    job.join()\n}"
-  ],
-  "Dispatchers": [
-   "Dispatchers determine thread pools: Default for CPU, IO for I/O, Main for UI, Unconfined for testing. `withContext` switches dispatchers.",
-   "import kotlinx.coroutines.*\n\nsuspend fun loadData(): String = withContext(Dispatchers.IO) {\n    // Network call on IO thread\n    delay(100)\n    \"Data loaded\"\n}\n\nrunBlocking {\n    println(loadData())\n}"
-  ],
-  "Structured Concurrency": [
-   "Coroutines lifetime ties to parent scope. Cancellation propagates downward; errors bubble up. `coroutineScope` waits for all children to complete.",
-   "runBlocking {\n    coroutineScope {\n        launch { delay(1000); println(\"1 done\") }\n        launch { delay(500); println(\"2 done\") }\n    }\n    println(\"All done\")\n}\n// 2 done, 1 done, All done"
-  ],
-  "supervisorScope": [
-   "supervisorScope isolates child failures: one child's exception doesn't cancel siblings or parent. Use for parallel independent work.",
-   "runBlocking {\n    supervisorScope {\n        launch {\n            try { delay(100); throw RuntimeException(\"Oops\") }\n            catch (e: Exception) { println(\"Caught: ${e.message}\") }\n        }\n        launch { delay(200); println(\"Still runs!\") }\n    }\n    println(\"Parent continues\")\n}"
-  ],
-  "Coroutine Context & Scope": [
-   "CoroutineContext combines Dispatcher, Job, and elements. `CoroutineScope` manages lifecycle. `Job` tracks lifecycle of a coroutine.",
-   "val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())\n\nval job = scope.launch(CoroutineName(\"worker\")) {\n    println(\"Running in ${coroutineContext[CoroutineName]}\")\n    delay(500)\n}\nscope.cancel()  // cancels all coroutines"
-  ],
-  "Cancellation & Timeouts": [
-   "Cancellation is cooperative \u2014 check `isActive` or use `yield()`. `withTimeout` throws TimeoutCancellationException. `withTimeoutOrNull` returns null.",
-   "runBlocking {\n    val result = withTimeoutOrNull(100) {\n        repeat(10) {\n            delay(50)\n            yield()\n        }\n        \"Finished\"\n    }\n    println(result)  // null (timed out)\n\n    // Cooperative cancellation:\n    val job = launch {\n        repeat(1000) {\n            if (!isActive) return@launch\n            // do work\n        }\n    }\n    delay(10); job.cancelAndJoin()\n}"
-  ],
-  "Exception Handling": [
-   "Uncaught exceptions cancel parent. Use `try-catch` inside coroutine, or `CoroutineExceptionHandler` for top-level exceptions.",
-   "val handler = CoroutineExceptionHandler { _, e ->\n    println(\"Caught: ${e.message}\")\n}\n\nrunBlocking {\n    val scope = CoroutineScope(handler + SupervisorJob())\n    scope.launch {\n        throw IllegalStateException(\"Something broke\")\n    }\n    delay(100)\n    println(\"Scope still active\")\n}"
-  ],
-  "coroutineScope vs runBlocking": [
-   "`coroutineScope` suspends without blocking a thread. `runBlocking` blocks the current thread for bridge mode. Use coroutineScope in suspend functions.",
-   "suspend fun fetchAll() = coroutineScope {\n    val one = async { fetchData(1) }\n    val two = async { fetchData(2) }\n    one.await() + two.await()\n}\n\n// runBlocking \u2014 bridge from non-suspend world\nfun main() = runBlocking {\n    println(fetchAll())\n}"
-  ],
-  "Dispatchers & Threading": [
-   "Dispatchers determine coroutine execution threads. Dispatchers.Default: CPU-bound work (thread pool = #cores). Dispatchers.IO: I/O-bound work (expandable pool). Dispatchers.Main: UI thread (Android, JavaFX). Dispatchers.Unconfined: runs in current thread until first suspension. `newSingleThreadContext`/`newFixedThreadPoolContext` for custom pools. `withContext` changes dispatcher within a coroutine.",
-   "import kotlinx.coroutines.*\n\nfun main() = runBlocking {\n    // Default dispatcher (CPU-bound)\n    launch(Dispatchers.Default) {\n        println(\"Default: ${Thread.currentThread().name}\")\n        // CPU-intensive computation\n        fibonacci(40)\n    }\n    \n    // IO dispatcher (I/O-bound)\n    launch(Dispatchers.IO) {\n        println(\"IO: ${Thread.currentThread().name}\")\n        // File/network operations\n        delay(100)\n    }\n    \n    // Unconfined \u2014 runs in current thread\n    launch(Dispatchers.Unconfined) {\n        println(\"Unconfined before: ${Thread.currentThread().name}\")\n        delay(10)\n        println(\"Unconfined after: ${Thread.currentThread().name}\")\n    }\n    \n    // Switching dispatchers mid-coroutine\n    val result = withContext(Dispatchers.Default) {\n        // CPU work\n        42\n    }\n    \n    // Custom dispatcher\n    val myDispatcher = newSingleThreadContext(\"MyThread\")\n    launch(myDispatcher) {\n        println(\"Custom: ${Thread.currentThread().name}\")\n    }\n    myDispatcher.close()\n    \n    // Limited parallelism\n    val limited = newFixedThreadPoolContext(2, \"Limited\")\n    \n    println(\"Done\")\n}\n\nfun fibonacci(n: Int): Long {\n    var a = 0L; var b = 1L\n    for (i in 2..n) { val tmp = a + b; a = b; b = tmp }\n    return b\n}"
-  ]
- },
- "Flows": {
-  "Flow Basics": [
-   "Flow is a cold async stream. Use `flow { }` builder with `emit()`, collect with `collect()`. Cold means nothing happens until collected.",
-   "import kotlinx.coroutines.flow.*\n\nfun countUp(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nrunBlocking { countUp().collect { println(it) } }"
-  ],
-  "Flow Builders": [
-   "Additional builders: `flowOf` for fixed values, `asFlow` on collections/ranges, `channelFlow` for concurrent emission, `callbackFlow` for callback APIs.",
-   "val f1 = flowOf(1, 2, 3)\nval f2 = (1..3).asFlow()\nval f3 = channelFlow {\n    launch { send(1) }\n    launch { send(2) }\n}\nrunBlocking { f3.collect { println(it) } }"
-  ],
-  "Flow Operators": [
-   "Intermediate operators: map, filter, transform, take, drop, debounce, sample, distinctUntilChanged, flatMapConcat, flatMapMerge, flatMapLatest.",
-   "runBlocking {\n    (1..5).asFlow()\n        .filter { it % 2 == 0 }\n        .map { \"Num: $it\" }\n        .debounce(100)\n        .collect { println(it) }\n\n    // flatMapLatest \u2014 cancels previous if new emission\n    flow {\n        emit(100); delay(50); emit(200)\n    }.flatMapLatest { delayMs ->\n        flow { emit(\"Start $delayMs\"); delay(delayMs); emit(\"End $delayMs\") }\n    }.collect { println(it) }\n}"
-  ],
-  "StateFlow": [
-   "StateFlow holds observable state. Hot flow \u2014 always has a value. Emits only distinct values. Ideal for ViewModels and UI state.",
-   "class MyViewModel {\n    private val _state = MutableStateFlow(\"Idle\")\n    val state: StateFlow<String> = _state\n\n    fun start() {\n        _state.value = \"Loading\"\n        // ...\n        _state.value = \"Done\"\n    }\n}\n\nrunBlocking {\n    val vm = MyViewModel()\n    launch { vm.state.drop(1).collect { println(it) } }\n    vm.start()\n}"
-  ],
-  "SharedFlow": [
-   "SharedFlow emits events to multiple collectors. Hot flow with replay cache. Use `MutableSharedFlow` for one-shot events like toasts.",
-   "runBlocking {\n    val events = MutableSharedFlow<String>(replay = 0)\n\n    launch {\n        repeat(3) { events.emit(\"Event $it\"); delay(100) }\n    }\n\n    launch {\n        events.collect { println(\"Collector 1: $it\") }\n    }\n    launch {\n        delay(50)\n        events.collect { println(\"Collector 2: $it\") }\n    }\n}"
-  ],
-  "CallbackFlow": [
-   "callbackFlow bridges callback-based APIs into Flows. Use `send()` inside, `awaitClose()` to clean up. Context preserving.",
-   "fun flowFromCallback(): Flow<String> = callbackFlow {\n    val listener = object : SomeListener {\n        override fun onEvent(data: String) {\n            trySend(data)\n        }\n        override fun onClose() {\n            close()\n        }\n    }\n    registerListener(listener)\n    awaitClose { unregisterListener(listener) }\n}"
-  ],
-  "Terminal Flow Operators": [
-   "Terminal ops trigger collection: `collect`, `toList`, `toSet`, `first`, `single`, `reduce`, `fold`, `launchIn`, `collectLatest`.",
-   "runBlocking {\n    val flow = (1..5).asFlow()\n\n    println(flow.toList())           // [1,2,3,4,5]\n    println(flow.first())            // 1\n    println(flow.reduce { a, b -> a + b })  // 15\n    println(flow.count { it % 2 == 0 })     // 2\n\n    // launchIn for fire-and-forget\n    flow.onEach { print(\"$it \") }.launchIn(this)\n}"
-  ],
-  "Combining Flows": [
-   "`zip` pairs elements one-to-one. `combine` merges latest values. `merge` interleaves multiple flows into one.",
-   "runBlocking {\n    val nums = (1..3).asFlow()\n    val letters = flowOf(\"A\", \"B\", \"C\")\n\n    nums.zip(letters) { n, l -> \"$n$l\" }\n        .collect { println(it) }  // 1A, 2B, 3C\n\n    // combine \u2014 re-emits when either flow emits\n    nums.combine(letters) { n, l -> \"$n$l\" }\n        .collect { println(it) }  // 3C (latest of each)\n}"
-  ],
-  "Flow Operators Deep": [
-   "Flow operators: map, filter, transform, take, drop, distinctUntilChanged, debounce, sample, flatMapConcat/Merge/Latest, buffer, conflate, catch, retry, retryWhen, onCompletion, combine, zip. Terminal operators: collect, toList, toSet, first, single, count, reduce, fold. Operators are cold (start on collect). Use flowOn to change context. Buffer for concurrent processing. catch recovers from upstream errors.",
-   "import kotlinx.coroutines.*\nimport kotlinx.coroutines.flow.*\n\nsuspend fun main() {\n    val flow = (1..5).asFlow()\n\n    flow.filter { it % 2 == 0 }\n        .map { \"Item: $it\" }\n        .collect { println(it) }\n\n    // Debounce\n    flowOf(1, 2, 3).debounce(100)\n\n    // Buffer for async\n    (1..10).asFlow()\n        .onEach { delay(100) }\n        .buffer(10)\n        .collect { println(\"Got $it\") }\n\n    // Combine\n    val nums = (1..3).asFlow()\n    val strs = flowOf(\"A\", \"B\", \"C\")\n    nums.combine(strs) { n, s -> \"$n$s\" }\n        .collect { println(it) }\n\n    // Error handling\n    flow { emit(1); emit(2); throw RuntimeException(\"Oops\") }\n        .catch { e -> emit(-1) }\n        .retry(2)\n        .collect { println(it) }\n\n    // flatMapLatest\n    (1..3).asFlow()\n        .onEach { delay(100) }\n        .flatMapLatest { flow { emit(it); delay(200); emit(it * 10) } }\n        .collect { println(it) }\n}"
-  ]
- },
- "Advanced Kotlin": {
-  "Context Receivers": [
-   "Context receivers declare dependency on context types without inheritance. Functions can receive multiple contexts for modular APIs.",
-   "interface LoggingContext {\n    fun log(msg: String)\n}\ncontext(LoggingContext)\nfun doWork() {\n    log(\"Working...\")\n}\n\nobject ConsoleLogger : LoggingContext {\n    override fun log(msg: String) = println(\"[LOG] $msg\")\n}\n\nfun main() {\n    with(ConsoleLogger) { doWork() }\n}"
-  ],
-  "Contracts": [
-   "Contracts tell the compiler about function behavior. Use `callsInPlace`, `returnsNotNull`, `implies` for smarter analysis and fewer warnings.",
-   "import kotlin.contracts.*\n\nfun requireNotNull(value: Any?): Any {\n    contract {\n        returns() implies (value != null)\n    }\n    if (value == null) throw IllegalArgumentException()\n    return value\n}\n\nval x: String? = \"Hello\"\nrequireNotNull(x)\nprintln(x.length)  // Smart-cast without !! thanks to contract"
-  ],
-  "@JvmInline & JvmAnnotations": [
-   "`@JvmInline` marks inline classes on JVM. `@JvmStatic`, `@JvmOverloads`, `@JvmField`, `@Throws` control Kotlin-to-Java interop.",
-   "@JvmInline\nvalue class Email(val value: String)\n\nclass Greeter {\n    companion object {\n        @JvmStatic\n        fun greet() = \"Hello\"\n\n        @JvmOverloads\n        fun create(name: String, age: Int = 0) = \"$name $age\"\n    }\n}\n// Java calls Greeter.greet() without Companion"
-  ],
-  "Type Erasure & Reified": [
-   "JVM erases generic types at runtime. `inline` + `reified` preserves them. `@Suppress(\"UNCHECKED_CAST\")` for manual casts.",
-   "inline fun <reified T> typeInfo() {\n    println(T::class.qualifiedName)\n    println(T::class.isAbstract)\n}\n\n// Erased version (won't compile without reified)\n// fun <T> erased() = T::class  // ERROR\n\ntypeInfo<String>()\ntypeInfo<List<Int>>()"
-  ],
-  "Reflection": [
-   "Kotlin reflection (`::class`, `::memberProperty`) inspects types at runtime. Use `memberProperties`, `functions`, `annotations` for meta-programming.",
-   "data class Person(val name: String, val age: Int)\n\nval kClass = Person::class\nprintln(kClass.simpleName)  // Person\nprintln(kClass.memberProperties)\n\nval prop = Person::name\nval person = Person(\"Alice\", 30)\nprintln(prop.get(person))  // Alice"
-  ],
-  "Annotations": [
-   "Kotlin annotations: `@Target`, `@Retention`, custom annotation classes. Apply to classes, functions, properties, or expressions with `@file:`, `@get:` etc.",
-   "@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)\n@Retention(AnnotationRetention.RUNTIME)\nannotation class Fancy(val author: String = \"Unknown\")\n\n@Fancy(author = \"Alice\")\nclass MyService {\n    @Fancy\n    fun doWork() {}\n}\n\n// Read at runtime\nval ann = MyService::class.findAnnotation<Fancy>()\nprintln(ann?.author)"
-  ],
-  "Destructuring Declarations": [
-   "Destructuring decomposes objects into variables with `componentN()` functions. Data classes auto-generate them; custom classes can implement operator fun componentN().",
-   "data class Point(val x: Int, val y: Int, val z: Int)\n\nval p = Point(1, 2, 3)\nval (x, y, z) = p\nprintln(\"$x, $y, $z\")  // 1,2,3\n\n// Destructuring in lambdas\nval points = listOf(Point(1,2,3))\npoints.forEach { (x, y) -> println(\"$x, $y\") }\n\n// For Map\nfor ((key, value) in mapOf(\"a\" to 1)) {}\nval (name, age) = Person(\"Alice\", 30)"
-  ],
-  "Inline Functions & Performance": [
-   "Inline functions copy their body to call sites, avoiding function call overhead. Use for lambdas (reduces object creation). `crossinline` prevents non-local returns, `noinline` prevents inlining specific parameters. `value class` + inline functions = zero-overhead abstractions. Over-inlining increases code size; use judiciously for small, frequently-called functions.",
-   "// Inline function \u2014 body is copied to call site\ninline fun <T> measureTime(block: () -> T): Pair<T, Long> {\n    val start = System.nanoTime()\n    val result = block()\n    val duration = (System.nanoTime() - start) / 1_000_000\n    return result to duration\n}\n\n// crossinline: can't use return in the lambda\ninline fun runOnUi(crossinline action: () -> Unit) {\n    // In a Runnable, return wouldn't work without crossinline\n    object : Runnable {\n        override fun run() = action()\n    }.run()\n}\n\n// noinline: keep lambda as object\ninline fun <T, R> transform(\n    value: T,\n    transformer: (T) -> R,  // inlined\n    noinline fallback: (T) -> R  // kept as function reference\n): R {\n    return transformer(value)\n}\n\nfun main() {\n    val (result, ms) = measureTime {\n        Thread.sleep(50)\n        42\n    }\n    println(\"Got $result in ${ms}ms\")\n    \n    runOnUi {\n        println(\"Running on UI\")\n        // return  // would not work without crossinline\n    }\n    \n    // noinline: can use as function reference\n    val ref: (Int) -> Int = { it * 2 }\n    println(transform(5, { it + 1 }, ref))\n}"
-  ]
- },
- "Kotlin Multiplatform": {
-  "KMP Overview": [
-   "Kotlin Multiplatform shares logic across platforms. Business logic, data models, and networking in commonMain; platform UIs in platform-specific source sets.",
-   "plugins { kotlin(\"multiplatform\") version \"1.9.0\" }\n\nkotlin {\n    jvm()\n    iosArm64()\n    iosSimulatorArm64()\n    sourceSets {\n        commonMain.dependencies {}\n        iosMain.dependencies {}\n    }\n}"
-  ],
-  "expect/actual": [
-   "`expect` declares platform-agnostic API in common code. `actual` provides platform-specific implementations. Compiler ensures all expects have actuals.",
-   "// commonMain\nexpect fun platformName(): String\nexpect class Platform\n\n// androidMain\nactual fun platformName(): String = \"Android\"\nactual typealias Platform = android.os.Build\n\n// iosMain\nactual fun platformName(): String = \"iOS\"\nactual typealias Platform = UIDevice"
-  ],
-  "Common Code": [
-   "CommonMain uses Kotlin stdlib-common, kotlinx.coroutines, kotlinx.serialization. Shared data models, repository logic, and ViewModels live here.",
-   "// commonMain\n@Serializable\ndata class User(val id: Int, val name: String)\n\ninterface UserRepository {\n    suspend fun getUser(id: Int): User\n}\n\nclass GetUserUseCase(private val repo: UserRepository) {\n    suspend operator fun invoke(id: Int) = repo.getUser(id)\n}"
-  ],
-  "Platform-Specific Code": [
-   "Platform source sets (jvmMain, iosMain, jsMain) provide actual implementations. Access platform APIs and libraries from each target.",
-   "// androidMain\nactual class NotificationManager(private val ctx: Context) {\n    actual fun show(title: String, msg: String) {\n        // Android notification using NotificationCompat\n    }\n}\n\n// iosMain\nactual class NotificationManager {\n    actual fun show(title: String, msg: String) {\n        // iOS notification using UNUserNotificationCenter\n    }\n}"
-  ],
-  "KMP Libraries & Frameworks": [
-   "KMP has a growing ecosystem: Ktor for networking, SQLDelight for databases, Koin for DI, kotlinx.serialization, and Compose Multiplatform for UI.",
-   "// build.gradle.kts\ncommonMain.dependencies {\n    implementation(\"io.ktor:ktor-client-core:2.3.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0\")\n    implementation(\"com.squareup.sqldelight:runtime:2.0.0\")\n}"
-  ],
-  "expect/actual Mechanism": [
-   "expect/actual declares platform-specific APIs. `expect` in common code defines the interface, `actual` in platform modules provides the implementation. Works for functions, properties, classes, objects, type aliases. Platform source sets: `commonMain`, `jvmMain`, `jsMain`, `nativeMain`, `iosMain`, etc. Use `@OptionalExpectation` for annotations.",
-   "// commonMain/kotlin/com/example/Platform.kt\nexpect fun getPlatformName(): String\n\n// commonMain/kotlin/com/example/Platform.kt\nexpect class Platform {\n    val name: String\n    val isDebug: Boolean\n}\n\n// jvmMain/kotlin/com/example/Platform.jvm.kt\nactual fun getPlatformName(): String = \"JVM (${System.getProperty(\"java.version\")})\"\n\nactual class Platform actual constructor() {\n    actual val name = \"JVM ${System.getProperty(\"os.name\")}\"\n    actual val isDebug = java.lang.management.ManagementFactory\n        .getRuntimeMXBean()\n        .inputArguments\n        .any { it.startsWith(\"-agentlib:jdwp\") }\n}\n\n// jsMain/kotlin/com/example/Platform.js.kt\n// actual fun getPlatformName(): String = \"Browser: ${js(\"navigator.userAgent\")}\"\n\n// nativeMain/kotlin/com/example/Platform.native.kt\n// actual fun getPlatformName(): String = \"Native (${Platform.memoryModel})\"\n\n// Usage in commonMain\nfun greet() = \"Hello from ${getPlatformName()}\""
-  ]
- },
- "Testing": {
-  "kotlin.test Basics": [
-   "`kotlin.test` provides `@Test`, `assertEquals`, `assertTrue`, `assertNull`, `assertThrows`. Annotations work with JUnit 4/5, and multiplatform testing.",
-   "import kotlin.test.*\n\nclass CalculatorTest {\n    @Test\n    fun `addition works`() {\n        assertEquals(4, 2 + 2)\n    }\n\n    @Test\n    fun `division throws`() {\n        assertThrows<ArithmeticException> {\n            val x = 1 / 0\n        }\n    }\n}"
-  ],
-  "Kotest": [
-   "Kotest is a multiplatform test framework with behavior specs, property-based testing, matchers, and data-driven tests.",
-   "class MyTest : StringSpec({\n    \"string length\".config(enabled = true) {\n        \"hello\".length shouldBe 5\n        \"hello\" shouldContain \"ell\"\n    }\n\n    \"numbers\" {\n        listOf(1, 2, 3).shouldContainExactlyInAnyOrder(3, 1, 2)\n    }\n})"
-  ],
-  "MockK": [
-   "MockK is a Kotlin-first mocking library. Supports coroutines, spies, relaxed mocks, capturing, and verification with expressive DSL.",
-   "class UserService(private val repo: UserRepository) {\n    suspend fun getUser(id: Int) = repo.findById(id)\n}\n\n@Test\nfun `mockk coroutine test`() = runBlocking {\n    val repo = mockk<UserRepository>(relaxed = true)\n    val service = UserService(repo)\n\n    coEvery { repo.findById(1) } returns User(1, \"Alice\")\n\n    val result = service.getUser(1)\n    assertEquals(\"Alice\", result.name)\n\n    coVerify { repo.findById(1) }\n}"
-  ],
-  "Property-Based Testing": [
-   "Property testing verifies invariants across many random inputs. Kotest and kotlin-check use generators (`Arb`) and properties (`forAll`).",
-   "class PropertyTest : StringSpec({\n    \"reverse reverses\" {\n        forAll<String> { str ->\n            str.reversed().reversed() == str\n        }\n    }\n\n    \"addition commutes\" {\n        forAll<Int, Int> { a, b ->\n            a + b == b + a\n        }\n    }\n})"
-  ],
-  "Coroutine Testing": [
-   "`kotlinx-coroutines-test` provides `runTest`, `TestScope`, and virtual time. `advanceTimeBy`, `advanceUntilIdle` skip delays instantly.",
-   "class CoroutineTest {\n    @Test\n    fun `test with virtual time`() = runTest {\n        var result = \"\"\n\n        launch {\n            delay(2000)\n            result = \"done\"\n        }\n\n        advanceTimeBy(2000)\n        assertEquals(\"done\", result)\n\n        // Or: advanceUntilIdle() \u2014 runs all pending\n    }\n\n    @Test\n    fun `test launch behavior`() = runTest {\n        var called = false\n        launch { called = true }\n        advanceUntilIdle()\n        assertTrue(called)\n    }\n}"
-  ],
-  "JUnit 5 Integration": [
-   "Kotlin works seamlessly with JUnit 5. Use `@ParameterizedTest`, `@MethodSource`, `@ValueSource` with Kotlin collections and lambdas.",
-   "class JUnit5Test {\n    @ParameterizedTest\n    @ValueSource(strings = [\"racecar\", \"level\", \"radar\"])\n    fun `palindromes`(word: String) {\n        assertEquals(word, word.reversed())\n    }\n\n    @TestFactory\n    fun `dynamic tests`() = listOf(1, 2, 3).map { n ->\n        DynamicTest.dynamicTest(\"Test $n squared\") {\n            assertEquals(n * n, n * n)\n        }\n    }\n}"
-  ],
-  "Property Testing (Kotest)": [
-   "Kotest property testing generates random inputs to verify invariants. `forAll`, `forNone`, `forAtLeast`. Generators: `Arb.int()`, `Arb.string()`, `Arb.list(Arb.int())`. Custom generators with `arbitrary { }`. Shrinking finds minimal failing case. Combine with table testing for specific cases. IntSeededRandom for reproducibility.",
-   "import io.kotest.core.spec.style.StringSpec\nimport io.kotest.property.*\nimport io.kotest.property.arbitrary.*\n\nclass MathProps : StringSpec({\n    \"addition is commutative\" {\n        forAll<Int, Int> { a, b ->\n            a + b == b + a\n        }\n    }\n    \n    \"reverse twice is identity\" {\n        forAll { list: List<Int> ->\n            list.reversed().reversed() == list\n        }\n    }\n    \n    \"abs is non-negative\" {\n        forAll<Int> { n ->\n            n.abs() >= 0\n        }\n    }\n    \n    \"string length is non-negative\" {\n        forAll<String> { s ->\n            s.length >= 0\n        }\n    }\n    \n    \"list size is non-negative\" {\n        forAll { list: List<String> ->\n            list.size >= 0\n        }\n    }\n    \n    \"custom generator: even numbers\" {\n        val evens = arbitrary { rs ->\n            IntRandom(rs).nextInt(-1000, 1000) * 2\n        }\n        forAll(evens) { n -> n % 2 == 0 }\n    }\n})\n\n// Kotest table testing\nclass CalculatorTableTest : StringSpec({\n    \"addition table\" {\n        val table = table(\n            headers(\"a\", \"b\", \"expected\"),\n            row(1, 2, 3),\n            row(0, 0, 0),\n            row(-1, 1, 0),\n            row(100, -100, 0)\n        )\n        forAll(table) { a, b, expected ->\n            a + b == expected\n        }\n    }\n})"
-  ],
-  "Mocking with MockK": [
-   "MockK is Kotlin's mocking library designed for Kotlin features: coroutines, extension functions, object mocks, private functions. Key features: `mockk<T>()`, `every { } returns`, `coEvery { } coReturns`, `verify { }`, `slot`, `capture`, `relaxed mock`. Use `mockkStatic` for companion/static, `spyk` for partial mocks. `confirmVerified` ensures all calls were verified.",
-   "import io.mockk.*\n\nclass UserRepo {\n    fun find(id: Int): String? = null\n    suspend fun save(name: String): Int = 0\n}\n\nclass Greeter(private val repo: UserRepo) {\n    fun greet(id: Int): String {\n        val name = repo.find(id)\n        return if (name != null) \"Hello $name\" else \"Unknown\"\n    }\n    suspend fun create(name: String): String {\n        val id = repo.save(name)\n        return \"Created id=$id\"\n    }\n}\n\nfun main() {\n    // Create mock\n    val repo = mockk<UserRepo>()\n\n    // Stub\n    every { repo.find(1) } returns \"Alice\"\n    every { repo.find(any()) } returns null\n\n    val greeter = Greeter(repo)\n    println(greeter.greet(1))  // Hello Alice\n\n    // Verify\n    verify { repo.find(1) }\n\n    // Coroutine mock\n    coEvery { repo.save(\"Bob\") } coReturns 42\n\n    // Slot capture\n    val slot = slot<Int>()\n    every { repo.find(capture(slot)) } returns \"captured\"\n    greeter.greet(99)\n    println(slot.captured)  // 99\n\n    // Relaxed mock (returns defaults)\n    val relaxed = mockk<UserRepo>(relaxed = true)\n    println(relaxed.find(5))  // null\n\n    confirmVerified(repo)\n}"
-  ]
- },
- "Build & Tooling": {
-  "Gradle Kotlin DSL": [
-   "Gradle Kotlin DSL is the idiomatic build configuration for Kotlin projects. Uses `.gradle.kts` files. Type-safe accessors for configurations, tasks, extensions. Key plugins: kotlin(\"jvm\"), kotlin(\"multiplatform\"), kotlin(\"plugin.serialization\"), application. Version catalogs (libs.versions.toml) for dependency management. Convention plugins for shared build logic.",
-   "plugins {\n    kotlin(\"jvm\") version \"1.9.22\"\n    application\n    kotlin(\"plugin.serialization\") version \"1.9.22\"\n}\n\ngroup = \"com.example\"\nversion = \"1.0\"\n\napplication {\n    mainClass.set(\"MainKt\")\n}\n\ndependencies {\n    // Kotlin stdlib is included by default\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2\")\n    \n    testImplementation(kotlin(\"test\"))\n    testImplementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0\")\n}\n\ntasks.test {\n    useJUnitPlatform()\n}\n\nkotlin {\n    jvmToolchain(21)\n    compilerOptions {\n        freeCompilerArgs.addAll(\"-Xcontext-receivers\")\n    }\n}\n\n// gradle/libs.versions.toml version catalog\n/*\n[versions]\ncoroutines = \"1.8.0\"\n\n[libraries]\ncoroutines-core = { group = \"org.jetbrains.kotlinx\", name = \"kotlinx-coroutines-core\", version.ref = \"coroutines\" }\n*/"
-  ],
-  "Version Catalogs": [
-   "Version catalogs in `gradle/libs.versions.toml` centralise dependency versions. Access via `libs.some.dependency` in build scripts.",
-   "# gradle/libs.versions.toml\n[versions]\nkotlin = \"1.9.22\"\nkotlinx-coroutines = \"1.7.3\"\n\n[libraries]\nkotlinx-coroutines-core = { module = \"org.jetbrains.kotlinx:kotlinx-coroutines-core\", version.ref = \"kotlinx-coroutines\" }\n\n# build.gradle.kts\ndependencies {\n    implementation(libs.kotlinx.coroutines.core)\n}"
-  ],
-  "buildSrc & Convention Plugins": [
-   "buildSrc stores shared build logic as Kotlin sources. Convention plugins apply common configurations across modules \u2014 DRY for multi-module projects.",
-   "// buildSrc/src/main/kotlin/kotlin-common.gradle.kts\nplugins {\n    kotlin(\"jvm\")\n}\ndependencies {\n    testImplementation(kotlin(\"test\"))\n}\ntasks.withType<Test> {\n    useJUnitPlatform()\n}\n\n// In module's build.gradle.kts\nplugins {\n    id(\"kotlin-common\")\n}"
-  ],
-  "KSP & K2 Compiler": [
-   "KSP (Kotlin Symbol Processing) is a compiler plugin for annotation processing. K2 compiler (1.9+) offers faster compilation and improved type inference.",
-   "plugins {\n    id(\"com.google.devtools.ksp\") version \"1.9.22-1.0.17\"\n}\n\n// K2 compiler (gradle.properties)\nkotlin.experimental.tryK2=true\n\n// Or explicitly:\ntasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {\n    kotlinOptions.jvmTarget = \"17\"\n    kotlinOptions.freeCompilerArgs += \"-Xcompiler-collect-comments\"\n}"
-  ],
-  "Dokka & Tooling": [
-   "Dokka generates Kotlin documentation (KDoc). Supports multiplatform projects, HTML/MD/JavaDoc outputs. Often used with Gradle's `dokka` plugin.",
-   "plugins {\n    id(\"org.jetbrains.dokka\") version \"1.9.10\"\n}\n\ntasks.dokkaHtml {\n    moduleName.set(\"My Library\")\n    outputDirectory.set(buildDir.resolve(\"dokka\"))\n}\n\n// KDoc style\n/**\n * Calculates sum of two integers.\n * @param a first addend\n * @param b second addend\n * @return sum of a and b\n */\nfun sum(a: Int, b: Int) = a + b"
-  ]
- },
- "Kotlin Idioms & DSL": {
-  "Scope Functions Deep": [
-   "Scope functions: `let`, `run`, `with`, `apply`, `also`. Key differences: context object (it vs this), return value (context vs lambda result). `let`: `it` + result for transformations/chaining. `apply`: `this` + context for configuration. `run`: `this` + result for computing with context. `also`: `it` + context for side effects. `with`: `this` + result (extension function, non-null). Combine thoughtfully for readable code.",
-   "data class User(var name: String = \"\", var age: Int = 0, var email: String = \"\")\n\nfun main() {\n    // apply \u2014 configure object, return object\n    val user = User().apply {\n        name = \"Alice\"\n        age = 30\n        email = \"alice@example.com\"\n    }\n    \n    // let \u2014 transform, return result\n    val greeting = user.name.let { name ->\n        \"Hello, $name!\"\n    }\n    println(greeting)\n    \n    // let with null check\n    val nullableName: String? = user.name\n    nullableName?.let { println(\"Name is $it\") }\n    \n    // run \u2014 compute with context, return result\n    val summary = user.run {\n        \"${this.name} (${this.age})\"\n    }\n    \n    // also \u2014 perform side effect, return original\n    user.also { println(\"Created user: $it\") }\n    \n    // with \u2014 non-extension version of run\n    with(user) {\n        println(\"Inside with: $name\")\n    }\n    \n    // Chaining\n    val result = User().apply {\n        name = \"Bob\"\n    }.let {\n        it.name.uppercase()\n    }\n    println(result)  // BOB\n}"
-  ],
-  "Lambda with Receiver": [
-   "Lambda with receiver allows calling methods on an implicit `this` inside the lambda. The `receiver` type is the context. Used by `apply`, `run`, `with`, `buildString`, and custom DSLs. From Kotlin in Action.",
-   "// buildString uses lambda with StringBuilder receiver\nval html = buildString {\n    append(\"<!DOCTYPE html>\\n\")\n    appendLine(\"<html>\")\n    appendLine(\"  <body>\")\n    append(\"    <h1>Hello</h1>\\n\")\n    appendLine(\"  </body>\")\n    append(\"</html>\")\n}\nprintln(html)\n\n// Custom builder using lambda with receiver\nclass HtmlBuilder {\n    private val sb = StringBuilder()\n    fun tag(name: String, content: String) {\n        sb.appendLine(\"<$name>$content</$name>\")\n    }\n    fun build(): String = sb.toString()\n}\n\nfun html(init: HtmlBuilder.() -> Unit): String {\n    val builder = HtmlBuilder()\n    builder.init()\n    return builder.build()\n}\n\nval page = html {\n    tag(\"h1\", \"Welcome\")     // 'this' is HtmlBuilder\n    tag(\"p\", \"Kotlin DSLs!\")\n}\nprintln(page)"
-  ],
-  "Type-Safe Builders & @DslMarker": [
-   "Type-safe builders use lambdas with receivers for declarative construction. @DslMarker restricts implicit receiver access to prevent ambiguity with nested builder contexts. Common: HTML builders, Gradle DSL, Compose UI. Builder pattern with apply/also. Context receivers (Kotlin 1.6+) for multiple receivers in scope.",
-   "import kotlin.DslMarker\n\n@DslMarker\nannotation class HtmlDsl\n\n@HtmlDsl\nclass Html {\n    private val children = mutableListOf<String>()\n    fun body(init: Body.() -> Unit) {\n        children.add(Body().apply(init).toString())\n    }\n    override fun toString() = \"<html>${children.joinToString(\"\")}</html>\"\n}\n\n@HtmlDsl\nclass Body {\n    private val children = mutableListOf<String>()\n    fun h1(text: String) { children.add(\"<h1>$text</h1>\") }\n    fun p(init: P.() -> Unit) { children.add(P().apply(init).render()) }\n    override fun toString() = \"<body>${children.joinToString(\"\")}</body>\"\n}\n\nclass P {\n    var text: String = \"\"\n    var style: String = \"\"\n    fun render() = if (style.isNotEmpty())\n        \"<p style=\\\"$style\\\">$text</p>\" else \"<p>$text</p>\"\n}\n\nfun html(init: Html.() -> Unit): Html = Html().apply(init)\n\nfun main() {\n    val doc = html {\n        body {\n            h1(\"Hello\")\n            p { text = \"World\" }\n            p { text = \"Styled\"; style = \"color:red\" }\n        }\n    }\n    println(doc)\n}"
-  ],
-  "SAM Conversion": [
-   "Single Abstract Method (SAM) conversion lets you pass a lambda where a Java functional interface is expected. Kotlin has built-in function types, so SAM conversion mainly applies to Java interop. From Head First Kotlin.",
-   "// Java interface\n// public interface OnClickListener {\n//     void onClick(View v);\n// }\n\n// Without SAM conversion (object expression)\nbutton.setOnClickListener(object : OnClickListener {\n    override fun onClick(v: View) {\n        println(\"Clicked!\")\n    }\n})\n\n// With SAM conversion (lambda \u2014 works if method expects Java SAM interface)\nbutton.setOnClickListener { v -> println(\"Clicked!\") }\n\n// Kotlin function types don't need SAM \u2014 use lambda directly\nval callback: (String) -> Unit = { println(it) }\n\n// With Kotlin functional interface (fun interface)\nfun interface StringTransformer {\n    fun transform(input: String): String\n}\n\nval upper = StringTransformer { it.uppercase() }\nval reversed = StringTransformer { it.reversed() }\nprintln(upper.transform(\"hello\"))  // HELLO\nprintln(reversed.transform(\"hello\"))  // olleh"
-  ],
-  "Java Interop": [
-   "Kotlin is 100% interoperable with Java. Key annotations: `@JvmStatic` for static methods, `@JvmOverloads` for overloaded methods, `@JvmField` for fields, `@Throws` for checked exceptions, `@JvmName` to resolve signature clashes.",
-   "// Kotlin side\nclass InteropDemo {\n    companion object {\n        @JvmStatic\n        fun staticMethod() = \"Called from Java statically\"\n\n        @JvmOverloads\n        fun greet(name: String, greeting: String = \"Hello\") = \"$greeting, $name\"\n    }\n\n    @JvmField\n    val instanceField = \"Direct field access\"\n\n    @Throws(IOException::class)\n    fun riskyOperation() {\n        throw IOException(\"Checked exception in Java\")\n    }\n\n    // Resolve signature clash\n    @JvmName(\"findByName\")\n    fun find(name: String): Person? = null\n\n    fun find(id: Int): Person? = null\n}\n\n// Java calls:\n// InteropDemo.staticMethod();               // @JvmStatic\n// InteropDemo.greet(\"Alice\");               // @JvmOverloads\n// InteropDemo.greet(\"Alice\", \"Hi\");\n// String f = demo.instanceField;            // @JvmField\n// try { demo.riskyOperation(); }            // @Throws\n\n// Platform types \u2014 String! means nullable unknown\nval list = mutableListOf<String>()\nlist.add(\"Hello\")\nval item: String? = list[0]  // platform type, treat as nullable"
-  ],
-  "Kotlin Idioms": [
-   "Common Kotlin idioms from Head First Kotlin and Kotlin in Action: default arguments for builders, `require`/`check` for preconditions, `use` for Closeable, `takeIf`/`takeUnless` for conditional returns, `TODO()` for stubs, `runCatching` for try-catch expressions.",
-   "// require \u2014 validate arguments\nfun factorial(n: Int): Int {\n    require(n >= 0) { \"n must be non-negative, got $n\" }\n    return if (n <= 1) 1 else n * factorial(n - 1)\n}\n\n// use \u2014 auto-close Closeable\nfun readFile(path: String): String {\n    return BufferedReader(FileReader(path)).use { it.readText() }\n}\n\n// takeIf / takeUnless \u2014 conditional return\nval adult = Person(\"Alice\", 30).takeIf { it.age >= 18 }\nprintln(adult)\n\n// runCatching \u2014 expression-based error handling\nval result = runCatching {\n    \"42\".toInt()\n}.fold(\n    onSuccess = { \"Parsed: $it\" },\n    onFailure = { \"Error: ${it.message}\" }\n)\nprintln(result)\n\n// TODO \u2014 placeholder that always throws\nfun notImplemented(): Nothing = TODO(\"Implement this later\")\n\n// apply for object construction\nval config = mutableMapOf<String, Any>().apply {\n    put(\"host\", \"localhost\")\n    put(\"port\", 8080)\n    put(\"debug\", true)\n}"
-  ]
- },
- "Android Development": {
-  "Jetpack Compose Basics": [
-   "Jetpack Compose is Kotlin's declarative UI framework for Android. `@Composable` functions describe UI. State: `mutableStateOf`, `remember`, `derivedStateOf`, `collectAsState`. Layout: Column, Row, Box, LazyColumn, LazyRow. Modifier chain for styling. Side effects: LaunchedEffect, DisposableEffect. Compose uses Kotlin coroutines for animations and async operations.",
-   "import androidx.compose.foundation.layout.*\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun CounterApp() {\n    var count by remember { mutableStateOf(0) }\n    \n    Column(\n        modifier = Modifier.padding(16.dp),\n        verticalArrangement = Arrangement.spacedBy(8.dp)\n    ) {\n        Text(\n            text = \"Count: $count\",\n            style = MaterialTheme.typography.headlineMedium\n        )\n        \n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            Button(onClick = { count++ }) {\n                Text(\"Increment\")\n            }\n            \n            Button(onClick = { count-- }) {\n                Text(\"Decrement\")\n            }\n            \n            OutlinedButton(onClick = { count = 0 }) {\n                Text(\"Reset\")\n            }\n        }\n        \n        // State derived from other state\n        val isEven by remember {\n            derivedStateOf { count % 2 == 0 }\n        }\n        \n        Text(\n            text = if (isEven) \"Even\" else \"Odd\",\n            color = if (isEven) MaterialTheme.colorScheme.primary\n                    else MaterialTheme.colorScheme.error\n        )\n    }\n}\n\n// Preview\n@Preview(showBackground = true)\n@Composable\nfun PreviewCounter() {\n    CounterApp()\n}"
-  ],
-  "ViewModel & State": [
-   "ViewModel survives configuration changes. Use `viewModel()` in Compose, expose `StateFlow`, and collect as Compose state with `collectAsState()`.",
-   "class CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count\n\n    fun increment() { _count.value++ }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel = viewModel()) {\n    val count by viewModel.count.collectAsState()\n\n    Text(\"Count: $count\")\n    Button(onClick = { viewModel.increment() }) {\n        Text(\"+1\")\n    }\n}"
-  ],
-  "LiveData & StateFlow": [
-   "LiveData is lifecycle-aware. StateFlow is the coroutines-native alternative. Use `asLiveData()` to bridge StateFlow to LiveData for legacy code.",
-   "class MyViewModel : ViewModel() {\n    private val _data = MutableLiveData<String>()\n    val data: LiveData<String> = _data\n\n    private val _state = MutableStateFlow(\"initial\")\n    val state: StateFlow<String> = _state\n\n    fun load() {\n        viewModelScope.launch {\n            _data.value = \"Loading\"\n            _state.value = \"Loading\"\n            val result = repository.fetch()\n            _data.value = result\n            _state.value = result\n        }\n    }\n}\n\n// StateFlow to LiveData bridge\nval liveData: LiveData<String> = stateFlow.asLiveData()"
-  ],
-  "Room Database": [
-   "Room is a SQLite ORM. Use `@Entity`, `@Dao`, `@Database`. Coroutines support via suspend functions and Flow return types in DAOs.",
-   "@Entity\ndata class User(\n    @PrimaryKey val id: Int,\n    val name: String,\n    val email: String\n)\n\n@Dao\ninterface UserDao {\n    @Query(\"SELECT * FROM user\")\n    fun getAll(): Flow<List<User>>\n\n    @Insert\n    suspend fun insert(user: User)\n\n    @Delete\n    suspend fun delete(user: User)\n}\n\n@Database(entities = [User::class], version = 1)\nabstract class AppDatabase : RoomDatabase() {\n    abstract fun userDao(): UserDao\n}"
-  ],
-  "Retrofit & Networking": [
-   "Retrofit type-safe HTTP client used with Kotlin coroutines. Define `suspend` functions in API interfaces. Use kotlinx.serialization or Moshi for JSON.",
-   "interface ApiService {\n    @GET(\"users/{id}\")\n    suspend fun getUser(@Path(\"id\") id: Int): User\n\n    @POST(\"users\")\n    suspend fun createUser(@Body user: User): User\n}\n\nobject RetrofitClient {\n    val instance: ApiService by lazy {\n        Retrofit.Builder()\n            .baseUrl(\"https://api.example.com/\")\n            .addConverterFactory(jsonConverterFactory)\n            .build()\n            .create(ApiService::class.java)\n    }\n}\n\nclass UserRepo(private val api: ApiService) {\n    suspend fun getUser(id: Int) = api.getUser(id)\n}"
-  ],
-  "Navigation Compose": [
-   "Navigation Compose provides type-safe navigation in Compose. Define routes with `NavHost`, navigate with `navController.navigate()`, pass safe args.",
-   "sealed class Screen(val route: String) {\n    object Home : Screen(\"home\")\n    object Profile : Screen(\"profile/{userId}\") {\n        fun createRoute(userId: Int) = \"profile/$userId\"\n    }\n}\n\n@Composable\nfun AppNavigation() {\n    val navController = rememberNavController()\n    NavHost(navController, startDestination = Screen.Home.route) {\n        composable(Screen.Home.route) {\n            HomeScreen(onProfile = { id ->\n                navController.navigate(Screen.Profile.createRoute(id))\n            })\n        }\n        composable(\n            route = Screen.Profile.route,\n            arguments = listOf(navArgument(\"userId\") { type = NavType.IntType })\n        ) { backStackEntry ->\n            val userId = backStackEntry.arguments?.getInt(\"userId\") ?: 0\n            ProfileScreen(userId)\n        }\n    }\n}"
-  ],
-  "Ktor Client & Networking": [
-   "Ktor Client is Kotlin multiplatform HTTP client. Features: coroutine-based, pluggable engines (OkHttp JVM, Darwin iOS, JS), content negotiation, kotlinx.serialization, auth, cookies, WebSockets. Build with HttpClient { install(ContentNegotiation) { json() } }. Requests: get, post, put, delete. Streaming with HttpStatement.",
-   "import io.ktor.client.*\nimport io.ktor.client.call.*\nimport io.ktor.client.plugins.contentnegotiation.*\nimport io.ktor.client.request.*\nimport io.ktor.http.*\nimport io.ktor.serialization.kotlinx.json.*\nimport kotlinx.serialization.Serializable\nimport kotlinx.serialization.json.Json\n\n@Serializable\ndata class Post(val userId: Int, val id: Int, val title: String, val body: String)\n\nsuspend fun main() {\n    val client = HttpClient {\n        install(ContentNegotiation) {\n            json(Json { ignoreUnknownKeys = true })\n        }\n    }\n\n    val post: Post = client\n        .get(\"https://jsonplaceholder.typicode.com/posts/1\")\n        .body()\n    println(post.title)\n\n    val posts: List<Post> = client\n        .get(\"https://jsonplaceholder.typicode.com/posts\") {\n            parameter(\"userId\", 1)\n        }.body()\n    println(\"Found ${posts.size} posts\")\n\n    client.close()\n}"
-  ]
- }
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "<p>Introduction to Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "<p>Variables and data types in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "<p>Operators in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "<p>Control flow statements in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "<p>Functions in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "<p>Working with collections in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "<p>String manipulation in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "<p>Key-value data structures in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "<p>OOP concepts in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "<p>Inheritance patterns in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "<p>Interfaces and contracts in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "<p>Exception handling in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "<p>Debugging Kotlin code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "<p>File I/O in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "<p>Input and output operations in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "<p>Concurrency in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "<p>Modular programming in Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "<p>Best practices for Kotlin.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "<p>Optimizing Kotlin code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Getting Started": {
+    "What is Kotlin": [
+      "Kotlin is a modern, statically-typed language that runs on the JVM, JS, and Native targets. It's concise, safe, and fully interoperable with Java.",
+      "fun main() {\n    println(\"Hello, Kotlin!\")\n}"
+    ],
+    "Kotlin Syntax": [
+      "Kotlin omits semicolons and uses `fun` for functions, `val` for read-only references, and `var` for mutable ones. Types come after colons.",
+      "val name: String = \"Doge\"\nvar age = 5\nfun greet() = \"Hello\"\nprintln(\"$name is $age\")"
+    ],
+    "Variables & Types": [
+      "Kotlin infers types. `val` (immutable like final) and `var` (mutable). Basic types: String, Int, Long, Double, Float, Boolean, Char, Byte, Short.",
+      "val pi = 3.14159\nvar counter = 0\nval visible: Boolean = true\nval items = listOf(1, 2, 3)\nprintln(pi::class.simpleName)"
+    ],
+    "Null Safety": [
+      "Kotlin eliminates null pointer exceptions with nullable types (`?`), safe calls (`?.`), Elvis operator (`?:`), and the not-null assertion (`!!`).",
+      "var name: String? = null\nprintln(name?.length)\nprintln(name ?: \"Default\")\nname = \"Doge\"\nprintln(name!!.length)"
+    ],
+    "Kotlin Playground": [
+      "The Kotlin Playground is an online IDE to experiment with Kotlin code. It supports multiplatform targets, embedded snippets, and sharing via URLs.",
+      "// https://play.kotlinlang.org\nfun main() {\n    val msg = \"Try Kotlin\"\n    println(\"$msg — online!\")\n}"
+    ],
+    "Multiplatform Overview": [
+      "Kotlin Multiplatform shares business logic across JVM, JS, iOS, Android, and Native. Write once in shared modules; platform code in target modules.",
+      "plugins { kotlin(\"multiplatform\") }\n\nkotlin {\n    jvm()\n    js()\n    iosX64()\n    sourceSets.commonMain.dependencies {\n        implementation(kotlin(\"stdlib-common\"))\n    }\n}"
+    ],
+    "Project Structure": [
+      "Standard Kotlin projects use Gradle with `src/main/kotlin` and `src/test/kotlin`. Multiplatform adds `commonMain`, `jvmMain`, `iosMain` source sets.",
+      "Project/\n ├── build.gradle.kts\n ├── settings.gradle.kts\n └── src/\n    ├── main/kotlin/\n    │   └── Main.kt\n    └── test/kotlin/\n        └── MainTest.kt"
+    ],
+    "Kotlin/Native & WASM": [
+      "Kotlin/Native compiles to native binaries (no JVM required) via LLVM. Targets: Windows (Mingw), Linux, macOS, iOS, Android NDK, WebAssembly. Use `konanTargets` in Gradle. Kotlin/Wasm targets WebAssembly with Kotlin/Wasm compiler. Native supports Kotlin's standard library subset, including coroutines and serialization.",
+      "plugins {\n    kotlin(\"multiplatform\") version \"1.9.22\"\n}\n\nkotlin {\n    val hostOs = System.getProperty(\"os.name\")\n    val isMingwX64 = hostOs.startsWith(\"Windows\")\n    val nativeTarget = when {\n        hostOs == \"Mac OS X\" -> macosX64(\"native\")\n        hostOs == \"Linux\" -> linuxX64(\"native\")\n        isMingwX64 -> mingwX64(\"native\")\n        else -> throw GradleException(\"Host OS $hostOs is not supported\")\n    }\n    \n    nativeTarget.apply {\n        binaries {\n            executable {\n                entryPoint = \"main\"\n            }\n        }\n    }\n    \n    js { browser { } }\n    wasmJs { browser { } }\n}"
+    ]
+  },
+  "Control Flow": {
+    "If & When expressions": [
+      "`if` and `when` are expressions that return values. `when` replaces Java's switch and supports smart casts, ranges, and arbitrary conditions.",
+      "val score = 85\nval grade = when {\n    score >= 90 -> 'A'\n    score >= 80 -> 'B'\n    else -> 'F'\n}\nval max = if (a > b) a else b\nprintln(grade)"
+    ],
+    "for & while Loops": [
+      "`for` iterates over ranges, collections, or anything with an iterator. `while` and `do..while` work as expected. Ranges use `..`, `until`, `downTo`, `step`.",
+      "for (i in 1..5) print(i)\nfor (i in 5 downTo 1 step 2) print(i)\nfor ((index, value) in listOf('a','b').withIndex())\n    println(\"$index: $value\")"
+    ],
+    "Range & Progression": [
+      "Ranges (`1..10`) define intervals. Progressions control step direction. Use `in` to check membership, `until` for exclusive end.",
+      "val closed = 1..5\nval half = 1 until 5\nval descending = 5 downTo 1\nval step = 0..10 step 2\nprintln(3 in closed)\nprintln(3 in half)"
+    ],
+    "Equality Checks": [
+      "`==` calls `equals()` (structural equality). `===` checks referential identity. `!=` and `!==` are the negated forms.",
+      "val a = listOf(1, 2)\nval b = listOf(1, 2)\nval c = a\nprintln(a == b)   // true — structural\nprintln(a === b)  // false — different references\nprintln(a === c)  // true — same reference"
+    ],
+    "Exception Handling": [
+      "Use `try-catch-finally`. Kotlin has no checked exceptions. `catch` blocks can filter by exception type, and `finally` always executes.",
+      "fun divide(a: Int, b: Int): Int {\n    return try {\n        a / b\n    } catch (e: ArithmeticException) {\n        println(\"Cannot divide by zero\")\n        0\n    } finally {\n        println(\"Division attempted\")\n    }\n}"
+    ],
+    "try as Expression": [
+      "`try` is an expression in Kotlin. It returns the last expression in the `try` block or the matching `catch` block. Use `finally` for side effects.",
+      "val input = \"42\"\nval parsed: Int? = try {\n    input.toInt()\n} catch (e: NumberFormatException) {\n    null\n}\nprintln(parsed ?: \"Invalid number\")"
+    ],
+    "Ranges & Progressions": [
+      "Ranges: `a..b` (inclusive), `a..<b` (exclusive, Kotlin 1.9+), `a downTo b`, `a..b step c`. Check containment with `in` operator. Progressions: IntProgression, LongProgression, CharProgression. Empty ranges: `10..1` (empty). `until` extension: `0 until 10` = `0..9`. Indices of collections. Iterate over ranges with for loops.",
+      "fun main() {\n    // Inclusive range\n    for (i in 1..5) print(\"$i \")  // 1 2 3 4 5\n    println()\n    \n    // Exclusive (Kotlin 1.9+)\n    // for (i in 1..<5) print(i)  // 1 2 3 4\n    \n    // Until\n    for (i in 0 until 5) print(\"$i \")  // 0 1 2 3 4\n    println()\n    \n    // Down to\n    for (i in 5 downTo 1) print(\"$i \")  // 5 4 3 2 1\n    println()\n    \n    // With step\n    for (i in 0..10 step 2) print(\"$i \")  // 0 2 4 6 8 10\n    println()\n    \n    // Character ranges\n    for (c in 'a'..'f') print(c)  // abcdef\n    println()\n    \n    // Containment check\n    val x = 7\n    println(x in 1..10)  // true\n    println(x !in 5..6)  // false\n    \n    // Iterating over indices\n    val list = listOf(\"a\", \"b\", \"c\")\n    for (i in list.indices) println(\"$i: ${list[i]}\")\n    \n    // Progressions are Iterable\n    val range: IntRange = 1..10\n    println(range.toList())\n}"
+    ]
+  },
+  "Functions": {
+    "Function Declaration": [
+      "Functions use `fun` with explicit return types. Expression bodies omit braces. Single-expression functions infer the return type automatically.",
+      "fun sum(a: Int, b: Int): Int = a + b\nfun greet(name: String) = \"Hello $name\"\nfun printSum(a: Int, b: Int): Unit { println(a + b) }"
+    ],
+    "Default & Named Args": [
+      "Parameters can have default values. Named arguments allow skipping or reordering parameters, improving readability for functions with many parameters.",
+      "fun createUser(name: String, age: Int = 18, active: Boolean = true) {}\ncreateUser(\"Alice\")\ncreateUser(\"Bob\", active = false)\ncreateUser(age = 25, name = \"Charlie\")"
+    ],
+    "Lambda & Higher-Order": [
+      "Lambdas are function literals. Higher-order functions take or return functions. Trailing lambda syntax removes parentheses for clean DSL-like code.",
+      "val numbers = listOf(1, 2, 3, 4, 5)\nval doubled = numbers.map { it * 2 }\nval sum = numbers.reduce { acc, n -> acc + n }\nnumbers.filter { it > 2 }.forEach { println(it) }"
+    ],
+    "Extension Functions": [
+      "Add new functions to existing classes without inheritance. Extensions are resolved statically — they don't actually modify the class.",
+      "fun String.isEmail() = this.contains('@') && this.contains('.')\nfun List<Int>.product() = fold(1) { acc, i -> acc * i }\n\nprintln(\"test@example.com\".isEmail())\nprintln(listOf(2, 3, 4).product())"
+    ],
+    "Infix Functions": [
+      "Infix functions are called without dot or parens. Single-parameter member or extension functions marked with `infix`. Common in DSLs.",
+      "infix fun Int.times(str: String) = str.repeat(this)\nprintln(3 times \"Ha \")  // Ha Ha Ha\n\n// Built-in: to\nval map = mapOf(1 to \"one\", 2 to \"two\")"
+    ],
+    "Operator Overloading": [
+      "Kotlin allows overloading operators like `+`, `-`, `*`, `[]`, `()` via functions named `plus`, `minus`, `times`, `get`, `invoke`.",
+      "data class Vector(val x: Int, val y: Int) {\n    operator fun plus(other: Vector) = Vector(x + other.x, y + other.y)\n    operator fun get(index: Int) = if (index == 0) x else y\n}\nval v1 = Vector(1, 2)\nval v2 = Vector(3, 4)\nprintln(v1 + v2)  // Vector(x=4, y=6)"
+    ],
+    "tailrec": [
+      "`tailrec` optimises recursive functions into iterative loops when the recursive call is in tail position. No stack overflow risk.",
+      "tailrec fun factorial(n: Int, acc: Int = 1): Int {\n    return if (n <= 1) acc else factorial(n - 1, n * acc)\n}\n\nprintln(factorial(5))  // 120\nprintln(factorial(10000))  // no stack overflow"
+    ],
+    "Inline Functions": [
+      "`inline` inlines the function body at call sites, avoiding lambda object allocation. Use for higher-order functions with lambda parameters.",
+      "inline fun <T> measure(block: () -> T): T {\n    val start = System.nanoTime()\n    val result = block()\n    val end = System.nanoTime()\n    println(\"Took ${end - start} ns\")\n    return result\n}\n\nmeasure { Thread.sleep(10); 42 }"
+    ],
+    "Destructuring Declarations": [
+      "Destructuring decomposes an object into variables: val (name, age) = person. Works for data classes, Pair, Triple, Map.Entry, and classes with componentN() operators. Use _ for unused components. In lambdas: map.forEach { (key, value) -> }. Destructuring in for loops: for ((k, v) in map). ComponentN is an operator function: operator fun component1(): Type.",
+      "data class Person(val name: String, val age: Int)\n\nfun main() {\n    val person = Person(\"John\", 30)\n    val (name, age) = person\n    println(\"$name, $age\")\n\n    val pair = \"key\" to \"value\"\n    val (k, v) = pair\n\n    val map = mapOf(\"a\" to 1, \"b\" to 2)\n    for ((key, value) in map) {\n        println(\"$key = $value\")\n    }\n\n    val list = listOf(1 to \"one\", 2 to \"two\")\n    list.forEach { (num, word) ->\n        println(\"$num = $word\")\n    }\n\n    val arr = intArrayOf(1, 2, 3)\n    val (x, y, z) = arr\n    println(\"$x, $y, $z\")\n\n    println(person.component1())\n    println(person.component2())\n}"
+    ]
+  },
+  "Collections": {
+    "Lists & Arrays": [
+      "`listOf` creates read-only lists, `mutableListOf` for mutable. `arrayOf` for arrays. Lists are covariant; arrays are invariant.",
+      "val readOnly = listOf(\"a\", \"b\", \"c\")\nval mutable = mutableListOf(\"a\", \"b\")\nmutable.add(\"d\")\nval arr = arrayOf(1, 2, 3)\nprintln(readOnly[1])\nprintln(mutable)"
+    ],
+    "Maps & Sets": [
+      "`mapOf`/`mutableMapOf` for key-value pairs. `setOf`/`mutableSetOf` for unique elements. Immutable by default.",
+      "val map = mapOf(\"key1\" to 1, \"key2\" to 2)\nval set = setOf(1, 2, 3, 2, 1)\nval mutableMap = mutableMapOf<String, Int>()\nmutableMap[\"Doge\"] = 5\nprintln(map[\"key1\"])\nprintln(set)"
+    ],
+    "Sequences": [
+      "Sequences provide lazy evaluation for collection chains. Use `asSequence()` for large datasets to avoid intermediate list allocations.",
+      "val result = (1..1_000_000)\n    .asSequence()\n    .filter { it % 2 == 0 }\n    .map { it * 3 }\n    .take(5)\n    .toList()\nprintln(result)"
+    ],
+    "Functional Operations": [
+      "Kotlin provides rich functional APIs: map, filter, reduce, fold, flatMap, sortedBy, distinct, zip, unzip, associate, and more.",
+      "val nums = listOf(1, 2, 3, 4, 5)\nprintln(nums.map { it * 2 })\nprintln(nums.filter { it % 2 == 0 })\nprintln(nums.fold(0) { acc, i -> acc + i })\nprintln(nums.flatMap { listOf(it, -it) })\nprintln(nums.associateWith { it * it })"
+    ],
+    "Grouping & Partitioning": [
+      "`groupBy` groups elements by a key selector. `partition` splits into two lists based on a predicate. `groupingBy` for eager grouping.",
+      "val words = listOf(\"apple\", \"bat\", \"cat\", \"a\", \"bb\")\nprintln(words.groupBy { it.length })\nprintln(words.partition { it.length > 2 })\n// groupBy: {1=[a], 2=[bat, bb], 3=[cat], 5=[apple]}\n// partition: ([apple, bat, cat], [a, bb])"
+    ],
+    "Windowed & Chunked": [
+      "`chunked(size)` splits collection into fixed-size lists. `windowed(size)` creates sliding windows. Both support partial windows and steps.",
+      "val nums = (1..8).toList()\nprintln(nums.chunked(3))       // [[1,2,3], [4,5,6], [7,8]]\nprintln(nums.windowed(3))      // [[1,2,3], [2,3,4], ... [6,7,8]]\nprintln(nums.windowed(3, 2))   // [[1,2,3], [3,4,5], [5,6,7]]"
+    ],
+    "Element Operations": [
+      "`first`, `last`, `single`, `elementAt`, `firstOrNull`, `minOrNull`, `maxOrNull`, `take`, `drop`, `slice` for element selection.",
+      "val nums = listOf(1, 2, 3, 2, 1)\nprintln(nums.first { it > 1 })    // 2\nprintln(nums.singleOrNull { it > 5 }) // null\nprintln(nums.take(2))             // [1, 2]\nprintln(nums.drop(2))             // [3, 2, 1]\nprintln(nums.distinct())          // [1, 2, 3]"
+    ],
+    "Sequences vs Iterables": [
+      "Sequences (Sequence<T>) provide lazy evaluation: intermediate operations don't execute until terminal operation. Collections are eager. Use `.asSequence()` for chains of `map/filter/take` to avoid intermediate collections. Sequences are ideal for large datasets, infinite series, and chaining many operations. Generate with `sequence { yield() }`, `generateSequence`, `asSequence`.",
+      "fun main() {\n    val data = (1..100).toList()\n    \n    // Eager (collections) — creates intermediate lists\n    val eager = data\n        .filter { println(\"filter $it\"); it % 2 == 0 }\n        .map { println(\"map $it\"); it * 2 }\n        .take(3)\n    println(\"Eager result: $eager\")\n    \n    // Lazy (sequences) — one element at a time\n    val lazy_result = data.asSequence()\n        .filter { println(\"seq filter $it\"); it % 2 == 0 }\n        .map { println(\"seq map $it\"); it * 2 }\n        .take(3)\n        .toList()\n    println(\"Lazy result: $lazy_result\")\n    \n    // Infinite sequence\n    val fib = sequence {\n        var a = 0L; var b = 1L\n        while (true) {\n            yield(a)\n            val tmp = a + b\n            a = b; b = tmp\n        }\n    }\n    println(fib.take(10).toList())\n    \n    // generateSequence\n    val powers = generateSequence(1) { it * 2 }\n    println(powers.take(10).toList())\n    \n    // When to use Sequences:\n    // - Multiple transformations on large collections\n    // - Infinite or very large data sets\n    // - Early termination (take, first)\n    // When to use Collections:\n    // - Small collections\n    // - Need indexed access\n    // - Few operations"
+    ]
+  },
+  "Classes & OOP": {
+    "Class Basics": [
+      "Classes use `class` with a primary constructor in the header. Properties declared in the constructor are automatically generated with getters/setters.",
+      "class Person(val name: String, var age: Int)\nval p = Person(\"Alice\", 30)\nprintln(p.name)\np.age = 31"
+    ],
+    "Inheritance & Interfaces": [
+      "Classes are final by default — use `open` to allow inheritance. Override methods with `override`. Interfaces can have abstract and default implementations.",
+      "open class Animal(open val name: String) {\n    open fun speak() = println(\"$name makes a sound\")\n}\ninterface Pet {\n    fun play() = println(\"Playing\")\n}\nclass Dog(override val name: String) : Animal(name), Pet {\n    override fun speak() = println(\"$name barks\")\n}"
+    ],
+    "Data Classes": [
+      "`data class` automatically generates equals(), hashCode(), toString(), copy(), and componentN() functions. Perfect for DTOs and value objects.",
+      "data class User(val id: Int, val name: String)\nval u1 = User(1, \"Alice\")\nval u2 = u1.copy(name = \"Bob\")\nprintln(u1)\nprintln(u1 == User(1, \"Alice\"))\nval (id, name) = u1  // destructuring"
+    ],
+    "Sealed Classes & Interfaces": [
+      "Sealed types restrict hierarchies to a fixed set of subclasses defined in the same file. Perfect for representing states or algebraic data types.",
+      "sealed class Result {\n    data class Success(val data: String) : Result()\n    data class Error(val msg: String) : Result()\n    object Loading : Result()\n}\nfun handle(r: Result) = when (r) {\n    is Result.Success -> println(r.data)\n    is Result.Error -> println(\"Error: ${r.msg}\")\n    Result.Loading -> println(\"Loading...\")\n}"
+    ],
+    "Object & Companion": [
+      "`object` declares a singleton. `companion object` defines static-like members inside a class. Objects can also implement interfaces as anonymous instances.",
+      "object Config {\n    const val BASE_URL = \"https://api.example.com\"\n}\nclass App {\n    companion object {\n        fun create() = App()\n    }\n}\nprintln(Config.BASE_URL)"
+    ],
+    "Value & Inline Classes": [
+      "`value class` wraps a single value without heap allocation overhead. Use `@JvmInline` for JVM interop. Prevents primitive boxing in many cases.",
+      "@JvmInline\nvalue class Password(val value: String) {\n    init {\n        require(value.length >= 8) { \"Too short\" }\n    }\n}\nval pwd = Password(\"secure123\")\nprintln(pwd.value)\n// No extra object at runtime — inlined to String"
+    ],
+    "Type Aliases": [
+      "Type aliases provide alternative names for existing types, improving readability without introducing new types. Useful for function types and complex generics.",
+      "typealias UserMap = Map<Int, User>\ntypealias Predicate<T> = (T) -> Boolean\ntypealias Callback = (Result) -> Unit\n\nval users: UserMap = mapOf(1 to User(1, \"Alice\"))\nval isAdult: Predicate<Int> = { it >= 18 }"
+    ],
+    "Delegation": [
+      "`by` delegates interface implementation to another object. `by lazy` for lazy initialization. Delegated properties via `observable`, `vetoable`, or custom delegates.",
+      "interface Sound { fun makeSound(): String }\nclass Bark : Sound { override fun makeSound() = \"Woof\" }\nclass Dog(sound: Sound) : Sound by sound\n\nval dog = Dog(Bark())\nprintln(dog.makeSound())  // Woof\n\nval lazyVal: String by lazy { \"Computed once\" }"
+    ],
+    "Abstract Classes & Nested": [
+      "Abstract classes can have constructors, state, and both abstract and concrete methods. Nested/inner classes differ by whether they hold an outer reference.",
+      "abstract class Shape {\n    abstract fun area(): Double\n}\nclass Circle(val r: Double) : Shape() {\n    override fun area() = Math.PI * r * r\n}\nclass Outer {\n    class Nested {}\n    inner class Inner { fun ref() = this@Outer }\n}\nprintln(Circle(3.0).area())"
+    ],
+    "Value Classes (Inline)": [
+      "Value classes wrap a single value with minimal overhead (no heap allocation in most cases). Declare with `@JvmInline value class`. Can have methods and computed properties but no backing fields, no `init` blocks, no class delegation. Inline classes replace primitive wrapper types with type safety. Also useful for type-safe IDs, units, domain primitives.",
+      "@JvmInline\nvalue class UserId(val id: String) {\n    init {\n        require(id.isNotBlank())\n    }\n    val isValid get() = id.length == 36  // UUID\n    fun display() = \"User#$id\"\n}\n\n@JvmInline\nvalue class Email(val value: String) {\n    val domain get() = value.substringAfter('@')\n}\n\nfun findUser(id: UserId): String = \"Found ${id.display()}\"\n\nfun main() {\n    val uid = UserId(\"abc-123\")\n    println(findUser(uid))\n    \n    // Type safety: can't mix up UserId and Email\n    // findUser(Email(\"x@y.com\"))  // won't compile\n    \n    // Runtime: UserId is just String (no wrapper allocation)\n    val id: UserId = UserId(\"uuid-here\")\n    val str: String = id.id  // unboxing\n    \n    // With multiple inline classes wrapping the same type\n    @JvmInline value class Meters(val v: Double)\n    @JvmInline value class Seconds(val v: Double)\n    \n    fun speed(dist: Meters, time: Seconds): Double =\n        dist.v / time.v  // must unwrap explicitly\n    \n    println(speed(Meters(100.0), Seconds(9.58)))\n}"
+    ]
+  },
+  "Generics": {
+    "Generic Functions & Classes": [
+      "Generics enable type-safe code with type parameters. Functions and classes can be parameterised with one or more type parameters.",
+      "class Box<T>(val value: T)\nfun <T> List<T>.secondOrNull(): T? = if (size >= 2) this[1] else null\n\nval intBox = Box(42)\nval strBox = Box(\"Hello\")\nprintln(listOf(1, 2, 3).secondOrNull())"
+    ],
+    "Variance — out & in": [
+      "`out T` makes a type covariant (producer). `in T` makes it contravariant (consumer). Declaration-site variance avoids wildcards.",
+      "interface Producer<out T> { fun produce(): T }\ninterface Consumer<in T> { fun consume(item: T) }\n\nclass StringProducer : Producer<String> {\n    override fun produce() = \"Hello\"\n}\nval p: Producer<Any> = StringProducer()  // OK: out\nprintln(p.produce())"
+    ],
+    "Reified Type Parameters": [
+      "Reified type parameters (inline fun <reified T>) preserve generic type information at runtime. Works only with inline functions. Enables `T::class`, `is T`, `as T`. Bypasses JVM type erasure of generics. Common use: type-safe Gson/Jackson deserialization, type checks, `instanceof`-style pattern matching.",
+      "import kotlin.reflect.KClass\n\n// Without reified — can't access T::class\nfun <T> fromJson1(json: String, klass: KClass<T>): T = TODO()\n\n// With reified — type is preserved inline fun <reified T> fromJson(json: String): T {\n    return kotlinx.serialization.json.Json.decodeFromString(json)\n}\n\ninline fun <reified T> typeName(): String = T::class.simpleName ?: \"unknown\"\n\ninline fun <reified T> isInstance(x: Any): Boolean = x is T\n\ninline fun <reified T> cast(x: Any): T = x as T\n\ninline fun <reified T> List<*>.filterIsInstance(): List<T> =\n    this.filterIsInstance<T>()\n\nfun main() {\n    println(typeName<String>())  // String\n    println(typeName<List<Int>>())  // List\n    \n    println(isInstance<String>(\"hello\"))  // true\n    println(isInstance<Int>(\"hello\"))      // false\n    \n    val mixed: List<Any> = listOf(1, \"a\", 2, \"b\", 3)\n    val ints: List<Int> = mixed.filterIsInstance<Int>()\n    println(ints)  // [1, 2, 3]\n    \n    // Type-safe JSON (with kotlinx.serialization)\n    // val user: User = fromJson(json)\n}"
+    ],
+    "Star Projections": [
+      "`*` for unknown type arguments. `MutableList<*>` is a mutable list of unknown type — safe to read as `Any?`, but not to write.",
+      "fun printSize(list: List<*>) = println(list.size)\nfun printFirst(list: MutableList<*>) {\n    val item: Any? = list.first()\n    // list.add(1)  // ERROR: cannot write to `*`\n    println(item)\n}\nprintSize(listOf(1, 2, 3))"
+    ],
+    "Type Bounds & Where": [
+      "`T : UpperBound` constrains type parameters. Multiple bounds use `where` clause. Use `Nothing` for impossible values.",
+      "fun <T : Comparable<T>> maxOf(a: T, b: T) = if (a > b) a else b\n\ninterface Serializable\nfun <T> copy(value: T): T where T : Comparable<T>, T : Serializable\n    = value\n\nprintln(maxOf(3, 7))"
+    ]
+  },
+  "Coroutines": {
+    "Launch & Async": [
+      "`launch` fires a fire-and-forget coroutine. `async` starts a coroutine that returns a `Deferred` result via `await()`. Both are non-blocking.",
+      "import kotlinx.coroutines.*\n\nrunBlocking {\n    val job = launch { delay(1000); println(\"Done\") }\n    val deferred = async { delay(500); 42 }\n    println(\"Result: ${deferred.await()}\")\n    job.join()\n}"
+    ],
+    "Dispatchers": [
+      "Dispatchers determine thread pools: Default for CPU, IO for I/O, Main for UI, Unconfined for testing. `withContext` switches dispatchers.",
+      "import kotlinx.coroutines.*\n\nsuspend fun loadData(): String = withContext(Dispatchers.IO) {\n    // Network call on IO thread\n    delay(100)\n    \"Data loaded\"\n}\n\nrunBlocking {\n    println(loadData())\n}"
+    ],
+    "Structured Concurrency": [
+      "Coroutines lifetime ties to parent scope. Cancellation propagates downward; errors bubble up. `coroutineScope` waits for all children to complete.",
+      "runBlocking {\n    coroutineScope {\n        launch { delay(1000); println(\"1 done\") }\n        launch { delay(500); println(\"2 done\") }\n    }\n    println(\"All done\")\n}\n// 2 done, 1 done, All done"
+    ],
+    "supervisorScope": [
+      "supervisorScope isolates child failures: one child's exception doesn't cancel siblings or parent. Use for parallel independent work.",
+      "runBlocking {\n    supervisorScope {\n        launch {\n            try { delay(100); throw RuntimeException(\"Oops\") }\n            catch (e: Exception) { println(\"Caught: ${e.message}\") }\n        }\n        launch { delay(200); println(\"Still runs!\") }\n    }\n    println(\"Parent continues\")\n}"
+    ],
+    "Coroutine Context & Scope": [
+      "CoroutineContext combines Dispatcher, Job, and elements. `CoroutineScope` manages lifecycle. `Job` tracks lifecycle of a coroutine.",
+      "val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())\n\nval job = scope.launch(CoroutineName(\"worker\")) {\n    println(\"Running in ${coroutineContext[CoroutineName]}\")\n    delay(500)\n}\nscope.cancel()  // cancels all coroutines"
+    ],
+    "Cancellation & Timeouts": [
+      "Cancellation is cooperative — check `isActive` or use `yield()`. `withTimeout` throws TimeoutCancellationException. `withTimeoutOrNull` returns null.",
+      "runBlocking {\n    val result = withTimeoutOrNull(100) {\n        repeat(10) {\n            delay(50)\n            yield()\n        }\n        \"Finished\"\n    }\n    println(result)  // null (timed out)\n\n    // Cooperative cancellation:\n    val job = launch {\n        repeat(1000) {\n            if (!isActive) return@launch\n            // do work\n        }\n    }\n    delay(10); job.cancelAndJoin()\n}"
+    ],
+    "Exception Handling": [
+      "Uncaught exceptions cancel parent. Use `try-catch` inside coroutine, or `CoroutineExceptionHandler` for top-level exceptions.",
+      "val handler = CoroutineExceptionHandler { _, e ->\n    println(\"Caught: ${e.message}\")\n}\n\nrunBlocking {\n    val scope = CoroutineScope(handler + SupervisorJob())\n    scope.launch {\n        throw IllegalStateException(\"Something broke\")\n    }\n    delay(100)\n    println(\"Scope still active\")\n}"
+    ],
+    "coroutineScope vs runBlocking": [
+      "`coroutineScope` suspends without blocking a thread. `runBlocking` blocks the current thread for bridge mode. Use coroutineScope in suspend functions.",
+      "suspend fun fetchAll() = coroutineScope {\n    val one = async { fetchData(1) }\n    val two = async { fetchData(2) }\n    one.await() + two.await()\n}\n\n// runBlocking — bridge from non-suspend world\nfun main() = runBlocking {\n    println(fetchAll())\n}"
+    ],
+    "Dispatchers & Threading": [
+      "Dispatchers determine coroutine execution threads. Dispatchers.Default: CPU-bound work (thread pool = #cores). Dispatchers.IO: I/O-bound work (expandable pool). Dispatchers.Main: UI thread (Android, JavaFX). Dispatchers.Unconfined: runs in current thread until first suspension. `newSingleThreadContext`/`newFixedThreadPoolContext` for custom pools. `withContext` changes dispatcher within a coroutine.",
+      "import kotlinx.coroutines.*\n\nfun main() = runBlocking {\n    // Default dispatcher (CPU-bound)\n    launch(Dispatchers.Default) {\n        println(\"Default: ${Thread.currentThread().name}\")\n        // CPU-intensive computation\n        fibonacci(40)\n    }\n    \n    // IO dispatcher (I/O-bound)\n    launch(Dispatchers.IO) {\n        println(\"IO: ${Thread.currentThread().name}\")\n        // File/network operations\n        delay(100)\n    }\n    \n    // Unconfined — runs in current thread\n    launch(Dispatchers.Unconfined) {\n        println(\"Unconfined before: ${Thread.currentThread().name}\")\n        delay(10)\n        println(\"Unconfined after: ${Thread.currentThread().name}\")\n    }\n    \n    // Switching dispatchers mid-coroutine\n    val result = withContext(Dispatchers.Default) {\n        // CPU work\n        42\n    }\n    \n    // Custom dispatcher\n    val myDispatcher = newSingleThreadContext(\"MyThread\")\n    launch(myDispatcher) {\n        println(\"Custom: ${Thread.currentThread().name}\")\n    }\n    myDispatcher.close()\n    \n    // Limited parallelism\n    val limited = newFixedThreadPoolContext(2, \"Limited\")\n    \n    println(\"Done\")\n}\n\nfun fibonacci(n: Int): Long {\n    var a = 0L; var b = 1L\n    for (i in 2..n) { val tmp = a + b; a = b; b = tmp }\n    return b\n}"
+    ]
+  },
+  "Flows": {
+    "Flow Basics": [
+      "Flow is a cold async stream. Use `flow { }` builder with `emit()`, collect with `collect()`. Cold means nothing happens until collected.",
+      "import kotlinx.coroutines.flow.*\n\nfun countUp(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nrunBlocking { countUp().collect { println(it) } }"
+    ],
+    "Flow Builders": [
+      "Additional builders: `flowOf` for fixed values, `asFlow` on collections/ranges, `channelFlow` for concurrent emission, `callbackFlow` for callback APIs.",
+      "val f1 = flowOf(1, 2, 3)\nval f2 = (1..3).asFlow()\nval f3 = channelFlow {\n    launch { send(1) }\n    launch { send(2) }\n}\nrunBlocking { f3.collect { println(it) } }"
+    ],
+    "Flow Operators": [
+      "Intermediate operators: map, filter, transform, take, drop, debounce, sample, distinctUntilChanged, flatMapConcat, flatMapMerge, flatMapLatest.",
+      "runBlocking {\n    (1..5).asFlow()\n        .filter { it % 2 == 0 }\n        .map { \"Num: $it\" }\n        .debounce(100)\n        .collect { println(it) }\n\n    // flatMapLatest — cancels previous if new emission\n    flow {\n        emit(100); delay(50); emit(200)\n    }.flatMapLatest { delayMs ->\n        flow { emit(\"Start $delayMs\"); delay(delayMs); emit(\"End $delayMs\") }\n    }.collect { println(it) }\n}"
+    ],
+    "StateFlow": [
+      "StateFlow holds observable state. Hot flow — always has a value. Emits only distinct values. Ideal for ViewModels and UI state.",
+      "class MyViewModel {\n    private val _state = MutableStateFlow(\"Idle\")\n    val state: StateFlow<String> = _state\n\n    fun start() {\n        _state.value = \"Loading\"\n        // ...\n        _state.value = \"Done\"\n    }\n}\n\nrunBlocking {\n    val vm = MyViewModel()\n    launch { vm.state.drop(1).collect { println(it) } }\n    vm.start()\n}"
+    ],
+    "SharedFlow": [
+      "SharedFlow emits events to multiple collectors. Hot flow with replay cache. Use `MutableSharedFlow` for one-shot events like toasts.",
+      "runBlocking {\n    val events = MutableSharedFlow<String>(replay = 0)\n\n    launch {\n        repeat(3) { events.emit(\"Event $it\"); delay(100) }\n    }\n\n    launch {\n        events.collect { println(\"Collector 1: $it\") }\n    }\n    launch {\n        delay(50)\n        events.collect { println(\"Collector 2: $it\") }\n    }\n}"
+    ],
+    "CallbackFlow": [
+      "callbackFlow bridges callback-based APIs into Flows. Use `send()` inside, `awaitClose()` to clean up. Context preserving.",
+      "fun flowFromCallback(): Flow<String> = callbackFlow {\n    val listener = object : SomeListener {\n        override fun onEvent(data: String) {\n            trySend(data)\n        }\n        override fun onClose() {\n            close()\n        }\n    }\n    registerListener(listener)\n    awaitClose { unregisterListener(listener) }\n}"
+    ],
+    "Terminal Flow Operators": [
+      "Terminal ops trigger collection: `collect`, `toList`, `toSet`, `first`, `single`, `reduce`, `fold`, `launchIn`, `collectLatest`.",
+      "runBlocking {\n    val flow = (1..5).asFlow()\n\n    println(flow.toList())           // [1,2,3,4,5]\n    println(flow.first())            // 1\n    println(flow.reduce { a, b -> a + b })  // 15\n    println(flow.count { it % 2 == 0 })     // 2\n\n    // launchIn for fire-and-forget\n    flow.onEach { print(\"$it \") }.launchIn(this)\n}"
+    ],
+    "Combining Flows": [
+      "`zip` pairs elements one-to-one. `combine` merges latest values. `merge` interleaves multiple flows into one.",
+      "runBlocking {\n    val nums = (1..3).asFlow()\n    val letters = flowOf(\"A\", \"B\", \"C\")\n\n    nums.zip(letters) { n, l -> \"$n$l\" }\n        .collect { println(it) }  // 1A, 2B, 3C\n\n    // combine — re-emits when either flow emits\n    nums.combine(letters) { n, l -> \"$n$l\" }\n        .collect { println(it) }  // 3C (latest of each)\n}"
+    ],
+    "Flow Operators Deep": [
+      "Flow operators: map, filter, transform, take, drop, distinctUntilChanged, debounce, sample, flatMapConcat/Merge/Latest, buffer, conflate, catch, retry, retryWhen, onCompletion, combine, zip. Terminal operators: collect, toList, toSet, first, single, count, reduce, fold. Operators are cold (start on collect). Use flowOn to change context. Buffer for concurrent processing. catch recovers from upstream errors.",
+      "import kotlinx.coroutines.*\nimport kotlinx.coroutines.flow.*\n\nsuspend fun main() {\n    val flow = (1..5).asFlow()\n\n    flow.filter { it % 2 == 0 }\n        .map { \"Item: $it\" }\n        .collect { println(it) }\n\n    // Debounce\n    flowOf(1, 2, 3).debounce(100)\n\n    // Buffer for async\n    (1..10).asFlow()\n        .onEach { delay(100) }\n        .buffer(10)\n        .collect { println(\"Got $it\") }\n\n    // Combine\n    val nums = (1..3).asFlow()\n    val strs = flowOf(\"A\", \"B\", \"C\")\n    nums.combine(strs) { n, s -> \"$n$s\" }\n        .collect { println(it) }\n\n    // Error handling\n    flow { emit(1); emit(2); throw RuntimeException(\"Oops\") }\n        .catch { e -> emit(-1) }\n        .retry(2)\n        .collect { println(it) }\n\n    // flatMapLatest\n    (1..3).asFlow()\n        .onEach { delay(100) }\n        .flatMapLatest { flow { emit(it); delay(200); emit(it * 10) } }\n        .collect { println(it) }\n}"
+    ]
+  },
+  "Advanced Kotlin": {
+    "Context Receivers": [
+      "Context receivers declare dependency on context types without inheritance. Functions can receive multiple contexts for modular APIs.",
+      "interface LoggingContext {\n    fun log(msg: String)\n}\ncontext(LoggingContext)\nfun doWork() {\n    log(\"Working...\")\n}\n\nobject ConsoleLogger : LoggingContext {\n    override fun log(msg: String) = println(\"[LOG] $msg\")\n}\n\nfun main() {\n    with(ConsoleLogger) { doWork() }\n}"
+    ],
+    "Contracts": [
+      "Contracts tell the compiler about function behavior. Use `callsInPlace`, `returnsNotNull`, `implies` for smarter analysis and fewer warnings.",
+      "import kotlin.contracts.*\n\nfun requireNotNull(value: Any?): Any {\n    contract {\n        returns() implies (value != null)\n    }\n    if (value == null) throw IllegalArgumentException()\n    return value\n}\n\nval x: String? = \"Hello\"\nrequireNotNull(x)\nprintln(x.length)  // Smart-cast without !! thanks to contract"
+    ],
+    "@JvmInline & JvmAnnotations": [
+      "`@JvmInline` marks inline classes on JVM. `@JvmStatic`, `@JvmOverloads`, `@JvmField`, `@Throws` control Kotlin-to-Java interop.",
+      "@JvmInline\nvalue class Email(val value: String)\n\nclass Greeter {\n    companion object {\n        @JvmStatic\n        fun greet() = \"Hello\"\n\n        @JvmOverloads\n        fun create(name: String, age: Int = 0) = \"$name $age\"\n    }\n}\n// Java calls Greeter.greet() without Companion"
+    ],
+    "Type Erasure & Reified": [
+      "JVM erases generic types at runtime. `inline` + `reified` preserves them. `@Suppress(\"UNCHECKED_CAST\")` for manual casts.",
+      "inline fun <reified T> typeInfo() {\n    println(T::class.qualifiedName)\n    println(T::class.isAbstract)\n}\n\n// Erased version (won't compile without reified)\n// fun <T> erased() = T::class  // ERROR\n\ntypeInfo<String>()\ntypeInfo<List<Int>>()"
+    ],
+    "Reflection": [
+      "Kotlin reflection (`::class`, `::memberProperty`) inspects types at runtime. Use `memberProperties`, `functions`, `annotations` for meta-programming.",
+      "data class Person(val name: String, val age: Int)\n\nval kClass = Person::class\nprintln(kClass.simpleName)  // Person\nprintln(kClass.memberProperties)\n\nval prop = Person::name\nval person = Person(\"Alice\", 30)\nprintln(prop.get(person))  // Alice"
+    ],
+    "Annotations": [
+      "Kotlin annotations: `@Target`, `@Retention`, custom annotation classes. Apply to classes, functions, properties, or expressions with `@file:`, `@get:` etc.",
+      "@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)\n@Retention(AnnotationRetention.RUNTIME)\nannotation class Fancy(val author: String = \"Unknown\")\n\n@Fancy(author = \"Alice\")\nclass MyService {\n    @Fancy\n    fun doWork() {}\n}\n\n// Read at runtime\nval ann = MyService::class.findAnnotation<Fancy>()\nprintln(ann?.author)"
+    ],
+    "Destructuring Declarations": [
+      "Destructuring decomposes objects into variables with `componentN()` functions. Data classes auto-generate them; custom classes can implement operator fun componentN().",
+      "data class Point(val x: Int, val y: Int, val z: Int)\n\nval p = Point(1, 2, 3)\nval (x, y, z) = p\nprintln(\"$x, $y, $z\")  // 1,2,3\n\n// Destructuring in lambdas\nval points = listOf(Point(1,2,3))\npoints.forEach { (x, y) -> println(\"$x, $y\") }\n\n// For Map\nfor ((key, value) in mapOf(\"a\" to 1)) {}\nval (name, age) = Person(\"Alice\", 30)"
+    ],
+    "Inline Functions & Performance": [
+      "Inline functions copy their body to call sites, avoiding function call overhead. Use for lambdas (reduces object creation). `crossinline` prevents non-local returns, `noinline` prevents inlining specific parameters. `value class` + inline functions = zero-overhead abstractions. Over-inlining increases code size; use judiciously for small, frequently-called functions.",
+      "// Inline function — body is copied to call site\ninline fun <T> measureTime(block: () -> T): Pair<T, Long> {\n    val start = System.nanoTime()\n    val result = block()\n    val duration = (System.nanoTime() - start) / 1_000_000\n    return result to duration\n}\n\n// crossinline: can't use return in the lambda\ninline fun runOnUi(crossinline action: () -> Unit) {\n    // In a Runnable, return wouldn't work without crossinline\n    object : Runnable {\n        override fun run() = action()\n    }.run()\n}\n\n// noinline: keep lambda as object\ninline fun <T, R> transform(\n    value: T,\n    transformer: (T) -> R,  // inlined\n    noinline fallback: (T) -> R  // kept as function reference\n): R {\n    return transformer(value)\n}\n\nfun main() {\n    val (result, ms) = measureTime {\n        Thread.sleep(50)\n        42\n    }\n    println(\"Got $result in ${ms}ms\")\n    \n    runOnUi {\n        println(\"Running on UI\")\n        // return  // would not work without crossinline\n    }\n    \n    // noinline: can use as function reference\n    val ref: (Int) -> Int = { it * 2 }\n    println(transform(5, { it + 1 }, ref))\n}"
+    ]
+  },
+  "Kotlin Multiplatform": {
+    "KMP Overview": [
+      "Kotlin Multiplatform shares logic across platforms. Business logic, data models, and networking in commonMain; platform UIs in platform-specific source sets.",
+      "plugins { kotlin(\"multiplatform\") version \"1.9.0\" }\n\nkotlin {\n    jvm()\n    iosArm64()\n    iosSimulatorArm64()\n    sourceSets {\n        commonMain.dependencies {}\n        iosMain.dependencies {}\n    }\n}"
+    ],
+    "expect/actual": [
+      "`expect` declares platform-agnostic API in common code. `actual` provides platform-specific implementations. Compiler ensures all expects have actuals.",
+      "// commonMain\nexpect fun platformName(): String\nexpect class Platform\n\n// androidMain\nactual fun platformName(): String = \"Android\"\nactual typealias Platform = android.os.Build\n\n// iosMain\nactual fun platformName(): String = \"iOS\"\nactual typealias Platform = UIDevice"
+    ],
+    "Common Code": [
+      "CommonMain uses Kotlin stdlib-common, kotlinx.coroutines, kotlinx.serialization. Shared data models, repository logic, and ViewModels live here.",
+      "// commonMain\n@Serializable\ndata class User(val id: Int, val name: String)\n\ninterface UserRepository {\n    suspend fun getUser(id: Int): User\n}\n\nclass GetUserUseCase(private val repo: UserRepository) {\n    suspend operator fun invoke(id: Int) = repo.getUser(id)\n}"
+    ],
+    "Platform-Specific Code": [
+      "Platform source sets (jvmMain, iosMain, jsMain) provide actual implementations. Access platform APIs and libraries from each target.",
+      "// androidMain\nactual class NotificationManager(private val ctx: Context) {\n    actual fun show(title: String, msg: String) {\n        // Android notification using NotificationCompat\n    }\n}\n\n// iosMain\nactual class NotificationManager {\n    actual fun show(title: String, msg: String) {\n        // iOS notification using UNUserNotificationCenter\n    }\n}"
+    ],
+    "KMP Libraries & Frameworks": [
+      "KMP has a growing ecosystem: Ktor for networking, SQLDelight for databases, Koin for DI, kotlinx.serialization, and Compose Multiplatform for UI.",
+      "// build.gradle.kts\ncommonMain.dependencies {\n    implementation(\"io.ktor:ktor-client-core:2.3.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0\")\n    implementation(\"com.squareup.sqldelight:runtime:2.0.0\")\n}"
+    ],
+    "expect/actual Mechanism": [
+      "expect/actual declares platform-specific APIs. `expect` in common code defines the interface, `actual` in platform modules provides the implementation. Works for functions, properties, classes, objects, type aliases. Platform source sets: `commonMain`, `jvmMain`, `jsMain`, `nativeMain`, `iosMain`, etc. Use `@OptionalExpectation` for annotations.",
+      "// commonMain/kotlin/com/example/Platform.kt\nexpect fun getPlatformName(): String\n\n// commonMain/kotlin/com/example/Platform.kt\nexpect class Platform {\n    val name: String\n    val isDebug: Boolean\n}\n\n// jvmMain/kotlin/com/example/Platform.jvm.kt\nactual fun getPlatformName(): String = \"JVM (${System.getProperty(\"java.version\")})\"\n\nactual class Platform actual constructor() {\n    actual val name = \"JVM ${System.getProperty(\"os.name\")}\"\n    actual val isDebug = java.lang.management.ManagementFactory\n        .getRuntimeMXBean()\n        .inputArguments\n        .any { it.startsWith(\"-agentlib:jdwp\") }\n}\n\n// jsMain/kotlin/com/example/Platform.js.kt\n// actual fun getPlatformName(): String = \"Browser: ${js(\"navigator.userAgent\")}\"\n\n// nativeMain/kotlin/com/example/Platform.native.kt\n// actual fun getPlatformName(): String = \"Native (${Platform.memoryModel})\"\n\n// Usage in commonMain\nfun greet() = \"Hello from ${getPlatformName()}\""
+    ]
+  },
+  "Testing": {
+    "kotlin.test Basics": [
+      "`kotlin.test` provides `@Test`, `assertEquals`, `assertTrue`, `assertNull`, `assertThrows`. Annotations work with JUnit 4/5, and multiplatform testing.",
+      "import kotlin.test.*\n\nclass CalculatorTest {\n    @Test\n    fun `addition works`() {\n        assertEquals(4, 2 + 2)\n    }\n\n    @Test\n    fun `division throws`() {\n        assertThrows<ArithmeticException> {\n            val x = 1 / 0\n        }\n    }\n}"
+    ],
+    "Kotest": [
+      "Kotest is a multiplatform test framework with behavior specs, property-based testing, matchers, and data-driven tests.",
+      "class MyTest : StringSpec({\n    \"string length\".config(enabled = true) {\n        \"hello\".length shouldBe 5\n        \"hello\" shouldContain \"ell\"\n    }\n\n    \"numbers\" {\n        listOf(1, 2, 3).shouldContainExactlyInAnyOrder(3, 1, 2)\n    }\n})"
+    ],
+    "MockK": [
+      "MockK is a Kotlin-first mocking library. Supports coroutines, spies, relaxed mocks, capturing, and verification with expressive DSL.",
+      "class UserService(private val repo: UserRepository) {\n    suspend fun getUser(id: Int) = repo.findById(id)\n}\n\n@Test\nfun `mockk coroutine test`() = runBlocking {\n    val repo = mockk<UserRepository>(relaxed = true)\n    val service = UserService(repo)\n\n    coEvery { repo.findById(1) } returns User(1, \"Alice\")\n\n    val result = service.getUser(1)\n    assertEquals(\"Alice\", result.name)\n\n    coVerify { repo.findById(1) }\n}"
+    ],
+    "Property-Based Testing": [
+      "Property testing verifies invariants across many random inputs. Kotest and kotlin-check use generators (`Arb`) and properties (`forAll`).",
+      "class PropertyTest : StringSpec({\n    \"reverse reverses\" {\n        forAll<String> { str ->\n            str.reversed().reversed() == str\n        }\n    }\n\n    \"addition commutes\" {\n        forAll<Int, Int> { a, b ->\n            a + b == b + a\n        }\n    }\n})"
+    ],
+    "Coroutine Testing": [
+      "`kotlinx-coroutines-test` provides `runTest`, `TestScope`, and virtual time. `advanceTimeBy`, `advanceUntilIdle` skip delays instantly.",
+      "class CoroutineTest {\n    @Test\n    fun `test with virtual time`() = runTest {\n        var result = \"\"\n\n        launch {\n            delay(2000)\n            result = \"done\"\n        }\n\n        advanceTimeBy(2000)\n        assertEquals(\"done\", result)\n\n        // Or: advanceUntilIdle() — runs all pending\n    }\n\n    @Test\n    fun `test launch behavior`() = runTest {\n        var called = false\n        launch { called = true }\n        advanceUntilIdle()\n        assertTrue(called)\n    }\n}"
+    ],
+    "JUnit 5 Integration": [
+      "Kotlin works seamlessly with JUnit 5. Use `@ParameterizedTest`, `@MethodSource`, `@ValueSource` with Kotlin collections and lambdas.",
+      "class JUnit5Test {\n    @ParameterizedTest\n    @ValueSource(strings = [\"racecar\", \"level\", \"radar\"])\n    fun `palindromes`(word: String) {\n        assertEquals(word, word.reversed())\n    }\n\n    @TestFactory\n    fun `dynamic tests`() = listOf(1, 2, 3).map { n ->\n        DynamicTest.dynamicTest(\"Test $n squared\") {\n            assertEquals(n * n, n * n)\n        }\n    }\n}"
+    ],
+    "Property Testing (Kotest)": [
+      "Kotest property testing generates random inputs to verify invariants. `forAll`, `forNone`, `forAtLeast`. Generators: `Arb.int()`, `Arb.string()`, `Arb.list(Arb.int())`. Custom generators with `arbitrary { }`. Shrinking finds minimal failing case. Combine with table testing for specific cases. IntSeededRandom for reproducibility.",
+      "import io.kotest.core.spec.style.StringSpec\nimport io.kotest.property.*\nimport io.kotest.property.arbitrary.*\n\nclass MathProps : StringSpec({\n    \"addition is commutative\" {\n        forAll<Int, Int> { a, b ->\n            a + b == b + a\n        }\n    }\n    \n    \"reverse twice is identity\" {\n        forAll { list: List<Int> ->\n            list.reversed().reversed() == list\n        }\n    }\n    \n    \"abs is non-negative\" {\n        forAll<Int> { n ->\n            n.abs() >= 0\n        }\n    }\n    \n    \"string length is non-negative\" {\n        forAll<String> { s ->\n            s.length >= 0\n        }\n    }\n    \n    \"list size is non-negative\" {\n        forAll { list: List<String> ->\n            list.size >= 0\n        }\n    }\n    \n    \"custom generator: even numbers\" {\n        val evens = arbitrary { rs ->\n            IntRandom(rs).nextInt(-1000, 1000) * 2\n        }\n        forAll(evens) { n -> n % 2 == 0 }\n    }\n})\n\n// Kotest table testing\nclass CalculatorTableTest : StringSpec({\n    \"addition table\" {\n        val table = table(\n            headers(\"a\", \"b\", \"expected\"),\n            row(1, 2, 3),\n            row(0, 0, 0),\n            row(-1, 1, 0),\n            row(100, -100, 0)\n        )\n        forAll(table) { a, b, expected ->\n            a + b == expected\n        }\n    }\n})"
+    ],
+    "Mocking with MockK": [
+      "MockK is Kotlin's mocking library designed for Kotlin features: coroutines, extension functions, object mocks, private functions. Key features: `mockk<T>()`, `every { } returns`, `coEvery { } coReturns`, `verify { }`, `slot`, `capture`, `relaxed mock`. Use `mockkStatic` for companion/static, `spyk` for partial mocks. `confirmVerified` ensures all calls were verified.",
+      "import io.mockk.*\n\nclass UserRepo {\n    fun find(id: Int): String? = null\n    suspend fun save(name: String): Int = 0\n}\n\nclass Greeter(private val repo: UserRepo) {\n    fun greet(id: Int): String {\n        val name = repo.find(id)\n        return if (name != null) \"Hello $name\" else \"Unknown\"\n    }\n    suspend fun create(name: String): String {\n        val id = repo.save(name)\n        return \"Created id=$id\"\n    }\n}\n\nfun main() {\n    // Create mock\n    val repo = mockk<UserRepo>()\n\n    // Stub\n    every { repo.find(1) } returns \"Alice\"\n    every { repo.find(any()) } returns null\n\n    val greeter = Greeter(repo)\n    println(greeter.greet(1))  // Hello Alice\n\n    // Verify\n    verify { repo.find(1) }\n\n    // Coroutine mock\n    coEvery { repo.save(\"Bob\") } coReturns 42\n\n    // Slot capture\n    val slot = slot<Int>()\n    every { repo.find(capture(slot)) } returns \"captured\"\n    greeter.greet(99)\n    println(slot.captured)  // 99\n\n    // Relaxed mock (returns defaults)\n    val relaxed = mockk<UserRepo>(relaxed = true)\n    println(relaxed.find(5))  // null\n\n    confirmVerified(repo)\n}"
+    ]
+  },
+  "Build & Tooling": {
+    "Gradle Kotlin DSL": [
+      "Gradle Kotlin DSL is the idiomatic build configuration for Kotlin projects. Uses `.gradle.kts` files. Type-safe accessors for configurations, tasks, extensions. Key plugins: kotlin(\"jvm\"), kotlin(\"multiplatform\"), kotlin(\"plugin.serialization\"), application. Version catalogs (libs.versions.toml) for dependency management. Convention plugins for shared build logic.",
+      "plugins {\n    kotlin(\"jvm\") version \"1.9.22\"\n    application\n    kotlin(\"plugin.serialization\") version \"1.9.22\"\n}\n\ngroup = \"com.example\"\nversion = \"1.0\"\n\napplication {\n    mainClass.set(\"MainKt\")\n}\n\ndependencies {\n    // Kotlin stdlib is included by default\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0\")\n    implementation(\"org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2\")\n    \n    testImplementation(kotlin(\"test\"))\n    testImplementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0\")\n}\n\ntasks.test {\n    useJUnitPlatform()\n}\n\nkotlin {\n    jvmToolchain(21)\n    compilerOptions {\n        freeCompilerArgs.addAll(\"-Xcontext-receivers\")\n    }\n}\n\n// gradle/libs.versions.toml version catalog\n/*\n[versions]\ncoroutines = \"1.8.0\"\n\n[libraries]\ncoroutines-core = { group = \"org.jetbrains.kotlinx\", name = \"kotlinx-coroutines-core\", version.ref = \"coroutines\" }\n*/"
+    ],
+    "Version Catalogs": [
+      "Version catalogs in `gradle/libs.versions.toml` centralise dependency versions. Access via `libs.some.dependency` in build scripts.",
+      "# gradle/libs.versions.toml\n[versions]\nkotlin = \"1.9.22\"\nkotlinx-coroutines = \"1.7.3\"\n\n[libraries]\nkotlinx-coroutines-core = { module = \"org.jetbrains.kotlinx:kotlinx-coroutines-core\", version.ref = \"kotlinx-coroutines\" }\n\n# build.gradle.kts\ndependencies {\n    implementation(libs.kotlinx.coroutines.core)\n}"
+    ],
+    "buildSrc & Convention Plugins": [
+      "buildSrc stores shared build logic as Kotlin sources. Convention plugins apply common configurations across modules — DRY for multi-module projects.",
+      "// buildSrc/src/main/kotlin/kotlin-common.gradle.kts\nplugins {\n    kotlin(\"jvm\")\n}\ndependencies {\n    testImplementation(kotlin(\"test\"))\n}\ntasks.withType<Test> {\n    useJUnitPlatform()\n}\n\n// In module's build.gradle.kts\nplugins {\n    id(\"kotlin-common\")\n}"
+    ],
+    "KSP & K2 Compiler": [
+      "KSP (Kotlin Symbol Processing) is a compiler plugin for annotation processing. K2 compiler (1.9+) offers faster compilation and improved type inference.",
+      "plugins {\n    id(\"com.google.devtools.ksp\") version \"1.9.22-1.0.17\"\n}\n\n// K2 compiler (gradle.properties)\nkotlin.experimental.tryK2=true\n\n// Or explicitly:\ntasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {\n    kotlinOptions.jvmTarget = \"17\"\n    kotlinOptions.freeCompilerArgs += \"-Xcompiler-collect-comments\"\n}"
+    ],
+    "Dokka & Tooling": [
+      "Dokka generates Kotlin documentation (KDoc). Supports multiplatform projects, HTML/MD/JavaDoc outputs. Often used with Gradle's `dokka` plugin.",
+      "plugins {\n    id(\"org.jetbrains.dokka\") version \"1.9.10\"\n}\n\ntasks.dokkaHtml {\n    moduleName.set(\"My Library\")\n    outputDirectory.set(buildDir.resolve(\"dokka\"))\n}\n\n// KDoc style\n/**\n * Calculates sum of two integers.\n * @param a first addend\n * @param b second addend\n * @return sum of a and b\n */\nfun sum(a: Int, b: Int) = a + b"
+    ]
+  },
+  "Kotlin Idioms & DSL": {
+    "Scope Functions Deep": [
+      "Scope functions: `let`, `run`, `with`, `apply`, `also`. Key differences: context object (it vs this), return value (context vs lambda result). `let`: `it` + result for transformations/chaining. `apply`: `this` + context for configuration. `run`: `this` + result for computing with context. `also`: `it` + context for side effects. `with`: `this` + result (extension function, non-null). Combine thoughtfully for readable code.",
+      "data class User(var name: String = \"\", var age: Int = 0, var email: String = \"\")\n\nfun main() {\n    // apply — configure object, return object\n    val user = User().apply {\n        name = \"Alice\"\n        age = 30\n        email = \"alice@example.com\"\n    }\n    \n    // let — transform, return result\n    val greeting = user.name.let { name ->\n        \"Hello, $name!\"\n    }\n    println(greeting)\n    \n    // let with null check\n    val nullableName: String? = user.name\n    nullableName?.let { println(\"Name is $it\") }\n    \n    // run — compute with context, return result\n    val summary = user.run {\n        \"${this.name} (${this.age})\"\n    }\n    \n    // also — perform side effect, return original\n    user.also { println(\"Created user: $it\") }\n    \n    // with — non-extension version of run\n    with(user) {\n        println(\"Inside with: $name\")\n    }\n    \n    // Chaining\n    val result = User().apply {\n        name = \"Bob\"\n    }.let {\n        it.name.uppercase()\n    }\n    println(result)  // BOB\n}"
+    ],
+    "Lambda with Receiver": [
+      "Lambda with receiver allows calling methods on an implicit `this` inside the lambda. The `receiver` type is the context. Used by `apply`, `run`, `with`, `buildString`, and custom DSLs. From Kotlin in Action.",
+      "// buildString uses lambda with StringBuilder receiver\nval html = buildString {\n    append(\"<!DOCTYPE html>\\n\")\n    appendLine(\"<html>\")\n    appendLine(\"  <body>\")\n    append(\"    <h1>Hello</h1>\\n\")\n    appendLine(\"  </body>\")\n    append(\"</html>\")\n}\nprintln(html)\n\n// Custom builder using lambda with receiver\nclass HtmlBuilder {\n    private val sb = StringBuilder()\n    fun tag(name: String, content: String) {\n        sb.appendLine(\"<$name>$content</$name>\")\n    }\n    fun build(): String = sb.toString()\n}\n\nfun html(init: HtmlBuilder.() -> Unit): String {\n    val builder = HtmlBuilder()\n    builder.init()\n    return builder.build()\n}\n\nval page = html {\n    tag(\"h1\", \"Welcome\")     // 'this' is HtmlBuilder\n    tag(\"p\", \"Kotlin DSLs!\")\n}\nprintln(page)"
+    ],
+    "Type-Safe Builders & @DslMarker": [
+      "Type-safe builders use lambdas with receivers for declarative construction. @DslMarker restricts implicit receiver access to prevent ambiguity with nested builder contexts. Common: HTML builders, Gradle DSL, Compose UI. Builder pattern with apply/also. Context receivers (Kotlin 1.6+) for multiple receivers in scope.",
+      "import kotlin.DslMarker\n\n@DslMarker\nannotation class HtmlDsl\n\n@HtmlDsl\nclass Html {\n    private val children = mutableListOf<String>()\n    fun body(init: Body.() -> Unit) {\n        children.add(Body().apply(init).toString())\n    }\n    override fun toString() = \"<html>${children.joinToString(\"\")}</html>\"\n}\n\n@HtmlDsl\nclass Body {\n    private val children = mutableListOf<String>()\n    fun h1(text: String) { children.add(\"<h1>$text</h1>\") }\n    fun p(init: P.() -> Unit) { children.add(P().apply(init).render()) }\n    override fun toString() = \"<body>${children.joinToString(\"\")}</body>\"\n}\n\nclass P {\n    var text: String = \"\"\n    var style: String = \"\"\n    fun render() = if (style.isNotEmpty())\n        \"<p style=\\\"$style\\\">$text</p>\" else \"<p>$text</p>\"\n}\n\nfun html(init: Html.() -> Unit): Html = Html().apply(init)\n\nfun main() {\n    val doc = html {\n        body {\n            h1(\"Hello\")\n            p { text = \"World\" }\n            p { text = \"Styled\"; style = \"color:red\" }\n        }\n    }\n    println(doc)\n}"
+    ],
+    "SAM Conversion": [
+      "Single Abstract Method (SAM) conversion lets you pass a lambda where a Java functional interface is expected. Kotlin has built-in function types, so SAM conversion mainly applies to Java interop. From Head First Kotlin.",
+      "// Java interface\n// public interface OnClickListener {\n//     void onClick(View v);\n// }\n\n// Without SAM conversion (object expression)\nbutton.setOnClickListener(object : OnClickListener {\n    override fun onClick(v: View) {\n        println(\"Clicked!\")\n    }\n})\n\n// With SAM conversion (lambda — works if method expects Java SAM interface)\nbutton.setOnClickListener { v -> println(\"Clicked!\") }\n\n// Kotlin function types don't need SAM — use lambda directly\nval callback: (String) -> Unit = { println(it) }\n\n// With Kotlin functional interface (fun interface)\nfun interface StringTransformer {\n    fun transform(input: String): String\n}\n\nval upper = StringTransformer { it.uppercase() }\nval reversed = StringTransformer { it.reversed() }\nprintln(upper.transform(\"hello\"))  // HELLO\nprintln(reversed.transform(\"hello\"))  // olleh"
+    ],
+    "Java Interop": [
+      "Kotlin is 100% interoperable with Java. Key annotations: `@JvmStatic` for static methods, `@JvmOverloads` for overloaded methods, `@JvmField` for fields, `@Throws` for checked exceptions, `@JvmName` to resolve signature clashes.",
+      "// Kotlin side\nclass InteropDemo {\n    companion object {\n        @JvmStatic\n        fun staticMethod() = \"Called from Java statically\"\n\n        @JvmOverloads\n        fun greet(name: String, greeting: String = \"Hello\") = \"$greeting, $name\"\n    }\n\n    @JvmField\n    val instanceField = \"Direct field access\"\n\n    @Throws(IOException::class)\n    fun riskyOperation() {\n        throw IOException(\"Checked exception in Java\")\n    }\n\n    // Resolve signature clash\n    @JvmName(\"findByName\")\n    fun find(name: String): Person? = null\n\n    fun find(id: Int): Person? = null\n}\n\n// Java calls:\n// InteropDemo.staticMethod();               // @JvmStatic\n// InteropDemo.greet(\"Alice\");               // @JvmOverloads\n// InteropDemo.greet(\"Alice\", \"Hi\");\n// String f = demo.instanceField;            // @JvmField\n// try { demo.riskyOperation(); }            // @Throws\n\n// Platform types — String! means nullable unknown\nval list = mutableListOf<String>()\nlist.add(\"Hello\")\nval item: String? = list[0]  // platform type, treat as nullable"
+    ],
+    "Kotlin Idioms": [
+      "Common Kotlin idioms from Head First Kotlin and Kotlin in Action: default arguments for builders, `require`/`check` for preconditions, `use` for Closeable, `takeIf`/`takeUnless` for conditional returns, `TODO()` for stubs, `runCatching` for try-catch expressions.",
+      "// require — validate arguments\nfun factorial(n: Int): Int {\n    require(n >= 0) { \"n must be non-negative, got $n\" }\n    return if (n <= 1) 1 else n * factorial(n - 1)\n}\n\n// use — auto-close Closeable\nfun readFile(path: String): String {\n    return BufferedReader(FileReader(path)).use { it.readText() }\n}\n\n// takeIf / takeUnless — conditional return\nval adult = Person(\"Alice\", 30).takeIf { it.age >= 18 }\nprintln(adult)\n\n// runCatching — expression-based error handling\nval result = runCatching {\n    \"42\".toInt()\n}.fold(\n    onSuccess = { \"Parsed: $it\" },\n    onFailure = { \"Error: ${it.message}\" }\n)\nprintln(result)\n\n// TODO — placeholder that always throws\nfun notImplemented(): Nothing = TODO(\"Implement this later\")\n\n// apply for object construction\nval config = mutableMapOf<String, Any>().apply {\n    put(\"host\", \"localhost\")\n    put(\"port\", 8080)\n    put(\"debug\", true)\n}"
+    ]
+  },
+  "Android Development": {
+    "Jetpack Compose Basics": [
+      "Jetpack Compose is Kotlin's declarative UI framework for Android. `@Composable` functions describe UI. State: `mutableStateOf`, `remember`, `derivedStateOf`, `collectAsState`. Layout: Column, Row, Box, LazyColumn, LazyRow. Modifier chain for styling. Side effects: LaunchedEffect, DisposableEffect. Compose uses Kotlin coroutines for animations and async operations.",
+      "import androidx.compose.foundation.layout.*\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun CounterApp() {\n    var count by remember { mutableStateOf(0) }\n    \n    Column(\n        modifier = Modifier.padding(16.dp),\n        verticalArrangement = Arrangement.spacedBy(8.dp)\n    ) {\n        Text(\n            text = \"Count: $count\",\n            style = MaterialTheme.typography.headlineMedium\n        )\n        \n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            Button(onClick = { count++ }) {\n                Text(\"Increment\")\n            }\n            \n            Button(onClick = { count-- }) {\n                Text(\"Decrement\")\n            }\n            \n            OutlinedButton(onClick = { count = 0 }) {\n                Text(\"Reset\")\n            }\n        }\n        \n        // State derived from other state\n        val isEven by remember {\n            derivedStateOf { count % 2 == 0 }\n        }\n        \n        Text(\n            text = if (isEven) \"Even\" else \"Odd\",\n            color = if (isEven) MaterialTheme.colorScheme.primary\n                    else MaterialTheme.colorScheme.error\n        )\n    }\n}\n\n// Preview\n@Preview(showBackground = true)\n@Composable\nfun PreviewCounter() {\n    CounterApp()\n}"
+    ],
+    "ViewModel & State": [
+      "ViewModel survives configuration changes. Use `viewModel()` in Compose, expose `StateFlow`, and collect as Compose state with `collectAsState()`.",
+      "class CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count\n\n    fun increment() { _count.value++ }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel = viewModel()) {\n    val count by viewModel.count.collectAsState()\n\n    Text(\"Count: $count\")\n    Button(onClick = { viewModel.increment() }) {\n        Text(\"+1\")\n    }\n}"
+    ],
+    "LiveData & StateFlow": [
+      "LiveData is lifecycle-aware. StateFlow is the coroutines-native alternative. Use `asLiveData()` to bridge StateFlow to LiveData for legacy code.",
+      "class MyViewModel : ViewModel() {\n    private val _data = MutableLiveData<String>()\n    val data: LiveData<String> = _data\n\n    private val _state = MutableStateFlow(\"initial\")\n    val state: StateFlow<String> = _state\n\n    fun load() {\n        viewModelScope.launch {\n            _data.value = \"Loading\"\n            _state.value = \"Loading\"\n            val result = repository.fetch()\n            _data.value = result\n            _state.value = result\n        }\n    }\n}\n\n// StateFlow to LiveData bridge\nval liveData: LiveData<String> = stateFlow.asLiveData()"
+    ],
+    "Room Database": [
+      "Room is a SQLite ORM. Use `@Entity`, `@Dao`, `@Database`. Coroutines support via suspend functions and Flow return types in DAOs.",
+      "@Entity\ndata class User(\n    @PrimaryKey val id: Int,\n    val name: String,\n    val email: String\n)\n\n@Dao\ninterface UserDao {\n    @Query(\"SELECT * FROM user\")\n    fun getAll(): Flow<List<User>>\n\n    @Insert\n    suspend fun insert(user: User)\n\n    @Delete\n    suspend fun delete(user: User)\n}\n\n@Database(entities = [User::class], version = 1)\nabstract class AppDatabase : RoomDatabase() {\n    abstract fun userDao(): UserDao\n}"
+    ],
+    "Retrofit & Networking": [
+      "Retrofit type-safe HTTP client used with Kotlin coroutines. Define `suspend` functions in API interfaces. Use kotlinx.serialization or Moshi for JSON.",
+      "interface ApiService {\n    @GET(\"users/{id}\")\n    suspend fun getUser(@Path(\"id\") id: Int): User\n\n    @POST(\"users\")\n    suspend fun createUser(@Body user: User): User\n}\n\nobject RetrofitClient {\n    val instance: ApiService by lazy {\n        Retrofit.Builder()\n            .baseUrl(\"https://api.example.com/\")\n            .addConverterFactory(jsonConverterFactory)\n            .build()\n            .create(ApiService::class.java)\n    }\n}\n\nclass UserRepo(private val api: ApiService) {\n    suspend fun getUser(id: Int) = api.getUser(id)\n}"
+    ],
+    "Navigation Compose": [
+      "Navigation Compose provides type-safe navigation in Compose. Define routes with `NavHost`, navigate with `navController.navigate()`, pass safe args.",
+      "sealed class Screen(val route: String) {\n    object Home : Screen(\"home\")\n    object Profile : Screen(\"profile/{userId}\") {\n        fun createRoute(userId: Int) = \"profile/$userId\"\n    }\n}\n\n@Composable\nfun AppNavigation() {\n    val navController = rememberNavController()\n    NavHost(navController, startDestination = Screen.Home.route) {\n        composable(Screen.Home.route) {\n            HomeScreen(onProfile = { id ->\n                navController.navigate(Screen.Profile.createRoute(id))\n            })\n        }\n        composable(\n            route = Screen.Profile.route,\n            arguments = listOf(navArgument(\"userId\") { type = NavType.IntType })\n        ) { backStackEntry ->\n            val userId = backStackEntry.arguments?.getInt(\"userId\") ?: 0\n            ProfileScreen(userId)\n        }\n    }\n}"
+    ],
+    "Ktor Client & Networking": [
+      "Ktor Client is Kotlin multiplatform HTTP client. Features: coroutine-based, pluggable engines (OkHttp JVM, Darwin iOS, JS), content negotiation, kotlinx.serialization, auth, cookies, WebSockets. Build with HttpClient { install(ContentNegotiation) { json() } }. Requests: get, post, put, delete. Streaming with HttpStatement.",
+      "import io.ktor.client.*\nimport io.ktor.client.call.*\nimport io.ktor.client.plugins.contentnegotiation.*\nimport io.ktor.client.request.*\nimport io.ktor.http.*\nimport io.ktor.serialization.kotlinx.json.*\nimport kotlinx.serialization.Serializable\nimport kotlinx.serialization.json.Json\n\n@Serializable\ndata class Post(val userId: Int, val id: Int, val title: String, val body: String)\n\nsuspend fun main() {\n    val client = HttpClient {\n        install(ContentNegotiation) {\n            json(Json { ignoreUnknownKeys = true })\n        }\n    }\n\n    val post: Post = client\n        .get(\"https://jsonplaceholder.typicode.com/posts/1\")\n        .body()\n    println(post.title)\n\n    val posts: List<Post> = client\n        .get(\"https://jsonplaceholder.typicode.com/posts\") {\n            parameter(\"userId\", 1)\n        }.body()\n    println(\"Found ${posts.size} posts\")\n\n    client.close()\n}"
+    ]
+  }
 }

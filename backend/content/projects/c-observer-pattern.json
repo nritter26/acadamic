@@ -1,0 +1,23 @@
+{
+  "id": "c-observer-pattern",
+  "title": "C: Observer Pattern",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "observer", "design patterns", "function pointers", "callbacks"],
+  "description": "Implement the Observer design pattern with a subject that notifies multiple observers via callback function pointers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Observer Registration and Notification",
+      "description": "Define an `Observer` struct with a function pointer `void (*notify)(int event)` and an id. Create a `Subject` struct that holds up to 10 observers and broadcasts events to all registered observers. Test with 2 observers.",
+      "hints": ["Subject stores an array of Observer pointers and a count.", "Register: add observer to array.", "Notify: call each observer's notify function."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\n#define MAX_OBSERVERS 10\n\ntypedef struct Observer {\n    int id;\n    void (*notify)(int event);\n} Observer;\n\ntypedef struct {\n    Observer *observers[MAX_OBSERVERS];\n    int count;\n} Subject;\n\nvoid subject_init(Subject *s) { s->count = 0; }\nvoid subject_register(Subject *s, Observer *o) {\n    if (s->count < MAX_OBSERVERS) s->observers[s->count++] = o;\n}\nvoid subject_notify(Subject *s, int event) {\n    for (int i = 0; i < s->count; i++)\n        s->observers[i]->notify(event);\n}\n\nvoid observer1_notify(int e) { printf(\"Observer 1 got event %d\\n\", e); }\nvoid observer2_notify(int e) { printf(\"Observer 2 got event %d\\n\", e); }\n\nint main() {\n    Subject s; subject_init(&s);\n    Observer o1 = {1, observer1_notify};\n    Observer o2 = {2, observer2_notify};\n    subject_register(&s, &o1);\n    subject_register(&s, &o2);\n    subject_notify(&s, 42);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Observer 1') && output.includes('Observer 2') && output.includes('42')",
+        "successMessage": "Observer pattern works!",
+        "failureMessage": "Both observers should be notified with event 42"
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "js-callbacks",
+  "title": "JavaScript: Callbacks",
+  "description": "Write a JavaScript program using callback functions for asynchronous and array operations.",
+  "difficulty": "intermediate",
+  "languages": [
+    "js"
+  ],
+  "codeTemplate": {
+    "js": "function greet(name, callback) {\n  const msg = 'Hello, ' + name + '!';\n  callback(msg);\n}\n\nfunction processArray(arr, callback) {\n  const result = [];\n  for (const item of arr) {\n    result.push(callback(item));\n  }\n  return result;\n}\n\nfunction delayedMessage(msg, delay, callback) {\n  setTimeout(() => {\n    callback('Delayed: ' + msg);\n  }, delay);\n}\n\ngreet('Alice', (msg) => console.log(msg));\n\nconst nums = [1, 2, 3, 4, 5];\nconst squared = processArray(nums, n => n * n);\nconsole.log('Squared:', squared);\n\nconsole.log('Before delay');\ndelayedMessage('Hello!', 10, (msg) => {\n  console.log(msg);\n  console.log('After delay');\n});"
+  },
+  "verificationTest": "output.includes('Hello, Alice!') && output.includes('Squared: [1, 4, 9, 16, 25]') && output.includes('Before delay')",
+  "hints": [
+    "A callback is a function passed as an argument to another function",
+    "Callbacks enable asynchronous execution patterns",
+    "Arrow functions make concise callbacks"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple callback",
+      "description": "Write doMath(a, b, callback) that calls callback(a, b). Test with add and multiply callbacks.",
+      "hints": [
+        "callback(a, b) inside doMath",
+        "Pass functions that take 2 arguments"
+      ],
+      "codeTemplate": {
+        "javascript": "function doMath(a, b, callback) {\n\n}\n\nfunction add(x, y) { return x + y; }\nfunction multiply(x, y) { return x * y; }\n\nconsole.log(doMath(5, 3, add));\nconsole.log(doMath(5, 3, multiply));\n"
+      },
+      "verification": {
+        "test": "output.includes(\"8\") && output.includes(\"15\")",
+        "successMessage": "Callback pattern works!",
+        "failureMessage": "Execute the callback with a and b."
+      }
+    }
+  ]
+}

@@ -51,7 +51,7 @@ import { generateDebugTheBug } from './generators/debug.js';
 import { generateCodeGolf, generateBinaryHexBlitz, generateCrossword, generateRegexRally } from './generators/text.js';
 import { generateTypingSpeed } from './generators/typing.js';
 
-const GENERATORS = {
+export const GENERATORS = {
   'typing-speed': generateTypingSpeed,
   'code-scramble': generateCodeScramble,
   'debug-the-bug': generateDebugTheBug,

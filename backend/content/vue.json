@@ -1,17 +1,105 @@
 {
   "Getting Started": {
+    "Vue Introduction": {
+      "exp": "<p>Introduction to Vue and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
     "Template Syntax": [
       "Vue uses an HTML-based template syntax that binds the DOM to component instance data using directives like v-bind, v-if, and v-for. Templates are compiled into optimized render functions.",
       "<div v-if=\"visible\">{{ message }}</div>"
     ],
     "Reactivity": [
       "Vue's reactivity system tracks dependencies and automatically updates the DOM when data changes. It uses Proxy objects in Vue 3 to intercept property access and mutations.",
-      "const count = ref(0);\ncount.value++;"  
+      "const count = ref(0);\ncount.value++;"
     ],
     "Instance": [
       "Every Vue component is backed by a component instance holding data, computed properties, methods, and lifecycle hooks. A root instance is created via createApp to mount the application.",
       "const app = createApp({\n  data() { return { msg: 'Hello' } }\n}).mount('#app');"
     ]
+  },
+  "Core Concepts": {
+    "Vue Core Features": {
+      "exp": "<p>Essential Vue concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Vue Components": {
+      "exp": "<p>Building user interfaces with Vue.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Vue Routing": {
+      "exp": "<p>Navigation and routing in Vue.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Vue Router": [
+      "Vue Router is the official routing library for Vue, enabling SPA navigation with nested routes, dynamic segments, and route-level code splitting. It integrates deeply with Vue's reactivity.",
+      "const routes = [\n  { path: '/users/:id', component: User }\n];"
+    ],
+    "Navigation Guards": [
+      "Navigation guards protect routes from unauthorized access, handle async data fetching before navigation, or cancel navigation conditionally. They can be global, per-route, or in-component.",
+      "router.beforeEach((to, from) => {\n  if (!isAuthenticated) return '/login';\n});"
+    ]
+  },
+  "State Management": {
+    "Vue State": {
+      "exp": "<p>Managing application state in Vue.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Vue Data": {
+      "exp": "<p>Working with data and APIs in Vue.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Vue Testing": {
+      "exp": "<p>Testing strategies for Vue.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Vitest": [
+      "Vitest is a blazing-fast unit test framework powered by Vite, compatible with Jest API and offering native ESM support, HMR, and parallel execution out of the box.",
+      "import { describe, it, expect } from 'vitest';\n\ndescribe('Counter', () => {\n  it('increments', () => { expect(add(1, 1)).toBe(2); });\n});"
+    ],
+    "Vue Test Utils": [
+      "Vue Test Utils is the official testing utility library for Vue components, providing mount, shallowMount, and utilities for stubbing, mocking, and asserting component behavior.",
+      "const wrapper = mount(MyComponent, { props: { msg: 'Hello' } });\nexpect(wrapper.text()).toContain('Hello');"
+    ],
+    "Cypress": [
+      "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
+      "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
+    ]
+  },
+  "Deployment": {
+    "Vue Deployment": {
+      "exp": "<p>Deploying Vue applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Vue Best Practices": {
+      "exp": "<p>Best practices for Vue development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Vue Advanced": {
+      "exp": "<p>Advanced Vue topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
   },
   "Components": {
     "Props": [
@@ -43,16 +131,6 @@
     "watch": [
       "watch observes one or more reactive sources and calls a callback when values change, providing old and new values. Use watchEffect for running side effects automatically.",
       "watch(count, (newVal, oldVal) => {\n  console.log(`Count changed from ${oldVal} to ${newVal}`);\n});"
-    ]
-  },
-  "Routing": {
-    "Vue Router": [
-      "Vue Router is the official routing library for Vue, enabling SPA navigation with nested routes, dynamic segments, and route-level code splitting. It integrates deeply with Vue's reactivity.",
-      "const routes = [\n  { path: '/users/:id', component: User }\n];"
-    ],
-    "Navigation Guards": [
-      "Navigation guards protect routes from unauthorized access, handle async data fetching before navigation, or cancel navigation conditionally. They can be global, per-route, or in-component.",
-      "router.beforeEach((to, from) => {\n  if (!isAuthenticated) return '/login';\n});"
     ]
   },
   "State": {
@@ -97,20 +175,6 @@
       "<Suspense>\n  <template #default><AsyncComponent /></template>\n  <template #fallback><Spinner /></template>\n</Suspense>"
     ]
   },
-  "Testing": {
-    "Vitest": [
-      "Vitest is a blazing-fast unit test framework powered by Vite, compatible with Jest API and offering native ESM support, HMR, and parallel execution out of the box.",
-      "import { describe, it, expect } from 'vitest';\n\ndescribe('Counter', () => {\n  it('increments', () => { expect(add(1, 1)).toBe(2); });\n});"
-    ],
-    "Vue Test Utils": [
-      "Vue Test Utils is the official testing utility library for Vue components, providing mount, shallowMount, and utilities for stubbing, mocking, and asserting component behavior.",
-      "const wrapper = mount(MyComponent, { props: { msg: 'Hello' } });\nexpect(wrapper.text()).toContain('Hello');"
-    ],
-    "Cypress": [
-      "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
-      "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
-    ]
-  },
   "Composables": {
     "useMouse": [
       "Composables are functions that leverage the Composition API to encapsulate reusable stateful logic. A useMouse composable tracks mouse position with reactive coordinates that any component can consume.",
@@ -151,6 +215,16 @@
     "VitePress": [
       "VitePress is a Vue-powered static site generator for documentation. It uses markdown content with Vue components, automatic search, and a default theme optimized for technical docs.",
       "npm create vitepress@latest && npm run docs:dev\n# docs/.vitepress/config.ts\nexport default { title: 'My Docs', themeConfig: { nav: [{ text: 'Guide', link: '/guide' }] } }"
+    ]
+  },
+  "Vue 3 Composition API Deep Dive": {
+    "Composables & Reusable Logic": [
+      "Vue 3 Composition API enables logic reuse via composables — functions that use <code>ref</code>, <code>reactive</code>, <code>computed</code>, and lifecycle hooks. Composables replace mixins with better TypeScript support and no naming collisions. <code>watchEffect</code> automatically tracks dependencies. <code>provide</code>/<code>inject</code> with symbols for dependency injection. <code>toRefs</code> and <code>toRaw</code> convert between reactive and raw objects. <code>shallowRef</code> and <code>shallowReactive</code> optimize for large data structures. <code>triggerRef</code> manually triggers effects on shallowRef changes.",
+      "// Composable: useMousePosition\nimport { ref, onMounted, onUnmounted } from 'vue';\n\nexport function useMousePosition() {\n  const x = ref(0);\n  const y = ref(0);\n\n  function update(event: MouseEvent) {\n    x.value = event.clientX;\n    y.value = event.clientY;\n  }\n\n  onMounted(() => window.addEventListener('mousemove', update));\n  onUnmounted(() => window.removeEventListener('mousemove', update));\n\n  return { x, y };\n}\n\n// Composable: useDebouncedWatch\nimport { watch, ref, type Ref } from 'vue';\n\nexport function useDebouncedWatch<T>(\n  source: Ref<T>,\n  callback: (value: T) => void,\n  delay: number = 300\n) {\n  let timer: ReturnType<typeof setTimeout>;\n\n  watch(source, (val) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => callback(val), delay);\n  });\n}\n\n// Using composables in a component\n<script setup lang=\"ts\">\nimport { ref, computed } from 'vue';\nimport { useMousePosition } from './composables/useMouse';\nimport { useDebouncedWatch } from './composables/useDebounce';\n\nconst { x, y } = useMousePosition();\nconst search = ref('');\n\nuseDebouncedWatch(search, (val) => {\n  fetchResults(val);\n}, 500);\n\nconst cursorStyle = computed(() => ({\n  left: `${x.value}px`,\n  top: `${y.value}px`\n}));\n</script>\n\n<template>\n  <div class=\"cursor\" :style=\"cursorStyle\" />\n  <input v-model=\"search\" placeholder=\"Search...\" />\n</template>"
+    ],
+    "Vue Router & State Management (Pinia)": [
+      "Pinia is Vue's official state management library (replacing Vuex). It provides a simpler API: stores defined with <code>defineStore</code>, <code>state</code> as a function, <code>getters</code> for derived state, and <code>actions</code> for mutations. TypeScript is a first-class citizen. DevTools support shows state changes. Stores can be used outside components. Vue Router 4 (for Vue 3) supports lazy-loading via dynamic imports, navigation guards, route meta fields, and programmatic navigation. Route transitions use <code>Transition</code> component wrapping <code>RouterView</code>.",
+      "// Pinia store\nimport { defineStore } from 'pinia';\nimport { ref, computed } from 'vue';\n\nexport const useCartStore = defineStore('cart', () => {\n  // State\n  const items = ref<CartItem[]>([]);\n  const promoCode = ref<string | null>(null);\n\n  // Getters\n  const itemCount = computed(() => items.value.reduce((sum, i) => sum + i.quantity, 0));\n  const total = computed(() => {\n    let t = items.value.reduce((sum, i) => sum + i.price * i.quantity, 0);\n    return promoCode.value === 'SAVE10' ? t * 0.9 : t;\n  });\n\n  // Actions\n  function addItem(product: Product) {\n    const existing = items.value.find(i => i.id === product.id);\n    if (existing) {\n      existing.quantity++;\n    } else {\n      items.value.push({ ...product, quantity: 1 });\n    }\n  }\n\n  function removeItem(id: number) {\n    items.value = items.value.filter(i => i.id !== id);\n  }\n\n  function applyPromo(code: string) {\n    promoCode.value = code;\n  }\n\n  return { items, promoCode, itemCount, total, addItem, removeItem, applyPromo };\n});\n\n// Vue Router setup\n// router/index.ts\nimport { createRouter, createWebHistory } from 'vue-router';\n\nconst router = createRouter({\n  history: createWebHistory(),\n  routes: [\n    {\n      path: '/',\n      component: () => import('../pages/Home.vue'),\n      name: 'home'\n    },\n    {\n      path: '/products',\n      component: () => import('../pages/Products.vue'),\n      name: 'products',\n      beforeEnter: (to, from) => {\n        // Route-specific guard\n      }\n    },\n    {\n      path: '/products/:id',\n      component: () => import('../pages/ProductDetail.vue'),\n      props: true\n    }\n  ]\n});\n\n// Navigation guard (global)\nrouter.beforeEach(async (to, from) => {\n  const auth = useAuthStore();\n  if (to.meta.requiresAuth && !auth.isLoggedIn) {\n    return { name: 'login', query: { redirect: to.fullPath } };\n  }\n});\n\nexport default router;"
     ]
   }
 }

@@ -1,0 +1,23 @@
+{
+  "id": "c-middleware",
+  "title": "C: Middleware Pipeline",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "middleware", "pipeline", "function pointers", "chain"],
+  "description": "Implement a middleware pipeline where each handler can process a request and optionally pass it to the next handler.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Middleware Chain",
+      "description": "Define a `Handler` struct with a function pointer `int (*handle)(char *req)` and a next handler pointer. Implement a logging middleware that prints the request, an auth middleware that checks if req contains 'token', and a final handler that processes the request.",
+      "hints": ["Each handler calls `next->handle(req)` if next exists.", "Logging: print req, then call next.", "Auth: check for 'token', return 0 if missing.", "Final handler: print 'Processed: ' + req."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\ntypedef struct Handler {\n    int (*handle)(struct Handler *self, char *req);\n    struct Handler *next;\n} Handler;\n\nint logging(Handler *self, char *req) {\n    printf(\"Logging: %s\\n\", req);\n    if (self->next) return self->next->handle(self->next, req);\n    return 1;\n}\n\nint auth_check(Handler *self, char *req) {\n    if (strstr(req, \"token\") == NULL) { printf(\"Auth: denied\\n\"); return 0; }\n    printf(\"Auth: ok\\n\");\n    if (self->next) return self->next->handle(self->next, req);\n    return 1;\n}\n\nint final_handler(Handler *self, char *req) {\n    printf(\"Processed: %s\\n\", req);\n    return 1;\n}\n\nint main() {\n    Handler h3 = {final_handler, NULL};\n    Handler h2 = {auth_check, &h3};\n    Handler h1 = {logging, &h2};\n    h1.handle(&h1, \"GET /data token=abc\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Logging') && output.includes('Auth: ok') && output.includes('Processed')",
+        "successMessage": "Middleware pipeline works!",
+        "failureMessage": "Run full middleware chain and print results"
+      }
+    }
+  ]
+}

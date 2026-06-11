@@ -1,0 +1,23 @@
+{
+  "id": "c-distributed-lock",
+  "title": "C: Distributed Lock (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "distributed lock", "mutex", "simulation", "concurrency"],
+  "description": "Simulate a distributed lock service using a central lock manager with acquire and release operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Lock Manager",
+      "description": "Define a `LockManager` struct with a flag for each lock (up to 10). Write `int acquire_lock(LockManager *m, int lock_id)` that succeeds if lock is free (returns 1) or fails if already held (returns 0). Write `void release_lock(LockManager *m, int lock_id)`. Simulate 2 clients contending for the same lock.",
+      "hints": ["Use `int locks[10]` array, 0=free, 1=held.", "acquire: if locks[id]==0, set to 1 and return 1.", "release: set locks[id]=0.", "Simulate with print statements for each operation."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef struct { int locks[10]; } LockManager;\n\nvoid lm_init(LockManager *m) { for (int i = 0; i < 10; i++) m->locks[i] = 0; }\n\nint acquire_lock(LockManager *m, int lock_id) {\n    if (m->locks[lock_id]) { printf(\"Lock %d: ACQUIRE FAIL (held)\\n\", lock_id); return 0; }\n    m->locks[lock_id] = 1;\n    printf(\"Lock %d: ACQUIRE OK\\n\", lock_id);\n    return 1;\n}\n\nvoid release_lock(LockManager *m, int lock_id) {\n    m->locks[lock_id] = 0;\n    printf(\"Lock %d: RELEASED\\n\", lock_id);\n}\n\nint main() {\n    LockManager lm;\n    lm_init(&lm);\n    // Client 1\n    printf(\"Client 1: \"); acquire_lock(&lm, 0);\n    // Client 2\n    printf(\"Client 2: \"); acquire_lock(&lm, 0);\n    // Client 1 releases\n    printf(\"Client 1: \"); release_lock(&lm, 0);\n    // Client 2 retries\n    printf(\"Client 2: \"); acquire_lock(&lm, 0);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('ACQUIRE OK') && output.includes('FAIL') && output.includes('RELEASED')",
+        "successMessage": "Distributed lock simulation works!",
+        "failureMessage": "Simulate lock contention between 2 clients"
+      }
+    }
+  ]
+}

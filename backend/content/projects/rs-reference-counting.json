@@ -1,0 +1,71 @@
+{
+  "id": "rs-reference-counting",
+  "title": "Rust: Rc, Arc, and RefCell",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "Rc", "Arc", "RefCell", "interior mutability", "shared ownership"],
+  "description": "Use Rc, Arc, and RefCell for shared ownership and interior mutability.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Rc (Reference Counting)",
+      "description": "Create an `Rc<String>` from `\"Hello\"`. Clone it and verify both point to the same allocation. Print the reference count and the value.",
+      "hints": ["`let a = Rc::new(\"Hello\".to_string());`", "`let b = Rc::clone(&a);` (or `a.clone()`)", "`Rc::strong_count(&a)` prints the reference count (2)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Hello') && output.contains('2')",
+        "successMessage": "Rc reference counting works!",
+        "failureMessage": "Create Rc, clone it, print value and reference count."
+      }
+    },
+    {
+      "id": 2,
+      "title": "RefCell (Interior Mutability)",
+      "description": "Create a `RefCell<i32>` with value 0. Borrow mutably to increment to 10. Borrow immutably to print the value. Then try to cause a runtime borrow panic (and catch it).",
+      "hints": ["`let cell = RefCell::new(0);`", "`*cell.borrow_mut() = 10;`", "`println!(\"{}\", cell.borrow());` prints 10."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('10')",
+        "successMessage": "RefCell interior mutability works!",
+        "failureMessage": "Set RefCell to 10 and print it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Rc<RefCell<T>> for Shared Mutable State",
+      "description": "Create an `Rc<RefCell<i32>>`. Share it between multiple owner scopes. Each scope modifies the value. Print the final value.",
+      "hints": ["`let shared = Rc::new(RefCell::new(0));`", "Clone the Rc for each scope.", "`*shared.borrow_mut() += 1;` in each scope."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('3') || output.contains('count')",
+        "successMessage": "Rc<RefCell<T>> works!",
+        "failureMessage": "Share a mutable counter across multiple owners and print final value."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Arc for Thread Safety",
+      "description": "Create an `Arc<Mutex<i32>>` and share it across 5 threads. Each thread increments the value. Print the final value after all threads finish.",
+      "hints": ["`let counter = Arc::new(Mutex::new(0));`", "Clone Arc for each thread.", "5 threads increment same counter."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('5')",
+        "successMessage": "Arc works across threads!",
+        "failureMessage": "5 threads increment a shared counter, print 5."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Graph with Rc",
+      "description": "Create a simple graph using Rc: `struct Node { value: i32, neighbors: Vec<Rc<RefCell<Node>>> }`. Create 3 connected nodes and traverse them, printing each node's value.",
+      "hints": ["`struct Node { value: i32, neighbors: Vec<Rc<RefCell<Node>>> }`", "Rc enables shared ownership (multiple nodes can reference the same neighbor).", "RefCell enables mutability (can add neighbors after creation)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('2') && output.contains('3')",
+        "successMessage": "Graph with Rc works!",
+        "failureMessage": "Create a graph node and print its value and neighbor values."
+      }
+    }
+  ]
+}

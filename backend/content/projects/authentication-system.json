@@ -7,15 +7,16 @@
     "typescript",
     "python"
   ],
-  "estimatedMinutes": 60,
+  "estimatedMinutes": 75,
   "concepts": [
     "JWT",
     "password hashing",
     "RBAC",
     "access/refresh tokens",
-    "security"
+    "security",
+    "OAuth2"
   ],
-  "description": "Build a complete authentication system with JWT access tokens, refresh tokens, password hashing, and role-based access control.",
+  "description": "Build a complete authentication system with JWT access tokens, refresh tokens, password hashing, role-based access control, and OAuth2 authorization code flow simulation.",
   "steps": [
     {
       "id": 1,
@@ -135,6 +136,26 @@
         "test": "output.includes('access token') && output.includes('refresh token') && (output.includes('Invalid') || output.includes('failed'))",
         "successMessage": "Complete login flow works — valid credentials return both tokens, invalid ones are rejected!",
         "failureMessage": "Print both tokens on successful login and show an error message for invalid credentials."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Simulate OAuth2 authorization code flow",
+      "description": "Implement a simplified OAuth2 authorization code flow. Create an `authorize` function that takes a `clientId`, `redirectUri`, and `userId`, generates a temporary authorization code (random string, 10-min TTL), and stores it in an auth code store. Create a `tokenExchange` function that takes the authorization code, validates it, and returns a new access token and refresh token pair. Print the authorization code and the exchanged tokens.",
+      "hints": [
+        "Auth code: generate a random hex string with crypto.randomBytes(16)",
+        "Store auth codes in a map: { code: { clientId, userId, redirectUri, expiresAt } }",
+        "tokenExchange should: find the code, check expiry, delete the code (one-time use), then generate tokens via existing functions"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('authorization code') && output.includes('access token') && output.includes('refresh') && output.length > 60",
+        "successMessage": "OAuth2 authorization code flow works — codes are exchanged for tokens and invalid codes are rejected!",
+        "failureMessage": "Print the generated authorization code, then show the exchanged tokens. Make sure codes are one-time use."
       }
     }
   ]

@@ -1,0 +1,71 @@
+{
+  "id": "rs-patterns-composite",
+  "title": "Rust: Composite Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "composite pattern", "tree", "recursive composition", "visitor"],
+  "description": "Implement the composite pattern for tree-like object structures.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Component Trait",
+      "description": "Define a `FileSystemNode` trait with `fn name(&self) -> &str` and `fn size(&self) -> u64`. Implement `File { name, size }`. Create a file and print its name and size.",
+      "hints": ["`trait FileSystemNode { fn name(&self) -> &str; fn size(&self) -> u64; }`", "`struct File { name: String, size: u64 }`", "`impl FileSystemNode for File { ... }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('readme.txt') && output.contains('1024')",
+        "successMessage": "File leaf node works!",
+        "failureMessage": "Create a file node and print its name and size."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Composite (Directory)",
+      "description": "Create a `Directory` struct that contains children: `Vec<Box<dyn FileSystemNode>>`. Implement `name()` and `size()` (sum of children's sizes). Create a directory with files and print its size.",
+      "hints": ["`struct Directory { name: String, children: Vec<Box<dyn FileSystemNode>> }`", "`fn size(&self) -> u64 { self.children.iter().map(|c| c.size()).sum() }`", "`fn add(&mut self, child: Box<dyn FileSystemNode>)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('dir') && output.contains('size')",
+        "successMessage": "Directory composite works!",
+        "failureMessage": "Create a directory with files and print its total size."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Nested Composites",
+      "description": "Create a nested structure: `root` > `docs` (README, manual.pdf), `src` (main.rs, lib.rs), file `Cargo.toml`. Print the total size of the project root.",
+      "hints": ["Create File nodes for each file.", "Create subdirectories and add files.", "Root directory contains docs, src, and Cargo.toml."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('root') || output.contains('size')",
+        "successMessage": "Nested composite tree works!",
+        "failureMessage": "Build a project directory tree and print the root size."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Visitor Traversal",
+      "description": "Implement a visitor: `FileSystemVisitor` trait with `fn visit_file(&mut self, file: &File)` and `fn visit_dir(&mut self, dir: &Directory)`. Implement a `ListVisitor` that prints the full tree structure with indentation.",
+      "hints": ["`trait FileSystemVisitor { fn visit_file(&mut self, file: &File); fn visit_dir(&mut self, dir: &Directory, depth: usize); }`", "ListVisitor tracks depth for indentation.", "Recursively visit directory children."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('readme.txt') || output.contains('manual.pdf')",
+        "successMessage": "Visitor traversal works!",
+        "failureMessage": "Traverse the project tree with ListVisitor and print the tree."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Find by Name",
+      "description": "Add a `find(&self, name: &str) -> Option<&dyn FileSystemNode>` method. Search recursively through the tree. Test by finding a file named \"manual.pdf\".",
+      "hints": ["Recursively search directories and files.", "If file name matches, return Some(file).", "For directories, search children first. If found in child, return it."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('manual.pdf') || output.contains('found')",
+        "successMessage": "Find by name works!",
+        "failureMessage": "Search the tree for 'manual.pdf' and print the result."
+      }
+    }
+  ]
+}

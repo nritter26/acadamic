@@ -1,0 +1,71 @@
+{
+  "id": "rs-interpreter",
+  "title": "Rust: AST Interpreter",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "interpreter", "AST", "evaluation", "environment"],
+  "description": "Build a tree-walking interpreter that executes AST nodes.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Value Type",
+      "description": "Define a `Value` enum: `Number(f64)`, `StringVal(String)`, `Bool(bool)`, `Null`. Implement `Display` for each variant. Print sample values.",
+      "hints": ["`enum Value { Number(f64), StringVal(String), Bool(bool), Null }`", "`impl Display for Value { fn fmt(&self, f: &mut Formatter) -> fmt::Result { match self { Value::Number(n) => write!(f, \"{}\", n), ... } } }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('Number')",
+        "successMessage": "Value type defined!",
+        "failureMessage": "Create and print a Number value."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Evaluate Literals",
+      "description": "Implement `fn eval(node: &ASTNode, env: &mut Environment) -> Result<Value, String>` that evaluates NumberLiteral and Ident (lookup in env). Test with `NumberLiteral(42)` and simple let-binding.",
+      "hints": ["`fn eval(node: &ASTNode, env: &mut HashMap<String, Value>) -> Result<Value, String>`", "NumberLiteral returns `Ok(Value::Number(n))`.", "Ident looks up in env and returns or error if not found."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42')",
+        "successMessage": "Literal evaluation works!",
+        "failureMessage": "Evaluate a number literal and print the result."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Evaluate Binary Expressions",
+      "description": "Extend eval to handle BinaryOp nodes. Implement `+`, `-`, `*`, `/` for Number values. Handle division by zero with an error. Evaluate `2 + 3 * 4` and print the result (14).",
+      "hints": ["Recursively eval left and right.", "Match on operator token type.", "`+`: left + right, `*`: left * right, etc."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('14')",
+        "successMessage": "Binary expression evaluation works!",
+        "failureMessage": "Evaluate '2 + 3 * 4' and print 14."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Evaluate Statements",
+      "description": "Handle Let and Print statements. Let evaluates the expression and stores in env. Print evaluates and prints the value. Execute `\"let x = 10; print x * 2\"` and verify output.",
+      "hints": ["Let: eval expr, store in env, return Null.", "Print: eval expr, print value.", "`let x = 10; print x * 2` should output `20`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('20')",
+        "successMessage": "Statement execution works!",
+        "failureMessage": "Interpret 'let x = 10; print x * 2' and print 20."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full REPL",
+      "description": "Create a simple Read-Eval-Print-Loop: tokenize, parse, evaluate, and print the result in a single `run(source: &str)` function. Test with multiple programs: `\"print 1 + 2\"`, `\"let x = 5; print x * x\"`.",
+      "hints": ["`fn run(source: &str) { let tokens = tokenize(source); let ast = parse(tokens); let result = eval(ast, &mut env); println!(\"{:?}\", result); }`", "The environment persists across multiple runs.", "Print the result of each evaluation."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('3') && output.contains('25')",
+        "successMessage": "Full REPL works!",
+        "failureMessage": "Run multiple programs and print results."
+      }
+    }
+  ]
+}

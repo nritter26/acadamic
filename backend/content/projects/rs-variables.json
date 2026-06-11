@@ -1,0 +1,71 @@
+{
+  "id": "rs-variables",
+  "title": "Rust: Variables and Mutability",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "variables", "mutability", "let", "const", "shadowing"],
+  "description": "Declare variables using let, mut, and const in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Immutable Variable",
+      "description": "Declare an immutable variable `name` with value `\"Rust\"` using `let` and print it.",
+      "hints": ["`let name = \"Rust\";` creates an immutable variable.", "Then `println!(\"{}\", name);` to print it.", "Immutable means you can't change it after assignment."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust')",
+        "successMessage": "Immutable variable declared!",
+        "failureMessage": "Declare name with let and print it."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Mutable Variable",
+      "description": "Declare a mutable variable `count` with `let mut`, set it to `5`, change it to `10`, and print it.",
+      "hints": ["`let mut count = 5;` then `count = 10;`", "The `mut` keyword makes the variable mutable.", "Print with `println!(\"{}\", count);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10')",
+        "successMessage": "Mutable variable works!",
+        "failureMessage": "Use let mut to declare count, change it to 10, and print it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Type Annotations",
+      "description": "Declare variables with explicit type annotations: `x: i32 = 10` and `y: f64 = 3.14`. Print both.",
+      "hints": ["`let x: i32 = 10;` declares an integer.", "`let y: f64 = 3.14;` declares a float.", "Print both with `println!(\"{} {}\", x, y);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('3.14')",
+        "successMessage": "Type annotations work!",
+        "failureMessage": "Declare x: i32 = 10 and y: f64 = 3.14 and print both."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Constants with const",
+      "description": "Declare a constant `MAX_SPEED` with value `120` using `const` and print it.",
+      "hints": ["`const MAX_SPEED: i32 = 120;`", "Constants must have explicit type annotations.", "Constants are always immutable and can be declared at global scope."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('120')",
+        "successMessage": "Constant declared!",
+        "failureMessage": "Use const to declare MAX_SPEED = 120 and print it."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Variable Shadowing",
+      "description": "Use shadowing to declare a variable `x` as `5`, then shadow it as `\"five\"` (change type). Print both values.",
+      "hints": ["`let x = 5;` then `let x = \"five\";` creates a new variable that shadows the old one.", "Shadowing lets you reuse the name with a different type.", "Print `x` after each declaration to see both values."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('five')",
+        "successMessage": "Shadowing demonstrated!",
+        "failureMessage": "Print x after each shadowing to see '5' and 'five'."
+      }
+    }
+  ]
+}

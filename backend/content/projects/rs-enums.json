@@ -1,0 +1,71 @@
+{
+  "id": "rs-enums",
+  "title": "Rust: Enums and Pattern Matching",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "enums", "pattern matching", "sum types", "Option", "Result"],
+  "description": "Work with Rust enums (sum types) and exhaustive pattern matching.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Enum",
+      "description": "Define an enum `Direction` with variants `North`, `South`, `East`, `West`. Write a function `describe(d: Direction) -> &str` that returns the direction name for each variant.",
+      "hints": ["`enum Direction { North, South, East, West }`", "Use `match d { Direction::North => \"North\", ... }`", "Match must be exhaustive (cover all variants)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('North') && output.includes('South')",
+        "successMessage": "Simple enum works!",
+        "failureMessage": "Print descriptions for all 4 directions."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Enum with Data",
+      "description": "Define an enum `Shape` with variants `Circle(f64)`, `Rectangle(f64, f64)`, `Triangle(f64, f64)`. Implement an `area(&self) -> f64` method for each.",
+      "hints": ["`Circle(r): 3.14159 * r * r`", "`Rectangle(w, h): w * h`", "`Triangle(b, h): 0.5 * b * h`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('78.5') || output.includes('78.54')",
+        "successMessage": "Enum with data works!",
+        "failureMessage": "Print area of Circle(5), Rectangle(4,5), Triangle(3,4)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Option and Some/None",
+      "description": "Write a function `safe_index(vec: &[i32], index: usize) -> Option<&i32>` that returns `Some(value)` if index is in bounds, or `None` otherwise. Test with valid and invalid indices.",
+      "hints": ["`if index < vec.len() { Some(&vec[index]) } else { None }`", "Use `match` to handle both cases.", "Print the value or 'Index out of bounds'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('None')",
+        "successMessage": "Safe index works!",
+        "failureMessage": "Access index 2 (30) and index 10 (None)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested Enums",
+      "description": "Define `enum WebEvent { WantsToQuit, KeyPress(char), Click { x: i64, y: i64 }, Paste(String) }`. Write a function `inspect(event: WebEvent)` that prints details for each variant.",
+      "hints": ["Match each variant with its associated data.", "`KeyPress(c) => println!(\"key: {}\", c)`, `Click { x, y } => ...`", "Use destructuring for struct-like variants."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('key') && output.includes('click')",
+        "successMessage": "Nested enum inspection works!",
+        "failureMessage": "Print details for each WebEvent variant."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Enum with if let",
+      "description": "Using the `Shape` enum, use `if let Circle(r) = shape` to match a single variant without a full match. Print the radius if it's a Circle, otherwise print 'Not a circle'.",
+      "hints": ["`if let Circle(r) = shape { println!(\"Radius: {}\", r); } else { println!(\"Not a circle\"); }`", "`if let` is concise for single-arm pattern matching.", "Test with both a Circle and a Rectangle."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Radius') && output.includes('Not a')",
+        "successMessage": "if let works!",
+        "failureMessage": "Print radius for Circle and 'Not a circle' for Rectangle."
+      }
+    }
+  ]
+}

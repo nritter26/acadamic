@@ -1,0 +1,23 @@
+{
+  "id": "c-event-bus",
+  "title": "C: Event Bus",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "event bus", "publish-subscribe", "callbacks", "function pointers"],
+  "description": "Implement a publish-subscribe event bus that allows listening to and emitting typed events (identified by integer IDs).",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Event Bus Core",
+      "description": "Define an `EventBus` struct with arrays of callbacks for up to 10 event types. Write `void eb_on(EventBus *eb, int event, void (*cb)(int, void*))` to register a callback and `void eb_emit(EventBus *eb, int event, void *data)` to emit an event. Test with 2 event types and 3 listeners.",
+      "hints": ["Store callbacks in a 2D array: `callbacks[MAX_EVENTS][MAX_LISTENERS]`.", "Also store count per event type.", "emit calls all registered callbacks for that event."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\n#define MAX_EVENTS 10\n#define MAX_LISTENERS 5\n\ntypedef struct {\n    void (*cbs[MAX_EVENTS][MAX_LISTENERS])(int, void*);\n    int counts[MAX_EVENTS];\n} EventBus;\n\nvoid eb_init(EventBus *eb) { for (int i=0;i<MAX_EVENTS;i++) eb->counts[i]=0; }\n\nvoid eb_on(EventBus *eb, int event, void (*cb)(int, void*)) {\n    if (eb->counts[event] < MAX_LISTENERS)\n        eb->cbs[event][eb->counts[event]++] = cb;\n}\n\nvoid eb_emit(EventBus *eb, int event, void *data) {\n    for (int i = 0; i < eb->counts[event]; i++)\n        eb->cbs[event][i](event, data);\n}\n\nvoid on_login(int e, void *d) { printf(\"Login event: %s\\n\", (char*)d); }\nvoid on_logout(int e, void *d) { printf(\"Logout event: %s\\n\", (char*)d); }\n\nint main() {\n    EventBus eb;\n    eb_init(&eb);\n    eb_on(&eb, 1, on_login);\n    eb_on(&eb, 2, on_logout);\n    eb_emit(&eb, 1, \"User1\");\n    eb_emit(&eb, 2, \"User1\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Login') && output.includes('Logout')",
+        "successMessage": "Event bus works!",
+        "failureMessage": "Emit both login and logout events"
+      }
+    }
+  ]
+}

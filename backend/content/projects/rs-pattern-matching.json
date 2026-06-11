@@ -1,0 +1,71 @@
+{
+  "id": "rs-pattern-matching",
+  "title": "Rust: Advanced Pattern Matching",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "pattern matching", "destructuring", "guards", "@ bindings"],
+  "description": "Use advanced pattern matching features: destructuring, guards, and @ bindings.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Destructuring Structs",
+      "description": "Define a struct `Point { x: i32, y: i32 }`. Use `let Point { x, y } = point;` to destructure. Print x and y separately.",
+      "hints": ["`let p = Point { x: 10, y: 20 };`", "`let Point { x, y } = p;` destructures the fields.", "Or match: `match p { Point { x, y } => println!(\"({}, {})\", x, y) }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('10') && output.contains('20')",
+        "successMessage": "Struct destructuring works!",
+        "failureMessage": "Destructure a Point and print x and y."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Destructuring Enums",
+      "description": "Define `enum Message { Quit, Move { x: i32, y: i32 }, Write(String), ChangeColor(i32, i32, i32) }`. Write a function `process(msg: Message)` that handles each variant differently. Test with all variants.",
+      "hints": ["`Match { x, y } => println!(\"Move to ({}, {})\", x, y)`", "`Write(text) => println!(\"Text: {}\", text)`", "`ChangeColor(r, g, b) => println!(\"Color: {},{},{}\", r, g, b)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Move') && output.contains('Text') && output.contains('Color')",
+        "successMessage": "Enum destructuring works!",
+        "failureMessage": "Process all 4 Message variants and print their data."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Match Guards",
+      "description": "Match on a number `x`: if x is positive and even → \"positive even\", if positive → \"positive\", if negative → \"negative\", if zero → \"zero\". Use match guards with `if`.",
+      "hints": ["`n if n > 0 && n % 2 == 0 => println!(\"positive even\")`", "Guards add extra conditions to match arms.", "Order matters: more specific guards first."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('positive') || output.contains('negative') || output.contains('zero')",
+        "successMessage": "Match guards work!",
+        "failureMessage": "Match a number with guards and print the description."
+      }
+    },
+    {
+      "id": 4,
+      "title": "@ Bindings",
+      "description": "Use `@` bindings to bind a value while also pattern matching on it. Match a number: if in range 1..=5 → print the value and \"small\", if in 6..=10 → print and \"medium\". Use `num @ 1..=5`.",
+      "hints": ["`num @ 1..=5 => println!(\"{} is small\", num)`", "`@` binds the value to a variable while also matching the pattern.", "This is useful when you need both the value and structural match."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('small') || output.contains('medium')",
+        "successMessage": "@ bindings work!",
+        "failureMessage": "Match a number with @ bindings and print its value and size."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Match on References",
+      "description": "Match on a reference to an Option: create `let x = Some(42); let ref_x = &x;`. Match on `ref_x` and extract the inner value without moving. Print the matched value.",
+      "hints": ["`match &x { Some(val) => println!(\"Got {}\", val), None => println!(\"None\") }`", "Matching on `&x` borrows the value.", "Val is `&i32` in this context (reference to the inner value)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42')",
+        "successMessage": "Reference matching works!",
+        "failureMessage": "Match on a reference to Option and print the value."
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-rest-api",
+  "title": "Rust: REST API (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "REST API", "CRUD", "routes", "serialization"],
+  "description": "Build a simulated REST API with CRUD endpoints for a resource.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Resource and Store",
+      "description": "Define a `Task` struct with `id: u32, title: String, completed: bool`. Create a `TaskStore` that manages tasks in a `HashMap<u32, Task>`. Add methods `list()`, `get(id)`, `create(task)`, `update(id, task)`, `delete(id)`.",
+      "hints": ["`struct Task { id: u32, title: String, completed: bool }`", "`TaskStore` has `tasks: HashMap<u32, Task>, next_id: u32`.", "Implement all CRUD methods."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Task') || output.contains('title')",
+        "successMessage": "TaskStore with CRUD created!",
+        "failureMessage": "Create a TaskStore and demonstrate CRUD."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Router with RESTful Routes",
+      "description": "Create a `Router` with RESTful routes for tasks: `GET /tasks` (list), `GET /tasks/:id` (get), `POST /tasks` (create), `PUT /tasks/:id` (update), `DELETE /tasks/:id` (delete).",
+      "hints": ["Map HTTP method + path pattern to handler functions.", "`POST /tasks` handler creates a task from query params.", "`DELETE /tasks/:id` removes and returns the deleted task."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('GET') && output.contains('POST') && output.contains('DELETE')",
+        "successMessage": "RESTful routes defined!",
+        "failureMessage": "Register all 5 REST endpoints and print their configurations."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Simulate Requests",
+      "description": "Simulate a sequence: POST to create 2 tasks, GET /tasks to list all, GET /tasks/1 to get first, PUT /tasks/1 to mark complete, DELETE /tasks/2, then GET /tasks to show final state.",
+      "hints": ["Call your route handlers directly with Request objects.", "Print the response body after each operation.", "Verify the task list after all operations."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Buy milk') || output.contains('completed')",
+        "successMessage": "Full REST API flow works!",
+        "failureMessage": "Run the full CRUD sequence and print all responses."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Error Handling",
+      "description": "Handle errors: return 404 if task not found, 400 if invalid data. Create an `ApiResult<T>` type alias for `Result<T, (u16, String)>` (status code + error message). Test with invalid requests.",
+      "hints": ["`type ApiResult<T> = Result<T, (u16, String)>;`", "`get(0)` returns `Err((404, \"Task not found\".into()))`.", "Return appropriate status codes."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('404') || output.contains('not found')",
+        "successMessage": "API error handling works!",
+        "failureMessage": "Test with a non-existent task ID and get 404."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Pagination Support",
+      "description": "Add pagination to the list endpoint: `GET /tasks?page=1&limit=2`. Return only the requested slice, plus total count. Create 5 tasks and test with page 1 (limit 2) and page 2.",
+      "hints": ["Parse `page` and `limit` from query params (default page=1, limit=10).", "`let start = (page - 1) * limit; let end = start + limit;`", "Return `{ \"data\": [...], \"total\": 5, \"page\": 1, \"limit\": 2 }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('page') || output.contains('total')",
+        "successMessage": "Pagination works!",
+        "failureMessage": "List tasks with pagination and print both page 1 and page 2."
+      }
+    }
+  ]
+}
