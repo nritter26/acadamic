@@ -3578,5 +3578,271 @@ func main() {
 
     },
 
+    "Network & HTTP Request Tracing (httptrace)": {
+      exp: "Go's <code>net/http/httptrace</code> package provides hooks into the HTTP request lifecycle: DNS lookup, TCP connection, TLS handshake, request start/end, response headers, and connection reuse. Use it to debug slow requests, DNS issues, TLS problems, and connection pooling. Combine with <code>net/http/pprof</code> for comprehensive HTTP debugging. The <code>httptrace.ClientTrace</code> struct accepts callback functions for each event. Always check <code>context.Done()</code> in long-running traces to avoid leaks.",
+      code: `// Network & HTTP Request Tracing
+package main
+
+import (
+    "fmt"
+    "net/http"
+    "net/http/httptrace"
+    "time"
+)
+
+func traceHTTPRequest(url string) error {
+    // Create a ClientTrace with all hooks
+    trace := &httptrace.ClientTrace{
+        // DNS lookup
+        DNSStart: func(info httptrace.DNSStartInfo) {
+            fmt.Printf("DNS Start: %s\\n", info.Host)
+        },
+        DNSDone: func(info httptrace.DNSDoneInfo) {
+            fmt.Printf("DNS Done: %v (err: %v)\\n", info.Addrs, info.Err)
+        },
+
+        // TCP connection
+        ConnectStart: func(network, addr string) {
+            fmt.Printf("TCP Connect Start: %s %s\\n", network, addr)
+        },
+        ConnectDone: func(network, addr string, err error) {
+            fmt.Printf("TCP Connect Done: %s %s (err: %v)\\n", network, addr, err)
+        },
+
+        // TLS handshake
+        TLSHandshakeStart: func() {
+            fmt.Println("TLS Handshake Start")
+        },
+        TLSHandshakeDone: func(state httptrace.TLSHandshakeState, err error) {
+            fmt.Printf("TLS Handshake Done: version=0x%x (err: %v)\\n", state.State.Version, err)
+        },
+
+        // Request headers
+        WroteHeaders: func() {
+            fmt.Println("Wrote Request Headers")
+        },
+        WroteRequest: func(info httptrace.WroteRequestInfo) {
+            fmt.Printf("Wrote Request Complete (err: %v)\\n", info.Err)
+        },
+
+        // Response
+        GotFirstResponseByte: func() {
+            fmt.Println("Got First Response Byte")
+        },
+    }
+
+    // Attach trace to request context
+    req, _ := http.NewRequest("GET", url, nil)
+    ctx := httptrace.WithClientTrace(req.Context(), trace)
+    req = req.WithContext(ctx)
+
+    // Execute request
+    client := &http.Client{Timeout: 10 * time.Second}
+    start := time.Now()
+    resp, err := client.Do(req)
+    elapsed := time.Since(start)
+
+    if err != nil {
+        return fmt.Errorf("request failed: %w", err)
+    }
+    defer resp.Body.Close()
+
+    fmt.Printf("\\nResponse: %s (status: %d, elapsed: %v)\\n", url, resp.StatusCode, elapsed)
+
+    // Check connection reuse
+    fmt.Printf("Connection reused: %v\\n", resp.Request == nil) // Simplified check
+
+    return nil
+}
+
+func main() {
+    urls := []string{
+        "https://google.com",
+        "https://github.com",
+        "https://httpbin.org/delay/2", // Slow endpoint
+    }
+
+    for _, url := range urls {
+        fmt.Printf("\\n=== Tracing: %s ===\\n", url)
+        if err := traceHTTPRequest(url); err != nil {
+            fmt.Printf("Error: %v\\n", err)
+        }
+    }
+
+    fmt.Println("\\nHTTP tracing use cases:")
+    fmt.Println("1. Debug slow API responses (DNS, TCP, TLS timing)")
+    fmt.Println("2. Find connection pooling issues")
+    fmt.Println("3. Detect DNS resolution failures")
+    fmt.Println("4. Debug TLS certificate problems")
+    fmt.Println("5. Monitor redirect chains")
+    fmt.Println("\\nCombine with pprof for full HTTP debugging")
+    fmt.Println("  import _ \"net/http/pprof\"")
+    fmt.Println("  go func() { http.ListenAndServe(\":6060\", nil) }()")
+}`
+
+    },
+
+    "Assembly Code Generation Inspection": {
+      exp: "Go's <code>go tool compile -S</code> generates assembly listings from Go source code, useful for debugging compiler optimizations, inlining decisions, and performance bottlenecks. Use <code>-S</code> for assembly output, <code>-m</code> for optimization decisions, <code>-l</code> for inlining control, and <code>-race</code> for race-instrumented assembly. Filter output with <code>grep</code> for specific functions. The <code>go tool objdump</code> disassembles compiled binaries. Compare assembly with and without optimizations to understand compiler behavior.",
+      code: `// Assembly Code Generation Inspection
+package main
+
+import "fmt"
+
+//go:noinline
+func sum(numbers []int) int {
+    total := 0
+    for _, n := range numbers {
+        total += n
+    }
+    return total
+}
+
+func main() {
+    data := []int{1, 2, 3, 4, 5}
+    result := sum(data)
+    fmt.Println("Result:", result)
+
+    // Assembly inspection commands:
+    // 1. Compile to assembly:
+    //    go tool compile -S main.go > assembly.s
+    //
+    // 2. With optimization decisions:
+    //    go tool compile -S -m main.go 2>&1
+    //
+    // 3. Compile without inlining:
+    //    go tool compile -S -l main.go > noinline_asm.s
+    //
+    // 4. Disassemble compiled binary:
+    //    go build -o app main.go
+    //    go tool objdump -s 'main\.sum' app
+    //
+    // 5. Machine code for a specific function:
+    //    go tool objdump -s 'main\.main' app
+    //
+    // 6. With race detection instrumentation:
+    //    go tool compile -race -S main.go > race_asm.s
+    //
+    // 7. Compare optimized vs unoptimized:
+    //    go tool compile -S -N -l main.go > unopt_asm.s
+    //    go tool compile -S main.go > opt_asm.s
+    //    diff unopt_asm.s opt_asm.s
+
+    // Reading assembly output:
+    // "TEXT main.sum(SB)" - Function symbol
+    // "MOVQ" - Move quad word (64-bit)
+    // "ADDQ" - Add quad word
+    // "CMPQ" - Compare quad word
+    // "JLT"  - Jump if less than
+    // "RET"  - Return
+
+    fmt.Println("\\nAssembly inspection commands:")
+    fmt.Println("  go tool compile -S main.go")
+    fmt.Println("  go tool compile -S -m main.go   (with opt decisions)")
+    fmt.Println("  go tool compile -S -l main.go   (no inlining)")
+    fmt.Println("  go tool objdump -s 'main.sum' app")
+    fmt.Println("  go tool objdump -s 'main.main' app")
+    fmt.Println("  go build -gcflags='-S' main.go  (direct asm output)")
+    fmt.Println("\\nKey assembly patterns:")
+    fmt.Println("  Bounds checking: CMPQ + JLS sequences")
+    fmt.Println("  Inlined calls: no CALL instruction")
+    fmt.Println("  Escape analysis: heap vs stack allocation")`
+    },
+
+    "Build Tag & Conditional Compilation Diagnostics": {
+      exp: "Go build tags and conditional compilation can introduce subtle bugs when files are unexpectedly included or excluded. Use <code>go list -json</code> to inspect resolved build constraints, <code>go build -v</code> to see which files are compiled, and <code>go list -f '{{.GoFiles}}'</code> for file listings. Debug tag resolution with <code>-tags</code> flag and <code>GOOS</code>/<code>GOARCH</code> environment variables. The <code>go/env</code> package and <code>runtime.GOOS</code>/<code>runtime.GOARCH</code> provide runtime platform detection. Common issues: missing //go:build directives, conflicting tags, and partial file inclusion.",
+      code: `// Build Tag & Conditional Compilation Diagnostics
+package main
+
+import (
+    "fmt"
+    "go/build"
+    "runtime"
+    "strings"
+)
+
+//go:build linux
+// +build linux
+
+// This file only compiles on linux
+// Check: go list -f '{{.GoFiles}}' .
+
+func platformSpecific() string {
+    return "Running on Linux"
+}
+
+// In a separate file (platform_windows.go):
+// //go:build windows
+// // +build windows
+// package main
+// func platformSpecific() string { return "Running on Windows" }
+
+// In default file (platform_default.go):
+// //go:build !linux && !windows
+// package main
+// func platformSpecific() string { return "Running on other OS" }
+
+func main() {
+    // 1. Runtime platform check
+    fmt.Printf("Runtime GOOS: %s\\n", runtime.GOOS)
+    fmt.Printf("Runtime GOARCH: %s\\n", runtime.GOARCH)
+
+    // 2. Build tags in effect
+    fmt.Println("\\n=== Build Context ===")
+    ctx := build.Default
+    fmt.Printf("GOOS: %s\\n", ctx.GOOS)
+    fmt.Printf("GOARCH: %s\\n", ctx.GOARCH)
+    fmt.Printf("Build tags: %v\\n", ctx.BuildTags)
+    fmt.Printf("Release tags: %v\\n", ctx.ReleaseTags)
+
+    // 3. Check if a file would be included
+    // Run: go list -json -tags 'prod,integration'
+    // Output shows: GoFiles, IgnoredGoFiles, TestGoFiles
+
+    // 4. Diagnostic commands
+    fmt.Println("\\n=== Build Tag Diagnostics ===")
+    fmt.Println("  go list -f '{{.GoFiles}}' .")
+    fmt.Println("  go list -f '{{.IgnoredGoFiles}}' .")
+    fmt.Println("  go list -f '{{.TestGoFiles}}' .")
+    fmt.Println("  go list -json . | grep GoFiles")
+    fmt.Println("  go build -v ./...")
+    fmt.Println("  go build -tags 'integration' -v ./...")
+
+    // 5. Environment variable debugging
+    fmt.Println("\\n=== Environment ===")
+    env := []string{"GOOS", "GOARCH", "GOARM", "GOMIPS", "CGO_ENABLED"}
+    for _, e := range env {
+        fmt.Printf("  %s=%s\\n", e, getEnv(e))
+    }
+
+    // 6. Conditional file inclusion test
+    platform := platformSpecific()
+    fmt.Printf("\\nPlatform-specific function says: %s\\n", platform)
+    fmt.Printf("File ends with _linux.go: %v\\n", strings.HasSuffix(runtime.GOOS+"_"+runtime.GOARCH, "_linux"))
+
+    fmt.Println("\\nCommon build tag issues:")
+    fmt.Println("1. Missing //go:build directive in new files")
+    fmt.Println("2. Conflicting tags across files")
+    fmt.Println("3. Case-sensitive tag names")
+    fmt.Println("4. Forgot to commit all platform files")
+    fmt.Println("5. CGO vs non-CGO build mismatches")
+    fmt.Println("\\nFix: use 'go list -json' to verify file inclusion")
+}
+
+func getEnv(key string) string {
+    // Simulated - use 'go env' command for actual values
+    values := map[string]string{
+        "GOOS":         runtime.GOOS,
+        "GOARCH":       runtime.GOARCH,
+        "CGO_ENABLED":  "1",
+    }
+    if v, ok := values[key]; ok {
+        return v
+    }
+    return "(run 'go env " + key + "')"
+}`
+
+    },
+
   }
 };
