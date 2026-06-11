@@ -315,7 +315,7 @@ fn format_query_result(rows: &[Vec<rusqlite::types::Value>], cols: &[String]) ->
             if i < widths.len() {
                 let s = match val {
                     rusqlite::types::Value::Null => "NULL".into(),
-                    _ => format!("{}", val),
+                    _ => format!("{:?}", val),
                 };
                 if s.len() > widths[i] {
                     widths[i] = std::cmp::min(s.len(), 80);
@@ -355,7 +355,7 @@ fn format_query_result(rows: &[Vec<rusqlite::types::Value>], cols: &[String]) ->
         for (i, val) in row.iter().enumerate() {
             let s = match val {
                 rusqlite::types::Value::Null => "NULL".into(),
-                _ => format!("{}", val),
+                _ => format!("{:?}", val),
             };
             let truncated = if s.len() > 80 {
                 format!("{}...", &s[..77])
