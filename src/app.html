@@ -9,8 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="%sveltekit.assets%/app.css" />
   %sveltekit.head%
+  <script>
+    // Google Translate initialization callback
+    function googleTranslateElementInit2() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false
+      }, 'google_translate_element2');
+    }
+  </script>
 </head>
-<body data-sveltekit-prerender="false">
+<body data-sveltekit-prerender="false" style="top:0px !important;">
   <div style="display: contents">%sveltekit.body%</div>
+  <!-- Hidden Google Translate target -->
+  <div id="google_translate_element2" style="display:none;"></div>
 </body>
 </html>
