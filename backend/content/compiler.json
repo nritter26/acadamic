@@ -1,12 +1,12 @@
 {
   "Compiler Fundamentals": {
     "What is a Compiler?": {
-      "exp": "<p>Introduction to compiler architecture.</p>",
+      "exp": "Introduction to compiler architecture.",
       "code": "Frontend vs backend, analysis vs synthesis phases, compilation vs interpretation.",
       "exercises": []
     },
     "Language Processors": {
-      "exp": "<p>Types of language processors.</p>",
+      "exp": "Types of language processors.",
       "code": "Compilers, interpreters, assemblers, transpilers, JIT compilers.",
       "exercises": []
     },
@@ -15,12 +15,12 @@
       "// Frontend: language-specific (clang)\n// Middle-end: IR optimization (opt)\n// Backend: target-specific (llc)\n// clang -S -emit-llvm input.c | opt -O2 | llc -o output.s"
     ],
     "Symbol Tables": {
-      "exp": "<p>Managing identifiers during compilation.</p>",
+      "exp": "Managing identifiers during compilation.",
       "code": "Symbol table structure, scope management, inserting and looking up symbols.",
       "exercises": []
     },
     "Error Handling": {
-      "exp": "<p>Strategies for compiler error handling.</p>",
+      "exp": "Strategies for compiler error handling.",
       "code": "Error detection, reporting, recovery; panic mode, error productions.",
       "exercises": []
     },
@@ -35,27 +35,27 @@
   },
   "Lexical Analysis": {
     "Tokens & Lexemes": {
-      "exp": "<p>Understanding tokens in the compilation process.</p>",
+      "exp": "Understanding tokens in the compilation process.",
       "code": "Keywords, identifiers, literals, operators, delimiters; token patterns and attributes.",
       "exercises": []
     },
     "Regular Expressions": {
-      "exp": "<p>Using regex for token specification.</p>",
+      "exp": "Using regex for token specification.",
       "code": "Regular expressions, NFA/DFA conversion, Thompson construction.",
       "exercises": []
     },
     "Finite Automata": {
-      "exp": "<p>DFA and NFA for lexical analysis.</p>",
+      "exp": "DFA and NFA for lexical analysis.",
       "code": "Deterministic and non-deterministic finite automata, state transition diagrams.",
       "exercises": []
     },
     "Lexer Generation": {
-      "exp": "<p>Automated lexer generation tools.</p>",
+      "exp": "Automated lexer generation tools.",
       "code": "Lex/Flex, re2c; specification format, actions, and conflict resolution.",
       "exercises": []
     },
     "Handwritten Lexers": {
-      "exp": "<p>Implementing lexers manually.</p>",
+      "exp": "Implementing lexers manually.",
       "code": "Buffer management, lookahead, sentinel characters, performance optimization.",
       "exercises": []
     },
@@ -74,22 +74,22 @@
   },
   "Syntax Analysis": {
     "Context-Free Grammars": {
-      "exp": "<p>CFG fundamentals for parsing.</p>",
+      "exp": "CFG fundamentals for parsing.",
       "code": "Productions, terminals, non-terminals, start symbol; derivation and parse trees.",
       "exercises": []
     },
     "Top-Down Parsing": {
-      "exp": "<p>Recursive descent and LL parsing.</p>",
+      "exp": "Recursive descent and LL parsing.",
       "code": "FIRST and FOLLOW sets, LL(1) grammars, left recursion elimination.",
       "exercises": []
     },
     "Bottom-Up Parsing": {
-      "exp": "<p>LR parsing techniques.</p>",
+      "exp": "LR parsing techniques.",
       "code": "LR(0), SLR, LR(1), LALR(1) parsers; shift-reduce and reduce-reduce conflicts.",
       "exercises": []
     },
     "Parser Generators": {
-      "exp": "<p>Automated parser generation.</p>",
+      "exp": "Automated parser generation.",
       "code": "Yacc/Bison, ANTLR; grammar specifications, action code, conflict resolution.",
       "exercises": []
     },
@@ -98,7 +98,7 @@
       "// AST for '3 + 4 * 5'\n// BinaryExpr(+)\n//   Number(3)\n//   BinaryExpr(*)\n//     Number(4)\n//     Number(5)"
     ],
     "Error Recovery in Parsing": {
-      "exp": "<p>Handling syntax errors gracefully.</p>",
+      "exp": "Handling syntax errors gracefully.",
       "code": "Panic mode, phrase-level recovery, error productions, global correction.",
       "exercises": []
     },
@@ -121,17 +121,17 @@
       "class TypeChecker {\n    check(node) {\n        if (node.type === 'NumberExpr') return 'number';\n        if (node.type === 'BinaryExpr') {\n            const l = this.check(node.left);\n            const r = this.check(node.right);\n            if (l !== r) throw new TypeError('Type mismatch');\n            return l;\n        }\n    }\n}"
     ],
     "Scope Resolution": {
-      "exp": "<p>Resolving identifiers in scopes.</p>",
+      "exp": "Resolving identifiers in scopes.",
       "code": "Lexical scoping, nested scopes, name hiding, hoisting.",
       "exercises": []
     },
     "Attribute Grammars": {
-      "exp": "<p>Augmenting CFGs with semantic rules.</p>",
+      "exp": "Augmenting CFGs with semantic rules.",
       "code": "Synthesized attributes, inherited attributes, attribute evaluation, L-attributed grammars.",
       "exercises": []
     },
     "Type Systems": {
-      "exp": "<p>Designing and implementing type systems.</p>",
+      "exp": "Designing and implementing type systems.",
       "code": "Strong vs weak typing, static vs dynamic, subtyping, polymorphism.",
       "exercises": []
     },
@@ -158,41 +158,41 @@
       "// Basic block: straight-line code\n// BB0: entry -> if (x > 0) goto BB1 else BB2\n// BB1: y = 5; goto BB3\n// BB2: y = 10; goto BB3\n// BB3: print(y) -> exit"
     ],
     "IR Generation": {
-      "exp": "<p>Generating IR from AST.</p>",
+      "exp": "Generating IR from AST.",
       "code": "Translation schemes, addressing modes, temporary variables.",
       "exercises": []
     }
   },
   "Code Optimization": {
     "Local Optimizations": {
-      "exp": "<p>Optimizations within basic blocks.</p>",
+      "exp": "Optimizations within basic blocks.",
       "code": "Common subexpression elimination, constant folding, algebraic simplification.",
       "exercises": []
     },
     "Global Optimizations": {
-      "exp": "<p>Optimizations across basic blocks.</p>",
+      "exp": "Optimizations across basic blocks.",
       "code": "Data-flow analysis, reaching definitions, live variable analysis.",
       "exercises": []
     },
     "Loop Optimizations": {
-      "exp": "<p>Optimizing loop execution.</p>",
+      "exp": "Optimizing loop execution.",
       "code": "Loop invariant code motion, induction variable elimination, loop unrolling.",
       "exercises": []
     },
     "Register Allocation": {
-      "exp": "<p>Efficient register usage.</p>",
+      "exp": "Efficient register usage.",
       "code": "Graph coloring, liveness analysis, interference graphs, spilling.",
       "exercises": []
     },
     "Instruction Scheduling": {
-      "exp": "<p>Ordering instructions for performance.</p>",
+      "exp": "Ordering instructions for performance.",
       "code": "Pipeline hazards, instruction latencies, list scheduling, software pipelining.",
       "exercises": []
     }
   },
   "Code Generation": {
     "Target Code": {
-      "exp": "<p>Generating machine code from IR.</p>",
+      "exp": "Generating machine code from IR.",
       "code": "Instruction selection, addressing modes, machine-specific idioms.",
       "exercises": []
     },
@@ -205,34 +205,34 @@
       "// IR -> x86-64\n// add t1, t2  ->  add rax, rbx\n// a[i] -> mov rax, [rdi + rsi*4]\n// f(a,b) -> mov rdi, a; mov rsi, b; call f"
     ],
     "Function Prologues/Epilogues": {
-      "exp": "<p>Calling conventions and stack frames.</p>",
+      "exp": "Calling conventions and stack frames.",
       "code": "Caller/callee save registers, stack layout, activation records.",
       "exercises": []
     }
   },
   "Compiler Construction Tools": {
     "Lex & Yacc": {
-      "exp": "<p>Classic compiler construction tools.</p>",
+      "exp": "Classic compiler construction tools.",
       "code": "Lex/Flex for lexer generation, Yacc/Bison for parser generation.",
       "exercises": []
     },
     "LLVM": {
-      "exp": "<p>LLVM compiler infrastructure.</p>",
+      "exp": "LLVM compiler infrastructure.",
       "code": "LLVM IR, optimization passes, backend code generation, Clang.",
       "exercises": []
     },
     "Multi-Stage Compilation": {
-      "exp": "<p>Linking, loading, and runtime.</p>",
+      "exp": "Linking, loading, and runtime.",
       "code": "Object files, linker, loader, dynamic linking, position-independent code.",
       "exercises": []
     },
     "Just-In-Time Compilation": {
-      "exp": "<p>JIT compilation techniques.</p>",
+      "exp": "JIT compilation techniques.",
       "code": "Hotspot detection, profiling, tiered compilation, dynamic recompilation.",
       "exercises": []
     },
     "Compiler Testing": {
-      "exp": "<p>Testing compiler correctness.</p>",
+      "exp": "Testing compiler correctness.",
       "code": "Test suites, regression testing, fuzzing, differential testing.",
       "exercises": []
     }
