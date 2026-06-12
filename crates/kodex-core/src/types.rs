@@ -437,3 +437,39 @@ pub struct AnalyzeInput {
     pub code: Option<String>,
     pub lang: Option<String>,
 }
+
+// ── Learner Engine ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LearnerProfile {
+    pub learner_id: String,
+    pub email: Option<String>,
+    pub name: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+    pub topics: Vec<TopicEntry>,
+    pub conversations: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TopicEntry {
+    pub topic: String,
+    pub phase: String,
+    pub lang: String,
+    pub mastery: f64,
+    pub attempts: u32,
+    pub correct: u32,
+    pub last_reviewed: Option<String>,
+    pub next_review: Option<String>,
+    pub interval_days: u32,
+    pub completed: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReviewEntry {
+    pub topic: String,
+    pub phase: String,
+    pub lang: String,
+    pub mastery: f64,
+    pub due_date: String,
+}

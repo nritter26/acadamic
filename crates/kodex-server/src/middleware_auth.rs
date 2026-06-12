@@ -31,11 +31,17 @@ pub async fn auth_middleware(
 ) -> Result<Response, Response> {
     let path = req.uri().path();
 
-    // Skip auth for health endpoint and auth routes
+    // Skip auth for system/health endpoints, auth routes, and WebSocket
     if path == "/api/health"
         || path.starts_with("/api/auth/")
         || path.starts_with("/api/openapi.json")
         || path == "/api/docs"
+        || path == "/ws"
+        || path == "/api/ollama/status"
+        || path == "/api/tutor/status"
+        || path == "/api/metrics"
+        || path == "/api/ws/stats"
+        || path == "/api/rate-limit/stats"
     {
         return Ok(next.run(req).await);
     }

@@ -107,17 +107,17 @@ impl DbManager {
         DbInitStatus {
             sqlite: kodex_core::types::DbInitStatus {
                 available: sqlite_ok,
-                reason: None,
+                reason: Some("SQLite (3 databases)".to_string()),
                 error: None,
             },
             pg: kodex_core::types::DbInitStatus {
                 available: false,
-                reason: Some("PostgreSQL not configured".into()),
+                reason: Some("PostgreSQL (optional)".to_string()),
                 error: None,
             },
             mysql: kodex_core::types::DbInitStatus {
                 available: false,
-                reason: Some("MySQL not configured".into()),
+                reason: Some("MySQL (optional)".to_string()),
                 error: None,
             },
         }
