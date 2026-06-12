@@ -27,7 +27,12 @@ function removePTags(str) {
 
 function walkAndClean(obj, path_ = '') {
   if (typeof obj === 'string') {
-    return obj; // We handle strings at the key level
+    // Clean <p> tags from all string values (handles array entries like ["<p>text</p>"])
+    const cleaned = removePTags(obj);
+    if (cleaned !== obj) {
+      console.log(`  [${path_}] string: removed <p> tags`);
+    }
+    return cleaned;
   }
   if (Array.isArray(obj)) {
     return obj.map((item, i) => walkAndClean(item, `${path_}[${i}]`));

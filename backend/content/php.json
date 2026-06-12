@@ -152,7 +152,7 @@
     ],
     "PHP Tags & Output": [
       "Multiple ways to output: echo (language construct), print (returns 1), printf (formatted), var_dump (debug info). Short echo tag <?= is shorthand for <?php echo. Always available in PHP 5.4+.",
-      "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<p><?= \"Hello from short tag\" ?></p>"
+      "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<?= \"Hello from short tag\" ?>"
     ]
   },
   "Control Flow": {
@@ -182,7 +182,7 @@
     ],
     "Alternative Syntax": [
       "PHP provides alternative syntax for control structures using colons and endif/endwhile/endfor/endforeach/endswitch. This is commonly used in templates to mix PHP with HTML cleanly.",
-      "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    <p>Welcome back!</p>\n<?php else: ?>\n    <p>Please log in</p>\n<?php endif; ?>"
+      "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    Welcome back!\n\n<?php else: ?>\n    Please log in\n\n<?php endif; ?>"
     ]
   },
   "Functions": {
@@ -396,7 +396,7 @@
     ],
     "Multi-byte Strings": [
       "Standard PHP string functions assume single-byte characters. Use mb_* (multi-byte) functions for UTF-8 and other encodings: mb_strlen(), mb_substr(), mb_strpos(), mb_strtolower(), etc. Enable mbstring extension. Always use mb_* for user input and international text. Check encoding with mb_detect_encoding().",
-      "<?php\n// Multi-byte strings (UTF-8)\n$text = 'Hëllö Wörld';\n\necho strlen($text);    // 15 (byte count)\necho mb_strlen($text); // 11 (character count)\n\necho substr($text, 0, 3);    // 'Hë' (may corrupt if multi-byte)\necho mb_substr($text, 0, 3); // 'Hël'\n\n$html = '<p>über</p>';\necho strip_tags($html);       // OK: 'über'\necho mb_strtolower($text);    // 'hëllö wörld'\n\n// Encoding detection\n$enc = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1']);\necho $enc;  // 'UTF-8'\n\n// Convert encoding\n$latin = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');\n\n// Always use mb_ for user input\nmb_regex_encoding('UTF-8');"
+      "<?php\n// Multi-byte strings (UTF-8)\n$text = 'Hëllö Wörld';\n\necho strlen($text);    // 15 (byte count)\necho mb_strlen($text); // 11 (character count)\n\necho substr($text, 0, 3);    // 'Hë' (may corrupt if multi-byte)\necho mb_substr($text, 0, 3); // 'Hël'\n\n$html = 'über\n';\necho strip_tags($html);       // OK: 'über'\necho mb_strtolower($text);    // 'hëllö wörld'\n\n// Encoding detection\n$enc = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1']);\necho $enc;  // 'UTF-8'\n\n// Convert encoding\n$latin = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');\n\n// Always use mb_ for user input\nmb_regex_encoding('UTF-8');"
     ]
   },
   "Testing": {

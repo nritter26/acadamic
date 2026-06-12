@@ -188,7 +188,7 @@
     ],
     "Transform": [
       "Transform streams are Duplex streams that can modify data during read/write operations. They are commonly used for compression, encryption, and data format conversion.",
-      "const { Transform } = require('stream');\nconst upperCase = new Transform({\n  transform(chunk, encoding, callback) {\n    this.push(chunk.toString().toUpperCase());\n    callback();\n  }\n});\nprocess.stdin.pipe(upperCase).pipe(process.stdout);\n"
+      "const { Transform } = require('stream');\nconst upperCase = new Transform({\n  transform(chunk, encoding, callback) {\n    this.push(chunk.toString().toUpperCase());\n    callback();\n  }\n});\nprocess.stdin.pipe(upperCase).pipe(process.stdout);"
     ],
     "Pipeline & Finished": [
       "stream.pipeline handles piping streams with automatic cleanup and error propagation. stream.finished provides a callback when a stream is no longer readable or writable.",
