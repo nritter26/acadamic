@@ -257,6 +257,26 @@ function doGTranslate(lang_pair) {
         teCombo.dispatchEvent(new Event('change'));
     }
 }
+
+// ── Auto-protect code blocks from Google Translate ──
+function protectCodeBlocks(root) {
+    var selectors = 'code, pre, textarea, .cm-editor, .editor-wrapper, .monaco-editor, .code-input, .game-input, #editor, #projectsEditor, .styling-textarea, #dblabTerminalInput, #gitvizTerminalInput, .notranslate';
+    (root || document).querySelectorAll(selectors).forEach(function(el) {
+        if (!el.classList.contains('notranslate')) {
+            el.classList.add('notranslate');
+        }
+    });
+}
+
+// Mutation observer to protect dynamically added code blocks
+var translateObserver = new MutationObserver(function() {
+    protectCodeBlocks(document);
+});
+translateObserver.observe(document.body, { childList: true, subtree: true });
+
+// Initial protection
+document.addEventListener('DOMContentLoaded', function() { protectCodeBlocks(document); });
+setTimeout(function() { protectCodeBlocks(document); }, 500);
 </script>
 
 <button class="ai-toggle" id="aiToggle" onclick="toggleAI()" style="font-size:9px">Devin</button>
