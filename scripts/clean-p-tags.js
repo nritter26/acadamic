@@ -15,11 +15,13 @@ const CONTENT_DIR = path.resolve(__dirname, '..', 'backend', 'content');
 
 function removePTags(str) {
   if (typeof str !== 'string') return str;
-  // Remove opening <p> and closing </p> tags, keeping the inner content
-  // Handle <p>text</p> -> text
-  // Handle nested: <p>text with <code>more</code></p> -> text with <code>more</code>
+  // Replace </p> with newline to preserve paragraph breaks, remove <p>
+  // <p>text</p> -> text
+  // <p>First.</p><p>Second.</p> -> First.\nSecond.
+  // CSS uses white-space: pre-wrap so \n renders as line breaks
   return str
-    .replace(/<\/?p>/gi, '')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<p>/gi, '')
     .trim();
 }
 
