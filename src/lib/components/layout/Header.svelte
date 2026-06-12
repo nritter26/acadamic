@@ -16,6 +16,7 @@
     { id: 'ai', label: 'AI', color: '#22d3ee' },
     { id: 'backend', label: 'Backend', color: '#6366F1' },
     { id: 'cicd', label: 'CI/CD', color: '#e24329' },
+    { id: 'debugging', label: 'Debugging', color: '#f59e0b' },
     { id: 'challenge', label: 'Code Lab', color: '#a855f7' },
     { id: 'compiler', label: 'Compiler', color: '#a5f3fc' },
     { id: 'dblab', label: 'DB Lab', color: '#2DD4BF' },

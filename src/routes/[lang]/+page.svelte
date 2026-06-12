@@ -10,7 +10,7 @@
   let lang = $derived($page.params.lang);
 
   const LANGUAGE_MODES = ['asm','htmlcss','bash','c','cs','cpp','db','go','java','js','kt','lua','php','py','rb','rs','scala','swift','ts','wasm','zig'];
-  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend', 'ai'];
+  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend', 'ai', 'debugging'];
   const isCurriculumMode = $derived(LANGUAGE_MODES.includes(lang) || CURRICULUM_MODES.includes(lang));
 
   onMount(() => {

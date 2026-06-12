@@ -311,6 +311,7 @@
     code: "// React Native example\nimport { Text, View } from 'react-native';\n\nfunction App() {\n  return (\n    <View>\n      <Text>Hello, Mobile!</Text>\n    </View>\n  );\n}"
   };
 
+  intro.debugging = { name:"Debugging", what:"Debugging is the systematic process of finding and fixing errors in code. It involves using developer tools, breakpoints, and systematic investigation to understand unexpected behavior.", usedFor:"Identifying runtime errors, inspecting program state, analyzing performance, finding memory leaks, and debugging production issues.", creator:"Debugging tools evolved from simple print statements to sophisticated IDEs. The term originated in 1947 when a moth was found in a Harvard Mark II computer relay.", code:"console.log('Debugging with console API');\nconsole.table([{name:'Feature A', status:'pass'}]);" };
   intro.cicd = {
     name: "CI/CD",
     what: "CI/CD (Continuous Integration/Continuous Delivery) is a set of practices automating the building, testing, and deployment of software. It enables teams to release code changes frequently and reliably.",

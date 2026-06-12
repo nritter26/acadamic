@@ -14,7 +14,7 @@ export const LANG_NAMES = {
   challenge: 'Challenge', projects: 'Projects',
   tutorial: 'Tutorial', techstack: 'Tech Stack',
   styling: 'Styling Grounds', schema: 'Schema Designer',
-  ai: 'AI', backend: 'Backend', cicd: 'CI/CD', mobile: 'Mobile',
+  ai: 'AI', backend: 'Backend', cicd: 'CI/CD', debugging: 'Debugging', mobile: 'Mobile',
   api: 'API Client',
 };
 
