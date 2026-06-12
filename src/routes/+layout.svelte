@@ -15,6 +15,7 @@
   import { getEditorState } from '$lib/stores/editor.svelte.js';
   import { getExecutionState } from '$lib/stores/execution.svelte.js';
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import { loadGoogleTranslate, applySavedLanguage, markCodeAsNotranslate } from '$lib/lib/translate.js';
   import '../app.css';
 
   const STANDALONE_ROUTES = new Set(['tutorial', 'game', 'git', 'legacy']);
@@ -41,6 +42,15 @@
   }
 
   onMount(() => {
+    // Initialize Google Translate for UI language support
+    loadGoogleTranslate(() => {
+      // After widget loads, apply any saved language preference
+      setTimeout(applySavedLanguage, 500);
+    });
+
+    // Protect code blocks from translation on mount
+    setTimeout(() => markCodeAsNotranslate(document), 100);
+
     const handlers = {
       'toggle-kodex': () => showKodex = !showKodex,
       'toggle-lang': () => showLang = !showLang,
@@ -76,8 +86,7 @@
       e.preventDefault();
       ai.togglePanel();
     }
-  }
-</script>
+  }</script>
 
 <svelte:window onkeydown={handleKeydown} />
 
