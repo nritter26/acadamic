@@ -3,6 +3,8 @@
   import { LANG_NAMES } from '$lib/lib/constants.js';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { getCurrentLang } from '$lib/lib/translate.js';
+  import { onMount } from 'svelte';
 
   let { onmodechange = () => {} } = $props();
   let app = $derived(getAppState());
@@ -29,6 +31,8 @@
     { id: 'legacy', label: 'Full Web App', color: '#22c55e' },
   ];
 
+  let uiLang = $state('EN');
+
   function handleMode(mode) {
     if (STANDALONE_TABS.has(mode)) {
       goto('/' + mode);
@@ -49,6 +53,17 @@
   function toggleLang() {
     window.dispatchEvent(new CustomEvent('toggle-lang'));
   }
+
+  function updateUILang() {
+    const lang = getCurrentLang();
+    uiLang = lang === 'en' ? 'EN' : lang.toUpperCase();
+  }
+
+  onMount(() => {
+    updateUILang();
+    window.addEventListener('language-changed', updateUILang);
+    return () => window.removeEventListener('language-changed', updateUILang);
+  });
 </script>
 
 <header id="app-header" class="header">
@@ -67,7 +82,7 @@
           <path d="M10 14 C10 14 12 10 20 10 C28 10 30 14 30 14" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </button>
-      <button class="kodex-nav-btn lang-btn" onclick={toggleLang} title="Change language">EN</button>
+      <button class="kodex-nav-btn lang-btn" onclick={toggleLang} title="Change language">{uiLang}</button>
     </div>
     <div class="header-extra-tabs">
       {#each EXTRA_TABS as tab}
