@@ -21,5 +21,5 @@ export const LANG_NAMES = {
 export const MODE_SPECIAL = new Set([
   'compiler','game','quiz','challenge','dblab','projects','git',
   'styling','schema','tutorial','techstack','backend','mobile',
-  'api','cicd','gamedev','ai',
+  'api','cicd','gamedev','ai','debugging',
 ]);
