@@ -1,0 +1,278 @@
+{
+  "เริ่มต้น": {
+    "Python คืออะไร": [
+      "Python เป็นภาษาระดับสูง (high-level) ที่ถูกแปลความ (interpreted) และมีชนิดแบบไดนามิก (dynamically typed) ที่ออกแบบมาเพื่อความสามารถในการอ่านโค้ดและการพัฒนาที่รวดเร็ว ใช้ในการพัฒนาเว็บ, วิทยาการข้อมูล (data science), ระบบอัตโนมัติ, การเขียนสคริปต์, และ AI/ML ข้อผิดพลาดทั่วไป: การสับสนระหว่าง dynamic typing กับ weak typing — Python เป็น strongly typed (ไม่มีการแปลงชนิดโดยนัยระหว่างชนิดที่เข้ากันไม่ได้ เช่น '5' + 3 จะทำให้เกิด TypeError) แนวปฏิบัติที่ดี: ใช้ virtual environments สำหรับทุกโปรเจกต์เพื่อแยก dependencies; ทำตาม PEP 8 เพื่อรูปแบบที่สม่ำเสมอ",
+      "print(\"Hello, Pythonista!\")\n\n# Python เป็น strongly typed — ไม่มีการแปลงชนิดโดยนัย\n# result = '5' + 3  # TypeError: can only concatenate str (not \"int\") to str\n\n# Python เป็น dynamically typed\nx = 42       # x เป็น int\nx = 'hello'  # x กลายเป็น str (ไม่มีข้อผิดพลาด)\n\n# ปรัชญาของ Python\nimport this  # \"Beautiful is better than ugly.\""
+    ],
+    "ไวยากรณ์ Python": [
+      "Python ใช้การย่อหน้าด้วยช่องว่าง (whitespace indentation) แทนวงเล็บปีกกาในการกำหนดบล็อก ใช้ 4 ช่องว่างต่อระดับ — ห้ามผสมแท็บและช่องว่าง คำสั่งจบโดยไม่ต้องใช้ semicolon ข้อผิดพลาดทั่วไป: การย่อหน้าที่ไม่สม่ำเสมอทำให้เกิด IndentationError; การผสมแท็บและช่องว่างทำให้เกิด TabError ที่แก้ไขยาก แนวปฏิบัติที่ดี: ตั้งค่า editor ให้ใช้ 4 ช่องว่างต่อการย่อหน้าและแปลงแท็บเป็นช่องว่าง; ใช้ linter (flake8, pylint) เพื่อจับปัญหาด้านรูปแบบตั้งแต่เนิ่นๆ",
+      "# การย่อหน้ากำหนดบล็อก — ไม่มีวงเล็บปีกกา\nif True:\n    print(\"บล็อกที่ย่อหน้า\")\n    if True:\n        print(\"ย่อหน้าซ้อน\")\nprint(\"กลับสู่ระดับบนสุด\")\n\n# โคลอนเริ่มต้นบล็อก, ไม่ต้องใช้ semicolon\nfor i in range(3):\n    print(i, end=' ')\n\n# การต่อบรรทัดด้วย backslash หรือโดยนัย\nresult = 1 + 2 + 3 \\\n       + 4 + 5\nwithin_parens = (1 + 2 + 3\n                 + 4 + 5)"
+    ],
+    "ตัวแปร": [
+      "ตัวแปร (Variables) ถูกสร้างขึ้นเมื่อกำหนดค่า ชนิดจะถูก推断โดยอัตโนมัติ ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่าตัวแปรถูกส่งแบบ reference — Python ใช้ assignment semantics (object references) ออบเจกต์ที่เปลี่ยนแปลงได้ (mutable) สามารถแก้ไขในที่เดิมได้; การกำหนดค่าใหม่จะสร้าง reference ใหม่",
+      "x = 5\nname = \"Doge\"\nprint(x, name)\n# กำหนดค่าใหม่\nx = \"Now a string\"  # ไม่มีข้อผิดพลาด\nprint(x)"
+    ],
+    "คอมเมนต์และ Docstrings": [
+      "ใช้ # สำหรับคอมเมนต์บรรทัดเดียว สตริงสามเครื่องหมายคำพูดทำหน้าที่เป็น docstrings สำหรับโมดูล, คลาส, และฟังก์ชัน — สามารถเข้าถึงได้ผ่าน help() และ .__doc__ ต่างจากคอมเมนต์ทั่วไป docstrings จะถูกเก็บเป็นแอตทริบิวต์ขณะทำงาน ข้อผิดพลาดทั่วไป: การใช้ block comments แทน docstrings — docstrings ช่วยให้เครื่องมือต่างๆ (autodoc, IDEs) ทำงานได้ ในขณะที่คอมเมนต์จะถูกมองข้าม แนวปฏิบัติที่ดี: เขียน docstrings สำหรับโมดูล, คลาส, และฟังก์ชันสาธารณะเสมอ; ใช้คอมเมนต์เฉพาะสำหรับหมายเหตุภายในเท่านั้น",
+      "# นี่คือคอมเมนต์บรรทัดเดียว — อธิบายว่าทำไม ไม่ใช่อะไร\n\ndef greet(name):\n    \"\"\"คืนค่าข้อความทักทาย\"\"\"\n    # รายละเอียดการ implement: ใช้ f-string เพื่อประสิทธิภาพ\n    return f\"Hello, {name}\"\n\nprint(greet.__doc__)     # 'Return a greeting message.'\nprint(help(greet))        # แสดง docstring ใน help viewer\n\n# Docstring ระดับโมดูลที่ด้านบนของไฟล์\n\"\"\"โมดูลนี้มี utility สำหรับการทักทาย\"\"\"\n\n# Triple quotes ยังใช้เป็นคอมเมนต์หลายบรรทัดได้ (ไม่ใช่ docstrings)\n\"\"\"\nนี่คือคอมเมนต์หลายบรรทัด\nไม่ต้องกำหนดค่าให้ตัวแปรสำหรับสตริงที่ใช้แค่ side-effect\n\"\"\""
+    ],
+    "I/O พื้นฐาน": [
+      "print() แสดงผลไปยัง stdout พร้อมขึ้นบรรทัดใหม่อัตโนมัติ ใช้พารามิเตอร์ sep และ end สำหรับการจัดรูปแบบที่กำหนดเอง input() อ่านหนึ่งบรรทัดจาก stdin เป็นสตริง ข้อผิดพลาดทั่วไป: การลืมแปลงผลลัพธ์จาก input() เป็น int/float สำหรับการดำเนินการทางตัวเลข",
+      "print(\"Hello\", \"World\", sep=\", \")\nname = input(\"กรุณาใส่ชื่อ: \")\nage = int(input(\"กรุณาใส่อายุ: \"))\nprint(f\"{name} อายุ {age} ปี\")"
+    ]
+  },
+  "พื้นฐาน Python": {
+    "ตัวแปรและชนิด": {
+      "exp": "ตัวแปร (Variables) และชนิดข้อมูล (Types) คือภาชนะที่มีชื่อสำหรับเก็บค่าข้อมูลในหน่วยความจำ ช่วยให้โปรแกรมสามารถเก็บ, อ้างอิง, และจัดการข้อมูลตลอดการทำงาน",
+      "code": "x = 5; name = \"Python\"; is_valid = True",
+      "exercises": []
+    },
+    "ตัวเลขและคณิตศาสตร์": {
+      "exp": "ตัวเลข (Numbers) และคณิตศาสตร์ (Math) แทนข้อมูลเชิงตัวเลขรวมถึงจำนวนเต็ม, จำนวนทศนิยม, และชนิดตัวเลขพิเศษ รองรับการดำเนินการทางคณิตศาสตร์และฟังก์ชันทางคณิตศาสตร์",
+      "code": "a = 10; b = 3.14; c = 1 + 2j",
+      "exercises": []
+    },
+    "สตริง": {
+      "exp": "สตริง (Strings) คือลำดับของอักขระที่ใช้แทนข้อมูลข้อความ รองรับการดำเนินการเช่นการต่อกัน, การตัด, การค้นหา, การแทนที่, และการจัดรูปแบบ",
+      "code": "s = \"Hello\"; s.upper(); s[0:5]",
+      "exercises": []
+    },
+    "การจัดรูปแบบสตริง": {
+      "exp": "การจัดรูปแบบสตริง (String Formatting) ช่วยสร้างสตริงที่มีค่าจากตัวแปรแบบไดนามิก Python มีหลายวิธี: f-strings, .format(), และ %-formatting",
+      "code": "f\"Value is {x}\"; \"Value is {}\".format(x); \"%d\" % x",
+      "exercises": []
+    },
+    "ลิสต์": {
+      "exp": "ลิสต์ (Lists) คือคอลเลกชันแบบมีลำดับที่สามารถเปลี่ยนแปลงได้ (mutable) และสามารถเก็บสมาชิกหลายชนิด มีเมธอดสำหรับการเพิ่ม, ลบ, ค้นหา, และเรียงลำดับ",
+      "code": "arr = [1,2,3]; arr.append(4); arr[1:3]",
+      "exercises": []
+    },
+    "ทูเพิล": {
+      "exp": "ทูเพิล (Tuples) คือคอลเลกชันแบบมีลำดับที่ไม่สามารถเปลี่ยนแปลงได้ (immutable) และสามารถเก็บสมาชิกหลายชนิด เหมาะสำหรับการจัดกลุ่มค่าที่เกี่ยวข้องกันและการคืนค่าหลายค่าจากฟังก์ชัน",
+      "code": "tup = (1, 2, 3); x, y, z = tup",
+      "exercises": []
+    },
+    "ดิกชันนารี": {
+      "exp": "ดิกชันนารี (Dictionaries) คือการจับคู่ key-value ที่ให้การค้นหาที่มีประสิทธิภาพด้วยคีย์ที่ไม่ซ้ำกัน รองรับการเพิ่ม, ลบ, และดึงข้อมูลด้วยความซับซ้อน O(1) โดยเฉลี่ย",
+      "code": "d = {\"key\": \"value\"}; d.get(\"key\", \"default\")",
+      "exercises": []
+    },
+    "เซต": {
+      "exp": "เซต (Sets) คือคอลเลกชันที่ไม่เรียงลำดับของสมาชิกที่ไม่ซ้ำกัน ให้การตรวจสอบสมาชิกที่มีประสิทธิภาพและการดำเนินการเซตเช่น union, intersection, และ difference",
+      "code": "s = {1, 2, 3}; s.add(4); s & {2,3}",
+      "exercises": []
+    },
+    "บูลีนและการเปรียบเทียบ": {
+      "exp": "บูลีน (Booleans) และการเปรียบเทียบ (Comparisons) เปรียบเทียบค่าโดยใช้ตัวดำเนินการเช่น equality, inequality, มากกว่า, และน้อยกว่า ผลลัพธ์เป็นบูลีนที่ใช้ขับเคลื่อนตรรกะแบบมีเงื่อนไข",
+      "code": "True and False; x == y; x is y; x in list",
+      "exercises": []
+    },
+    "การแปลงชนิด": {
+      "exp": "การแปลงชนิด (Type Conversion) แปลงค่าจากชนิดข้อมูลหนึ่งไปยังอีกชนิดหนึ่ง ทั้งโดยนัยจาก runtime หรือโดยชัดแจ้งจากโปรแกรมเมอร์",
+      "code": "int(\"123\"); str(456); list(\"abc\"); tuple([1,2])",
+      "exercises": []
+    }
+  },
+  "การควบคุมการทำงาน": {
+    "คำสั่ง If": {
+      "exp": "คำสั่ง If (If Statements) อนุญาตให้ทำงานตามเงื่อนไขของบล็อกโค้ดตามนิพจน์บูลีน การใช้ if/elif/else ช่วยให้มีหลายเส้นทาง",
+      "code": "if x > 0: print(\"positive\")\nelif x == 0: print(\"zero\")\nelse: print(\"negative\")",
+      "exercises": []
+    },
+    "การวนลูป For": {
+      "exp": "การวนลูป For (For Loops) วนซ้ำตามจำนวนครั้งที่กำหนดหรือเหนือสมาชิกในคอลเลกชัน",
+      "code": "for i in range(5): print(i)\nfor key, val in dict.items(): print(key, val)",
+      "exercises": []
+    },
+    "การวนลูป While": {
+      "exp": "การวนลูป While (While Loops) ทำซ้ำตราบใดที่เงื่อนไขที่กำหนดยังเป็นจริง",
+      "code": "while x > 0: print(x); x -= 1",
+      "exercises": []
+    },
+    "Break และ Continue": {
+      "exp": "คำสั่ง Break และ Continue ข้ามคำสั่งที่เหลือในรอบการวนลูปปัจจุบันและไปยังรอบถัดไป",
+      "code": "for i in range(10):\n  if i == 5: break\n  if i % 2 == 0: continue\n  print(i)",
+      "exercises": []
+    },
+    "List Comprehensions": {
+      "exp": "List Comprehensions ให้ไวยากรณ์ที่กระชับสำหรับการสร้างคอลเลกชันโดยการวนซ้ำและกรองสมาชิก",
+      "code": "[x**2 for x in range(10) if x % 2 == 0]",
+      "exercises": []
+    },
+    "Dict Comprehensions": {
+      "exp": "Dict Comprehensions ให้ไวยากรณ์ที่กระชับสำหรับการสร้างดิกชันนารีโดยการวนซ้ำและกรอง",
+      "code": "{x: x**2 for x in range(5)}",
+      "exercises": []
+    },
+    "Generator Expressions": {
+      "exp": "Generator Expressions ให้ไวยากรณ์ที่กระชับสำหรับการสร้าง iterator ที่ขี้เกียจ (lazy) ซึ่งผลิตค่าทีละค่า ประหยัดหน่วยความจำ",
+      "code": "sum(x**2 for x in range(1000000))",
+      "exercises": []
+    },
+    "Ternary Operator": {
+      "exp": "Ternary Operator คือนิพจน์แบบมีเงื่อนไขในบรรทัดเดียว: value_if_true if condition else value_if_false",
+      "code": "\"even\" if x % 2 == 0 else \"odd\"",
+      "exercises": []
+    },
+    "if-elif-else": [
+      "Branch การทำงานตามเงื่อนไขบูลีน Python ใช้ elif สำหรับ if-else chains ต้องใช้โคลอนและการย่อหน้า ข้อผิดพลาดทั่วไป: การลืมโคลอนที่ท้ายเงื่อนไข แนวปฏิบัติที่ดี: หลีกเลี่ยงการซ้อนลึกโดยการ return เร็วหรือใช้ guard clauses",
+      "score = 85\nif score >= 90:\n    print('A')\nelif score >= 80:\n    print('B')\nelse:\n    print('C')"
+    ],
+    "Match Statement": [
+      "Structural pattern matching (Python 3.10+) ช่วยให้การแตกแขนงแบบหลายทางที่สวยงาม รองรับ literal, class, sequence, และ mapping patterns ข้อผิดพลาดทั่วไป: การลืมว่า patterns จับคู่แบบโครงสร้าง ไม่ใช่โดย identity ใช้ _ เป็น default case",
+      "status = 404\nmatch status:\n    case 200:\n        print('OK')\n    case 404:\n        print('Not Found')\n    case _:\n        print('Unknown')"
+    ],
+    "for & range()": [
+      "วนซ้ำผ่าน iterable ใดๆ range(stop), range(start, stop), range(start, stop, step) ข้อผิดพลาดทั่วไป: การแก้ไขลิสต์ขณะวนซ้ำ — วนซ้ำบน copy แทน แนวปฏิบัติที่ดี: ใช้ enumerate() เมื่อต้องการทั้ง index และ value",
+      "for i in range(3):\n    print(i)\n\nfruits = ['apple', 'banana', 'cherry']\nfor i, fruit in enumerate(fruits):\n    print(f\"{i}: {fruit}\")"
+    ],
+    "while statement": [
+      "วนลูปตราบใดที่เงื่อนไขเป็น True ใช้ด้วยความระมัดระวังเพื่อหลีกเลี่ยง infinite loops ข้อผิดพลาดทั่วไป: การลืมอัปเดตตัวแปรลูป แนวปฏิบัติที่ดี: เลือกใช้ for-loops มากกว่า while-loops เมื่อวนซ้ำลำดับที่รู้จัก",
+      "i = 0\nwhile i < 3:\n    print(i)\n    i += 1\n\nwhile True:\n    line = input('> ')\n    if line == 'quit':\n        break\n    print(line)"
+    ],
+    "break, continue & else": [
+      "'break' ออกจากลูปทันที 'continue' ข้ามไปยัง iteration ถัดไป 'else' clause ในลูปจะทำงานเฉพาะเมื่อลูปจบตามปกติ (ไม่มีการ break) ข้อผิดพลาดทั่วไป: การลืมว่า loop-else ทำงานหลังจากจบปกติ — มันจะไม่ทำงานเมื่อ break ถูกเรียก",
+      "for n in range(5):\n    if n == 2: continue\n    if n == 4: break\n    print(n)\n\nfor n in range(3):\n    print(n)\nelse:\n    print(\"Loop completed (no break)\")"
+    ]
+  },
+  "ฟังก์ชัน": {
+    "พื้นฐานฟังก์ชัน": {
+      "exp": "ฟังก์ชัน (Functions) คือบล็อกโค้ดที่สามารถนำกลับมาใช้ใหม่ได้ รับอินพุต, ดำเนินการ, และคืนค่าผลลัพธ์",
+      "code": "def greet(name): return f\"Hello {name}\"; result = greet(\"Alice\")",
+      "exercises": []
+    },
+    "พารามิเตอร์และอาร์กิวเมนต์": {
+      "exp": "พารามิเตอร์ (Parameters) และอาร์กิวเมนต์ (Arguments) คือตัวแปรในนิยามฟังก์ชันที่รับค่าเมื่อถูกเรียกใช้ Python รองรับ positional, keyword, default, *args, และ **kwargs",
+      "code": "def func(a, b=2, *args, **kwargs): pass",
+      "exercises": []
+    },
+    "Lambda Functions": {
+      "exp": "ฟังก์ชัน Lambda (Lambda Functions) คือฟังก์ชันไร้ชื่อแบบอินไลน์ที่จำกัดเพียงนิพจน์เดียว",
+      "code": "add = lambda a, b: a + b; list(map(lambda x: x*2, [1,2,3]))",
+      "exercises": []
+    },
+    "Decorators": {
+      "exp": "Decorators คือฟังก์ชันที่ปรับเปลี่ยนหรือเพิ่มประสิทธิภาพของฟังก์ชันอื่น ใช้ไวยากรณ์ @ และใช้ทั่วไปสำหรับ logging, validation, และ access control",
+      "code": "def timer(f):\n  def wrapper(*args, **kwargs):\n    start = time.time(); result = f(*args, **kwargs); print(time.time()-start); return result\n  return wrapper",
+      "exercises": []
+    },
+    "Generators": {
+      "exp": "Generators คือฟังก์ชันที่สามารถหยุดการทำงานชั่วคราวและผลิตค่าหลายค่าเมื่อเวลาผ่านไป รักษาสถานะระหว่างการเรียก เหมาะสำหรับ lazy evaluation และลำดับอนันต์",
+      "code": "def count(n):\n  for i in range(n): yield i",
+      "exercises": []
+    },
+    "Iterators": {
+      "exp": "Iterators คือออบเจกต์ที่ implement iteration protocol ให้วิธีการ遍历สมาชิกตามลำดับ",
+      "code": "",
+      "exercises": []
+    },
+    "Definitions & Scopes": [
+      "ฟังก์ชันนิยามด้วย 'def' ตัวแปรทำตามกฎ LEGB: Local, Enclosing, Global, Built-in ใช้ 'global' และ 'nonlocal' เพื่อ rebind ตัวแปรในขอบเขตภายนอก ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า nested function สามารถแก้ไขตัวแปรภายนอกได้โดยไม่ต้องใช้ 'nonlocal' — การกำหนดค่าจะสร้าง local ใหม่แทน",
+      "x = 'global'\ndef outer():\n    x = 'enclosing'\n    def inner():\n        nonlocal x\n        x = 'changed'\n    inner()\n    print(x)  # 'changed'\nouter()\nprint(x)  # 'global'"
+    ],
+    "Argument Logic": [
+      "Python รองรับ positional, keyword, default, *args, และ **kwargs parameters ลำดับ: positional, *args, keyword-only, **kwargs ข้อผิดพลาดทั่วไป: การใช้ mutable default arguments (เช่น def f(x=[])) — default จะถูกประเมินครั้งเดียวตอนนิยาม แนวปฏิบัติที่ดี: ใช้ None เป็นค่าเริ่มต้นและสร้าง mutable ภายใน",
+      "def func(a, b=10, *args, verbose=False, **kwargs):\n    print(a, b, args, verbose, kwargs)\n\nfunc(1, 2, 3, 4, verbose=True, name='test')\n\ndef add_item(item, container=None):\n    if container is None:\n        container = []\n    container.append(item)\n    return container"
+    ],
+    "Lambda Expressions": [
+      "ฟังก์ชันไร้ชื่อแบบอินไลน์ที่จำกัดเพียงนิพจน์เดียว มีประโยชน์กับ sorted(), map(), filter() และ key functions ข้อผิดพลาดทั่วไป: การพยายามใช้คำสั่ง (print, return) ภายใน lambda — อนุญาตเฉพาะนิพจน์เท่านั้น แนวปฏิบัติที่ดี: ใช้ lambda เฉพาะการดำเนินการง่ายๆ; นิยามฟังก์ชันที่มีชื่อสำหรับตรรกะที่ซับซ้อน",
+      "add = lambda x, y: x + y\nprint(add(2, 3))\n\ndata = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]\nsorted_data = sorted(data, key=lambda x: x['age'])\nprint(sorted_data)"
+    ],
+    "Recursion": [
+      "ฟังก์ชันที่เรียกใช้ตัวเอง Python มีค่าเริ่มต้น recursion limit ที่ 1000 — ใช้ sys.setrecursionlimit() ด้วยความระมัดระวัง ข้อผิดพลาดทั่วไป: การลืม base case ทำให้เกิด RecursionError แนวปฏิบัติที่ดี: เลือกใช้ iteration มากกว่า recursion สำหรับการเรียกซ้ำลึก; พิจารณา lru_cache สำหรับ memoization",
+      "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))  # 120\n\nfrom functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n-1) + fib(n-2)\n\nprint(fib(100))  # 354224848179261915075"
+    ],
+    "Docstrings": [
+      "สตริงสามเครื่องหมายคำพูดเป็นคำสั่งแรกในฟังก์ชัน/คลาส/โมดูล เข้าถึงผ่าน .__doc__ หรือ help() ข้อผิดพลาดทั่วไป: การบันทึก 'อะไร' แทน 'ทำไม' — docstrings ควรอธิบายพฤติกรรม, พารามิเตอร์, ค่าที่คืน, และข้อยกเว้นที่โยน แนวปฏิบัติที่ดี: ทำตาม PEP 257 หรือใช้ Google/NumPy style",
+      "def divide(a: float, b: float) -> float:\n    \"\"\"หาร a ด้วย b\n\n    Args:\n        a: ตัวตั้ง\n        b: ตัวหาร (ห้ามเป็นศูนย์)\n\n    Returns:\n        ผลหารเป็น float\n\n    Raises:\n        ZeroDivisionError: ถ้า b เป็นศูนย์\n    \"\"\"\n    return a / b\n\nprint(divide.__doc__)"
+    ],
+    "Type Hints ในฟังก์ชัน": [
+      "PEP 484 annotations สำหรับพารามิเตอร์และชนิดที่คืนค่า ไม่ได้บังคับใช้ตอน runtime — ตรวจสอบโดย static type checkers (mypy, pyright) ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า annotations มีผลต่อ runtime behavior — ไม่มี แนวปฏิบัติที่ดี: annotate ทุก public function signature",
+      "from typing import List, Optional\n\ndef process(items: List[int], multiplier: Optional[float] = None) -> List[int]:\n    if multiplier is not None:\n        return [int(x * multiplier) for x in items]\n    return items\n\nprint(process([1, 2, 3], 2.5))"
+    ]
+  },
+  "การจัดการข้อผิดพลาด": {
+    "Try Except": {
+      "exp": "Try/Except จัดการข้อผิดพลาดแบบมีโครงสร้าง where โค้ดที่อาจล้มเหลวทำงานใน try block และข้อผิดพลาดถูกจับใน except blocks finally block ทำงานโค้ดทำความสะอาดไม่ว่าผลลัพธ์จะเป็นอย่างไร",
+      "code": "try:\n  result = risky_operation()\nexcept ValueError as e:\n  print(f\"Value error: {e}\")\nexcept Exception as e:\n  print(f\"Unexpected: {e}\")\nelse:\n  print(\"No error\")\nfinally:\n  cleanup()",
+      "exercises": []
+    },
+    "Custom Exceptions": {
+      "exp": "ข้อยกเว้นแบบกำหนดเอง (Custom Exceptions) ให้กำหนดประเภทข้อผิดพลาดเฉพาะของแอปพลิเคชันที่พกพาข้อมูลที่เกี่ยวข้อง",
+      "code": "class ValidationError(Exception):\n  def __init__(self, message):\n    self.message = message\n    super().__init__(self.message)",
+      "exercises": []
+    },
+    "Exception Hierarchy": {
+      "exp": "Exception Hierarchy จัดระเบียบประเภทข้อยกเว้นในลำดับชั้นคลาส where ข้อยกเว้นที่เฉพาะเจาะจงสืบทอดจากข้อยกเว้นทั่วไป",
+      "code": "BaseException -> SystemExit, KeyboardInterrupt, Exception -> all standard errors",
+      "exercises": []
+    },
+    "Assertions": {
+      "exp": "การยืนยัน (Assertions) ตรวจสอบว่าค่าจริงตรงกับค่าที่คาดหวังในการทดสอบ เมื่อการยืนยันล้มเหลว มันจะโยนข้อผิดพลาดพร้อมข้อความอธิบาย",
+      "code": "assert x > 0, \"x must be positive\"",
+      "exercises": []
+    },
+    "Context Managers": {
+      "exp": "Context Managers จัดการทรัพยากรที่ต้องการ setup และ cleanup ที่เหมาะสม คำสั่ง with ทำให้มั่นใจว่าทรัพยากรถูก acquire และ release อย่างถูกต้องแม้เมื่อมีข้อยกเว้น",
+      "code": "with open(\"file.txt\", \"r\") as f:\n  content = f.read()",
+      "exercises": []
+    },
+    "Raising Exceptions": {
+      "exp": "การโยนข้อยกเว้น (Raising Exceptions) คือออบเจกต์ที่แทนเงื่อนไขพิเศษที่ต้องการการจัดการพิเศษ พวกมันแพร่กระจายขึ้นไปตาม call stack จนกว่าจะถูกจับ",
+      "code": "raise ValueError(\"Invalid input\")",
+      "exercises": []
+    }
+  },
+  "การเขียนโปรแกรมเชิงออบเจกต์": {
+    "คลาสและออบเจกต์": {
+      "exp": "คลาส (Classes) และออบเจกต์ (Objects) คือแม่แบบสำหรับสร้างออบเจกต์ที่มี properties และ methods ร่วมกัน",
+      "code": "class Dog:\n  def __init__(self, name):\n    self.name = name\n  def bark(self):\n    return f\"{self.name} says woof\"",
+      "exercises": []
+    },
+    "การสืบทอด": {
+      "exp": "การสืบทอด (Inheritance) ช่วยให้คลาสสามารถรับ properties และ methods จากคลาสแม่",
+      "code": "class Puppy(Dog):\n  def bark(self):\n    return f\"{self.name} says yip\"",
+      "exercises": []
+    },
+    "Polymorphism": {
+      "exp": "Polymorphism 允许ออบเจกต์ชนิดต่างๆ ถูกจัดการอย่างเป็นหนึ่งเดียวผ่านอินเทอร์เฟสร่วม",
+      "code": "for animal in [Dog(\"Rex\"), Cat(\"Whiskers\")]:\n  print(animal.speak())",
+      "exercises": []
+    },
+    "Encapsulation": {
+      "exp": "Encapsulation รวบรวมข้อมูลและ methods ที่ดำเนินการกับข้อมูลนั้นไว้ในหน่วยเดียว จำกัดการเข้าถึงโดยตรงไปยังรายละเอียดภายใน",
+      "code": "class Person:\n  def __init__(self):\n    self._protected = \"single underscore\"\n    self.__private = \"name mangled\"",
+      "exercises": []
+    },
+    "Properties": {
+      "exp": "Properties คือสมาชิกคลาสที่ให้การเข้าถึงข้อมูลภายในที่มีการควบคุมผ่าน getter และ setter methods",
+      "code": "@property\n  def age(self): return self._age\n  @age.setter\n  def age(self, val):\n    if val < 0: raise ValueError\n    self._age = val",
+      "exercises": []
+    },
+    "Magic Methods": {
+      "exp": "Magic Methods คือ methods พิเศษที่มีเครื่องหมาย underscore คู่ที่กำหนดว่าออบเจกต์ทำงานอย่างไรกับการดำเนินการในตัว",
+      "code": "__init__, __str__, __repr__, __len__, __getitem__, __call__",
+      "exercises": []
+    },
+    "Class Methods": {
+      "exp": "Class Methods คือฟังก์ชันที่ belongs to คลาส ไม่ใช่ instance ใช้ @classmethod decorator",
+      "code": "@classmethod\n  def from_string(cls, s):\n    return cls(*s.split(\",\"))",
+      "exercises": []
+    },
+    "Static Methods": {
+      "exp": "Static Methods คือฟังก์ชันที่ belongs to คลาส แต่ไม่ต้องเข้าถึง instance หรือคลาส ใช้ @staticmethod decorator",
+      "code": "@staticmethod\n  def validate(x):\n    return isinstance(x, int)",
+      "exercises": []
+    },
+    "Abstract Classes": {
+      "exp": "Abstract Classes ไม่สามารถสร้าง instance ได้โดยตรงและถูกออกแบบมาให้เป็น base class สำหรับ inheritance",
+      "code": "from abc import ABC, abstractmethod\nclass Shape(ABC):\n  @abstractmethod\n  def area(self): pass",
+      "exercises": []
+    },
+    "Dataclasses": {
+      "exp": "Dataclasses คือคลาสที่เรียบง่ายที่ออกแบบมาสำหรับเก็บข้อมูลโดยมี boilerplate น้อยที่สุด",
+      "code": "from dataclasses import dataclass\n@dataclass\nclass Point:\n  x: float\n  y: float",
+      "exercises": []
+    }
+  }
+}
