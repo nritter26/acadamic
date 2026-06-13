@@ -477,5 +477,97 @@
       "code": "Temporal.Now.plainDateISO();",
       "exercises": []
     }
+  },
+  "ประสิทธิภาพและการปรับแต่ง": {
+    "การจัดการหน่วยความจำ": {
+      "exp": "ทำความเข้าใจวงจรชีวิตของหน่วยความจำใน JavaScript",
+      "code": "Allocation, usage, and garbage collection phases.",
+      "exercises": []
+    },
+    "Garbage Collection": {
+      "exp": "การคืนหน่วยความจำอัตโนมัติ",
+      "code": "Mark-and-sweep algorithm; generational GC in V8.",
+      "exercises": []
+    },
+    "Memory Leaks": {
+      "exp": "รูปแบบทั่วไปที่ทำให้เกิดการรั่วไหลของหน่วยความจำ",
+      "code": "Global variables, forgotten timers, detached DOM nodes, closures.",
+      "exercises": []
+    },
+    "Debouncing": {
+      "exp": "การหน่วงเวลาการเรียกใช้ฟังก์ชันจนกว่าจะหยุดชั่วคราว",
+      "code": "function debounce(fn, delay) { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); }; }",
+      "exercises": []
+    },
+    "Throttling": {
+      "exp": "การจำกัดอัตราการเรียกใช้ฟังก์ชัน",
+      "code": "function throttle(fn, limit) { let inThrottle; return (...args) => { if (!inThrottle) { fn(...args); inThrottle = true; setTimeout(() => inThrottle = false, limit); } }; }",
+      "exercises": []
+    },
+    "กลยุทธ์การแคช": {
+      "exp": "เทคนิคเพื่อหลีกเลี่ยงการคำนวณที่ซ้ำซ้อน",
+      "code": "Memoization, request caching, service worker cache.",
+      "exercises": []
+    },
+    "Code Splitting": {
+      "exp": "การแบ่งโค้ดเป็นชิ้นส่วนที่โหลดตามต้องการ",
+      "code": "Dynamic import() enables code splitting in bundlers.",
+      "exercises": []
+    },
+    "Tree Shaking": {
+      "exp": "การกำจัดโค้ดที่ไม่ได้ใช้ระหว่างการรวมไฟล์",
+      "code": "Using ES modules enables tree shaking in bundlers like Webpack.",
+      "exercises": []
+    },
+    "Lazy Loading": {
+      "exp": "การเลื่อนการโหลดทรัพยากรที่ไม่สำคัญ",
+      "code": "IntersectionObserver for lazy loading images and components.",
+      "exercises": []
+    }
+  },
+  "ตัวแปรและชนิด": {
+    "var let const": [
+      "The Good Parts แนะนำไม่ให้ใช้ var เลย — เพราะมันรั่วไหลของขอบเขต (scope) และทำให้เกิดข้อผิดพลาดที่ซับซ้อน ใช้ const เป็นค่าเริ่มต้น, ใช้ let เฉพาะเมื่อต้องการกำหนดค่าใหม่ const ไม่ได้หมายถึง immutable (เปลี่ยนแปลงไม่ได้) แต่หมายถึงตัว binding เท่านั้นที่เปลี่ยนไม่ได้",
+      "var oldStyle = 1;    // var: function-scoped, hoisted ไปเป็น undefined, สามารถประกาศซ้ำได้\nlet modern = 2;      // let: block-scoped, hoisted แต่มี TDZ, สามารถกำหนดค่าใหม่ได้\nconst fixed = 3;     // const: block-scoped, ต้องกำหนดค่าเริ่มต้น, ไม่สามารถกำหนดค่าใหม่ได้\n\n// const object: properties สามารถเปลี่ยนได้, binding ไม่สามารถเปลี่ยนได้\nconst user = { name: 'Doge' };            // const binding, mutable object\nuser.name = 'Buddy';  // ✅ อนุญาต — เปลี่ยนแปลง property\n// user = {};         // ❌ TypeError — กำหนดค่า const ใหม่\n\n// ข้อผิดพลาดของ var hoisting\nfunction test() {\n  console.log(x);     // undefined (ไม่ใช่ error — var ถูก hoisted)\n  var x = 5;                             // declaration ถูก hoisted, init อยู่ที่เดิม\n}\n\n// การสาธิต block scope\nif (true) {\n  var a = 1;          // รั่วออกนอก block!\n  let b = 2;          // อยู่ภายใน block\n}\nconsole.log(a);       // 1\n// console.log(b);    // ❌ ReferenceError"
+    ],
+    "ชนิดพื้นฐาน": [
+      "JavaScript มีชนิดพื้นฐาน (primitive types) 7 ชนิด ชนิดพื้นฐานไม่สามารถเปลี่ยนแปลงได้ (immutable) — คุณไม่สามารถเปลี่ยนมันได้ การดำเนินการจะคืนค่าใหม่ typeof null คืนค่า 'object' (เป็นบั๊กของ JS ตั้งแต่แรกเริ่ม)",
+      "typeof 'text';      // 'string' — ข้อมูลข้อความ\ntypeof 42;          // 'number' — 64-bit float (จำนวนเต็มและทศนิยม)\ntypeof 1n;          // 'bigint' — จำนวนเต็มความแม่นยำตามอำเภอใจ\ntypeof true;        // 'boolean' — จริงหรือเท็จ\ntypeof undefined;   // 'undefined' — ประกาศแล้วแต่ยังไม่ได้กำหนดค่า\ntypeof Symbol();    // 'symbol' — ตัวระบุที่ไม่ซ้ำกัน\ntypeof null;        // 'object' — ⚠️ บั๊กที่รู้จักกันดีของ JS (null เป็น primitive)\n\n// ความแปลกประหลาดของตัวเลข: 0.1 + 0.2 ≠ 0.3\nconsole.log(0.1 + 0.2);  // 0.30000000000000004 (IEEE 754 float)"
+    ],
+    "ชนิดอ้างอิง": [
+      "Objects, arrays, และ functions เป็นชนิดอ้างอิง (reference types): ตัวแปรเก็บ pointer ไปยังค่าในหน่วยความจำ การกำหนดค่าหรือการส่งผ่านจะคัดลอก reference ไม่ใช่ค่า — การเปลี่ยนแปลงค่าหนึ่งจะส่งผลต่ออีกค่าหนึ่ง ใช้ spread หรือ structuredClone() สำหรับการคัดลอก",
+      "const obj = { name: 'Doge' };     // สร้าง object literal\nconst copy = obj;                    // copy เป็น REFERENCE (ไม่ใช่ออบเจกต์ใหม่)\ncopy.name = 'Buddy';                 // เปลี่ยนแปลงต้นฉบับผ่าน reference\nconsole.log(obj.name);               // 'Buddy' — ต้นฉบับก็เปลี่ยนด้วย!\n\n// Shallow copy ด้วย spread\nconst shallow = { ...obj };          // แพร่กระจาย properties ไปยังออบเจกต์ใหม่\n\n// Deep copy (จัดการแบบซ้อน)\nconst original = { a: 1, nested: { b: 2 } };  // nested object\nconst deep = structuredClone(original);        // deep copy, ไม่มีการอ้างอิงร่วม\ndeep.nested.b = 99;                            // แก้ไขเฉพาะ deep copy\nconsole.log(original.nested.b);                // 2 — แยกอิสระ"
+    ],
+    "Truthy และ Falsy": [
+      "ทุกค่าจะถูกแปลงเป็น boolean ในเงื่อนไข Crockford เรียกกฎ falsy ของ JavaScript ว่า 'a land of false promises' — เรียนรู้ให้แม่นยำเพื่อหลีกเลี่ยงข้อผิดพลาด มีค่า falsy เพียง 7 ค่า: false, 0, -0, 0n, '', null, undefined, NaN ค่าที่ทำให้สับสน: empty arrays [] และ objects {} เป็น truthy Eloquent JavaScript แสดงรูปแบบที่ใช้งานได้จริง: ใช้ explicit Boolean() หรือ !! เพื่อความชัดเจน และหลีกเลี่ยงการพึ่งพา coercion ในเงื่อนไขที่ซับซ้อน",
+      "// ค่า falsy 7 ค่า — จดจำให้ขึ้นใจ\nconsole.log(Boolean(false));     // false\nconsole.log(Boolean(0));         // false\nconsole.log(Boolean(-0));        // false\nconsole.log(Boolean(0n));        // false\nconsole.log(Boolean(''));        // false\nconsole.log(Boolean(null));      // false\nconsole.log(Boolean(undefined)); // false\nconsole.log(Boolean(NaN));       // false\n\n// ทุกอย่างอื่นเป็น truthy — รวมถึงสิ่งเหล่านี้\nconsole.log(Boolean([]));        // true! (empty array)\nconsole.log(Boolean({}));        // true! (empty object)\nconsole.log(Boolean('false'));   // true! (non-empty string)\nconsole.log(Boolean(Infinity));  // true\n\n// การปฏิบัติ: การตรวจสอบแบบชัดแจ้ง vs การตรวจสอบ truthy\nconst items = [];\n// if (items) เป็น true แม้ว่าจะว่างเปล่า — ผิด!\nif (items.length > 0) { /* ถูกต้อง */ }\n\n// Double negation สำหรับการแปลงอย่างชัดแจ้ง\nconst hasValue = !!input; // true สำหรับค่า truthy ทั้งหมด"
+    ],
+    "การแปลงชนิด": [
+      "JavaScript เป็น weakly typed — มันแปลงชนิดโดยอัตโนมัติ สะดวกแต่อันตราย The Good Parts: ใช้ === และการแปลงอย่างชัดแจ้งเสมอ",
+      "'5' + 1;            // '51' — + กระตุ้น string concat เมื่อ operand ใดเป็น string\n'5' - 1;            // 4 — - บังคับแปลงเป็น number\nNumber('10');       // 10 — แปลง string → number อย่างชัดแจ้ง\nString(42);         // '42' — แปลง number → string อย่างชัดแจ้ง\nBoolean(1);         // true — การแปลงอย่างชัดแจ้ง\n\n// ข้อผิดพลาดของการเท่ากันแบบหลวม (หลีกเลี่ยงสิ่งเหล่านี้)\n5 == '5';           // true — ⚠️ coercion ซ่อนข้อผิดพลาด\n'' == false;        // true — ⚠️\nnull == undefined;  // true — ⚠️ กฎพิเศษ\n\n// ใช้ strict equality แทน\n5 === '5';          // false — ✅ ถูกต้อง"
+    ],
+    "เทมเพลตลิเทอรัล": [
+      "เทมเพลตลิเทอรัล (Template Literals) ใช้ backticks (`) แทนเครื่องหมายคำพูด ใส่นิพจน์ด้วย ${} รองรับหลายบรรทัดโดยไม่ต้องใช้ \\n",
+      "const name = 'Doge';            // ประกาศตัวแปรสำหรับ template string\n`Hello ${name}!`;              // 'Hello Doge!' — ฝังตัวแปร\n\n// หลายบรรทัดโดยไม่ต้องต่อสตริง\nconst html = `\n  <div>\n    <h1>${name}</h1>\n  </div>\n`;\n\n// นิพจน์ใดก็ได้ ไม่ใช่แค่ตัวแปร\n`Total: $${(19.99 * 1.08).toFixed(2)}`;  // 'Total: $21.59'"
+    ],
+    "null กับ undefined": [
+      "undefined หมายถึงตัวแปรถูกประกาศแต่ยังไม่ได้กำหนดค่า null ถูกตั้งค่าให้ว่างเปล่าโดยเจตนา — คุณกำหนดมันอย่างชัดแจ้ง ทั้งสองเป็นคนละชนิดกัน",
+      "let a;                // undefined (อัตโนมัติ — ไม่เคยถูกกำหนดค่า)\nconst b = null;       // null (ว่างเปล่าโดยเจตนา)\n\ntypeof null;          // 'object' — ⚠️ บั๊กของ JS\ntypeof undefined;     // 'undefined'\n\nnull == undefined;    // true — loose equality (หลีกเลี่ยง)\nnull === undefined;   // false — strict equality (ถูกต้อง)\n\n// ?? ถือว่าเฉพาะ null/undefined เท่านั้นที่ 'ไม่มีค่า'\n0 ?? 10;              // 0 (?? เก็บค่า 0)\n0 || 10;              // 10 (|| ถือว่า 0 เป็น falsy)"
+    ],
+    "Symbol และ BigInt": [
+      "Symbol สร้างตัวระบุที่ไม่ซ้ำกันและไม่เปลี่ยนแปลงสำหรับ properties ของออบเจกต์ BigInt แทนจำนวนเต็มที่เกิน Number.MAX_SAFE_INTEGER โดยใช้คำต่อท้าย n",
+      "const sym = Symbol('id');      // สร้าง symbol key ที่ไม่ซ้ำกัน\nconst obj = { [sym]: 'secret' }; // ใช้ symbol เป็น property key\nconsole.log(obj[sym]);           // เข้าถึง property ผ่าน symbol\n\nconst big = 9007199254740991n;   // bigint literal ที่มี n ต่อท้าย\nconsole.log(big + 1n);           // การคำนวณเลขคณิตทำงานกับ bigints"
+    ]
+  },
+  "ตัวดำเนินการ": {
+    "ตัวดำเนินการเลขคณิต": [
+      "คณิตศาสตร์มาตรฐาน: + (บวก), - (ลบ), * (คูณ), / (หาร), % (เศษเหลือ/modulo), ** (ยกกำลัง) ++ และ -- แบบ prefix/postfix เพิ่ม/ลดทีละ 1 ข้อผิดพลาดทั่วไป: + ยังใช้ต่อสตริงได้ด้วย — ถ้า operand ใดเป็นสตริง ทั้งคู่จะถูกแปลงเป็นสตริง แนวปฏิบัติที่ดี: ใช้วงเล็บเพื่อความชัดเจนของลำดับความสำคัญของตัวดำเนินการ; หลีกเลี่ยงการใช้ ++ ภายในนิพจน์",
+      "console.log(10 + 3);   // 13\nconsole.log(10 - 3);   // 7\nconsole.log(10 * 3);   // 30\nconsole.log(10 / 3);   // 3.333... (float, ไม่ใช่ floor)\nconsole.log(10 % 3);   // 1 (เศษเหลือ)\nconsole.log(2 ** 4);   // 16 (ยกกำลัง)\n\n// + กับสตริงกระตุ้นการต่อกัน\nconsole.log(1 + '2');  // '12' (string, ไม่ใช่ 3)\nconsole.log(1 + 2 + '3'); // '33' (ซ้ายไปขวา: 1+2=3, แล้ว 3+'3')"
+    ],
+    "ตัวดำเนินการเปรียบเทียบ": [
+      "เปรียบเทียบค่าและคืนค่า boolean เชิงสัมพันธ์: >, <, >=, <= ความเท่ากัน: === (strict, ไม่มีการแปลงชนิด) และ == (loose, แปลงชนิด) ข้อผิดพลาดทั่วไป: การใช้ == อนุญาตให้มีการแปลงชนิด (เช่น 5 == '5' เป็น true) ซึ่งทำให้เกิดข้อผิดพลาดที่ซับซ้อน แนวปฏิบัติที่ดี: ใช้ === และ !== เสมอ; ใช้ Object.is() สำหรับการเปรียบเทียบ NaN (Object.is(NaN, NaN) เป็น true, ต่างจาก NaN === NaN ที่เป็น false)",
+      "console.log(5 > 3);     // true\nconsole.log(5 <= 3);    // false\n\n// Strict vs loose equality\nconsole.log(5 === '5'); // false (ชนิดต่างกัน — ถูกต้อง)\nconsole.log(5 == '5');  // true (coercion — หลีกเลี่ยง)\n\n// NaN เป็นค่าเดียวที่ไม่เท่ากับตัวมันเอง\nconsole.log(NaN === NaN); // false (แปลก)\nconsole.log(Object.is(NaN, NaN)); // true\n\n// Object.is สำหรับ strict equality กับกรณีพิเศษ\nconsole.log(Object.is(0, -0)); // false (แยกแยะเครื่องหมายศูนย์)"
+    ]
   }
 }
+
