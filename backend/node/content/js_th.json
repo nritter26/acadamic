@@ -1,0 +1,481 @@
+{
+  "พื้นฐาน": {
+    "ตัวแปร": {
+      "exp": "ตัวแปร (Variables) คือภาชนะสำหรับเก็บค่าข้อมูล",
+      "code": "let x = 5;",
+      "exercises": []
+    },
+    "ชนิดข้อมูล": {
+      "exp": "JavaScript มีชนิดข้อมูลแบบไดนามิก (dynamic types): string, number, boolean, null, undefined, object, symbol, bigint",
+      "code": "let name = \"Alice\"; let age = 30; let isStudent = true;",
+      "exercises": []
+    },
+    "ตัวดำเนินการ": {
+      "exp": "ตัวดำเนินการ (Operators) ใช้ดำเนินการกับตัวแปรและค่า",
+      "code": "let sum = 10 + 5; let isEqual = (x === y);",
+      "exercises": []
+    },
+    "การควบคุมการทำงาน": {
+      "exp": "คำสั่งควบคุมการทำงาน (Control Flow) ควบคุมลำดับการทำงานของโค้ด",
+      "code": "if (x > 0) { console.log(\"Positive\"); } else { console.log(\"Non-positive\"); }",
+      "exercises": []
+    },
+    "การวนลูป": {
+      "exp": "การวนลูป (Loops) ทำซ้ำการทำงานของโค้ดตามเงื่อนไขที่กำหนด",
+      "code": "for (let i = 0; i < 5; i++) { console.log(i); }",
+      "exercises": []
+    },
+    "ฟังก์ชัน": {
+      "exp": "ฟังก์ชัน (Functions) คือบล็อกโค้ดที่สามารถนำกลับมาใช้ใหม่ได้",
+      "code": "function greet(name) { return \"Hello \" + name; }",
+      "exercises": []
+    },
+    "คอมเมนต์": {
+      "exp": "คอมเมนต์ (Comments) ใช้อธิบายโค้ดและจะไม่ถูกทำงาน",
+      "code": "// This is a single-line comment\n/* This is a multi-line comment */",
+      "exercises": []
+    },
+    "โหมดเข้มงวด": [
+      "ใช้ 'use strict' เพื่อเปิดใช้งานการทำงานของ JavaScript ที่ปลอดภัยและคาดเดาได้มากขึ้น และหลีกเลี่ยงข้อผิดพลาดเงียบทั่วไป",
+      "'use strict';                      // เปิดใช้งานโหมดเข้มงวด — จับข้อผิดพลาดเงียบ\nfunction check() {                 // โหมดเข้มงวดจะทำงานในขอบเขตฟังก์ชัน\n  x = 5; // ReferenceError ในโหมดเข้มงวด\n}",
+      [
+        {
+          "type": "mcq",
+          "prompt": "เกิดอะไรขึ้นเมื่อคุณกำหนดค่าให้ตัวแปรที่ไม่ได้ประกาศในโหมดเข้มงวด?",
+          "options": [
+            "ตัวแปรถูกสร้างเป็น global โดยอัตโนมัติ",
+            "เกิด ReferenceError",
+            "การกำหนดค่าถูกเพิกเฉยอย่างเงียบๆ",
+            "ตัวแปรกลายเป็น undefined"
+          ],
+          "correctIndex": 1,
+          "explanation": "ในโหมดเข้มงวด การกำหนดค่าให้ตัวแปรที่ไม่ได้ประกาศจะทำให้เกิด ReferenceError แทนที่จะสร้างตัวแปร global ซึ่งป้องกันการสร้างตัวแปร global โดยไม่ตั้งใจ"
+        },
+        {
+          "type": "fix-bug",
+          "prompt": "แก้ไขโค้ดนี้ให้ประกาศตัวแปรอย่างถูกต้องแทนที่จะสร้างตัวแปร global โดยไม่ตั้งใจ:",
+          "code": "function add(a, b) {\n  result = a + b;\n  return result;\n}",
+          "hint": "เพิ่มคำประกาศ (let หรือ const) ก่อนตัวแปร",
+          "expected": "function add(a, b) {\n  const result = a + b;\n  return result;\n}"
+        }
+      ]
+    ],
+    "JavaScript คืออะไร": [
+      "JavaScript เป็นภาษาระดับสูง (high-level) ที่ถูกแปลความ (interpreted) และมีชนิดแบบไดนามิก (dynamically typed) ที่ทำงานในเบราว์เซอร์และบนเซิร์ฟเวอร์ (Node.js) มันมีส่วนที่ดี (functions เป็น first-class citizens, objects, closures) และส่วนที่ไม่ดี (global variables, ความแปลกประหลาดของ type coercion) หนังสือ 'The Good Parts' ของ Crockford แนะนำให้หลีกเลี่ยงส่วนที่ไม่ดีโดยใช้ strict mode, ใช้ === แทน ==, และลดการใช้ global scope ข้อมูลเชิงลึกจาก Eloquent JavaScript: ให้คิดถึง JavaScript เป็นภาษาที่ functions เป็นค่าที่สามารถส่งต่อได้ ทำให้ภาษามีรากฐานที่ลึกซึ้งในรูปแบบการเขียนโปรแกรมเชิงฟังก์ชัน (functional programming) ควบคู่ไปกับรูปแบบเชิงคำสั่ง (imperative style)",
+      "console.log('Hello JavaScript');  // พิมพ์สตริงไปยัง console ของเบราว์เซอร์\n\n// ส่วนที่ดี: functions เป็นค่า\nconst greet = function(name) { return 'Hello ' + name; };  // กำหนด anonymous function ให้ตัวแปร\nconsole.log(greet('World'));  // เรียกใช้ฟังก์ชัน, แสดงผลลัพธ์",
+      [
+        {
+          "type": "mcq",
+          "prompt": "console.log ทำอะไร?",
+          "options": [
+            "อ่านข้อมูลจากผู้ใช้",
+            "พิมพ์ผลลัพธ์ไปยังคอนโซลของเบราว์เซอร์",
+            "สร้างตัวแปรใหม่",
+            "กำหนดฟังก์ชัน"
+          ],
+          "correctIndex": 1,
+          "explanation": "console.log() พิมพ์อาร์กิวเมนต์ไปยังคอนโซลสำหรับนักพัฒนาของเบราว์เซอร์ เป็นวิธีที่ใช้บ่อยที่สุดในการดีบัก JavaScript"
+        },
+        {
+          "type": "fill-blank",
+          "prompt": "เติมฟังก์ชันที่ทักทายผู้ใช้ตามชื่อให้สมบูรณ์:",
+          "code": "function greet(name) {\n  ___\n}",
+          "expected": "function greet(name) {\n  return 'Hello ' + name;\n}"
+        }
+      ]
+    ],
+    "ไวยากรณ์และคอมเมนต์": [
+      "ไวยากรณ์ของ JavaScript คล้ายภาษา C มีการใช้ semicolon, บล็อก, และการ区分ตัวพิมพ์เล็กใหญ่ Crockford แนะนำให้ใช้ semicolon เสมอ — automatic semicolon insertion (ASI) อาจทำให้โค้ดเสียหายเมื่อบรรทัดเริ่มต้นด้วย ( หรือ [ คอมเมนต์ควรอธิบาย WHY (ทำไม) ไม่ใช่ WHAT (อะไร) Eloquent JavaScript เน้นการจัดรูปแบบที่สะอาด: การย่อหน้า (indentation) ที่สม่ำเสมอ (2 ช่องว่าง), ชื่อที่มีความหมาย, และการแยกนิพจน์ที่ซับซ้อนออกเป็นส่วนย่อยที่มีชื่อ",
+      "// Single-line comment — อธิบายว่าทำไม (why) ไม่ใช่อะไร (what)\n/* Multi-line comment */\n\n// หลีกเลี่ยงการพึ่งพา ASI — ใช้ semicolon เสมอ\nconst add = function(a, b) {\n  return a + b;\n}; // ต้องมี semicolon ที่นี่\n\n// ถ้าไม่มี semicolon โค้ดนี้จะเสีย:\nconst x = add(1, 2)\n[1, 2, 3].forEach(console.log); // ถูกตีความเป็น add(...)[...]"
+    ],
+    "คำสั่งและบล็อก": [
+      "เรียนรู้ว่ากลุ่มคำสั่งและขอบเขตของบล็อกทำงานกับวงเล็บปีกกาอย่างไร และเหตุใดการจัดกลุ่มคำสั่งอย่างระมัดระวังช่วยหลีกเลี่ยงข้อผิดพลาด",
+      "if (true) {           // เป็นจริงเสมอ, บล็อกทำงาน\n  let count = 1;       // ประกาศตัวแปรแบบ block-scoped\n  console.log(count);  // แสดง 1, count อยู่ในขอบเขตบล็อก\n}"
+    ],
+    "เอนจิน JavaScript": [
+      "เอนจิน JavaScript: V8 (Chrome, Node.js, Deno), SpiderMonkey (Firefox), JavaScriptCore (Safari), Chakra (Edge รุ่นเก่า) ทั้งหมดใช้งานตามข้อกำหนด ECMAScript การคอมไพล์แบบ Just-In-Time (JIT): Ignition (interpreter) + TurboFan (optimizing compiler) ใน V8 เอนจินเพิ่มความสามารถผ่านสภาพแวดล้อมโฮสต์ (browser APIs, Node.js APIs) ข้อกำหนด ECMAScript กำหนดภาษาหลัก; เอนจินอาจขยายเพิ่มเติม",
+      "// การตรวจสอบเอนจิน (ไม่น่าเชื่อถือ, แค่สาธิต)\nconst engine = typeof globalThis.Buffer !== 'undefined' ? 'Node.js (V8)' :\n    typeof window !== 'undefined' ? 'Browser' : 'Unknown';\nconsole.log(`Running in: ${engine}`);\n\n// ตรวจสอบเอนจินผ่าน stack trace\nfunction getEngine() {\n    try {\n        throw new Error();\n    } catch (e) {\n        const stack = e.stack;\n        if (stack.includes('V8')) return 'V8';\n        if (stack.includes('SpiderMonkey')) return 'SpiderMonkey';\n        return 'Unknown';\n    }\n}\n\n// V8 --harmony flags เปิดใช้งาน proposal stage 3+\n// Node: node --v8-options | grep harmony\n// Chrome: chrome://flags/#enable-javascript-harmony"
+    ]
+  },
+  "สตริงและตัวเลข": {
+    "เมธอดสตริง": {
+      "exp": "สตริง (Strings) มีเมธอดในตัวสำหรับการจัดการ",
+      "code": "\"Hello\".toUpperCase(); \"Hello\".length;",
+      "exercises": []
+    },
+    "เทมเพลตลิเทอรัล": {
+      "exp": "เทมเพลตลิเทอรัล (Template Literals) อนุญาตให้แทรกนิพจน์ได้",
+      "code": "let name = \"World\"; console.log(`Hello ${name}`);",
+      "exercises": []
+    },
+    "เมธอดตัวเลข": {
+      "exp": "ตัวเลข (Numbers) มีเมธอดและคุณสมบัติในตัว",
+      "code": "Math.round(4.7); Number.isInteger(5);",
+      "exercises": []
+    },
+    "ออบเจกต์ Math": {
+      "exp": "ออบเจกต์ Math มีค่าคงที่และฟังก์ชันทางคณิตศาสตร์",
+      "code": "Math.random(); Math.floor(4.7); Math.pow(2, 3);",
+      "exercises": []
+    },
+    "การแปลงชนิด": {
+      "exp": "JavaScript สามารถแปลงระหว่างชนิดได้ทั้งโดยนัยและโดยชัดแจ้ง",
+      "code": "String(123); Number(\"456\"); Boolean(0);",
+      "exercises": []
+    },
+    "ความแม่นยำของตัวเลข": {
+      "exp": "ตัวเลขทศนิยม (floating-point) มีข้อจำกัดด้านความแม่นยำ",
+      "code": "console.log(0.1 + 0.2); // 0.30000000000000004",
+      "exercises": []
+    }
+  },
+  "อาร์เรย์และคอลเลกชัน": {
+    "เมธอดอาร์เรย์": [
+      "Eloquent JavaScript เรียกเมธอดของอาร์เรย์ (Array) อย่าง map, filter, และ reduce ว่า 'higher-order functions' — ฟังก์ชันที่ทำงานกับฟังก์ชันอื่น ทำให้สามารถเขียนในลักษณะ declarative: คุณอธิบาย WHAT (อะไร) ที่คุณต้องการ ไม่ใช่ HOW (อย่างไร) ซึ่งอ่านง่ายกว่าและมีข้อผิดพลาดน้อยกว่าการใช้ for loop ด้วยตนเอง map เปลี่ยนแต่ละสมาชิก filter เลือกสมาชิก reduce รวมสมาชิกเป็นค่าเดียว find หาค่าที่ตรงกันเป็นค่าแรก some ตรวจสอบว่ามีสมาชิกใดตรงตามเงื่อนไขหรือไม่ every ตรวจสอบว่าทุกสมาชิกตรงตามเงื่อนไขหรือไม่ The Good Parts เตือนไม่ให้เปลี่ยนแปลงอาร์เรย์ในขณะที่กำลังวนลูป — ให้ใช้ map/filter เพื่อสร้างอาร์เรย์ใหม่แทน",
+      "const numbers = [1, 2, 3, 4, 5];        // อาร์เรย์ต้นทาง\n\n// รูปแบบ Declarative vs Imperative\n// Imperative (for loop): HOW (อย่างไร)\nlet evens = [];\nfor (let i = 0; i < numbers.length; i++) {         // วนลูปด้วยตนเอง\n  if (numbers[i] % 2 === 0) evens.push(numbers[i]); // ตรวจสอบและรวบรวม\n}\n\n// Declarative (higher-order): WHAT (อะไร)\nconst even = numbers.filter(n => n % 2 === 0);     // filter: เก็บเฉพาะเลขคู่\n\n// การต่อ chain\nconst result = numbers\n  .filter(n => n > 2)             // เก็บเฉพาะตัวเลข > 2\n  .map(n => n * 10)               // คูณแต่ละตัวด้วย 10\n  .reduce((sum, n) => sum + n, 0); // รวมทั้งหมดเป็นค่าเดียว\n\n// Reduce มีพลังมากที่สุด\nconst sum = numbers.reduce((a, b) => a + b, 0);     // รวมทุกสมาชิก\nconst max = numbers.reduce((a, b) => Math.max(a, b)); // หาค่าสูงสุด\nconst grouped = ['a', 'b', 'a', 'c'].reduce((acc, val) => { // สร้างแผนที่ความถี่\n  acc[val] = (acc[val] || 0) + 1;   // เพิ่มจำนวนนับสำหรับแต่ละค่า\n  return acc;                        // คืนค่า accumulator\n}, {});                              // เริ่มต้นด้วยออบเจกต์ว่าง\nconsole.log(grouped); // { a: 2, b: 1, c: 1 }",
+      "อาร์เรย์และคอลเลกชัน::อาร์เรย์"
+    ],
+    "การวนซ้ำอาร์เรย์": {
+      "exp": "อาร์เรย์สามารถวนซ้ำด้วย forEach, map, filter, reduce",
+      "code": "arr.filter(x => x > 5).map(x => x * 2);",
+      "exercises": []
+    },
+    "เซต": {
+      "exp": "เซต (Sets) เก็บค่าที่ไม่ซ้ำกันของชนิดใดก็ได้",
+      "code": "let set = new Set([1,2,3,3]); // {1,2,3}",
+      "exercises": []
+    },
+    "แผนที่": {
+      "exp": "แผนที่ (Maps) เก็บคู่ key-value โดย key สามารถเป็นชนิดใดก็ได้",
+      "code": "let map = new Map(); map.set(\"key\", \"value\");",
+      "exercises": []
+    },
+    "การแยกโครงสร้าง": [
+      "แยกค่าจากอาร์เรย์หรือคุณสมบัติจากออบเจกต์ไปยังตัวแปรต่างๆ รองรับการแยกโครงสร้างแบบซ้อน (nested), ค่าเริ่มต้น (default values), และรูปแบบ rest ข้อผิดพลาดทั่วไป: การพยายามแยกโครงสร้าง null หรือ undefined — จะทำให้เกิด TypeError แนวปฏิบัติที่ดี: กำหนดค่าเริ่มต้นเพื่อความปลอดภัย; ใช้การเปลี่ยนชื่อ (object: { oldName: newName }) เพื่อหลีกเลี่ยงความขัดแย้งของชื่อ",
+      "// การแยกโครงสร้างอาร์เรย์\nconst [a, b] = [1, 2];\nconsole.log(a);            // 1\n\n// ข้ามสมาชิก\nconst [first, , third] = [1, 2, 3, 4];\nconsole.log(first, third); // 1, 3\n\n// Rest ในการแยกโครงสร้าง\nconst [head, ...tail] = [1, 2, 3, 4];\nconsole.log(head);         // 1\nconsole.log(tail);         // [2, 3, 4]\n\n// การแยกโครงสร้างออบเจกต์\nconst { name, age } = { name: 'Doge', age: 5 };\n\n// การเปลี่ยนชื่อ\nconst { name: userName } = { name: 'Doge' };\nconsole.log(userName);     // 'Doge'\n\n// การแยกโครงสร้างแบบซ้อน\nconst data = { user: { id: 1, tags: ['a', 'b'] } };\nconst { user: { id, tags: [firstTag] } } = data;\nconsole.log(id, firstTag); // 1, 'a'\n\n// การแยกโครงสร้างพารามิเตอร์ฟังก์ชัน\nfunction greet({ name, age }) {\n  console.log(`${name} is ${age}`);\n}"
+    ],
+    "ตัวดำเนินการ Spread": {
+      "exp": "ตัวดำเนินการ Spread (Spread Operator) ขยาย iterables เป็นสมาชิก",
+      "code": "let arr = [...arr1, ...arr2]; let obj = {...obj1, ...obj2};",
+      "exercises": []
+    },
+    "เมธอด JSON": {
+      "exp": "JSON.parse() และ JSON.stringify() แปลงระหว่าง JSON และออบเจกต์",
+      "code": "JSON.parse('{\"a\":1}'); JSON.stringify({a:1});",
+      "exercises": []
+    },
+    "อาร์เรย์": [
+      "คอลเลกชันแบบมีลำดับ (ordered), มีดัชนีเริ่มจากศูนย์ (zero-indexed) อาร์เรย์เป็นออบเจกต์ — typeof [] คืนค่า 'object' คุณสมบัติ length อัปเดตอัตโนมัติแต่สามารถตั้งค่าด้วยตนเองได้ (ตัดทอนหรือสร้างช่องว่าง) ข้อผิดพลาดทั่วไป: การใช้ for...in กับอาร์เรย์ (วนซ้ำ key เป็นสตริงและรวมคุณสมบัติที่สืบทอดมา) แนวปฏิบัติที่ดี: ใช้ array literal [] แทน new Array(); ใช้ for...of, forEach, หรือ array methods (map/filter) สำหรับการวนซ้ำ",
+      "const fruits = ['apple', 'banana', 'cherry'];\nconsole.log(fruits[0]);        // 'apple' — zero-indexed\nconsole.log(fruits.length);    // 3\n\nconst arr = new Array(3);      // [empty × 3] — สร้าง sparse array!\nconsole.log(arr.length);       // 3\nconsole.log(arr[0]);           // undefined (empty slot)\n\n// เมธอดที่เปลี่ยนแปลงอาร์เรย์\nfruits.push('date');           // เพิ่มท้าย\nfruits.pop();                  // ลบจากท้าย\nfruits.unshift('apricot');     // เพิ่มหน้า\nfruits.shift();                // ลบจากหน้า\n\n// การตรวจสอบอาร์เรย์\nconsole.log(Array.isArray(fruits)); // true — ใช้วิธีนี้ ไม่ใช่ typeof"
+    ],
+    "Map และ Set": [
+      "Map เก็บคู่ key-value โดย key สามารถเป็นชนิดใดก็ได้ (objects, functions, primitives) — ต่างจากออบเจกต์ที่รับเฉพาะ strings/symbols Map รักษาลำดับการเพิ่มและมีการค้นหาแบบ O(1) Set เก็บค่าที่ไม่ซ้ำกันของชนิดใดก็ได้ ข้อผิดพลาดทั่วไป: การใช้ออบเจกต์เป็น Map — key ของออบเจกต์เป็นสตริงเสมอ; key ของ Map รักษาชนิดไว้ (number key 1 ไม่เท่ากับ string key '1') แนวปฏิบัติที่ดี: ใช้ Map แทน plain objects สำหรับคอลเลกชัน key แบบไดนามิก; ใช้ Set สำหรับการตัดค่าซ้ำและการตรวจสอบสมาชิกที่รวดเร็ว",
+      "// Map — คีย์ทุกชนิด\nconst map = new Map();\nmap.set('name', 'Doge');\nmap.set(42, 'answer');          // คีย์ตัวเลข (ไม่ถูกแปลง)\nmap.set(obj, 'metadata');       // คีย์ออบเจกต์\nconsole.log(map.get(42));       // 'answer'\nconsole.log(map.size);          // 3\n\n// การวนซ้ำรักษาลำดับการเพิ่ม\nfor (const [key, value] of map) {\n  console.log(key, value);\n}\n\n// Set — ค่าที่ไม่ซ้ำกัน\nconst set = new Set([1, 2, 2, 3]);\nconsole.log(set);               // Set {1, 2, 3} — ตัดค่าซ้ำออก\nconsole.log(set.has(2));        // true\nset.add(4);\nset.delete(1);\n\n// การแปลงระหว่างกัน\nconst unique = [...new Set([1, 2, 2, 3])]; // [1, 2, 3]"
+    ],
+    "WeakMap และ WeakSet": [
+      "WeakMap เก็บการอ้างอิงแบบ 'weak' ไปยัง key ที่เป็นออบเจกต์ — ถ้าไม่มีการอ้างอิงอื่นไปยัง key นั้นอีก สมาชิกจะถูกเก็บขยะ (garbage collected) WeakSet ก็เช่นกัน เก็บการอ้างอิงแบบ weak ไปยังออบเจกต์ ไม่สามารถวนซ้ำได้และไม่มีคุณสมบัติ .size เพราะเนื้อหาสามารถเปลี่ยนแปลงได้ทุกเมื่อเนื่องจากการเก็บขยะ ข้อผิดพลาดทั่วไป: คาดหวังให้ WeakMap/WeakSet วนซ้ำได้หรือมี .size — มันไม่มีโดยการออกแบบ แนวปฏิบัติที่ดี: ใช้ WeakMap สำหรับข้อมูลส่วนตัว (ทางเลือกของ closure), การทำแคชที่เกี่ยวข้องกับสมาชิก DOM, หรือป้องกันการรั่วไหลของหน่วยความจำจากการอ้างอิงที่ยาวนาน",
+      "const wm = new WeakMap();\nlet obj = {};\nwm.set(obj, 'private data');\nconsole.log(wm.get(obj));  // 'private data'\nobj = null;                // obj ถูกลบ, entry ถูกลบอัตโนมัติ\n\n// การประยุกต์ใช้: ข้อมูลส่วนตัวของ instance\nconst privates = new WeakMap();\nclass User {\n  constructor(name) {\n    privates.set(this, { name });\n  }\n  getName() {\n    return privates.get(this).name;\n  }\n}\n\n// WeakSet — ติดตามออบเจกต์โดยไม่ป้องกัน GC\nconst visited = new WeakSet();\nlet node = {};\nvisited.add(node);\nconsole.log(visited.has(node)); // true"
+    ],
+    "Iterators และ Generators": [
+      "Iterators คือออบเจกต์ที่มีเมธอด next() ที่คืนค่า { value, done } ออบเจกต์ใดที่มี [Symbol.iterator] จะเป็น iterable (ใช้ได้กับ for...of, spread, destructuring) Generators (function*) ทำให้การสร้าง iterator ง่ายขึ้น — หยุดที่แต่ละ yield และเริ่มต่อเมื่อเรียกครั้งต่อไป ข้อผิดพลาดทั่วไป: generators ใช้ได้ครั้งเดียว — ไม่สามารถเริ่มใหม่ได้; ต้องสร้าง generator ใหม่ทุกครั้ง แนวปฏิบัติที่ดี: ใช้ generators สำหรับลำดับแบบขี้เกียจ (lazy sequences), สตรีมอนันต์ (infinite streams), และการวนซ้ำแบบอะซิงก์ (async function*)",
+      "// Iterator ที่กำหนดเอง\nconst range = {\n  from: 1, to: 3,\n  [Symbol.iterator]() {\n    let current = this.from;\n    const end = this.to;\n    return {\n      next() {\n        return current <= end\n          ? { value: current++, done: false }\n          : { done: true };\n      }\n    };\n  }\n};\nconsole.log([...range]);  // [1, 2, 3]\n\n// Generator — สิ่งเดียวกัน แต่เขียนง่ายกว่า\nfunction* genRange(start, end) {\n  for (let i = start; i <= end; i++) {\n    yield i;\n  }\n}\nconst gen = genRange(1, 3);\nconsole.log(gen.next());   // { value: 1, done: false }\nconsole.log(gen.next());   // { value: 2, done: false }\nconsole.log(gen.next());   // { value: 3, done: false }\nconsole.log(gen.next());   // { done: true }\n\n// yield* มอบหมายให้ iterable อื่น\nfunction* combine() {\n  yield* [1, 2];\n  yield* 'ab';\n}\nconsole.log([...combine()]); // [1, 2, 'a', 'b']"
+    ]
+  },
+  "ออบเจกต์และ OOP": {
+    "พื้นฐานออบเจกต์": {
+      "exp": "ออบเจกต์ (Objects) คือคอลเลกชันของคู่ key-value",
+      "code": "let person = {name: \"Alice\", age: 30};",
+      "exercises": []
+    },
+    "โปรโตไทป์": {
+      "exp": "JavaScript ใช้การสืบทอดแบบโปรโตไทป์ (prototypal inheritance)",
+      "code": "function Person(name) { this.name = name; }\nPerson.prototype.greet = function() { return \"Hi \" + this.name; };",
+      "exercises": []
+    },
+    "คลาส": {
+      "exp": "คลาส (Classes) ES6 มีไวยากรณ์ที่สะอาดขึ้นสำหรับ OOP",
+      "code": "class Animal { constructor(name) { this.name = name; } speak() {} }",
+      "exercises": []
+    },
+    "Getter และ Setter": {
+      "exp": "Getter และ Setter ควบคุมการเข้าถึงคุณสมบัติ",
+      "code": "class Person { get fullName() { return this.first + \" \" + this.last; } }",
+      "exercises": []
+    },
+    "คีย์เวิร์ด this": {
+      "exp": "คีย์เวิร์ด 'this' อ้างถึงบริบทการทำงานปัจจุบัน",
+      "code": "const obj = { name: \"test\", log: function() { console.log(this.name); } };",
+      "exercises": []
+    },
+    "Bind Call Apply": {
+      "exp": "เมธอดเหล่านี้กำหนดค่า 'this' อย่างชัดเจน",
+      "code": "func.bind(context); func.call(context, arg1); func.apply(context, [args]);",
+      "exercises": []
+    },
+    "เมธอด Static": {
+      "exp": "เมธอด static เป็นของคลาสเอง ไม่ใช่ของอินสแตนซ์",
+      "code": "class MathUtils { static add(a,b) { return a+b; } }\nMathUtils.add(2,3);",
+      "exercises": []
+    },
+    "ฟิลด์ส่วนตัว": {
+      "exp": "ฟิลด์ส่วนตัว (Private Fields) สามารถเข้าถึงได้เฉพาะภายในคลาสเท่านั้น",
+      "code": "class Person { #age; constructor(age) { this.#age = age; } }",
+      "exercises": []
+    }
+  },
+  "ฟังก์ชันเจาะลึก": {
+    "Arrow Functions": {
+      "exp": "Arrow Functions มีไวยากรณ์ฟังก์ชันที่สั้นและกระชับ",
+      "code": "const add = (a, b) => a + b;",
+      "exercises": []
+    },
+    "Closures": {
+      "exp": "Closure คือฟังก์ชันที่สามารถเข้าถึงขอบเขตภายนอกของมันได้",
+      "code": "function outer(x) { return function(y) { return x + y; }; }",
+      "exercises": []
+    },
+    "Higher-Order Functions": {
+      "exp": "ฟังก์ชันที่รับหรือคืนค่าฟังก์ชันอื่น",
+      "code": "function map(arr, fn) { return arr.map(fn); }",
+      "exercises": []
+    },
+    "Recursion": {
+      "exp": "ฟังก์ชันที่เรียกใช้งานตัวเองเพื่อแก้ปัญหา",
+      "code": "function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }",
+      "exercises": []
+    },
+    "Default Parameters": {
+      "exp": "พารามิเตอร์ของฟังก์ชันสามารถมีค่าเริ่มต้นได้",
+      "code": "function greet(name = \"World\") { return `Hello ${name}`; }",
+      "exercises": []
+    },
+    "Rest Parameters": {
+      "exp": "Rest Parameters เก็บอาร์กิวเมนต์ที่เหลือลงในอาร์เรย์",
+      "code": "function sum(...numbers) { return numbers.reduce((a,b) => a+b, 0); }",
+      "exercises": []
+    },
+    "IIFE": {
+      "exp": "Immediately Invoked Function Expressions ทำงานทันทีที่ถูกประกาศ",
+      "code": "(function() { console.log(\"Runs now\"); })();",
+      "exercises": []
+    },
+    "Callbacks": {
+      "exp": "ฟังก์ชันที่ถูกส่งเป็นอาร์กิวเมนต์ให้กับฟังก์ชันอื่น",
+      "code": "setTimeout(() => console.log(\"Done\"), 1000);",
+      "exercises": []
+    }
+  },
+  "JavaScript แบบอะซิงก์": {
+    "Promises": {
+      "exp": "Promises แสดงถึงการทำงานแบบอะซิงก์ (asynchronous) ที่จะเสร็จสมบูรณ์ในอนาคต",
+      "code": "fetch(\"/api\").then(res => res.json()).catch(err => console.error(err));",
+      "exercises": []
+    },
+    "Async Await": {
+      "exp": "Async/await มีไวยากรณ์ที่สะอาดกว่าสำหรับการทำงานกับ promises",
+      "code": "async function getData() { const res = await fetch(\"/api\"); return res.json(); }",
+      "exercises": []
+    },
+    "การจัดการข้อผิดพลาด": {
+      "exp": "บล็อก try/catch จัดการข้อผิดพลาดในโค้ดแบบอะซิงก์",
+      "code": "try { await riskyOperation(); } catch (err) { console.error(err); }",
+      "exercises": []
+    },
+    "Event Loop": {
+      "exp": "Event Loop จัดการการทำงานแบบอะซิงก์ใน JavaScript",
+      "code": "console.log(\"1\"); setTimeout(() => console.log(\"2\"), 0); console.log(\"3\"); // 1, 3, 2",
+      "exercises": []
+    },
+    "Microtasks": {
+      "exp": "Microtasks มีลำดับความสำคัญสูงกว่า macrotasks",
+      "code": "Promise.resolve().then(() => console.log(\"microtask\"));",
+      "exercises": []
+    },
+    "Fetch API": {
+      "exp": "Fetch API ใช้สำหรับทำ HTTP requests",
+      "code": "const res = await fetch(url, { method: \"POST\", body: JSON.stringify(data), headers: {\"Content-Type\": \"application/json\"} });",
+      "exercises": []
+    },
+    "Web Workers": {
+      "exp": "Web Workers เรียกใช้สคริปต์ในเธรดเบื้องหลัง",
+      "code": "const worker = new Worker(\"worker.js\"); worker.postMessage(\"data\");",
+      "exercises": []
+    },
+    "Service Workers": {
+      "exp": "Service Workers ทำหน้าที่เป็นพร็อกซีเครือข่ายสำหรับการรองรับการทำงานแบบออฟไลน์",
+      "code": "navigator.serviceWorker.register(\"/sw.js\");",
+      "exercises": []
+    }
+  },
+  "DOM และ Browser APIs": {
+    "การเลือก DOM": {
+      "exp": "เมธอดสำหรับเลือกสมาชิก DOM",
+      "code": "document.getElementById(\"id\"); document.querySelector(\".class\");",
+      "exercises": []
+    },
+    "การจัดการ DOM": [
+      "DOM (Document Object Model) คือ API ของเบราว์เซอร์สำหรับ HTML เลือกสมาชิกด้วย querySelector (เดี่ยว) หรือ querySelectorAll (NodeList) แก้ไขเนื้อหาผ่าน textContent, innerHTML, หรือ classList ข้อผิดพลาดทั่วไป: การใช้ innerHTML แทน textContent ซึ่งปลอดภัยกว่า (innerHTML แยกวิเคราะห์ HTML และอาจทำให้เกิด XSS) แนวปฏิบัติที่ดี: เก็บการอ้างอิง DOM ไว้ในตัวแปร (การค้นหา DOM ช้า); ใช้ classList.add/remove/toggle แทนการจัดการ className ด้วยสตริง; เลือกใช้ textContent มากกว่า innerHTML สำหรับการเปลี่ยนแปลงเฉพาะข้อความ",
+      "// การเลือกสมาชิก\nconst heading = document.querySelector('h1');\nconst items = document.querySelectorAll('.item');\nconst byId = document.getElementById('app');\n\n// การแก้ไขเนื้อหา\nheading.textContent = 'New Title';  // ปลอดภัย (ไม่แยกวิเคราะห์ HTML)\nheading.style.color = 'blue';\n\n// การจัดการคลาส\nheading.classList.add('active');\nheading.classList.remove('hidden');\nheading.classList.toggle('visible');\n\n// การสร้างสมาชิก\nconst div = document.createElement('div');\ndiv.textContent = 'Dynamic';\ndocument.body.appendChild(div);"
+    ],
+    "อีเวนต์": [
+      "อีเวนต์ (Events) บ่งชี้การโต้ตอบของผู้ใช้ (click, keydown, submit, scroll) addEventListener(type, handler) แนบตัวจัดการเหตุการณ์ อีเวนต์ไหลผ่านสามเฟส: capture (จากนอกเข้าใน), target, และ bubble (จากในออกนอก) ข้อผิดพลาดทั่วไป: การใช้ตัวจัดการเหตุการณ์แบบอินไลน์ (onclick=) — สร้างฟังก์ชัน global และอนุญาตให้มีตัวจัดการได้เพียงตัวเดียวต่ออีเวนต์ แนวปฏิบัติที่ดี: ใช้ addEventListener แทน onclick; ใช้ event delegation (ฟังบน parent) สำหรับสมาชิกย่อยแบบไดนามิก; เรียก removeEventListener เพื่อป้องกันการรั่วไหลของหน่วยความจำ",
+      "// ตัวจัดการคลิกพื้นฐาน\ndocument.querySelector('button').addEventListener('click', (e) => {\n  console.log('Clicked:', e.target);\n});\n\n// เฟสของอีเวนต์ — อาร์กิวเมนต์ที่สาม\nparent.addEventListener('click', () => console.log('capture'), true);  // capture phase\ndocument.addEventListener('click', () => console.log('bubble'));        // bubble phase (ค่าเริ่มต้น)\n\n// Event delegation — ฟังบน parent สำหรับสมาชิกย่อยแบบไดนามิก\nul.addEventListener('click', (e) => {\n  if (e.target.matches('li')) {\n    console.log('Item clicked:', e.target.textContent);\n  }\n});\n\n// การป้องกันค่าเริ่มต้น\ndocument.querySelector('form').addEventListener('submit', (e) => {\n  e.preventDefault();  // หยุดการส่งฟอร์ม\n});"
+    ],
+    "Event Bubbling": {
+      "exp": "อีเวนต์แพร่กระจายจากสมาชิกลูกไปยังสมาชิกแม่",
+      "code": "parent.addEventListener(\"click\", () => console.log(\"parent\"), false);",
+      "exercises": []
+    },
+    "Event Delegation": {
+      "exp": "การจัดการอีเวนต์บนสมาชิกลูกหลายตัวผ่านสมาชิกแม่",
+      "code": "parent.addEventListener(\"click\", (e) => { if(e.target.matches(\".item\")) handleItem(e); });",
+      "exercises": []
+    },
+    "LocalStorage": {
+      "exp": "พื้นที่เก็บข้อมูลแบบ key-value แบบถาวรในเบราว์เซอร์",
+      "code": "localStorage.setItem(\"key\", \"value\"); const val = localStorage.getItem(\"key\");",
+      "exercises": []
+    },
+    "SessionStorage": {
+      "exp": "พื้นที่เก็บข้อมูลแบบ key-value เฉพาะเซสชัน",
+      "code": "sessionStorage.setItem(\"temp\", \"data\");",
+      "exercises": []
+    },
+    "Canvas API": {
+      "exp": "การวาดกราฟิก 2D ด้วย Canvas API",
+      "code": "const ctx = canvas.getContext(\"2d\"); ctx.fillRect(10, 10, 100, 100);",
+      "exercises": []
+    },
+    "Geolocation API": {
+      "exp": "การเข้าถึงตำแหน่งของผู้ใช้",
+      "code": "navigator.geolocation.getCurrentPosition(pos => console.log(pos.coords));",
+      "exercises": []
+    },
+    "History API": {
+      "exp": "การจัดการประวัติเบราว์เซอร์",
+      "code": "history.pushState({page: 1}, \"title\", \"/page1\");",
+      "exercises": []
+    }
+  },
+  "การจัดการข้อผิดพลาดและการดีบัก": {
+    "Try Catch": {
+      "exp": "การจัดการข้อผิดพลาดขณะทำงานด้วย try/catch",
+      "code": "try { riskyCode(); } catch (err) { console.error(err.message); } finally { cleanup(); }",
+      "exercises": []
+    },
+    "Custom Errors": {
+      "exp": "การสร้างประเภทข้อผิดพลาดแบบกำหนดเอง",
+      "code": "class ValidationError extends Error { constructor(msg) { super(msg); this.name = \"ValidationError\"; } }",
+      "exercises": []
+    },
+    "เครื่องมือดีบัก": {
+      "exp": "เครื่องมือสำหรับนักพัฒนาในเบราว์เซอร์สำหรับการดีบัก",
+      "code": "console.log, console.table, console.time, debugger statement",
+      "exercises": []
+    },
+    "Console Methods": {
+      "exp": "เมธอด console ต่างๆ สำหรับการดีบัก",
+      "code": "console.group(\"Group\"); console.warn(\"Warning\"); console.error(\"Error\"); console.groupEnd();",
+      "exercises": []
+    },
+    "Source Maps": {
+      "exp": "แผนที่ที่เชื่อมโยงโค้ดที่ถูกคอมไพล์กลับไปยังโค้ดต้นทาง",
+      "code": "//# sourceMappingURL=app.js.map",
+      "exercises": []
+    },
+    "Error Boundary": {
+      "exp": "แนวคิดจาก React ที่นำมาปรับใช้: การจับข้อผิดพลาดในการเรนเดอร์",
+      "code": "// try/catch around rendering logic",
+      "exercises": []
+    }
+  },
+  "โมดูลและเครื่องมือ": {
+    "ES Modules": {
+      "exp": "ระบบโมดูล (Modules) ดั้งเดิมของ JavaScript",
+      "code": "import { func } from \"./module.js\"; export const value = 42;",
+      "exercises": []
+    },
+    "Dynamic Import": {
+      "exp": "การนำเข้าโมดูลแบบไดนามิกในขณะทำงาน",
+      "code": "const module = await import(\"./module.js\");",
+      "exercises": []
+    },
+    "npm Packages": {
+      "exp": "การใช้และการจัดการแพ็กเกจจาก npm",
+      "code": "npm install lodash\nimport _ from \"lodash\";",
+      "exercises": []
+    },
+    "Bundlers": {
+      "exp": "เครื่องมือที่รวมไฟล์ JS สำหรับการใช้งานจริง",
+      "code": "Webpack, Vite, esbuild, Rollup",
+      "exercises": []
+    },
+    "Transpilers": {
+      "exp": "เครื่องมือที่แปลง JavaScript สมัยใหม่เป็นไวยากรณ์รุ่นเก่า",
+      "code": "Babel converts ES6+ to ES5 for browser compatibility.",
+      "exercises": []
+    },
+    "Linters": {
+      "exp": "เครื่องมือที่วิเคราะห์โค้ดหาข้อผิดพลาดที่อาจเกิดขึ้น",
+      "code": "ESLint: static analysis tool for JS/TS",
+      "exercises": []
+    },
+    "Formatters": {
+      "exp": "เครื่องมือที่จัดรูปแบบโค้ดอย่างสม่ำเสมอ",
+      "code": "Prettier: opinionated code formatter",
+      "exercises": []
+    },
+    "Testing Frameworks": {
+      "exp": "เครื่องมือสำหรับเขียนและเรียกใช้การทดสอบ",
+      "code": "Jest, Vitest, Mocha, Jasmine",
+      "exercises": []
+    }
+  },
+  "ฟีเจอร์ JavaScript สมัยใหม่": {
+    "Optional Chaining": {
+      "exp": "การเข้าถึงคุณสมบัติที่ซ้อนกันอย่างปลอดภัย",
+      "code": "const name = user?.profile?.name ?? \"Anonymous\";",
+      "exercises": []
+    },
+    "Nullish Coalescing": {
+      "exp": "ให้ค่าเริ่มต้นสำหรับ null/undefined",
+      "code": "const value = input ?? \"default\";",
+      "exercises": []
+    },
+    "Logical Assignment": {
+      "exp": "รวมตัวดำเนินการตรรกะเข้ากับการกำหนดค่า",
+      "code": "x ||= y; x &&= y; x ??= y;",
+      "exercises": []
+    },
+    "BigInt": {
+      "exp": "จำนวนเต็มที่มีความแม่นยำตามอำเภอใจ",
+      "code": "const big = 9007199254740991n;",
+      "exercises": []
+    },
+    "Symbol": {
+      "exp": "ค่าพื้นฐาน (primitive) ที่ไม่ซ้ำกันและไม่สามารถเปลี่ยนแปลงได้",
+      "code": "const sym = Symbol(\"description\"); const obj = { [sym]: \"value\" };",
+      "exercises": []
+    },
+    "SharedArrayBuffer": {
+      "exp": "หน่วยความจำที่ใช้ร่วมกันระหว่าง workers",
+      "code": "const sab = new SharedArrayBuffer(1024);",
+      "exercises": []
+    },
+    "WeakRef": {
+      "exp": "การอ้างอิงแบบอ่อนสำหรับการแคชที่ไวต่อการเก็บขยะ",
+      "code": "const ref = new WeakRef(obj); const val = ref.deref();",
+      "exercises": []
+    },
+    "Atomics": {
+      "exp": "การดำเนินการแบบอะตอมสำหรับหน่วยความจำที่ใช้ร่วมกัน",
+      "code": "Atomics.add(buf, 0, 1); Atomics.load(buf, 0);",
+      "exercises": []
+    },
+    "Temporal API": {
+      "exp": "การจัดการวันที่/เวลาสมัยใหม่ (ข้อเสนอ)",
+      "code": "Temporal.Now.plainDateISO();",
+      "exercises": []
+    }
+  }
+}
