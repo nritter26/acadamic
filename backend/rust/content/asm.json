@@ -1,0 +1,485 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "<p>Introduction to Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "<p>Variables and data types in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "<p>Operators in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "<p>Control flow statements in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "<p>Functions in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "<p>Working with collections in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "<p>String manipulation in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "<p>Key-value data structures in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "<p>OOP concepts in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "<p>Inheritance patterns in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "<p>Interfaces and contracts in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "<p>Exception handling in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "<p>Debugging Assembly code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "<p>File I/O in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "<p>Input and output operations in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "<p>Concurrency in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "<p>Modular programming in Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "<p>Best practices for Assembly.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "<p>Optimizing Assembly code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Number Systems and Data Representation": {
+    "Binary Numbers": [
+      "Computers use binary (base-2) with digits 0 and 1. Each position represents a power of 2. A byte is 8 bits (0-255). A nibble is 4 bits. Binary addition: 0+0=0, 0+1=1, 1+1=0 carry 1. The LSB is bit 0, MSB is bit 7. Binary is the foundation of all machine-level operations.",
+      "; Binary: 1011 = 1*8 + 0*4 + 1*2 + 1*1 = 11 decimal\n; Bit positions: 7 6 5 4 3 2 1 0\n; Byte:  0b10110011 = 0xB3 = 179\n; Nibbles: high=0b1011=11, low=0b0011=3\n\nsection .data\n    bin_val db 0b10110011\n    msg db 'Binary fundamentals',0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    mov rax, 1\n    mov rdi, 1\n    mov rsi, msg\n    mov rdx, len\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Hexadecimal System": [
+      "Hexadecimal (base-16) uses digits 0-9 and A-F. Each hex digit represents 4 bits (a nibble). Hex is the standard notation for assembly: addresses, opcodes, and data. Two hex digits = one byte. Prefix: 0x (C/ASM) or h (MASM). Converting hex to binary is trivial: F=1111, A=1010, etc.",
+      "section .data\n    ; Hex values in NASM use 0x prefix\n    val_byte  db 0xFF        ; 255\n    val_word  dw 0xABCD      ; 43981\n    val_dword dd 0xDEADBEEF  ; 3735928559\n    val_qword dq 0x1234567890ABCDEF\n    ; Hex addition: 0xA + 0xF = 0x19\n    ; Hex subtraction: 0x10 - 0x1 = 0xF\n    msg db 'Hex: ',0x48,0x65,0x78,0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 1\n    mov rdi, 1\n    mov rsi, msg\n    mov rdx, 6\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Two's Complement": [
+      "Signed integers use two's complement. The MSB is the sign bit (0=positive, 1=negative). To negate: invert all bits and add 1. Range for N bits: -2^(N-1) to 2^(N-1)-1. For 8 bits: -128 to +127. The CPU doesn't distinguish signed vs unsigned — the same ADD instruction works for both; the programmer interprets the result.",
+      "section .data\n    ; Two's complement examples\n    pos8  db  42     ; 0x2A\n    neg8  db  -42    ; 0xD6 (two's complement of 42)\n    ; Verify: 0xD6 + 0x2A = 0x100 = 0 (mod 256)\n    pos16 dw  1000\n    neg16 dw  -1000  ; 0xFC18\n    ; Max 8-bit signed: 127  (0x7F)\n    ; Min 8-bit signed: -128 (0x80)\n    msg db 'Two complement works',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Boolean Logic": [
+      "Boolean algebra operates on true (1) and false (0). AND: both must be 1. OR: at least one is 1. XOR: exactly one is 1. NOT: invert. NAND, NOR are complements. De Morgan's laws: NOT(A AND B) = NOT(A) OR NOT(B). Truth tables define all combinations. Assembly provides AND, OR, XOR, NOT, TEST instructions.",
+      "section .data\n    ; Boolean truth table for AND, OR, XOR\n    ; A B | A&B A|B A^B\n    ; 0 0 |  0   0   0\n    ; 0 1 |  0   1   1\n    ; 1 0 |  0   1   1\n    ; 1 1 |  1   1   0\n    msg db 'Logic verified',0xa\n\nsection .text\n    global _start\n_start:\n    mov al, 0b1100\n    mov bl, 0b1010\n    and al, bl         ; al = 0b1000\n    mov al, 0b1100\n    or  al, bl         ; al = 0b1110\n    mov al, 0b1100\n    xor al, bl         ; al = 0b0110\n    not al             ; al = 0b1001\n    ; TEST sets flags without modifying operands\n    mov al, 0b0001\n    test al, 0b0001   ; ZF=0 (non-zero result)\n    test al, 0b0010   ; ZF=1 (zero result)\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Bit Shifting": [
+      "SHL/SHR shift bits left/right by a count. Each left shift multiplies by 2; each right shift divides by 2 (unsigned). SAR preserves the sign bit. ROL/ROR rotate bits through a circle. RCL/RCR rotate through the carry flag. Shift counts can be an immediate or CL register.",
+      "section .data\n    msg db 'Shift test',0xa\n\nsection .text\n    global _start\n_start:\n    mov al, 5          ; al = 0b00000101 = 5\n    shl al, 1          ; al = 0b00001010 = 10 (5*2)\n    shl al, 2          ; al = 0b00101000 = 40 (10*4)\n    shr al, 1          ; al = 0b00010100 = 20 (40/2)\n    ; Arithmetic shift vs logical shift\n    mov al, 0x80       ; al = 128 (signed: -128)\n    shr al, 1          ; al = 0x40 = 64 (unsigned: 128/2)\n    mov al, 0x80\n    sar al, 1          ; al = 0xC0 = -64 (signed: -128/2)\n    ; Rotation\n    mov al, 0b10000001\n    rol al, 1          ; al = 0b00000011 (bits wrap around)\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "ASCII and BCD Numbers": [
+      "ASCII digits: '0'=0x30 through '9'=0x39. To convert ASCII to binary: subtract 0x30. To convert binary to ASCII: add 0x30. Unpacked BCD stores one decimal digit per byte (0x00-0x09). Packed BCD stores two digits per byte (high/low nibble). DAA adjusts after ADD for packed BCD. DAS adjusts after SUB. AAA/AAS/AAM/AAD are legacy ASCII adjust instructions.",
+      "section .data\n    ; ASCII represented digits\n    ascii_digit db '7', 0     ; 0x37 = 55\n    ; Packed BCD\n    packed_bcd  db 0x42       ; 42 in packed BCD\n    ; Unpacked BCD\n    unpacked_bcd db 0x04, 0x02 ; 42 in unpacked BCD\n    msg db 'BCD test',0xa\n\nsection .text\n    global _start\n_start:\n    ; ASCII to binary conversion\n    mov al, '7'               ; 0x37\n    sub al, '0'               ; al = 7\n    ; Binary to ASCII conversion\n    mov al, 9\n    add al, '0'               ; al = '9' (0x39)\n    ; Packed BCD: 0x42 = 42 decimal\n    mov al, 0x42\n    mov bl, 0x28              ; add 28\n    add al, bl                ; al = 0x6A (not valid BCD!)\n    daa                       ; al = 0x70 (70 decimal, correct BCD!)\n    ; Simple BCD addition\n    mov al, 0x15              ; 15\n    add al, 0x27              ; 27 -> 0x3C\n    daa                       ; al = 0x42 (42, corrected!)\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Endianness": [
+      "Endianness describes byte order in memory. Little-endian (x86): LSB at lowest address. Big-endian: MSB at lowest address. x86 is little-endian: 0x12345678 stored as 78 56 34 12. Network protocols use big-endian. BSWAP instruction converts endianness in registers. MOVBE (mov big-endian) on newer CPUs.",
+      "section .data\n    qword_val dq 0x1234567890ABCDEF\n    msg db 'Endianness demo',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel qword_val]\n    bswap rax         ; convert to big-endian\n    ; Memory: little-endian bytes\n    ; 0x1234567890ABCDEF stored as:\n    ; EF CD AB 90 78 56 34 12\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Getting Started with Assembly": {
+    "Environment Setup": [
+      "NASM is the assembler of choice for x86-64 Linux. Install: `sudo apt install nasm` (Debian/Ubuntu), `sudo yum install nasm` (RHEL/Fedora), `brew install nasm` (macOS), or download from nasm.us (Windows). Assemble: `nasm -f elf64 prog.asm -o prog.o`. Link: `ld -o prog prog.o`. Run: `./prog`. For libc programs: `gcc -no-pie -o prog prog.o`. Debug: `nasm -f elf64 -g -F dwarf prog.asm`. Use make or shell scripts for multi-file projects.",
+      "; Creating an assembly development environment\n;\n; 1. Install NASM:\n;    sudo apt install nasm binutils\n;    nasm --version   # verify\n;\n; 2. Write hello.asm\n; 3. Assemble:\n;    nasm -f elf64 hello.asm -o hello.o\n; 4. Link:\n;    ld -o hello hello.o\n; 5. Run:\n;    ./hello\n;\n; For C library interop (gcc instead of ld):\n;    nasm -f elf64 prog.asm -o prog.o\n;    gcc -no-pie -o prog prog.o\n;\n; Debug build with DWARF symbols:\n;    nasm -f elf64 -g -F dwarf debug.asm\n;    gdb ./debug\n\nsection .data\n    msg db 'Environment ready!', 0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, len\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Basic NASM Syntax": [
+      "NASM syntax: `[label:] instruction [operands] [; comment]`. Labels mark positions and are symbolic addresses. Local labels start with a dot (`.loop`) and are scoped to the preceding global label. Sections: `.data` (initialized data), `.bss` (uninitialized), `.text` (code). Directives: `global` exports symbols, `extern` imports, `equ` defines constants, `times` repeats. The entry point is `_start` for standalone or `main` for programs linking with libc.",
+      "; NASM syntax components:\n;\n; Label:       start:\n; Instruction: mov rax, 60\n; Operands:    rax (destination), 60 (source)\n; Comment:     ; everything after semicolon\n;\n; Sections are declared with 'section' directive\n\nsection .data\n    ; Initialized data goes here\n    hello db 'Syntax demo', 0xa\n    .len  equ $ - hello   ; local label: .len = 11\n\nsection .bss\n    ; Uninitialized data (reserved space)\n    buffer resb 256\n\nsection .text\n    global _start          ; export entry point\n\n_start:                   ; global label\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel hello]\n    mov rdx, hello.len    ; access local label\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Memory Segments": [
+      "An ELF binary has segments loaded by the OS. `.text` — executable code, read-only, mapped with RX permissions. `.data` — initialized global/static variables, mapped RW. `.bss` — uninitialized data, zero-filled at load time, mapped RW (occupies no disk space). The stack — temporary data (local vars, return addresses), grows downward from high addresses. The heap — dynamically allocated memory via brk/sbrk or mmap, grows upward from low addresses.",
+      "section .data\n    ; Initialized data segment\n    init_val  dq  42        ; stored in the ELF file\n    hello     db  'Hello', 0\n\nsection .bss\n    ; Uninitialized data (zeroed at runtime, no disk space)\n    large_buf resb 65536    ; 64KB buffer\n    counter   resq 1        ; one qword\n\nsection .text\n    global _start\n_start:\n    ; .text segment: code, read-only, executable\n    mov rax, [rel init_val] ; read from .data\n    ; Write to .bss\n    mov qword [rel counter], 1\n    ; Stack segment: accessed via push/pop or RSP\n    push 42\n    pop rax\n    ; Heap: sys_brk (12) or sys_mmap (9)\n    mov rax, 9          ; sys_mmap\n    xor rdi, rdi        ; addr = NULL\n    mov rsi, 4096       ; length\n    mov rdx, 3          ; PROT_READ|PROT_WRITE\n    mov r10, 0x22       ; MAP_PRIVATE|MAP_ANONYMOUS\n    mov r8, -1          ; fd = -1\n    xor r9, r9          ; offset = 0\n    syscall\n    ; rax = heap address\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Variables": [
+      "Variables are named memory locations declared with DB (byte), DW (word), DD (dword), DQ (qword), or DT (10 bytes). Initialize with a value or comma-separated list for arrays. Use TIMES for repeating patterns. Access with `mov reg, [var_name]` for load, `mov [var_name], reg` for store. NASM doesn't have typed variables — the assembler just associates a name with an address; you must use the correct instruction size.",
+      "section .data\n    ; Variable declarations\n    byte_var   db  0x42          ; 1 byte\n    word_var   dw  0xABCD        ; 2 bytes\n    dword_var  dd  0xDEADBEEF    ; 4 bytes\n    qword_var  dq  0x1234567890ABCDEF ; 8 bytes\n    ; Initialized array\n    scores     db  85, 92, 78, 95 ; 4 bytes\n    ; String variables\n    name_str   db  'Assembly', 0  ; null-terminated\n    ; Using TIMES for arrays\n    zeros      times 16 db 0      ; 16 zero bytes\n    pattern    times 8 dw 0x1234  ; 8 words\n\nsection .text\n    global _start\n_start:\n    ; Load variable into register\n    mov al, [rel byte_var]      ; al = 0x42\n    mov ax, [rel word_var]      ; ax = 0xABCD\n    mov eax, [rel dword_var]    ; eax = 0xDEADBEEF\n    mov rax, [rel qword_var]    ; rax = 0x1234567890ABCDEF\n    ; Store register into variable\n    mov qword [rel qword_var], 0\n    ; Access array element\n    mov al, [rel scores + 2]    ; al = 78 (third element)\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Constants": [
+      "NASM constants are evaluated at assembly time, not runtime. `EQU` assigns a name to a value (cannot be redefined). `%assign` defines a numeric constant that can be redefined. `%define` is a textual macro replacement (like C's #define). Constants improve readability and maintainability — use them for syscall numbers, buffer sizes, flags, and masks. They consume no memory and have no runtime overhead.",
+      "section .data\n    ; System call number constants\n    SYS_READ    equ 0\n    SYS_WRITE   equ 1\n    SYS_OPEN    equ 2\n    SYS_CLOSE   equ 3\n    SYS_MMAP    equ 9\n    SYS_EXIT    equ 60\n    ; File descriptor constants\n    FD_STDIN    equ 0\n    FD_STDOUT   equ 1\n    FD_STDERR   equ 2\n    ; Buffer size constant\n    BUF_SIZE    equ 4096\n    ; Flag constants\n    O_RDONLY    equ 0\n    O_WRONLY    equ 1\n    O_CREAT     equ 0x40\n    O_TRUNC     equ 0x200\n    ; %assign (redefinable)\n    %assign VERSION 1\n    %assign VERSION 2  ; OK\n    ; %define (textual substitution)\n    %define NEWLINE 0xa\n    %define PRINT(msg) mov rax, SYS_WRITE; mov rdi, FD_STDOUT; lea rsi, [rel msg]; mov rdx, len_ %+ msg; syscall\n\nsection .bss\n    buffer resb BUF_SIZE\n\nsection .text\n    global _start\n_start:\n    PRINT(hello_msg)\n    mov rax, SYS_EXIT\n    xor rdi, rdi\n    syscall\n\nsection .data\n    hello_msg db 'Constant test', NEWLINE\n    len_hello_msg equ $ - hello_msg"
+    ],
+    "Build Tools & Makefiles": [
+      "Use Makefiles to automate assembly workflow. Pattern rules handle .asm → .o → executable. Common targets: all (build), clean (remove artifacts), debug (with DWARF symbols), run. The `$@` (target), `$<` (first dep), `$^` (all deps) automatic variables streamline rules.",
+      "# Makefile for assembly projects\nAS=nasm\nLD=ld\nASFLAGS=-f elf64 -g -F dwarf\nLDFLAGS=\n\n# Pattern rule: .asm → .o\n%.o: %.asm\n\t$(AS) $(ASFLAGS) $< -o $@\n\n# Standalone executable (no libc)\nhello: hello.o\n\t$(LD) $(LDFLAGS) -o $@ $^\n\n# Libc-linked executable\nprog: prog.o\n\tgcc -no-pie -o $@ $^\n\n# All targets\nall: hello prog\n\n# Debug\n.PHONY: debug\ndebug: hello\n\tgdb ./hello\n\n# Clean\n.PHONY: clean\nclean:\n\trm -f *.o hello prog"
+    ]
+  },
+  "x64 Architecture and Registers": {
+    "CPU Architecture Overview": [
+      "The x86-64 CPU has: ALU (arithmetic logic unit), control unit, registers (fast on-chip storage), cache (L1/L2/L3), MMU (memory management unit), FPU (floating-point), and SIMD units. Execution pipeline: fetch decode execute memory access write-back. Long mode (64-bit) allows 64-bit addressing, 16 general-purpose registers, and SSE/AVX.",
+      "section .data\n    ; CPU modes:\n    ; Real Mode   (16-bit, DOS, 1MB addressable)\n    ; Protected   (32-bit, Windows/Linux, 4GB)\n    ; Long Mode   (64-bit, >4GB addressing)\n    msg db 'x86-64 architecture',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "General Purpose Registers": [
+      "x86-64 has 16 GPRs: RAX (accumulator), RBX (base), RCX (counter), RDX (data), RSI (source index), RDI (dest index), RBP (base pointer), RSP (stack pointer), R8-R15 (extended). Sub-registers: RAX EAX (32) AX (16) AH/AL (8). In 64-bit mode, writing to a 32-bit subregister zero-extends to 64 bits.",
+      "section .data\n    msg db 'Registers demo',0xa\n\nsection .text\n    global _start\n_start:\n    ; 64-bit operations\n    mov rax, 0x1234567890ABCDEF\n    mov rbx, -1\n    mov rcx, 1000\n    ; 32-bit subregisters (zero-extend to 64)\n    mov eax, 0xFFFFFFFF    ; rax = 0x00000000FFFFFFFF\n    mov rax, -1\n    ; 16-bit subregisters\n    mov ax, 0xABCD         ; only lower 16 bits changed\n    ; 8-bit subregisters\n    mov al, 0x42           ; lowest byte\n    mov ah, 0x99           ; second byte\n    ; R8-R15 (extended registers)\n    mov r8, 0xDEADBEEF\n    mov r9d, 12345         ; r9d = r9 lower 32 bits\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Special Purpose Registers": [
+      "RIP (instruction pointer) points to the next instruction. RFLAGS stores condition flags: CF (carry), PF (parity), AF (adjust), ZF (zero), SF (sign), OF (overflow), IF (interrupt), DF (direction). Control registers CR0-CR4 manage system state. Segment registers (CS, DS, ES, FS, GS, SS) are largely vestigial in 64-bit mode.",
+      "section .data\n    msg db 'Flags demo',0xa\n    eq_msg db 'Equal',0xa\n    ne_msg db 'Not equal',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 42\n    mov rbx, 42\n    cmp rax, rbx       ; sets ZF=1, CF=0\n    je .equal\n    mov rsi, ne_msg\n    jmp .print\n.equal:\n    mov rsi, eq_msg\n.print:\n    mov rax, 1\n    mov rdi, 1\n    mov rdx, 6\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Stack and Calling Conventions": [
+      "The stack grows downward (RSP decreases on push). PUSH decrements RSP then stores; POP loads then increments RSP. The System V AMD64 ABI: first 6 args in RDI, RSI, RDX, RCX, R8, R9; return value in RAX. RSP must be 16-byte aligned before CALL. CALL pushes return address; RET pops it. The red zone (128 bytes below RSP) is scratch space.",
+      "section .data\n    msg db 'Stack: Hello!',0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    push 42\n    push msg\n    pop rsi\n    pop rdx\n    push len\n    pop rdx\n    mov rax, 1\n    mov rdi, 1\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Memory Addressing Modes": [
+      "x86-64 addressing: [base + index*scale + displacement]. Scale can be 1, 2, 4, 8. Modes: register (mov rax, rbx), immediate (mov rax, 42), direct (mov rax, [addr]), register indirect (mov rax, [rbx]), base+displacement (mov rax, [rbx+8]), indexed (mov rax, [array+rbx*8]), RIP-relative (mov rax, [rel msg]). 64-bit uses RIP-relative by default for data access.",
+      "section .data\n    array dq 10, 20, 30, 40, 50\n    msg db 'Addr mode',0xa\n\nsection .text\n    global _start\n_start:\n    ; Direct addressing\n    mov rax, [rel msg]\n    ; Register indirect\n    lea rbx, [rel array]\n    mov rax, [rbx]\n    ; Base + displacement\n    mov rax, [rbx + 8]\n    ; Indexed addressing\n    mov rcx, 2\n    mov rax, [rbx + rcx*8]\n    ; LEA (load effective address)\n    lea rdi, [rbx + rcx*8 + 8]\n    mov rax, [rdi]\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Segment & Control Registers": [
+      "Segment registers (CS, DS, ES, FS, GS, SS) are mostly vestigial in 64-bit. FS is used for thread-local storage (TLS). GS is used for processor-specific data on some OSes. Control registers: CR0 (protection enable, paging), CR2 (page fault address), CR3 (page table base), CR4 (extensions). Read via MOV from CRn (privileged). EFLAGS/RFLAGS register controls CPU behavior.",
+      "section .data\n    msg db 'Control regs',0xa\n\nsection .text\n    global _start\n_start:\n    ; Reading RFLAGS\n    pushfq\n    pop rax\n    ; RFLAGS bits:\n    ; CF=0, PF=1, AF=2, ZF=4, SF=5,\n    ; TF=6, IF=7, DF=8, OF=9\n    ; Read FS segment base (TLS pointer)\n    ; Not directly accessible from user mode\n    ; Kernel can read/write CR registers:\n    ; mov rax, cr3  ; get page table base\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SIMD Register State": [
+      "SIMD state: MMX uses MM0-MM7 (64-bit, legacy). SSE uses XMM0-XMM15 (128-bit). AVX: YMM0-YMM15 (256-bit). AVX-512: ZMM0-ZMM15 (512-bit). MXCSR controls SSE rounding/exception masks. VZEROUPPER clears upper YMM bits when mixing SSE/AVX. XSAVE/XRSTOR save/restore full SIMD state.",
+      "section .data\n    align 32\n    vec_a dd 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0\n    vec_b dd 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0\n    mxcsr_val dd 0\n\nsection .text\n    global _start\n_start:\n    ; Read MXCSR\n    stmxcsr [rel mxcsr_val]\n    ; Default rounding: round to nearest (bits 13-14 = 00)\n    ; Set flush-to-zero (bit 15)\n    mov eax, [rel mxcsr_val]\n    or eax, 1 << 15\n    ldmxcsr [rel mxcsr_val]\n    ; SIMD operations\n    vmovaps ymm0, [rel vec_a]\n    vmovaps ymm1, [rel vec_b]\n    vaddps ymm2, ymm0, ymm1\n    ; Clear upper YMM state before SSE operations\n    vzeroupper\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "NASM Assembly Basics": {
+    "Hello World": [
+      "NASM syntax: label: instruction operands ; comment. Sections: .data (initialized data), .bss (uninitialized data), .text (code). The `_start` label is the ELF entry point. Use `nasm -f elf64 file.asm && ld -o file file.o`. System calls use `syscall` with the syscall number in RAX and arguments in RDI, RSI, RDX, R10, R8, R9.",
+      "; Hello World in x64 NASM Linux\n; Assemble: nasm -f elf64 hello.asm\n; Link:     ld -o hello hello.o\n; Run:      ./hello\n\nsection .data\n    msg db 'Hello, World!', 0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    mov rax, 1       ; sys_write\n    mov rdi, 1       ; stdout\n    mov rsi, msg     ; buffer\n    mov rdx, len     ; length\n    syscall\n    mov rax, 60      ; sys_exit\n    xor rdi, rdi     ; exit code 0\n    syscall"
+    ],
+    "Data Types and Directives": [
+      "NASM data directives: DB (byte), DW (word = 2 bytes), DD (dword = 4), DQ (qword = 8), DT (10 bytes), DO (16), DY (32), DZ (64). TIMES repeats data. EQU defines constants. $ is the current address. RESB/RESW/RESD/RESQ reserve space in .bss.",
+      "section .data\n    b db 0xFF\n    w dw 0xABCD\n    d dd 0xDEADBEEF\n    q dq 0x1234567890ABCDEF\n    str1 db 'Hello', 0\n    buffer times 64 db 0\n    SYS_READ  equ 0\n    SYS_WRITE equ 1\n    SYS_EXIT  equ 60\n\nsection .bss\n    resv resb 256\n    resq resq 16\n\nsection .text\n    global _start\n_start:\n    mov rax, SYS_EXIT\n    xor rdi, rdi\n    syscall"
+    ],
+    "Moving Data": [
+      "MOV copies data between registers, memory, and immediates. MOV cannot do memory-to-memory directly. MOVZX (zero-extend) and MOVSX (sign-extend) for smaller to larger sizes. XCHG swaps values. LEA loads effective address without accessing memory. CMOVcc (conditional move) avoids branches.",
+      "section .data\n    src dq 0x1234567890ABCDEF\n    dst dq 0\n    msg db 'Move data',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, rbx\n    mov rcx, 42\n    mov rdx, [rel src]\n    mov [rel dst], rdx\n    mov al, 0xAB\n    movzx rbx, al\n    movsx rcx, al\n    lea rsi, [rel msg]\n    mov rax, 10\n    mov rbx, 20\n    xchg rax, rbx\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Arithmetic Instructions": [
+      "ADD, SUB, MUL, DIV for arithmetic. ADD/SUB work on any operand size. MUL unsigned: RAX = RAX * rm. IMUL for signed. DIV unsigned: RAX / rm  quotient=RAX, remainder=RDX. IDIV for signed. ADC/SBB include carry. INC/DEC increment/decrement. NEG negates.",
+      "section .data\n    msg db 'Arith ok',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 50\n    add rax, 30\n    sub rax, 20\n    inc rax\n    dec rax\n    mov rax, 100\n    mov rbx, 200\n    mul rbx\n    mov rax, -5\n    imul rax, 10\n    xor rdx, rdx\n    mov rax, 100\n    mov rcx, 7\n    div rcx\n    mov rax, 42\n    neg rax\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Control Flow and Branching": [
+      "Unconditional: JMP. Conditional: JE, JNE, JG, JL, JGE, JLE, JA, JB, JAE, JBE, JO, JS, JC, JP. Based on RFLAGS set by CMP or arithmetic. CMP subtracts operands, sets flags, discards result. TEST performs AND, sets flags, discards result. Jcc checks specific flags.",
+      "section .data\n    msg_gt db 'Greater',0xa\n    msg_eq db 'Equal',0xa\n    msg_lt db 'Less',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 42\n    mov rbx, 50\n    cmp rax, rbx\n    jg  .greater\n    je .equal\n    mov rsi, msg_lt\n    mov rdx, 5\n    jmp .print\n.greater:\n    mov rsi, msg_gt\n    mov rdx, 8\n    jmp .print\n.equal:\n    mov rsi, msg_eq\n    mov rdx, 6\n.print:\n    mov rax, 1\n    mov rdi, 1\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Loops": [
+      "The LOOP instruction decrements RCX and jumps to a label if RCX != 0. LOOPE/LOOPZ (loop while equal) also checks ZF=1. LOOPNE/LOOPNZ (loop while not equal) also checks ZF=0. For more control, implement loops manually with a counter register, CMP, and conditional jump. Nested loops require saving/restoring the outer loop counter.",
+      "section .data\n    star db '*'\n    newline db 0xa\n    count equ 10\n\nsection .text\n    global _start\n_start:\n    ; LOOP instruction (counts down RCX)\n    mov rcx, count\n.print_loop:\n    push rcx\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel star]\n    mov rdx, 1\n    syscall\n    pop rcx\n    loop .print_loop\n    ; Newline\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel newline]\n    mov rdx, 1\n    syscall\n    ; Manual loop with counter\n    mov rcx, 5\n.manual_loop:\n    ; do work here\n    dec rcx\n    jnz .manual_loop\n    ; Nested loop: print 3 rows of 5 stars\n    mov rbx, 3            ; outer counter\n.outer:\n    mov rcx, 5            ; inner counter\n.inner:\n    push rcx\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel star]\n    mov rdx, 1\n    syscall\n    pop rcx\n    loop .inner\n    ; newline after each row\n    push rbx\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel newline]\n    mov rdx, 1\n    syscall\n    pop rbx\n    dec rbx\n    jnz .outer\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Stack Operations": [
+      "PUSH decrements RSP then stores. POP loads then increments RSP. PUSHA/POPA (all regs) are 32-bit only. PUSHF/POPF save/restore RFLAGS. ENTER/LEAVE create/destroy stack frames (rarely used — prefer manual frame setup). Stack grows toward lower addresses. In 64-bit mode, PUSH/POP default to 64-bit operands.",
+      "section .data\n    val1 dq 100\n    val2 dq 200\n    msg db 'Stack ops',0xa\n\nsection .text\n    global _start\n_start:\n    push qword [rel val1]\n    push qword [rel val2]\n    pop rax             ; rax = 200\n    pop rbx             ; rbx = 100\n    pushfq              ; save flags\n    mov rax, 42\n    mov rbx, 42\n    cmp rax, rbx\n    popfq               ; restore flags\n    push 0              ; push immediate (sign-extended)\n    push -1\n    ; Multiple pushes/pops for register save\n    push rax\n    push rcx\n    push rdx\n    ; ... do work ...\n    pop rdx\n    pop rcx\n    pop rax\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Procedures and the Stack": {
+    "CALL and RET": [
+      "CALL pushes the return address (RIP) onto the stack then jumps to the target. RET pops the return address and jumps back. Near calls (within same segment) are standard in 64-bit. CALL can be direct (call label) or indirect (call rax, call [table+rcx*8]). RET can take an immediate to pop extra bytes.",
+      "section .data\n    msg db 'Procedure!', 0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    call print_msg\n    call print_msg\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n\nprint_msg:\n    push rax\n    push rdi\n    push rsi\n    push rdx\n    mov rax, 1\n    mov rdi, 1\n    mov rsi, msg\n    mov rdx, len\n    syscall\n    pop rdx\n    pop rsi\n    pop rdi\n    pop rax\n    ret"
+    ],
+    "Passing Arguments": [
+      "System V AMD64 ABI: integer args in RDI, RSI, RDX, RCX, R8, R9 (left to right). Additional args on the stack. Return value in RAX. Callee-saved: RBX, RBP, R12-R15. Caller-saved: RAX, RCX, RDX, RSI, RDI, R8-R11. Stack must be 16-byte aligned before CALL.",
+      "section .data\n    msg db 'Sum: ',0xa\n\nsection .text\n    global _start\n_start:\n    mov rdi, 10\n    mov rsi, 20\n    mov rdx, 30\n    call sum_three\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n\nsum_three:\n    push rbp\n    mov rbp, rsp\n    mov rax, rdi\n    add rax, rsi\n    add rax, rdx\n    pop rbp\n    ret"
+    ],
+    "Stack Frames": [
+      "A stack frame is created with `push rbp; mov rbp, rsp`. Local variables are allocated by subtracting from RSP: `sub rsp, 32`. RBP provides a stable reference: parameters at positive offsets [rbp+16+], locals at negative offsets [rbp-8]. Leave instruction: `mov rsp, rbp; pop rbp`.",
+      "section .text\n    global _start\n_start:\n    mov rdi, 7\n    call factorial\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n\nfactorial:\n    push rbp\n    mov rbp, rsp\n    sub rsp, 16\n    cmp rdi, 1\n    jle .base\n    push rdi\n    dec rdi\n    call factorial\n    pop rdi\n    mul rdi\n    jmp .done\n.base:\n    mov rax, 1\n.done:\n    leave\n    ret"
+    ],
+    "Recursion": [
+      "A recursive procedure calls itself. Each call creates a new stack frame with its own parameters, local variables, and return address. Must have a base case to terminate and a recursive case that progresses toward the base. Deep recursion can overflow the stack (default ulimit ~8MB). Use the stack to save state across calls. Factorial and Fibonacci are classic examples.",
+      "section .data\n    fmt db 'Fibonacci(%d) = %d', 10, 0\n\nextern printf\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n    ; Compute fibonacci(10)\n    mov rdi, 10\n    call fib\n    ; Print result\n    lea rdi, [rel fmt]\n    mov rsi, 10\n    mov rdx, rax\n    xor eax, eax\n    call printf\n    mov eax, 0\n    pop rbp\n    ret\n\n; int fib(int n)\n; Returns nth Fibonacci number recursively\nfib:\n    push rbp\n    mov rbp, rsp\n    ; Base cases: fib(0)=0, fib(1)=1\n    cmp rdi, 1\n    jle .base\n    ; Recursive: fib(n-1) + fib(n-2)\n    push rdi              ; save n\n    dec rdi\n    call fib              ; fib(n-1)\n    pop rdi\n    push rax              ; save fib(n-1)\n    push rdi\n    sub rdi, 2\n    call fib              ; fib(n-2)\n    pop rdi\n    pop rcx               ; rcx = fib(n-1)\n    add rax, rcx          ; rax = fib(n-1) + fib(n-2)\n    pop rbp\n    ret\n.base:\n    mov rax, rdi          ; return n (0 or 1)\n    pop rbp\n    ret"
+    ],
+    "Macros": [
+      "NASM macros: %define (single-line) and %macro (multi-line). %define can have parameters: `%define mulby2(x) x*2`. Multi-line: `%macro name paramcount` ... `%endmacro`. %rotate cycles through parameters. %assign for numeric macros. Conditional assembly: %if, %elif, %else, %endif.",
+      "; Single-line macro\n%define NEWLINE 0xa\n%define PRINT(msg) mov rax, 1; mov rdi, 1; mov rsi, msg; mov rdx, len_msg; syscall\n\nsection .data\n    hello db 'Hello', NEWLINE\n    len_msg equ $ - hello\n\nsection .text\n    global _start\n\n%macro PRINT_STRING 1\n    mov rax, 1\n    mov rdi, 1\n    mov rsi, %1\n    mov rdx, len_%1\n    syscall\n%endmacro\n\n_start:\n    PRINT(hello)\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Multi-File Programs": [
+      "Large programs split into multiple .asm files and link together. Use `extern` to declare symbols from other files, `global` to make symbols visible. Assemble each file separately, link together. `nasm -f elf64 util.asm -o util.o && nasm -f elf64 main.asm -o main.o && ld -o prog main.o util.o`. Avoid name collisions with LOCAL labels (.label).",
+      "; ---- file: util.asm ----\nsection .text\n    global print_char\n\nprint_char:\n    push rax\n    push rdi\n    push rsi\n    push rdx\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rsp + 32]\n    mov rdx, 1\n    syscall\n    pop rdx\n    pop rsi\n    pop rdi\n    pop rax\n    ret\n\n; ---- file: main.asm ----\nextern print_char\n\nsection .data\n    star db '*'\n\nsection .text\n    global _start\n_start:\n    mov rcx, 10\n.loop:\n    push rcx\n    mov rdi, [star]\n    call print_char\n    pop rcx\n    loop .loop\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Stack Alignment & Red Zone": [
+      "System V AMD64 ABI: RSP must be 16-byte aligned before CALL. The stack is 16-byte aligned at _start. After CALL (pushes 8-byte return address), RSP is 8 mod 16. Subroutines adjust RSP to maintain alignment. The red zone is 128 bytes below RSP — safe for scratch data (not affected by signals/handlers in leaf functions).",
+      "section .data\n    msg db 'Align test',0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    ; RSP is 16-byte aligned here\n    sub rsp, 8  ; adjust to maintain alignment after CALL\n    call func\n    add rsp, 8\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n\nfunc:\n    ; RSP = original - 8 (return addr)\n    sub rsp, 8 + 8 ; align + space\n    ; Use red zone (128 bytes below RSP)\n    mov [rsp - 128], qword 42\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, len\n    syscall\n    add rsp, 8 + 8\n    ret"
+    ]
+  },
+  "Condition Codes and Logical Operations": {
+    "Flag Register": [
+      "RFLAGS is 64-bit but only lower 32 bits are used. Key flags: CF (carry), PF (parity), AF (adjust), ZF (zero), SF (sign), OF (overflow), DF (direction), IF (interrupt). LAHF/SAHF transfer flags to/from AH.",
+      "section .data\n    msg db 'Flags test',0xa\n\nsection .text\n    global _start\n_start:\n    mov al, 0xFF\n    add al, 1          ; CF=1, ZF=1\n    mov al, 127\n    add al, 1          ; OF=1\n    xor rax, rax       ; ZF=1\n    mov rax, -1\n    test rax, rax      ; SF=1\n    mov al, 0b00010001\n    test al, al        ; PF=1\n    jz .zero\n    jmp .done\n.zero:\n    mov rsi, msg\n    mov rdx, 10\n    mov rax, 1\n    mov rdi, 1\n    syscall\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Comparison and TEST": [
+      "CMP = SUB that only sets flags. Used before conditional jumps for signed (JG, JL, JGE, JLE, JE, JNE) and unsigned (JA, JB, JAE, JBE). TEST = AND that only sets flags. Used for bit testing.",
+      "section .data\n    msg_a db 'Above',0xa\n    msg_b db 'Below',0xa\n    msg_g db 'Greater',0xa\n    msg_l db 'Less',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, -1\n    mov rbx, 1\n    cmp rax, rbx\n    jl  .less_signed\n    mov rax, -1\n    mov rbx, 1\n    cmp rax, rbx\n    ja  .above_unsigned\n    mov al, 0b00001000\n    test al, 0b00001000\n    jnz .bit_set\n    jmp .done\n.less_signed:\n    mov rsi, msg_l\n    mov rdx, 5\n    jmp .print\n.above_unsigned:\n    mov rsi, msg_a\n    mov rdx, 6\n.print:\n    mov rax, 1\n    mov rdi, 1\n    syscall\n.bit_set:\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Conditional Moves": [
+      "CMOVcc combines comparison and move: CMOVZ, CMOVNZ, CMOVG, CMOVL, CMOVGE, CMOVLE, CMOVA, CMOVB. Avoids branch mispredictions. SETcc sets a byte to 0/1 based on condition.",
+      "section .data\n    a dq 42\n    b dq 100\n    result dq 0\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel a]\n    mov rbx, [rel b]\n    cmp rax, rbx\n    cmovl rax, rbx\n    mov [rel result], rax\n    xor rax, rax\n    mov rbx, 42\n    mov rcx, 42\n    cmp rbx, rcx\n    sete al\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Logical Instructions": [
+      "AND, OR, XOR, NOT, NEG, TEST. AND for bit masking. OR sets bits. XOR toggles. XOR same register is idiomatic zero. AND with 1 checks parity. NOT flips all bits.",
+      "section .data\n    flags db 0b10101100\n    mask  db 0b00001111\n    msg   db 'Logic test',0xa\n\nsection .text\n    global _start\n_start:\n    mov al, [rel flags]\n    and al, [rel mask]\n    mov al, [rel flags]\n    or  al, 0b00010000\n    mov al, [rel flags]\n    xor al, 0b11111111\n    mov al, [rel flags]\n    test al, 0b00000100\n    jnz .has_bit2\n    jmp .done\n.has_bit2:\n    mov rsi, msg\n    mov rdx, 10\n    mov rax, 1\n    mov rdi, 1\n    syscall\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Bit Manipulation": [
+      "BT (bit test), BTC (bit test and complement), BTR (bit test and reset), BTS (bit test and set). BSF/BSR (bit scan forward/reverse). POPCNT counts set bits. LZCNT/TZCNT (leading/trailing zero count). SHLD/SHRD (double precision shifts).",
+      "section .data\n    value dq 0b1000100010001000\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel value]\n    bt  rax, 3\n    jnc .no_bit3\n.no_bit3:\n    bts rax, 3\n    bsf rcx, rax\n    bsr rdx, rax\n    popcnt r8, rax\n    btc rax, 7\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SETcc & Bit Test Instructions": [
+      "SETcc sets a byte register to 0 or 1 based on a condition. SETZ/SETE (zero), SETNZ/SETNE (non-zero), SETG (signed >), SETL (signed <), SETA (unsigned >), SETB (unsigned <), SETS (sign), SETO (overflow). BT/BTC/BTR/BTS test and optionally modify specific bits. Bit test is atomic with LOCK prefix.",
+      "section .data\n    a dq 42\n    b dq 100\n    result db 0\n    flag_bits dq 0b10101010\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel a]\n    test rax, rax\n    setz byte [rel result]\n    cmp rax, [rel b]\n    setl byte [rel result + 1]\n    mov rax, [rel flag_bits]\n    bt rax, 3           ; CF = bit 3\n    jnc .bit_clear\n    bts rax, 5          ; set bit 5, CF = old bit 5\n    btr rax, 7          ; clear bit 7, CF = old bit 7\n    btc rax, 1          ; toggle bit 1\n.bit_clear:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Strings and Data Structures": {
+    "String Instructions": [
+      "String instructions use RSI (source) and RDI (dest). MOVSB/MOVSW/MOVSD/MOVSQ (move). LODSB/LODSW/LODSD/LODSQ (load from [RSI]). STOSB/STOSW/STOSD/STOSQ (store to [RDI]). CMPSB/CMPSW/CMPSD/CMPSQ (compare). SCASB/SCASW/SCASD/SCASQ (scan). REP repeats RCX times. REPE/REPNE repeats while equal/not equal.",
+      "section .data\n    src db 'Hello, World!', 0\n    dst times 14 db 0\n    len equ 14\n\nsection .text\n    global _start\n_start:\n    lea rsi, [rel src]\n    lea rdi, [rel dst]\n    cld\n    mov rcx, len\n    rep movsb\n    lea rsi, [rel src]\n    lodsb\n    lea rdi, [rel dst]\n    mov al, 'A'\n    mov rcx, 5\n    rep stosb\n    lea rdi, [rel src]\n    mov al, 0\n    mov rcx, 20\n    repne scasb\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Arrays and Addressing": [
+      "Arrays are contiguous memory. Element access: base + index * element_size. Word: `mov ax, [array + rbx*2]`. Dword: `mov eax, [array + rcx*4]`. Qword: `mov rax, [array + rdx*8]`. LEA calculates addresses. Multidimensional arrays use row-major ordering.",
+      "section .data\n    arr dq 10, 20, 30, 40, 50\n    matrix dd 1,2,3,4, 5,6,7,8, 9,10,11,12\n    ROWS equ 3\n    COLS equ 4\n    msg  db 'Array OK',0xa\n\nsection .text\n    global _start\n_start:\n    mov rbx, 2\n    mov rax, [rel arr + rbx*8]\n    mov rcx, 1\n    mov rdx, 2\n    shl rcx, 4\n    lea rsi, [rel matrix]\n    mov rax, [rsi + rcx + rdx*4]\n    lea rsi, [rel arr]\n    xor rcx, rcx\n.loop:\n    mov rax, [rsi + rcx*8]\n    inc rcx\n    cmp rcx, 5\n    jl .loop\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Structures and Records": [
+      "Structures group related data. NASM uses STRUC/ENDSTRUC with RESB/RESW/RESD/RESQ for fields. Initialize with ISTRUC/IEND. Field access with `[struc_variable + field_name]`. Alignment: naturally align fields. PADDING between fields maintains alignment.",
+      "section .data\n    struc point\n        .x: resd 1\n        .y: resd 1\n        .color: resd 1\n    endstruc\n\n    struc person\n        .id:     resq 1\n        .name:   resb 32\n        .age:    resd 1\n        .salary: resq 1\n    endstruc\n\n    p1:\n        istruc point\n            at point.x, dd 10\n            at point.y, dd 20\n            at point.color, dd 0xFF0000\n        iend\n\nsection .text\n    global _start\n_start:\n    mov eax, [p1 + point.x]\n    mov eax, [p1 + point.y]\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Buffers and I/O": [
+      "Buffers are memory blocks for data transfer. .bss reserves uninitialized space with RESB. For file I/O, use sys_open (rax=2), sys_read (0), sys_write (1), sys_close (3). sys_open returns fd in RAX (-1 on error). Buffered I/O: read chunks into buffer, process, write output.",
+      "section .data\n    filename db 'test.txt', 0\n    msg_out  db 'Writing to file', 0xa\n    len_out  equ $ - msg_out\n    SYS_OPEN  equ 2\n    SYS_READ  equ 0\n    SYS_WRITE equ 1\n    SYS_CLOSE equ 3\n    O_CREAT  equ 0x40\n    O_WRONLY equ 0x01\n    O_TRUNC  equ 0x200\n    MODE     equ 0o644\n\nsection .bss\n    buffer resb 4096\n\nsection .text\n    global _start\n_start:\n    mov rax, SYS_OPEN\n    lea rdi, [rel filename]\n    mov rsi, O_WRONLY | O_CREAT | O_TRUNC\n    mov rdx, MODE\n    syscall\n    mov rdi, rax\n    mov rax, SYS_WRITE\n    lea rsi, [rel msg_out]\n    mov rdx, len_out\n    syscall\n    mov rax, SYS_CLOSE\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "String Comparison and Search": [
+      "String compare: CMPSB/CMPSW/CMPSD with REPE/REPNE prefix. REPE CMPSB compares until mismatch or RCX=0. String search: SCASB scans for a byte. REPNE SCASB finds a byte. For null-terminated strings use `repne scasb` to find length.",
+      "section .data\n    str1 db 'Hello', 0\n    str2 db 'Hello', 0\n    str3 db 'World', 0\n    match_msg db 'Match!', 0xa\n    no_msg    db 'No match', 0xa\n\nsection .text\n    global _start\n_start:\n    lea rsi, [rel str1]\n    lea rdi, [rel str2]\n    cld\n    mov rcx, 6\n    repe cmpsb\n    jne .no_match\n    mov rsi, match_msg\n    mov rdx, 7\n    jmp .print\n.no_match:\n    mov rsi, no_msg\n    mov rdx, 9\n.print:\n    mov rax, 1\n    mov rdi, 1\n    syscall\n    lea rdi, [rel str1]\n    mov al, 0\n    mov rcx, -1\n    repne scasb\n    not rcx\n    dec rcx\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Linked List Traversal": [
+      "Linked lists are dynamic data structures. Node = data pointer + next pointer. Traverse by following next pointers until NULL. Operations: insert (update prev.next and new.next), delete (update prev.next to skip node), search (linear traversal). Assembly list: careful with memory dereferences and pointer arithmetic.",
+      "section .data\n    struc node\n        .data: resq 1\n        .next: resq 1\n    endstruc\n\n    node3: istruc node\n        at node.data, dq 30\n        at node.next, dq 0\n    iend\n    node2: istruc node\n        at node.data, dq 20\n        at node.next, dq node3\n    iend\n    node1: istruc node\n        at node.data, dq 10\n        at node.next, dq node2\n    iend\n\nsection .text\n    global _start\n_start:\n    mov rbx, node1          ; head pointer\n.traverse:\n    test rbx, rbx\n    jz .done\n    mov rax, [rbx + node.data]\n    mov rbx, [rbx + node.next]\n    jmp .traverse\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Floating Point and SIMD": {
+    "x87 Floating Point": [
+      "The legacy x87 FPU uses a stack of 8 registers (ST0-ST7). Instructions: FLD (load), FST/FSTP (store/pop), FADD, FSUB, FMUL, FDIV, FCHS, FSQRT, FCOM (compare), FTST (compare with 0). x87 is mostly superseded by SSE but still used in legacy code.",
+      "section .data\n    val1 dt 3.141592653589793\n    val2 dq 2.718281828\n    result dt 0.0\n\nsection .text\n    global _start\n_start:\n    finit\n    fld tword [rel val1]\n    fld qword [rel val2]\n    fadd\n    fstp tword [rel result]\n    fld qword [rel val2]\n    fsqrt\n    fld tword [rel val1]\n    fld qword [rel val2]\n    fcompp\n    fstsw ax\n    sahf\n    ja .pi_greater\n    jmp .done\n.pi_greater:\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SSE Scalar Operations": [
+      "SSE provides XMM0-XMM15 (128-bit) registers. Scalar: ADDSD (add scalar double), SUBSD, MULSD, DIVSD, SQRTSD. MOVSD moves scalar double. CVTSI2SD converts integer to double, CVTSD2SI converts double to integer. UCOMISD compares scalars.",
+      "section .data\n    a dq 3.14\n    b dq 2.71\n    c dq 0.0\n    int_val dq 42\n\nsection .text\n    global _start\n_start:\n    movsd xmm0, [rel a]\n    movsd xmm1, [rel b]\n    addsd xmm0, xmm1\n    mulsd xmm0, xmm0\n    sqrtsd xmm2, xmm0\n    cvtsi2sd xmm3, [rel int_val]\n    movsd [rel c], xmm0\n    movsd xmm4, [rel a]\n    movsd xmm5, [rel b]\n    ucomisd xmm4, xmm5\n    ja .a_greater\n    jmp .done\n.a_greater:\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SSE Packed Operations": [
+      "SSE processes multiple elements at once: packed add/sub/mul/div on 2 doubles or 4 floats. ADDPS (packed single), ADDPD (packed double). SUBPS, MULPS, DIVPS. Also: MAXPS, MINPS, SQRTPS. HADDPS (horizontal add) sums adjacent pairs. MOVAPS/MOVUPS for aligned/unaligned moves.",
+      "section .data\n    vec1 dd 1.0, 2.0, 3.0, 4.0\n    vec2 dd 5.0, 6.0, 7.0, 8.0\n    result dd 0.0, 0.0, 0.0, 0.0\n    dbl1 dq 10.0, 20.0\n    dbl2 dq 30.0, 40.0\n\nsection .text\n    global _start\n_start:\n    movaps xmm0, [rel vec1]\n    movaps xmm1, [rel vec2]\n    addps xmm0, xmm1\n    mulps xmm0, xmm0\n    movaps [rel result], xmm0\n    movapd xmm2, [rel dbl1]\n    movapd xmm3, [rel dbl2]\n    addpd xmm2, xmm3\n    haddps xmm0, xmm0\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "AVX and Advanced SIMD": [
+      "AVX extends XMM to 256-bit YMM registers (YMM0-YMM15). Three-operand syntax: `vaddps ymm0, ymm1, ymm2`. Non-destructive sources. AVX2 adds gather, FMA. AVX-512 extends to 512-bit ZMM. VZEROUPPER clears upper bits when mixing SSE and AVX.",
+      "section .data\n    align 32\n    a dd 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0\n    b dd 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0\n\nsection .text\n    global _start\n_start:\n    vmovaps ymm0, [rel a]\n    vmovaps ymm1, [rel b]\n    vaddps ymm2, ymm0, ymm1\n    vmulps ymm3, ymm0, ymm1\n    vfmadd213ps ymm4, ymm1, ymm0\n    vhaddps ymm5, ymm0, ymm0\n    vzeroupper\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SSE Integer and Conversion": [
+      "SSE2 adds 128-bit integer ops in XMM: PADDB/W/D/Q, PSUBB/W/D/Q, PMULLW/D. PCMPEQB/W/D (compare equal). PCMPGTB/W/D. PAND, POR, PXOR, PANDN. PACKSSWB/PACKUSDW (pack with saturation). PMOVMSKB creates integer mask from byte MSBs.",
+      "section .data\n    ints1 dd 100, 200, 300, 400\n    ints2 dd 5, 10, 15, 20\n    result dd 0, 0, 0, 0\n\nsection .text\n    global _start\n_start:\n    movdqa xmm0, [rel ints1]\n    movdqa xmm1, [rel ints2]\n    paddd xmm0, xmm1\n    movdqa [rel result], xmm0\n    movdqa xmm2, [rel ints1]\n    movdqa xmm3, [rel ints2]\n    pcmpeqd xmm2, xmm3\n    movdqa xmm4, [rel ints1]\n    pand xmm4, xmm3\n    por xmm4, xmm3\n    pxor xmm4, xmm4\n    pmovmskb eax, xmm0\n    cvtdq2ps xmm5, xmm1\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "SSE Data Conversion & Shuffle": [
+      "SSE conversion: CVTSI2SD (int→double), CVTSD2SI (double→int), CVTTSD2SI (truncate), CVTDQ2PS (int→float), CVTPS2DQ (float→int). Shuffle: PSHUFD (dword shuffle), SHUFPS (float shuffle), PUNPCKLDQ (interleave low dwords), PACKSSDW (pack with saturation). Shuffle masks select source elements.",
+      "section .data\n    int_vals dd 10, 20, 30, 40\n    float_vals dd 0.0, 0.0, 0.0, 0.0\n    dbl_vals dq 3.14, 2.71\n\nsection .text\n    global _start\n_start:\n    ; Integer to float conversion\n    cvtdq2ps xmm0, [rel int_vals]\n    movaps [rel float_vals], xmm0\n    ; Float to integer (truncate)\n    cvtps2dq xmm1, xmm0\n    ; Double to integer\n    cvtsd2si rax, [rel dbl_vals]\n    ; Shuffle dwords\n    movdqa xmm2, [rel int_vals]\n    pshufd xmm3, xmm2, 0b00011011  ; reverse order\n    ; Unpack low dwords\n    movdqa xmm4, [rel int_vals]\n    punpckldq xmm4, xmm2\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Interfacing with C and Linux": {
+    "Linux System Calls": [
+      "Linux syscalls: RAX = syscall number, RDI/RSI/RDX/R10/R8/R9 = args, syscall invokes the kernel. Return in RAX. Common: 0=read, 1=write, 2=open, 3=close, 9=mmap, 12=brk, 60=exit. Syscall numbers differ between x86 and x64. See /usr/include/asm/unistd_64.h.",
+      "section .data\n    msg db 'syscall demo', 0xa\n    len equ $ - msg\n    SYS_READ    equ 0\n    SYS_WRITE   equ 1\n    SYS_OPEN    equ 2\n    SYS_CLOSE   equ 3\n    SYS_MMAP    equ 9\n    SYS_BRK     equ 12\n    SYS_EXIT    equ 60\n\nsection .bss\n    buf resb 256\n\nsection .text\n    global _start\n_start:\n    mov rax, SYS_WRITE\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, len\n    syscall\n    mov rax, SYS_BRK\n    xor rdi, rdi\n    syscall\n    mov rax, SYS_EXIT\n    xor rdi, rdi\n    syscall"
+    ],
+    "Calling C Library Functions": [
+      "Link with gcc instead of ld to use libc: `nasm -f elf64 prog.asm && gcc -no-pie -o prog prog.o`. Libc provides printf, malloc, fopen, etc. The C runtime expects `main` instead of `_start`. RSP must be 16-byte aligned before CALL.",
+      "extern printf\n\nsection .data\n    fmt_int db 'Value: %d', 10, 0\n    fmt_str db 'String: %s', 10, 0\n    hello db 'Hello from ASM!', 0\n    val dq 42\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n    lea rdi, [rel fmt_int]\n    mov rsi, [rel val]\n    xor eax, eax\n    call printf\n    lea rdi, [rel fmt_str]\n    lea rsi, [rel hello]\n    xor eax, eax\n    call printf\n    mov eax, 0\n    pop rbp\n    ret"
+    ],
+    "Command Line Arguments": [
+      "When linked with libc and using `main`, argc is in RDI, argv is in RSI. argc = argument count (program name counts as 1). argv = array of char* pointers, null-terminated. Environment variables (envp) are in RDX.",
+      "extern printf\n\nsection .data\n    fmt_arg db 'Arg %d: %s', 10, 0\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n    mov r12, rdi\n    mov r13, rsi\n    xor r14, r14\n.loop:\n    cmp r14, r12\n    jge .done\n    lea rdi, [rel fmt_arg]\n    mov rsi, r14\n    mov rdx, [r13 + r14*8]\n    xor eax, eax\n    call printf\n    inc r14\n    jmp .loop\n.done:\n    mov eax, 0\n    pop rbp\n    ret"
+    ],
+    "File I/O with syscalls": [
+      "File operations: open (returns fd), read/write, close, lseek. sys_open: path in RDI, flags in RSI, mode in RDX. Flags: O_RDONLY=0, O_WRONLY=1, O_RDWR=2, O_CREAT=0x40, O_TRUNC=0x200, O_APPEND=0x400. Always check return values: negative = error.",
+      "section .data\n    fname db 'test.txt', 0\n    buffer times 256 db 0\n    err_msg db 'Error!', 0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 2\n    lea rdi, [rel fname]\n    xor rsi, rsi\n    syscall\n    test rax, rax\n    js .error\n    mov r8, rax\n    mov rax, 0\n    mov rdi, r8\n    lea rsi, [rel buffer]\n    mov rdx, 256\n    syscall\n    mov rdx, rax\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel buffer]\n    syscall\n    mov rax, 3\n    mov rdi, r8\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n.error:\n    mov rax, 1\n    mov rdi, 2\n    lea rsi, [rel err_msg]\n    mov rdx, 7\n    syscall\n    mov rax, 60\n    mov rdi, 1\n    syscall"
+    ],
+    "Memory Management": [
+      "sys_brk (12) allocates heap memory. Call with RDI=0 to get current break, then RDI=new_break to allocate. More flexible: sys_mmap (9) maps anonymous memory. mmap args: addr=0, length, prot=3 (PROT_READ|PROT_WRITE), flags=0x22 (MAP_PRIVATE|MAP_ANONYMOUS), fd=-1, offset=0. munmap (11) frees.",
+      "section .data\n    PROT_READ  equ 0x1\n    PROT_WRITE equ 0x2\n    MAP_PRIVATE equ 0x02\n    MAP_ANON   equ 0x20\n\nsection .bss\n    static_buf resb 1024\n\nsection .text\n    global _start\n_start:\n    mov rax, 9\n    xor rdi, rdi\n    mov rsi, 4096\n    mov rdx, PROT_READ | PROT_WRITE\n    mov r10, MAP_PRIVATE | MAP_ANON\n    mov r8, -1\n    xor r9, r9\n    syscall\n    mov r15, rax\n    mov dword [r15], 42\n    mov dword [r15+4], 100\n    mov rax, 11\n    mov rdi, r15\n    mov rsi, 4096\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Debugging with GDB": [
+      "Assemble with debug symbols: `nasm -f elf64 -g -F dwarf prog.asm`. GDB commands: break, run, stepi, nexti, info registers, x/Nx addr (examine memory), disas (disassemble), backtrace. Use layout reg for register view, layout asm for disassembly.",
+      "; nasm -f elf64 -g -F dwarf debug.asm\n; ld -o debug debug.o\n; gdb ./debug\n\nsection .data\n    val dq 42\n    msg db 'Debug me', 0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel val]\n    add rax, 10\n    mov rbx, rax\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, 9\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Dynamic Linking & Shared Libraries": [
+      "Create shared libraries: `nasm -f elf64 -dPIC lib.asm && gcc -shared -o libfoo.so lib.o`. Use from C or ASM. GOT (Global Offset Table) holds addresses of global symbols. PLT (Procedure Linkage Table) enables lazy binding. Position-independent code (PIC) uses RIP-relative addressing for shared libraries.",
+      "# Create shared library:\n# nasm -f elf64 -dPIC mathlib.asm\n# gcc -shared -o libmath.so mathlib.o\n# \n# Usage:\n# gcc -no-pie -o prog main.c -L. -lmath\n# LD_LIBRARY_PATH=. ./prog\n\nsection .data\n    ; Shared library code\n    err_msg db 'Error in lib',0xa\n\nsection .text\n    global add_ints\n    global mul_ints\n\nadd_ints:\n    mov rax, rdi\n    add rax, rsi\n    ret\n\nmul_ints:\n    mov rax, rdi\n    imul rax, rsi\n    ret\n\n; dlopen/dlsym for runtime loading\n; void* handle = dlopen(\"libfoo.so\", RTLD_LAZY);\n; int (*fn)(int) = dlsym(handle, \"func\");"
+    ]
+  },
+  "Advanced Topics and Optimization": {
+    "Performance Optimization": [
+      "x64 optimization: minimize memory access (load once, reuse), align code/data to cache lines (64 bytes), avoid branch mispredictions (use CMOV, bit manipulation), use SIMD for parallel processing, unroll loops carefully, prefer register args over stack, avoid partial register stalls (use movzx not mov+and), use LEA for arithmetic when possible.",
+      "section .data\n    align 64\n    data times 1024 dq 0\n    n equ 1024\n\nsection .text\n    global _start\n_start:\n    xor rcx, rcx\n.slow_loop:\n    mov rax, [rel data + rcx*8]\n    add rax, 1\n    mov [rel data + rcx*8], rax\n    inc rcx\n    cmp rcx, n\n    jl .slow_loop\n    xor rcx, rcx\n    mov rbx, n\n    xor rax, rax\n.fast_loop:\n    add rax, 2\n    inc rcx\n    cmp rcx, rbx\n    jl .fast_loop\n    lea rax, [rcx + rbx + 10]\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Inline Assembly (GCC)": [
+      "GCC inline assembly: `asm(\"instructions\" : outputs : inputs : clobbers)`. Extended asm: `asm volatile(\"add %1, %0\" : \"+r\"(a) : \"r\"(b))`. AT&T syntax (src,dst) vs Intel (dst,src). Use `-masm=intel` for Intel syntax. Constraints: r=register, m=memory, i=immediate.",
+      "#include <stdio.h>\n\nint main() {\n    int a = 10, b = 20, result;\n\n    asm(\"add %1, %0\"\n        : \"+r\" (a)\n        : \"r\" (b)\n    );\n    printf(\"a + b = %d\\n\", a);\n\n    int x = 42, y = 0;\n    asm volatile(\n        \"mov %0, %1\\n\\t\"\n        \"add %0, 10\"\n        : \"=r\" (y)\n        : \"r\" (x)\n    );\n    printf(\"y = %d\\n\", y);\n\n    long long rax_val;\n    asm(\"mov %%rax, %0\" : \"=r\" (rax_val));\n    printf(\"RAX = 0x%lx\\n\", rax_val);\n\n    return 0;\n}"
+    ],
+    "Interrupts and Exception Handling": [
+      "x86-64 has an IDT (Interrupt Descriptor Table). Linux exceptions: #DE (divide error, vector 0), #DB (debug, 1), #BP (breakpoint, 3), #GP (general protection, 13), #PF (page fault, 14). The `int` instruction triggers software interrupts (syscall is preferred on x64).",
+      "section .data\n    msg db 'Safe division',0xa\n    div_by_zero db 'Divide by zero!',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 100\n    mov rbx, 0\n    test rbx, rbx\n    jz .error\n    xor rdx, rdx\n    div rbx\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, 15\n    syscall\n    jmp .exit\n.error:\n    mov rax, 1\n    mov rdi, 2\n    lea rsi, [rel div_by_zero]\n    mov rdx, 15\n    syscall\n.exit:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "PIC and Position-Independent Code": [
+      "Position-independent code (PIC) is required for shared libraries. Use `lea rax, [rel symbol]` instead of `mov rax, symbol`. NASM's `default rel` sets RIP-relative addressing as default. For shared libraries: `nasm -f elf64 -dPIC lib.asm && gcc -shared -o lib.so lib.o`. GOT and PLT enable dynamic linking.",
+      "default rel\n\nsection .data\n    msg db 'PIC code', 0xa\n    len equ $ - msg\n\nsection .text\n    global my_function\n\nmy_function:\n    lea rsi, [msg]\n    mov rdx, len\n    mov rax, 1\n    mov rdi, 1\n    syscall\n    ret"
+    ],
+    "Multithreading and Atomic Ops": [
+      "Atomic operations prevent race conditions. LOCK prefix: `lock inc dword [counter]`, `lock xadd`, `lock cmpxchg`, `lock bts`. CMPXCHG (compare and exchange) is the core of lock-free programming. MFENCE/LFENCE/SFENCE for memory ordering. POSIX threads (pthreads) can be called from assembly via libc. Thread-local storage (TLS) uses the FS segment register in x86-64.",
+      "extern printf\n\nsection .data\n    fmt db 'Counter: %d', 10, 0\n    counter dd 0\n    iterations equ 10000\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n\n    mov ecx, iterations\n.loop:\n    lock inc dword [rel counter]\n    dec ecx\n    jnz .loop\n\n    mov eax, [rel counter]\n    mov edx, 0\n    lock cmpxchg [rel counter], edx\n\n    lea rdi, [rel fmt]\n    mov esi, eax\n    xor eax, eax\n    call printf\n\n    mov eax, 0\n    pop rbp\n    ret"
+    ],
+    "Loop Optimization & Unrolling": [
+      "Loop optimization: unroll to reduce loop overhead (dec/jnz). Partial unrolling for non-multiple iteration counts. Software pipelining: reorder instructions to hide latency. Align loop entry points to 16/32 bytes. Use registers instead of memory for loop counters. Prefer `sub rcx, 1; jnz .loop` over `loop .loop` (LOOP is slower on modern CPUs).",
+      "section .data\n    align 64\n    src times 1024 dq 1\n    dst times 1024 dq 0\n    n equ 1024\n\nsection .text\n    global _start\n_start:\n    mov rsi, src\n    mov rdi, dst\n    mov rcx, n / 4\n\n; Unrolled loop: processes 4 elements per iteration\n.unrolled_loop:\n    mov rax, [rsi]\n    mov rbx, [rsi + 8]\n    mov rdx, [rsi + 16]\n    mov r8,  [rsi + 24]\n    add rax, 1\n    add rbx, 1\n    add rdx, 1\n    add r8,  1\n    mov [rdi], rax\n    mov [rdi + 8], rbx\n    mov [rdi + 16], rdx\n    mov [rdi + 24], r8\n    add rsi, 32\n    add rdi, 32\n    dec rcx\n    jnz .unrolled_loop\n\n; Handle remaining elements\n    mov rcx, n % 4\n.remainder:\n    test rcx, rcx\n    jz .done\n    mov rax, [rsi]\n    add rax, 1\n    mov [rdi], rax\n    add rsi, 8\n    add rdi, 8\n    dec rcx\n    jmp .remainder\n.done:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Data Alignment & Prefetching": [
+      "Data alignment: CPUs access aligned data faster. Natural alignment: 2-byte data on 2-byte boundaries, 4-byte on 4-byte, etc. Misaligned access causes penalty (or fault on some architectures). Use ALIGN directive: `align 16`, `align 64` (cache line). Prefetch: PREFETCH0/PREFETCH1/PREFETCH2/PREFETCHNTA bring data into caches before use. Prefetch avoids cache misses on predictable access patterns.",
+      "section .data\n    align 64\n    ; Aligned to 64-byte cache line\n    aligned_data times 1024 dq 0\n    ; Misaligned (offset by 8)\n    misalign db 0\n    bad_data times 1023 dq 0\n\nsection .text\n    global _start\n_start:\n    lea rsi, [rel aligned_data]\n    mov rcx, 128\n\n.loop:\n    ; Prefetch next cache line\n    prefetcht0 [rsi + 64]\n    mov rax, [rsi]\n    mov rbx, [rsi + 8]\n    mov rdx, [rsi + 16]\n    mov r8, [rsi + 24]\n    add rsi, 32\n    dec rcx\n    jnz .loop\n\n    ; PREFETCHNTA for non-temporal (streaming) data\n    ; PREFETCHT0 for L1 cache\n    ; PREFETCHT1 for L2 cache\n    ; PREFETCHT2 for L3 cache\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Macros & Preprocessing": {
+    "Multi-Line Macros": [
+      "NASM %macro defines multi-line macros with parameters. %1-%9 access parameters, %10+ need braces. %rotate cycles parameters. %rep/%endrep repeats blocks. %exitmacro exits early. Use %macro for complex code generation that would be tedious to write manually.",
+      "%macro PRINT_DECIMAL 1\n    %%buffer resb 20\n    mov rcx, 10\n    mov rax, %1\n    lea rdi, [rel %%buffer + 19]\n    mov byte [rdi], 0\n%%loop:\n    xor rdx, rdx\n    div rcx\n    add dl, '0'\n    dec rdi\n    mov [rdi], dl\n    test rax, rax\n    jnz %%loop\n%endmacro\n\n%macro REVERSE_STRING 2\n    ; reverses %2 bytes at %1\n    mov rsi, %1\n    mov rdi, %1\n    add rdi, %2 - 1\n    mov rcx, %2 / 2\n%%rev:\n    mov al, [rsi]\n    mov bl, [rdi]\n    mov [rsi], bl\n    mov [rdi], al\n    inc rsi\n    dec rdi\n    dec rcx\n    jnz %%rev\n%endmacro\n\nsection .data\n    str db 'Hello',0\n\nsection .text\n    global _start\n_start:\n    REVERSE_STRING str, 5\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Conditional Assembly": [
+      "Conditional directives: %if, %elif, %else, %endif. Conditions: %id (defined), %nid (not defined), %idef (defined, case-insensitive), numeric expressions. %ifdef/%ifndef for simple existence checks. %ifctx/%ifidn for context stack. Useful for platform-specific code, debug builds, and feature toggles.",
+      "BITS 64\n\n%define LINUX\n%define DEBUG\n\nsection .data\n%ifdef LINUX\n    syscall_num equ 60\n    msg db 'Linux build', 0xa\n%else\n    syscall_num equ 1  ; different OS\n    msg db 'Other OS', 0xa\n%endif\n\n%ifdef DEBUG\n    dbg_msg db 'Debug mode', 0xa\n    len equ $ - dbg_msg\n%endif\n\n%assign COUNTER 0\n%rep 5\n    %assign COUNTER COUNTER + 1\n    val_%[COUNTER] db COUNTER\n%endrep\n\nsection .text\n    global _start\n_start:\n%ifdef DEBUG\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel dbg_msg]\n    mov rdx, len\n    syscall\n%endif\n    mov rax, syscall_num\n    xor rdi, rdi\n    syscall"
+    ],
+    "Context Stack & Advanced Preprocessing": [
+      "NASM context stack: %push, %pop, %repl. %ifctx checks context name. Useful for scoped macro state and block matching. %[+/-]contextname for context-local labels. %strlen, %substr, %strcat for string operations at assembly time. %arg, %local, %stacksize macros (from macro package) simplify stack frame creation.",
+      "%push myctx\n    %assign count 0\n    %rep 3\n        %assign count count + 1\n        %if count > 1\n            str_%[count] db 'Repeat', 0\n        %endif\n    %endrep\n%pop\n\n%define REPEAT_MACRO(cnt, body) %rep cnt \\\n    body \\\n%endrep\n\n; Using %strlen and %substr\n%define HELLO \"Hello, World!\"\n%strlen len HELLO\n%substr first_char HELLO 1\n\n; %arg / %stacksize (from nasm's macro package)\n; %stacksize 64\n; %arg arg1:qword, arg2:qword\n; %local local_var:qword\n\nsection .data\n    msg db 'Preprocessor done',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "%include & File Organization": [
+      "%include inserts another source file at assembly time (like C #include). Use for shared constants, macros, and structure definitions across multiple ASM files. Paths relative to current file or include search path (`-I` flag). Guard against double inclusion with %ifndef.",
+      "// file: sysconsts.asm\n%ifndef SYSCONSTS_ASM\n%define SYSCONSTS_ASM\n\nSYS_READ    equ 0\nSYS_WRITE   equ 1\nSYS_OPEN    equ 2\nSYS_CLOSE   equ 3\nSYS_MMAP    equ 9\nSYS_BRK     equ 12\nSYS_EXIT    equ 60\n\nFD_STDIN    equ 0\nFD_STDOUT   equ 1\nFD_STDERR   equ 2\n\n%macro PRINT 2\n    mov rax, SYS_WRITE\n    mov rdi, FD_STDOUT\n    lea rsi, [rel %1]\n    mov rdx, %2\n    syscall\n%endmacro\n\n%endif\n\n// file: main.asm\n%include \"sysconsts.asm\"\n%include \"macros.asm\"\n\n# Compile:\n# nasm -f elf64 -I./include/ main.asm -o main.o\n# ld -o main main.o\n\nsection .data\n    msg db 'File org', 0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    PRINT msg, len\n    mov rax, SYS_EXIT\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Debugging & Profiling": {
+    "GDB Advanced Techniques": [
+      "Advanced GDB: conditional breakpoints (`break func if rax==42`), watchpoints (`watch var`), reverse debugging (record/replay), checkpoint/restart. examine: `x/20gx $rsp` (20 qwords as hex), `x/s $rsi` (string). display: `display/8i $rip` (show instructions each step). define custom commands with `define`.",
+      "# GDB commands for assembly\n# nasm -f elf64 -g -F dwarf prog.asm && gdb ./prog\n\n# layout asm   ; show disassembly\n# layout reg   ; show registers\n\n# breakpoints\n# break _start\n# break *0x400100\n# break *$rip+10\n# condition 1 rax == 42\n\n# single stepping\n# stepi          ; one instruction\n# stepi 5        ; 5 instructions\n# nexti          ; step over calls\n\n# examine registers\n# info registers\n# info all-registers\n\n# examine memory\n# x/10gx $rsp   ; 10 qwords on stack\n# x/s $rdi       ; string\n# x/5i $rip      ; 5 instructions\n\n# modify registers\n# set $rax = 42\n# set $eflags.ZF = 1\n\n# reverse debugging (if supported)\n# record\n# continue\n# reverse-stepi\n# reverse-continue\n\n# scripting\n# define print_mem\n#   x/8gx $rdi\n# end"
+    ],
+    "Profiling & Performance Counters": [
+      "Performance counters via `perf stat ./prog`, `perf record ./prog` + `perf report`. Linux perf events: cycles, instructions, branch-misses, cache-misses. rdtsc/rdtscp reads the timestamp counter. Read PMCs (performance monitoring counters) via RDPMC (privileged). Use-p stat for basic counts. perf top for live profiling.",
+      "section .data\n    start_time dq 0\n    end_time dq 0\n    msg db 'Time measured',0xa\n\nsection .text\n    global _start\n_start:\n    ; Read timestamp counter\n    rdtsc               ; EDX:EAX = TSC\n    shl rdx, 32\n    or rax, rdx\n    mov [rel start_time], rax\n\n    ; Code to measure\n    mov rcx, 1000000\n.loop:\n    dec rcx\n    jnz .loop\n\n    ; Read TSC again\n    rdtsc\n    shl rdx, 32\n    or rax, rdx\n    sub rax, [rel start_time]\n    mov [rel end_time], rax\n\n    ; Linux perf:\n    ; perf stat ./prog\n    ; perf record ./prog && perf report\n    ; perf top -p $(pgrep prog)\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Valgrind & Sanitizers": [
+      "Valgrind finds memory errors without recompilation: `valgrind --tool=memcheck ./prog`. Tools: memcheck (leaks, invalid accesses), cachegrind (cache profiling), callgrind (call graph), helgrind (thread races). AddressSanitizer (-fsanitize=address) for C-linked code. For pure assembly, check syscall parameter correctness manually.",
+      "# Valgrind command\n# valgrind --tool=memcheck ./prog\n# valgrind --leak-check=full ./prog\n# valgrind --tool=cachegrind ./prog\n# cg_annotate cachegrind.out.*\n\n# strace - trace syscalls\n# strace ./prog\n# strace -e trace=read,write ./prog\n# strace -c ./prog  ; summary\n\n# ltrace - trace library calls\n# ltrace ./prog\n\n# For C-linked assembly programs:\n# gcc -no-pie -fsanitize=address -o prog prog.o main.c\n# gcc -no-pie -fsanitize=undefined -o prog prog.o\n\nsection .data\n    msg db 'Profile test',0xa\n\nsection .text\n    global _start\n_start:\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, 13\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "GAS & Other Assemblers": [
+      "GNU Assembler (GAS) uses AT&T syntax by default: `mov src, dst` (opposite of NASM). Register prefix: `%rax`. Immediate prefix: `$42`. Memory: `disp(base, index, scale)`. GAS with .intel_syntax noprefix matches NASM syntax. Other assemblers: MASM (Windows), FASM (flat assembler, portable), YASM (NASM-compatible rewrite). GAS is the default for GCC/LLVM.",
+      "# GAS AT&T syntax (default)\n# .section .data\n# msg:  .ascii \"Hello\\n\"\n# .set len, . - msg\n# .section .text\n# .globl _start\n# _start:\n#     mov $1, %rax        # AT&T: src, dst\n#     mov $1, %rdi\n#     lea msg(%rip), %rsi\n#     mov $len, %rdx\n#     syscall\n#     mov $60, %rax\n#     xor %rdi, %rdi\n#     syscall\n\n# GAS with Intel syntax\n# .intel_syntax noprefix\n# mov rax, 1  # same as NASM\n\n# Assembling GAS:\n# as -o prog.o prog.s\n# ld -o prog prog.o\n\n# Or use gcc directly:\n# gcc -o prog prog.s\n\nsection .data\n    msg db 'GAS comparison',0xa\n    len equ $ - msg\n\nsection .text\n    global _start\n_start:\n    mov rax, 1\n    mov rdi, 1\n    lea rsi, [rel msg]\n    mov rdx, len\n    syscall\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "Crypto & Security": {
+    "AES-NI Instructions": [
+      "AES-NI provides hardware-accelerated AES: AESENC (encrypt round), AESENCLAST (final round), AESDEC (decrypt), AESDECLAST, AESKEYGENASSIST (key expansion), AESIMC (inverse mix columns). PCLMULQDQ for carry-less multiplication (GCM). Instructions are constant-time, mitigating timing side-channel attacks.",
+      "section .data\n    align 16\n    plaintext  db 0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77\n               db 0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF\n    key        db 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07\n               db 0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F\n    ciphertext db 16 dup(0)\n\nsection .text\n    global _start\n_start:\n    movdqu xmm0, [rel plaintext]   ; load plaintext\n    movdqu xmm1, [rel key]         ; load key\n\n    ; AES-128 encrypt (10 rounds)\n    aesenc xmm0, xmm1              ; round 1\n    aesenc xmm0, xmm1              ; round 2-9 (simplified)\n    aesenclast xmm0, xmm1          ; final round\n\n    movdqu [rel ciphertext], xmm0  ; store result\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "Constant-Time Code": [
+      "Constant-time code prevents timing side channels. No secret-dependent branches (use CMOV). No secret-dependent memory access (use bit masking). Use XOR/AND/OR/CMOV for conditional logic. Avoid lookup tables indexed by secret data. CPU instructions should execute in the same number of cycles regardless of operand values.",
+      "section .data\n    secret dq 42\n    public_val dq 100\n    result dq 0\n    mask dq 0\n\nsection .text\n    global _start\n_start:\n    mov rax, [rel secret]\n    mov rbx, [rel public_val]\n\n; Constant-time compare\n    xor rax, rbx        ; rax = diff\n    neg rax             ; CF=1 if non-zero\n    sbb rax, rax        ; rax = 0 if equal, -1 if not\n    mov [rel mask], rax\n\n; Constant-time select using mask\n    mov rax, [rel secret]\n    mov rbx, [rel public_val]\n    xor rax, rbx        ; diff\n    and rax, [rel mask]  ; mask (0 if equal, diff if not)\n    xor rax, rbx        ; result\n    mov [rel result], rax\n\n; Avoid:\n;   cmp rax, rbx\n;   je .equal          ; timing leaks!\n;\n; Use CMOV instead of branches\n    mov rax, 10\n    mov rbx, 20\n    cmp rax, rbx\n    cmovb rax, rbx     ; no branch\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ],
+    "CRC & Hashing Instructions": [
+      "CRC32C instruction (SSE4.2) accelerates CRC-32C checksums. CRC32 reg, mem/reg. Used in iSCSI, ext4, network protocols. Also supports: SHA extensions (SHA1RNDs4, SHA256RNDs2) on newer CPUs. PCLMULQDQ enables fast GHASH (GCM mode). These hardware instructions are much faster than software implementations.",
+      "section .data\n    data_block db 'Hello, CRC!', 0\n    len equ $ - data_block\n    crc_result dd 0\n\nsection .text\n    global _start\n_start:\n    ; CRC32C computation\n    xor rax, rax          ; initialize CRC = 0\n    lea rsi, [rel data_block]\n    mov rcx, len\n\n.crc_loop:\n    crc32 rax, byte [rsi]  ; process one byte\n    inc rsi\n    dec rcx\n    jnz .crc_loop\n\n    mov [rel crc_result], eax\n\n    ; SHA-256 acceleration (if supported)\n    ; movdqa xmm0, [message_schedule]\n    ; sha256rnds2 xmm0, xmm1, xmm0\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall"
+    ]
+  },
+  "System Programming": {
+    "Signal Handling": [
+      "Signals are software interrupts sent to processes. Register handlers with sigaction syscall (13) or libc's signal(). Common signals: SIGINT (2), SIGTERM (15), SIGKILL (9, cannot be caught), SIGSEGV (11, segfault). SA_RESTART flag re-starts interrupted syscalls. Signal handlers run on an alternate stack (sigaltstack) for SIGSEGV handling.",
+      "extern signal, printf, exit\n\nsection .data\n    msg db 'Caught Ctrl+C!', 10, 0\n    SIGINT equ 2\n\nsection .text\n    global main\n\n; Signal handler\nhandler:\n    push rbp\n    mov rbp, rsp\n    lea rdi, [rel msg]\n    xor eax, eax\n    call printf\n    mov edi, 0\n    call exit\n    pop rbp\n\nmain:\n    push rbp\n    mov rbp, rsp\n    ; Register signal handler\n    mov edi, SIGINT\n    lea rsi, [rel handler]\n    call signal\n    ; Infinite loop until Ctrl+C\n.loop:\n    xor eax, eax\n    pause             ; hint: spinlock hint\n    jmp .loop\n\n    pop rbp\n    ret"
+    ],
+    "Process Creation & Syscalls": [
+      "Linux process creation via sys_fork (57) or sys_clone (56). fork: returns 0 in child, PID in parent. execve (59) replaces process image with a new program. waitpid (61) waits for child. exit_group (231) exits all threads. POSIX libc wrappers: fork(), execvp(), wait(), system().",
+      "extern printf, fork, execlp, waitpid\n\nsection .data\n    fmt_parent db 'Parent: child PID = %d', 10, 0\n    fmt_child  db 'Child: PID = %d', 10, 0\n    prog_path  db '/bin/echo', 0\n    arg1       db 'echo', 0\n    arg2       db 'Hello from child!', 0\n    args       dq 0, 0, 0, 0  ; will fill in\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n\n    call fork\n    test eax, eax\n    jz .child\n\n.parent:\n    ; Parent: wait for child (eax = child PID)\n    mov edi, eax\n    xor esi, esi\n    xor edx, edx\n    call waitpid\n    lea rdi, [rel fmt_parent]\n    mov esi, eax\n    xor eax, eax\n    call printf\n    jmp .done\n\n.child:\n    ; Child: exec echo\n    lea rdi, [rel prog_path]\n    lea rsi, [rel args]\n    mov qword [rel args], arg1\n    mov qword [rel args + 8], arg2\n    mov qword [rel args + 16], 0\n    call execlp\n\n.done:\n    mov eax, 0\n    pop rbp\n    ret"
+    ],
+    "Shared Memory & IPC": [
+      "Inter-process communication (IPC) via shared memory (shmget/shmat), pipes (pipe syscall), FIFOs (named pipes), message queues (msgget/msgsnd/msgrcv), and sockets. mmap with MAP_SHARED creates shared memory mappings. semaphores provide synchronization. Use futex for fast user-space mutual exclusion.",
+      "extern printf, shmget, shmat, shmdt, shmctl\nstruct shmid_ds {\n    .shm_segsz resd 1  ; size of segment\n    ; ... more fields\n}\n\nsection .data\n    key equ 1234\n    size equ 4096\n    IPC_CREAT equ 01000\n    SHM_R equ 0400\n    SHM_W equ 0200\n    mode equ SHM_R | SHM_W\n    flags equ IPC_CREAT | mode\n    fmt db 'Shared memory at %p', 10, 0\n\nsection .text\n    global main\nmain:\n    push rbp\n    mov rbp, rsp\n\n    ; Create shared memory segment\n    mov edi, key\n    mov esi, size\n    mov edx, flags\n    call shmget\n\n    ; Attach\n    mov edi, eax\n    xor esi, esi\n    xor edx, edx\n    call shmat\n\n    ; Print address\n    mov rdi, rax\n    lea rsi, [rel fmt]\n    xor eax, eax\n    call printf\n\n    ; Detach\n    call shmdt\n\n    mov eax, 0\n    pop rbp\n    ret"
+    ]
+  },
+  "x86-64 Architecture Deep Dive": {
+    "Registers & Calling Conventions": [
+      "x86-64 has 16 general-purpose registers: <code>RAX</code>, <code>RBX</code>, <code>RCX</code>, <code>RDX</code>, <code>RSI</code>, <code>RDI</code>, <code>RBP</code>, <code>RSP</code>, and <code>R8</code>-<code>R15</code>. Each register can be accessed in 64-bit (RAX), 32-bit (EAX), 16-bit (AX), or 8-bit (AL/AH) modes. The System V AMD64 calling convention (Linux/macOS) passes first 6 integer args in <code>RDI</code>, <code>RSI</code>, <code>RDX</code>, <code>RCX</code>, <code>R8</code>, <code>R9</code>, then stack. Return value goes in <code>RAX</code>. Callee-saved registers (RBX, RBP, R12-R15) must be preserved. Stack alignment to 16 bytes is required before calls. Microsoft x64 on Windows uses <code>RCX</code>, <code>RDX</code>, <code>R8</code>, <code>R9</code> for first 4 args.",
+      "; System V calling convention example\n; int add_five(int a, int b, int c, int d, int e)\n; Args: a=RDI, b=RSI, c=RDX, d=RCX, e=R8\nadd_five:\n    push  rbp\n    mov   rbp, rsp\n    \n    ; a + b + c + d + e\n    mov   rax, rdi        ; a\n    add   rax, rsi        ; + b\n    add   rax, rdx        ; + c\n    add   rax, rcx        ; + d\n    add   rax, r8         ; + e\n    \n    pop   rbp\n    ret\n\n; Caller preserves R12-R15 if using them\nmy_func:\n    push  r12            ; save callee-saved\n    push  r13\n    mov   r12, 10\n    mov   r13, 20\n    call  add_five       ; R12, R13 preserved by add_five\n    pop   r13\n    pop   r12\n    ret"
+    ],
+    "Condition Codes & Control Flow": [
+      "x86-64 uses the RFLAGS register for condition codes. <code>CMP</code> and <code>TEST</code> instructions set flags without modifying operands. Key flags: <code>ZF</code> (zero), <code>SF</code> (sign), <code>OF</code> (overflow), <code>CF</code> (carry). Conditional jumps use these flags: <code>JE</code>/<code>JZ</code> (jump if equal/zero), <code>JNE</code>/<code>JNZ</code> (not equal), <code>JG</code>/<code>JNLE</code> (signed greater), <code>JL</code>/<code>JNGE</code> (signed less), <code>JA</code>/<code>JNBE</code> (unsigned above), <code>JB</code>/<code>JNAE</code> (unsigned below). <code>SETcc</code> sets a byte to 1 based on condition. <code>CMOVcc</code> conditionally moves data. The <code>LEA</code> instruction computes effective addresses without accessing memory.",
+      "; If-else: if (rax > 5) rbx = 1 else rbx = 2\n    cmp   rax, 5\n    jg    .greater\n    mov   rbx, 2          ; else branch\n    jmp   .end\n.greater:\n    mov   rbx, 1          ; then branch\n.end:\n\n; Loop: for (rcx = 0; rcx < 10; rcx++)\n    xor   rcx, rcx        ; rcx = 0\n.loop:\n    ; loop body here\n    inc   rcx\n    cmp   rcx, 10\n    jl    .loop\n\n; Conditional move (branchless)\n    cmp   rax, rbx\n    cmovg rcx, rax        ; if (rax > rbx) rcx = rax\n    cmovl rcx, rbx        ; if (rax < rbx) rcx = rbx\n\n; Set byte based on condition\n    cmp   rax, rbx\n    setg  al              ; al = (rax > rbx) ? 1 : 0\n\n; LEA for arithmetic (no memory access)\n    lea   rcx, [rax + rbx*4 + 8]  ; rcx = rax + rbx*4 + 8"
+    ],
+    "Stack Frames & Function Prologues": [
+      "Function prologues and epilogues manage the stack frame. Standard prologue: <code>push rbp; mov rbp, rsp</code> saves the old base pointer and sets up a new frame. Local variables are allocated by subtracting from <code>RSP</code>: <code>sub rsp, 32</code> (allocate 32 bytes). The epilogue reverses: <code>mov rsp, rbp; pop rbp; ret</code>. Red zone (128 bytes below RSP) can be used without adjusting RSP in leaf functions. Stack canaries guard against buffer overflows. Frame pointers can be omitted (<code>-fomit-frame-pointer</code>) for performance using RSP-relative addressing instead.",
+      "; Function with local variables\nmy_function:\n    ; Prologue\n    push  rbp\n    mov   rbp, rsp\n    sub   rsp, 32         ; allocate 32 bytes for locals\n    \n    ; Local variables at [rbp-8], [rbp-16], etc.\n    mov   qword [rbp-8], 10       ; int local_a = 10\n    mov   qword [rbp-16], 20      ; int local_b = 20\n    \n    mov   rax, [rbp-8]\n    add   rax, [rbp-16]\n    mov   [rbp-24], rax           ; result = local_a + local_b\n    \n    ; Epilogue\n    mov   rsp, rbp\n    pop   rbp\n    ret\n\n; Leaf function (doesn't call others) - can omit frame\n; Uses 128-byte red zone below RSP without adjusting\nleaf_function:\n    mov   rax, rdi\n    add   rax, rsi\n    ret\n\n; Stack canary (compiler-generated protection)\n; mov   rax, fs:0x28   ; load canary from TLS\n; mov   [rbp-8], rax   ; save on stack\n; ... function body ...\n; mov   rcx, [rbp-8]   ; check canary\n; xor   rcx, fs:0x28\n; jne   .stack_chk_fail ; abort if corrupted"
+    ],
+    "SIMD & Vector Instructions": [
+      "SIMD (Single Instruction, Multiple Data) processes multiple data elements in one instruction. x86-64 provides SSE (128-bit XMM registers), AVX (256-bit YMM registers), and AVX-512 (512-bit ZMM registers). XMM0-XMM15 (SSE), YMM0-YMM15 (AVX/AVX2). Basic operations: <code>MOVDQA</code> (aligned move), <code>MOVDQU</code> (unaligned move), <code>PADDB/PADDW/PADDD</code> (packed add), <code>PMULLD</code> (packed multiply), <code>PSHUFB</code> (shuffle bytes), <code>PCMPEQB</code> (compare equality). Auto-vectorization by compilers generates these instructions automatically. Manual SIMD optimization can outperform compiler-generated code by 2-4x for specific algorithms.",
+      "; SSE2: Add four 32-bit integers\nsection .data\n    align 16\n    a dd 1, 2, 3, 4\n    b dd 5, 6, 7, 8\n    result dd 0, 0, 0, 0\n\nsection .text\n    movdqa  xmm0, [a]       ; load a (16-byte aligned)\n    movdqa  xmm1, [b]       ; load b\n    paddd   xmm0, xmm1      ; packed add of 4 int32s\n    movdqa  [result], xmm0  ; store result\n\n; AVX2: Multiply 8 integers\n    vmovdqu ymm0, [array_a]  ; load 8 int32s\n    vmovdqu ymm1, [array_b]\n    vpmulld ymm2, ymm0, ymm1 ; packed multiply\n    vmovdqu [result], ymm2\n\n; Horizontal add: sum all elements of XMM0\n    haddps  xmm0, xmm0      ; horizontal add packed singles\n    haddps  xmm0, xmm0      ; result in lowest element\n\n; Shuffle bytes (for byte manipulation)\n    pshufb  xmm0, xmm1      ; permute bytes in xmm0 using xmm1 mask"
+    ]
+  },
+  "ARM64 Assembly": {
+    "ARM64 vs x86-64 Comparison": [
+      "ARM64 (AArch64) is a RISC architecture with key differences from x86 CISC: fixed 4-byte instruction size, 31 general-purpose 64-bit registers (X0-X30), load-store architecture (only load/store access memory), conditional execution via <code>CSEL</code> instead of flags, and no variable instruction length. X30 is the link register (return address). X29 is the frame pointer. Stack pointer is a special register (SP). ARM64 uses <code>BL</code>/<code>RET</code> for calls. First 8 args in X0-X7. Return value in X0. ARM64 dominates mobile devices (Apple Silicon, Qualcomm) and is growing in servers (AWS Graviton, Ampere). Understanding both ISAs is valuable for performance-critical development.",
+      "; ARM64 vs x86-64 equivalent operations\n\n; ARM64 add\n; ADD X0, X1, X2    ; X0 = X1 + X2\n; Equivalent x86:\n; mov rax, rsi\n; add rax, rdx\n\n; ARM64 load/store\n; LDR X0, [X1]      ; X0 = *X1 (load)\n; STR X0, [X1]      ; *X1 = X0 (store)\n; Equivalent x86:\n; mov rax, [rsi]\n; mov [rsi], rax\n\n; ARM64 conditional\n; CMP X0, X1\n; CSEL X2, X3, X4, GT  ; if (X0 > X1) X2 = X3 else X2 = X4\n; Equivalent x86:\n; cmp rax, rbx\n; cmovg rcx, rdx\n\n; ARM64 function call\n; BL my_function    ; branch with link (stores return in X30)\n; RET               ; return (jumps to X30)\n; Equivalent x86:\n; call my_function\n; ret\n\n; ARM64 multiply-add\n; MADD X0, X1, X2, X3  ; X0 = (X1 * X2) + X3\n; Equivalent x86:\n; imul rsi, rdx       ; rax = rsi * rdx\n; add rax, rcx"
+    ],
+    "ARM64 NEON SIMD": [
+      "ARM64 NEON provides 128-bit SIMD with 32 registers (V0-V31). Each register can hold 2x64-bit, 4x32-bit, 8x16-bit, or 16x8-bit elements. Key instructions: <code>LD1</code>/<code>ST1</code> (load/store multiple), <code>ADD</code>/<code>SUB</code>/<code>MUL</code> (vector arithmetic), <code>FMLA</code> (fused multiply-add), <code>EXT</code> (extract), <code>TBL</code>/<code>TBX</code> (table lookup). NEON is particularly efficient for audio/video processing, image manipulation, and machine learning inference. Apple's Accelerate framework and libraries like <code>sleef</code> provide optimized NEON routines.",
+      "; ARM64 NEON: Add 4 floats\n    LD1     {V0.4S}, [X0]     ; load 4 floats from X0\n    LD1     {V1.4S}, [X1]     ; load 4 floats from X1\n    FADD    V2.4S, V0.4S, V1.4S  ; vector add\n    ST1     {V2.4S}, [X2]     ; store result\n\n; Multiply-accumulate (fused)\n    FMUL    V3.4S, V0.4S, V1.4S  ; multiply\n    FADD    V4.4S, V3.4S, V2.4S  ; accumulate\n; Or with FMLA:\n    FMLA    V2.4S, V0.4S, V1.4S  ; V2 += V0 * V1 (single instruction!)\n\n; Horizontal sum across vector\n    ; Sum all 4 float elements of V0\n    FADDP   V0.4S, V0.4S, V0.4S  ; pair add\n    FADDP   V0.4S, V0.4S, V0.4S  ; second pass\n    ; Result in V0[0]\n\n; Dot product (for matrix multiply)\n    UDOT    V0.4S, V1.16B, V2.16B  ; byte dot product to 32-bit"
+    ]
+  }
+}

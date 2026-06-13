@@ -1,0 +1,272 @@
+{
+  "Getting Started": {
+    "Angular Introduction": {
+      "exp": "<p>Introduction to Angular and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Components": [
+      "Components are the fundamental building blocks of Angular apps, each consisting of a TypeScript class, HTML template, and optional CSS styles. They control a view via a decorated class with @Component metadata.",
+      "@Component({\n  selector: 'app-hello',\n  template: '<h1>{{ title }}</h1>'\n})\nexport class HelloComponent { title = 'Hello Angular'; }"
+    ],
+    "Modules": [
+      "NgModules organize an Angular app into cohesive blocks of functionality by declaring components, importing dependencies, and providing services. Every app has a root module (AppModule) as the entry point.",
+      "@NgModule({\n  declarations: [AppComponent],\n  imports: [BrowserModule],\n  bootstrap: [AppComponent]\n})\nexport class AppModule {}"
+    ],
+    "Templates": [
+      "Angular templates extend HTML with custom syntax including interpolation ({{ }}), property binding ([ ]), event binding (( )), and structural directives (*ngIf, *ngFor) for dynamic views.",
+      "<div *ngFor=\"let item of items\" (click)=\"select(item)\">{{ item.name }}</div>"
+    ]
+  },
+  "Core Concepts": {
+    "Angular Core Features": {
+      "exp": "<p>Essential Angular concepts and features.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Angular Components": {
+      "exp": "<p>Building user interfaces with Angular.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Angular Routing": {
+      "exp": "<p>Navigation and routing in Angular.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Router": [
+      "Angular Router enables navigation between views in SPAs with URL-based routing, nested routes, lazy-loaded modules, and route parameters. It integrates with the browser's history API.",
+      "const routes: Routes = [\n  { path: 'users/:id', component: UserComponent }\n];"
+    ],
+    "Lazy Loading": [
+      "Lazy loading loads feature modules on demand when the user navigates to their routes, reducing initial bundle size. Use loadChildren in route config to point to a module imported via dynamic import.",
+      "{ path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) }"
+    ],
+    "Guards": [
+      "Route guards control navigation using interfaces like CanActivate, CanDeactivate, and Resolve. They prevent unauthorized access, prompt for unsaved changes, and pre-fetch data before a route activates.",
+      "@Injectable({ providedIn: 'root' })\nexport class AuthGuard implements CanActivate {\n  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {\n    return this.auth.isLoggedIn();\n  }\n}"
+    ]
+  },
+  "State Management": {
+    "Angular State": {
+      "exp": "<p>Managing application state in Angular.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Angular Data": {
+      "exp": "<p>Working with data and APIs in Angular.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Angular Testing": {
+      "exp": "<p>Testing strategies for Angular.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Jasmine": [
+      "Jasmine is a behavior-driven development framework for testing JavaScript code with a clean, readable syntax. It provides describe/it blocks, matchers (toEqual, toContain), and spies.",
+      "describe('Calculator', () => {\n  it('should add numbers', () => {\n    expect(calc.add(2, 3)).toEqual(5);\n  });\n});"
+    ],
+    "Karma": [
+      "Karma is a test runner that executes tests in real browsers, providing fast feedback loops and reporting. It's the default test runner in Angular CLI projects via ng test.",
+      "ng test --code-coverage --browsers ChromeHeadless"
+    ],
+    "TestBed": [
+      "TestBed is Angular's primary testing utility for configuring and creating component test environments. It manages module compilation, dependency injection, and provides ComponentFixture for interaction.",
+      "TestBed.configureTestingModule({\n  declarations: [MyComponent],\n  providers: [DataService]\n}).compileComponents();"
+    ]
+  },
+  "Deployment": {
+    "Angular Deployment": {
+      "exp": "<p>Deploying Angular applications.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Angular Best Practices": {
+      "exp": "<p>Best practices for Angular development.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Angular Advanced": {
+      "exp": "<p>Advanced Angular topics and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Services & DI": {
+    "Dependency Injection": [
+      "Angular's dependency injection system provides dependencies to classes via constructor parameters. The injector hierarchy creates singleton or per-component instances of services automatically.",
+      "constructor(private http: HttpClient) {}"
+    ],
+    "Services": [
+      "Services are singleton classes decorated with @Injectable that encapsulate business logic, data access, or cross-cutting concerns. They are the recommended way to share logic between components.",
+      "@Injectable({ providedIn: 'root' })\nexport class DataService {\n  fetchData() { return this.http.get('/api/data'); }\n}"
+    ],
+    "Providers": [
+      "Providers configure the injector with dependency recipes, controlling how services are created and scoped. They can be registered at module level, component level, or using providedIn: 'root' for tree-shaking.",
+      "@Component({\n  providers: [LoggerService]\n})"
+    ]
+  },
+  "Forms": {
+    "Template-driven": [
+      "Template-driven forms rely on directives in the template like ngModel for two-way data binding. They are simpler but less scalable than reactive forms, suitable for basic form use cases.",
+      "<input [(ngModel)]=\"user.name\" name=\"name\" required />"
+    ],
+    "Reactive": [
+      "Reactive forms provide a model-driven approach with form control instances created programmatically, offering more predictability, testability, and advanced validation capabilities.",
+      "this.form = new FormGroup({\n  email: new FormControl('', [Validators.required, Validators.email])\n});"
+    ],
+    "Validation": [
+      "Angular forms support built-in validators (required, minLength, pattern) and custom async validators. Validation state is exposed through CSS classes (ng-valid, ng-invalid) and component properties.",
+      "<div *ngIf=\"email.invalid && email.touched\" class=\"error\">Valid email required</div>"
+    ]
+  },
+  "HTTP": {
+    "HttpClient": [
+      "HttpClient is Angular's built-in HTTP client with typed request/response, interceptors, and automatic JSON parsing. Methods return Observables supporting RxJS operators for transformations.",
+      "this.http.get<User[]>('/api/users').subscribe(users => this.users = users);"
+    ],
+    "Interceptors": [
+      "Interceptors sit between the application and the backend, transforming outgoing requests or incoming responses. Common use cases include adding auth tokens, logging, and error handling.",
+      "@Injectable()\nexport class AuthInterceptor implements HttpInterceptor {\n  intercept(req: HttpRequest<any>, next: HttpHandler) {\n    const authReq = req.clone({ setHeaders: { Authorization: 'Bearer token' } });\n    return next.handle(authReq);\n  }\n}"
+    ],
+    "Error Handling": [
+      "Error handling in HTTP requests is done via RxJS catchError operator, retrying failed requests, or displaying user-friendly error messages. Global error handling can be centralized in interceptors.",
+      "this.http.get('/api/data').pipe(\n  retry(2),\n  catchError(err => { console.error(err); return of([]); })\n);"
+    ]
+  },
+  "Advanced": {
+    "Directives": [
+      "Angular offers three types of directives: components, structural directives (alter DOM layout), and attribute directives (change appearance or behavior). Custom directives encapsulate reusable DOM manipulation.",
+      "@Directive({ selector: '[appHighlight]' })\nexport class HighlightDirective {\n  @HostBinding('style.backgroundColor') bgColor = 'yellow';\n}"
+    ],
+    "Pipes": [
+      "Pipes transform data in templates for display, such as formatting dates, currencies, or filtering lists. Angular provides built-in pipes and you can create custom pure or impure pipes.",
+      "@Pipe({ name: 'truncate' })\nexport class TruncatePipe implements PipeTransform {\n  transform(value: string, limit: number): string {\n    return value.length > limit ? value.slice(0, limit) + '...' : value;\n  }\n}"
+    ],
+    "Custom Decorators": [
+      "Decorators are TypeScript features used extensively in Angular for metadata. Custom decorators can extend component behavior, add logging, or transform class properties at design time.",
+      "function Log(target: any, key: string) {\n  let val = target[key];\n  Object.defineProperty(target, key, {\n    get: () => val,\n    set: (next) => { console.log(`${key} changed to`, next); val = next; }\n  });\n}"
+    ]
+  },
+  "Performance": {
+    "Change Detection": [
+      "Angular's default change detection checks every component in the tree when any data changes, ensuring consistency. It uses zone.js to patch browser APIs and trigger checks automatically.",
+      "constructor(private cd: ChangeDetectorRef) {}\nthis.cd.detectChanges();"
+    ],
+    "OnPush": [
+      "OnPush change detection strategy reduces unnecessary checks by only running detection when input references change, events fire, or observables emit. It's essential for large lists and performance-critical views.",
+      "@Component({\n  changeDetection: ChangeDetectionStrategy.OnPush\n})"
+    ],
+    "Code Splitting": [
+      "Angular supports code splitting through lazy-loaded modules and ES dynamic imports. The CLI generates separate chunks per lazy route, and the router loads them on demand when the user navigates.",
+      "{ path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }"
+    ]
+  },
+  "Standalone Components": {
+    "Standalone API": [
+      "Standalone components, directives, and pipes are self-contained without needing NgModules. Created with the standalone: true flag, they import dependencies directly and can be lazy-loaded via the router.",
+      "@Component({\n  standalone: true,\n  imports: [CommonModule, RouterModule],\n  template: '<h1>{{ title }}</h1>'\n})\nexport class HomeComponent { title = 'Standalone'; }"
+    ],
+    "Bootstrap Standalone": [
+      "Applications can bootstrap directly from a standalone component instead of NgModule. The main.ts calls bootstrapApplication with the root component and optional provider configuration.",
+      "import { bootstrapApplication } from '@angular/platform-browser';\nimport { AppComponent } from './app/app.component';\n\nbootstrapApplication(AppComponent, {\n  providers: [importProvidersFrom(HttpClientModule)]\n});"
+    ],
+    "Routing Standalone": [
+      "Standalone components load lazily with loadComponent in the route config, eliminating the need for feature modules. Each route points directly to a component with its own imports.",
+      "const routes: Routes = [{\n  path: 'admin',\n  loadComponent: () => import('./admin/admin.component').then(c => c.AdminComponent)\n}];"
+    ]
+  },
+  "Signals": {
+    "Writable Signals": [
+      "Signals are reactive primitives that notify consumers when their value changes. Writable signals created with signal() expose get/set/update methods for synchronous state management.",
+      "const count = signal(0);\ncount.set(5);\ncount.update(v => v + 1);\nconsole.log(count());"
+    ],
+    "Computed Signals": [
+      "Computed signals derive values from other signals with lazy evaluation and caching. They only recompute when dependent signals change, replacing manual ChangeDetectorRef calls.",
+      "const count = signal(0);\nconst doubled = computed(() => count() * 2);\nconst label = computed(() => `Count is ${count()}`);"
+    ],
+    "Effects": [
+      "Effects run side effects automatically when their signal dependencies change. They are used for syncing state to localStorage, logging, or triggering imperative DOM operations.",
+      "effect(() => {\n  console.log(`Count changed to ${count()}`);\n  localStorage.setItem('count', String(count()));\n});"
+    ],
+    "Signal Inputs": [
+      "Signal-based inputs replace @Input with input() and input.required(), providing reactive input values without lifecycle hooks. They integrate natively with the change detection system.",
+      "export class MyComponent {\n  name = input.required<string>();\n  role = input('user');\n  items = input<Item[]>([]);\n}"
+    ]
+  },
+  "CLI & Schematics": {
+    "ng generate": [
+      "The Angular CLI generates components, directives, pipes, services, modules, and more using ng generate. Schematics customize generation with options for style, inline template, and routing.",
+      "ng generate component dashboard --standalone --inline-style --skip-tests\nng generate service api/data\nng generate module admin --route admin --module app"
+    ],
+    "Custom Schematics": [
+      "Custom schematics automate project scaffolding by generating files, modifying existing code, and installing dependencies. They are published as npm packages and run with ng generate.",
+      "// collection.json\n{\n  \"schematics\": {\n    \"my-component\": {\n      \"factory\": \"./my-component\",\n      \"schema\": \"./schema.json\"\n    }\n  }\n}"
+    ],
+    "Angular Builders": [
+      "Builders extend the Angular CLI build pipeline with custom build, test, or deploy logic. They replace Angular's default builder to support custom tooling like custom webpack configs.",
+      "// Custom builder\nimport { BuilderOutput, createBuilder } from '@angular-devkit/architect';\nexport default createBuilder((options, context) => {\n  return { success: true } as BuilderOutput;\n});"
+    ]
+  },
+  "Deferrable Views": {
+    "@defer": [
+      "Deferrable views (introduced in Angular 17) lazy-load component dependencies with @defer blocks. They improve initial bundle size by deferring heavy components until a specified trigger.",
+      "@defer (on viewport) {\n  <heavy-chart />\n} @placeholder {\n  <div>Chart loading...</div>\n} @loading {\n  <spinner />\n} @error {\n  <p>Failed to load chart</p>\n}"
+    ],
+    "Defer Triggers": [
+      "Defer triggers control when lazy content loads: on viewport (enters viewport), on interaction (user clicks), on immediate, on idle (browser idle), or on a custom timer.",
+      "@defer (on interaction; on timer(5000)) {\n  <expensive-component />\n} @placeholder {\n  <button>Click to load</button>\n}"
+    ],
+    "Defer Dependencies": [
+      "Deferred components and their transitive dependencies are split into separate JavaScript chunks. Angular loads these chunks asynchronously when the trigger condition is met, reducing initial payload.",
+      "// All imports inside @defer are automatically code-split\n@defer (on viewport) {\n  <admin-widget />\n}"
+    ]
+  },
+  "inject Function": {
+    "inject()": [
+      "The inject() function provides a programmatic alternative to constructor-based dependency injection. It can be called in the class body, making DI more flexible and reducing boilerplate.",
+      "export class DataService {\n  private http = inject(HttpClient);\n  private config = inject(APP_CONFIG);\n  private router = inject(Router);\n}"
+    ],
+    "Injection Context": [
+      "inject() must be called within an injection context such as a constructor, class field initializer, or factory function. Outside these contexts it throws, ensuring predictable DI resolution.",
+      "// Allowed: class field initializer\nprivate logger = inject(LoggerService);\n\n// Allowed: factory function\nexport const token = new InjectionToken<string>('config', {\n  factory: () => inject(HttpClient).getBaseUrl()\n});"
+    ]
+  },
+  "Angular Signals & New Control Flow": {
+    "Angular Signals Deep Dive": [
+      "Angular Signals provide reactive state management with fine-grained reactivity. Unlike Zone.js-based change detection (which checks the entire component tree), Signals track dependencies automatically and update only affected consumers. Key APIs: <code>signal()</code> creates a writable signal, <code>computed()</code> creates derived values, <code>effect()</code> runs side effects when signal values change. The new control flow (<code>@if</code>, <code>@for</code>, <code>@switch</code>) replaces <code>*ngIf</code>, <code>*ngFor</code>, and <code>ngSwitch</code> with better type narrowing and performance. Standalone components are now the default — NgModules are optional.",
+      "// Angular Signals\nimport { Component, signal, computed, effect } from '@angular/core';\nimport { CommonModule } from '@angular/common';\n\n@Component({\n  selector: 'app-counter',\n  standalone: true,\n  template: `\n    <h2>Count: {{ count() }}</h2>\n    <h3>Doubled: {{ doubled() }}</h3>\n    <h4>Status: {{ status() }}</h4>\n    <button (click)=\"decrement()\">-</button>\n    <button (click)=\"increment()\">+</button>\n\n    <!-- New control flow -->\n    @if (count() > 10) {\n      <p>You've clicked many times!</p>\n    } @else if (count() > 5) {\n      <p>Keep going!</p>\n    } @else {\n      <p>Click more to start</p>\n    }\n\n    <ul>\n      @for (item of items(); track item.id; let i = $index) {\n        <li>{{ i + 1 }}. {{ item.name }}</li>\n      } @empty {\n        <li>No items yet</li>\n      }\n    </ul>\n  `\n})\nexport class CounterComponent {\n  private readonly count = signal(0);\n  readonly doubled = computed(() => this.count() * 2);\n  readonly status = computed(() => this.count() >= 10 ? 'high' : 'low');\n  readonly items = signal<{ id: number; name: string }[]>([]);\n\n  constructor() {\n    effect(() => {\n      console.log(`Count changed to: ${this.count()}`);\n      // Auto-logging for debugging\n    });\n  }\n\n  increment() { this.count.update(c => c + 1); }\n  decrement() { this.count.update(c => c - 1); }\n}"
+    ],
+    "Angular Routing & Lazy Loading": [
+      "Angular Router enables SPA navigation with lazy-loaded feature modules/routes. Routes are defined as an array of <code>Route</code> objects with <code>path</code>, <code>component</code> or <code>loadComponent</code> (standalone) / <code>loadChildren</code> (modules). <code>canActivate</code>, <code>canDeactivate</code>, and <code>canLoad</code> guards protect routes. <code>Resolve</code> fetches data before route activation. Route params (<code>paramMap</code>, <code>queryParamMap</code>) are accessible via <code>ActivatedRoute</code>. PreloadingStrategy (PreloadAllModules, custom strategies) balances initial bundle size with subsequent navigation speed. Router events (NavigationStart, NavigationEnd, NavigationError) enable loading indicators.",
+      "// Lazy-loaded standalone routes\n// app.routes.ts\nexport const routes: Routes = [\n  {\n    path: 'dashboard',\n    loadComponent: () => import('./dashboard/dashboard.component')\n      .then(m => m.DashboardComponent),\n    canActivate: [authGuard],\n    resolve: { userData: userResolver }\n  },\n  {\n    path: 'products',\n    loadChildren: () => import('./products/products.routes')\n      .then(m => m.productRoutes),\n    data: { preload: true },\n    canMatch: [featureFlagGuard]\n  },\n  {\n    path: 'admin',\n    loadComponent: () => import('./admin/admin.component')\n      .then(m => m.AdminComponent),\n    canActivate: [adminGuard],\n    title: 'Admin Panel'\n  },\n  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },\n  { path: '**', component: NotFoundComponent }\n];\n\n// Guards\nimport { inject } from '@angular/core';\nimport { CanActivateFn, Router } from '@angular/router';\n\nexport const authGuard: CanActivateFn = (route, state) => {\n  const auth = inject(AuthService);\n  const router = inject(Router);\n  \n  if (auth.isLoggedIn()) return true;\n  \n  return router.parseUrl('/login?redirect=' + state.url);\n};\n\n// Custom preloading strategy\nimport { Observable } from 'rxjs';\nimport { PreloadingStrategy, Route } from '@angular/router';\n\nexport class SelectivePreloadStrategy implements PreloadingStrategy {\n  preload(route: Route, load: () => Observable<any>): Observable<any> {\n    return route.data?.['preload'] ? load() : of(null);\n  }\n}"
+    ],
+    "Angular Forms & Validation": [
+      "Angular provides two form approaches: Template-driven Forms (simpler, suitable for basic forms) and Reactive Forms (more flexible, suitable for complex forms, better testing). Reactive Forms use <code>FormControl</code>, <code>FormGroup</code>, and <code>FormArray</code> with explicit validation via <code>Validators</code>. Custom validators extend validation logic. Async validators call servers (e.g., checking username availability). Form arrays handle dynamic form fields. <code>ValueChanges</code> observable enables reactive form interactions. Typed forms (Angular 14+) provide strict typing for form values.",
+      "// Reactive Forms with typed controls\nimport { Component, inject } from '@angular/core';\nimport { FormBuilder, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';\n\ninterface UserForm {\n  name: FormControl<string>;\n  email: FormControl<string>;\n  addresses: FormArray<FormGroup<AddressForm>>;\n}\n\ninterface AddressForm {\n  street: FormControl<string>;\n  city: FormControl<string>;\n  zip: FormControl<string>;\n}\n\n@Component({\n  selector: 'app-user-form',\n  standalone: true,\n  imports: [ReactiveFormsModule],\n  template: `\n    <form [formGroup]=\"userForm\" (ngSubmit)=\"onSubmit()\">\n      <input formControlName=\"name\" placeholder=\"Name\" />\n      @if (userForm.get('name')?.invalid && userForm.get('name')?.touched) {\n        <span class=\"error\">Name is required</span>\n      }\n\n      <input formControlName=\"email\" placeholder=\"Email\" />\n      @if (userForm.get('email')?.hasError('email')) {\n        <span class=\"error\">Invalid email format</span>\n      }\n\n      <div formArrayName=\"addresses\">\n        @for (addr of addresses.controls; track i; let i = $index) {\n          <div [formGroupName]=\"i\">\n            <input formControlName=\"street\" placeholder=\"Street\" />\n            <input formControlName=\"city\" placeholder=\"City\" />\n            <input formControlName=\"zip\" placeholder=\"ZIP\" />\n          </div>\n        }\n        <button type=\"button\" (click)=\"addAddress()\">+ Add Address</button>\n      </div>\n\n      <button type=\"submit\" [disabled]=\"userForm.invalid\">Save</button>\n    </form>\n  `\n})\nexport class UserFormComponent {\n  private fb = inject(FormBuilder);\n\n  userForm = this.fb.nonNullable.group<UserForm>({\n    name: ['', [Validators.required, Validators.minLength(2)]],\n    email: ['', [Validators.required, Validators.email]],\n    addresses: this.fb.array<FormGroup<AddressForm>>([])\n  });\n\n  get addresses() { return this.userForm.get('addresses') as FormArray; }\n\n  addAddress() {\n    this.addresses.push(this.fb.nonNullable.group<AddressForm>({\n      street: ['', Validators.required],\n      city: ['', Validators.required],\n      zip: ['', [Validators.required, Validators.pattern(/^\\d{5}$/)]]\n    }));\n  }\n\n  onSubmit() {\n    if (this.userForm.valid) {\n      console.log('Form submitted:', this.userForm.getRawValue());\n    }\n  }\n}"
+    ]
+  },
+  "Angular Testing & Performance": {
+    "Testing Components & Services": [
+      "Angular Testing uses TestBed for configuring modules, creating components, and injecting services. <code>ComponentFixture</code> provides component instance and debug element. <code>async()</code> and <code>fakeAsync()</code> handle asynchronous operations. <code>HttpClientTestingModule</code> and <code>HttpTestingController</code> mock HTTP requests. Use <code>By.css()</code> for DOM querying and <code>DetectChanges()</code> to trigger change detection. Component harnesses (CDK) provide a stable API for interacting with components in tests. Override providers in TestBed to mock services. E2E tests use Playwright or Cypress.",
+      "// Angular unit test with TestBed\nimport { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';\nimport { provideHttpClient } from '@angular/common/http';\nimport { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';\nimport { UserListComponent } from './user-list.component';\n\ndescribe('UserListComponent', () => {\n  let component: UserListComponent;\n  let fixture: ComponentFixture<UserListComponent>;\n  let httpMock: HttpTestingController;\n\n  beforeEach(async () => {\n    await TestBed.configureTestingModule({\n      imports: [UserListComponent],\n      providers: [\n        provideHttpClient(),\n        provideHttpClientTesting()\n      ]\n    }).compileComponents();\n\n    fixture = TestBed.createComponent(UserListComponent);\n    component = fixture.componentInstance;\n    httpMock = TestBed.inject(HttpTestingController);\n  });\n\n  afterEach(() => {\n    httpMock.verify();\n  });\n\n  it('should display users after fetch', fakeAsync(() => {\n    const mockUsers = [\n      { id: 1, name: 'Alice' },\n      { id: 2, name: 'Bob' }\n    ];\n\n    component.ngOnInit();\n    const req = httpMock.expectOne('/api/users');\n    expect(req.request.method).toBe('GET');\n    req.flush(mockUsers);\n    tick();\n\n    fixture.detectChanges();\n    const items = fixture.debugElement.queryAll(By.css('.user-item'));\n    expect(items.length).toBe(2);\n    expect(items[0].nativeElement.textContent).toContain('Alice');\n  }));\n\n  it('should handle error state', fakeAsync(() => {\n    component.ngOnInit();\n    const req = httpMock.expectOne('/api/users');\n    req.flush('Error', { status: 500, statusText: 'Server Error' });\n    tick();\n\n    fixture.detectChanges();\n    expect(fixture.debugElement.query(By.css('.error'))).toBeTruthy();\n  }));\n});"
+    ],
+    "Angular Performance Optimization": [
+      "Angular performance optimization: <code>ChangeDetectionStrategy.OnPush</code> reduces change detection to only when inputs change or events fire. <code>trackBy</code> in <code>@for</code>/<code>ngFor</code> prevents unnecessary DOM re-creation. Lazy loading reduces initial bundle size. <code>@defer</code> (Angular 17+) defers loading of heavy components until viewport or interaction. <code>provideZoneFlush</code> with <code>NoopZone</code> enables zoneless change detection with signals. <code>pure</code> pipes prevent recalculation. Server-Side Rendering (SSR) with Angular Universal improves initial load. Core Web Vitals (LCP, CLS, INP) guide performance targets.",
+      "// Angular 17+ @defer for lazy loading\n@Component({\n  selector: 'app-heavy',\n  template: `\n    <h1>Main content (loaded immediately)</h1>\n\n    <!-- Defer expensive component until visible -->\n    @defer (on viewport) {\n      <app-expensive-chart />\n    } @placeholder {\n      <div class=\"chart-placeholder\">Chart loading...</div>\n    } @loading (minimum 500ms) {\n      <app-spinner />\n    } @error {\n      <p>Failed to load chart</p>\n    }\n\n    <!-- Defer until interaction -->\n    @defer (on interaction) {\n      <app-comment-section />\n    } @placeholder {\n      <button>Load comments</button>\n    }\n\n    <!-- Defer with conditions -->\n    @defer (when isVisible()) {\n      <app-data-table [data]=\"tableData()\" />\n    }\n  `\n})\nexport class DashboardComponent {\n  isVisible = signal(false);\n  tableData = signal<DataRow[]>([]);\n\n  constructor() {\n    // Load table data eagerly, but render deferred\n    this.loadData();\n  }\n}\n\n// Performance monitoring\n@Component({\n  selector: 'app-root',\n  template: '...',\n  host: {\n    '[class.lcp-loaded]': 'lcpLoaded()'\n  }\n})\nexport class AppComponent {\n  private perf = inject(PerformanceService);\n  lcpLoaded = signal(false);\n\n  constructor() {\n    new PerformanceObserver((list) => {\n      for (const entry of list.getEntries()) {\n        if (entry.entryType === 'largest-contentful-paint') {\n          this.lcpLoaded.set(true);\n          console.log('LCP:', entry.startTime);\n        }\n      }\n    }).observe({ type: 'largest-contentful-paint', buffered: true });\n  }\n}"
+    ]
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "<p>Introduction to CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "<p>Variables and data types in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "<p>Operators in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "<p>Control flow statements in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "<p>Functions in CSS.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "<p>Working with collections in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "<p>String manipulation in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "<p>Key-value data structures in CSS.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "<p>OOP concepts in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "<p>Inheritance patterns in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "<p>Interfaces and contracts in CSS.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "<p>Exception handling in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "<p>Debugging CSS code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "<p>File I/O in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "<p>Input and output operations in CSS.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "<p>Concurrency in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "<p>Modular programming in CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "<p>Best practices for CSS.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "<p>Optimizing CSS code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "CSS Fundamentals": {
+    "What is CSS?": [
+      "<p>CSS (Cascading Style Sheets) controls the visual presentation of HTML. Rules consist of a <strong>selector</strong> and a <strong>declaration block</strong> with properties and values. Apply via inline, internal (<code>&lt;style&gt;</code>), or external (<code>.css</code> file).</p>",
+      "/* External CSS */\nh1 {\n    color: #333;\n    font-size: 32px;\n    text-align: center;\n}\n\np {\n    color: #666;\n    line-height: 1.6;\n    margin-bottom: 16px;\n}"
+    ],
+    "Selectors": [
+      "<p>CSS selectors target elements: <strong>element</strong> (<code>p</code>), <strong>class</strong> (<code>.my-class</code>), <strong>id</strong> (<code>#my-id</code>), <strong>attribute</strong> (<code>[type=\"text\"]</code>), <strong>universal</strong> (<code>*</code>). Combinators: descendant (<code>div p</code>), child (<code>div > p</code>), sibling (<code>h2 + p</code>).</p>",
+      "/* Element selector */\np { color: #333; }\n/* Class selector */\n.highlight { background: yellow; }\n/* ID selector */\n#header { font-size: 24px; }\n/* Attribute selector */\n[type=\"email\"] { border-color: blue; }\n/* Descendant */\narticle p { line-height: 1.8; }\n/* Child */\nul > li { list-style: square; }"
+    ],
+    "Colors & Units": [
+      "<p>Color formats: named (<code>red</code>), hex (<code>#FF5733</code>), RGB (<code>rgb(255, 87, 51)</code>), RGBA (<code>rgba(255, 87, 51, 0.5)</code>), HSL/HSLA. Units: <code>px</code>, <code>em</code> (relative to parent font), <code>rem</code> (relative to root), <code>%</code>, <code>vw</code>/<code>vh</code>, <code>ch</code>.</p>",
+      ".colors {\n    color: #333;\n    background-color: rgb(240, 240, 245);\n    border: 2px solid rgba(255, 87, 51, 0.3);\n}\n\n.units {\n    font-size: 16px;\n    padding: 1em;\n    margin: 1rem;\n    width: 80%;\n    height: 100vh;\n    max-width: 60ch;\n}"
+    ],
+    "Typography": [
+      "<p>Typography properties: <code>font-family</code>, <code>font-size</code>, <code>font-weight</code> (100-900), <code>font-style</code>, <code>text-align</code>, <code>text-decoration</code>, <code>text-transform</code>, <code>line-height</code>, <code>letter-spacing</code>. Use web fonts via <code>@font-face</code> or Google Fonts.</p>",
+      "body {\n    font-family: \"Roboto\", Arial, sans-serif;\n    font-size: 16px;\n    line-height: 1.6;\n    color: #333;\n}\n\nh1 {\n    font-weight: 700;\n    font-size: 2.5rem;\n    letter-spacing: -0.5px;\n}\n\n.uppercase { text-transform: uppercase; }\n.strikethrough { text-decoration: line-through; }"
+    ],
+    "Box Model": [
+      "<p>Every element is a box: <strong>content</strong> (inner), <strong>padding</strong> (around content), <strong>border</strong> (edge), <strong>margin</strong> (outside). Use <code>box-sizing: border-box</code> to include padding/border in width.</p>",
+      ".box {\n    width: 300px;\n    padding: 20px;\n    border: 2px solid #333;\n    margin: 15px;\n    box-sizing: border-box;\n}\n\n/* Without border-box: total width = 300 + 40 + 4 = 344px */\n/* With border-box: total width = 300px */"
+    ],
+    "CSS Variables": [
+      "<p>CSS custom properties (variables) defined with <code>--name</code>, accessed with <code>var(--name)</code>. They cascade and can be overridden, enabling easy theme systems.</p>",
+      ":root {\n    --primary: #4A90D9;\n    --secondary: #6c757d;\n    --font-size: 16px;\n    --spacing: 16px;\n}\n\n.dark-theme {\n    --primary: #90caf9;\n    --bg: #121212;\n    --text: #e0e0e0;\n}\n\n.card {\n    background: var(--bg, white);\n    color: var(--text, #333);\n    padding: var(--spacing);\n    border: 1px solid var(--primary);\n}"
+    ],
+    "Specificity & Cascade": [
+      "<p>CSS specificity determines which rule wins. Inline > ID > Class > Element. When equal, last rule wins. Use <code>!important</code> sparingly — it breaks the natural cascade.</p>",
+      "/* Specificity: 0,0,1,0 */\n.button { color: blue; }\n\n/* Specificity: 0,1,0,0 */\n#submit-btn { color: red; }\n\n/* Specificity: 0,0,1,1 */\na.button { color: green; }\n\n/* This wins vs .button alone */\n/* Avoid !important when possible */\n.urgent { color: orange !important; }"
+    ],
+    "Inheritance": [
+      "<p>Some CSS properties inherit from parent elements: <code>color</code>, <code>font-family</code>, <code>line-height</code>. Others like <code>margin</code>, <code>padding</code>, <code>border</code> do not. Control with <code>inherit</code>, <code>initial</code>, <code>unset</code>, <code>revert</code>.</p>",
+      "body {\n    color: #333;         /* inherited */\n    font-family: Arial;   /* inherited */\n    margin: 0;            /* NOT inherited */\n}\n\np {\n    color: inherit;       /* explicit inherit */\n    margin: initial;      /* reset to default */\n    border: unset;        /* behaves as inherit if inheritable, else initial */\n}"
+    ],
+    "Cascade Layers Intro": [
+      "<p>The <code>@layer</code> rule defines cascade layers. Styles in later layers override earlier ones regardless of specificity. Use to organize resets, base styles, components, and utilities in predictable order.</p>",
+      "@layer reset, base, components, utilities;\n\n@layer reset {\n    *, *::before, *::after {\n        margin: 0;\n        padding: 0;\n        box-sizing: border-box;\n    }\n}\n\n@layer base {\n    body { font-family: system-ui; line-height: 1.6; color: #333; }\n    a { color: #4A90D9; text-decoration: none; }\n}\n\n@layer components {\n    .card { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; }\n    .btn { padding: 0.5rem 1rem; border-radius: 6px; background: #4A90D9; color: white; }\n}\n\n@layer utilities {\n    .mt-4 { margin-top: 1rem; }\n    .text-center { text-align: center; }\n}"
+    ],
+    "CSS Reset & Normalize": [
+      "<p>Browsers apply default styles inconsistently. CSS resets remove all defaults (<code>margin: 0</code>, <code>padding: 0</code>). Normalize.css preserves useful defaults while fixing cross-browser differences. Choose based on project needs.</p>",
+      "/* CSS Reset */\n*, *::before, *::after {\n    margin: 0;\n    padding: 0;\n    box-sizing: border-box;\n}\n\nhtml { font-size: 16px; }\nbody { line-height: 1.6; font-family: sans-serif; }\nimg { max-width: 100%; display: block; }\na { text-decoration: none; color: inherit; }\nbutton { font: inherit; cursor: pointer; }\nul, ol { list-style: none; }\n\n/* Normalize-style */\nhtml { line-height: 1.15; -webkit-text-size-adjust: 100%; }\nbody { margin: 0; }\nmain { display: block; }\nsmall { font-size: 80%; }\n[hidden] { display: none; }"
+    ]
+  },
+  "CSS Layout & Design": {
+    "Display Property": [
+      "<p>The <code>display</code> property controls rendering: <code>block</code> (full width, new line), <code>inline</code> (flows with text), <code>inline-block</code> (inline but accepts width/height), <code>none</code> (hidden, removed from flow). Modern: <code>flex</code>, <code>grid</code>.</p>",
+      ".block { display: block; width: 100%; }\n.inline { display: inline; }\n.inline-block { display: inline-block; width: 150px; }\n.hidden { display: none; }\n\n.flex-container {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n}\n\n.grid-container {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 20px;\n}"
+    ],
+    "Flexbox": [
+      "<p>Flexbox is a 1D layout model. Container: <code>display: flex</code>. Main axis: <code>justify-content</code>. Cross axis: <code>align-items</code>. Items wrap with <code>flex-wrap</code>, grow with <code>flex-grow</code>, order with <code>order</code>.</p>",
+      ".flex-container {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 16px;\n    justify-content: center;\n    align-items: stretch;\n}\n\n.flex-item {\n    flex: 1 1 200px;\n    padding: 20px;\n    background: #f0f0f0;\n    border-radius: 8px;\n}\n\n.special-item {\n    order: -1;\n    align-self: flex-end;\n    flex-grow: 2;\n}"
+    ],
+    "CSS Grid": [
+      "<p>CSS Grid is a 2D layout system. Define columns with <code>grid-template-columns</code>, rows with <code>grid-template-rows</code>. Use <code>grid-area</code> with named template areas for complex layouts.</p>",
+      ".grid-container {\n    display: grid;\n    grid-template-columns: 1fr 2fr 1fr;\n    grid-template-rows: auto 1fr auto;\n    grid-template-areas:\n        \"header header header\"\n        \"sidebar content aside\"\n        \"footer footer footer\";\n    gap: 16px;\n    min-height: 100vh;\n}\n\n.header { grid-area: header; }\n.content { grid-area: content; }\n.sidebar { grid-area: sidebar; }\n.footer { grid-area: footer; }"
+    ],
+    "Positioning": [
+      "<p><code>position</code> values: <code>static</code> (default), <code>relative</code> (offset from normal), <code>absolute</code> (relative to positioned ancestor), <code>fixed</code> (relative to viewport), <code>sticky</code> (toggles between relative/fixed on scroll).</p>",
+      ".relative-box { position: relative; top: 20px; left: 10px; }\n\n.absolute-box {\n    position: absolute;\n    top: 0;\n    right: 0;\n    z-index: 10;\n}\n\n.fixed-header {\n    position: fixed;\n    top: 0;\n    width: 100%;\n    z-index: 100;\n}\n\n.sticky-nav {\n    position: sticky;\n    top: 0;\n    background: white;\n    z-index: 50;\n}"
+    ],
+    "Responsive Design": [
+      "<p>Media queries adapt layouts to screen sizes. Use <code>@media (min-width: ...)</code> for mobile-first approach. Common breakpoints: 576px (mobile), 768px (tablet), 992px (desktop), 1200px (wide).</p>",
+      "/* Mobile first: base styles */\n.container { padding: 16px; flex-direction: column; }\n\n/* Tablet */\n@media (min-width: 768px) {\n    .container {\n        flex-direction: row;\n        max-width: 720px;\n        margin: 0 auto;\n    }\n}\n\n/* Desktop */\n@media (min-width: 992px) {\n    .container { max-width: 960px; }\n}\n\n@media print {\n    .no-print { display: none; }\n    body { font-size: 12pt; }\n}"
+    ],
+    "Backgrounds & Gradients": [
+      "<p>Background properties: <code>background-color</code>, <code>background-image</code>, <code>background-size</code>, <code>background-position</code>, <code>background-repeat</code>. Gradients: <code>linear-gradient()</code> and <code>radial-gradient()</code>. Multiple backgrounds can be layered.</p>",
+      ".gradient-box {\n    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n    color: white;\n    padding: 40px;\n}\n\n.radial-box {\n    background: radial-gradient(circle, #ffe259, #ffa751);\n}\n\n.hero {\n    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),\n                url(\"hero.jpg\") center/cover;\n    height: 400px;\n}"
+    ],
+    "Transitions & Transforms": [
+      "<p>Transitions animate property changes: <code>transition-property</code>, <code>transition-duration</code>, <code>transition-timing-function</code>, <code>transition-delay</code>. Transforms: <code>rotate()</code>, <code>scale()</code>, <code>translate()</code>, <code>skew()</code>.</p>",
+      ".button {\n    background: #4A90D9;\n    color: white;\n    padding: 12px 24px;\n    border-radius: 6px;\n    transition: all 0.3s ease;\n}\n\n.button:hover {\n    background: #357ABD;\n    transform: translateY(-2px);\n    box-shadow: 0 4px 12px rgba(0,0,0,0.2);\n}\n\n.card:hover {\n    transform: scale(1.05) rotate(1deg);\n    box-shadow: 0 8px 25px rgba(0,0,0,0.15);\n}"
+    ],
+    "Animations": [
+      "<p>CSS animations use <code>@keyframes</code> to define sequences. The <code>animation</code> shorthand: name, duration, timing function, delay, iteration count, direction, fill mode.</p>",
+      "@keyframes slideIn {\n    from { transform: translateX(-100%); opacity: 0; }\n    to { transform: translateX(0); opacity: 1; }\n}\n\n@keyframes pulse {\n    0% { transform: scale(1); }\n    50% { transform: scale(1.1); }\n    100% { transform: scale(1); }\n}\n\n.animated { animation: slideIn 0.5s ease-out; }\n.loading-dot { animation: pulse 1.5s ease-in-out infinite; }"
+    ],
+    "Pseudo-classes": [
+      "<p>Pseudo-classes target element states: <code>:hover</code>, <code>:focus</code>, <code>:nth-child()</code>, <code>:not()</code>, <code>:is()</code>, <code>:has()</code>, <code>:first-child</code>, <code>:last-child</code>, <code>:empty</code>.</p>",
+      "li:nth-child(odd) { background: #f9f9f9; }\ntr:hover { background: #e8f4fd; }\ninput:focus { outline: 2px solid var(--primary); }\np:first-child { margin-top: 0; }\nbutton:not(.primary) { opacity: 0.7; }\n.card:has(img) { padding: 0; }\n\n/* Pseudo-elements */\n.quote::before { content: \"\\201C\"; }\n.quote::after { content: \"\\201D\"; }\n::selection { background: #4A90D9; color: white; }"
+    ],
+    "List Styling & Counters": [
+      "<p>Style lists with <code>list-style-type</code>, <code>list-style-position</code>, <code>list-style-image</code>. CSS counters (<code>counter-reset</code>, <code>counter-increment</code>) create numbered headings, table-of-contents, or custom list numbering.</p>",
+      "ul {\n    list-style-type: square;\n    list-style-position: inside;\n}\n\nol.custom {\n    list-style-type: upper-roman;\n}\n\n/* Custom counter */\nbody { counter-reset: section; }\nh2::before {\n    counter-increment: section;\n    content: \"Section \" counter(section) \": \";\n}\n\nol.custom-counter {\n    counter-reset: item;\n    list-style: none;\n}\n.custom-counter li::before {\n    counter-increment: item;\n    content: counter(item, lower-alpha) \". \";\n    font-weight: bold;\n    margin-right: 0.5em;\n}"
+    ],
+    "Form Styling with CSS": [
+      "<p>Style form elements using CSS: inputs, textareas, selects, checkboxes, radio buttons, and buttons. Normalize browser defaults. Use <code>:focus</code>, <code>:valid</code>, <code>:invalid</code>, <code>:disabled</code> pseudo-classes for state styling.</p>",
+      "input, textarea, select {\n    font: inherit;\n    padding: 0.5rem 0.75rem;\n    border: 1px solid #ccc;\n    border-radius: 6px;\n    width: 100%;\n    box-sizing: border-box;\n    transition: border-color 0.2s;\n}\n\ninput:focus, textarea:focus, select:focus {\n    outline: none;\n    border-color: #4A90D9;\n    box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.2);\n}\n\ninput:invalid { border-color: #e74c3c; }\ninput:valid { border-color: #2ecc71; }\ninput:disabled { background: #f5f5f5; opacity: 0.7; }\n\nbutton {\n    padding: 0.6rem 1.2rem;\n    border: none;\n    border-radius: 6px;\n    background: #4A90D9;\n    color: white;\n    cursor: pointer;\n    transition: background 0.2s;\n}\nbutton:hover { background: #357ABD; }"
+    ]
+  },
+  "CSS Visual & Effects": {
+    "Box Shadows": [
+      "<p>The <code>box-shadow</code> property adds shadows: <code>offset-x offset-y blur-radius spread-radius color</code>. Multiple shadows can be layered. Use <code>inset</code> for inner shadows.</p>",
+      ".shadow-light { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n.shadow-medium { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }\n.shadow-heavy { box-shadow: 0 8px 25px rgba(0,0,0,0.2); }\n\n.shadow-inset { box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }\n\n.shadow-multi {\n    box-shadow:\n        0 2px 4px rgba(0,0,0,0.1),\n        0 8px 16px rgba(0,0,0,0.1);\n}"
+    ],
+    "Text Effects": [
+      "<p>Text styling: <code>text-shadow</code> for shadows, <code>text-overflow</code> for ellipsis, <code>word-break</code> for breaking long words, <code>white-space</code> for spacing control, <code>text-wrap</code> for wrapping behavior.</p>",
+      ".text-shadow {\n    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);\n}\n\n.ellipsis {\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    max-width: 200px;\n}\n\n.word-break {\n    word-break: break-all;\n    overflow-wrap: break-word;\n}\n\n.clamp {\n    display: -webkit-box;\n    -webkit-line-clamp: 3;\n    -webkit-box-orient: vertical;\n    overflow: hidden;\n}"
+    ],
+    "Filters & Blend Modes": [
+      "<p>CSS <code>filter</code> applies visual effects: <code>blur()</code>, <code>brightness()</code>, <code>contrast()</code>, <code>grayscale()</code>, <code>sepia()</code>, <code>hue-rotate()</code>, <code>drop-shadow()</code>. <code>mix-blend-mode</code> blends elements with their background.</p>",
+      ".blur { filter: blur(4px); }\n.grayscale { filter: grayscale(100%); }\n.bright { filter: brightness(1.2) contrast(1.1); }\n.sepia { filter: sepia(60%) hue-rotate(30deg); }\n.drop-shadow { filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); }\n\n.blend-multiply { mix-blend-mode: multiply; }\n.blend-overlay { mix-blend-mode: overlay; }\n.backdrop-blur { backdrop-filter: blur(8px); }"
+    ],
+    "Clip Path & Shapes": [
+      "<p><code>clip-path</code> clips elements to a shape: <code>circle()</code>, <code>ellipse()</code>, <code>polygon()</code>, <code>inset()</code>. <code>shape-outside</code> makes text wrap around a shape.</p>",
+      ".circle-clip {\n    clip-path: circle(50%);\n    width: 200px;\n    height: 200px;\n}\n\n.polygon-clip {\n    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);\n}\n\n.shape-wrap {\n    shape-outside: circle(50%);\n    float: left;\n    width: 200px;\n    height: 200px;\n}\n\n.ellipse-clip {\n    clip-path: ellipse(50% 60% at 50% 50%);\n}"
+    ],
+    "Object Fit & Position": [
+      "<p><code>object-fit</code> controls how replaced elements (images, videos) fit their container: <code>fill</code>, <code>contain</code>, <code>cover</code>, <code>none</code>, <code>scale-down</code>. <code>object-position</code> sets alignment within the box.</p>",
+      ".cover-image {\n    width: 300px;\n    height: 200px;\n    object-fit: cover;\n    object-position: center;\n}\n\n.contain-image {\n    width: 300px;\n    height: 200px;\n    object-fit: contain;\n}\n\n.fill-image {\n    width: 300px;\n    height: 200px;\n    object-fit: fill;\n}\n\n.aspect-ratio-box {\n    aspect-ratio: 16 / 9;\n    object-fit: cover;\n}"
+    ],
+    "Overflow & Scroll": [
+      "<p><code>overflow</code> controls content overflow: <code>visible</code>, <code>hidden</code>, <code>scroll</code>, <code>auto</code>. <code>overflow-x</code>/<code>overflow-y</code> for axis-specific. <code>scroll-behavior: smooth</code> for smooth scrolling. <code>scroll-snap</code> for snap points.</p>",
+      ".scroll-container {\n    overflow-y: auto;\n    max-height: 400px;\n    scroll-behavior: smooth;\n}\n\n.snap-container {\n    scroll-snap-type: y mandatory;\n    overflow-y: scroll;\n    height: 100vh;\n}\n\n.snap-item {\n    scroll-snap-align: start;\n    height: 100vh;\n}\n\n.hide-scrollbar {\n    overflow: auto;\n    scrollbar-width: thin;\n}\n\n.custom-scrollbar::-webkit-scrollbar {\n    width: 8px;\n}"
+    ],
+    "Cursor & Pointer Events": [
+      "<p>The <code>cursor</code> property changes the mouse cursor: <code>pointer</code>, <code>grab</code>, <code>text</code>, <code>not-allowed</code>, <code>wait</code>. <code>pointer-events</code> controls click/touch behavior: <code>auto</code> (default), <code>none</code> (disable), <code>visiblePainted</code> (SVG).</p>",
+      ".clickable { cursor: pointer; }\n.grabbable { cursor: grab; }\n.grabbable:active { cursor: grabbing; }\n.text-select { cursor: text; }\n.disabled-btn { cursor: not-allowed; opacity: 0.6; }\n.loading { cursor: wait; }\n\n/* Disable pointer events */\n.overlay { pointer-events: none; }\n.overlay > * { pointer-events: auto; }\n\n/* Custom cursor */\n.custom-cursor {\n    cursor: url(\"cursor.png\") 2 2, auto;\n}"
+    ],
+    "Resize & Object View": [
+      "<p>The <code>resize</code> property makes elements user-resizable: <code>both</code>, <code>horizontal</code>, <code>vertical</code>. <code>field-sizing</code> makes textareas/contenteditable auto-size. <code>object-view-box</code> crops replaced elements without changing the image.</p>",
+      ".resizable-textarea {\n    resize: vertical;\n    min-height: 100px;\n    max-height: 400px;\n}\n\n.resizable-div {\n    resize: both;\n    overflow: auto;\n    border: 1px dashed #ccc;\n    padding: 1rem;\n    min-width: 200px;\n    min-height: 100px;\n}\n\n/* Object view box - crop without distortion */\n.cropped-image {\n    width: 300px;\n    height: 200px;\n    object-view-box: inset(10% 20% 10% 20%);\n}"
+    ],
+    "Columns & Multi-Column": [
+      "<p>Multi-column layout with <code>column-count</code>, <code>column-width</code>, <code>column-gap</code>, <code>column-rule</code>. Content flows automatically between columns. Useful for text-heavy layouts like newspapers.</p>",
+      ".multi-column {\n    column-count: 3;\n    column-gap: 40px;\n    column-rule: 1px solid #ddd;\n    column-width: 250px;\n}\n\nh2 {\n    column-span: all;\n}\n\n.avoid-break {\n    break-inside: avoid;\n    page-break-inside: avoid;\n}"
+    ]
+  },
+  "CSS Advanced Topics": {
+    "CSS Architecture (BEM)": [
+      "<p>Scalable CSS methodologies: <strong>BEM</strong> (Block Element Modifier) uses naming like <code>.block__element--modifier</code>. Prevents conflicts and improves maintainability by enforcing naming conventions.</p>",
+      "/* BEM Example */\n.card { background: white; border-radius: 8px; }\n.card__title { font-size: 1.25rem; }\n.card__description { color: #666; }\n.card--featured { border: 2px solid gold; }\n.card--featured .card__title { color: goldenrod; }\n\n.alert { padding: 12px; border-radius: 6px; }\n.alert--success { background: #d4edda; color: #155724; }\n.alert--error { background: #f8d7da; color: #721c24; }\n.alert__icon { margin-right: 8px; }"
+    ],
+    "Preprocessors (Sass/SCSS)": [
+      "<p>CSS preprocessors extend CSS with variables, nesting, mixins, functions. SCSS features: <code>$variables</code>, <code>@mixin</code>/<code>@include</code>, <code>&</code> parent selector, built-in functions for colors and math.</p>",
+      "// SCSS\n$primary: #4A90D9;\n\n@mixin respond-to($bp) {\n    @media (min-width: $bp) { @content; }\n}\n\n.card {\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n\n    &__title {\n        font-size: 1.25rem;\n        color: $primary;\n    }\n\n    @include respond-to(768px) {\n        padding: 30px;\n    }\n}\n\n@function spacing($n) {\n    @return $n * 8px;\n}\n.container { padding: spacing(2); }"
+    ],
+    "CSS Layers (@layer)": [
+      "<p>The <code>@layer</code> rule controls cascade layer order. Later layers override earlier ones regardless of specificity. Useful for organizing resets, components, and utilities.</p>",
+      "@layer reset, base, components, utilities;\n\n@layer reset {\n    *, *::before, *::after {\n        margin: 0;\n        padding: 0;\n        box-sizing: border-box;\n    }\n}\n\n@layer base {\n    body { font-family: system-ui; line-height: 1.6; color: #333; }\n}\n\n@layer components {\n    .card { border: 1px solid #ddd; padding: 1rem; }\n}\n\n@layer utilities {\n    .mt-4 { margin-top: 1rem; }\n    .text-center { text-align: center; }\n}"
+    ],
+    "Container Queries": [
+      "<p>Container queries (<code>@container</code>) style elements based on container size rather than viewport. Define a containment context with <code>container-type</code>. Enables truly reusable components.</p>",
+      ".card-container {\n    container-type: inline-size;\n    container-name: card;\n}\n\n@container card (min-width: 400px) {\n    .card {\n        display: flex;\n        flex-direction: row;\n    }\n    .card__image { width: 200px; }\n}\n\n@container card (max-width: 399px) {\n    .card {\n        display: flex;\n        flex-direction: column;\n    }\n    .card__image { width: 100%; }\n}"
+    ],
+    "Nesting & @scope": [
+      "<p>CSS nesting (native) lets you nest selectors like SCSS. The <code>@scope</code> rule limits styles to a subtree, providing better encapsulation without Shadow DOM.</p>",
+      ".card {\n    background: white;\n    border-radius: 8px;\n\n    & .title {\n        font-size: 1.25rem;\n        font-weight: 600;\n\n        &.featured { color: goldenrod; }\n    }\n\n    & > .body { padding: 1rem; }\n\n    /* Nesting media queries */\n    @media (min-width: 768px) {\n        padding: 2rem;\n    }\n}\n\n/* @scope limits selector reach */\n@scope (.card) {\n    :scope { border: 1px solid #ddd; }\n    p { margin: 0.5em 0; }\n    img { max-width: 100%; }\n}"
+    ],
+    "Logical Properties": [
+      "<p>Logical properties use flow-relative directions: <code>margin-inline-start</code> instead of <code>margin-left</code>, <code>padding-block</code> instead of <code>padding-top</code>/<code>padding-bottom</code>. Better for internationalization and RTL support.</p>",
+      ".card {\n    margin-inline: auto;\n    padding-block: 1rem;\n    padding-inline: 1.5rem;\n    border-inline-start: 4px solid var(--primary);\n}\n\n/* Physical vs Logical */\n.physical {\n    margin-top: 10px;\n    margin-left: 20px;\n    padding-bottom: 15px;\n    border-right: 2px solid;\n}\n\n.logical {\n    margin-block-start: 10px;\n    margin-inline-start: 20px;\n    padding-block-end: 15px;\n    border-inline-end: 2px solid;\n}"
+    ],
+    "CSS Functions": [
+      "<p>Powerful CSS functions: <code>calc()</code> for math, <code>min()</code>/<code>max()</code>/<code>clamp()</code> for responsive values, <code>attr()</code> for HTML attributes, <code>url()</code> for resources, <code>var()</code> for variables.</p>",
+      ".responsive {\n    width: calc(100% - 40px);\n    font-size: clamp(1rem, 2.5vw, 2rem);\n    max-width: min(1200px, 100%);\n    padding: max(1rem, 2vw);\n}\n\n.grid-auto {\n    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));\n}\n\n.counter-example {\n    counter-reset: section;\n}\n\n.counter-example h2::before {\n    counter-increment: section;\n    content: \"Section \" counter(section) \": \";\n}"
+    ],
+    "Content Visibility": [
+      "<p><code>content-visibility</code> skips rendering of off-screen elements for performance. <code>contain</code> isolates layout/style/paint. <code>content-visibility: auto</code> automatically skips hidden content.</p>",
+      ".lazy-render {\n    content-visibility: auto;\n    contain-intrinsic-size: 0 500px;\n}\n\n.contain-layout {\n    contain: layout style paint;\n}\n\n.size {\n    contain-intrinsic-size: 100vw 300px;\n}\n\n/* Combined for performance */\n.optimized-section {\n    content-visibility: auto;\n    contain-intrinsic-size: auto 300px;\n}"
+    ],
+    "CSS Color Modern Functions": [
+      "<p>Modern CSS color functions: <code>color-mix()</code> blends colors, <code>color()</code> accesses wider gamuts (Display P3, sRGB), <code>lch()</code>/<code>lab()</code> for perceptually uniform colors, <code>oklch()</code>/<code>oklab()</code> for better gradients.</p>",
+      ":root {\n    --primary: #4A90D9;\n    --accent: #e44d26;\n}\n\n/* Color mixing */\n.mixed {\n    background: color-mix(in srgb, var(--primary) 50%, white);\n    border: 2px solid color-mix(in srgb, var(--primary), var(--accent));\n}\n\n/* Relative color syntax */\n.darker-primary {\n    background: rgb(from var(--primary) r calc(g - 40) calc(b - 60));\n}\n\n/* OKLCH for perceptually uniform colors */\n.gradient {\n    background: linear-gradient(in oklch, #4A90D9, #e44d26);\n}\n\n/* Wider gamut (Display P3) */\n@supports (color: color(display-p3 1 1 1)) {\n    .vibrant {\n        color: color(display-p3 0.9 0.2 0.3);\n    }\n}"
+    ],
+    "@property & Custom Properties Deep Dive": [
+      "<p>The <code>@property</code> rule defines typed CSS custom properties with initial values and inheritance control. Enables animation of custom properties, validation, and better developer ergonomics.</p>",
+      "@property --rotation {\n    syntax: \"<angle>\";\n    inherits: false;\n    initial-value: 0deg;\n}\n\n@property --scale {\n    syntax: \"<number>\";\n    inherits: true;\n    initial-value: 1;\n}\n\n@property --color-palette {\n    syntax: \"<color>+\";\n    inherits: true;\n    initial-value: #333 #666;\n}\n\n.spinner {\n    --rotation: 0deg;\n    transform: rotate(var(--rotation));\n    transition: --rotation 0.5s ease;\n}\n\n.spinner:hover {\n    --rotation: 180deg;\n}\n\n/* Fallback for browsers without @property */\n:root {\n    --rotation: 0deg;\n}"
+    ],
+    "Container Query Units & Style Queries": [
+      "<p>Container query units: <code>cqw</code> (1% container width), <code>cqh</code> (1% height), <code>cqi</code> (1% inline size), <code>cqb</code> (1% block size), <code>cqmin</code>/<code>cqmax</code>. Style queries (<code>@container style()</code>) query computed style values.</p>",
+      ".card-container {\n    container-type: inline-size;\n    container-name: card;\n}\n\n@container card (min-width: 500px) {\n    .card {\n        display: flex;\n        gap: 1rem;\n        font-size: clamp(1rem, 5cqi, 2rem);\n        padding: 3cqi;\n    }\n    .card__image { width: 30cqw; }\n}\n\n@container card (max-width: 499px) {\n    .card {\n        flex-direction: column;\n        padding: 1rem;\n    }\n}\n\n/* Style queries - check computed value */\n@container style(--theme: dark) {\n    .card { background: #222; color: #eee; }\n}"
+    ],
+    "View Transitions API": [
+      "<p>View Transitions animate between page states or navigations. Use <code>@view-transition</code> navigation rule, <code>view-transition-name</code> on elements, and <code>::view-transition-*</code> pseudo-elements for custom animations.</p>",
+      "@view-transition {\n    navigation: auto;\n}\n\n/* Assign transition names to elements */\n.main-header { view-transition-name: header; }\n.main-content { view-transition-name: content; }\n.page-thumbnail { view-transition-name: thumbnail; }\n\n/* Customize transitions */\n::view-transition-old(header) {\n    animation: fadeOut 0.3s ease;\n}\n\n::view-transition-new(header) {\n    animation: fadeIn 0.3s ease;\n}\n\n@keyframes fadeOut {\n    to { opacity: 0; transform: translateY(-20px); }\n}\n\n@keyframes fadeIn {\n    from { opacity: 0; transform: translateY(20px); }\n}\n\n/* Cross-fade (default) */\n::view-transition-old(root),\n::view-transition-new(root) {\n    animation-duration: 0.5s;\n}"
+    ]
+  },
+  "CSS Architecture & Tools": {
+    "CSS Methodologies": [
+      "<p>Beyond BEM: <strong>SMACSS</strong> (categorizes into base/layout/module/state/theme), <strong>ITCSS</strong> (layers by specificity), <strong>OOCSS</strong> (separates structure from skin, container from content). Choose what fits your project.</p>",
+      "/* SMACSS: categories */\n/* Base - element defaults */\na { color: blue; }\n/* Layout - major components */\n.l-header { width: 100%; }\n.l-sidebar { float: left; width: 250px; }\n/* Module - reusable widgets */\n.widget { padding: 1rem; }\n/* State - dynamic states */\n.is-active { font-weight: bold; }\n.is-hidden { display: none; }\n/* Theme - visual variations */\n.theme-dark { background: #333; color: #fff; }"
+    ],
+    "PostCSS & Autoprefixer": [
+      "<p>PostCSS is a tool for transforming CSS with JavaScript plugins. Autoprefixer automatically adds vendor prefixes (<code>-webkit-</code>, <code>-moz-</code>, etc.). Other plugins enable future CSS syntax today.</p>",
+      "/* Input - modern CSS */\n.grid {\n    display: grid;\n    gap: 16px;\n}\n\n.card {\n    position: sticky;\n    top: 0;\n    backdrop-filter: blur(8px);\n}\n\n/* Output after Autoprefixer */\n.grid {\n    display: -ms-grid;\n    display: grid;\n    gap: 16px;\n}\n\n.card {\n    position: -webkit-sticky;\n    position: sticky;\n    top: 0;\n    -webkit-backdrop-filter: blur(8px);\n    backdrop-filter: blur(8px);\n}"
+    ],
+    "Tailwind CSS & Utility-First": [
+      "<p>Utility-first CSS uses small, composable classes. Tailwind CSS provides <code>.flex</code>, <code>.text-center</code>, <code>.p-4</code> etc. Encourages design consistency and reduces CSS file size. Trade-off: verbose HTML.</p>",
+      "<!-- Tailwind example -->\n<div class=\"flex items-center justify-between p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow\">\n    <div class=\"flex items-center gap-4\">\n        <img class=\"w-12 h-12 rounded-full\" src=\"avatar.jpg\" alt=\"\">\n        <div>\n            <h3 class=\"text-lg font-semibold text-gray-900\">John Doe</h3>\n            <p class=\"text-sm text-gray-500\">Software Engineer</p>\n        </div>\n    </div>\n    <button class=\"px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700\">\n        Follow\n    </button>\n</div>"
+    ],
+    "CSS Modules & Scoped Styles": [
+      "<p>CSS Modules generate locally scoped class names. Imported like JS modules. Class names are hashed at build time to avoid conflicts. Works well with component frameworks like React, Vue, Svelte.</p>",
+      "/* Component.module.css */\n.card {\n    background: white;\n    border-radius: 8px;\n    padding: 1rem;\n}\n\n.title {\n    font-size: 1.25rem;\n    font-weight: 600;\n    color: #333;\n}\n\n/* Generated unique class names:\n   .Component_card_a1b2c, .Component_title_d3e4f */\n\n// React usage\nimport styles from \"./Component.module.css\";\nfunction Card() {\n    return (\n        <div className={styles.card}>\n            <h3 className={styles.title}>Title</h3>\n        </div>\n    );\n}"
+    ],
+    "CSS Grid Advanced": [
+      "<p>Advanced Grid: <code>subgrid</code> passes grid tracks to children. <code>auto-fill</code>/<code>auto-fit</code> for responsive grids without media queries. <code>grid-auto-flow: dense</code> fills gaps automatically.</p>",
+      ".responsive-grid {\n    display: grid;\n    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));\n    gap: 16px;\n}\n\n.dense-grid {\n    display: grid;\n    grid-auto-flow: dense;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 12px;\n}\n\n.featured { grid-column: span 2; grid-row: span 2; }\n\n.subgrid-example {\n    display: grid;\n    grid-template-columns: 1fr 2fr 1fr;\n}\n\n.subgrid-item {\n    display: grid;\n    grid-column: span 2;\n    grid-template-columns: subgrid;\n}"
+    ],
+    "Performance & Best Practices": [
+      "<p>CSS performance: minimize specificity chains, avoid expensive properties (box-shadow, border-radius), use <code>will-change</code> sparingly, avoid <code>@import</code>, reduce repaints/reflows, use GPU-accelerated properties (<code>transform</code>, <code>opacity</code>).</p>",
+      "/* Good for performance */\n.moving-element {\n    transform: translateZ(0);  /* GPU layer */\n    will-change: transform;\n    transition: transform 0.3s ease;\n}\n\n/* Avoid */\n.expensive {\n    box-shadow: 0 0 0 1px rgba(0,0,0,0.1),\n                0 2px 4px rgba(0,0,0,0.1),\n                0 8px 16px rgba(0,0,0,0.1);\n    border-radius: 8px;\n    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));\n}\n\n/* Use transform instead of top/left for animations */\n.good { transform: translateX(100px); }\n.bad { left: 100px; }"
+    ],
+    "CSS Debugging & DevTools": [
+      "<p>Browser DevTools: inspect computed styles, trace specificity, toggle pseudo-classes (<code>:hover</code>, <code>:focus</code>), edit live CSS, view box model diagram, debug animations with timeline. Use <code>outline</code> to visualize elements.</p>",
+      "/* Debug helpers */\n.debug * { outline: 1px solid red; }\n.debug .container { outline: 2px solid blue; }\n\n/* Check for overflow */\n.debug-overflow {\n    overflow: hidden;\n    outline: 2px dashed orange;\n}\n\n/* Visualize box model */\n* { background: rgba(0,0,0,0.05) !important; }\n\n/* Print CSS to debug print layout */\n@media print {\n    .no-print { display: none; }\n    body { font-size: 12pt; }\n}\n\n/* DevTools tip: use 'Computed' tab to see final values */\n/* Tip: 'Styles' tab shows matched rules and overrides */"
+    ],
+    "Print & Accessibility Styles": [
+      "<p>Print stylesheets optimize pages for paper: hide nav/sidebars/ads, use <code>page-break-*</code> properties, ensure link URLs print. Accessibility: respect <code>prefers-reduced-motion</code>, <code>prefers-color-scheme</code>, <code>prefers-contrast</code>, <code>forced-colors</code>.</p>",
+      "@media print {\n    @page { margin: 2cm; }\n    nav, .sidebar, .ads, .no-print { display: none; }\n    body { font-size: 12pt; line-height: 1.5; color: black; }\n    a[href^=\"http\"]::after { content: \" (\" attr(href) \")\"; }\n    h1 { page-break-before: always; }\n    h2 { page-break-after: avoid; }\n}\n\n/* Accessibility: respect user preferences */\n@media (prefers-reduced-motion: reduce) {\n    *, *::before, *::after {\n        animation-duration: 0.01ms !important;\n        transition-duration: 0.01ms !important;\n    }\n}\n\n@media (prefers-color-scheme: dark) {\n    body { background: #121212; color: #e0e0e0; }\n}\n\n@media (prefers-contrast: high) {\n    body { color: black; background: white; }\n    a { color: #0000ee; text-decoration: underline; }\n}\n\n@media (forced-colors: active) {\n    .button { border: 2px solid ButtonText; }\n}"
+    ]
+  },
+  "CSS Layout Modern": {
+    "CSS Grid Advanced": [
+      "CSS Grid Layout is a two-dimensional layout system. Key properties: <code>grid-template-columns</code> and <code>grid-template-rows</code> define tracks. <code>fr</code> unit distributes available space. <code>grid-template-areas</code> provides visual layout mapping. <code>auto-fit</code> and <code>auto-fill</code> create responsive grids without media queries. <code>minmax()</code> sets flexible track sizes. <code>gap</code> controls gutter spacing. Grid placement functions: <code>grid-column</code>, <code>grid-row</code>, <code>grid-area</code>. Grid is best for page-level layouts and two-dimensional arrangements.",
+      ".dashboard {\n  display: grid;\n  grid-template-columns: 250px 1fr 1fr;\n  grid-template-rows: auto 1fr auto;\n  grid-template-areas:\n    \"header header header\"\n    \"sidebar main main\"\n    \"footer footer footer\";\n  gap: 16px;\n  min-height: 100vh;\n}\n.header { grid-area: header; }\n.sidebar { grid-area: sidebar; }\n.main { grid-area: main; }\n.footer { grid-area: footer; }\n\n/* Responsive grid without media queries */\n.gallery {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n  gap: 1rem;\n}\n\n/* Named grid lines */\n.layout {\n  display: grid;\n  grid-template-columns: [sidebar] 200px [content] 1fr 1fr;\n  gap: 20px;\n}\n.sidebar { grid-column: sidebar; }\n.content { grid-column: content / -1; }"
+    ],
+    "CSS Custom Properties (Variables)": [
+      "CSS Custom Properties (CSS variables) enable reusable values throughout a stylesheet. Declared with <code>--name</code> and accessed with <code>var(--name, fallback)</code>. They cascade like regular CSS — set global variables on <code>:root</code> and override in specific scopes. CSS variables can be changed at runtime via JavaScript (<code>element.style.setProperty('--color', 'red')</code>) enabling dynamic theming. Use with <code>calc()</code> for computed values. Unlike preprocessor variables (Sass/Less), CSS variables cascade and can be updated dynamically.",
+      ":root {\n  /* Design tokens */\n  --color-primary: #6366f1;\n  --color-primary-light: #a5b4fc;\n  --color-text: #1e293b;\n  --color-bg: #ffffff;\n  --spacing-unit: 8px;\n  --border-radius: 4px;\n  --font-sans: 'Inter', system-ui, sans-serif;\n  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);\n}\n\n/* Theming with overrides */\n[data-theme=\"dark\"] {\n  --color-primary: #818cf8;\n  --color-text: #e2e8f0;\n  --color-bg: #0f172a;\n}\n\n/* Usage with calc */\n.card {\n  background: var(--color-bg);\n  color: var(--color-text);\n  padding: calc(var(--spacing-unit) * 3);\n  border-radius: var(--border-radius);\n  box-shadow: var(--shadow-sm);\n}\n\n/* Component-level overrides */\n.card.featured {\n  --color-primary: #f59e0b;  /* only affects this scope */\n}\n\n/* Dynamic update via JS */\n// document.documentElement.style.setProperty('--color-primary', '#10b981');"
+    ],
+    "CSS Animations & Keyframes": [
+      "CSS animations bring interfaces to life. <code>@keyframes</code> defines animation steps using percentage points or <code>from</code>/<code>to</code>. The <code>animation</code> shorthand: name, duration, timing function, delay, iteration count, direction, fill mode, play state. Timing functions: <code>ease</code>, <code>linear</code>, <code>ease-in</code>, <code>ease-out</code>, <code>ease-in-out</code>, <code>cubic-bezier()</code>, <code>steps()</code>. <code>animation-fill-mode: forwards</code> retains the end state. <code>animation-direction: alternate</code> creates smooth back-and-forth animations. <code>prefers-reduced-motion</code> respects user accessibility settings.",
+      "@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(10px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes pulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.05); }\n}\n\n@keyframes spin {\n  to { transform: rotate(360deg); }\n}\n\n@keyframes slideIn {\n  from {\n    transform: translateX(-100%);\n    opacity: 0;\n  }\n  to {\n    transform: translateX(0);\n    opacity: 1;\n  }\n}\n\n.animate-in {\n  animation: fadeIn 0.3s ease-out forwards;\n}\n\n.loading-spinner {\n  animation: spin 1s linear infinite;\n}\n\n/* Stagger children animations */n.card:nth-child(1) { animation-delay: 0ms; }\n.card:nth-child(2) { animation-delay: 100ms; }\n.card:nth-child(3) { animation-delay: 200ms; }\n\n/* Respect reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  * {\n    animation-duration: 0.01ms !important;\n    transition-duration: 0.01ms !important;\n  }\n}"
+    ],
+    "CSS Transforms & Transitions": [
+      "CSS <code>transform</code> modifies element appearance: <code>translate()</code> (move), <code>rotate()</code> (turn), <code>scale()</code> (size), <code>skew()</code> (shear). <code>transform-origin</code> changes the pivot point. 3D transforms: <code>translateZ()</code>, <code>rotateX()</code>, <code>rotateY()</code>, <code>perspective()</code>. <code>backface-visibility: hidden</code> prevents reverse-side rendering. <code>transition</code> animates property changes smoothly with duration, timing function, and delay. Use <code>will-change</code> to hint at upcoming transforms for GPU acceleration. Hardware-accelerated properties: <code>transform</code>, <code>opacity</code>.",
+      ".button {\n  background: var(--color-primary);\n  color: white;\n  padding: 12px 24px;\n  border: none;\n  border-radius: 4px;\n  cursor: pointer;\n  \n  /* Transition shorthand */\n  transition: transform 0.2s ease, box-shadow 0.2s ease;\n  \n  /* GPU acceleration hint */\n  will-change: transform;\n}\n\n.button:hover {\n  transform: translateY(-2px) scale(1.02);\n  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);\n}\n\n.button:active {\n  transform: translateY(0) scale(0.98);\n}\n\n/* Card flip 3D effect */\n.card-container {\n  perspective: 1000px;\n}\n.card {\n  transition: transform 0.6s;\n  transform-style: preserve-3d;\n}\n.card.flipped {\n  transform: rotateY(180deg);\n}\n.card-front, .card-back {\n  backface-visibility: hidden;\n  position: absolute;\n  width: 100%;\n  height: 100%;\n}\n.card-back {\n  transform: rotateY(180deg);\n}"
+    ],
+    "CSS Container Queries": [
+      "Container queries allow styling elements based on their container's size rather than the viewport. Define a containment context with <code>container-type: inline-size</code> and optionally name it with <code>container-name</code>. Use <code>@container (min-width: 400px)</code> to apply styles when the container reaches that width. Container queries are ideal for reusable component libraries where a component must adapt to various placement contexts. They work with <code>cqw</code>, <code>cqi</code> (container query units).",
+      ".card-container {\n  container-type: inline-size;\n  container-name: card;\n}\n\n/* Default styles (small container) */\n.card {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n/* When container is wide enough */\n@container card (min-width: 400px) {\n  .card {\n    flex-direction: row;\n  }\n  .card-image {\n    width: 200px;\n  }\n}\n\n@container card (min-width: 600px) {\n  .card {\n    padding: 24px;\n  }\n  .card-title {\n    font-size: 1.5rem;\n  }\n}\n\n/* Container query units */\n.card-title {\n  font-size: clamp(1rem, 5cqi, 2rem);\n}"
+    ]
+  },
+  "CSS Architecture & Methodologies": {
+    "BEM Methodology": [
+      "Block Element Modifier (BEM) is a naming convention that makes CSS more maintainable. Block: standalone component (<code>.card</code>). Element: part of a block (<code>.card__title</code>). Modifier: variant (<code>.card--featured</code>, <code>.card__title--large</code>). Benefits: prevents naming conflicts, increases readability, and creates a clear relationship between HTML and CSS. Each selector has the same specificity, making overrides predictable. Works well with preprocessors using <code>&</code> nesting.",
+      "/* BEM Naming */\n/* Block */\n.card { background: white; border-radius: 8px; }\n\n/* Element (double underscore) */\n.card__title { font-size: 1.25rem; font-weight: 600; }\n.card__body { padding: 16px; }\n.card__image { width: 100%; height: auto; }\n.card__actions { display: flex; gap: 8px; }\n\n/* Modifier (double dash) */\n.card--featured { border: 2px solid gold; }\n.card__title--large { font-size: 1.5rem; }\n.card__actions--centered { justify-content: center; }\n\n/* HTML structure:\n<div class=\"card card--featured\">\n  <img class=\"card__image\" src=\"...\">\n  <div class=\"card__body\">\n    <h2 class=\"card__title card__title--large\">Title</h2>\n    <p class=\"card__text\">Content</p>\n    <div class=\"card__actions card__actions--centered\">\n      <button>Action</button>\n    </div>\n  </div>\n</div> */"
+    ],
+    "CSS Preprocessors (Sass/PostCSS)": [
+      "CSS preprocessors extend CSS with features like variables, nesting, mixins, functions, and inheritance. Sass/SCSS is the most popular: <code>$variables</code>, <code>@mixin</code>/<code>@include</code> for reusable styles, <code>@extend</code> for inheritance, nesting for hierarchy, <code>&</code> parent selector, and built-in functions (darken, lighten, rgba). PostCSS is a tool for transforming CSS with plugins: Autoprefixer (adds vendor prefixes), PostCSS Preset Env (future CSS syntax), CSS Modules (local scoping). Modern browsers support many features (CSS variables, nesting via postcss-nesting) reducing preprocessor dependency. Consider native CSS vs preprocessed CSS based on team preferences and project needs.",
+      "// SCSS Example\n$primary: #6366f1;\n$font-stack: 'Inter', sans-serif;\n$breakpoint-md: 768px;\n\n@mixin flex-center {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n@mixin respond-to($bp) {\n  @media (min-width: $bp) {\n    @content;\n  }\n}\n\n.button {\n  @include flex-center;\n  background: $primary;\n  font-family: $font-stack;\n  \n  &:hover {\n    background: darken($primary, 10%);\n  }\n  \n  @include respond-to($breakpoint-md) {\n    padding: 16px 32px;\n  }\n}\n\n// Generated CSS:\n// .button { display: flex; align-items: center; justify-content: center; background: #6366f1; }\n// .button:hover { background: #4f46e5; }\n// @media (min-width: 768px) { .button { padding: 16px 32px; } }"
+    ]
+  }
+}
