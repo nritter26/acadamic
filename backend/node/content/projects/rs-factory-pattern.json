@@ -1,0 +1,71 @@
+{
+  "id": "rs-factory-pattern",
+  "title": "Rust: Factory Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "factory pattern", "trait objects", "polymorphism"],
+  "description": "Implement factory pattern for creating objects polymorphically.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Factory Function",
+      "description": "Define a `Shape` trait with `fn area(&self) -> f64`. Implement Circle, Rectangle, Triangle. Create a factory function `make_shape(kind: &str, params: Vec<f64>) -> Box<dyn Shape>`.",
+      "hints": ["`Circle { radius }`, `Rectangle { width, height }`, `Triangle { base, height }`", "Factory: `match kind { \"circle\" => Box::new(Circle { radius: params[0] }), ... }`", "Call factory and print area."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('78.5') || output.includes('78.54')",
+        "successMessage": "Shape factory works!",
+        "failureMessage": "Create a circle with radius 5 using the factory and print its area."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Factory with Parameter Validation",
+      "description": "Make the factory return `Result<Box<dyn Shape>, String>`. Validate that the correct number of parameters is provided. Test with valid and invalid parameters.",
+      "hints": ["Circle needs 1 param, Rectangle needs 2, Triangle needs 2.", "`if params.len() != expected { return Err(\"...\".into()); }`", "Handle both Ok and Err in main."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('area') || output.includes('Error')",
+        "successMessage": "Factory with validation works!",
+        "failureMessage": "Create valid shapes and handle invalid parameters."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Registry-Based Factory",
+      "description": "Instead of hardcoded match arms, use a `HashMap<String, Box<dyn Fn(Vec<f64>) -> Box<dyn Shape>>>` as a registry where new shape types can be registered dynamically.",
+      "hints": ["`let mut registry: HashMap<String, Box<dyn Fn(Vec<f64>) -> Box<dyn Shape>>> = HashMap::new();`", "`registry.insert(\"circle\", Box::new(|params| Box::new(Circle { radius: params[0] })));`", "New shape types can be added without changing the factory function."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('78.5') || output.includes('area')",
+        "successMessage": "Registry-based factory works!",
+        "failureMessage": "Register and create shapes using the registry."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Abstract Factory",
+      "description": "Create an abstract factory: a `GUIFactory` trait with methods `create_button() -> Box<dyn Button>` and `create_checkbox() -> Box<dyn Checkbox>`. Implement `WindowsFactory` and `MacFactory`.",
+      "hints": ["`win_button: \"Windows Button\"`, `mac_button: \"Mac Button\"`", "`WindowsFactory` creates Windows-style widgets.", "`MacFactory` creates Mac-style widgets."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Windows') && output.includes('Mac')",
+        "successMessage": "Abstract factory works!",
+        "failureMessage": "Create UI widgets for both Windows and Mac factories."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Factory Method",
+      "description": "Implement the Factory Method pattern: a `Document` trait with `fn create_row(&self) -> Box<dyn Row>`. Implement `CSVDocument` and `JSONDocument` that each create their own row type.",
+      "hints": ["CSV rows return comma-separated strings.", "JSON rows return JSON-formatted strings.", "The document defines which row type to create (Factory Method)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('CSV') || output.includes('JSON')",
+        "successMessage": "Factory Method pattern works!",
+        "failureMessage": "Create CSV and JSON documents and print their rows."
+      }
+    }
+  ]
+}

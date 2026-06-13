@@ -1,0 +1,83 @@
+{
+  "id": "go-crdt-counter",
+  "title": "Go: CRDT Counter",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 60,
+  "concepts": ["go", "CRDT", "distributed systems", "G-Counter", "PN-Counter", "OR-Set"],
+  "description": "Build CRDT counters (G-Counter, PN-Counter, OR-Set) with per-replica state and merge semantics.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "G-Counter: increment and value",
+      "description": "Define `GCounter` with `state map[string]int` (replica ID → count). Implement `Increment(replicaID string)` (adds 1) and `Value() int` (sums all counts). Print the value after incrementing with two different replica IDs.",
+      "hints": ["`state[replicaID]++` in Increment.", "`Value()` loops over map values and sums them.", "Initialize the map in a `NewGCounter() *GCounter` constructor."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('2')",
+        "successMessage": "G-Counter value sums all replica increments.",
+        "failureMessage": "Increment on two replicas should give Value() == 2."
+      }
+    },
+    {
+      "id": 2,
+      "title": "G-Counter: merge with max",
+      "description": "Implement `Merge(other GCounter)` that takes the element-wise `max` of state maps (per-replica). Print the value before and after merging two G-Counters with different replica histories.",
+      "hints": ["For each key in both counters, keep `max(c1.state[k], c2.state[k])`.", "Use a new map and iterate over both, taking the max.", "Print `fmt.Printf(\"before=%d after=%d\", before, after)`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('after')",
+        "successMessage": "G-Counter merge uses element-wise max.",
+        "failureMessage": "Merge should take the max for each replica's count."
+      }
+    },
+    {
+      "id": 3,
+      "title": "PN-Counter: positive and negative",
+      "description": "Implement `PNCounter` with `pos *GCounter` and `neg *GCounter`. `Increment(replicaID)` calls `pos.Increment(replicaID)`. `Decrement(replicaID)` calls `neg.Increment(replicaID)`. `Value() int` returns `pos.Value() - neg.Value()`. Print the value after incrementing and decrementing.",
+      "hints": ["PNCounter embeds or holds two GCounters.", "`Value()` subtracts neg total from pos total.", "Print `fmt.Printf(\"value=%d\", pn.Value())`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('value=')",
+        "successMessage": "PN-Counter tracks increments and decrements.",
+        "failureMessage": "Value() should be pos total minus neg total."
+      }
+    },
+    {
+      "id": 4,
+      "title": "PN-Counter: state merge",
+      "description": "Implement `PNCounter.Merge(other PNCounter)` by merging both `pos` and `neg` sub-counters. Print the value after merging two PN-Counters and verify it equals the expected sum of individual operations.",
+      "hints": ["Merge pos with pos, neg with neg using GCounter.Merge.", "CRDT merge is idempotent, commutative, and associative.", "Print the value after merge to confirm correctness."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('value=')",
+        "successMessage": "PN-Counter merge combines pos and neg correctly.",
+        "failureMessage": "Both positive and negative GCounters must be merged separately."
+      }
+    },
+    {
+      "id": 5,
+      "title": "OR-Set implementation",
+      "description": "Implement an Observed-Remove Set (`ORSet`) with `state map[string]map[string]struct{}` (element → set of replica+timestamp tags). `Add(elem string, replicaID string)` adds a tag; `Remove(elem string)` adds all current tags to a tombstone; `Contains(elem string) bool` checks if any active tags remain. Print the result of add, remove, and contains operations.",
+      "hints": ["Each element has a set of unique tags (replicaID + counter).", "On Remove, move all tags for the element to a separate tombstone set.", "Contains returns true if element has any tags not in the tombstone."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "OR-Set correctly tracks adds and removes.",
+        "failureMessage": "After add, Contains should be true; after remove, false."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Replication simulator",
+      "description": "Build a `Replica` struct with an ID and a CRDT (e.g. GCounter). Simulate three replicas: each increments, then they exchange state via `Merge`. Print the final converged value across all replicas using `fmt.Println(replica.Value())` for each.",
+      "hints": ["Create a slice of replicas, each with their own GCounter.", "Simulate a gossip protocol: each replica merges with a random peer.", "After enough merges, all replicas should converge to the same value."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.count('6') == 3",
+        "successMessage": "All replicas converge to the same value after gossip.",
+        "failureMessage": "After merging, all replicas should have identical values."
+      }
+    }
+  ]
+}

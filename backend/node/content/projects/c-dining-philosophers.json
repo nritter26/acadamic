@@ -1,0 +1,23 @@
+{
+  "id": "c-dining-philosophers",
+  "title": "C: Dining Philosophers",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "concurrency", "deadlock", "simulation", "state machine"],
+  "description": "Simulate the dining philosophers problem with 5 philosophers and 5 forks, avoiding deadlock.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Philosopher Simulation",
+      "description": "Define a `Philosopher` struct with id, state (THINKING/HUNGRY/EATING), and left/right fork. Simulate 5 philosophers. In each round, a hungry philosopher picks up both forks (if available), eats, then puts them down. Print state changes and detect if deadlock occurs.",
+      "hints": ["Fork available = true in a bool array.", "Pick up left fork, then right fork.", "If a fork is unavailable, the philosopher waits.", "Put down both forks after eating."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { THINKING, HUNGRY, EATING } State;\n\ntypedef struct { int id; State state; } Philosopher;\n\nint forks[5] = {1, 1, 1, 1, 1};\n\nvoid pickup(Philosopher *p) {\n    int left = p->id;\n    int right = (p->id + 1) % 5;\n    if (p->state == HUNGRY && forks[left] && forks[right]) {\n        forks[left] = 0; forks[right] = 0;\n        p->state = EATING;\n        printf(\"P%d picks up forks and eats\\n\", p->id);\n    }\n}\n\nvoid putdown(Philosopher *p) {\n    int left = p->id;\n    int right = (p->id + 1) % 5;\n    forks[left] = 1; forks[right] = 1;\n    p->state = THINKING;\n    printf(\"P%d puts down forks and thinks\\n\", p->id);\n}\n\nint main() {\n    Philosopher ps[5];\n    for (int i = 0; i < 5; i++) { ps[i].id = i; ps[i].state = THINKING; }\n    for (int round = 0; round < 3; round++) {\n        for (int i = 0; i < 5; i++) {\n            ps[i].state = HUNGRY;\n            printf(\"P%d is hungry\\n\", i);\n            pickup(&ps[i]);\n        }\n        for (int i = 0; i < 5; i++) if (ps[i].state == EATING) putdown(&ps[i]);\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('P0 picks up') && output.includes('puts down')",
+        "successMessage": "Dining philosophers simulation works!",
+        "failureMessage": "Simulate philosophers eating and thinking"
+      }
+    }
+  ]
+}

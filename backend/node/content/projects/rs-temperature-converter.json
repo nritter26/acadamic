@@ -1,0 +1,71 @@
+{
+  "id": "rs-temperature-converter",
+  "title": "Rust: Temperature Converter",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "arithmetic", "conversion", "functions"],
+  "description": "Convert temperatures between Fahrenheit and Celsius.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Celsius to Fahrenheit",
+      "description": "Write a function `c_to_f(c: f64) -> f64` that converts Celsius to Fahrenheit: F = C * 9/5 + 32. Call with 0 and 100, print both.",
+      "hints": ["`c * 9.0 / 5.0 + 32.0`", "0°C = 32°F", "100°C = 212°F"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('32') && output.includes('212')",
+        "successMessage": "Celsius to Fahrenheit works!",
+        "failureMessage": "Convert 0°C (32°F) and 100°C (212°F)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fahrenheit to Celsius",
+      "description": "Write a function `f_to_c(f: f64) -> f64` that converts Fahrenheit to Celsius: C = (F - 32) * 5/9. Call with 32 and 212, print both.",
+      "hints": ["`(f - 32.0) * 5.0 / 9.0`", "32°F = 0°C", "212°F = 100°C"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('100')",
+        "successMessage": "Fahrenheit to Celsius works!",
+        "failureMessage": "Convert 32°F (0°C) and 212°F (100°C)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Converter with Match",
+      "description": "Write a function `convert(value: f64, unit: char) -> f64` that converts based on unit: 'C' → F, 'F' → C. Print convert(100.0, 'C') and convert(32.0, 'F').",
+      "hints": ["Use `match unit { 'C' => c_to_f(value), 'F' => f_to_c(value), _ => value }`", "Call with both conversions.", "Print both results."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('212') && output.includes('0')",
+        "successMessage": "Converter with match works!",
+        "failureMessage": "Convert 100C → 212F and 32F → 0C."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Temperature Table",
+      "description": "Print a conversion table from 0°C to 100°C in steps of 10, showing both °C and °F on each line.",
+      "hints": ["Use a for loop: `for c in (0..=100).step_by(10)`", "Format: `println!(\"{}°C = {}°F\", c, c_to_f(c as f64));`", "Round to 1 decimal with `{:.1}`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0°C') && output.includes('100°C') && output.includes('212')",
+        "successMessage": "Temperature table works!",
+        "failureMessage": "Print the Celsius to Fahrenheit conversion table."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Kelvin Conversion",
+      "description": "Extend with Kelvin: add `c_to_k(c: f64) -> f64` (K = C + 273.15) and `k_to_c(k: f64) -> f64`. Convert 0°C to Kelvin and 373.15K to Celsius.",
+      "hints": ["K = C + 273.15", "C = K - 273.15", "0°C = 273.15K, 373.15K = 100°C"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('273.15') && output.includes('100')",
+        "successMessage": "Kelvin conversion works!",
+        "failureMessage": "Convert 0C to Kelvin and 373.15K to Celsius."
+      }
+    }
+  ]
+}

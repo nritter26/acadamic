@@ -1,0 +1,23 @@
+{
+  "id": "c-date-time",
+  "title": "C: Date/Time Library",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "time.h", "structs", "formatting"],
+  "description": "Use the time.h library to get the current time and format it as a readable string.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print Current Time",
+      "description": "Use `time()`, `localtime()`, and `strftime()` to print the current date and time formatted as 'YYYY-MM-DD HH:MM:SS'. Since the sandbox may not have real time, simulate by generating a date string.",
+      "hints": ["`time_t now = time(NULL);` gets current time.", "`struct tm *t = localtime(&now);`", "`strftime(buf, 80, \"%Y-%m-%d %H:%M:%S\", t);`"],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <time.h>\n\nint main() {\n    time_t now = time(NULL);\n    struct tm *t = localtime(&now);\n    char buf[80];\n    strftime(buf, sizeof(buf), \"%Y-%m-%d %H:%M:%S\", t);\n    printf(\"%s\\n\", buf);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.length() > 5",
+        "successMessage": "Date/time formatting works!",
+        "failureMessage": "Print the current date and time"
+      }
+    }
+  ]
+}

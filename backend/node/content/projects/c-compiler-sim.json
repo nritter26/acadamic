@@ -1,0 +1,23 @@
+{
+  "id": "c-compiler-sim",
+  "title": "C: Simple Compiler (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "compiler", "lexer", "parser", "code generation", "simulation"],
+  "description": "Simulate a simple compiler that converts arithmetic expressions to assembly-like instructions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Tokenize Expression",
+      "description": "Write a simple tokenizer that splits an arithmetic expression string like '3 + 4 * 2' into tokens: numbers and operators. Print each token.",
+      "hints": ["Walk through the string character by character.", "Collect consecutive digits into numbers.", "Skip spaces and recognize +, -, *, /."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n\nint main() {\n    char expr[] = \"3 + 4 * 2\";\n    for (int i = 0; i < strlen(expr); i++) {\n        if (isspace(expr[i])) continue;\n        if (isdigit(expr[i])) {\n            int num = 0;\n            while (i < strlen(expr) && isdigit(expr[i])) {\n                num = num * 10 + (expr[i] - '0');\n                i++;\n            }\n            i--;\n            printf(\"NUMBER: %d\\n\", num);\n        } else {\n            printf(\"OPERATOR: %c\\n\", expr[i]);\n        }\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('3') && output.includes('4') && output.includes('2') && output.includes('*')",
+        "successMessage": "Tokenization works!",
+        "failureMessage": "Print all tokens (3, +, 4, *, 2)"
+      }
+    }
+  ]
+}

@@ -1,62 +1,49 @@
 <script>
   import Modal from '$lib/components/shared/Modal.svelte';
-  import { doGTranslate, loadGoogleTranslate, getCurrentLang } from '$lib/lib/translate.js';
+  import { getCurrentLang, setCurrentLang } from '$lib/lib/translate.js';
 
   let { open = false, onclose = () => {} } = $props();
-  let loaded = $state(false);
   let currentLang = $state('en');
 
-  const LANGUAGES = [
-    { code: 'en', label: 'English', flag: '🇬🇧' },
-    { code: 'th', label: 'ไทย (Thai)', flag: '🇹🇭' },
-    { code: 'de', label: 'Deutsch (German)', flag: '🇩🇪' },
-    { code: 'es', label: 'Español (Spanish)', flag: '🇪🇸' },
-    { code: 'fr', label: 'Français (French)', flag: '🇫🇷' },
-    { code: 'ja', label: '日本語 (Japanese)', flag: '🇯🇵' },
-    { code: 'ko', label: '한국어 (Korean)', flag: '🇰🇷' },
-    { code: 'zh-CN', label: '中文 (Chinese Simplified)', flag: '🇨🇳' },
-    { code: 'vi', label: 'Tiếng Việt (Vietnamese)', flag: '🇻🇳' },
-    { code: 'pt', label: 'Português (Portuguese)', flag: '🇵🇹' },
-    { code: 'ru', label: 'Русский (Russian)', flag: '🇷🇺' },
-    { code: 'ar', label: 'العربية (Arabic)', flag: '🇸🇦' },
-  ];
-
   $effect(() => {
-    if (open && !loaded) {
-      loadGoogleTranslate(() => {
-        loaded = true;
-        currentLang = getCurrentLang();
-      });
-    }
     if (open) {
       currentLang = getCurrentLang();
     }
   });
 
   function handleLang(code) {
-    doGTranslate('en|' + code);
+    setCurrentLang(code);
     currentLang = code;
     onclose();
   }
 </script>
 
 <Modal {open} {onclose}>
-  <div class="lang-popup-header">🌐 Select Language</div>
+  <div class="lang-popup-header">🌐 เลือกภาษา / Select Language</div>
   <div class="lang-popup-body">
-    {#each LANGUAGES as lang}
-      <button
-        class="gtranslate-option"
-        class:active={currentLang === lang.code}
-        onclick={() => handleLang(lang.code)}
-      >
-        <span class="lang-flag">{lang.flag}</span>
-        <span class="lang-label">{lang.label}</span>
-        {#if currentLang === lang.code}
-          <span class="lang-check">✓</span>
-        {/if}
-      </button>
-    {/each}
-    <div class="lang-note">Translations are powered by Google Translate. Code blocks remain in English.</div>
+    <button
+      class="gtranslate-option"
+      class:active={currentLang === 'en'}
+      onclick={() => handleLang('en')}
+    >
+      <span class="lang-flag">🇬🇧</span>
+      <span class="lang-label">English</span>
+      {#if currentLang === 'en'}
+        <span class="lang-check">✓</span>
+      {/if}
+    </button>
+    <button
+      class="gtranslate-option"
+      class:active={currentLang === 'th'}
+      onclick={() => handleLang('th')}
+    >
+      <span class="lang-flag">🇹🇭</span>
+      <span class="lang-label">ไทย (Thai)</span>
+      {#if currentLang === 'th'}
+        <span class="lang-check">✓</span>
+      {/if}
+    </button>
+    <div class="lang-note">Switch between English and Thai curriculum content. Code blocks remain in English.</div>
   </div>
 </Modal>
 

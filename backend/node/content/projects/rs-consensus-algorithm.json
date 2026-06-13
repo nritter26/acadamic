@@ -1,0 +1,71 @@
+{
+  "id": "rs-consensus-algorithm",
+  "title": "Rust: Consensus Algorithm",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "consensus", "raft", "leader election", "replication"],
+  "description": "Implement a simple consensus algorithm for distributed agreement.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Node State",
+      "description": "Define a `RaftNode` struct with `id: u32, term: u64, voted_for: Option<u32>, state: NodeState` (enum: Follower, Candidate, Leader). Create 3 nodes and print their state.",
+      "hints": ["`enum NodeState { Follower, Candidate, Leader }`", "`struct RaftNode { id: u32, term: u64, voted_for: Option<u32>, state: NodeState }`", "All nodes start as Follower with term=0."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Follower') && output.contains('term')",
+        "successMessage": "Node state defined!",
+        "failureMessage": "Create 3 nodes and print their initial state."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Leader Election (Simplified)",
+      "description": "Implement a simplified leader election: a candidate increments term, votes for itself, and sends vote requests. If it gets majority votes, it becomes leader. Simulate with nodes in a Vec.",
+      "hints": ["Candidate: `self.term += 1; self.state = Candidate; self.voted_for = Some(self.id);`", "Request votes from other nodes (simulate with function calls).", "Majority = floor(N/2) + 1. With 3 nodes, majority = 2."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Leader') || output.contains('elected')",
+        "successMessage": "Leader election works!",
+        "failureMessage": "Run an election and print which node becomes leader."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Log Replication",
+      "description": "Add a `log: Vec<String>` to each node. The leader appends entries to its log. Implement a simplified `AppendEntries` RPC that sends log entries to followers. Print replicated log entries.",
+      "hints": ["Leader appends entry to log.", "Leader sends `AppendEntries` to followers (simulated function call).", "Followers append the entries to their own log."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('log') && output.contains('replicat')",
+        "successMessage": "Log replication works!",
+        "failureMessage": "Leader appends an entry, replicate to followers, print all logs."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Term and Election Safety",
+      "description": "Add election safety: if a node receives a request with a higher term, it becomes Follower and updates its term. A candidate can only win if its log is at least as up-to-date as the voter's.",
+      "hints": ["If `request.term > self.term`, become Follower and update term.", "Compare log length and last term for log up-to-date check.", "This ensures the elected leader has the most complete log."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('term') || output.contains('higher')",
+        "successMessage": "Term and election safety work!",
+        "failureMessage": "Simulate a higher-term request and show the node steps down."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Consensus Simulation",
+      "description": "Run a full simulation: 3 nodes, elect a leader, replicate 3 log entries, handle a leader failure (simulate), and elect a new leader. Print the state after each step.",
+      "hints": ["Phase 1: elect Leader A.", "Phase 2: replicate 'x=1', 'y=2', 'z=3'.", "Phase 3: simulate leader failure (remove from pool).", "Phase 4: elect new leader from remaining nodes."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Leader') && output.contains('x=1') && output.contains('term')",
+        "successMessage": "Full consensus simulation works!",
+        "failureMessage": "Run the full simulation and print states after each phase."
+      }
+    }
+  ]
+}

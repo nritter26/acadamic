@@ -1,0 +1,120 @@
+{
+  "id": "express-test-integration",
+  "title": "Integration Testing for User CRUD",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["integration-testing", "CRUD", "REST", "users", "test-workflow"],
+  "serverMode": true,
+  "description": "Build a complete integration test suite for a user CRUD API, testing create, read, update, and delete operations with verification.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "List users endpoint",
+      "description": "Create a GET /users endpoint that returns a list of users with status 200.",
+      "hints": [
+        "Use app.get('/users', handler)",
+        "Return an array of user objects",
+        "Start with an empty array if no users exist"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\n\napp.get('/users', (req, res) => {\n  res.json(users);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nlet users: User[] = [];\n\napp.get('/users', (req: Request, res: Response) => {\n  res.json(users);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nusers = []\n\n@app.get('/users')\ndef list_users():\n    return users\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype User struct {\n\tID    int    `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\nvar users []User\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(users)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "expectedStatus": 200,
+            "expectedBodyShape": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create and retrieve a user",
+      "description": "Add POST /users to create a user (201) and GET /users/:id to retrieve it (200).",
+      "hints": [
+        "POST /users accepts name and email, returns 201 with the created user",
+        "GET /users/:id returns a single user by id",
+        "Verify the created user can be retrieved by GET /users/:id"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextId = 1;\n\napp.get('/users', (req, res) => {\n  res.json(users);\n});\n\napp.post('/users', (req, res) => {\n  const { name, email } = req.body;\n  const user = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nlet users: User[] = [];\nlet nextId = 1;\n\napp.get('/users', (req: Request, res: Response) => {\n  res.json(users);\n});\n\napp.post('/users', (req: Request, res: Response) => {\n  const { name, email } = req.body;\n  const user: User = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    name: str\n    email: str\n\nusers = []\nnext_id = 1\n\n@app.get('/users')\ndef list_users():\n    return users\n\n@app.post('/users', status_code=201)\ndef create_user(user: UserIn):\n    global next_id\n    new_user = {'id': next_id, 'name': user.name, 'email': user.email}\n    next_id += 1\n    users.append(new_user)\n    return new_user\n\n@app.get('/users/{user_id}')\ndef get_user(user_id: int):\n    for u in users:\n        if u['id'] == user_id:\n            return u\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID    int    `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\nvar (\n\tusers  []User\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(users)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tName  string `json:\"name\"`\n\t\t\t\tEmail string `json:\"email\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tuser := User{ID: nextID, Name: body.Name, Email: body.Email}\n\t\t\tnextID++\n\t\t\tusers = append(users, user)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(user)\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/users/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/users/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor _, u := range users {\n\t\t\tif u.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(u)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/users",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Update a user",
+      "description": "Add PUT /users/:id to update a user and return 200, then verify with GET.",
+      "hints": [
+        "Accept name and email in the request body to update",
+        "Find the user by id and update fields",
+        "Return 200 with the updated user, verify via GET"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextId = 1;\n\napp.get('/users', (req, res) => {\n  res.json(users);\n});\n\napp.post('/users', (req, res) => {\n  const { name, email } = req.body;\n  const user = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.put('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  const { name, email } = req.body;\n  if (name) user.name = name;\n  if (email) user.email = email;\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nlet users: User[] = [];\nlet nextId = 1;\n\napp.get('/users', (req: Request, res: Response) => {\n  res.json(users);\n});\n\napp.post('/users', (req: Request, res: Response) => {\n  const { name, email } = req.body;\n  const user: User = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.put('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  const { name, email } = req.body;\n  if (name) user.name = name;\n  if (email) user.email = email;\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    name: str\n    email: str\n\nclass UserUpdate(BaseModel):\n    name: str = None\n    email: str = None\n\nusers = []\nnext_id = 1\n\n@app.get('/users')\ndef list_users():\n    return users\n\n@app.post('/users', status_code=201)\ndef create_user(user: UserIn):\n    global next_id\n    new_user = {'id': next_id, 'name': user.name, 'email': user.email}\n    next_id += 1\n    users.append(new_user)\n    return new_user\n\n@app.get('/users/{user_id}')\ndef get_user(user_id: int):\n    for u in users:\n        if u['id'] == user_id:\n            return u\n    return {'error': 'Not found'}\n\n@app.put('/users/{user_id}')\ndef update_user(user_id: int, update: UserUpdate):\n    for u in users:\n        if u['id'] == user_id:\n            if update.name: u['name'] = update.name\n            if update.email: u['email'] = update.email\n            return u\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID    int    `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\nvar (\n\tusers  []User\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(users)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tName  string `json:\"name\"`\n\t\t\t\tEmail string `json:\"email\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tuser := User{ID: nextID, Name: body.Name, Email: body.Email}\n\t\t\tnextID++\n\t\t\tusers = append(users, user)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(user)\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/users/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/users/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor i, u := range users {\n\t\t\tif u.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tswitch r.Method {\n\t\t\t\tcase \"GET\":\n\t\t\t\t\tjson.NewEncoder(w).Encode(u)\n\t\t\t\tcase \"PUT\":\n\t\t\t\t\tvar body struct {\n\t\t\t\t\t\tName  string `json:\"name\"`\n\t\t\t\t\t\tEmail string `json:\"email\"`\n\t\t\t\t\t}\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\tif body.Name != \"\" { users[i].Name = body.Name }\n\t\t\t\t\tif body.Email != \"\" { users[i].Email = body.Email }\n\t\t\t\t\tjson.NewEncoder(w).Encode(users[i])\n\t\t\t\t}\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "PUT",
+            "path": "/users/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "name"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Delete a user and verify",
+      "description": "Add DELETE /users/:id that returns 200, then verify with GET that user is gone (404).",
+      "hints": [
+        "Remove the user from the array by id",
+        "Return 200 with success message",
+        "Verify with GET /users/:id that returns 404"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextId = 1;\n\napp.get('/users', (req, res) => {\n  res.json(users);\n});\n\napp.post('/users', (req, res) => {\n  const { name, email } = req.body;\n  const user = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.put('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  const { name, email } = req.body;\n  if (name) user.name = name;\n  if (email) user.email = email;\n  res.json(user);\n});\n\napp.delete('/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const idx = users.findIndex(u => u.id === id);\n  if (idx === -1) return res.status(404).json({ error: 'Not found' });\n  users.splice(idx, 1);\n  res.json({ deleted: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nlet users: User[] = [];\nlet nextId = 1;\n\napp.get('/users', (req: Request, res: Response) => {\n  res.json(users);\n});\n\napp.post('/users', (req: Request, res: Response) => {\n  const { name, email } = req.body;\n  const user: User = { id: nextId++, name, email };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.put('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  const { name, email } = req.body;\n  if (name) user.name = name;\n  if (email) user.email = email;\n  res.json(user);\n});\n\napp.delete('/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const idx = users.findIndex(u => u.id === id);\n  if (idx === -1) return res.status(404).json({ error: 'Not found' });\n  users.splice(idx, 1);\n  res.json({ deleted: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    name: str\n    email: str\n\nclass UserUpdate(BaseModel):\n    name: str = None\n    email: str = None\n\nusers = []\nnext_id = 1\n\n@app.get('/users')\ndef list_users():\n    return users\n\n@app.post('/users', status_code=201)\ndef create_user(user: UserIn):\n    global next_id\n    new_user = {'id': next_id, 'name': user.name, 'email': user.email}\n    next_id += 1\n    users.append(new_user)\n    return new_user\n\n@app.get('/users/{user_id}')\ndef get_user(user_id: int):\n    for u in users:\n        if u['id'] == user_id:\n            return u\n    return {'error': 'Not found'}\n\n@app.put('/users/{user_id}')\ndef update_user(user_id: int, update: UserUpdate):\n    for u in users:\n        if u['id'] == user_id:\n            if update.name: u['name'] = update.name\n            if update.email: u['email'] = update.email\n            return u\n    return {'error': 'Not found'}\n\n@app.delete('/users/{user_id}')\ndef delete_user(user_id: int):\n    for i, u in enumerate(users):\n        if u['id'] == user_id:\n            users.pop(i)\n            return {'deleted': True}\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID    int    `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\nvar (\n\tusers  []User\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(users)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tName  string `json:\"name\"`\n\t\t\t\tEmail string `json:\"email\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tuser := User{ID: nextID, Name: body.Name, Email: body.Email}\n\t\t\tnextID++\n\t\t\tusers = append(users, user)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(user)\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/users/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/users/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor i, u := range users {\n\t\t\tif u.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tswitch r.Method {\n\t\t\t\tcase \"GET\":\n\t\t\t\t\tjson.NewEncoder(w).Encode(u)\n\t\t\t\tcase \"PUT\":\n\t\t\t\t\tvar body struct {\n\t\t\t\t\t\tName  string `json:\"name\"`\n\t\t\t\t\t\tEmail string `json:\"email\"`\n\t\t\t\t\t}\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\tif body.Name != \"\" { users[i].Name = body.Name }\n\t\t\t\t\tif body.Email != \"\" { users[i].Email = body.Email }\n\t\t\t\t\tjson.NewEncoder(w).Encode(users[i])\n\t\t\t\tcase \"DELETE\":\n\t\t\t\t\tusers = append(users[:i], users[i+1:]...)\n\t\t\t\t\tjson.NewEncoder(w).Encode(map[string]bool{\"deleted\": true})\n\t\t\t\t}\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "DELETE",
+            "path": "/users/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "deleted"
+          }
+        ]
+      }
+    }
+  ]
+}

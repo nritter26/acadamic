@@ -1,0 +1,23 @@
+{
+  "id": "c-2d-arrays",
+  "title": "C: 2D Arrays",
+  "difficulty": "beginner",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "2D arrays", "nested loops", "printf"],
+  "description": "Work with 2D arrays: initialize a 3x3 matrix and print it in a grid format.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print a 3x3 Grid",
+      "description": "Declare a 3x3 int matrix: `int matrix[3][3] = {{1,2,3},{4,5,6},{7,8,9}}`. Print it in a grid format with each row on a new line and numbers separated by tabs.",
+      "hints": ["Use nested for loops.", "Outer loop for rows, inner loop for columns.", "Use `\\t` between numbers and `\\n` after each row."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    int matrix[3][3] = {{1,2,3},{4,5,6},{7,8,9}};\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1\\t2\\t3') || (output.includes('1') && output.includes('5') && output.includes('9'))",
+        "successMessage": "2D array printed correctly!",
+        "failureMessage": "Print the 3x3 matrix in grid format"
+      }
+    }
+  ]
+}

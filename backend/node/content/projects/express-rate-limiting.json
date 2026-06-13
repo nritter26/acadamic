@@ -1,0 +1,198 @@
+{
+  "id": "express-rate-limiting",
+  "title": "Rate Limiting Middleware",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["rate-limiting", "middleware", "in-memory", "express", "throttling", "security"],
+  "description": "Build a rate-limiting middleware for Express that tracks requests per IP and blocks excessive traffic with configurable limits.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic API endpoint",
+      "description": "Create a GET /api endpoint that returns a success response. This will be the endpoint we protect with rate limiting.",
+      "hints": [
+        "Use app.get('/api', handler) to define the route",
+        "Return JSON with a message and timestamp",
+        "No rate limiting yet"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/api', (req, res) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/api', (req: Request, res: Response) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport time\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/api')\ndef api():\n    return {'message': 'Success', 'timestamp': time.time()}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Success\", \"timestamp\": time.Now().UnixMilli()})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "message"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Rate limit exceeded",
+      "description": "Simulate rate limiting by making 5+ rapid requests. After the limit is exceeded, the server should return 429 Too Many Requests.",
+      "hints": [
+        "Track request counts per IP address in an in-memory object",
+        "Define a limit (e.g., 5 requests) and a window (e.g., 10 seconds)",
+        "If the count exceeds the limit, return 429 with { error: 'Too many requests' }"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\nconst requestCounts = {};\nconst LIMIT = 5;\nconst WINDOW_MS = 10 * 1000;\n\napp.use((req, res, next) => {\n  const ip = req.ip;\n  const now = Date.now();\n  if (!requestCounts[ip] || now - requestCounts[ip].windowStart > WINDOW_MS) {\n    requestCounts[ip] = { count: 1, windowStart: now };\n    return next();\n  }\n  requestCounts[ip].count++;\n  if (requestCounts[ip].count > LIMIT) {\n    return res.status(429).json({ error: 'Too many requests' });\n  }\n  next();\n});\n\napp.get('/api', (req, res) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\ninterface RateLimitEntry {\n  count: number;\n  windowStart: number;\n}\n\nconst requestCounts: Record<string, RateLimitEntry> = {};\nconst LIMIT = 5;\nconst WINDOW_MS = 10 * 1000;\n\napp.use((req: Request, res: Response, next: NextFunction) => {\n  const ip = req.ip;\n  const now = Date.now();\n  if (!requestCounts[ip] || now - requestCounts[ip].windowStart > WINDOW_MS) {\n    requestCounts[ip] = { count: 1, windowStart: now };\n    return next();\n  }\n  requestCounts[ip].count++;\n  if (requestCounts[ip].count > LIMIT) {\n    return res.status(429).json({ error: 'Too many requests' });\n  }\n  next();\n});\n\napp.get('/api', (req: Request, res: Response) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nimport time\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nrequest_counts = {}\nLIMIT = 5\nWINDOW_SEC = 10\n\n@app.middleware('http')\nasync def rate_limit_middleware(request: Request, call_next):\n    ip = request.client.host\n    now = time.time()\n    entry = request_counts.get(ip)\n    if not entry or now - entry['window_start'] > WINDOW_SEC:\n        request_counts[ip] = {'count': 1, 'window_start': now}\n        return await call_next(request)\n    entry['count'] += 1\n    if entry['count'] > LIMIT:\n        return JSONResponse(status_code=429, content={'error': 'Too many requests'})\n    return await call_next(request)\n\n@app.get('/api')\ndef api():\n    return {'message': 'Success', 'timestamp': time.time()}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n\t\"time\"\n)\n\ntype RateLimitEntry struct {\n\tCount       int\n\tWindowStart time.Time\n}\n\nvar (\n\tmu            sync.Mutex\n\trequestCounts = make(map[string]*RateLimitEntry)\n)\n\nconst LIMIT = 5\nconst WINDOW = 10 * time.Second\n\nfunc rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tmu.Lock()\n\t\tip := r.RemoteAddr\n\t\tnow := time.Now()\n\t\tentry, exists := requestCounts[ip]\n\t\tif !exists || now.Sub(entry.WindowStart) > WINDOW {\n\t\t\trequestCounts[ip] = &RateLimitEntry{Count: 1, WindowStart: now}\n\t\t\tmu.Unlock()\n\t\t\tnext(w, r)\n\t\t\treturn\n\t\t}\n\t\tentry.Count++\n\t\tif entry.Count > LIMIT {\n\t\t\tmu.Unlock()\n\t\t\tw.WriteHeader(http.StatusTooManyRequests)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Too many requests\"})\n\t\t\treturn\n\t\t}\n\t\tmu.Unlock()\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api\", rateLimitMiddleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Success\", \"timestamp\": time.Now().UnixMilli()})\n\t}))\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 429,
+            "expectedBodySubstring": "Too many"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Refactor rate limiter middleware",
+      "description": "Refactor the rate limiting logic into a reusable `rateLimiter` middleware function that accepts options like limit and window duration.",
+      "hints": [
+        "Create a function: rateLimiter({ windowMs, max }) => (req, res, next) => { ... }",
+        "Clean up old entries periodically to prevent memory leaks",
+        "Set the rate limit info on the response headers (X-RateLimit-Remaining, X-RateLimit-Reset)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\nfunction rateLimiter({ windowMs = 10 * 1000, max = 5 } = {}) {\n  const requestCounts = {};\n  return (req, res, next) => {\n    const ip = req.ip;\n    const now = Date.now();\n    if (!requestCounts[ip] || now - requestCounts[ip].windowStart > windowMs) {\n      requestCounts[ip] = { count: 1, windowStart: now };\n      res.setHeader('X-RateLimit-Remaining', max - 1);\n      res.setHeader('X-RateLimit-Reset', Math.ceil((now + windowMs) / 1000));\n      return next();\n    }\n    requestCounts[ip].count++;\n    const remaining = Math.max(0, max - requestCounts[ip].count);\n    res.setHeader('X-RateLimit-Remaining', remaining);\n    res.setHeader('X-RateLimit-Reset', Math.ceil((requestCounts[ip].windowStart + windowMs) / 1000));\n    if (requestCounts[ip].count > max) {\n      return res.status(429).json({ error: 'Too many requests' });\n    }\n    next();\n  };\n}\n\napp.use('/api', rateLimiter({ windowMs: 10 * 1000, max: 5 }));\n\napp.get('/api', (req, res) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\ninterface RateLimiterOptions {\n  windowMs?: number;\n  max?: number;\n}\n\ninterface RateLimitEntry {\n  count: number;\n  windowStart: number;\n}\n\nfunction rateLimiter({ windowMs = 10 * 1000, max = 5 }: RateLimiterOptions = {}) {\n  const requestCounts: Record<string, RateLimitEntry> = {};\n  return (req: Request, res: Response, next: NextFunction) => {\n    const ip = req.ip;\n    const now = Date.now();\n    if (!requestCounts[ip] || now - requestCounts[ip].windowStart > windowMs) {\n      requestCounts[ip] = { count: 1, windowStart: now };\n      res.setHeader('X-RateLimit-Remaining', max - 1);\n      res.setHeader('X-RateLimit-Reset', Math.ceil((now + windowMs) / 1000));\n      return next();\n    }\n    requestCounts[ip].count++;\n    const remaining = Math.max(0, max - requestCounts[ip].count);\n    res.setHeader('X-RateLimit-Remaining', remaining);\n    res.setHeader('X-RateLimit-Reset', Math.ceil((requestCounts[ip].windowStart + windowMs) / 1000));\n    if (requestCounts[ip].count > max) {\n      res.status(429).json({ error: 'Too many requests' });\n      return;\n    }\n    next();\n  };\n}\n\napp.use('/api', rateLimiter({ windowMs: 10 * 1000, max: 5 }));\n\napp.get('/api', (req: Request, res: Response) => {\n  res.json({ message: 'Success', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nimport time\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndef rate_limiter(window_sec: int = 10, max_requests: int = 5):\n    counts = {}\n    async def middleware(request: Request, call_next):\n        ip = request.client.host\n        now = time.time()\n        entry = counts.get(ip)\n        if not entry or now - entry['window_start'] > window_sec:\n            counts[ip] = {'count': 1, 'window_start': now}\n            return await call_next(request)\n        entry['count'] += 1\n        if entry['count'] > max_requests:\n            return JSONResponse(status_code=429, content={'error': 'Too many requests'})\n        return await call_next(request)\n    return middleware\n\napp.middleware('http')(rate_limiter(window_sec=10, max_requests=5))\n\n@app.get('/api')\ndef api():\n    return {'message': 'Success', 'timestamp': time.time()}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n\t\"time\"\n)\n\ntype RateLimitEntry struct {\n\tCount       int\n\tWindowStart time.Time\n}\n\ntype RateLimiter struct {\n\tmu    sync.Mutex\n\tstore map[string]*RateLimitEntry\n\twindow time.Duration\n\tmax   int\n}\n\nfunc NewRateLimiter(window time.Duration, max int) *RateLimiter {\n\treturn &RateLimiter{\n\t\tstore:  make(map[string]*RateLimitEntry),\n\t\twindow: window,\n\t\tmax:    max,\n\t}\n}\n\nfunc (rl *RateLimiter) Middleware(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\trl.mu.Lock()\n\t\tip := r.RemoteAddr\n\t\tnow := time.Now()\n\t\tentry, exists := rl.store[ip]\n\t\tif !exists || now.Sub(entry.WindowStart) > rl.window {\n\t\t\trl.store[ip] = &RateLimitEntry{Count: 1, WindowStart: now}\n\t\t\trl.mu.Unlock()\n\t\t\tnext(w, r)\n\t\t\treturn\n\t\t}\n\t\tentry.Count++\n\t\tif entry.Count > rl.max {\n\t\t\trl.mu.Unlock()\n\t\t\tw.WriteHeader(http.StatusTooManyRequests)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Too many requests\"})\n\t\t\treturn\n\t\t}\n\t\trl.mu.Unlock()\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\trlimiter := NewRateLimiter(10*time.Second, 5)\n\n\thttp.HandleFunc(\"/api\", rlimiter.Middleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Success\", \"timestamp\": time.Now().UnixMilli()})\n\t}))\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Success"
+          },
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 429,
+            "expectedBodySubstring": "Too many"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Different limits per route",
+      "description": "Configure different rate limits for different routes. For example, /api/expensive has a lower limit (2 req/10s) while /api/cheap has a higher limit (10 req/10s).",
+      "hints": [
+        "Create multiple rateLimiter instances with different options",
+        "Apply specific rate limiters to specific routes via app.use('/api/expensive', ...)",
+        "Test that the expensive route hits 429 faster than the cheap route"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\nfunction rateLimiter({ windowMs = 10 * 1000, max = 5 } = {}) {\n  const requestCounts = {};\n  return (req, res, next) => {\n    const ip = req.ip;\n    const now = Date.now();\n    if (!requestCounts[ip] || now - requestCounts[ip].windowStart > windowMs) {\n      requestCounts[ip] = { count: 1, windowStart: now };\n      return next();\n    }\n    requestCounts[ip].count++;\n    if (requestCounts[ip].count > max) {\n      return res.status(429).json({ error: 'Too many requests' });\n    }\n    next();\n  };\n}\n\nconst cheapLimiter = rateLimiter({ windowMs: 10 * 1000, max: 10 });\nconst expensiveLimiter = rateLimiter({ windowMs: 10 * 1000, max: 2 });\n\napp.get('/api/cheap', cheapLimiter, (req, res) => {\n  res.json({ message: 'Cheap endpoint', timestamp: Date.now() });\n});\n\napp.get('/api/expensive', expensiveLimiter, (req, res) => {\n  res.json({ message: 'Expensive endpoint', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\ninterface RateLimiterOptions {\n  windowMs?: number;\n  max?: number;\n}\n\nfunction rateLimiter({ windowMs = 10 * 1000, max = 5 }: RateLimiterOptions = {}) {\n  const requestCounts: Record<string, { count: number; windowStart: number }> = {};\n  return (req: Request, res: Response, next: NextFunction) => {\n    const ip = req.ip;\n    const now = Date.now();\n    if (!requestCounts[ip] || now - requestCounts[ip].windowStart > windowMs) {\n      requestCounts[ip] = { count: 1, windowStart: now };\n      return next();\n    }\n    requestCounts[ip].count++;\n    if (requestCounts[ip].count > max) {\n      res.status(429).json({ error: 'Too many requests' });\n      return;\n    }\n    next();\n  };\n}\n\nconst cheapLimiter = rateLimiter({ windowMs: 10 * 1000, max: 10 });\nconst expensiveLimiter = rateLimiter({ windowMs: 10 * 1000, max: 2 });\n\napp.get('/api/cheap', cheapLimiter, (req: Request, res: Response) => {\n  res.json({ message: 'Cheap endpoint', timestamp: Date.now() });\n});\n\napp.get('/api/expensive', expensiveLimiter, (req: Request, res: Response) => {\n  res.json({ message: 'Expensive endpoint', timestamp: Date.now() });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nimport time\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndef rate_limiter(window_sec: int = 10, max_requests: int = 5):\n    counts = {}\n    async def middleware(request: Request, call_next):\n        ip = request.client.host\n        now = time.time()\n        entry = counts.get(ip)\n        if not entry or now - entry['window_start'] > window_sec:\n            counts[ip] = {'count': 1, 'window_start': now}\n            return await call_next(request)\n        entry['count'] += 1\n        if entry['count'] > max_requests:\n            return JSONResponse(status_code=429, content={'error': 'Too many requests'})\n        return await call_next(request)\n    return middleware\n\n@app.get('/api/cheap')\ndef cheap():\n    return {'message': 'Cheap endpoint', 'timestamp': time.time()}\n\n@app.get('/api/expensive')\ndef expensive():\n    return {'message': 'Expensive endpoint', 'timestamp': time.time()}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n\t\"time\"\n)\n\ntype RateLimiter struct {\n\tmu     sync.Mutex\n\tstore  map[string]*struct{ Count int; WindowStart time.Time }\n\twindow time.Duration\n\tmax    int\n}\n\nfunc NewRateLimiter(window time.Duration, max int) *RateLimiter {\n\treturn &RateLimiter{\n\t\tstore:  make(map[string]*struct{ Count int; WindowStart time.Time }),\n\t\twindow: window,\n\t\tmax:    max,\n\t}\n}\n\nfunc (rl *RateLimiter) Middleware(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\trl.mu.Lock()\n\t\tip := r.RemoteAddr\n\t\tnow := time.Now()\n\t\tentry, exists := rl.store[ip]\n\t\tif !exists || now.Sub(entry.WindowStart) > rl.window {\n\t\t\trl.store[ip] = &struct{ Count int; WindowStart time.Time }{Count: 1, WindowStart: now}\n\t\t\trl.mu.Unlock()\n\t\t\tnext(w, r)\n\t\t\treturn\n\t\t}\n\t\tentry.Count++\n\t\tif entry.Count > rl.max {\n\t\t\trl.mu.Unlock()\n\t\t\tw.WriteHeader(http.StatusTooManyRequests)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Too many requests\"})\n\t\t\treturn\n\t\t}\n\t\trl.mu.Unlock()\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tcheapLimiter := NewRateLimiter(10*time.Second, 10)\n\texpensiveLimiter := NewRateLimiter(10*time.Second, 2)\n\n\thttp.HandleFunc(\"/api/cheap\", cheapLimiter.Middleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Cheap endpoint\", \"timestamp\": time.Now().UnixMilli()})\n\t}))\n\n\thttp.HandleFunc(\"/api/expensive\", expensiveLimiter.Middleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"message\": \"Expensive endpoint\", \"timestamp\": time.Now().UnixMilli()})\n\t}))\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api/cheap",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Cheap"
+          },
+          {
+            "method": "GET",
+            "path": "/api/expensive",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Expensive"
+          },
+          {
+            "method": "GET",
+            "path": "/api/expensive",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Expensive"
+          },
+          {
+            "method": "GET",
+            "path": "/api/expensive",
+            "expectedStatus": 429,
+            "expectedBodySubstring": "Too many"
+          }
+        ]
+      }
+    }
+  ]
+}

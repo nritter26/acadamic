@@ -1,0 +1,162 @@
+{
+  "id": "authentication-system",
+  "title": "Authentication System",
+  "difficulty": "expert",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 75,
+  "concepts": [
+    "JWT",
+    "password hashing",
+    "RBAC",
+    "access/refresh tokens",
+    "security",
+    "OAuth2"
+  ],
+  "description": "Build a complete authentication system with JWT access tokens, refresh tokens, password hashing, role-based access control, and OAuth2 authorization code flow simulation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement password hashing with salt",
+      "description": "Write a `hashPassword` function that takes a plaintext password, generates a random salt using crypto random bytes, and returns a combined salt+hash string (e.g. base64 encoded). Use SHA-256 HMAC. Print the resulting hash to verify it works.",
+      "hints": [
+        "Generate 16 random bytes for the salt using crypto.randomBytes or os.urandom",
+        "Hash the password concatenated with the salt using SHA-256",
+        "Return salt and hash concatenated with a delimiter like ':' so they can be split later"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('hash:') && output.length > 30",
+        "successMessage": "Password hashing with random salt produces a unique hash each time!",
+        "failureMessage": "Your hashPassword function should print the salt and hash. Make sure you use a random salt per call."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create JWT token generation",
+      "description": "Implement a `generateToken` function that creates a JWT using the HS256 algorithm. Build the header and payload manually, base64url encode them, compute the HMAC-SHA256 signature, and produce the full token string (header.payload.signature). Print the generated token.",
+      "hints": [
+        "Header: {'alg': 'HS256', 'typ': 'JWT'} — base64url encode it",
+        "Payload: include 'sub' (user id), 'iat' (issued at), 'exp' (expiration) as epoch seconds",
+        "Signature: HMAC-SHA256 of base64url(header) + '.' + base64url(payload) using your secret key"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('header') && output.includes('payload') && output.includes('signature') && output.split('.').length === 3",
+        "successMessage": "JWT token with correct header.payload.signature format is generated!",
+        "failureMessage": "Your token must have exactly 3 dot-separated segments. Print the full token to the console."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement access token verification",
+      "description": "Write a `verifyToken` function that takes a JWT string and a secret, splits it into parts, recomputes the HMAC signature, and compares it to the provided signature. Decode and print the payload. Return null if the token is invalid or expired.",
+      "hints": [
+        "Split on '.' to get header, payload, and signature segments",
+        "Recompute the HMAC-SHA256 signature and compare using constant-time comparison",
+        "Check the 'exp' claim against current time — if expired, print 'Token expired' and return null"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('payload') && output.includes('sub') && (output.includes('invalid') || output.includes('expired'))",
+        "successMessage": "Token verification correctly decodes the payload and detects invalid tokens!",
+        "failureMessage": "Print the decoded payload from a valid token and show 'invalid token' for a tampered one."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add refresh token rotation",
+      "description": "Implement a refresh token system with rotation. Create a `generateRefreshToken` function that produces a cryptographically random token, stores it in an in-memory store mapped to a user ID, and returns it. Write a `rotateRefreshToken` that invalidates the old token and issues a new one. Print the refresh token and rotation result.",
+      "hints": [
+        "Use crypto.randomBytes(32) and convert to hex for the refresh token value",
+        "Store tokens in a Map or object: refreshTokenStore.set(token, { userId, createdAt })",
+        "On rotation, delete the old token from the store before inserting the new one"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('refresh token:') && output.includes('rotated') && output.length > 50",
+        "successMessage": "Refresh token rotation works — old token is invalidated and a new one is issued!",
+        "failureMessage": "Print the generated refresh token and confirm rotation. Show that the old token is no longer valid."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Implement role-based access control",
+      "description": "Write a `checkPermission` function that takes a user object (with a `role` property) and an array of allowed roles, and returns true if the user's role is in the allowed list. Then build a `requireRole` middleware-style function that wraps another function and checks permissions before executing. Print pass/fail results for admin, user, and guest roles.",
+      "hints": [
+        "checkPermission should do: allowedRoles.includes(user.role)",
+        "requireRole returns a wrapper function that checks permission first, then calls the original function if allowed",
+        "Test with at least three roles: 'admin', 'user', and 'guest' against a route requiring 'admin' access"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('admin') && output.includes('access') && (output.includes('denied') || output.includes('granted'))",
+        "successMessage": "Role-based access control correctly grants or denies access based on user role!",
+        "failureMessage": "Show that an admin is granted access, a guest is denied, and print the permission check results."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Build a login flow",
+      "description": "Combine all components into a `login` function. It takes a username and password, looks up the user, verifies the password hash, generates both an access token and a refresh token, and returns them. Write a `refreshAccessToken` function that uses a valid refresh token to issue a new access token. Print both tokens from a successful login and a failed login attempt.",
+      "hints": [
+        "Store user objects with hashed passwords and roles — look up by username",
+        "On successful login: call generateAccessToken and generateRefreshToken, print both",
+        "On failed login (wrong password or unknown user): print 'Invalid credentials' and return null"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('access token') && output.includes('refresh token') && (output.includes('Invalid') || output.includes('failed'))",
+        "successMessage": "Complete login flow works — valid credentials return both tokens, invalid ones are rejected!",
+        "failureMessage": "Print both tokens on successful login and show an error message for invalid credentials."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Simulate OAuth2 authorization code flow",
+      "description": "Implement a simplified OAuth2 authorization code flow. Create an `authorize` function that takes a `clientId`, `redirectUri`, and `userId`, generates a temporary authorization code (random string, 10-min TTL), and stores it in an auth code store. Create a `tokenExchange` function that takes the authorization code, validates it, and returns a new access token and refresh token pair. Print the authorization code and the exchanged tokens.",
+      "hints": [
+        "Auth code: generate a random hex string with crypto.randomBytes(16)",
+        "Store auth codes in a map: { code: { clientId, userId, redirectUri, expiresAt } }",
+        "tokenExchange should: find the code, check expiry, delete the code (one-time use), then generate tokens via existing functions"
+      ],
+      "codeTemplate": {
+        "javascript": "",
+        "typescript": "",
+        "python": ""
+      },
+      "verification": {
+        "test": "output.includes('authorization code') && output.includes('access token') && output.includes('refresh') && output.length > 60",
+        "successMessage": "OAuth2 authorization code flow works — codes are exchanged for tokens and invalid codes are rejected!",
+        "failureMessage": "Print the generated authorization code, then show the exchanged tokens. Make sure codes are one-time use."
+      }
+    }
+  ]
+}

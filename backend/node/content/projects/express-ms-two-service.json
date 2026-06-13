@@ -1,0 +1,138 @@
+{
+  "id": "express-ms-two-service",
+  "title": "Two Microservices",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["microservices", "multi-service", "rest", "express", "fastapi"],
+  "description": "Run two microservices (user and product) on different ports and coordinate them.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "User service",
+      "description": "Create Service A (user service) on port 3001 with a GET /users endpoint returning a list of users.",
+      "hints": [
+        "Use app.get('/users', handler) to respond with user data",
+        "Return an array of user objects with id and name fields",
+        "Listen on port 3001"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = 3001;\n\nconst users = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\napp.get('/users', (req, res) => {\n  res.json(users);\n});\n\napp.listen(port, () => console.log(`User service on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = 3001;\n\ninterface User {\n  id: number;\n  name: string;\n}\n\nconst users: User[] = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\napp.get('/users', (req: Request, res: Response) => {\n  res.json(users);\n});\n\napp.listen(port, () => console.log(`User service on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uvicorn\n\napp = FastAPI()\nport = 3001\n\nusers = [\n    {'id': 1, 'name': 'Alice'},\n    {'id': 2, 'name': 'Bob'}\n]\n\n@app.get('/users')\ndef get_users():\n    return users\n\nif __name__ == '__main__':\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype User struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar users = []User{\n\t{ID: 1, Name: \"Alice\"},\n\t{ID: 2, Name: \"Bob\"},\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(users)\n\t})\n\n\thttp.ListenAndServe(\":3001\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Alice"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Product service",
+      "description": "Create Service B (product service) on port 3002 with a GET /products endpoint returning product data.",
+      "hints": [
+        "Create a separate Express app or file for product service",
+        "Listen on port 3002",
+        "Use app.get('/products', handler) returning products array"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = 3002;\n\nconst products = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\n\napp.get('/products', (req, res) => {\n  res.json(products);\n});\n\napp.listen(port, () => console.log(`Product service on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = 3002;\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\n\napp.get('/products', (req: Request, res: Response) => {\n  res.json(products);\n});\n\napp.listen(port, () => console.log(`Product service on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uvicorn\n\napp = FastAPI()\nport = 3002\n\nproducts = [\n    {'id': 1, 'name': 'Widget', 'price': 9.99},\n    {'id': 2, 'name': 'Gadget', 'price': 19.99}\n]\n\n@app.get('/products')\ndef get_products():\n    return products\n\nif __name__ == '__main__':\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype Product struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar products = []Product{\n\t{ID: 1, Name: \"Widget\", Price: 9.99},\n\t{ID: 2, Name: \"Gadget\", Price: 19.99},\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/products\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(products)\n\t})\n\n\thttp.ListenAndServe(\":3002\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/products",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Widget"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Both services running",
+      "description": "Ensure both services run simultaneously on different ports. Each should respond with 200 on its endpoints.",
+      "hints": [
+        "Start both services in separate processes or threads",
+        "Service A on port 3001, Service B on port 3002",
+        "Use separate terminals or process spawn to run both"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\n\n// Service A - User service on port 3001\nconst appA = express();\nconst users = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\nappA.get('/users', (req, res) => res.json(users));\nappA.listen(3001, () => console.log('User service on 3001'));\n\n// Service B - Product service on port 3002\nconst appB = express();\nconst products = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\nappB.get('/products', (req, res) => res.json(products));\nappB.listen(3002, () => console.log('Product service on 3002'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\n\ninterface User {\n  id: number;\n  name: string;\n}\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\n// Service A - User service on port 3001\nconst appA = express();\nconst users: User[] = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\nappA.get('/users', (req: Request, res: Response) => res.json(users));\nappA.listen(3001, () => console.log('User service on 3001'));\n\n// Service B - Product service on port 3002\nconst appB = express();\nconst products: Product[] = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\nappB.get('/products', (req: Request, res: Response) => res.json(products));\nappB.listen(3002, () => console.log('Product service on 3002'));\n",
+        "python": "from fastapi import FastAPI\nimport uvicorn\nimport threading\n\napp_a = FastAPI()\napp_b = FastAPI()\n\nusers = [\n    {'id': 1, 'name': 'Alice'},\n    {'id': 2, 'name': 'Bob'}\n]\nproducts = [\n    {'id': 1, 'name': 'Widget', 'price': 9.99},\n    {'id': 2, 'name': 'Gadget', 'price': 19.99}\n]\n\n@app_a.get('/users')\ndef get_users():\n    return users\n\n@app_b.get('/products')\ndef get_products():\n    return products\n\ndef run_a():\n    uvicorn.run(app_a, port=3001)\n\ndef run_b():\n    uvicorn.run(app_b, port=3002)\n\nthreading.Thread(target=run_a).start()\nthreading.Thread(target=run_b).start()\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype User struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\ntype Product struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar users = []User{\n\t{ID: 1, Name: \"Alice\"},\n\t{ID: 2, Name: \"Bob\"},\n}\n\nvar products = []Product{\n\t{ID: 1, Name: \"Widget\", Price: 9.99},\n\t{ID: 2, Name: \"Gadget\", Price: 19.99},\n}\n\nfunc main() {\n\tgo func() {\n\t\thttp.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(users)\n\t\t})\n\t\thttp.ListenAndServe(\":3001\", nil)\n\t}()\n\n\tgo func() {\n\t\thttp.HandleFunc(\"/products\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(products)\n\t\t})\n\t\thttp.ListenAndServe(\":3002\", nil)\n\t}()\n\n\tselect {}\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Alice"
+          },
+          {
+            "method": "GET",
+            "path": "/products",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Widget"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Health checks",
+      "description": "Add a /health endpoint to each service that returns 200 with a status object.",
+      "hints": [
+        "Add app.get('/health', handler) to each service",
+        "Return { status: 'ok' } from each health endpoint",
+        "Both services should respond 200 on their /health routes"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\n\n// Service A - User service on port 3001\nconst appA = express();\nconst users = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\nappA.get('/health', (req, res) => res.json({ status: 'ok', service: 'users' }));\nappA.get('/users', (req, res) => res.json(users));\nappA.listen(3001, () => console.log('User service on 3001'));\n\n// Service B - Product service on port 3002\nconst appB = express();\nconst products = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\nappB.get('/health', (req, res) => res.json({ status: 'ok', service: 'products' }));\nappB.get('/products', (req, res) => res.json(products));\nappB.listen(3002, () => console.log('Product service on 3002'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\n\ninterface User {\n  id: number;\n  name: string;\n}\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\n// Service A - User service on port 3001\nconst appA = express();\nconst users: User[] = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\nappA.get('/health', (req: Request, res: Response) => res.json({ status: 'ok', service: 'users' }));\nappA.get('/users', (req: Request, res: Response) => res.json(users));\nappA.listen(3001, () => console.log('User service on 3001'));\n\n// Service B - Product service on port 3002\nconst appB = express();\nconst products: Product[] = [\n  { id: 1, name: 'Widget', price: 9.99 },\n  { id: 2, name: 'Gadget', price: 19.99 }\n];\nappB.get('/health', (req: Request, res: Response) => res.json({ status: 'ok', service: 'products' }));\nappB.get('/products', (req: Request, res: Response) => res.json(products));\nappB.listen(3002, () => console.log('Product service on 3002'));\n",
+        "python": "from fastapi import FastAPI\nimport uvicorn\nimport threading\n\napp_a = FastAPI()\napp_b = FastAPI()\n\nusers = [\n    {'id': 1, 'name': 'Alice'},\n    {'id': 2, 'name': 'Bob'}\n]\nproducts = [\n    {'id': 1, 'name': 'Widget', 'price': 9.99},\n    {'id': 2, 'name': 'Gadget', 'price': 19.99}\n]\n\n@app_a.get('/health')\ndef health_a():\n    return {'status': 'ok', 'service': 'users'}\n\n@app_a.get('/users')\ndef get_users():\n    return users\n\n@app_b.get('/health')\ndef health_b():\n    return {'status': 'ok', 'service': 'products'}\n\n@app_b.get('/products')\ndef get_products():\n    return products\n\ndef run_a():\n    uvicorn.run(app_a, port=3001)\n\ndef run_b():\n    uvicorn.run(app_b, port=3002)\n\nthreading.Thread(target=run_a).start()\nthreading.Thread(target=run_b).start()\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype User struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\ntype Product struct {\n\tID    int     `json:\"id\"`\n\tName  string  `json:\"name\"`\n\tPrice float64 `json:\"price\"`\n}\n\nvar users = []User{\n\t{ID: 1, Name: \"Alice\"},\n\t{ID: 2, Name: \"Bob\"},\n}\n\nvar products = []Product{\n\t{ID: 1, Name: \"Widget\", Price: 9.99},\n\t{ID: 2, Name: \"Gadget\", Price: 19.99},\n}\n\nfunc main() {\n\tgo func() {\n\t\tmuxA := http.NewServeMux()\n\t\tmuxA.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\", \"service\": \"users\"})\n\t\t})\n\t\tmuxA.HandleFunc(\"/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(users)\n\t\t})\n\t\thttp.ListenAndServe(\":3001\", muxA)\n\t}()\n\n\tgo func() {\n\t\tmuxB := http.NewServeMux()\n\t\tmuxB.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\", \"service\": \"products\"})\n\t\t})\n\t\tmuxB.HandleFunc(\"/products\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(products)\n\t\t})\n\t\thttp.ListenAndServe(\":3002\", muxB)\n\t}()\n\n\tselect {}\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "ok"
+          },
+          {
+            "method": "GET",
+            "path": "/users",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Alice"
+          },
+          {
+            "method": "GET",
+            "path": "/products",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Widget"
+          }
+        ]
+      }
+    }
+  ]
+}

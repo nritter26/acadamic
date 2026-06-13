@@ -1,0 +1,112 @@
+{
+  "id": "express-ms-tracing",
+  "title": "Distributed Tracing",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 40,
+  "concepts": ["microservices", "distributed-tracing", "trace-id", "spans", "propagation", "express", "fastapi"],
+  "description": "Implement distributed tracing with trace propagation across services, span collection, and trace querying.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Trace propagation",
+      "description": "When a request comes in with an x-trace-id header, propagate it to downstream service calls.",
+      "hints": [
+        "Extract x-trace-id from incoming request headers", "Generate a new trace ID if none is present", "Forward the trace ID in the x-trace-id header when calling downstream services"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst http = require('http');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction getTraceId(req) {\n  return req.headers['x-trace-id'] || crypto.randomUUID();\n}\n\napp.get('/api', (req, res) => {\n  const traceId = getTraceId(req);\n  const options = {\n    hostname: 'localhost',\n    port: 3001,\n    path: '/downstream',\n    headers: { 'x-trace-id': traceId }\n  };\n  http.get(options, (downstreamRes) => {\n    let data = '';\n    downstreamRes.on('data', chunk => data += chunk);\n    downstreamRes.on('end', () => {\n      res.json({ traceId, service: 'A', downstream: JSON.parse(data) });\n    });\n  });\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Downstream service B\nconst appB = express();\nappB.get('/downstream', (req, res) => {\n  res.json({ traceId: req.headers['x-trace-id'], service: 'B' });\n});\nappB.listen(3001, () => console.log('Service B on 3001'));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport http from 'http';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nfunction getTraceId(req: Request): string {\n  return (req.headers['x-trace-id'] as string) || crypto.randomUUID();\n}\n\napp.get('/api', (req: Request, res: Response) => {\n  const traceId = getTraceId(req);\n  const options = {\n    hostname: 'localhost',\n    port: 3001,\n    path: '/downstream',\n    headers: { 'x-trace-id': traceId }\n  };\n  http.get(options, (downstreamRes) => {\n    let data = '';\n    downstreamRes.on('data', chunk => data += chunk);\n    downstreamRes.on('end', () => {\n      res.json({ traceId, service: 'A', downstream: JSON.parse(data) });\n    });\n  });\n});\n\napp.listen(port, () => console.log(`Service A on port ${port}`));\n\n// Downstream service B\nconst appB = express();\nappB.get('/downstream', (req: Request, res: Response) => {\n  res.json({ traceId: req.headers['x-trace-id'], service: 'B' });\n});\nappB.listen(3001, () => console.log('Service B on 3001'));\n",
+        "python": "from fastapi import FastAPI, Request\nimport httpx\nimport uuid\nimport uvicorn\nimport threading\n\napp = FastAPI()\nport = 3000\n\ndef get_trace_id(request: Request):\n    return request.headers.get('x-trace-id', str(uuid.uuid4()))\n\n@app.get('/api')\ndef api(request: Request):\n    trace_id = get_trace_id(request)\n    with httpx.Client() as client:\n        resp = client.get('http://localhost:3001/downstream', headers={'x-trace-id': trace_id})\n        return {'traceId': trace_id, 'service': 'A', 'downstream': resp.json()}\n\n# Downstream service B\napp_b = FastAPI()\n\n@app_b.get('/downstream')\ndef downstream(request: Request):\n    return {'traceId': request.headers.get('x-trace-id'), 'service': 'B'}\n\ndef run_b():\n    uvicorn.run(app_b, port=3001)\n\nthreading.Thread(target=run_b).start()\n\nif __name__ == '__main__':\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"io\"\n\t\"net/http\"\n)\n\nfunc getTraceID(r *http.Request) string {\n\ttraceID := r.Header.Get(\"x-trace-id\")\n\tif traceID != \"\" {\n\t\treturn traceID\n\t}\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tgo func() {\n\t\thttp.HandleFunc(\"/downstream\", func(w http.ResponseWriter, r *http.Request) {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\n\t\t\t\t\"traceId\": r.Header.Get(\"x-trace-id\"),\n\t\t\t\t\"service\": \"B\",\n\t\t\t})\n\t\t})\n\t\thttp.ListenAndServe(\":3001\", nil)\n\t}()\n\n\thttp.HandleFunc(\"/api\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\ttraceID := getTraceID(r)\n\n\t\treq, _ := http.NewRequest(\"GET\", \"http://localhost:3001/downstream\", nil)\n\t\treq.Header.Set(\"x-trace-id\", traceID)\n\n\t\tclient := &http.Client{}\n\t\tresp, err := client.Do(req)\n\t\tif err != nil {\n\t\t\tw.WriteHeader(http.StatusInternalServerError)\n\t\t\treturn\n\t\t}\n\t\tdefer resp.Body.Close()\n\t\tbody, _ := io.ReadAll(resp.Body)\n\t\tvar downstreamData interface{}\n\t\tjson.Unmarshal(body, &downstreamData)\n\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"traceId\":    traceID,\n\t\t\t\"service\":    \"A\",\n\t\t\t\"downstream\": downstreamData,\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "traceId"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Get trace by ID",
+      "description": "Create GET /trace/:traceId that returns all spans associated with a given trace ID.",
+      "hints": [
+        "Store spans in a global map keyed by traceId", "Each span should have service name, duration, and parent span info", "Return the spans array for the given traceId"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst http = require('http');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst traces = {};\n\nfunction addSpan(traceId, span) {\n  if (!traces[traceId]) traces[traceId] = [];\n  traces[traceId].push(span);\n}\n\napp.get('/trace/:traceId', (req, res) => {\n  const spans = traces[req.params.traceId] || [];\n  res.json({ traceId: req.params.traceId, spans });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Span {\n  spanId: string;\n  service: string;\n  duration: number;\n  parentSpan?: string;\n  timestamp: Date;\n}\n\nconst traces: Record<string, Span[]> = {};\n\napp.get('/trace/:traceId', (req: Request, res: Response) => {\n  const spans = traces[req.params.traceId] || [];\n  res.json({ traceId: req.params.traceId, spans });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ntraces = {}\n\n@app.get('/trace/{trace_id}')\ndef get_trace(trace_id: str):\n    spans = traces.get(trace_id, [])\n    return {'traceId': trace_id, 'spans': spans}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n)\n\ntype Span struct {\n\tSpanID     string `json:\"spanId\"`\n\tService    string `json:\"service\"`\n\tDuration   int64  `json:\"duration\"`\n\tParentSpan string `json:\"parentSpan,omitempty\"`\n}\n\nvar traces = make(map[string][]Span)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/trace/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\ttraceID := strings.TrimPrefix(r.URL.Path, \"/trace/\")\n\t\tspans := traces[traceID]\n\t\tif spans == nil {\n\t\t\tspans = []Span{}\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"traceId\": traceID, \"spans\": spans})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/trace/test123",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "spans"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Span details",
+      "description": "Each span in a trace includes service name, duration in milliseconds, and an optional parent span reference.",
+      "hints": [
+        "A span is a unit of work with a service name", "Record start and end times to compute duration", "Parent span ID links spans to create a hierarchy"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst traces = {};\n\nfunction startSpan(traceId, service, parentSpan) {\n  const spanId = crypto.randomUUID().split('-')[0];\n  const span = { spanId, service, parentSpan: parentSpan || null, startTime: Date.now() };\n  if (!traces[traceId]) traces[traceId] = [];\n  traces[traceId].push(span);\n  return span;\n}\n\nfunction endSpan(traceId, spanId) {\n  const span = traces[traceId].find(s => s.spanId === spanId);\n  if (span) {\n    span.duration = Date.now() - span.startTime;\n    delete span.startTime;\n  }\n}\n\napp.get('/trace/:traceId', (req, res) => {\n  const spans = (traces[req.params.traceId] || []).map(s => ({\n    spanId: s.spanId,\n    service: s.service,\n    duration: s.duration || 0,\n    parentSpan: s.parentSpan\n  }));\n  res.json({ traceId: req.params.traceId, spans });\n});\n\n// Demo: create a sample trace\nconst traceId = 'demo-trace';\nconst span1 = startSpan(traceId, 'service-a', null);\nsetTimeout(() => {\n  const span2 = startSpan(traceId, 'service-b', span1.spanId);\n  endSpan(traceId, span1.spanId);\n  setTimeout(() => {\n    endSpan(traceId, span2.spanId);\n  }, 100);\n}, 100);\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Span {\n  spanId: string;\n  service: string;\n  duration?: number;\n  parentSpan?: string | null;\n  startTime?: number;\n}\n\nconst traces: Record<string, Span[]> = {};\n\nfunction startSpan(traceId: string, service: string, parentSpan?: string): Span {\n  const spanId = crypto.randomUUID().split('-')[0];\n  const span: Span = { spanId, service, parentSpan: parentSpan || null, startTime: Date.now() };\n  if (!traces[traceId]) traces[traceId] = [];\n  traces[traceId].push(span);\n  return span;\n}\n\nfunction endSpan(traceId: string, spanId: string): void {\n  const span = traces[traceId].find(s => s.spanId === spanId);\n  if (span && span.startTime) {\n    span.duration = Date.now() - span.startTime;\n    delete span.startTime;\n  }\n}\n\napp.get('/trace/:traceId', (req: Request, res: Response) => {\n  const spans = (traces[req.params.traceId] || []).map(s => ({\n    spanId: s.spanId,\n    service: s.service,\n    duration: s.duration || 0,\n    parentSpan: s.parentSpan\n  }));\n  res.json({ traceId: req.params.traceId, spans });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uuid\nimport time\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ntraces = {}\n\ndef start_span(trace_id, service, parent_span=None):\n    span_id = str(uuid.uuid4()).split('-')[0]\n    span = {\n        'spanId': span_id,\n        'service': service,\n        'parentSpan': parent_span,\n        'startTime': time.time()\n    }\n    if trace_id not in traces:\n        traces[trace_id] = []\n    traces[trace_id].append(span)\n    return span\n\ndef end_span(trace_id, span_id):\n    for s in traces.get(trace_id, []):\n        if s['spanId'] == span_id and 'startTime' in s:\n            s['duration'] = int((time.time() - s['startTime']) * 1000)\n            del s['startTime']\n            break\n\n@app.get('/trace/{trace_id}')\ndef get_trace(trace_id: str):\n    spans = []\n    for s in traces.get(trace_id, []):\n        spans.append({\n            'spanId': s['spanId'],\n            'service': s['service'],\n            'duration': s.get('duration', 0),\n            'parentSpan': s.get('parentSpan')\n        })\n    return {'traceId': trace_id, 'spans': spans}\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"sync\"\n\t\"time\"\n)\n\ntype Span struct {\n\tSpanID     string `json:\"spanId\"`\n\tService    string `json:\"service\"`\n\tDuration   int64  `json:\"duration\"`\n\tParentSpan string `json:\"parentSpan,omitempty\"`\n}\n\ntype internalSpan struct {\n\tSpanID     string\n\tService    string\n\tParentSpan string\n\tStartTime  time.Time\n\tDuration   int64\n}\n\nvar (\n\ttraces = make(map[string][]*internalSpan)\n\tmu     sync.RWMutex\n)\n\nfunc generateSpanID() string {\n\tbytes := make([]byte, 8)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/trace/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\ttraceID := strings.TrimPrefix(r.URL.Path, \"/trace/\")\n\t\tmu.RLock()\n\t\tspans := make([]Span, 0)\n\t\tfor _, s := range traces[traceID] {\n\t\t\tspans = append(spans, Span{\n\t\t\t\tSpanID:     s.SpanID,\n\t\t\t\tService:    s.Service,\n\t\t\t\tDuration:   s.Duration,\n\t\t\t\tParentSpan: s.ParentSpan,\n\t\t\t})\n\t\t}\n\t\tmu.RUnlock()\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"traceId\": traceID, \"spans\": spans})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/trace/demo-trace",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "spans"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "List recent traces",
+      "description": "Create GET /traces that returns a list of recent trace IDs.",
+      "hints": [
+        "Maintain a list of trace IDs as they are created", "Return the list sorted by most recent first", "Limit to a maximum number of traces (e.g., 100)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst traces = {};\nconst traceOrder = [];\nconst MAX_TRACES = 100;\n\nfunction addSpan(traceId, span) {\n  if (!traces[traceId]) {\n    traces[traceId] = [];\n    traceOrder.unshift(traceId);\n    if (traceOrder.length > MAX_TRACES) traceOrder.pop();\n  }\n  traces[traceId].push(span);\n}\n\napp.get('/traces', (req, res) => {\n  const traceList = traceOrder.map(id => ({\n    traceId: id,\n    spanCount: traces[id].length\n  }));\n  res.json(traceList);\n});\n\napp.get('/trace/:traceId', (req, res) => {\n  const spans = traces[req.params.traceId] || [];\n  res.json({ traceId: req.params.traceId, spans });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Span {\n  spanId: string;\n  service: string;\n  duration?: number;\n  parentSpan?: string;\n}\n\nconst traces: Record<string, Span[]> = {};\nconst traceOrder: string[] = [];\nconst MAX_TRACES = 100;\n\napp.get('/traces', (req: Request, res: Response) => {\n  const traceList = traceOrder.map(id => ({\n    traceId: id,\n    spanCount: traces[id].length\n  }));\n  res.json(traceList);\n});\n\napp.get('/trace/:traceId', (req: Request, res: Response) => {\n  const spans = traces[req.params.traceId] || [];\n  res.json({ traceId: req.params.traceId, spans });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ntraces = {}\ntrace_order = []\nMAX_TRACES = 100\n\n@app.get('/traces')\ndef list_traces():\n    return [{'traceId': tid, 'spanCount': len(traces[tid])} for tid in trace_order]\n\n@app.get('/trace/{trace_id}')\ndef get_trace(trace_id: str):\n    spans = traces.get(trace_id, [])\n    return {'traceId': trace_id, 'spans': spans}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"sync\"\n)\n\ntype Span struct {\n\tSpanID   string `json:\"spanId\"`\n\tService  string `json:\"service\"`\n\tDuration int64  `json:\"duration\"`\n}\n\nvar (\n\ttraces     = make(map[string][]Span)\n\ttraceOrder []string\n\tmu         sync.RWMutex\n\tmaxTraces  = 100\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/traces\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tmu.RLock()\n\t\tresult := make([]map[string]interface{}, 0, len(traceOrder))\n\t\tfor _, id := range traceOrder {\n\t\t\tresult = append(result, map[string]interface{}{\n\t\t\t\t\"traceId\":   id,\n\t\t\t\t\"spanCount\": len(traces[id]),\n\t\t\t})\n\t\t}\n\t\tmu.RUnlock()\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.HandleFunc(\"/trace/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\ttraceID := strings.TrimPrefix(r.URL.Path, \"/trace/\")\n\t\tmu.RLock()\n\t\tspans := traces[traceID]\n\t\tmu.RUnlock()\n\t\tif spans == nil {\n\t\t\tspans = []Span{}\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"traceId\": traceID, \"spans\": spans})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/traces",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "traceId"
+          }
+        ]
+      }
+    }
+  ]
+}

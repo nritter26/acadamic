@@ -1,0 +1,23 @@
+{
+  "id": "c-strategy-pattern",
+  "title": "C: Strategy Pattern",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "strategy pattern", "function pointers", "design patterns"],
+  "description": "Implement the Strategy pattern that allows selecting an algorithm at runtime via function pointers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Sorting Strategies",
+      "description": "Define a `Strategy` function pointer type: `void (*sort_fn)(int*, int)`. Implement bubble sort and insertion sort strategies. Write a `context_execute` function that takes a strategy and runs it. Test both strategies on the same array.",
+      "hints": ["Strategy type: `void (*strategy)(int*, int)`.", "bubble_sort and insertion_sort match the signature.", "Print the sorted array after each strategy."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef void (*sort_strategy)(int*, int);\n\nvoid bubble_sort(int arr[], int n) {\n    for (int i = 0; i < n-1; i++)\n        for (int j = 0; j < n-i-1; j++)\n            if (arr[j] > arr[j+1]) { int t=arr[j]; arr[j]=arr[j+1]; arr[j+1]=t; }\n}\n\nvoid insertion_sort(int arr[], int n) {\n    for (int i = 1; i < n; i++) {\n        int key = arr[i], j = i-1;\n        while (j >= 0 && arr[j] > key) { arr[j+1] = arr[j]; j--; }\n        arr[j+1] = key;\n    }\n}\n\nvoid sort_and_print(sort_strategy s, int arr[], int n) {\n    s(arr, n);\n    for (int i = 0; i < n; i++) printf(\"%d \", arr[i]);\n    printf(\"\\n\");\n}\n\nint main() {\n    int arr1[] = {5, 2, 9, 1, 5};\n    int arr2[] = {5, 2, 9, 1, 5};\n    sort_and_print(bubble_sort, arr1, 5);\n    sort_and_print(insertion_sort, arr2, 5);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1 2 5 5 9')",
+        "successMessage": "Strategy pattern works!",
+        "failureMessage": "Sort the array using both strategies"
+      }
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "Getting Started": {
+    "Godot Introduction": {
+      "exp": "Introduction to Godot and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "Hello Godot": [
+      "Godot uses a scene-based architecture. Every game is built with nodes arranged in a tree. The main script extends Node or one of its subclasses like Node2D, Sprite2D, or CharacterBody2D. GDScript is Godot's primary scripting language — it's Python-like and deeply integrated with the engine.\n\nTo start, create a scene with a Node2D root, attach a GDScript, and use the _ready() function for initialization. Run your scene to see the output.",
+      "extends Node\n\n# Called when the node enters the scene tree for the first time.\nfunc _ready():\n    print(\"Hello, Godot!\")\n    print(\"Welcome to game development!\")\n\n# Called every frame. 'delta' is the elapsed time since the previous frame.\nfunc _process(delta):\n    # Game logic runs here each frame\n    pass"
+    ]
+  },
+  "Core Concepts": {
+    "Godot Core Features": {
+      "exp": "Essential Godot concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Godot Components": {
+      "exp": "Building user interfaces with Godot.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Godot Routing": {
+      "exp": "Navigation and routing in Godot.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Godot State": {
+      "exp": "Managing application state in Godot.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Godot Data": {
+      "exp": "Working with data and APIs in Godot.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Godot Testing": {
+      "exp": "Testing strategies for Godot.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Godot Deployment": {
+      "exp": "Deploying Godot applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Godot Best Practices": {
+      "exp": "Best practices for Godot development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Godot Advanced": {
+      "exp": "Advanced Godot topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Nodes & Scenes": {
+    "Scene Tree": [
+      "Every Godot game is a tree of nodes. A scene is a collection of nodes organized hierarchically. Nodes can be added, removed, and rearranged at runtime. The SceneTree manages all active nodes and handles processing, rendering, and input.",
+      "extends Node2D\n\nfunc _ready():\n    # Add a child node at runtime\n    var sprite = Sprite2D.new()\n    sprite.texture = preload(\"res://icon.svg\")\n    add_child(sprite)\n    \n    # Find nodes by path\n    var player = get_node(\"Player\")\n    \n    # Connect signals\n    sprite.connect(\"mouse_entered\", Callable(self, \"_on_sprite_hover\"))\n\nfunc _on_sprite_hover():\n    print(\"Mouse entered sprite!\")"
+    ]
+  },
+  "GDScript Deep": {
+    "Types & Syntax": [
+      "GDScript is dynamically typed with optional static typing. Use <code>: Type</code> to declare types. The <code>@export</code> annotation exposes variables in the inspector. <code>@onready</code> defers initialization until the node is ready. Match statements provide powerful pattern matching. Lambda functions with <code>func</code> syntax are first-class citizens.",
+      "extends CharacterBody2D\n\n@export var speed: float = 300.0\n@export var jump_velocity: float = -400.0\n@onready var sprite: Sprite2D = $Sprite2D\n\nfunc _ready() -> void:\n    var items = [\"sword\", \"potion\", \"shield\"]\n    for item in items:\n        match item:\n            \"sword\":\n                print(\"Equipping sword!\")\n            \"potion\":\n                print(\"Drinking potion!\")\n            _:\n                print(\"Unknown item: \", item)\n    \n    # Lambda\n    var double = func(x: int) -> int: return x * 2\n    print(double(5))\n    \n    # Type inference\n    var health := 100\n    var name := \"Hero\""
+    ]
+  },
+  "Physics": {
+    "PhysicsBody & Collisions": [
+      "Godot provides three physics body types: <code>StaticBody</code> (non-moving obstacles), <code>RigidBody</code> (full physics simulation), and <code>CharacterBody</code> (kinematic movement with custom logic). Use <code>move_and_slide()</code> for CharacterBody movement with automatic collision resolution. Collision layers and masks control which objects interact.",
+      "extends CharacterBody2D\n\n@export var speed := 300.0\nvar gravity := ProjectSettings.get_setting(\"physics/2d/default_gravity\") as float\n\nfunc _physics_process(delta: float) -> void:\n    # Apply gravity\n    if not is_on_floor():\n        velocity.y += gravity * delta\n    \n    # Horizontal movement\n    var direction := Input.get_axis(\"move_left\", \"move_right\")\n    if direction:\n        velocity.x = direction * speed\n    else:\n        velocity.x = move_toward(velocity.x, 0, speed * 0.1)\n    \n    # Jump\n    if Input.is_action_just_pressed(\"jump\") and is_on_floor():\n        velocity.y = -400.0\n    \n    move_and_slide()\n    \n    # Check collisions with Area nodes\n    var overlapping_areas = $HitboxArea.get_overlapping_areas()\n    for area in overlapping_areas:\n        if area.is_in_group(\"enemies\"):\n            take_damage(10)"
+    ]
+  },
+  "Signals & Groups": {
+    "Event System": [
+      "Signals are Godot's built-in event system. They are type-safe and can be connected in the editor or via code. Custom signals are declared with the <code>signal</code> keyword. Groups tag nodes for bulk operations — call methods on all group members or get all nodes in a group. Use <code>CONNECT_ONE_SHOT</code> for one-time connections and <code>CONNECT_DEFERRED</code> for safe cross-frame calls.",
+      "extends Node\n\nsignal health_changed(old_value: int, new_value: int)\nsignal died()\nsignal item_collected(item: String, count: int)\n\n@export var health := 100\n\nfunc take_damage(amount: int) -> void:\n    var old = health\n    health -= amount\n    if health <= 0:\n        health = 0\n        died.emit()\n    health_changed.emit(old, health)\n\nfunc _ready():\n    # Connect with flags\n    health_changed.connect(_on_health_changed, CONNECT_ONE_SHOT)\n    \n    # Groups\n    add_to_group(\"enemies\")\n    add_to_group(\"attackable\")\n    \n    # Call on all group members\n    get_tree().call_group(\"enemies\", \"pause\")\n    \n    # Get all nodes in group\n    var enemies = get_tree().get_nodes_in_group(\"enemies\")\n    \n    # Check if in group\n    if is_in_group(\"players\"):\n        print(\"Is a player!\")"
+    ]
+  },
+  "Tilemaps & TileSets": {
+    "TileSet & TileMapLayer": [
+      "The <code>TileMapLayer</code> node creates grid-based levels. A <code>TileSet</code> resource defines tiles with physics layers, navigation polygons, and terrain definitions for auto-tiling. You can add custom data per tile. Use terrain bits for automatic tile connection (like biome blending). Animated and random tiles add visual variety without code.",
+      "extends TileMapLayer\n\nfunc _ready():\n    # Programmatic tileset\n    var tileset = TileSet.new()\n    var source = TileSetAtlasSource.new()\n    source.texture = preload(\"res://assets/tileset.png\")\n    source.texture_region_size = Vector2i(16, 16)\n    \n    # Add alternative tiles (for random variation)\n    source.create_alternative_tile(Vector2i(1, 0))\n    source.create_alternative_tile(Vector2i(2, 0))\n    tileset.add_source(source)\n    \n    # Set tile\n    set_cell(Vector2i(5, 3), 0, Vector2i(0, 0))\n    \n    # Terrain auto-tiling\n    # Configure terrain sets in TileSet editor,\n    # then use:\n    set_cells_terrain_connect(get_used_cells(), 0, 0)\n    \n    # Navigation layer on tiles\n    tileset.set_navigation_layer(0)\n    \n    # Physics layer on tiles\n    tileset.set_physics_layer(0)\n    \n    # Custom data\n    tileset.set_custom_data(\"damage\", Variant.Type.TYPE_INT)\n    var data = get_cell_tile_data(Vector2i(5, 3))\n    if data:\n        var damage = data.get_custom_data(\"damage\")"
+    ]
+  },
+  "Shaders": {
+    "CanvasItem & Spatial": [
+      "Godot supports three shader types: <code>canvas_item</code> (2D nodes), <code>spatial</code> (3D nodes), and <code>particles</code> (particle systems). Shaders use a GLSL-like language with Godot-specific uniforms and built-ins. <code>VisualShader</code> provides a node-based editor for creating shaders without code. Use uniforms to expose parameters to the inspector.",
+      "// Canvas item shader (2D dissolve effect)\nshader_type canvas_item;\n\nuniform float dissolve_amount : hint_range(0, 1) = 0.0;\nuniform sampler2D noise_tex : source_color;\n\nvoid fragment() {\n    vec4 tex = texture(TEXTURE, UV);\n    float noise = texture(noise_tex, UV).r;\n    float cutoff = noise - dissolve_amount;\n    COLOR = tex;\n    if (cutoff < 0.0) discard;\n    COLOR.a = smoothstep(-0.1, 0.0, cutoff);\n}\n\n// Spatial shader (3D outline)\nshader_type spatial;\n\nuniform float outline_width : hint_range(0, 0.1) = 0.02;\nuniform vec4 outline_color : source_color = vec4(1.0, 0.0, 0.0, 1.0);\n\nvoid fragment() {\n    ALBEDO = vec3(0.8, 0.2, 0.2);\n    METALLIC = 0.3;\n    ROUGHNESS = 0.4;\n}\n\nvoid vertex() {\n    VERTEX += NORMAL * outline_width;\n}"
+    ]
+  },
+  "Input Handling": {
+    "Input Map & Actions": [
+      "Godot's Input Map in Project Settings defines named actions bound to keys, buttons, or controller axes. Use <code>Input.get_action_strength()</code> for analog input (trigger pressure, joystick). The <code>_input(event)</code> callback processes individual events, while <code>_process()</code> or <code>_physics_process()</code> polling handles continuous input. Action names enable easy rebinding.",
+      "extends CharacterBody2D\n\nfunc _input(event: InputEvent) -> void:\n    # Event-driven (use for UI/interaction)\n    if event.is_action_pressed(\"interact\"):\n        open_chest()\n    \n    if event is InputEventMouseButton:\n        if event.button_index == MOUSE_BUTTON_LEFT:\n            shoot_at(event.position)\n    \n    if event is InputEventMouseMotion:\n        if event.button_mask & MOUSE_BUTTON_MASK_RIGHT:\n            camera_pan(event.relative)\n\nfunc _process(delta: float) -> void:\n    # Polling (use for continuous movement)\n    var move = Input.get_vector(\"move_left\", \"move_right\", \"move_up\", \"move_down\")\n    var sprint = Input.get_action_strength(\"sprint\")  # analog: 0.0-1.0\n    velocity = move * speed * (1.0 + sprint * 0.5)\n    move_and_slide()\n\nfunc _unhandled_input(event: InputEvent) -> void:\n    # Fallback for unhandled events (e.g. UI consumes first)\n    if event.is_action_pressed(\"ui_cancel\"):\n        pause_game()"
+    ]
+  },
+  "Animation": {
+    "AnimationPlayer & AnimationTree": [
+      "The <code>AnimationPlayer</code> node animates any node property via keyframes. <code>AnimationTree</code> adds state machine blending with parameters. Blend spaces (1D/2D) blend between animations based on a parameter like speed or direction. Root motion allows animations to drive character movement. Use <code>AnimationNodeStateMachinePlayback</code> to control state transitions.",
+      "extends CharacterBody3D\n\n@onready var anim_player := $AnimationPlayer\n@onready var anim_tree := $AnimationTree\n@onready var state_machine := anim_tree.get(\"parameters/playback\") as AnimationNodeStateMachinePlayback\n\nfunc _physics_process(delta: float) -> void:\n    var speed := Input.get_axis(\"backward\", \"forward\")\n    var direction := Input.get_axis(\"left\", \"right\")\n    \n    # Drive blend space parameters\n    anim_tree.set(\"parameters/move/blend_position\", speed)\n    anim_tree.set(\"parameters/turn/blend_position\", direction)\n    \n    # State machine transitions\n    if speed > 0.1:\n        state_machine.travel(\"move\")\n    elif direction < -0.1 or direction > 0.1:\n        state_machine.travel(\"turn\")\n    else:\n        state_machine.travel(\"idle\")\n    \n    # One-shot animation\n    if Input.is_action_just_pressed(\"attack\"):\n        state_machine.travel(\"attack\")\n        # Queue return to locomotion after attack\n        await anim_player.animation_finished\n        state_machine.travel(\"idle\")"
+    ]
+  },
+  "Audio": {
+    "Audio & Buses": [
+      "Godot uses an audio bus system for routing and effects. <code>AudioStreamPlayer</code> plays 2D sounds, <code>AudioStreamPlayer2D/3D</code> provides positional audio. The Audio bus layout allows adding effects like reverb, EQ, compression, and distortion per bus. Use <code>AudioServer</code> for global control. Stream players support OGG, MP3, and WAV formats.",
+      "extends Node\n\n@onready var sfx_player := $AudioStreamPlayer\n@onready var music_player := $AudioStreamPlayer2D\n@onready var footsteps := $FootstepPool as AudioStreamPlayer\n\nfunc play_sfx(path: String) -> void:\n    sfx_player.stream = load(path)\n    sfx_player.play()\n\nfunc setup_positional_audio() -> void:\n    # 2D positional audio\n    music_player.attenuation = 1.0\n    music_player.max_distance = 500.0\n    music_player.panning_strength = 0.8\n\nfunc adjust_bus_volume(bus_name: String, volume_db: float) -> void:\n    var bus_idx = AudioServer.get_bus_index(bus_name)\n    AudioServer.set_bus_volume_db(bus_idx, volume_db)\n\nfunc add_effect_to_bus(bus_name: String) -> void:\n    var bus_idx = AudioServer.get_bus_index(bus_name)\n    var reverb = AudioEffectReverb.new()\n    reverb.room_size = 0.8\n    AudioServer.add_bus_effect(bus_idx, reverb, 0)\n\nfunc _ready() -> void:\n    # Crossfade music\n    var tween = create_tween()\n    tween.tween_property(music_player, \"volume_db\", -10.0, 1.0)"
+    ]
+  },
+  "Resources": {
+    "Resource System": [
+      "Resources are reusable data containers saved as <code>.tres</code> (text) or <code>.res</code> (binary). They store game data like item definitions, stats, dialogue trees, and level configs. Create custom resources by extending the <code>Resource</code> class. Resources are cached by default — use <code>preload()</code> or <code>load()</code> to access them. Use <code>.duplicate()</code> for unique runtime instances.",
+      "# Custom resource definition\nextends Resource\nclass_name ItemData\n\n@export var item_name: String\n@export var description: String\n@export_multiline var lore: String\n@export var icon: Texture2D\n@export var value: int = 0\n@export var consumable: bool = false\n@export var effects: Array[StatusEffect] = []\n@export var stackable: bool = true\n@export var max_stack: int = 64\n\n# Usage in game code\nextends Node\n\nvar item_cache: Dictionary = {}\n\nfunc get_item(id: String) -> ItemData:\n    if not item_cache.has(id):\n        item_cache[id] = load(\"res://data/items/\" + id + \".tres\")\n    return item_cache[id]\n\nfunc create_runtime_item(template: ItemData) -> ItemData:\n    var instance = template.duplicate()\n    instance.item_name = template.item_name + \" (Custom)\"\n    return instance\n\nfunc _ready() -> void:\n    var potion = preload(\"res://data/items/health_potion.tres\")\n    print(potion.item_name, \" heals for \", potion.value)\n    \n    # Resource cache is global\n    # ResourceLoader.exists() to check before loading"
+    ]
+  },
+  "Editor Plugins": {
+    "@tool & EditorPlugin": [
+      "Scripts with the <code>@tool</code> annotation run in the editor, enabling live preview and custom tools. Use <code>EditorPlugin</code> to add docks, buttons, menu items, and inspector plugins. Create custom gizmos for in-editor manipulation. Build importers, exporters, and level editors that extend Godot's functionality without modifying the engine itself.",
+      "tool\nextends EditorPlugin\n\nconst MainDock = preload(\"res://addons/my_tool/dock.tscn\")\nvar dock_instance: Control\n\nfunc _enter_tree() -> void:\n    # Add toolbar button\n    add_tool_menu_item(\"Generate Level\", Callable(self, \"_generate_level\"))\n    \n    # Add dock to editor\n    dock_instance = MainDock.instantiate()\n    add_control_to_dock(DOCK_SLOT_LEFT_UR, dock_instance)\n    \n    # Custom inspector plugin for ItemData\n    var inspector_plugin = preload(\"res://addons/my_tool/item_inspector_plugin.gd\").new()\n    add_inspector_plugin(inspector_plugin)\n\nfunc _exit_tree() -> void:\n    remove_tool_menu_item(\"Generate Level\")\n    remove_control_from_docks(dock_instance)\n    dock_instance.queue_free()\n\nfunc _generate_level() -> void:\n    # @tool allows editor-level operations\n    var root = Node3D.new()\n    root.name = \"GeneratedLevel\"\n    get_editor_interface().get_edited_scene_root().add_child(root)\n    root.owner = get_editor_interface().get_edited_scene_root()\n\n# Gizmo plugin for custom nodes\n# extends EditorNode3DGizmoPlugin"
+    ]
+  },
+  "GDExtension": {
+    "C++ Bindings": [
+      "GDExtension (Godot 4) allows writing C++ libraries that dynamically link without recompiling the engine. Ideal for performance-critical systems like custom physics, pathfinding, or audio processing. Classes registered via GDExtension are fully accessible from GDScript. Replaces the GDNative system from Godot 3. Uses the godot-cpp bindings library for C++ API access.",
+      "// GDExtension entry point\nextern \"C\" {\nGDExtensionBool GDE_EXPORT example_init(\n    GDExtensionInterfaceGetProcAddress p_get_proc_address,\n    GDExtensionClassLibraryPtr p_library,\n    GDExtensionInitialization* r_initialization\n) {\n    godot::GDExtensionBinding::InitObject init_obj(\n        p_get_proc_address, p_library, r_initialization\n    );\n    \n    init_obj.register_engine_custom_class<MyCustomNode>(\"MyCustomNode\");\n    init_obj.register_engine_custom_class<MySingleton>(\"MySingleton\");\n    return init_obj.init();\n}\n}\n\n// Custom node exposed to GDScript\n#include <godot_cpp/classes/node.hpp>\n\nclass MyCustomNode : public godot::Node {\n    GDCLASS(MyCustomNode, godot::Node)\n\nprotected:\n    static void _bind_methods() {\n        ClassDB::bind_method(D_METHOD(\"heavy_compute\", \"data\"), &MyCustomNode::heavy_compute);\n    }\n\npublic:\n    godot::Array heavy_compute(godot::Array data) {\n        // C++ fast path for performance-critical code\n        return data;\n    }\n};"
+    ]
+  },
+  "XR & Render": {
+    "OpenXR + Render Modes": [
+      "Godot 4 offers three renderers: <code>forward_plus</code> (desktop, many lights, SSAO, glow), <code>mobile</code> (faster, simpler, for mobile), and <code>gl_compatibility</code> (OpenGL fallback). XR support via OpenXR — use <code>XROrigin3D</code>, <code>XRCamera3D</code>, and <code>XRController3D</code>. Supports hand tracking, passthrough AR, and standalone headsets.",
+      "extends XRToolsSceneBase\n\nfunc _ready():\n    var interface = XRServer.find_interface(\"OpenXR\")\n    if interface and interface.initialize():\n        get_viewport().use_xr = true\n        print(\"XR initialized: \", interface.name)\n\nfunc setup_renderer() -> void:\n    # Forward+ (default): high quality, SSAO, glow\n    get_viewport().use_taa = true\n    get_viewport().scaling_3d_scale = 0.75  # FSR upscaling\n    \n    # Mobile: limit lights for performance\n    if RenderingServer.get_rendering_device().get_device_name():\n        pass\n\nfunc _process(delta: float) -> void:\n    # XR controller input\n    if Input.is_action_just_pressed(\"trigger_left\"):\n        grab_object($XROrigin3D/LeftController)\n    \n    var velocity = Input.get_vector(\n        \"thumbstick_left_x\", \"thumbstick_right_x\",\n        \"thumbstick_left_y\", \"thumbstick_right_y\"\n    )\n    move_in_view_direction(velocity)\n\n# Render mode query\nfunc get_renderer_name() -> String:\n    return RenderingServer.get_rendering_device().get_device_name()"
+    ]
+  },
+  "2D Sprites & Viewports": {
+    "Sprites, Layers & Effects": [
+      "<code>Sprite2D</code> displays textures with properties like centered, flip, offset, and modulate. <code>AnimatedSprite2D</code> plays sprite sheet animations via the <code>SpriteFrames</code> resource. <code>CanvasLayer</code> separates rendering layers for parallax or UI. <code>Viewport</code> renders to a texture for mini-maps, security cameras, or in-game screens. <code>Light2D</code> adds 2D dynamic lighting with shadow caster occlusion.",
+      "extends Node2D\n\n@onready var sprite := $Sprite2D as Sprite2D\n@onready var anim_sprite := $AnimatedSprite2D as AnimatedSprite2D\n\nfunc _ready() -> void:\n    # Sprite2D properties\n    sprite.texture = preload(\"res://assets/character.png\")\n    sprite.centered = true\n    sprite.flip_h = false\n    sprite.offset = Vector2(0, -8)\n    sprite.modulate = Color(1, 0.5, 0.5, 1)  # tint red\n    \n    # AnimatedSprite2D\n    anim_sprite.sprite_frames = preload(\"res://assets/run_frames.tres\")\n    anim_sprite.play(\"run\")\n    anim_sprite.animation_finished.connect(_on_anim_finished)\n    \n    # CanvasLayer for parallax\n    var layer = CanvasLayer.new()\n    layer.layer = -1  # behind everything\n    add_child(layer)\n    \n    # Viewport for mini-map\n    var viewport = SubViewport.new()\n    viewport.size = Vector2i(256, 256)\n    viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS\n    var mini_map = Sprite2D.new()\n    mini_map.texture = viewport.get_texture()\n    add_child(mini_map)\n    \n    # 2D Light\n    # $Light2D.enabled = true\n    # $Light2D.shadow_color = Color.BLACK\n    # $Light2D.energy = 1.5"
+    ]
+  },
+  "3D World & Lighting": {
+    "3D Nodes & Environment": [
+      "Godot 4 uses <code>Node3D</code> as the base for all 3D nodes. <code>MeshInstance3D</code> renders meshes with materials. Lighting includes <code>DirectionalLight3D</code> (sun), <code>OmniLight3D</code> (point), and <code>SpotLight3D</code> (cone). <code>WorldEnvironment</code> controls sky, ambient light, fog, and tonemapping. VoxelGI and SDFGI provide real-time global illumination.",
+      "extends Node3D\n\n@onready var mesh := $MeshInstance3D as MeshInstance3D\n@onready var light := $DirectionalLight3D as DirectionalLight3D\n@onready var env := $WorldEnvironment as WorldEnvironment\n\nfunc _ready() -> void:\n    # Mesh and material\n    var box = BoxMesh.new()\n    box.size = Vector3(2, 2, 2)\n    var material = StandardMaterial3D.new()\n    material.albedo_color = Color(0.2, 0.5, 0.8)\n    material.metallic = 0.3\n    material.roughness = 0.4\n    mesh.mesh = box\n    mesh.material_override = material\n    \n    # Directional light (sun)\n    light.light_energy = 1.0\n    light.light_indirect_energy = 0.5\n    light.shadow_enabled = true\n    light.light_bake_mode = Light3D.BAKE_SDFGI\n    \n    # WorldEnvironment\n    env.environment.background_mode = Environment.BG_SKY\n    var sky = ProceduralSkyMaterial.new()\n    sky.sky_top_color = Color(0.2, 0.5, 1.0)\n    sky.sky_horizon_color = Color(0.8, 0.8, 0.8)\n    env.environment.sky = Sky.new()\n    env.environment.sky.sky_material = sky\n    env.environment.ssao_enabled = true\n    env.environment.ssao_radius = 2.0\n    env.environment.glow_enabled = true\n    \n    # VoxelGI for baked GI\n    # var gi = VoxelGI.new()\n    # gi.extend = Vector3(20, 10, 20)\n    # add_child(gi)\n    # gi.bake()"
+    ]
+  },
+  "UI & Themes": {
+    "Control Nodes & Theming": [
+      "Godot's UI system uses <code>Control</code> nodes: <code>Button</code>, <code>Label</code>, <code>TextureRect</code>, <code>Panel</code>, <code>Container</code> (HBox, VBox, Grid, Margin). <code>Theme</code> resources define colors, fonts, icons, and styles across all UI elements. Use <code>Theme.duplicate()</code> for runtime theme variants. <code>StyleBoxFlat</code>, <code>StyleBoxTexture</code>, and <code>StyleBoxLine</code> style individual elements.",
+      "extends CanvasLayer\n\nfunc _ready() -> void:\n    # Create UI hierarchy\n    var panel = Panel.new()\n    var hbox = HBoxContainer.new()\n    var label = Label.new()\n    var button = Button.new()\n    \n    label.text = \"Score: 0\"\n    label.add_theme_font_size_override(\"font_size\", 24)\n    button.text = \"Start\"\n    \n    add_child(panel)\n    panel.add_child(hbox)\n    hbox.add_child(label)\n    hbox.add_child(button)\n    \n    # Theme\n    var theme = Theme.new()\n    var font = preload(\"res://assets/fonts/game_font.ttf\")\n    theme.default_font = font\n    \n    var style = StyleBoxFlat.new()\n    style.bg_color = Color(0.2, 0.3, 0.5)\n    style.corner_radius = 8\n    style.border_width = 2\n    style.border_color = Color.WHITE\n    \n    theme.set_stylebox(\"panel\", \"Panel\", style)\n    \n    var button_style = StyleBoxFlat.new()\n    button_style.bg_color = Color(0.3, 0.6, 0.3)\n    button_style.corner_radius = 4\n    theme.set_stylebox(\"normal\", \"Button\", button_style)\n    \n    theme.theme = theme\n    \n    # Container layout\n    var grid = GridContainer.new()\n    grid.columns = 3\n    for i in range(9):\n        var btn = Button.new()\n        btn.text = str(i + 1)\n        grid.add_child(btn)"
+    ]
+  },
+  "Networking & Multiplayer": {
+    "Multiplayer API": [
+      "Godot's high-level multiplayer system syncs game state across the network. <code>MultiplayerSpawner</code> auto-spawns scenes on all peers. <code>MultiplayerSynchronizer</code> replicates properties. Use the <code>@rpc</code> annotation for remote procedure calls with modes: <code>authority</code>, <code>any_peer</code>, <code>call_local</code>, <code>reliable</code>, <code>unreliable</code>. <code>ENetMultiplayerPeer</code> handles low-level connection.",
+      "extends Node\n\n@onready var spawner := $MultiplayerSpawner as MultiplayerSpawner\n@onready var syncer := $MultiplayerSynchronizer as MultiplayerSynchronizer\n\nconst PORT := 8070\nconst MAX_PLAYERS := 8\n\nfunc host_game() -> void:\n    var peer = ENetMultiplayerPeer.new()\n    peer.create_server(PORT, MAX_PLAYERS)\n    multiplayer.multiplayer_peer = peer\n    multiplayer.peer_connected.connect(_on_player_joined)\n    print(\"Hosting on port \", PORT)\n\nfunc join_game(address: String) -> void:\n    var peer = ENetMultiplayerPeer.new()\n    peer.create_client(address, PORT)\n    multiplayer.multiplayer_peer = peer\n\n@rpc(\"authority\", \"call_local\", \"reliable\")\nfunc spawn_player(id: int) -> void:\n    var player = preload(\"res://player.tscn\").instantiate()\n    player.name = str(id)\n    add_child(player)\n\n@rpc(\"any_peer\", \"call_remote\", \"unreliable\")\nfunc send_input(input_data: Dictionary) -> void:\n    # Server receives input\n    if not multiplayer.is_server():\n        return\n    apply_input(input_data)\n\nfunc _on_player_joined(id: int) -> void:\n    spawn_player.rpc(id)\n\nfunc _ready() -> void:\n    # Auto-configure spawner\n    spawner.spawn_scene = preload(\"res://player.tscn\")\n    spawner.spawn_function = _spawn_player\n\nfunc _spawn_player(id: int) -> Node:\n    var p = preload(\"res://player.tscn\").instantiate()\n    p.name = str(id)\n    return p"
+    ]
+  },
+  "Save & File Systems": {
+    "File I/O & Save Games": [
+      "Godot provides <code>FileAccess</code> for binary and text file operations. <code>ConfigFile</code> manages INI-style configs with sections and keys. <code>ResourceSaver</code> and <code>ResourceLoader</code> persist/<code>.res</code> and <code>.tres</code> resources. Use <code>OS.get_user_data_dir()</code> for cross-platform save paths. <code>ZIPPacker</code>/<code>ZIPReader</code> handle compressed archives.",
+      "extends Node\n\nconst SAVE_PATH := \"user://savegame.dat\"\nconst CONFIG_PATH := \"user://settings.cfg\"\n\nfunc save_game(data: Dictionary) -> void:\n    var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)\n    if file:\n        var json = JSON.stringify(data)\n        file.store_string(json)\n        file.close()\n        print(\"Game saved!\")\n\nfunc load_game() -> Dictionary:\n    if not FileAccess.file_exists(SAVE_PATH):\n        return {}\n    var file = FileAccess.open(SAVE_PATH, FileAccess.READ)\n    if file:\n        var json = file.get_as_text()\n        file.close()\n        return JSON.parse_string(json) as Dictionary\n    return {}\n\nfunc use_config() -> void:\n    var config = ConfigFile.new()\n    config.set_value(\"video\", \"fullscreen\", true)\n    config.set_value(\"video\", \"resolution\", Vector2i(1920, 1080))\n    config.set_value(\"audio\", \"master_volume\", 0.8)\n    config.save(CONFIG_PATH)\n    \n    var loaded = ConfigFile.new()\n    loaded.load(CONFIG_PATH)\n    var fullscreen = loaded.get_value(\"video\", \"fullscreen\", false)\n    \n    # Resource persistence\n    var data = preload(\"res://data/player_stats.tres\")\n    data.score = 100\n    ResourceSaver.save(data, \"res://data/player_stats.tres\")\n    \n    # Directory operations\n    var dir = DirAccess.open(\"user://\")\n    if dir:\n        dir.list_dir_begin()\n        var file_name = dir.get_next()\n        while file_name != \"\":\n            print(\"Found: \", file_name)\n            file_name = dir.get_next()"
+    ]
+  },
+  "Performance Optimization": {
+    "Profiling & Optimization": [
+      "Godot's Debugger has a Profiler tab (Script, Visual, Servers) and a Monitors tab (FPS, physics time, draw calls). Use <code>Engine.get_frames_per_second()</code> for runtime FPS. Key optimizations: sprite atlasing, MultiMesh instancing, object pooling, disabling off-screen nodes with <code>VisibleOnScreenNotifier2D</code>, and reducing draw calls via batching. Use <code>Performance</code> singleton for custom metrics.",
+      "extends Node\n\nfunc _ready() -> void:\n    # Check performance from code\n    print(\"FPS: \", Engine.get_frames_per_second())\n    print(\"Draw calls: \", Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))\n    print(\"Objects: \", Performance.get_monitor(Performance.OBJECT_NODE_COUNT))\n\nfunc optimize_particles() -> void:\n    # Use GPUParticles instead of CPUParticles for many particles\n    $GPUParticles2D.amount = 500\n    $GPUParticles2D.local_coords = false\n\nfunc object_pool_example() -> void:\n    # Pre-create and reuse\n    var pool = []\n    for i in range(50):\n        var bullet = preload(\"res://bullet.tscn\").instantiate()\n        bullet.visible = false\n        add_child(bullet)\n        pool.append(bullet)\n    \n    var b = pool.pop_front()\n    b.global_position = $Muzzle.global_position\n    b.visible = true\n    pool.append(b)\n\nfunc _process(delta: float) -> void:\n    # Profile expensive operations\n    var start = Time.get_ticks_usec()\n    # ... heavy logic ...\n    var elapsed = Time.get_ticks_usec() - start\n    if elapsed > 1000:\n        print(\"Warning: operation took \", elapsed, \"us\")\n    \n    # MultiMesh for many similar objects\n    # var mm = MultiMeshInstance2D.new()\n    # mm.multimesh = MultiMesh.new()\n    # mm.multimesh.transform_format = MultiMesh.TRANSFORM_2D\n    # mm.multimesh.instance_count = 1000\n    # mm.multimesh.visible_instance_count = 500"
+    ]
+  },
+  "Procedural Generation": {
+    "Procedural Content": [
+      "Godot's <code>FastNoiseLite</code> provides Perlin, Simplex, Cellular, and Value noise for procedural generation. Use <code>NoiseTexture2D</code> to generate texture-based noise. <code>SurfaceTool</code> builds custom meshes programmatically. Combine with <code>ArrayMesh</code> for complex procedural geometry. Generate terrain heightmaps, cave systems, and infinite worlds using chunk-based loading.",
+      "extends Node3D\n\nfunc _ready() -> void:\n    # FastNoiseLite setup\n    var noise = FastNoiseLite.new()\n    noise.noise_type = FastNoiseLite.TYPE_PERLIN\n    noise.fractal_type = FastNoiseLite.FRACTAL_FBM\n    noise.fractal_octaves = 6\n    noise.fractal_lacunarity = 2.0\n    noise.fractal_gain = 0.5\n    noise.frequency = 0.05\n    noise.seed = randi()\n    \n    # Sample noise\n    var height = noise.get_noise_2d(x, y)\n    \n    # NoiseTexture2D\n    var noise_tex = NoiseTexture2D.new()\n    noise_tex.noise = noise\n    noise_tex.width = 512\n    noise_tex.height = 512\n    noise_tex.seamless = true\n    \n    # Generate terrain mesh\n    var st = SurfaceTool.new()\n    st.begin(Mesh.PRIMITIVE_TRIANGLES)\n    \n    var resolution := 64\n    var size := 50.0\n    for z in range(resolution):\n        for x in range(resolution):\n            var u = float(x) / (resolution - 1)\n            var v = float(z) / (resolution - 1)\n            var world_x = (u - 0.5) * size\n            var world_z = (v - 0.5) * size\n            var h = noise.get_noise_2d(world_x, world_z) * 5.0\n            var vertex = Vector3(world_x, h, world_z)\n            st.set_uv(Vector2(u, v))\n            st.add_vertex(vertex)\n    \n    # Generate indices\n    st.generate_normals()\n    var mesh = st.commit()\n    \n    var mi = MeshInstance3D.new()\n    mi.mesh = mesh\n    add_child(mi)\n    \n    # Infinite world: use chunks\n    # var chunk = load_chunk(chunk_x, chunk_z)\n    # if chunk_position not in loaded_chunks:"
+    ]
+  },
+  "Export & Deployment": {
+    "Export Templates & Platforms": [
+      "Godot exports to Windows, Linux, macOS, Android, iOS, and Web. Configure export presets in Project > Export. Install export templates via Editor > Manage Export Templates. Set application name, version, icon, and orientation per platform. Use <code>OS.get_name()</code> for platform detection. For mobile: configure AAB/APK signing, permissions, and screen sizes.",
+      "extends Node\n\nfunc _ready() -> void:\n    detect_platform()\n\nfunc detect_platform() -> void:\n    match OS.get_name():\n        \"Windows\":\n            DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)\n        \"Android\", \"iOS\":\n            Input.set_screen_orientation(Input.SCREEN_LANDSCAPE)\n            DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)\n        \"Web\":\n            JavaScriptBridge.eval(\"console.log('Game loaded in browser!')\")\n        \"Linux\", \"macOS\":\n            DisplayServer.window_set_size(Vector2i(1280, 720))\n\nfunc setup_export() -> void:\n    # Project settings per platform\n    ProjectSettings.set_setting(\"application/config/name\", \"My Game\")\n    ProjectSettings.set_setting(\"application/config/version\", \"1.0.0\")\n    ProjectSettings.set_setting(\"application/config/icon\", \"res://icon.png\")\n    \n    # Export template paths\n    # Windows: ~/.local/share/godot/export_templates/<version>/windows_x86_64_release.exe\n    # Android: ~/.local/share/godot/export_templates/<version>/android_release.apk\n    \n    # For Steam Deck verification\n    # ProjectSettings.set_setting(\"display/window/size/mode\", 0)  # Windowed scaling\n\nfunc get_save_path() -> String:\n    # Cross-platform save location\n    return ProjectSettings.globalize_path(\"user://\")"
+    ]
+  }
+}

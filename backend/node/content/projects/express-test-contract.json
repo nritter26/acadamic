@@ -1,0 +1,120 @@
+{
+  "id": "express-test-contract",
+  "title": "Contract Testing API",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["contract-testing", "api", "validation", "json-schema", "response-shape"],
+  "serverMode": true,
+  "description": "Build a contract testing API that validates request and response shapes against a defined contract, checking for required fields and types.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Return contract specification",
+      "description": "Create a GET /api/contract endpoint that returns a JSON contract defining the expected API shape.",
+      "hints": [
+        "Define a contract with expectedBodyShape for each endpoint",
+        "Include properties and types for request/response",
+        "Return the contract as JSON"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst contract = {\n  openapi: '3.0.0',\n  info: { title: 'Contract Test API', version: '1.0.0' },\n  paths: {\n    '/items': {\n      post: {\n        requestBody: { required: ['name'], properties: { name: { type: 'string' } } },\n        responses: { '201': { properties: { id: { type: 'number' }, name: { type: 'string' } } } }\n      }\n    }\n  }\n};\n\napp.get('/api/contract', (req, res) => {\n  res.json(contract);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Contract {\n  openapi: string;\n  info: { title: string; version: string };\n  paths: Record<string, any>;\n}\n\nconst contract: Contract = {\n  openapi: '3.0.0',\n  info: { title: 'Contract Test API', version: '1.0.0' },\n  paths: {\n    '/items': {\n      post: {\n        requestBody: { required: ['name'], properties: { name: { type: 'string' } } },\n        responses: { '201': { properties: { id: { type: 'number' }, name: { type: 'string' } } } }\n      }\n    }\n  }\n};\n\napp.get('/api/contract', (req: Request, res: Response) => {\n  res.json(contract);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ncontract = {\n    'openapi': '3.0.0',\n    'info': {'title': 'Contract Test API', 'version': '1.0.0'},\n    'paths': {\n        '/items': {\n            'post': {\n                'requestBody': {'required': ['name'], 'properties': {'name': {'type': 'string'}}},\n                'responses': {'201': {'properties': {'id': {'type': 'number'}, 'name': {'type': 'string'}}}}\n            }\n        }\n    }\n}\n\n@app.get('/api/contract')\ndef get_contract():\n    return contract\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nvar contract = map[string]interface{}{\n\t\"openapi\": \"3.0.0\",\n\t\"info\":    map[string]string{\"title\": \"Contract Test API\", \"version\": \"1.0.0\"},\n\t\"paths\": map[string]interface{}{\n\t\t\"/items\": map[string]interface{}{\n\t\t\t\"post\": map[string]interface{}{\n\t\t\t\t\"requestBody\": map[string]interface{}{\n\t\t\t\t\t\"required\":   []string{\"name\"},\n\t\t\t\t\t\"properties\": map[string]interface{}{\"name\": map[string]string{\"type\": \"string\"}},\n\t\t\t\t},\n\t\t\t\t\"responses\": map[string]interface{}{\n\t\t\t\t\t\"201\": map[string]interface{}{\n\t\t\t\t\t\t\"properties\": map[string]interface{}{\n\t\t\t\t\t\t\t\"id\":   map[string]string{\"type\": \"number\"},\n\t\t\t\t\t\t\t\"name\": map[string]string{\"type\": \"string\"},\n\t\t\t\t\t\t},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t},\n\t\t},\n\t},\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/contract\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(contract)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api/contract",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "openapi"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Verify response shape matches contract",
+      "description": "Ensure the response from POST /items matches the expectedBodyShape defined in the contract.",
+      "hints": [
+        "Create a POST /items endpoint that returns a response matching the contract shape",
+        "The response must have id (number) and name (string)",
+        "Return 201 with the created item"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\nconst contract = {\n  openapi: '3.0.0',\n  info: { title: 'Contract Test API', version: '1.0.0' },\n  paths: {\n    '/items': {\n      post: {\n        requestBody: { required: ['name'], properties: { name: { type: 'string' } } },\n        responses: { '201': { properties: { id: { type: 'number' }, name: { type: 'string' } } } }\n      }\n    }\n  }\n};\n\napp.get('/api/contract', (req, res) => res.json(contract));\n\napp.post('/items', (req, res) => {\n  const { name } = req.body;\n  const item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item { id: number; name: string; }\n\nlet items: Item[] = [];\nlet nextId = 1;\n\nconst contract = {\n  openapi: '3.0.0',\n  info: { title: 'Contract Test API', version: '1.0.0' },\n  paths: {\n    '/items': {\n      post: {\n        requestBody: { required: ['name'], properties: { name: { type: 'string' } } },\n        responses: { '201': { properties: { id: { type: 'number' }, name: { type: 'string' } } } }\n      }\n    }\n  }\n};\n\napp.get('/api/contract', (req: Request, res: Response) => res.json(contract));\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name } = req.body;\n  const item: Item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n\nclass Item(BaseModel):\n    id: int\n    name: str\n\nitems = []\nnext_id = 1\n\n@app.get('/api/contract')\ndef get_contract():\n    return {\n        'openapi': '3.0.0',\n        'info': {'title': 'Contract Test API', 'version': '1.0.0'},\n        'paths': {\n            '/items': {\n                'post': {\n                    'requestBody': {'required': ['name'], 'properties': {'name': {'type': 'string'}}},\n                    'responses': {'201': {'properties': {'id': {'type': 'number'}, 'name': {'type': 'string'}}}}\n                }\n            }\n        }\n    }\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = Item(id=next_id, name=item.name)\n    next_id += 1\n    items.append(new_item)\n    return new_item\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Item struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n\tcontract = map[string]interface{}{\n\t\t\"openapi\": \"3.0.0\",\n\t\t\"info\":    map[string]string{\"title\": \"Contract Test API\", \"version\": \"1.0.0\"},\n\t\t\"paths\": map[string]interface{}{\n\t\t\t\"/items\": map[string]interface{}{\n\t\t\t\t\"post\": map[string]interface{}{\n\t\t\t\t\t\"requestBody\": map[string]interface{}{\n\t\t\t\t\t\t\"required\":   []string{\"name\"},\n\t\t\t\t\t\t\"properties\": map[string]interface{}{\"name\": map[string]string{\"type\": \"string\"}},\n\t\t\t\t\t},\n\t\t\t\t\t\"responses\": map[string]interface{}{\n\t\t\t\t\t\t\"201\": map[string]interface{}{\n\t\t\t\t\t\t\t\"properties\": map[string]interface{}{\n\t\t\t\t\t\t\t\t\"id\":   map[string]string{\"type\": \"number\"},\n\t\t\t\t\t\t\t\t\"name\": map[string]string{\"type\": \"string\"},\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t},\n\t\t},\n\t}\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/api/contract\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(contract)\n\t})\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct{ Name string `json:\"name\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\titem := Item{ID: nextID, Name: body.Name}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "POST with contract-matching body",
+      "description": "Send a POST request with a body that matches the contract schema and verify the response matches too.",
+      "hints": [
+        "Send JSON with name field (string) as required by the contract",
+        "Expect 201 response with id and name fields",
+        "Verify the response has the expected shape"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name } = req.body;\n  if (!name) return res.status(400).json({ error: 'name is required' });\n  const item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item { id: number; name: string; }\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name } = req.body;\n  if (!name) return res.status(400).json({ error: 'name is required' });\n  const item: Item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = {'id': next_id, 'name': item.name}\n    next_id += 1\n    items.append(new_item)\n    return new_item\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Item struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct{ Name string `json:\"name\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"name is required\"})\n\t\t\treturn\n\t\t}\n\t\titem := Item{ID: nextID, Name: body.Name}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "name"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "POST with missing field returns 400",
+      "description": "Send a POST request with a missing required field and verify 400 error response.",
+      "hints": [
+        "Send POST /items with an empty body or missing name field",
+        "Expect 400 Bad Request",
+        "Response should include an error message"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet items = [];\nlet nextId = 1;\n\napp.post('/items', (req, res) => {\n  const { name } = req.body;\n  if (!name) return res.status(400).json({ error: 'name is required' });\n  const item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Item { id: number; name: string; }\n\nlet items: Item[] = [];\nlet nextId = 1;\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name } = req.body;\n  if (!name) return res.status(400).json({ error: 'name is required' });\n  const item: Item = { id: nextId++, name };\n  items.push(item);\n  res.status(201).json(item);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ItemIn(BaseModel):\n    name: str\n\nitems = []\nnext_id = 1\n\n@app.post('/items', status_code=201)\ndef create_item(item: ItemIn):\n    global next_id\n    new_item = {'id': next_id, 'name': item.name}\n    next_id += 1\n    items.append(new_item)\n    return new_item\n\n@app.exception_handler(Exception)\ndef validation_error(request, exc):\n    return JSONResponse(status_code=400, content={'error': 'name is required'})\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Item struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar (\n\titems  []Item\n\tnextID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct{ Name string `json:\"name\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"name is required\"})\n\t\t\treturn\n\t\t}\n\t\titem := Item{ID: nextID, Name: body.Name}\n\t\tnextID++\n\t\titems = append(items, item)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(item)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "expectedStatus": 400,
+            "expectedBodySubstring": "error"
+          }
+        ]
+      }
+    }
+  ]
+}

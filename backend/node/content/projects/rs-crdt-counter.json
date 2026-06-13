@@ -1,0 +1,71 @@
+{
+  "id": "rs-crdt-counter",
+  "title": "Rust: CRDT Counter",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "CRDT", "conflict-free", "distributed", "G-Counter", "PN-Counter"],
+  "description": "Implement Conflict-Free Replicated Data Types (CRDT) for distributed counters.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "G-Counter (Grow-Only)",
+      "description": "Implement a `GCounter` that can only increase. Uses per-node counts: `HashMap<String, u64>`. `value()` sums all node counts. `add(node, n)` increases node's count. `merge(other)` takes max per node.",
+      "hints": ["`struct GCounter { counts: HashMap<String, u64> }`", "`value()`: `self.counts.values().sum()`", "`merge(other)`: for each node, `max(self.counts[node], other.counts[node])`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('10') || output.contains('value')",
+        "successMessage": "G-Counter works!",
+        "failureMessage": "Create a GCounter, add values, print the total."
+      }
+    },
+    {
+      "id": 2,
+      "title": "PN-Counter (Positive-Negative)",
+      "description": "Implement a `PNCounter` using two GCounters: one for increments, one for decrements. `value()` = inc.value() - dec.value(). `add(n)` increments inc. `sub(n)` increments dec. Test with add 5, sub 3.",
+      "hints": ["`struct PNCounter { pos: GCounter, neg: GCounter }`", "`value()` = `self.pos.value() - self.neg.value()`", "Add 5, sub 3 → value = 2"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('2')",
+        "successMessage": "PN-Counter works!",
+        "failureMessage": "Add 5 and sub 3, print value 2."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Merging Replicas",
+      "description": "Create two replicas of a PNCounter. Replica A adds 10, Replica B adds 5. Merge A into B and B into A. Both should have value 15 after merging.",
+      "hints": ["Create two separate counters.", "A.add(10), B.add(5).", "A.merge(&B), B.merge(&A). Both value() = 15."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('15')",
+        "successMessage": "Replica merging works!",
+        "failureMessage": "Merge two replicas and print the converged value."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Conflict Resolution",
+      "description": "Simulate a conflict: both replicas independently receive the same increment. Merge both ways and verify the value is correct (not double-counted).",
+      "hints": ["A.add(5), B.add(5) (same increment on both).", "After merge: value should be 10, not 15.", "Per-node max prevents double-counting."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('10')",
+        "successMessage": "Conflict resolution works! No double-counting.",
+        "failureMessage": "Merge after concurrent adds, value should be 10."
+      }
+    },
+    {
+      "id": 5,
+      "title": "G-Set (Grow-Only Set)",
+      "description": "Extend CRDT patterns to a `GSet<T>` (grow-only set). Elements can be added but never removed. Merge takes union. Test with two replicas adding different fruits.",
+      "hints": ["`struct GSet<T> { elements: HashSet<T> }`", "`add(elem)`: insert into set.", "`merge(other)`: union of both sets.", "Two replicas → merged set has all elements from both."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('apple') && output.contains('banana')",
+        "successMessage": "G-Set works!",
+        "failureMessage": "Merge two G-Set replicas and print all elements."
+      }
+    }
+  ]
+}

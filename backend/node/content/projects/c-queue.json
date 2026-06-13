@@ -1,0 +1,23 @@
+{
+  "id": "c-queue",
+  "title": "C: Queue (Array)",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "queue", "FIFO", "struct", "arrays"],
+  "description": "Implement a queue data structure using a circular array with enqueue and dequeue operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Queue Operations",
+      "description": "Define a `Queue` struct with int array, front, rear, and size. Implement `void enqueue(Queue *q, int val)` and `int dequeue(Queue *q)`. Enqueue 10, 20, 30, dequeue once, and print the remaining elements.",
+      "hints": ["Use circular indexing: `q->rear = (q->rear + 1) % 100`.", "Enqueue at rear, dequeue from front.", "Check for empty: `q->front == q->rear`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct { int data[100]; int front, rear; } Queue;\n\nvoid enqueue(Queue *q, int val) {\n    \n}\n\nint dequeue(Queue *q) {\n    \n}\n\nint main() {\n    Queue q = {.front = 0, .rear = 0};\n    enqueue(&q, 10); enqueue(&q, 20); enqueue(&q, 30);\n    printf(\"Dequeued: %d\\n\", dequeue(&q));\n    printf(\"Front: %d\\n\", q.data[q.front]);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20')",
+        "successMessage": "Queue operations work!",
+        "failureMessage": "Dequeue should return 10, front should be 20"
+      }
+    }
+  ]
+}

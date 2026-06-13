@@ -1,0 +1,23 @@
+{
+  "id": "c-rate-limiter",
+  "title": "C: Rate Limiter (Token Bucket)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "rate limiting", "token bucket", "simulation", "time"],
+  "description": "Implement a token bucket rate limiter that controls how many operations can be performed per second.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Token Bucket Rate Limiter",
+      "description": "Define a `TokenBucket` struct with capacity, tokens, and fill rate. Write `int allow_request(TokenBucket *tb)` that consumes a token if available. Simulate 8 requests with bucket capacity of 5: first 5 should be allowed, next 3 denied.",
+      "hints": ["Tokens fill up over time (simulate with a counter).", "If tokens > 0, consume 1 and return 1 (allow).", "Otherwise return 0 (deny).", "Refill tokens each call up to capacity."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef struct { int capacity; int tokens; int fill_rate; } TokenBucket;\n\nvoid tb_init(TokenBucket *tb, int cap, int rate) {\n    tb->capacity = cap; tb->tokens = cap; tb->fill_rate = rate;\n}\n\nint allow_request(TokenBucket *tb) {\n    if (tb->tokens < tb->capacity) tb->tokens++;\n    if (tb->tokens > 0) { tb->tokens--; return 1; }\n    return 0;\n}\n\nint main() {\n    TokenBucket tb;\n    tb_init(&tb, 5, 1);\n    for (int i = 1; i <= 8; i++) {\n        printf(\"Req %d: %s\\n\", i, allow_request(&tb) ? \"Allowed\" : \"Denied\");\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.match(/Allowed/g).length === 5",
+        "successMessage": "Rate limiter works!",
+        "failureMessage": "First 5 requests allowed, next 3 denied"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-sorting",
+  "title": "Rust: Sorting Algorithms",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "sorting", "bubble sort", "quicksort", "sort"],
+  "description": "Implement sorting algorithms and use Rust's built-in sort methods.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Built-in sort",
+      "description": "Sort the array `[5, 2, 8, 1, 9]` using `.sort()` and print the result.",
+      "hints": ["`numbers.sort();` sorts in place.", "Requires the type to implement `Ord`.", "Print with `println!(\"{:?}\", numbers);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('9')",
+        "successMessage": "Built-in sort works!",
+        "failureMessage": "Sort [5,2,8,1,9] and print (should be [1,2,5,8,9])."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Bubble Sort",
+      "description": "Implement bubble sort manually. Write a function `bubble_sort(arr: &mut [i32])` that sorts in place. Test with `[4, 3, 2, 1]`.",
+      "hints": ["Loop through the array, swapping adjacent elements if out of order.", "Repeat until no swaps are needed.", "Bubble sort has O(n²) time complexity."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4')",
+        "successMessage": "Bubble sort works!",
+        "failureMessage": "Bubble sort [4,3,2,1] and print [1,2,3,4]."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Quicksort",
+      "description": "Implement quicksort: `fn quicksort(arr: &mut [i32])`. Pick a pivot, partition, and recursively sort. Test with `[7, 2, 9, 1, 5]`.",
+      "hints": ["Choose the last element as pivot.", "Partition: move smaller elements left, larger right.", "Recursively sort the left and right partitions."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('9') && output.includes('5')",
+        "successMessage": "Quicksort works!",
+        "failureMessage": "Quicksort [7,2,9,1,5] and print the sorted result."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Custom Sort with Comparator",
+      "description": "Use `.sort_by()` with a custom comparator to sort strings `[\"apple\", \"banana\", \"kiwi\", \"strawberry\"]` by length (shortest first).",
+      "hints": ["`fruits.sort_by(|a, b| a.len().cmp(&b.len()));`", "`.cmp()` returns an `Ordering` (Less, Equal, Greater).", "Shortest first: kiwi, apple, banana, strawberry"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('kiwi') && output.includes('apple') && output.includes('banana')",
+        "successMessage": "Custom sort by length works!",
+        "failureMessage": "Sort strings by length and print."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Stable Sort",
+      "description": "Given `[(3, \"a\"), (1, \"b\"), (2, \"c\"), (1, \"d\")]`, sort by the first element using `.sort_by_key()` (which is stable) and verify equal keys maintain original relative order.",
+      "hints": ["`pairs.sort_by_key(|p| p.0);` — stable sort by first element.", "Stable: (1,\"b\") comes before (1,\"d\") after sorting.", "Print sorted pairs to verify order."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('b') && output.includes('d')",
+        "successMessage": "Stable sort preserves original order of equal keys!",
+        "failureMessage": "Sort pairs and print — (1,b) should come before (1,d)."
+      }
+    }
+  ]
+}

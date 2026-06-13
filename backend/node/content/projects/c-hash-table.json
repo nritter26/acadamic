@@ -1,0 +1,35 @@
+{
+  "id": "c-hash-table",
+  "title": "C: Hash Table",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "hash table", "linked list", "dynamic memory", "structs"],
+  "description": "Implement a hash table with string keys and integer values using separate chaining for collision resolution.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Hash Function and Insert",
+      "description": "Implement a hash table with 8 buckets. Define a `KeyValue` struct node for the linked list chain. Write `unsigned int hash(char *key)` and `void insert(KeyValue **table, char *key, int val)`. Test with 3 entries.",
+      "hints": ["Hash function: sum of char values modulo table size.", "Insert at head of the chain at table[hash(key)].", "Use `strdup()` or `malloc+strcpy` for key."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define TABLE_SIZE 8\n\ntypedef struct KV { char *key; int val; struct KV *next; } KeyValue;\n\nunsigned int hash(char *key) {\n    \n}\n\nvoid insert(KeyValue **table, char *key, int val) {\n    \n}\n\nint main() {\n    KeyValue *table[TABLE_SIZE] = {NULL};\n    insert(table, \"apple\", 5);\n    insert(table, \"banana\", 3);\n    insert(table, \"cherry\", 8);\n    for (int i = 0; i < TABLE_SIZE; i++) {\n        if (table[i]) {\n            printf(\"Bucket %d: \", i);\n            KeyValue *cur = table[i];\n            while (cur) { printf(\"%s=%d \", cur->key, cur->val); cur = cur->next; }\n            printf(\"\\n\");\n        }\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana')",
+        "successMessage": "Hash table insert works!",
+        "failureMessage": "Print all buckets with their key-value pairs"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Hash Table Search",
+      "description": "Write `int search(KeyValue **table, char *key, int *result)` that returns 1 if found, 0 otherwise. Search for 'banana' and 'grape'.",
+      "hints": ["Find the bucket using hash(key).", "Traverse the linked list comparing keys with strcmp.", "Return 0 if not found."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define TABLE_SIZE 8\ntypedef struct KV { char *key; int val; struct KV *next; } KeyValue;\n\nunsigned int hash(char *key) { unsigned int h=0; while(*key) h+=*key++; return h%TABLE_SIZE; }\nvoid insert(KeyValue **t, char *k, int v) {\n    KeyValue *n = malloc(sizeof(KeyValue));\n    n->key = strdup(k); n->val = v; n->next = t[hash(k)]; t[hash(k)] = n;\n}\n\nint search(KeyValue **table, char *key, int *result) {\n    \n}\n\nint main() {\n    KeyValue *table[TABLE_SIZE] = {NULL};\n    insert(table, \"apple\", 5); insert(table, \"banana\", 3); insert(table, \"cherry\", 8);\n    int val;\n    if (search(table, \"banana\", &val)) printf(\"Found: %d\\n\", val);\n    if (!search(table, \"grape\", &val)) printf(\"Not found\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Found: 3') && output.includes('Not found')",
+        "successMessage": "Hash table search works!",
+        "failureMessage": "Search for banana (found) and grape (not found)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-builder-pattern",
+  "title": "Rust: Builder Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "builder pattern", "type-safe builder", "fluent API"],
+  "description": "Implement the builder pattern for constructing complex objects with a fluent API.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Builder",
+      "description": "Create a `Person` struct with fields `name: String`, `age: u32`, `email: String`. Create a `PersonBuilder` with chainable `name()`, `age()`, `email()` methods and a `build()` method.",
+      "hints": ["`PersonBuilder` stores optional fields: `name: Option<String>` etc.", "Builder methods return `&mut Self` for chaining.", "`build()` constructs the Person, using defaults for missing fields."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30')",
+        "successMessage": "Basic builder works!",
+        "failureMessage": "Build and print a Person using the builder."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Consuming Builder",
+      "description": "Make the builder methods take and return `self` (consuming) instead of `&mut self`. This allows `Person::builder().name(\"Bob\").age(25).build()` style.",
+      "hints": ["`fn name(mut self, name: &str) -> Self { self.name = Some(name.to_string()); self }`", "Methods take ownership of self and return Self.", "This prevents reuse of a builder after build."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Bob') && output.includes('25')",
+        "successMessage": "Consuming builder works!",
+        "failureMessage": "Build Bob using consuming builder method chain."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Required Fields with Panic",
+      "description": "Add validation in `build()`: panic if name is missing (with a clear error message). Demonstrate building with and without a name.",
+      "hints": ["`let name = self.name.expect(\"name is required\");`", "Call `std::panic::catch_unwind` to safely test the panic.", "A good builder tells you exactly what's missing."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('name is required') || output.includes('panicked')",
+        "successMessage": "Required field validation works!",
+        "failureMessage": "Print the error message when building without a name."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Builder with Complex Validation",
+      "description": "Create an `OrderBuilder` for building an `Order` struct with items (Vec<String>), shipping address, and payment method. Validate that at least one item is present. Print the built order.",
+      "hints": ["`struct Order { items: Vec<String>, address: String, payment: String }`", "`add_item(mut self, item: &str) -> Self` adds to the items vec.", "`build()` returns `Result<Order, String>` for validation failures."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('item') || output.includes('Order')",
+        "successMessage": "Order builder with validation works!",
+        "failureMessage": "Build an Order with items and print it."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Type-State Builder",
+      "description": "Create a type-state builder where the type system enforces required fields. Use separate structs for each state (e.g., `EmptyPersonBuilder`, `WithNamePersonBuilder`, `CompletePersonBuilder`).",
+      "hints": ["`struct PersonBuilderName { name: String }`", "`PersonBuilderName::age(self, age: u32) -> PersonBuilderComplete`", "This moves invalid states to compile-time (zero runtime overhead)."],
+      "codeTemplate": { "rust": "struct EmptyBuilder;\nstruct WithName { name: String };\nstruct Complete { name: String, age: u32 };\n\nimpl EmptyBuilder {\n    fn name(self, name: &str) -> WithName {\n        WithName { name: name.to_string() }\n    }\n}\nimpl WithName {\n    fn age(self, age: u32) -> Complete {\n        Complete { name: self.name, age }\n    }\n}\n\nfn main() {\n    let person = EmptyBuilder.name(\"TypeState\").age(30);\n    println!(\"{} is {} years old\", person.name, person.age);\n}" },
+      "verification": {
+        "test": "output.includes('TypeState') && output.includes('30')",
+        "successMessage": "Type-state builder works!",
+        "failureMessage": "Build a person using the type-state builder and print."
+      }
+    }
+  ]
+}

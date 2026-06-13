@@ -1,0 +1,71 @@
+{
+  "id": "rs-distributed-lock",
+  "title": "Rust: Distributed Lock",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "distributed lock", "consensus", "leader election", "mutual exclusion"],
+  "description": "Implement a distributed lock algorithm with leader election and heartbeat.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Lock Interface",
+      "description": "Define a `DistributedLock` trait with `acquire(&self, name: &str) -> bool` and `release(&self, name: &str) -> bool`. Create a simple `InMemoryLock` using a `HashMap<String, bool>`.",
+      "hints": ["`trait DistributedLock { fn acquire(&self, name: &str) -> bool; fn release(&self, name: &str) -> bool; }`", "`struct InMemoryLock { locks: Mutex<HashMap<String, bool>> }`", "Acquire fails if already locked."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('acquired') && output.contains('released')",
+        "successMessage": "Lock interface works!",
+        "failureMessage": "Acquire and release a lock, print results."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Lock with Timeout",
+      "description": "Add `try_acquire_with_timeout(name, timeout_ms)` that retries acquiring for a duration. Use `Instant` and loop. Print each retry attempt.",
+      "hints": ["`let deadline = Instant::now() + Duration::from_millis(timeout_ms);`", "Loop: if acquire succeeds return true. If deadline passed, return false.", "Sleep a small interval between retries."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('acquired') || output.contains('timeout')",
+        "successMessage": "Lock with timeout works!",
+        "failureMessage": "Try to acquire with timeout and print the result."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Leader Election",
+      "description": "Implement leader election: multiple nodes compete for a `\"leader\"` lock. The first to acquire becomes leader. The leader holds the lock with a heartbeat. If the leader disconnects, a new election occurs.",
+      "hints": ["Each node tries to acquire the leader lock.", "The leader periodically renews the lock (heartbeat).", "If the leader lock expires, other nodes can become the new leader."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('leader') && output.contains('elected')",
+        "successMessage": "Leader election works!",
+        "failureMessage": "Run leader election and print the elected leader."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Reentrant Lock",
+      "description": "Add reentrancy: a lock can be acquired multiple times by the same owner. Track `owner: String` and `count: u32`. Each acquire increments count, each release decrements.",
+      "hints": ["Track `(owner, count)` instead of just a boolean.", "If same owner tries to acquire, increment count.", "Release only frees when count reaches 0."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('reentrant') || output.contains('acquired')",
+        "successMessage": "Reentrant lock works!",
+        "failureMessage": "Show that same owner can acquire the same lock multiple times."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Lock with Fencing Token",
+      "description": "Add fencing tokens: each successful acquire returns a monotonically increasing token number. If a request comes with an old token, it's rejected. This prevents stale locks from causing issues.",
+      "hints": ["Maintain a global counter: `next_token: AtomicU64`.", "Acquire returns `(bool, u64)` — the token.", "Requests include the token. Server checks it matches `current_token`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('token') || output.contains('fencing')",
+        "successMessage": "Fencing tokens work!",
+        "failureMessage": "Acquire a lock and show the fencing token."
+      }
+    }
+  ]
+}

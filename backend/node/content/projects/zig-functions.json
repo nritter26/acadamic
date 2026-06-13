@@ -1,0 +1,23 @@
+{
+  "id": "zig-functions",
+  "title": "Zig: Functions",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "functions", "parameters", "return values"],
+  "description": "Write a function that adds two integers and returns the result.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Add Function",
+      "description": "Write a function `fn add(a: i32, b: i32) i32` that returns the sum. In main(), call it with 10 and 20 and print the result.",
+      "hints": ["Zig functions: `fn add(a: i32, b: i32) i32 { return a + b; }`", "No arrow syntax — just `fn name(params) ReturnType { body }`.", "Call: `const result = add(10, 20);`"],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\nfn add(a: i32, b: i32) i32 {\n    \n}\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('30')",
+        "successMessage": "Function works!",
+        "failureMessage": "Call add(10, 20) and print '30'"
+      }
+    }
+  ]
+}

@@ -1,0 +1,433 @@
+{
+  "Getting Started": {
+    "MongoDB Introduction": {
+      "exp": "Introduction to MongoDB.",
+      "code": "",
+      "exercises": []
+    },
+    "What is MongoDB": [
+      "MongoDB is a NoSQL document database that stores data in flexible, JSON-like BSON documents. It's schema-less, horizontally scalable, and designed for modern applications with dynamic data models. Supports replica sets for HA and sharding for distributed data.",
+      "use('myDatabase');\ndb.createCollection('users');\nprint('MongoDB ready');\n// Documents can have different structures\ndb.users.insertOne({ name: 'Alice', age: 30 });\ndb.users.insertOne({ name: 'Bob', phone: '555-1234' });"
+    ],
+    "Document Model Deep Dive": [
+      "Documents are JSON-like structures with field-value pairs. Values can be strings, numbers, booleans, arrays, nested objects, dates, ObjectIds, and more. Max document size is 16MB. Nested fields use dot notation for access.",
+      "db.orders.insertOne({\n  _id: ObjectId('507f1f77bcf86cd799439011'),\n  customer: {\n    name: 'Alice',\n    address: { city: 'NYC', zip: '10001' }\n  },\n  items: [\n    { sku: 'ABC', qty: 2, price: 9.99 },\n    { sku: 'XYZ', qty: 1, price: 24.99 }\n  ],\n  total: 44.97,\n  createdAt: new Date()\n})\ndb.orders.find({ 'customer.address.city': 'NYC' })"
+    ],
+    "BSON Types Deep": [
+      "BSON extends JSON with types: ObjectId (12-byte unique id), Date (64-bit millisecond timestamp), NumberInt/NumberLong, Decimal128 (exact precision), Binary, Regex, Code, Timestamp, and MinKey/MaxKey for comparison.",
+      "db.typesDemo.insertOne({\n  _id: ObjectId(),\n  intVal: NumberInt(42),\n  longVal: NumberLong(9999999999),\n  decVal: NumberDecimal('19.99'),\n  dateVal: new Date(),\n  binaryVal: BinData(0, 'S2V5cw=='),\n  regexVal: /search.*term/i,\n  tsVal: Timestamp({ t: Math.floor(Date.now()/1000), i: 1 })\n})"
+    ],
+    "MongoDB Versions & Editions": [
+      "MongoDB 7.0+ (latest) with improved queryable encryption, change streams, and aggregation. Editions: Community (free), Enterprise (advanced security, auditing, Ops Manager), and Atlas (cloud-managed).",
+      "// Check version\ndb.version()\n// MongoDB 7.0 features - queryable encryption\ndb.createCollection('encrypted', {\n  encryptedFields: {\n    fields: [{\n      path: 'ssn',\n      bsonType: 'string',\n      queries: { queryType: 'equality' }\n    }]\n  }\n})"
+    ],
+    "Atlas & Cloud Setup": [
+      "MongoDB Atlas offers free M0 clusters, auto-scaling, backups, monitoring, global clusters, serverless instances, and Atlas Search. Provision via web UI, API, or Terraform.",
+      "# Create Atlas cluster via API\ncurl -s -u \"publicKey:privateKey\" \\\n  --digest https://cloud.mongodb.com/api/atlas/v1.0/groups/{groupId}/clusters \\\n  -X POST -H 'Content-Type: application/json' \\\n  -d '{\"name\":\"MyCluster\",\"providerSettings\":{\"providerName\":\"AWS\",\"regionName\":\"us-east-1\",\"instanceSizeName\":\"M10\"}}'"
+    ],
+    "Connection Strings": [
+      "Standard format: `mongodb://host:port/db`. Atlas SRV format: `mongodb+srv://cluster.mongodb.net/db`. Options: retryWrites, w, readPreference, maxPoolSize, connectTimeoutMS, tls.",
+      "# Standard\nmongodb://localhost:27017/myDB\n# With auth\nmongodb://user:pass@host1:27017,host2:27017/myDB?replicaSet=rs0\n# Atlas SRV\nmongodb+srv://myUser:myPass@cluster0.abcde.mongodb.net/sales?retryWrites=true&w=majority\n# Pool options\nmongodb://localhost:27017/myDB?maxPoolSize=50&connectTimeoutMS=5000"
+    ],
+    "mongosh Scripting": [
+      "mongosh supports full JavaScript scripting with variables, loops, functions, and print helpers. Write scripts and load them with `load()`. The `--eval` flag runs inline expressions.",
+      "// script.js\nconst dbName = 'sales_db';\nconst coll = db.getSiblingDB(dbName).orders;\nconst total = coll.aggregate([\n  { $group: { _id: null, total: { $sum: '$amount' } } }\n]).toArray()[0].total;\nprint(`Total sales: $${total}`);\n// Run: mongosh --eval \"load('script.js')\""
+    ]
+  },
+  "Core Concepts": {
+    "MongoDB Fundamentals": {
+      "exp": "Core MongoDB concepts.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Modeling": {
+    "MongoDB Schema Design": {
+      "exp": "Designing schemas in MongoDB.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Querying": {
+    "MongoDB Queries": {
+      "exp": "Querying data in MongoDB.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Indexes & Performance": {
+    "MongoDB Performance": {
+      "exp": "Optimizing MongoDB performance.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Security": {
+    "MongoDB Security": {
+      "exp": "Securing your MongoDB databases.",
+      "code": "",
+      "exercises": []
+    },
+    "Authentication Methods": [
+      "MongoDB supports SCRAM (default, password-based), x.509 (certificate), LDAP (enterprise), and Kerberos (enterprise). SCRAM-SHA-256 is the default mechanism, more secure than SCRAM-SHA-1.",
+      "// Create SCRAM user\ndb.createUser({\n  user: 'appUser',\n  pwd: 'securePass123',\n  mechanisms: ['SCRAM-SHA-256'],\n  roles: [{ role: 'readWrite', db: 'myDB' }]\n})\n\n// x.509 authentication (member cert)\ndb.getSiblingDB('$external').createUser({\n  user: 'CN=appServer,OU=Dev,O=Company',\n  roles: [{ role: 'readWrite', db: 'myDB' }]\n})"
+    ],
+    "Authorization & Roles": [
+      "Roles define permissions. Built-in: `read`, `readWrite`, `dbAdmin`, `userAdmin`, `clusterAdmin`. Create custom roles with specific actions on specific resources. Use `--auth` flag to enable.",
+      "// Create custom role\ndb.createRole({\n  role: 'orderManager',\n  privileges: [\n    { resource: { db: 'sales', collection: 'orders' },\n      actions: ['find', 'insert', 'update'] },\n    { resource: { db: 'sales', collection: 'reports' },\n      actions: ['find'] }\n  ],\n  roles: [{ role: 'read', db: 'logs' }]\n})\n\n// Grant role to user\ndb.grantRolesToUser('appUser', ['orderManager'])\n\n// Show user privileges\ndb.getUser('appUser').roles"
+    ],
+    "Field Level Encryption": [
+      "Client-Side Field Level Encryption (CSFLE) encrypts fields before they reach the server. Supports deterministic (supports queries) and random (more secure) encryption. Uses a local or remote KMS.",
+      "const client = new MongoClient(uri, {\n  autoEncryption: {\n    keyVaultNamespace: 'encryption.__keyVault',\n    kmsProviders: {\n      local: { key: localMasterKey }\n    },\n    schemaMap: {\n      'mydb.users': {\n        bsonType: 'object',\n        properties: {\n          ssn: {\n            encrypt: {\n              bsonType: 'string',\n              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'\n            }\n          }\n        }\n      }\n    }\n  }\n})\n\n// Query encrypted field directly\ncollection.find({ ssn: '123-45-6789' })"
+    ],
+    "Audit Log": [
+      "Enterprise feature that logs all auth events, DDL operations, and CRUD operations. Output to console, syslog, JSON file, or BSON. Configure in mongod.conf. Essential for compliance (SOC2, HIPAA, PCI).",
+      "# mongod.conf audit configuration\nauditLog:\n  destination: file\n  format: JSON\n  path: /var/log/mongodb/audit.log\n  filter: '{\"atype\":{\"$in\":[\"authCheck\",\"createCollection\",\"dropCollection\",\"createUser\",\"dropUser\"]}}'\n\n# Or via command line\nmongod --auditDestination file --auditFormat JSON --auditPath /var/log/mongodb/audit.log\n\n# Parse audit logs\ndb.adminCommand({ getLog: 'audit' })"
+    ],
+    "TLS/SSL & Network Compression": [
+      "Enable TLS for encrypted client-server communication. Use PEM certificates. MongoDB supports snappy, zlib, and zstd compression to reduce network bandwidth. Configure both on mongod and client side.",
+      "# mongod.conf TLS\nnet:\n  tls:\n    mode: requireTLS\n    certificateKeyFile: /etc/mongodb/server.pem\n    CAFile: /etc/mongodb/ca.pem\n    allowConnectionsWithoutCertificates: false\n\n# Client connection with TLS\nmongosh --tls --tlsCertificateKeyFile client.pem --tlsCAFile ca.pem \\\n  --host myHost --port 27017\n\n# Connection string with TLS\nmongodb://host:27017/db?tls=true&tlsCertificateKeyFile=client.pem&tlsCAFile=ca.pem\n\n# Network compression\nmongod --networkMessageCompressors snappy,zstd,zlib"
+    ],
+    "IP Whitelisting & Security Checklist": [
+      "Bind IP to specific interfaces (not 0.0.0.0). Use firewalls, VPCs, and security groups. Enable `--auth`. Rotate users' passwords. Use SCRAM-SHA-256. Monitor with audit logs. Enable TLS everywhere.",
+      "# mongod.conf security best practices\nnet:\n  bindIp: 10.0.0.1,10.0.0.2  # NOT 0.0.0.0\n  port: 27017\n  tls:\n    mode: requireTLS\n\nsecurity:\n  authorization: enabled\n  javascriptEnabled: false  # disable if not needed\n\n# IP access control list\n# Use iptables, AWS SG, etc:\niptables -A INPUT -p tcp --dport 27017 -s 10.0.0.0/8 -j ACCEPT\niptables -A INPUT -p tcp --dport 27017 -j DROP"
+    ]
+  },
+  "Advanced Features": {
+    "MongoDB Advanced": {
+      "exp": "Advanced MongoDB features and techniques.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "CRUD Operations": {
+    "Create (insertOne / insertMany)": [
+      "`insertOne()` inserts a single document, `insertMany()` inserts multiple in one round-trip. Each document auto-receives an `_id` (ObjectId) if not provided. `insertMany()` is ordered by default; use `{ ordered: false }` to continue on error.",
+      "db.users.insertOne({\n  name: 'Alice',\n  email: 'alice@example.com',\n  roles: ['viewer'],\n  createdAt: new Date()\n})\ndb.users.insertMany([\n  { name: 'Bob', email: 'bob@example.com' },\n  { name: 'Charlie', email: 'charlie@example.com' }\n], { ordered: false })"
+    ],
+    "Read (find / findOne)": [
+      "`find()` returns a cursor to matching documents. `findOne()` returns the first matched doc. Filter object selects documents; projection object limits returned fields. Use `.pretty()` for formatted output in shell.",
+      "db.users.find({ age: { $gte: 21 } }, { name: 1, email: 1 })\ndb.users.findOne({ email: 'alice@example.com' })\ndb.products.find(\n  { category: 'Electronics', price: { $lt: 100 } },\n  { name: 1, price: 1, _id: 0 }\n).sort({ price: 1 }).limit(10)"
+    ],
+    "Update (updateOne / updateMany)": [
+      "`updateOne()` updates the first matching doc. `updateMany()` updates all matching docs. Use `$set`, `$unset`, `$inc`, `$push`, `$pull`, and more. The third parameter accepts options like `upsert: true`.",
+      "db.users.updateOne(\n  { email: 'alice@example.com' },\n  { $set: { lastLogin: new Date() }, $inc: { loginCount: 1 } }\n)\ndb.products.updateMany(\n  { category: 'Discontinued' },\n  { $set: { active: false }, $unset: { discount: '' } }\n)"
+    ],
+    "Delete (deleteOne / deleteMany)": [
+      "`deleteOne()` deletes the first match. `deleteMany()` deletes all matches. `drop()` removes the entire collection including indexes. Deletes are permanent — verify filters with `find()` first.",
+      "db.users.deleteOne({ status: 'inactive' })\ndb.users.deleteMany({ lastLogin: { $lt: new Date('2023-01-01') } })\ndb.tempData.drop()\n// Safe delete pattern\nconst filter = { status: 'pending' }\nprint('Docs to delete:', db.users.countDocuments(filter))\ndb.users.deleteMany(filter)"
+    ],
+    "bulkWrite": [
+      "`bulkWrite()` performs multiple write operations (insert, update, replace, delete) in a single batch. Accepts an array of operation objects. Supports `{ ordered: false }` for parallel execution.",
+      "db.products.bulkWrite([\n  { insertOne: { document: { name: 'Phone', price: 699 } } },\n  { updateOne: {\n    filter: { name: 'Laptop' },\n    update: { $set: { price: 999 } }\n  }},\n  { deleteOne: { filter: { name: 'Old Model' } } },\n  { replaceOne: {\n    filter: { sku: 'TAB-001' },\n    replacement: { name: 'Tablet Pro', price: 499 }\n  }}\n], { ordered: false })"
+    ],
+    "findAndModify": [
+      "`findOneAndUpdate()`, `findOneAndDelete()`, `findOneAndReplace()` atomically find and modify a document. Options: `returnDocument: 'after'/'before'`, `sort`, `projection`, `upsert`. Useful for queues and counters.",
+      "// Atomic counter increment\nconst counter = db.counters.findOneAndUpdate(\n  { _id: 'orderSeq' },\n  { $inc: { seq: 1 } },\n  { returnDocument: 'after', upsert: true }\n)\nprint('Next order#:', counter.seq)\n\n// Queue dequeue\nconst job = db.queue.findOneAndDelete(\n  { status: 'pending' },\n  { sort: { priority: -1, createdAt: 1 } }\n)"
+    ],
+    "replaceOne": [
+      "`replaceOne()` replaces the entire document (except `_id`) matching the filter. Unlike `updateOne()` with `$set`, this replaces all fields. The replacement doc must not contain update operators.",
+      "db.users.replaceOne(\n  { email: 'alice@old.com' },\n  {\n    name: 'Alice Smith',\n    email: 'alice@new.com',\n    updatedAt: new Date()\n  },\n  { upsert: true }\n)"
+    ],
+    "Update Operators Deep": [
+      "`$push` adds to array. `$pull` removes matching items. `$addToSet` adds if not present. `$each` pushes multiple. `$position` inserts at index. `$slice` limits array size after push.",
+      "db.posts.updateOne(\n  { _id: postId },\n  { $push: { tags: { $each: ['mongodb', 'database'], $position: 0 } } }\n)\ndb.posts.updateOne(\n  { _id: postId },\n  { $push: { comments: { $each: [newComment], $sort: { createdAt: -1 }, $slice: 50 } } }\n)\ndb.users.updateOne(\n  { _id: userId },\n  { $pull: { roles: { $in: ['temporary', 'expired'] } } }\n)\ndb.tags.updateOne(\n  { _id: tagId },\n  { $addToSet: { followers: userId } }\n)"
+    ],
+    "arrayFilters & upsert Deep": [
+      "arrayFilters target specific array elements for update. upsert: true creates a doc if no match is found. Combined, they enable powerful conditional updates on nested arrays.",
+      "db.students.updateOne(\n  { name: 'Alice' },\n  { $set: { 'scores.$[elem].grade': 'A' } },\n  {\n    arrayFilters: [{ 'elem.subject': 'Math' }],\n    upsert: false\n  }\n)\n\n// Upsert with $setOnInsert\ndb.inventory.updateOne(\n  { sku: 'NEW-ITEM' },\n  {\n    $inc: { qty: 5 },\n    $setOnInsert: { createdAt: new Date(), status: 'active' }\n  },\n  { upsert: true }\n)"
+    ],
+    "Write Concern": [
+      "Write concern controls acknowledgment: `w: 0` (fire-and-forget), `w: 1` (primary acknowledged), `w: 'majority'` (majority of nodes), `w: <tag>` (custom tag set). `wtimeout` cancels if not met.",
+      "db.orders.insertOne(\n  { item: 'Book', qty: 10 },\n  { writeConcern: { w: 'majority', wtimeout: 5000, j: true } }\n)\n\n// Journaled write\ndb.transactions.insertOne(\n  { from: 'A', to: 'B', amount: 100 },\n  { writeConcern: { w: 'majority', j: true } }\n)"
+    ]
+  },
+  "Querying & Operators": {
+    "Comparison Operators": [
+      "`$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`. Combine multiple on the same field. `$in` accepts an array of values. Use `$ne` and `$nin` with indexes carefully (they scan broadly).",
+      "db.products.find({ price: { $gte: 10, $lte: 100 } })\ndb.products.find({ category: { $in: ['Electronics', 'Books'] } })\ndb.orders.find({ status: { $ne: 'cancelled' }, total: { $gte: 50 } })"
+    ],
+    "Logical Operators": [
+      "`$and`, `$or`, `$not`, `$nor`. Implicit AND is used for comma-separated conditions. Use explicit `$and` when conditions involve the same field or complex expressions.",
+      "db.users.find({\n  $and: [{ age: { $gte: 18 } }, { status: 'active' }]\n})\ndb.users.find({\n  $or: [{ role: 'admin' }, { permissions: 'manage' }]\n})\ndb.items.find({ price: { $not: { $gte: 100 } } })\ndb.users.find({\n  $nor: [{ status: 'banned' }, { deleted: true }]\n})"
+    ],
+    "Array Operators": [
+      "`$all` matches arrays containing all elements. `$elemMatch` matches docs with an array element satisfying all conditions. `$size` matches exact array length. Combine for precise array queries.",
+      "db.articles.find({ tags: { $all: ['mongodb', 'database'] } })\ndb.scores.find({\n  results: { $elemMatch: { score: { $gte: 80, $lte: 100 }, passed: true } }\n})\ndb.posts.find({ comments: { $size: 0 } })"
+    ],
+    "Element & Evaluation Operators": [
+      "`$exists` checks field presence. `$type` matches BSON type. `$expr` enables aggregation expressions in queries. `$mod` modulo match. `$regex` pattern matching.",
+      "db.users.find({ email: { $exists: true, $type: 'string' } })\ndb.orders.find({ $expr: { $gt: ['$total', '$limit'] } })\ndb.orders.find({ $expr: {\n  $and: [\n    { $gte: ['$total', 100] },\n    { $lt: [{ $size: '$items' }, 10] }\n  ]\n}})\ndb.users.find({ name: { $regex: /^alice/i } })"
+    ],
+    "Cursor Methods & Projection": [
+      "Cursors provide `.sort()`, `.limit()`, `.skip()`, `.count()`, `.forEach()`, `.map()`, `.toArray()`. Projection `{ field: 1 }` includes; `{ field: 0 }` excludes. `_id` is included by default.",
+      "db.users.find({}, { name: 1, email: 1, _id: 0 })\n  .sort({ name: 1 })\n  .skip(20)\n  .limit(10)\n  .forEach(doc => print(doc.name))\n\n// Cursor count (honors skip/limit)\ndb.orders.find({ status: 'shipped' }).limit(50).count()"
+    ],
+    "Sort & Pagination Patterns": [
+      "Use `.sort()` with `.skip()`/`.limit()` for pagination (inefficient at scale). For efficient pagination, use range-based with `$lt`/`$gt` on indexed fields. Avoid large skips.",
+      "// Page-based (inefficient for deep pages)\ndb.articles.find().sort({ createdAt: -1 }).skip(100).limit(20)\n\n// Range-based (efficient, uses index)\ndb.articles.find({ createdAt: { $lt: lastSeen } })\n  .sort({ createdAt: -1 })\n  .limit(20)\n\n// Keyset pagination\ndb.articles.find({\n  $or: [\n    { createdAt: { $lt: lastCreatedAt } },\n    { createdAt: lastCreatedAt, _id: { $lt: lastId } }\n  ]\n}).sort({ createdAt: -1, _id: -1 }).limit(20)"
+    ],
+    "Geospatial Queries": [
+      "Supports GeoJSON objects (Point, LineString, Polygon). Create a `2dsphere` index for spherical queries. Operators: `$near` (sorted proximity), `$geoWithin` (within shape), `$geoIntersects` (intersects shape).",
+      "db.places.createIndex({ location: '2dsphere' })\n\n$near: sorted proximity\ndb.places.find({\n  location: {\n    $near: {\n      $geometry: { type: 'Point', coordinates: [-73.97, 40.77] },\n      $maxDistance: 1000,\n      $minDistance: 10\n    }\n  }\n})\n\n$geoWithin\ndb.places.find({\n  location: {\n    $geoWithin: {\n      $geometry: {\n        type: 'Polygon',\n        coordinates: [[[0,0],[0,10],[10,10],[10,0],[0,0]]]\n      }\n    }\n  }\n})"
+    ],
+    "Text Search Deep": [
+      "`$text` query operator with `$search` performs full-text search on text-indexed fields. Supports `$language` for stemming, `$caseSensitive`, `$diacriticSensitive`. `$meta: 'textScore'` for relevance ranking.",
+      "db.articles.createIndex({ title: 'text', body: 'text' })\n\n// Basic search\ndb.articles.find({ $text: { $search: 'mongodb performance' } })\n\n// With scoring\ndb.articles.find(\n  { $text: { $search: 'database scaling' } },\n  { score: { $meta: 'textScore' } }\n).sort({ score: { $meta: 'textScore' } })\n\n// Phrase search (exact)\ndb.articles.find({ $text: { $search: '\\\"distributed systems\\\"' } })"
+    ],
+    "$expr & Aggregation Variables": [
+      "`$expr` allows aggregation expressions in queries. `$$` references system variables (`$NOW`, `$ROOT`). `let` defines variables for use within `$expr`. Enables cross-field comparisons and computed conditions.",
+      "db.orders.find({ $expr: { $gt: ['$total', '$freeThreshold'] } })\n\n// Using $$NOW\ndb.orders.find({ $expr: {\n  $gt: ['$expiresAt', '$$NOW']\n}})\n\n// let variables\ndb.orders.find({\n  $let: {\n    vars: { discount: { $multiply: ['$total', 0.1] } },\n    in: { $expr: { $gte: ['$total', { $add: ['$discountedTotal', '$$discount'] }] } }\n  }\n})"
+    ]
+  },
+  "Indexing": {
+    "Index Basics": [
+      "Indexes speed up queries at the cost of write performance and storage. `createIndex()` creates an index. Types: single-field, compound, multikey (array), text, geospatial, hashed. Use `getIndexes()` to inspect.",
+      "db.users.createIndex({ email: 1 }, { unique: true })\ndb.users.createIndex({ name: 1, age: -1 })\ndb.orders.createIndex({ tags: 1 }) // multikey (array field)\ndb.users.getIndexes()\n// List all indexes\ndb.users.getIndexes().forEach(idx => printjson(idx))"
+    ],
+    "Compound Indexes & ESR Rule": [
+      "Compound indexes support queries on multiple fields. ESR rule: Equality fields first, Sort fields next, Range fields last. Prefix matching — a compound index can serve queries on its leading fields.",
+      "db.orders.createIndex({ status: 1, createdAt: -1 })\n// Serves:\ndb.orders.find({ status: 'shipped' }).sort({ createdAt: -1 })\ndb.orders.find({ status: 'shipped', createdAt: { $gte: ISODate('2024-01-01') } })\n\n// ESR: status (E), createdAt (S), total (R)\ndb.orders.createIndex({ status: 1, createdAt: -1, total: 1 })"
+    ],
+    "Text Indexes": [
+      "Text indexes enable full-text search with `$text`. A collection can have only one text index (can cover multiple fields). Supports stemming, stop words, weights for field ranking, and text scoring.",
+      "db.articles.createIndex(\n  { title: 'text', body: 'text', tags: 'text' },\n  { weights: { title: 10, tags: 5, body: 1 }, name: 'article_text_index' }\n)\ndb.articles.find(\n  { $text: { $search: 'mongodb aggregation', $language: 'en' } },\n  { score: { $meta: 'textScore' } }\n).sort({ score: { $meta: 'textScore' } })"
+    ],
+    "Explain & Optimize": [
+      "`.explain('executionStats')` shows query plans, scanned docs, index usage, and timing. Look for IXSCAN (good) vs COLLSCAN (bad). `winningPlan` shows the chosen plan; `rejectedPlans` shows alternatives.",
+      "db.users.find({ email: 'alice@example.com' }).explain('executionStats')\n// Key fields:\n//   stage: IXSCAN | COLLSCAN\n//   totalDocsExamined\n//   executionTimeMillisEstimate\n//   nReturned\n\n// Index filter hint\ndb.orders.find({ status: 'active', createdAt: { $gt: cutoff } })\n  .hint({ status: 1, createdAt: -1 })\n  .explain('executionStats')"
+    ],
+    "Special Index Types": [
+      "TTL indexes auto-delete docs after a timeout. Sparse indexes skip null fields. Unique indexes enforce uniqueness. Partial indexes index only matching docs. Hidden indexes are not used by the query planner.",
+      "// TTL: docs expire 3600s after createdAt\ndb.sessions.createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 })\n\n// Sparse: only index docs with email\ndb.users.createIndex({ email: 1 }, { sparse: true, unique: true })\n\n// Partial: index only active users\ndb.users.createIndex({ name: 1 }, { partialFilterExpression: { status: 'active' } })\n\n// Hidden: conceal from planner (test dropping safely)\ndb.orders.createIndex({ total: 1 }, { hidden: true })"
+    ],
+    "Index Intersection": [
+      "MongoDB can use multiple indexes to satisfy a query via index intersection. Use `$or` clauses or compound queries. The query planner evaluates intersection vs compound index to pick the best plan.",
+      "db.orders.createIndex({ status: 1 })\ndb.orders.createIndex({ customerId: 1 })\n\n// Index intersection: uses both indexes\ndb.orders.find({\n  status: 'pending',\n  customerId: 'ABC123'\n}).explain()\n// Stage: IXSCAN (status) ∩ IXSCAN (customerId)"
+    ],
+    "Covered Queries": [
+      "A covered query is fulfilled entirely from the index without reading documents. All queried and projected fields must be in the index. `explain()` shows `FETCH` stage is absent for covered queries.",
+      "db.users.createIndex({ name: 1, email: 1 })\n\n// Covered query\nconst result = db.users.find(\n  { name: 'Alice' },\n  { _id: 0, name: 1, email: 1 }\n).explain('executionStats')\n// totalDocsExamined: 0 (no FETCH stage)\n\n// Not covered (needs _id)\ndb.users.find({ name: 'Alice' }, { name: 1 }).explain()"
+    ],
+    "Index Builds & Rolling Builds": [
+      "Index builds can block reads/writes on the collection (foreground) or run in background. In replica sets, rolling index builds build on each member sequentially to avoid downtime. For large collections, use `createIndex()` with `{ background: true }`.",
+      "// Foreground (fast, but blocks)\ndb.largeCollection.createIndex({ field: 1 })\n\n// Background (slower, non-blocking)\ndb.largeCollection.createIndex({ field: 1 }, { background: true })\n\n// Rolling index build strategy:\n// 1. Take secondary down 2. Build index 3. Rejoin\n// 4. Repeat for other secondaries\n// 5. Step down primary, build on old-primary last\nrs.stepDown(60)"
+    ]
+  },
+  "Aggregation Pipeline": {
+    "Pipeline Overview & $match / $group": [
+      "The aggregation pipeline processes documents through a sequence of stages. `$match` filters early (like find). `$group` groups by key and computes accumulators. Always put `$match` early.",
+      "db.orders.aggregate([\n  { $match: { status: 'completed', date: { $gte: ISODate('2024-01-01') } } },\n  { $group: {\n    _id: '$customerId',\n    totalSpent: { $sum: '$amount' },\n    orderCount: { $sum: 1 },\n    avgAmount: { $avg: '$amount' }\n  }},\n  { $sort: { totalSpent: -1 } },\n  { $limit: 10 }\n])"
+    ],
+    "Accumulators Deep ($first / $last / $push / $addToSet)": [
+      "`$sum` adds values. `$avg` averages. `$min`/`$max` find extremes. `$first`/`$last` get first/last doc per group (requires sort). `$push` collects into array. `$addToSet` collects unique values.",
+      "db.sales.aggregate([\n  { $sort: { region: 1, saleDate: -1 } },\n  { $group: {\n    _id: '$region',\n    totalSales: { $sum: '$amount' },\n    avgSale: { $avg: '$amount' },\n    maxSale: { $max: '$amount' },\n    firstSale: { $first: '$$ROOT' },\n    lastSale: { $last: '$$ROOT' },\n    allItems: { $push: '$item' },\n    uniqueItems: { $addToSet: '$item' },\n    saleDates: { $push: { date: '$saleDate', amount: '$amount' } }\n  }}\n])"
+    ],
+    "$lookup (Joins) & $unwind": [
+      "`$lookup` performs left outer join. `from` is the target collection, `localField` and `foreignField` define the join, `as` names the output array. `$unwind` deconstructs arrays (flattens).",
+      "db.orders.aggregate([\n  { $match: { status: 'completed' } },\n  { $lookup: {\n    from: 'customers',\n    localField: 'customerId',\n    foreignField: '_id',\n    as: 'customer'\n  }},\n  { $unwind: { path: '$customer', preserveNullAndEmptyArrays: false } },\n  { $lookup: {\n    from: 'products',\n    localField: 'productIds',\n    foreignField: '_id',\n    as: 'products'\n  }},\n  { $project: {\n    'customer.name': 1,\n    'products.name': 1,\n    total: 1\n  }}\n])"
+    ],
+    "$bucket & $bucketAuto": [
+      "`$bucket` groups documents into user-defined ranges. `$bucketAuto` auto-generates evenly-sized buckets. Both support `$output` with accumulators. Useful for histograms and distribution analysis.",
+      "db.scores.aggregate([\n  { $bucket: {\n    groupBy: '$score',\n    boundaries: [0, 60, 70, 80, 90, 100],\n    default: 'Other',\n    output: {\n      count: { $sum: 1 },\n      avgScore: { $avg: '$score' }\n    }\n  }}\n])\n\n// Auto-bucket into 5 buckets\ndb.scores.aggregate([\n  { $bucketAuto: {\n    groupBy: '$score',\n    buckets: 5,\n    output: {\n      count: { $sum: 1 },\n      minScore: { $min: '$score' },\n      maxScore: { $max: '$score' }\n    }\n  }}\n])"
+    ],
+    "$facet & $graphLookup": [
+      "`$facet` runs multiple sub-pipelines on the same input. `$graphLookup` performs recursive graph traversal for hierarchical data like org charts or social networks.",
+      "db.orders.aggregate([\n  { $match: { date: { $gte: ISODate('2024-01-01') } } },\n  { $facet: {\n    byCategory: [\n      { $group: { _id: '$category', count: { $sum: 1 }, total: { $sum: '$amount' } } }\n    ],\n    stats: [\n      { $group: { _id: null, avgTotal: { $avg: '$amount' }, maxTotal: { $max: '$amount' } } }\n    ],\n    topCustomers: [\n      { $sort: { amount: -1 } },\n      { $limit: 5 },\n      { $project: { customerId: 1, amount: 1 } }\n    ]\n  }}\n])\n\n// Graph traversal - org hierarchy\ndb.employees.aggregate([\n  { $match: { name: 'Alice' } },\n  { $graphLookup: {\n    from: 'employees',\n    startWith: '$_id',\n    connectFromField: 'managerId',\n    connectToField: '_id',\n    as: 'subordinates',\n    maxDepth: 5,\n    depthField: 'level'\n  }}\n])"
+    ],
+    "$merge & $out": [
+      "`$out` writes pipeline results to a new collection (replaces entire collection). `$merge` merges results into an existing collection with merge strategies: `replace`, `merge`, `keepExisting`, `fail`.",
+      "db.rawEvents.aggregate([\n  { $match: { eventType: 'purchase' } },\n  { $group: { _id: '$userId', totalSpent: { $sum: '$amount' }, purchases: { $sum: 1 } } },\n  { $merge: {\n    into: 'userPurchaseSummary',\n    on: '_id',\n    whenMatched: 'merge',\n    whenNotMatched: 'insert'\n  }}\n])\n\n// Replace entire collection\ndb.orders.aggregate([\n  { $group: { _id: '$region', total: { $sum: '$amount' } } },\n  { $sort: { total: -1 } },\n  { $out: 'regionSummary' }\n])"
+    ],
+    "$unionWith & $setWindowFields": [
+      "`$unionWith` combines results from multiple collections (like SQL UNION). `$setWindowFields` enables window functions: `$rank`, `$denseRank`, `$rowNumber`, `$shift`, and sliding window accumulators.",
+      "// Union current and archived orders\ndb.orders.aggregate([\n  { $match: { year: 2024 } },\n  { $unionWith: { coll: 'orders_archive', pipeline: [{ $match: { year: 2024 } }] } },\n  { $group: { _id: '$region', total: { $sum: '$amount' } } }\n])\n\n// Window functions - rank employees by salary\ndb.employees.aggregate([\n  { $setWindowFields: {\n    partitionBy: '$department',\n    sortBy: { salary: -1 },\n    output: {\n      rank: { $rank: {} },\n      denseRank: { $denseRank: {} },\n      departmentAvg: { $avg: '$salary', window: { documents: ['unbounded', 'current'] } },\n      nextLower: { $shift: { output: '$salary', by: 1, default: null } }\n    }\n  }}\n])"
+    ],
+    "Aggregation Expressions": [
+      "Expressions include arithmetic (`$add`, `$multiply`, `$subtract`, `$divide`, `$mod`), string (`$concat`, `$substr`, `$toLower`, `$toUpper`, `$trim`), date (`$year`, `$month`, `$dayOfMonth`, `$dateToString`), and conditional (`$cond`, `$ifNull`, `$switch`).",
+      "db.orders.aggregate([\n  { $project: {\n    orderYear: { $year: '$createdAt' },\n    orderMonth: { $month: '$createdAt' },\n    formattedDate: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },\n    fullName: { $concat: ['$firstName', ' ', '$lastName'] },\n    discountedPrice: { $multiply: ['$price', { $subtract: [1, '$discountPercent'] }] },\n    tax: { $multiply: ['$subtotal', 0.08] },\n    categoryLabel: {\n      $switch: {\n        branches: [\n          { case: { $eq: ['$category', 'ELEC'] }, then: 'Electronics' },\n          { case: { $eq: ['$category', 'BOOK'] }, then: 'Books' }\n        ],\n        default: 'Other'\n      }\n    },\n    priority: { $cond: { if: { $gte: ['$total', 100] }, then: 'HIGH', else: 'NORMAL' } }\n  }}\n])"
+    ]
+  },
+  "Schema Design": {
+    "Embedding vs Referencing": [
+      "Embedding stores related data in the same document (fast reads, atomic updates). Referencing stores IDs and uses `$lookup` to join (avoids 16MB limit, reduces duplication). Prefer embedding for one-to-few, referencing for one-to-many.",
+      "// Embedding (one-to-few)\ndb.authors.insertOne({\n  name: 'Alice',\n  books: [\n    { title: 'MongoDB Guide', year: 2023 },\n    { title: 'NoSQL Deep Dive', year: 2024 }\n  ]\n})\n\n// Referencing (one-to-many)\ndb.authors.insertOne({ _id: 1, name: 'Bob' })\ndb.books.insertMany([\n  { authorId: 1, title: 'Book A' },\n  { authorId: 1, title: 'Book B' }\n])"
+    ],
+    "One-to-One / One-to-Many / Many-to-Many": [
+      "One-to-one: embed or reference with unique constraint. One-to-many: embed (few) or reference (many). Many-to-many: array of references on either side or a junction collection.",
+      "// One-to-One: embed profile in user\ndb.users.insertOne({ name: 'Alice', profile: { avatar: 'a.png', bio: 'Dev' } })\n\n// One-to-Many (many): reference\ndb.users.insertOne({ _id: 1, name: 'Alice' })\ndb.posts.insertMany([\n  { userId: 1, title: 'Post 1' },\n  { userId: 1, title: 'Post 2' }\n])\n\n// Many-to-Many: array of refs\ndb.students.insertOne({ _id: 1, name: 'Alice', courseIds: [101, 102] })\ndb.courses.insertMany([\n  { _id: 101, name: 'Math', studentIds: [1, 2] },\n  { _id: 102, name: 'Science', studentIds: [1] }\n])"
+    ],
+    "Polymorphic Patterns": [
+      "Store different entity types in the same collection using a type discriminator field. Common for event sourcing, content management (articles, videos, podcasts), and product catalogs with shared base fields.",
+      "db.content.insertMany([\n  {\n    type: 'article',\n    title: 'MongoDB Guide',\n    body: 'Content...',\n    tags: ['database'],\n    wordCount: 1200\n  },\n  {\n    type: 'video',\n    title: 'Aggregation Tutorial',\n    url: 'https://...',\n    duration: 1800,\n    resolution: '1080p'\n  },\n  {\n    type: 'podcast',\n    title: 'NoSQL Deep Dive',\n    audioUrl: 'https://...',\n    duration: 3600,\n    guests: ['Alice']\n  }\n])\ndb.content.createIndex({ type: 1, createdAt: -1 })"
+    ],
+    "Bucket Pattern": [
+      "The bucket pattern groups related data into time-based or size-based buckets. Ideal for time-series data (IoT sensor readings) — reduces document count, improves index efficiency, and enables pre-aggregation.",
+      "// Instead of one doc per reading:\ndb.sensorReadings.insertOne({\n  sensorId: 'temp-001',\n  hour: ISODate('2024-01-01T00:00:00Z'),\n  readings: [\n    { t: '00:01:00', v: 22.5 },\n    { t: '00:02:00', v: 22.7 },\n    // ... 60 readings per bucket\n  ],\n  stats: {\n    min: 22.1,\n    max: 23.4,\n    avg: 22.8,\n    count: 60\n  }\n})\ndb.sensorReadings.createIndex({ sensorId: 1, hour: -1 })"
+    ],
+    "Computed & Pre-Aggregation Patterns": [
+      "Pre-compute aggregates and store them alongside or in separate collections. Use `$merge` for periodic rollups. Reduce computation at read time — ideal for dashboards, leaderboards, and trend analysis.",
+      "// Store computed totals\nconst pipeline = [\n  { $match: { createdAt: { $gte: start, $lt: end } } },\n  { $group: {\n    _id: '$category',\n    totalSales: { $sum: '$amount' },\n    avgSale: { $avg: '$amount' },\n    count: { $sum: 1 }\n  }}\n]\ndb.dailySalesRollup.aggregate([\n  ...pipeline,\n  { $merge: { into: 'categoryStats', on: '_id', whenMatched: 'replace' } }\n])\n\n// Computed field in doc\ndb.orders.insertOne({\n  items: [{ price: 10, qty: 2 }, { price: 5, qty: 1 }],\n  subtotal: 25,\n  tax: 2.00,\n  // Pre-computed instead of calculating at read\n  total: 27.00\n})"
+    ],
+    "Document Versioning": [
+      "Track document versions using a version field or separate history collection. Pattern: store current doc in main collection, append versions to a history collection. Supports rollback and audit trails.",
+      "// Schema with version field\ndb.articles.insertOne({\n  _id: 1,\n  title: 'MongoDB',\n  body: '...',\n  version: 1,\n  updatedAt: new Date()\n})\n\n// Update with version increment\ndb.articles.updateOne(\n  { _id: 1, version: 1 },\n  {\n    $set: { body: 'updated...', updatedAt: new Date() },\n    $inc: { version: 1 }\n  }\n)\n\n// Or side-collection history\ndb.articleHistory.insertOne({\n  articleId: 1,\n  version: 1,\n  body: 'original...',\n  archivedAt: new Date()\n})"
+    ],
+    "Schema Validation": [
+      "MongoDB supports JSON Schema validation (`$jsonSchema`) at collection level. Validate required fields, types, ranges, enums, and patterns. Use `validationLevel: 'strict' | 'moderate'` and `validationAction: 'error' | 'warn'`.",
+      "db.createCollection('users', {\n  validator: {\n    $jsonSchema: {\n      bsonType: 'object',\n      required: ['name', 'email', 'age'],\n      properties: {\n        name: { bsonType: 'string', description: 'required string' },\n        email: {\n          bsonType: 'string',\n          pattern: '^[a-zA-Z0-9@.]+$'\n        },\n        age: { bsonType: 'int', minimum: 0, maximum: 150 },\n        role: { enum: ['user', 'admin', 'moderator'] },\n        phone: {\n          bsonType: 'string',\n          pattern: '^\\\\+?[0-9]{7,15}$'\n        }\n      }\n    }\n  },\n  validationLevel: 'strict',\n  validationAction: 'error'\n})"
+    ]
+  },
+  "Performance & Optimization": {
+    "Query Profiling": [
+      "Set profiling level to capture slow queries. Level 0: off. Level 1: queries slower than `slowms`. Level 2: all queries. Results stored in `system.profile`. Analyze for full scans, missing indexes, and sort patterns.",
+      "// Enable profiling (slow queries > 100ms)\ndb.setProfilingLevel(1, { slowms: 100 })\n\n// Check current level\ndb.getProfilingStatus()\n\n// View recent slow queries\ndb.system.profile.find({\n  op: { $in: ['query', 'command'] },\n  millis: { $gte: 100 }\n}).sort({ ts: -1 }).limit(10).pretty()\n\n// Disable\ndb.setProfilingLevel(0)"
+    ],
+    "Slow Query Analysis": [
+      "Use `explain('executionStats')` and system.profile to diagnose. Key metrics: `COLLSCAN` (bad, full collection scan), `IXSCAN` (good), `nReturned` vs `totalDocsExamined`, `executionTimeMillis`, and `docsExamined`.",
+      "// Analyze problematic query\ndb.orders.find({ status: 'active', total: { $gt: 100 } })\n  .sort({ createdAt: -1 })\n  .explain('executionStats')\n\n// Red flags:\n// stage: 'COLLSCAN'\n// totalDocsExamined >> nReturned\n// executionTimeMillisEstimate > 100\n\n// Fix with compound index\ndb.orders.createIndex({ status: 1, total: 1, createdAt: -1 })"
+    ],
+    "mongostat & mongotop Deep": [
+      "`mongostat` shows real-time metrics: inserts/sec, queries/sec, page faults, % locked. `mongotop` shows read/write time per collection. Run with `--discover` for replica set monitoring.",
+      "# Real-time server stats (every 2s)\nmongostat --host localhost:27017 --port 27017 2\n# Fields: insert query update delete getmore command %dirty %used flushes vsize   res\n\n# Collection-level read/write activity\nmongotop 5\n# Fields: ns    total    read    write\n\n# JSON output for parsing\nmongostat --host localhost:27017 --json 2\n\n# Discovery mode for replica sets\nmongostat --discover --host 'myReplSet/localhost:27017' 2"
+    ],
+    "serverStatus & Operation Profiling": [
+      "`db.serverStatus()` provides comprehensive server metrics: connections, network, operations, memory, locks, wiredTiger cache, and repl info. `db.currentOp()` shows running operations. Kill slow ops with `db.killOp()`.",
+      "// Server health overview\ndb.serverStatus().connections\ndb.serverStatus().network\ndb.serverStatus().mem\ndb.serverStatus().opcounters\n\n// WiredTiger cache stats\ndb.serverStatus().wiredTiger.cache\n\n// Find running operations > 5s\ndb.currentOp({\n  $ownOps: false,\n  active: true,\n  secs_running: { $gt: 5 }\n}).inProgress.forEach(op => {\n  print(op.opid, op.ns, op.secs_running)\n})\n\n// Kill a specific operation\ndb.killOp(opId)"
+    ],
+    "Connection Pooling": [
+      "Connection pooling reuses TCP connections to MongoDB. Default pool size is 100 per mongos/mongod. Monitor with `serverStatus().connections`. Tune with `maxPoolSize` and `minPoolSize` in connection string.",
+      "// Connection string with pool sizing\nmongodb://localhost:27017/mydb?maxPoolSize=50&minPoolSize=5&waitQueueTimeoutMS=2000\n\n// Monitor pool usage\ndb.serverStatus().connections\n// { current: 25, available: 75, totalCreated: 200 }\n\n// Driver-level (Node.js)\nconst client = new MongoClient(uri, {\n  maxPoolSize: 50,\n  minPoolSize: 10,\n  maxIdleTimeMS: 30000,\n  waitQueueTimeoutMS: 5000\n})"
+    ],
+    "WiredTiger Deep & Cache Management": [
+      "WiredTiger is the default storage engine. It uses a cache (default 50% of RAM - 1GB, min 256MB). Manages data with B-trees and MVCC. Monitor cache hit ratio, evictions, and dirty pages via `serverStatus()`.",
+      "// WiredTiger cache configuration in mongod.conf\n// storage:\n//   wiredTiger:\n//     engineConfig:\n//       cacheSizeGB: 10\n\n// Monitor cache performance\ndb.serverStatus().wiredTiger.cache\n// Key metrics:\n//   'bytes currently in the cache'\n//   'maximum bytes configured'\n//   'tracked dirty bytes in the cache'\n//   'unmodified page evictions' (low is good)\n//   'modified page evictions' (high = cache too small)\n\n// Page fault check\ndb.serverStatus().extra_info.page_faults"
+    ]
+  },
+  "Replication & High Availability": {
+    "Replica Sets Overview": [
+      "Replica sets provide HA with automatic failover. Primary handles writes; secondaries replicate via oplog. Minimum 3 members (or 2 + arbiter). Use `rs.status()` and `rs.conf()` to monitor.",
+      "rs.initiate({\n  _id: 'myReplicaSet',\n  members: [\n    { _id: 0, host: 'node1:27017', priority: 2 },\n    { _id: 1, host: 'node2:27017', priority: 1 },\n    { _id: 2, host: 'node3:27017', priority: 1 }\n  ]\n})\nrs.status()\nrs.conf()\n// Force re-election\nrs.stepDown(60)"
+    ],
+    "Election Process Deep": [
+      "Elections occur when primary becomes unreachable. Nodes vote using a protocol based on Raft. The node with highest priority and most up-to-date oplog wins. `settings.electionTimeoutMillis` (default 10s) controls detection speed.",
+      "// Check election state\ndb.serverStatus().repl.electionMetrics\n\n// Configure election timeout (in mongod.conf)\n// replication:\n//   electionTimeoutMillis: 15000  // slower detection\n\n// Manual election\ndb.adminCommand({ replSetStepDown: 30, force: true })\n\n// Freeze a node (prevent election)\ndb.adminCommand({ replSetFreeze: 120 })\n\n// Watch election events\nChangeStream:\ndb.adminCommand({\n  collMod: 'local.oplog.rs',\n  changeStreamPreAndPostImages: { enabled: true }\n})"
+    ],
+    "Oplog Size Management": [
+      "The oplog (local.oplog.rs) is a capped collection recording all writes. Default size: 5% of free disk (min 990MB, max 50GB). If too small, secondaries can fall behind. Resize with `replSetResizeOplog`.",
+      "// Check oplog stats\ndb.getSiblingDB('local').oplog.rs.stats(1024*1024)\n\n// Oplog window (how far behind a secondary can recover)\ndb.getSiblingDB('local').oplog.rs.find()\n  .sort({ $natural: -1 })\n  .limit(1)\n  .next().ts\n\n// Resize oplog (e.g., to 24GB)\ndb.adminCommand({ replSetResizeOplog: 1, size: 24000 })\n\n// Monitor oplog usage per secondary\nrs.printSecondaryReplicationInfo()"
+    ],
+    "Read Preference Modes": [
+      "Read preference controls where queries are routed: `primary` (default, strong consistency), `primaryPreferred`, `secondary` (offload reads), `secondaryPreferred`, `nearest` (lowest latency). Use with `maxStalenessSeconds`.",
+      "// Connection string with read preference\nmongodb://host:27017/mydb?readPreference=secondaryPreferred&maxStalenessSeconds=120\n\n// Driver-level\nconst client = new MongoClient(uri, {\n  readPreference: 'secondary',\n  readConcern: { level: 'local' },\n  maxStalenessSeconds: 90\n})\n\n// Per-operation\ncollection.find({ status: 'active' })\n  .readPref('secondary')\n  .readConcern('local')\n  .toArray()"
+    ],
+    "Delayed & Hidden Members": [
+      "Delayed members replicate data with a time lag (e.g., 1 hour) — protection against accidental drops/corruption. Hidden members are invisible to application queries — used for reporting, backups, or analytics workloads.",
+      "// Add hidden, delayed member\nrs.add({\n  _id: 3,\n  host: 'node4:27017',\n  hidden: true,\n  priority: 0,\n  slaveDelay: 3600   // 1 hour behind\n})\n\n// Hidden member for reporting only\nrs.add({\n  _id: 4,\n  host: 'node5:27017',\n  hidden: true,\n  priority: 0\n})\n\n// Verify\nrs.status()\nrs.isMaster()"
+    ],
+    "Arbiters": [
+      "An arbiter participates in elections but holds no data. Use to achieve odd-number voting in a 2-node replica set. Never run arbiter on the same server as a data node. Minimum recommended: 3 data nodes instead of 2+arbiter.",
+      "// Add arbiter to a replica set\nrs.addArb('arbiter1:27017')\n\n// Or via config\nrs.initiate({\n  _id: 'mySet',\n  members: [\n    { _id: 0, host: 'node1:27017' },\n    { _id: 1, host: 'node2:27017' },\n    { _id: 2, host: 'arbiter1:27017', arbiterOnly: true }\n  ]\n})\n\n// Verify arbiter status\nrs.status().members.forEach(m => {\n  print(m.name, m.stateStr, m.arbiterOnly)\n})"
+    ],
+    "Replica Set Tags": [
+      "Tags enable custom write concern and read preference routing. Define tags per member in `rs.conf()`. Use `w: 'majority'` with tag sets to require acknowledgments from specific data centers.",
+      "// Configure tags\ncfg = rs.conf()\ncfg.members[0].tags = { dc: 'us-east', region: 'east', tier: 'primary' }\ncfg.members[1].tags = { dc: 'us-west', region: 'west', tier: 'secondary' }\ncfg.members[2].tags = { dc: 'us-west', region: 'west', tier: 'secondary' }\nrs.reconfig(cfg)\n\n// Write concern to require acknowledgment from both DCs\ndb.orders.insertOne(\n  { item: 'Book' },\n  { writeConcern: { w: 'majority', wtimeout: 5000 } }\n)\n\n// Read preference with tag\ndb.collection.find()\n  .readPref('secondary', [{ tier: 'secondary' }])"
+    ]
+  },
+  "Sharding & Scalability": {
+    "Sharding Overview": [
+      "Sharding horizontally partitions data across shards. Components: mongos (router), config servers (metadata), shards (data). A shard key determines data distribution. Enable per-database, then per-collection.",
+      "// Step 1: Enable sharding on database\nsh.enableSharding('sales_db')\n\n// Step 2: Shard a collection\nsh.shardCollection('sales_db.orders', { customerId: 1 })\n\n// Step 3: Check status\nsh.status()\n\n// View shard distribution\ndb.orders.getShardDistribution()"
+    ],
+    "Shard Key Strategies": [
+      "Hashed shard keys provide even distribution (good for monotonically increasing fields like ObjectId). Ranged shard keys support range queries but can create hotspots. Zone sharding pins data to specific shards based on key range.",
+      "// Hashed shard key (even distribution)\nsh.shardCollection('logs.appEvents', { eventId: 'hashed' })\n\n// Ranged shard key (good for range queries)\nsh.shardCollection('sales_db.orders', { region: 1, createdAt: -1 })\n\n// Compound shard key\nsh.shardCollection('sales_db.orders', { region: 1, customerId: 1 })\n\n// Check key distribution\ndb.appEvents.aggregate([\n  { $group: { _id: { $toHashedIndexKey: '$eventId' }, count: { $sum: 1 } } }\n])"
+    ],
+    "Jumbo Chunks & Balancing": [
+      "Jumbo chunks exceed the configured chunk size (default 64MB) and cannot be split or moved. Causes: poor shard key cardinality. Balancer migrates chunks between shards. Monitor with `sh.status(true)`.",
+      "// Check for jumbo chunks\nsh.status(true)\n// Look for 'jumbo' flag in the chunk output\n\n// Force splitting a jumbo chunk\nsh.splitAt('sales_db.orders', { _id: ObjectId('...') })\n\n// Move a chunk manually\nsh.moveChunk('sales_db.orders',\n  { customerId: 'ABC' },\n  'shard0002'\n)\n\n// Disable/enable balancer\nsh.disableBalancing('sales_db.orders')\nsh.enableBalancing('sales_db.orders')\n\n// Configure balancer window\nsh.setBalancerState(true)\ndb.adminCommand({\n  configureBalancer: 'myCluster',\n  activeWindow: { start: '02:00', stop: '06:00' }\n})"
+    ],
+    "Shard Zones": [
+      "Shard zones allow pinning data to specific shards based on shard key ranges. Useful for data residency (GDPR), hot data on fast SSDs, cold data on cheaper storage, and multi-region deployments.",
+      "// Tag shards with zone names\nsh.addShardTag('shard0000', 'US_East')\nsh.addShardTag('shard0001', 'US_West')\n\n// Associate key ranges with zones\nsh.updateZoneKeyRange(\n  'sales_db.orders',\n  { region: 'NY' },\n  { region: 'NZ' },\n  'US_East'\n)\nsh.updateZoneKeyRange(\n  'sales_db.orders',\n  { region: 'CA' },\n  { region: 'CZ' },\n  'US_West'\n)\n\n// Verify zone configuration\nsh.status()"
+    ],
+    "Resharding": [
+      "Resharding changes the shard key of a collection after deployment. MongoDB 7.0+ supports live resharding without downtime. The old key remains until resharding completes. Monitor with `sh.status()`.",
+      "// Initiate resharding (MongoDB 7.0+)\ndb.adminCommand({\n  reshardCollection: 'sales_db.orders',\n  key: { customerId: 'hashed' }\n})\n\n// Or with zone specification\ndb.adminCommand({\n  reshardCollection: 'sales_db.orders',\n  key: { region: 1, customerId: 1 },\n  unique: false\n})\n\n// Monitor resharding progress\nsh.status()\n// Look for 'reshardingFields' in status output\n\ndb.adminCommand({ reshardCollection: 'sales_db.orders', key: { _id: 'hashed' } })"
+    ],
+    "mongos Scaling": [
+      "mongos routers are stateless and can be scaled horizontally. Place mongos close to application servers. Use connection pooling and load balancers in front of multiple mongos instances for HA and throughput.",
+      "# Start mongos instances\nmongos --configdb configReplSet/cfg1:27019,cfg2:27019,cfg3:27019 --port 27017\nmongos --configdb configReplSet/cfg1:27019,cfg2:27019,cfg3:27019 --port 27018\n\n# Connection string with multiple mongos\nmongodb://mongos1:27017,mongos2:27017,mongos3:27017/mydb?\n  loadBalanced=true&retryWrites=true"
+    ]
+  },
+  "MongoDB Atlas": {
+    "Atlas Overview & Deployment": [
+      "Atlas provides fully-managed MongoDB on AWS, Azure, GCP. Free M0 cluster (512MB). Features: auto-scaling, automated backups, monitoring alerts, BI Connector, global clusters, and serverless instances.",
+      "# Create cluster via Atlas CLI\natlas clusters create myCluster --provider AWS --region US_EAST_1 --tier M10 --members 3\n\n# Get connection string\natlas clusters connectionString describe myCluster\n\n# Create database user\natlas dbusers create --username appUser --role readWriteAnyDatabase\n\n# Whitelist IP\natlas accessList create --ip 203.0.113.0"
+    ],
+    "Atlas Search": [
+      "Atlas Search is built on Lucene for full-text search. Supports fuzzy matching, autocomplete, synonyms, faceted search, highlighting, and compound queries. Create indexes via web UI or API.",
+      "// Create Atlas Search index (JSON in Atlas UI)\n{\n  \"mappings\": {\n    \"dynamic\": false,\n    \"fields\": {\n      \"title\": [{\"type\": \"string\", \"analyzer\": \"lucene.english\"}],\n      \"description\": [{\"type\": \"string\", \"analyzer\": \"lucene.english\"}],\n      \"tags\": [{\"type\": \"string\"}],\n      \"price\": [{\"type\": \"number\"}],\n      \"createdAt\": [{\"type\": \"date\"}]\n    }\n  }\n}\n\n// $search aggregation stage\ndb.articles.aggregate([\n  {\n    $search: {\n      compound: {\n        must: [{ text: { query: 'mongodb performance', path: ['title', 'description'] } }],\n        filter: [{ range: { path: 'price', gte: 10, lte: 100 } }]\n      }\n    }\n  },\n  { $limit: 20 },\n  { $project: { title: 1, score: { $meta: 'searchScore' } } }\n])"
+    ],
+    "Atlas Data Lake & Federated Query": [
+      "Atlas Data Lake queries data across Atlas clusters, AWS S3, and Azure Blob Storage using the MongoDB Query API (including aggregation). No data movement — query in place with federated database instances.",
+      "// Create federated database instance (via API/UI)\n// Configure stores: Atlas cluster + S3 bucket\n\n// Federated query across sources\ndb.orders.aggregate([\n  { $match: { status: 'completed' } },\n  { $lookup: {\n    from: {\n      $external: { store: 's3', name: 'customer_data' }\n    },\n    localField: 'customerId',\n    foreignField: '_id',\n    as: 'customer'\n  }},\n  { $out: 'enrichedOrders' }\n])"
+    ],
+    "Atlas App Services": [
+      "Atlas App Services (formerly Realm) provides serverless backend: Functions (JS on Atlas), Triggers (DB/webhook/scheduled), GraphQL API, and Data Access Rules. Enables rapid app development without managing servers.",
+      "// Atlas Function (server-side JS)\nexports = function(userId) {\n  const collection = context.services\n    .get('mongodb-atlas')\n    .db('sales')\n    .collection('orders');\n\n  return collection.aggregate([\n    { $match: { customerId: userId } },\n    { $group: { _id: null, total: { $sum: '$amount' } } }\n  ]).toArray();\n};\n\n// Database Trigger (on insert)\nexports = function(changeEvent) {\n  const fullDoc = changeEvent.fullDocument;\n  // Process new document...\n};"
+    ],
+    "Online Archive & Serverless Instances": [
+      "Online Archive automatically moves older data to cost-effective S3 storage (fully queryable). Serverless instances scale from 0 to 1M+ ops/sec without capacity planning. Pay per operation.",
+      "# Set up online archive (via Atlas CLI)\natlas clusters onlineArchives create --clusterName myCluster \\\n  --db sales --collection orders \\\n  --dateField createdAt --archiveAfter 90\n\n# Query archived data (transparent — same queries)\ndb.orders.find({ createdAt: { $lt: new Date('2023-01-01') } })\n\n# Create serverless instance\natlas clusters create myServerless --provider AWS --region US_EAST_1 \\\n  --tier SERVERLESS --serverlessBackupOptions enabled=true"
+    ],
+    "Global Clusters & BI Connector": [
+      "Global clusters distribute data across geographic regions for low-latency reads/writes worldwide. BI Connector (MySQL protocol) enables Tableau, Power BI, and other BI tools to query MongoDB via SQL.",
+      "# Global cluster config (via Atlas API)\n# Zone-based data distribution\natlas clusters update myCluster \\\n  --globalClusterConfig '{\"customZoneMapping\":{\"US\":\"us-east-1\",\"EU\":\"eu-west-1\",\"APAC\":\"ap-southeast-1\"}}'\n\n// Connection to BI Connector (MySQL port 27016)\nmysql -h mycluster.mongodb.net -P 27016 -u myUser -p\n\n// SQL query on MongoDB collections\nSELECT c.name, SUM(o.amount) as total\nFROM orders o\nJOIN customers c ON o.customerId = c._id\nWHERE o.createdAt > '2024-01-01'\nGROUP BY c.name\nORDER BY total DESC;"
+    ]
+  },
+  "Drivers & ODM": {
+    "MongoDB Driver Deep": [
+      "Official drivers (Node.js, Python, Java, Go, etc.) provide low-level database access. Key concepts: MongoClient (connection pool), Database, Collection, Cursor. Events: `commandStarted`, `commandSucceeded`, `commandFailed`.",
+      "// Node.js driver\nconst { MongoClient } = require('mongodb');\nconst client = new MongoClient(uri, {\n  maxPoolSize: 50,\n  serverSelectionTimeoutMS: 5000\n});\n\nawait client.connect();\nconst db = client.db('sales');\nconst coll = db.collection('orders');\n\n// Monitoring events\nclient.on('commandStarted', (event) => {\n  console.log(`Executing: ${event.commandName} on ${event.databaseName}.${event.command[event.commandName]}`);\n});\n\n// Transaction\nconst session = client.startSession();\ntry {\n  await session.withTransaction(async () => {\n    await coll.updateOne({ _id: 1 }, { $inc: { balance: -50 } }, { session });\n    await coll.updateOne({ _id: 2 }, { $inc: { balance: 50 } }, { session });\n  });\n} finally {\n  await session.endSession();\n}"
+    ],
+    "Mongoose Deep (Middleware, Virtuals, Populate)": [
+      "Mongoose provides schema-based modeling with middleware (pre/post hooks for save, validate, find, etc.), virtuals (computed properties), population (reference resolution), plugins, and custom validators.",
+      "const mongoose = require('mongoose');\nconst Schema = mongoose.Schema;\n\nconst userSchema = new Schema({\n  name: { type: String, required: true, trim: true },\n  email: { type: String, unique: true, lowercase: true },\n  role: { type: String, enum: ['user', 'admin'], default: 'user' },\n  passwordHash: String,\n  lastLogin: Date\n}, {\n  timestamps: true,\n  toJSON: { virtuals: true }\n});\n\n// Virtual\nuserSchema.virtual('isAdmin').get(function() {\n  return this.role === 'admin';\n});\n\n// Pre-save middleware\nuserSchema.pre('save', async function(next) {\n  if (this.isModified('passwordHash')) {\n    this.passwordHash = await bcrypt.hash(this.passwordHash, 10);\n  }\n  next();\n});\n\n// Post-find middleware\nuserSchema.post('find', function(docs) {\n  docs.forEach(d => console.log(`Found user: ${d.name}`));\n});\n\n// Populate\nconst orderSchema = new Schema({\n  user: { type: Schema.Types.ObjectId, ref: 'User' },\n  total: Number\n});\nconst Order = mongoose.model('Order', orderSchema);\nOrder.find().populate('user', 'name email').exec();"
+    ],
+    "Change Streams": [
+      "Change streams provide real-time notifications of data changes (insert, update, replace, delete, drop, invalidate). Can watch a collection, database, or entire cluster. Resumable via resume token.",
+      "const collection = db.collection('orders');\n\n// Open change stream\nconst changeStream = collection.watch([], {\n  fullDocument: 'updateLookup',\n  batchSize: 100\n});\n\nchangeStream.on('change', (change) => {\n  console.log(change.operationType, change.documentKey);\n  if (change.operationType === 'insert') {\n    // process new order\n    processOrder(change.fullDocument);\n  }\n});\n\n// Resume from token\nconst pipeline = [{ $match: { operationType: 'insert' } }];\nconst resumeStream = collection.watch(pipeline, {\n  resumeAfter: savedResumeToken\n});\n\n// Post-image requires feature flag\ndb.adminCommand({\n  setParameter: 1,\n  changeStreamPreAndPostImages: { enabled: true }\n});"
+    ],
+    "Transactions": [
+      "MongoDB supports multi-document ACID transactions (since 4.0). Must use replica set or sharded cluster. Session-based: start a session, execute ops within `withTransaction()`, automatic retry on transient errors.",
+      "const session = client.startSession();\n\ntry {\n  const result = await session.withTransaction(async () => {\n    const orders = client.db('sales').collection('orders');\n    const inventory = client.db('sales').collection('inventory');\n\n    const order = await orders.insertOne({\n      userId: 'ABC',\n      items: [{ sku: 'LAPTOP', qty: 1, price: 999 }],\n      total: 999\n    }, { session });\n\n    const update = await inventory.updateOne(\n      { sku: 'LAPTOP', qty: { $gte: 1 } },\n      { $inc: { qty: -1 } },\n      { session }\n    );\n\n    if (update.modifiedCount === 0) {\n      throw new Error('Insufficient inventory');\n    }\n\n    return order.insertedId;\n  }, {\n    readConcern: { level: 'majority' },\n    writeConcern: { w: 'majority' },\n    readPreference: 'primary'\n  });\n} catch (err) {\n  console.error('Transaction failed:', err);\n} finally {\n  await session.endSession();\n}"
+    ],
+    "Retryable Writes": [
+      "Retryable writes automatically retry write operations on network errors (not on write conflicts). Must use replica set. Enable with `retryWrites=true` in connection string. Idempotent ops are automatically retried.",
+      "// Connection string with retryable writes\nmongodb://host:27017/mydb?retryWrites=true&w=majority\n\n// Driver-level\nconst client = new MongoClient(uri, {\n  retryWrites: true,\n  retryReads: true\n});\n\n// All writes are automatically retried on transient errors\nawait collection.insertOne({ name: 'Alice' });\nawait collection.updateOne({ _id: 1 }, { $set: { status: 'active' } });\n\n// Note: findOneAndModify-like ops that return the document\n// are NOT automatically retryed (not idempotent)"
+    ]
+  },
+  "Backup & Recovery": {
+    "mongodump & mongorestore": [
+      "`mongodump` creates BSON binary backups. `mongorestore` restores them. Supports `--db`, `--collection`, `--query` (filtered dump), `--gzip`, `--archive`. For consistent backups on replica sets, use `--oplog` or read from secondary.",
+      "# Dump entire server\nmongodump --uri \"mongodb://user:pass@localhost:27017\" --out /backup/full\n\n# Dump single database to gzip archive\nmongodump --db myDB --gzip --archive=/backup/myDB.gz\n\n# Dump with query filter\nmongodump --db myDB --collection orders --query '{ \"createdAt\": { \"$gte\": ISODate(\"2024-01-01\") } }' --out /backup/orders\n\n# Point-in-time restore\nmongorestore --drop --oplogReplay /backup/full\n\n# Restore from archive\nmongorestore --gzip --archive=/backup/myDB.gz --drop"
+    ],
+    "Atlas Backups": [
+      "Atlas provides automated backups with configurable retention (1-35 days for M10+). Serverless and M0 have continuous backups. Restore via UI, API, or CLI. Supports point-in-time recovery (PITR) within the retention window.",
+      "# Trigger snapshot via Atlas CLI\natlas backups snapshots create --clusterName myCluster --description \"pre-upgrade backup\"\n\n# List snapshots\natlas backups snapshots list --clusterName myCluster\n\n# Restore snapshot\natlas backups restore start --clusterName myCluster \\\n  --snapshotId <snapshotId> --targetProjectId <projectId>\n\n# Enable PITR\natlas clusters update myCluster --enablePitr \\\n  --pitrBackupWindowDays 7\n\n# Restore to point in time\natlas backups restore start --clusterName myCluster \\\n  --pointInTimeUTCMillis 1704067200000"
+    ],
+    "Ops Manager & On-Premise Backups": [
+      "Ops Manager (Enterprise) provides automated backup, monitoring, and DB management for on-premise MongoDB. Supports continuous block-level backups with incremental snapshots, queryable backups, and point-in-time recovery.",
+      "# Ops Manager backup daemon configuration\n# Backup jobs configured via Ops Manager UI\n\n# Command-line backup daemon\nmongobackup --backup --destination /data/backups\n\n# Restore from Ops Manager backup\n# Via UI: Select snapshot -> Restore -> Target cluster\n\n# Headend restore for fine-grained recovery\n# 1. Download snapshot\n# 2. Apply oplog\nmongorestore --oplogReplay /path/to/oplog/bson"
+    ],
+    "Continuous Backups & PITR": [
+      "Continuous backups apply oplog entries on top of snapshots for point-in-time recovery within a window. Trade-off: higher storage cost vs granular recovery. PITR allows restoring to any second within the window.",
+      "# Enable continuous backup (Atlas)\natlas clusters update myCluster --enablePitr --pitrBackupWindowDays 7\n\n# Ops Manager continuous backup\n# Configure via Ops Manager UI > Project > Backup > Continuous\n\n# Restore to a specific timestamp\nmongorestore \\\n  --oplogFile /path/to/oplog.bson \\\n  --oplogLimit \"1704067200:1\" \\\n  --oplogReplay \\\n  /path/to/snapshot\n\n# Validate backup integrity\nmongorestore --dryRun --oplogReplay /path/to/backup"
+    ],
+    "Backup Strategy & Best Practices": [
+      "Combine snapshot backups (mongodump/Atlas snapshots) with oplog-based continuous backup for PITR. Automate with cron/Ops Manager/Atlas. Test restores regularly. Store backups in different region. Consider compliance retention.",
+      "# Weekly full + daily incremental cron\n# crontab:\n0 3 * * 0  mongodump --uri \"$URI\" --gzip --archive=/backups/full/$(date +%%Y%%m%%d).gz\n0 3 * * 1-6 mongodump --uri \"$URI\" --gzip --archive=/backups/inc/$(date +%%Y%%m%%d).gz --query '{ \"updatedAt\": { \"$gte\": ISODate(\"'$(date -d '-1 day' +%%Y-%%m-%%d)'\") } }'\n\n# Test restore\ntest_restore() {\n  mongorestore --gzip --archive=/backups/full/latest.gz --db test_restore\n  if [ $? -eq 0 ]; then\n    echo \"Backup validated successfully\"\n    mongosh --eval 'db.getSiblingDB(\"test_restore\").dropDatabase()'\n  fi\n}"
+    ]
+  }
+}

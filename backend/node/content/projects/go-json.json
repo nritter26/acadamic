@@ -1,0 +1,91 @@
+{
+  "id": "go-json",
+  "title": "Go: JSON Encoding and Decoding",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "JSON", "encoding/json"],
+  "description": "Marshal and unmarshal JSON data with Go structs, tags, and nested types.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Marshal a struct",
+      "description": "Define a `Person` struct with `Name` and `Age` fields. Create an instance and use `json.Marshal` to convert it to JSON. Print the JSON byte slice as a string.",
+      "hints": [
+        "Struct fields must be exported (capitalized) for json.Marshal",
+        "`json.Marshal(v)` returns `([]byte, error)`",
+        "Convert the result to string for printing: `fmt.Println(string(data))`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Name') && output.includes('Age')",
+        "successMessage": "Struct marshaled to JSON!",
+        "failureMessage": "Make sure the struct fields are exported (capitalized)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Unmarshal JSON",
+      "description": "Take the JSON string `{\"Name\":\"Alice\",\"Age\":30}` and use `json.Unmarshal` to decode it into a `Person` struct. Print the Name and Age fields individually.",
+      "hints": [
+        "`json.Unmarshal([]byte(jsonStr), &p)` — pass a pointer to the struct",
+        "Create a var `var p Person` to hold the result",
+        "Print with `fmt.Printf(\"Name: %s, Age: %d\\n\", p.Name, p.Age)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30')",
+        "successMessage": "JSON decoded back into a Go struct!",
+        "failureMessage": "Remember to pass a pointer to Unmarshal."
+      }
+    },
+    {
+      "id": 3,
+      "title": "MarshalIndent",
+      "description": "Marshal the same Person struct using `json.MarshalIndent` with a prefix of \"\" and indent of \"  \" (two spaces). Print the prettified JSON.",
+      "hints": [
+        "`json.MarshalIndent(v, prefix, indent)` produces formatted JSON",
+        "Use `json.MarshalIndent(p, \"\", \"  \")`",
+        "The output should have line breaks and indentation"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('\\n') && output.includes('  ')",
+        "successMessage": "Indented JSON looks clean and readable!",
+        "failureMessage": "Make sure you use MarshalIndent with spaces as the indent string."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Custom field names with tags",
+      "description": "Define a `User` struct with JSON tags: `Username string \\`json:\"username\"\\`` and `Email string \\`json:\"email,omitempty\"\\``. Marshal and show the output uses lowercase keys.",
+      "hints": [
+        "JSON tags let you control the key names in the output",
+        "`omitempty` omits the field if it's the zero value",
+        "Tags go after the field type in backticks"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('username') && !output.includes('Username')",
+        "successMessage": "Custom JSON tags control field naming!",
+        "failureMessage": "The JSON output should show lowercase keys, not the Go field names."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Nested JSON",
+      "description": "Define an `Address` struct (Street, City) and a `Company` struct (Name, Address). Marshal a Company instance and print the nested JSON.",
+      "hints": [
+        "Embed the Address struct as a field in Company",
+        "Both structs need exported fields",
+        "The JSON output will be nested: `{\"Name\":...,\"Address\":{\"Street\":...,\"City\":...}}`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Street') && output.includes('City')",
+        "successMessage": "Nested structs produce nested JSON!",
+        "failureMessage": "Make sure the Address field in Company is exported."
+      }
+    }
+  ]
+}

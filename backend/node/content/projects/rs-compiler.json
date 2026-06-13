@@ -1,0 +1,71 @@
+{
+  "id": "rs-compiler",
+  "title": "Rust: Simple Compiler (Bytecode)",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 45,
+  "concepts": ["rust", "compiler", "bytecode", "code generation", "VM"],
+  "description": "Build a compiler that generates bytecode from AST and run it on a VM.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Bytecode Instructions",
+      "description": "Define an `Opcode` enum: `Push(f64)`, `Add`, `Sub`, `Mul`, `Div`, `Pop`, `Print`, `Halt`. Create a `Chunk` that stores a sequence of opcodes. Print the disassembly.",
+      "hints": ["`#[derive(Debug)] enum Opcode { Push(f64), Add, Sub, Mul, Div, Pop, Print, Halt }`", "`struct Chunk { code: Vec<Opcode> }`", "Print each instruction: `println!(\"{:?}\", op)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Push') && output.contains('Add') && output.contains('Halt')",
+        "successMessage": "Bytecode instructions defined!",
+        "failureMessage": "Create and print a chunk with Push(42), Print, Halt."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Stack-Based VM",
+      "description": "Implement a `VM` struct with a `value_stack: Vec<f64>`. Implement `run(&mut self, chunk: &Chunk)` that interprets opcodes. Test with `Push(2), Push(3), Add, Print, Halt` (should print 5).",
+      "hints": ["`Push`: push value onto stack.", "`Add`: pop two, add, push result.", "`Print`: pop top and print.", "`Halt`: stop execution."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('5')",
+        "successMessage": "VM runs bytecode correctly!",
+        "failureMessage": "Run Push(2), Push(3), Add, Print and output 5."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Compiler: Expression to Bytecode",
+      "description": "Write a compiler that takes an AST from your parser and generates bytecode. Compile `2 + 3 * 4` to bytecode and run it on the VM. Result should be 14.",
+      "hints": ["Walk the AST tree in postfix order.", "BinaryOp: compile left, compile right, emit the operator opcode.", "`2 + 3 * 4` → Push(2), Push(3), Push(4), Mul, Add, Print, Halt"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('14')",
+        "successMessage": "Expression compilation works!",
+        "failureMessage": "Compile and execute '2 + 3 * 4' to get 14."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Variables and Environment",
+      "description": "Add `StoreVar(String)` and `LoadVar(String)` opcodes. Add a `variables: HashMap<String, f64>` to the VM. Compile `let x = 42; print x` with bytecode and run.",
+      "hints": ["StoreVar pops value from stack and stores in VM's variables.", "LoadVar pushes the variable value onto the stack.", "`let x = 42; print x` → Push(42), StoreVar(\"x\"), LoadVar(\"x\"), Print, Halt"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42')",
+        "successMessage": "Variable compilation works!",
+        "failureMessage": "Compile and run 'let x = 42; print x' to get 42."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Pipeline",
+      "description": "Create a full pipeline: source code → Lexer → Parser → Compiler → VM → output. Test with a multi-line program: `let x = 10; let y = 20; print x + y`. Print the compiled bytecode and the execution result.",
+      "hints": ["Wire all stages: `let tokens = Lexer::new(source).tokenize();`", "`let ast = Parser::new(tokens).parse(); let code = Compiler::new().compile(&ast); VM::new().run(&code);`", "Print both bytecode disassembly and execution output."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('30') && (output.contains('Push') || output.contains('Print'))",
+        "successMessage": "Full compiler pipeline works!",
+        "failureMessage": "Compile 'let x=10; let y=20; print x+y' and print 30."
+      }
+    }
+  ]
+}

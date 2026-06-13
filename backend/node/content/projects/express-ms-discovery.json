@@ -1,0 +1,118 @@
+{
+  "id": "express-ms-discovery",
+  "title": "Service Discovery",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["microservices", "service-discovery", "registry", "rest", "express", "fastapi"],
+  "description": "Build a service registry for microservices to register, discover, and deregister services.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Register service",
+      "description": "Create POST /register that accepts service name, host, and port, and returns a 201 with a unique serviceId.",
+      "hints": [
+        "Use a counter or uuid to generate unique service IDs",
+        "Store registered services in an array or map in memory",
+        "Return { serviceId: '...' } with status 201"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst services = [];\n\napp.post('/register', (req, res) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  const service = { serviceId, name, host, port: servicePort, registeredAt: new Date() };\n  services.push(service);\n  res.status(201).json({ serviceId });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Service {\n  serviceId: string;\n  name: string;\n  host: string;\n  port: number;\n  registeredAt: Date;\n}\n\nconst services: Service[] = [];\n\napp.post('/register', (req: Request, res: Response) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  const service: Service = { serviceId, name, host, port: servicePort, registeredAt: new Date() };\n  services.push(service);\n  res.status(201).json({ serviceId });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ServiceIn(BaseModel):\n    name: str\n    host: str\n    port: int\n\nservices = []\n\n@app.post('/register', status_code=201)\ndef register(body: ServiceIn):\n    service_id = str(uuid.uuid4())\n    services.append({\n        'serviceId': service_id,\n        'name': body.name,\n        'host': body.host,\n        'port': body.port,\n        'registeredAt': datetime.now().isoformat()\n    })\n    return {'serviceId': service_id}\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Service struct {\n\tServiceID    string    `json:\"serviceId\"`\n\tName         string    `json:\"name\"`\n\tHost         string    `json:\"host\"`\n\tPort         int       `json:\"port\"`\n\tRegisteredAt time.Time `json:\"registeredAt\"`\n}\n\nvar services []Service\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/register\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tvar body struct {\n\t\t\tName string `json:\"name\"`\n\t\t\tHost string `json:\"host\"`\n\t\t\tPort int    `json:\"port\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Name is required\"})\n\t\t\treturn\n\t\t}\n\t\tsvc := Service{\n\t\t\tServiceID:    generateID(),\n\t\t\tName:         body.Name,\n\t\t\tHost:         body.Host,\n\t\t\tPort:         body.Port,\n\t\t\tRegisteredAt: time.Now(),\n\t\t}\n\t\tservices = append(services, svc)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"serviceId\": svc.ServiceID})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/register",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "serviceId"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "List services",
+      "description": "Create GET /services that returns the list of all registered services.",
+      "hints": [
+        "Use app.get('/services', handler) to return the services array",
+        "Return the full list with all service details",
+        "Handle the case where no services are registered"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst services = [];\n\napp.post('/register', (req, res) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req, res) => {\n  res.json(services);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Service {\n  serviceId: string;\n  name: string;\n  host: string;\n  port: number;\n  registeredAt: Date;\n}\n\nconst services: Service[] = [];\n\napp.post('/register', (req: Request, res: Response) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req: Request, res: Response) => {\n  res.json(services);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ServiceIn(BaseModel):\n    name: str\n    host: str\n    port: int\n\nservices = []\n\n@app.post('/register', status_code=201)\ndef register(body: ServiceIn):\n    service_id = str(uuid.uuid4())\n    services.append({\n        'serviceId': service_id,\n        'name': body.name,\n        'host': body.host,\n        'port': body.port,\n        'registeredAt': datetime.now().isoformat()\n    })\n    return {'serviceId': service_id}\n\n@app.get('/services')\ndef list_services():\n    return services\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Service struct {\n\tServiceID    string    `json:\"serviceId\"`\n\tName         string    `json:\"name\"`\n\tHost         string    `json:\"host\"`\n\tPort         int       `json:\"port\"`\n\tRegisteredAt time.Time `json:\"registeredAt\"`\n}\n\nvar services []Service\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/register\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tvar body struct {\n\t\t\tName string `json:\"name\"`\n\t\t\tHost string `json:\"host\"`\n\t\t\tPort int    `json:\"port\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Name is required\"})\n\t\t\treturn\n\t\t}\n\t\tsvc := Service{\n\t\t\tServiceID:    generateID(),\n\t\t\tName:         body.Name,\n\t\t\tHost:         body.Host,\n\t\t\tPort:         body.Port,\n\t\t\tRegisteredAt: time.Now(),\n\t\t}\n\t\tservices = append(services, svc)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"serviceId\": svc.ServiceID})\n\t})\n\n\thttp.HandleFunc(\"/services\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(services)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/services",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "[]"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Get service by name",
+      "description": "Create GET /services/:name that returns the details (host, port) of a registered service.",
+      "hints": [
+        "Use app.get('/services/:name', handler) to find service by name",
+        "Return 404 if the service name is not found",
+        "Return the full service details object"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst services = [];\n\napp.post('/register', (req, res) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req, res) => {\n  res.json(services);\n});\n\napp.get('/services/:name', (req, res) => {\n  const svc = services.find(s => s.name === req.params.name);\n  if (!svc) return res.status(404).json({ error: 'Service not found' });\n  res.json(svc);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Service {\n  serviceId: string;\n  name: string;\n  host: string;\n  port: number;\n  registeredAt: Date;\n}\n\nconst services: Service[] = [];\n\napp.post('/register', (req: Request, res: Response) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req: Request, res: Response) => {\n  res.json(services);\n});\n\napp.get('/services/:name', (req: Request, res: Response) => {\n  const svc = services.find(s => s.name === req.params.name);\n  if (!svc) return res.status(404).json({ error: 'Service not found' });\n  res.json(svc);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ServiceIn(BaseModel):\n    name: str\n    host: str\n    port: int\n\nservices = []\n\n@app.post('/register', status_code=201)\ndef register(body: ServiceIn):\n    service_id = str(uuid.uuid4())\n    services.append({\n        'serviceId': service_id,\n        'name': body.name,\n        'host': body.host,\n        'port': body.port,\n        'registeredAt': datetime.now().isoformat()\n    })\n    return {'serviceId': service_id}\n\n@app.get('/services')\ndef list_services():\n    return services\n\n@app.get('/services/{name}')\ndef get_service(name: str):\n    for s in services:\n        if s['name'] == name:\n            return s\n    from fastapi.responses import JSONResponse\n    return JSONResponse(status_code=404, content={'error': 'Service not found'})\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Service struct {\n\tServiceID    string    `json:\"serviceId\"`\n\tName         string    `json:\"name\"`\n\tHost         string    `json:\"host\"`\n\tPort         int       `json:\"port\"`\n\tRegisteredAt time.Time `json:\"registeredAt\"`\n}\n\nvar services []Service\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/register\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tvar body struct {\n\t\t\tName string `json:\"name\"`\n\t\t\tHost string `json:\"host\"`\n\t\t\tPort int    `json:\"port\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Name is required\"})\n\t\t\treturn\n\t\t}\n\t\tsvc := Service{\n\t\t\tServiceID:    generateID(),\n\t\t\tName:         body.Name,\n\t\t\tHost:         body.Host,\n\t\t\tPort:         body.Port,\n\t\t\tRegisteredAt: time.Now(),\n\t\t}\n\t\tservices = append(services, svc)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"serviceId\": svc.ServiceID})\n\t})\n\n\thttp.HandleFunc(\"/services\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/services/\")\n\t\tif path != \"\" && path != r.URL.Path {\n\t\t\tfor _, s := range services {\n\t\t\t\tif s.Name == path {\n\t\t\t\t\tjson.NewEncoder(w).Encode(s)\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t}\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Service not found\"})\n\t\t\treturn\n\t\t}\n\t\tjson.NewEncoder(w).Encode(services)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/services/unknown",
+            "expectedStatus": 404,
+            "expectedBodySubstring": "not found"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Deregister service",
+      "description": "Create DELETE /services/:id that removes a registered service by its serviceId.",
+      "hints": [
+        "Use app.delete('/services/:id', handler)", "Find the service by its serviceId in the array", "Remove it and return 200, or 404 if not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst crypto = require('crypto');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst services = [];\n\napp.post('/register', (req, res) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req, res) => {\n  res.json(services);\n});\n\napp.get('/services/:name', (req, res) => {\n  const svc = services.find(s => s.name === req.params.name);\n  if (!svc) return res.status(404).json({ error: 'Service not found' });\n  res.json(svc);\n});\n\napp.delete('/services/:id', (req, res) => {\n  const index = services.findIndex(s => s.serviceId === req.params.id);\n  if (index === -1) return res.status(404).json({ error: 'Service not found' });\n  services.splice(index, 1);\n  res.json({ message: 'Service deregistered' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Service {\n  serviceId: string;\n  name: string;\n  host: string;\n  port: number;\n  registeredAt: Date;\n}\n\nconst services: Service[] = [];\n\napp.post('/register', (req: Request, res: Response) => {\n  const { name, host, port: servicePort } = req.body;\n  if (!name) return res.status(400).json({ error: 'Name is required' });\n  const serviceId = crypto.randomUUID();\n  services.push({ serviceId, name, host, port: servicePort, registeredAt: new Date() });\n  res.status(201).json({ serviceId });\n});\n\napp.get('/services', (req: Request, res: Response) => {\n  res.json(services);\n});\n\napp.get('/services/:name', (req: Request, res: Response) => {\n  const svc = services.find(s => s.name === req.params.name);\n  if (!svc) return res.status(404).json({ error: 'Service not found' });\n  res.json(svc);\n});\n\napp.delete('/services/:id', (req: Request, res: Response) => {\n  const index = services.findIndex(s => s.serviceId === req.params.id);\n  if (index === -1) return res.status(404).json({ error: 'Service not found' });\n  services.splice(index, 1);\n  res.json({ message: 'Service deregistered' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport uuid\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ServiceIn(BaseModel):\n    name: str\n    host: str\n    port: int\n\nservices = []\n\n@app.post('/register', status_code=201)\ndef register(body: ServiceIn):\n    service_id = str(uuid.uuid4())\n    services.append({\n        'serviceId': service_id,\n        'name': body.name,\n        'host': body.host,\n        'port': body.port,\n        'registeredAt': datetime.now().isoformat()\n    })\n    return {'serviceId': service_id}\n\n@app.get('/services')\ndef list_services():\n    return services\n\n@app.get('/services/{name}')\ndef get_service(name: str):\n    for s in services:\n        if s['name'] == name:\n            return s\n    from fastapi.responses import JSONResponse\n    return JSONResponse(status_code=404, content={'error': 'Service not found'})\n\n@app.delete('/services/{service_id}')\ndef deregister(service_id: str):\n    for i, s in enumerate(services):\n        if s['serviceId'] == service_id:\n            services.pop(i)\n            return {'message': 'Service deregistered'}\n    from fastapi.responses import JSONResponse\n    return JSONResponse(status_code=404, content={'error': 'Service not found'})\n",
+        "go": "package main\n\nimport (\n\t\"crypto/rand\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Service struct {\n\tServiceID    string    `json:\"serviceId\"`\n\tName         string    `json:\"name\"`\n\tHost         string    `json:\"host\"`\n\tPort         int       `json:\"port\"`\n\tRegisteredAt time.Time `json:\"registeredAt\"`\n}\n\nvar services []Service\n\nfunc generateID() string {\n\tbytes := make([]byte, 16)\n\trand.Read(bytes)\n\treturn hex.EncodeToString(bytes)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/register\", func(w http.ResponseWriter, r *http.Request) {\n\t\tif r.Method != \"POST\" {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar body struct {\n\t\t\tName string `json:\"name\"`\n\t\t\tHost string `json:\"host\"`\n\t\t\tPort int    `json:\"port\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Name == \"\" {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Name is required\"})\n\t\t\treturn\n\t\t}\n\t\tsvc := Service{\n\t\t\tServiceID:    generateID(),\n\t\t\tName:         body.Name,\n\t\t\tHost:         body.Host,\n\t\t\tPort:         body.Port,\n\t\t\tRegisteredAt: time.Now(),\n\t\t}\n\t\tservices = append(services, svc)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"serviceId\": svc.ServiceID})\n\t})\n\n\thttp.HandleFunc(\"/services\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/services/\")\n\t\tif path != \"\" && path != r.URL.Path {\n\t\t\tif r.Method == \"DELETE\" {\n\t\t\t\tfor i, s := range services {\n\t\t\t\t\tif s.ServiceID == path {\n\t\t\t\t\t\tservices = append(services[:i], services[i+1:]...)\n\t\t\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Service deregistered\"})\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Service not found\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\tfor _, s := range services {\n\t\t\t\tif s.Name == path {\n\t\t\t\t\tjson.NewEncoder(w).Encode(s)\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t}\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Service not found\"})\n\t\t\treturn\n\t\t}\n\t\tjson.NewEncoder(w).Encode(services)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "DELETE",
+            "path": "/services/nonexistent",
+            "expectedStatus": 404,
+            "expectedBodySubstring": "not found"
+          }
+        ]
+      }
+    }
+  ]
+}

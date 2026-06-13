@@ -1,0 +1,91 @@
+{
+  "id": "go-benchmarking",
+  "title": "Go: Benchmarking",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 25,
+  "concepts": ["go", "testing", "benchmarking"],
+  "description": "Write and run benchmarks in Go to measure and compare function performance.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Benchmark function",
+      "description": "Write a function `Sum(n int) int` that returns the sum 1..n. Create a benchmark `BenchmarkSum` that calls `Sum(1000)` in a loop `for i := 0; i < b.N; i++`. Print the benchmark result.",
+      "hints": [
+        "Benchmark functions go in `*_test.go` files",
+        "Signature: `func BenchmarkSum(b *testing.B)`",
+        "The `b.N` value is adjusted by the framework for stable timing"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('BenchmarkSum') || output.includes('ns/op')",
+        "successMessage": "Benchmark function runs and reports timing!",
+        "failureMessage": "Loop b.N times inside the benchmark function."
+      }
+    },
+    {
+      "id": 2,
+      "title": "b.N loop pattern",
+      "description": "Write a function `Concat(n int) string` that concatenates \"a\" repeated n times. Benchmark it with n=100. Print the number of iterations (`b.N`) and the result to show the pattern works.",
+      "hints": [
+        "Put the setup code OUTSIDE the b.N loop — only the code to measure goes inside",
+        "b.N is determined by the benchmark framework",
+        "Reset timer if setup is expensive: `b.ResetTimer()`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Benchmark') && output.includes('ns/op')",
+        "successMessage": "b.N loop pattern used correctly!",
+        "failureMessage": "Make sure only the code to benchmark is inside the b.N loop."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Reset timer",
+      "description": "Benchmark a `SortSlice(s []int)` function. Before the benchmark loop, create a large slice (10000 elements). Use `b.ResetTimer()` to exclude setup time. Print the benchmark results.",
+      "hints": [
+        "`b.ResetTimer()` resets the benchmark timer to zero",
+        "`b.StopTimer()` and `b.StartTimer()` pause/resume the timer",
+        "Use ResetTimer after expensive setup but before the measurement loop"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Benchmark') && output.includes('ns/op')",
+        "successMessage": "Timer reset excluded setup from benchmark timing!",
+        "failureMessage": "Call b.ResetTimer() after setup but before the loop."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Benchmark different inputs",
+      "description": "Write a `Fibonacci(n int) int` (recursive). Create benchmarks `BenchmarkFibonacci10` and `BenchmarkFibonacci20` using different input values. Print the comparison.",
+      "hints": [
+        "Run separate benchmarks for each input size",
+        "b.N is automatically smaller for slower functions",
+        "Compare results: Fibonacci(20) should show more ns/op than Fibonacci(10)"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('BenchmarkFibonacci') && output.includes('ns/op')",
+        "successMessage": "Benchmarks with different inputs show scaling!",
+        "failureMessage": "Create two benchmark functions for different inputs."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Bench comparison",
+      "description": "Benchmark two implementations of `Reverse(s string) string`: one using concatenation and one using `strings.Builder`. Print both results so you can compare which is faster.",
+      "hints": [
+        "Implement both versions as separate functions",
+        "Create separate benchmarks: `BenchmarkReverseConcat` and `BenchmarkReverseBuilder`",
+        "strings.Builder is generally faster for string concatenation"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('ReverseConcat') && output.includes('ReverseBuilder')",
+        "successMessage": "Bench comparison shows which implementation is faster!",
+        "failureMessage": "Create two separate benchmark functions for each implementation."
+      }
+    }
+  ]
+}

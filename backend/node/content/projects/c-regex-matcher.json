@@ -1,0 +1,23 @@
+{
+  "id": "c-regex-matcher",
+  "title": "C: Simple Regex Matcher",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 30,
+  "concepts": ["c", "regex", "pattern matching", "recursion", "strings"],
+  "description": "Implement a simple regex engine that supports ., *, and + operators.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Match with . and *",
+      "description": "Write a recursive function `int match(char *regex, char *text)` that supports `.` (any char) and `*` (zero or more of preceding char). Test: match(\"a*b\", \"b\") = 1, match(\"a.b\", \"axb\") = 1, match(\"ab*c\", \"abc\") = 1.",
+      "hints": ["If next char is *, try matching 0 or more occurrences.", "'.' matches any single character.", "Base cases: if regex empty -> text empty.", "If regex[0] == text[0] or regex[0] == '.', recurse on rest."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint match(char *r, char *t) {\n    if (r[0] == '\\0') return t[0] == '\\0';\n    if (r[1] == '*') {\n        int m = match(r+2, t);\n        if (t[0] != '\\0' && (r[0] == '.' || r[0] == t[0]))\n            m = m || match(r, t+1);\n        return m;\n    }\n    if (t[0] != '\\0' && (r[0] == '.' || r[0] == t[0]))\n        return match(r+1, t+1);\n    return 0;\n}\n\nint main() {\n    printf(\"%d\\n\", match(\"a*b\", \"b\"));\n    printf(\"%d\\n\", match(\"a.b\", \"axb\"));\n    printf(\"%d\\n\", match(\"ab*c\", \"abc\"));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('1') && output.includes('1')",
+        "successMessage": "Regex matcher works!",
+        "failureMessage": "Test patterns a*b, a.b, ab*c"
+      }
+    }
+  ]
+}

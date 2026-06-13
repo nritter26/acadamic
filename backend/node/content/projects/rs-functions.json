@@ -1,0 +1,71 @@
+{
+  "id": "rs-functions",
+  "title": "Rust: Functions",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "functions", "parameters", "return values", "expressions"],
+  "description": "Define and call functions with parameters and return values in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Function",
+      "description": "Define a function `greet` that prints `\"Hi!\"` and call it from `main`.",
+      "hints": ["`fn greet() { println!(\"Hi!\"); }`", "Call it with `greet();` in main.", "Functions can be defined before or after main."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hi!')",
+        "successMessage": "Function called!",
+        "failureMessage": "Define and call a function that prints 'Hi!'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Function with Parameters",
+      "description": "Write a function `say_hello(name: &str)` that prints `\"Hello, NAME!\"` and call it with your name.",
+      "hints": ["`fn say_hello(name: &str) { println!(\"Hello, {}!\", name); }`", "Call `say_hello(\"Rust\");` in main.", "`&str` is a string slice parameter."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello')",
+        "successMessage": "Parameters work!",
+        "failureMessage": "Write say_hello(name) that prints 'Hello, NAME!'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Return Values",
+      "description": "Write a function `add(a: i32, b: i32) -> i32` that returns the sum and print the result of `add(3, 7)`.",
+      "hints": ["`fn add(a: i32, b: i32) -> i32 { a + b }`", "The last expression in a function is returned (no semicolon!).", "Call it: `let sum = add(3, 7);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10')",
+        "successMessage": "Return values work!",
+        "failureMessage": "Write add(a, b) that returns a+b and print the result of 3+7."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Function with Expression Body",
+      "description": "Write a function `square(x: i32) -> i32` that returns x*x using a single expression (no curly braces). Call and print `square(5)`.",
+      "hints": ["`fn square(x: i32) -> i32 { x * x }`", "In Rust, the last expression is returned automatically.", "Don't add a semicolon after `x * x` if you want it returned."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('25')",
+        "successMessage": "Expression body works!",
+        "failureMessage": "Write square(x) that returns x*x and print square(5)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Multiple Parameters and Early Return",
+      "description": "Write a function `max(a: i32, b: i32) -> i32` that returns the larger of two numbers using `if/else`. Print `max(8, 15)`.",
+      "hints": ["`if a > b { a } else { b }` — this is an expression!", "The if/else expression returns a value.", "max(8, 15) should return 15."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('15')",
+        "successMessage": "Function with conditionals works!",
+        "failureMessage": "Write max(a, b) that returns the larger number."
+      }
+    }
+  ]
+}

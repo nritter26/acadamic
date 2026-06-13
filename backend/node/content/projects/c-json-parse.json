@@ -1,0 +1,23 @@
+{
+  "id": "c-json-parse",
+  "title": "C: Simple JSON Parser",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "parsing", "strings", "structs", "pointers"],
+  "description": "Parse a simple JSON object string with string key/value pairs into a struct representation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Tokenize JSON",
+      "description": "Write a function that extracts keys and values from a simple JSON string like `{\"name\":\"Alice\",\"age\":\"30\"}`. Print each key-value pair.",
+      "hints": ["Skip the opening `{` and closing `}`.", "Look for patterns: `\"key\":\"value\"`.", "Use pointer arithmetic to find `\"` characters."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char json[] = \"{\\\"name\\\":\\\"Alice\\\",\\\"age\\\":\\\"30\\\"}\";\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('name: Alice') || output.includes('Alice')",
+        "successMessage": "JSON parsing works!",
+        "failureMessage": "Parse and print key-value pairs from the JSON string"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-process-simulation",
+  "title": "Rust: Process and Signals",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "std::process", "Command", "signals", "subprocess"],
+  "description": "Use std::process to run external commands and handle process interaction.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Run a Shell Command",
+      "description": "Use `std::process::Command::new` to run `echo \"Hello from Rust!\"` and capture output. Print the stdout.",
+      "hints": ["`let output = Command::new(\"echo\").arg(\"Hello from Rust!\").output().unwrap();`", "`println!(\"{}\", String::from_utf8_lossy(&output.stdout));`", "Don't forget `use std::process::Command;`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Hello from Rust!')",
+        "successMessage": "Shell command executed!",
+        "failureMessage": "Run echo \"Hello from Rust!\" and capture its output."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pipe Data Between Processes",
+      "description": "Pipe echo output into a command. Run `echo \"hello world\" | tr '[:lower:]' '[:upper:]'` by chaining commands. Print the uppercase result.",
+      "hints": ["Create a `Command::new(\"sh\")` with `-c` flag.", "Pass the full pipeline as one argument.", "`sh -c \"echo 'hello world' | tr '[:lower:]' '[:upper:]'\"`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('HELLO WORLD')",
+        "successMessage": "Pipeline execution works!",
+        "failureMessage": "Run a pipeline that uppercases 'hello world'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Process Exit Status",
+      "description": "Run commands that succeed (exit 0) and fail (exit 1). Use `.status()` to get the exit code. Print success or failure for each.",
+      "hints": ["`Command::new(\"true\").status().unwrap().success()` → true.", "`Command::new(\"false\").status().unwrap().success()` → false.", "`.status()` waits for the process and returns ExitStatus."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "Process status checks work!",
+        "failureMessage": "Run true and false commands and print their exit status."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Environment Variables",
+      "description": "Set and get environment variables for a subprocess. Run a command that reads env vars and prints them.",
+      "hints": ["`Command::new(\"sh\").env(\"GREETING\", \"Hello\").arg(\"-c\").arg(\"echo $GREETING world\").status()`", "`.env(key, val)` sets an env var for the subprocess.", "`.env_remove(key)` removes an inherited env var."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Hello world')",
+        "successMessage": "Environment variables work!",
+        "failureMessage": "Set GREETING env var and print 'Hello world'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Timeout Process Execution",
+      "description": "Spawn a long-running command and kill it after a timeout. Use `std::time::Duration` and `thread::sleep` to simulate timeout logic.",
+      "hints": ["Spawn command with `.spawn()` (doesn't wait).", "Sleep for a duration, then `kill()` the child process.", "`let child = Command::new(\"sleep\").arg(\"10\").spawn().unwrap(); thread::sleep(Duration::from_millis(100)); child.kill();`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('killed') || output.contains('timeout')",
+        "successMessage": "Process timeout works!",
+        "failureMessage": "Spawn a long process and kill it after a timeout."
+      }
+    }
+  ]
+}

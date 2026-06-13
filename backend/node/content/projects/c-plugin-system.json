@@ -1,0 +1,23 @@
+{
+  "id": "c-plugin-system",
+  "title": "C: Plugin System (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "plugins", "function pointers", "dynamic loading", "simulation"],
+  "description": "Simulate a plugin system where plugins register operations via a central registry using function pointers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Plugin Registry",
+      "description": "Define a `Plugin` struct with name, version, and an `execute` function pointer. Create a registry that stores up to 10 plugins. Write `void register_plugin(Plugin *p)` and `void run_plugin(char *name)`. Create 2 plugins: 'math' (adds 5+3) and 'print' (prints a message).",
+      "hints": ["Plugin: `char name[32]; int version; void (*execute)(void);`.", "Registry: array of Plugin pointers.", "Run: find by name and call execute."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\n#define MAX_PLUGINS 10\n\ntypedef struct { char name[32]; int version; void (*execute)(void); } Plugin;\n\nPlugin *registry[MAX_PLUGINS];\nint plugin_count = 0;\n\nvoid register_plugin(Plugin *p) {\n    if (plugin_count < MAX_PLUGINS) registry[plugin_count++] = p;\n}\n\nvoid run_plugin(char *name) {\n    for (int i = 0; i < plugin_count; i++)\n        if (strcmp(registry[i]->name, name) == 0) registry[i]->execute();\n}\n\nvoid math_plugin() { printf(\"Math: 5 + 3 = %d\\n\", 5+3); }\nvoid print_plugin() { printf(\"Print: Hello from plugin!\\n\"); }\n\nint main() {\n    Plugin math = {\"math\", 1, math_plugin};\n    Plugin print = {\"print\", 1, print_plugin};\n    register_plugin(&math);\n    register_plugin(&print);\n    run_plugin(\"math\");\n    run_plugin(\"print\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('8') && output.includes('Hello from plugin')",
+        "successMessage": "Plugin system works!",
+        "failureMessage": "Run both math and print plugins"
+      }
+    }
+  ]
+}

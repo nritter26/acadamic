@@ -1,0 +1,71 @@
+{
+  "id": "rs-binary-tree",
+  "title": "Rust: Binary Search Tree",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "binary tree", "BST", "traversal", "insert", "search"],
+  "description": "Implement a binary search tree with insert, search, and traversal operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Tree Node",
+      "description": "Define a `TreeNode<T>` struct with value, left, and right children (using `Option<Box<TreeNode<T>>>`). Define a `Tree<T>` struct wrapping an optional root. Create an empty tree.",
+      "hints": ["`struct TreeNode<T> { value: T, left: Option<Box<TreeNode<T>>>, right: Option<Box<TreeNode<T>>> }`", "`struct Tree<T> { root: Option<Box<TreeNode<T>>> }`", "Create with `Tree { root: None }`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('tree') || output.includes('Tree')",
+        "successMessage": "Tree structure defined!",
+        "failureMessage": "Create and print a description of an empty tree."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Insert into BST",
+      "description": "Implement `insert(&mut self, value: T)` on Tree. For a BST, values less than or equal to the current node go left, greater values go right. Insert [5, 3, 7, 1, 9].",
+      "hints": ["Use a recursive helper or loop through the tree.", "Compare value with current node's value.", "If going left or right and the child is None, insert there."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('3') && output.includes('7')",
+        "successMessage": "BST insert works!",
+        "failureMessage": "Insert 5,3,7,1,9 into the BST and print the values (traversal)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "In-Order Traversal",
+      "description": "Implement `in_order(&self) -> Vec<&T>` that performs in-order traversal (left, root, right) and returns the values as a Vec. Print the result.",
+      "hints": ["Recursively traverse left, push root value, traverse right.", "In-order traversal of a BST gives sorted order.", "[5,3,7,1,9] → in-order → [1,3,5,7,9]"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('9')",
+        "successMessage": "In-order traversal gives sorted order!",
+        "failureMessage": "Print the in-order traversal of the BST."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Search in BST",
+      "description": "Implement `contains(&self, value: &T) -> bool` that searches for a value. Return true if found. Test with values 7 (found) and 4 (not found).",
+      "hints": ["Compare value with current node.", "If equal, return true.", "If less, search left; if greater, search right. If None, return false."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Search works!",
+        "failureMessage": "Print whether 7 (true) and 4 (false) exist in the tree."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Tree Height",
+      "description": "Implement `height(&self) -> u32` that returns the height of the tree (number of edges on longest root-to-leaf path). Insert values [5, 3, 7, 1] and print the height.",
+      "hints": ["Height = 1 + max(left.height(), right.height()).", "Empty node (None) has height 0.", "Tree [5, 3, 7, 1] has height 2 (5→3→1)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') || output.includes('height')",
+        "successMessage": "Tree height calculation works!",
+        "failureMessage": "Print the height of the BST."
+      }
+    }
+  ]
+}

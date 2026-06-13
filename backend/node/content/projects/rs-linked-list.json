@@ -1,0 +1,71 @@
+{
+  "id": "rs-linked-list",
+  "title": "Rust: Linked List",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "linked list", "Box", "recursive types", "ownership"],
+  "description": "Implement a singly linked list in Rust using Box for heap allocation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define List Node",
+      "description": "Define an enum `List<T>` with variants `Cons(T, Box<List<T>>)` and `Nil`. Create a list containing `[1, 2, 3]` and print with `{:?}`.",
+      "hints": ["`enum List<T> { Cons(T, Box<List<T>>), Nil }`", "`use List::{Cons, Nil};` to bring variants into scope.", "Create: `let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3')",
+        "successMessage": "Linked list created!",
+        "failureMessage": "Create and print a list of [1, 2, 3]."
+      }
+    },
+    {
+      "id": 2,
+      "title": "List Length",
+      "description": "Implement a method `len(&self) -> u32` on List that recursively counts the number of elements.",
+      "hints": ["Match on self: `Cons(_, tail) => 1 + tail.len()`, `Nil => 0`", "Method is defined in `impl<T> List<T> { ... }`.", "Test: [1, 2, 3].len() = 3"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "List length works!",
+        "failureMessage": "Print the length of a 3-element list."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Push Front",
+      "description": "Implement a method `push_front(&mut self, value: T)` that adds an element to the front of the list. Demonstrate by pushing 0 to the front of [1, 2, 3].",
+      "hints": ["`let old = std::mem::replace(self, Nil);` to take ownership.", "Then `*self = Cons(value, Box::new(old));`", "This is needed because you can't move out of &mut self directly."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('1')",
+        "successMessage": "Push front works!",
+        "failureMessage": "Push 0 to the front of [1,2,3] and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "To Vec",
+      "description": "Implement a method `to_vec(&self) -> Vec<&T>` that converts the list to a Vec. Also implement `from_vec(vec: Vec<T>) -> Self` as an associated function.",
+      "hints": ["`to_vec`: recursively traverse and push each element.", "`from_vec`: iterate the Vec in reverse and cons each element.", "These conversions make testing much easier."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('4') && output.includes('5') && output.includes('6')",
+        "successMessage": "Vec↔List conversion works!",
+        "failureMessage": "Convert [4,5,6] to List and back to Vec, print result."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Pop Front",
+      "description": "Implement `pop_front(&mut self) -> Option<T>` that removes and returns the first element. Test by popping all elements from [1, 2, 3] until the list is empty.",
+      "hints": ["`match std::mem::replace(self, Nil) { Nil => None, Cons(v, tail) => { *self = *tail; Some(v) } }`", "Call pop_front in a while-let loop until None.", "Print each popped value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3') && output.includes('None')",
+        "successMessage": "Pop front works! List fully drained.",
+        "failureMessage": "Pop all elements from [1,2,3] and print each."
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-recursion",
+  "title": "Rust: Recursion",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "recursion", "factorial", "fibonacci"],
+  "description": "Write recursive functions in Rust: factorial and fibonacci.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Factorial Recursively",
+      "description": "Write a recursive function `factorial(n: u32) -> u32` that returns n!. Call with 5 and print.",
+      "hints": ["Base case: `if n <= 1 { 1 }`", "Recursive case: `n * factorial(n - 1)`", "factorial(5) = 5*4*3*2*1 = 120"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('120')",
+        "successMessage": "Recursive factorial works!",
+        "failureMessage": "Write recursive factorial(5) and print 120."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fibonacci Recursively",
+      "description": "Write a recursive function `fib(n: u32) -> u32` that returns the nth Fibonacci number. Call with 7 and print.",
+      "hints": ["Base cases: `if n == 0 { 0 } else if n == 1 { 1 }`", "Recursive case: `fib(n - 1) + fib(n - 2)`", "fib(7) = 13"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('13')",
+        "successMessage": "Recursive fibonacci works!",
+        "failureMessage": "Write recursive fib(7) and print 13."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Sum of Digits",
+      "description": "Write a recursive function `sum_digits(n: u32) -> u32` that sums the digits of a number. Call with `1234` and print.",
+      "hints": ["Base case: `if n == 0 { 0 }`", "Recursive case: `(n % 10) + sum_digits(n / 10)`", "sum_digits(1234) = 1+2+3+4 = 10"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10')",
+        "successMessage": "Sum of digits works!",
+        "failureMessage": "Write sum_digits(1234) and print 10."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Power Function",
+      "description": "Write a recursive function `power(base: i32, exp: u32) -> i32` that computes base^exp. Call with `power(2, 10)` and print.",
+      "hints": ["Base case: `if exp == 0 { 1 }`", "Recursive case: `base * power(base, exp - 1)`", "power(2, 10) = 1024"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1024')",
+        "successMessage": "Recursive power works!",
+        "failureMessage": "Write power(2, 10) and print 1024."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Count Down Recursively",
+      "description": "Write a recursive function `count_down(n: i32)` that prints n, then calls itself with n-1 until n reaches 0. Call with 5.",
+      "hints": ["Base case: `if n <= 0 { println!(\"Done!\"); }`", "Recursive case: print n, then call `count_down(n - 1)`", "Output should show 5, 4, 3, 2, 1, Done!"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('Done')",
+        "successMessage": "Recursive countdown works!",
+        "failureMessage": "Print numbers from 5 down to Done! using recursion."
+      }
+    }
+  ]
+}

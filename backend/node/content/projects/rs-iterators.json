@@ -1,0 +1,71 @@
+{
+  "id": "rs-iterators",
+  "title": "Rust: Iterators and Combinators",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "iterators", "Iterator trait", "lazy evaluation", "combinators"],
+  "description": "Master Rust's iterator pattern with lazy evaluation and combinator methods.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Iterator Methods",
+      "description": "Create a Vec `[1, 2, 3, 4, 5]` and use `.iter()`, `.skip(2)`, `.take(2)` to get `[3, 4]`. Collect and print.",
+      "hints": ["`let result: Vec<&i32> = numbers.iter().skip(2).take(2).collect();`", "Iterators are lazy — nothing happens until `.collect()` is called.", "This chains multiple adapters."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('3') && output.contains('4')",
+        "successMessage": "Iterator chaining works!",
+        "failureMessage": "Skip 2, take 2 from [1,2,3,4,5] and print [3,4]."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Custom Iterator",
+      "description": "Implement the `Iterator` trait for a `Fibonacci` struct that generates Fibonacci numbers. Create an iterator that yields the first 10 Fibonacci numbers. Print them.",
+      "hints": ["`struct Fibonacci { curr: u64, next: u64 }`", "`impl Iterator for Fibonacci { type Item = u64; fn next(&mut self) -> Option<u64> { let new = self.curr + self.next; self.curr = self.next; self.next = new; Some(self.curr) } }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('34')",
+        "successMessage": "Custom Fibonacci iterator works!",
+        "failureMessage": "Print the first 10 Fibonacci numbers using a custom iterator."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Infinite Iterator with take",
+      "description": "Create an infinite iterator using `std::iter::repeat(\"Rust!\")` and use `.take(3)` to get the first 3 values. Print them.",
+      "hints": ["`std::iter::repeat(\"Rust!\")` yields the same value forever.", "Combine with `.take(3)` to limit.", "This demonstrates the power of lazy iteration."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/Rust!/g)?.length === 3",
+        "successMessage": "Infinite iterator with take works!",
+        "failureMessage": "Print 'Rust!' 3 times using repeat and take."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Chain and Zip",
+      "description": "Use `.chain()` to concatenate two iterators, and `.zip()` to pair elements. Chain `[1, 2]` and `[3, 4]`, then zip with `[\"a\", \"b\", \"c\", \"d\"]`. Print the pairs.",
+      "hints": ["`let chained = vec![1, 2].into_iter().chain(vec![3, 4]);`", "`let zipped = chained.zip(vec![\"a\", \"b\", \"c\", \"d\"]);`", "Zip stops when the shorter iterator ends."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('d')",
+        "successMessage": "Chain and zip work!",
+        "failureMessage": "Chain [1,2] and [3,4], zip with letters, print pairs."
+      }
+    },
+    {
+      "id": 5,
+      "title": "flatten and flat_map",
+      "description": "Given `[[1, 2], [3, 4, 5], [6]]`, use `.iter().flatten()` to get a single sequence. Also use `.flat_map()` to transform and flatten in one step. Print both results.",
+      "hints": ["`let flat: Vec<&i32> = nested.iter().flatten().collect();` → [1,2,3,4,5,6]", "`let doubled: Vec<i32> = nested.iter().flat_map(|arr| arr.iter().map(|x| x * 2)).collect();` → [2,4,6,8,10,12]"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('6') && output.contains('12')",
+        "successMessage": "Flatten and flat_map work!",
+        "failureMessage": "Flatten nested arrays and print both results."
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "loan-calculator",
+  "title": "Loan Calculator",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["financial math", "amortization", "comparison", "affordability"],
+  "description": "Build a loan calculator that computes monthly payments, total interest, amortization schedules, compares loan terms, and checks affordability.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Monthly payment formula",
+      "description": "Write `monthlyPayment(principal, annualRate, years)` that computes the monthly payment using the standard loan formula: `P * (r * (1 + r)^n) / ((1 + r)^n - 1)` where r is monthly rate and n is total months.",
+      "hints": ["Convert annual rate to monthly: annualRate / 12 / 100", "Total months = years * 12", "Use Math.pow() for exponentiation"],
+      "codeTemplate": {
+        "javascript": "function monthlyPayment(principal, annualRate, years) {\n  // Your code here\n}\nconsole.log(monthlyPayment(100000, 5, 30));\nconsole.log(monthlyPayment(50000, 3.5, 15));\n",
+        "typescript": "function monthlyPayment(principal: number, annualRate: number, years: number): number {\n  // Your code here\n}\nconsole.log(monthlyPayment(100000, 5, 30));\nconsole.log(monthlyPayment(50000, 3.5, 15));\n",
+        "python": "def monthly_payment(principal, annual_rate, years):\n    # Your code here\n\nprint(monthly_payment(100000, 5, 30))\nprint(monthly_payment(50000, 3.5, 15))\n"
+      },
+      "verification": {
+        "test": "output.includes('536.82') || output.includes('536') || output.includes('357')",
+        "successMessage": "Monthly payment formula works!",
+        "failureMessage": "Use the standard amortization formula."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Total interest calculation",
+      "description": "Write `totalInterest(principal, annualRate, years)` that returns the total interest paid over the life of the loan.",
+      "hints": ["Calculate monthly payment first", "Total paid = monthlyPayment * months", "Interest = totalPaid - principal"],
+      "codeTemplate": {
+        "javascript": "function totalInterest(principal, annualRate, years) {\n  // Your code here\n}\nconsole.log(totalInterest(100000, 5, 30));\nconsole.log(totalInterest(50000, 3.5, 15));\n",
+        "typescript": "function totalInterest(principal: number, annualRate: number, years: number): number {\n  // Your code here\n}\nconsole.log(totalInterest(100000, 5, 30));\nconsole.log(totalInterest(50000, 3.5, 15));\n",
+        "python": "def total_interest(principal, annual_rate, years):\n    # Your code here\n\nprint(total_interest(100000, 5, 30))\nprint(total_interest(50000, 3.5, 15))\n"
+      },
+      "verification": {
+        "test": "output.includes('93255') || output.includes('93256') || output.includes('14435')",
+        "successMessage": "Total interest calculation works!",
+        "failureMessage": "Return totalPaid - principal."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Amortization schedule",
+      "description": "Write `amortizationSchedule(principal, annualRate, years)` that returns an array of monthly objects with `payment`, `principalPaid`, `interestPaid`, and `balance`.",
+      "hints": ["Loop through each month", "Interest portion = balance * monthlyRate", "Principal portion = payment - interest", "Update remaining balance"],
+      "codeTemplate": {
+        "javascript": "function amortizationSchedule(principal, annualRate, years) {\n  // Your code here\n}\nconst schedule = amortizationSchedule(10000, 5, 1);\nconsole.log(JSON.stringify(schedule.slice(0, 2)));\n",
+        "typescript": "interface AmortizationEntry {\n  payment: number;\n  principalPaid: number;\n  interestPaid: number;\n  balance: number;\n}\nfunction amortizationSchedule(principal: number, annualRate: number, years: number): AmortizationEntry[] {\n  // Your code here\n}\nconst schedule = amortizationSchedule(10000, 5, 1);\nconsole.log(JSON.stringify(schedule.slice(0, 2)));\n",
+        "python": "def amortization_schedule(principal, annual_rate, years):\n    # Your code here\n\nschedule = amortization_schedule(10000, 5, 1)\nimport json\nprint(json.dumps(schedule[:2]))\n"
+      },
+      "verification": {
+        "test": "output.includes('payment') && output.includes('principalPaid') && output.includes('interestPaid') && output.includes('balance')",
+        "successMessage": "Amortization schedule works!",
+        "failureMessage": "Return array with payment, principalPaid, interestPaid, balance per month."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Compare loan terms",
+      "description": "Write `compareLoans(principal, annualRate, yearOptions)` that accepts an array of year lengths and returns an array of objects comparing monthly payment and total interest for each.",
+      "hints": ["Map each year option to a result object", "Call monthlyPayment and totalInterest for each", "Return { years, monthlyPayment, totalInterest }"],
+      "codeTemplate": {
+        "javascript": "function compareLoans(principal, annualRate, yearOptions) {\n  // Your code here\n}\nconsole.log(JSON.stringify(compareLoans(100000, 5, [15, 20, 30])));\n",
+        "typescript": "interface LoanComparison {\n  years: number;\n  monthlyPayment: number;\n  totalInterest: number;\n}\nfunction compareLoans(principal: number, annualRate: number, yearOptions: number[]): LoanComparison[] {\n  // Your code here\n}\nconsole.log(JSON.stringify(compareLoans(100000, 5, [15, 20, 30])));\n",
+        "python": "def compare_loans(principal, annual_rate, year_options):\n    # Your code here\n\nimport json\nprint(json.dumps(compare_loans(100000, 5, [15, 20, 30])))\n"
+      },
+      "verification": {
+        "test": "output.includes('15') && output.includes('20') && output.includes('30') && output.includes('monthlyPayment')",
+        "successMessage": "Loan comparison works!",
+        "failureMessage": "Return array with years, monthlyPayment, totalInterest for each option."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Affordability check",
+      "description": "Write `canAfford(principal, annualRate, years, monthlyIncome)` that returns `true` if the monthly payment is <= 28% of monthly income (standard DTI ratio).",
+      "hints": ["Calculate monthly payment", "Calculate 28% of monthlyIncome", "Return true if payment <= threshold"],
+      "codeTemplate": {
+        "javascript": "function canAfford(principal, annualRate, years, monthlyIncome) {\n  // Your code here\n}\nconsole.log(canAfford(100000, 5, 30, 5000));\nconsole.log(canAfford(500000, 5, 30, 5000));\n",
+        "typescript": "function canAfford(principal: number, annualRate: number, years: number, monthlyIncome: number): boolean {\n  // Your code here\n}\nconsole.log(canAfford(100000, 5, 30, 5000));\nconsole.log(canAfford(500000, 5, 30, 5000));\n",
+        "python": "def can_afford(principal, annual_rate, years, monthly_income):\n    # Your code here\n\nprint(can_afford(100000, 5, 30, 5000))\nprint(can_afford(500000, 5, 30, 5000))\n"
+      },
+      "verification": {
+        "test": "output.includes('true') || output.includes('True')",
+        "successMessage": "Affordability check works!",
+        "failureMessage": "Return true if payment <= 28% of monthly income."
+      }
+    }
+  ]
+}

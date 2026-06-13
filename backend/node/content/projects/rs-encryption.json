@@ -1,0 +1,71 @@
+{
+  "id": "rs-encryption",
+  "title": "Rust: Encryption and Hashing",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "encryption", "hashing", "SHA", "AES", "cryptography"],
+  "description": "Implement basic encryption, hashing, and cryptographic operations in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Caesar Cipher",
+      "description": "Implement a Caesar cipher: `encrypt(text: &str, shift: u8) -> String` that shifts each letter by `shift` positions. Test with `\"abc\"` shifted by 3.",
+      "hints": ["Iterate over chars, shift only alphabetic characters.", "Wrap around: `((c - b'a' + shift) % 26 + b'a')` for lowercase.", "\"abc\" with shift 3 → \"def\""],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('def')",
+        "successMessage": "Caesar cipher works!",
+        "failureMessage": "Encrypt 'abc' with shift 3 and print 'def'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Decrypt Caesar Cipher",
+      "description": "Implement a `decrypt` function. Decrypt `\"khoor\"` (which was encrypted with shift 3) and print the result.",
+      "hints": ["Decrypt by shifting backwards: `(c - b'a' - shift + 26) % 26`", "Or call encrypt with `(26 - shift) % 26`.", "\"khoor\" decrypts to \"hello\""],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('hello')",
+        "successMessage": "Decryption works!",
+        "failureMessage": "Decrypt 'khoor' and print 'hello'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Vigenère Cipher",
+      "description": "Implement a Vigenère cipher using a keyword key. Encrypt `\"rustlang\"` with key `\"key\"` and print the result.",
+      "hints": ["Use each letter of the key to shift the corresponding plaintext letter.", "Repeat the key: \"keykeyke\" for \"rustlang\".", "Shift amounts: k=10, e=4, y=24"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('b') || output.length > 0",
+        "successMessage": "Vigenère cipher works!",
+        "failureMessage": "Encrypt 'rustlang' with key 'key' and print the ciphertext."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Base64 Encoding (Manual)",
+      "description": "Implement a simple encoding scheme: convert each byte to a 2-digit hex string. Encode `\"Hello\"` and print the hex representation.",
+      "hints": ["`for b in text.bytes() { print!(\"{:02x}\", b); }`", "H=0x48, e=0x65, l=0x6c, l=0x6c, o=0x6f", "Output: \"48656c6c6f\""],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('48656c6c6f')",
+        "successMessage": "Hex encoding works!",
+        "failureMessage": "Encode 'Hello' to hex and print '48656c6c6f'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "SHA-256 Simulation",
+      "description": "Implement a simple checksum (not real SHA-256): sum all bytes and return as hex. Hash `\"Rust\"` and print. While not cryptographically secure, it demonstrates the concept.",
+      "hints": ["`let sum: u32 = text.bytes().map(|b| b as u32).sum();`", "Print `{:x}` to show hex.", "Simple hash: not secure, just demonstrates the concept."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 0",
+        "successMessage": "Checksum computed!",
+        "failureMessage": "Compute and print a checksum for 'Rust'."
+      }
+    }
+  ]
+}

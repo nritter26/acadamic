@@ -1,0 +1,71 @@
+{
+  "id": "rs-boolean-logic",
+  "title": "Rust: Boolean Logic",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "boolean", "logical operators", "&&", "||", "!"],
+  "description": "Use logical operators AND (&&), OR (||), and NOT (!) in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "AND Operator",
+      "description": "Evaluate `true && true`, `true && false`, and `false && false`. Print each result.",
+      "hints": ["`true && true` evaluates to `true`.", "Any other combination of `&&` is `false`.", "Print with `println!(\"{}\", true && true);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/g)?.length === 1 && output.match(/false/g)?.length === 2",
+        "successMessage": "AND operator understood!",
+        "failureMessage": "Print results of all three AND combinations."
+      }
+    },
+    {
+      "id": 2,
+      "title": "OR Operator",
+      "description": "Evaluate `true || false`, `false || true`, and `false || false`. Print each result.",
+      "hints": ["`||` is the logical OR operator.", "OR is `true` if at least one operand is `true`.", "Only `false || false` is `false`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/g)?.length === 2 && output.match(/false/g)?.length === 1",
+        "successMessage": "OR operator understood!",
+        "failureMessage": "Print results of all three OR combinations."
+      }
+    },
+    {
+      "id": 3,
+      "title": "NOT Operator",
+      "description": "Apply the NOT operator `!` to `true` and `false`. Print both results.",
+      "hints": ["`!true` evaluates to `false`.", "`!false` evaluates to `true`.", "`!` flips the boolean value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "NOT operator understood!",
+        "failureMessage": "Print the results of !true and !false."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Combined Logic",
+      "description": "Evaluate `(true && false) || true` and `!(true && true)`. Print both results.",
+      "hints": ["Use parentheses to control evaluation order.", "`(true && false) || true` → `false || true` → `true`.", "`!(true && true)` → `!true` → `false`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Combined logic works!",
+        "failureMessage": "Evaluate both combined expressions and print the results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Short-Circuit Evaluation",
+      "description": "Show short-circuit evaluation: evaluate `false && println!(\"won't print\");` and `true || println!(\"won't print either\");`. Print a message after each to prove short-circuiting.",
+      "hints": ["In `false && anything`, the right side never executes (short-circuit).", "In `true || anything`, the right side never executes.", "Use `println!` to see which expressions actually run."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('short') || output.includes('circuit')",
+        "successMessage": "Short-circuit evaluation demonstrated!",
+        "failureMessage": "Print messages showing short-circuit behavior."
+      }
+    }
+  ]
+}

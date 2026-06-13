@@ -1,0 +1,230 @@
+{
+  "Getting Started": {
+    "Vue Introduction": {
+      "exp": "Introduction to Vue and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "Template Syntax": [
+      "Vue uses an HTML-based template syntax that binds the DOM to component instance data using directives like v-bind, v-if, and v-for. Templates are compiled into optimized render functions.",
+      "<div v-if=\"visible\">{{ message }}</div>"
+    ],
+    "Reactivity": [
+      "Vue's reactivity system tracks dependencies and automatically updates the DOM when data changes. It uses Proxy objects in Vue 3 to intercept property access and mutations.",
+      "const count = ref(0);\ncount.value++;"
+    ],
+    "Instance": [
+      "Every Vue component is backed by a component instance holding data, computed properties, methods, and lifecycle hooks. A root instance is created via createApp to mount the application.",
+      "const app = createApp({\n  data() { return { msg: 'Hello' } }\n}).mount('#app');"
+    ]
+  },
+  "Core Concepts": {
+    "Vue Core Features": {
+      "exp": "Essential Vue concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Vue Components": {
+      "exp": "Building user interfaces with Vue.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Vue Routing": {
+      "exp": "Navigation and routing in Vue.",
+      "code": "",
+      "exercises": []
+    },
+    "Vue Router": [
+      "Vue Router is the official routing library for Vue, enabling SPA navigation with nested routes, dynamic segments, and route-level code splitting. It integrates deeply with Vue's reactivity.",
+      "const routes = [\n  { path: '/users/:id', component: User }\n];"
+    ],
+    "Navigation Guards": [
+      "Navigation guards protect routes from unauthorized access, handle async data fetching before navigation, or cancel navigation conditionally. They can be global, per-route, or in-component.",
+      "router.beforeEach((to, from) => {\n  if (!isAuthenticated) return '/login';\n});"
+    ]
+  },
+  "State Management": {
+    "Vue State": {
+      "exp": "Managing application state in Vue.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Vue Data": {
+      "exp": "Working with data and APIs in Vue.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Vue Testing": {
+      "exp": "Testing strategies for Vue.",
+      "code": "",
+      "exercises": []
+    },
+    "Vitest": [
+      "Vitest is a blazing-fast unit test framework powered by Vite, compatible with Jest API and offering native ESM support, HMR, and parallel execution out of the box.",
+      "import { describe, it, expect } from 'vitest';\n\ndescribe('Counter', () => {\n  it('increments', () => { expect(add(1, 1)).toBe(2); });\n});"
+    ],
+    "Vue Test Utils": [
+      "Vue Test Utils is the official testing utility library for Vue components, providing mount, shallowMount, and utilities for stubbing, mocking, and asserting component behavior.",
+      "const wrapper = mount(MyComponent, { props: { msg: 'Hello' } });\nexpect(wrapper.text()).toContain('Hello');"
+    ],
+    "Cypress": [
+      "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
+      "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
+    ]
+  },
+  "Deployment": {
+    "Vue Deployment": {
+      "exp": "Deploying Vue applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Vue Best Practices": {
+      "exp": "Best practices for Vue development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Vue Advanced": {
+      "exp": "Advanced Vue topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components": {
+    "Props": [
+      "Props are custom attributes registered on a component that allow parent-to-child data flow. Vue validates prop types at runtime in development mode to catch bugs early.",
+      "defineProps<{ title: string; count?: number }>()"
+    ],
+    "Slots": [
+      "Slots allow parents to inject content into a child component's layout, enabling flexible composition. Named slots and scoped slots provide even more control over content distribution.",
+      "<slot name=\"header\" :user=\"user\">{{ user.name }}</slot>"
+    ],
+    "Emits": [
+      "Emits define custom events a component can fire to communicate upward to its parent. Using defineEmits with TypeScript gives type safety for event payloads.",
+      "const emit = defineEmits<{ (e: 'submit', id: number): void }>()"
+    ]
+  },
+  "Composition API": {
+    "ref": [
+      "ref creates a reactive reference to any value, wrapping it in an object with a .value property. Accessing .value triggers dependency tracking for Vue's reactivity system.",
+      "const count = ref(0);\nconsole.log(count.value);"
+    ],
+    "reactive": [
+      "reactive returns a deeply reactive proxy of an object, working directly with property access without .value. It's best suited for plain objects or arrays with nested data.",
+      "const state = reactive({ user: { name: 'Alice' } });\nstate.user.name = 'Bob';"
+    ],
+    "computed": [
+      "computed creates derived state that updates automatically when its dependencies change. Computed values are lazily evaluated and cached until their reactive sources change.",
+      "const doubled = computed(() => count.value * 2);"
+    ],
+    "watch": [
+      "watch observes one or more reactive sources and calls a callback when values change, providing old and new values. Use watchEffect for running side effects automatically.",
+      "watch(count, (newVal, oldVal) => {\n  console.log(`Count changed from ${oldVal} to ${newVal}`);\n});"
+    ]
+  },
+  "State": {
+    "Pinia": [
+      "Pinia is the recommended state management library for Vue 3 with a modular architecture, full TypeScript support, and a simple API similar to Composition API. Each store is an object with state, getters, and actions.",
+      "export const useCounterStore = defineStore('counter', {\n  state: () => ({ count: 0 }),\n  actions: { increment() { this.count++ } }\n});"
+    ],
+    "State Management": [
+      "Vue's state management pattern involves lifting shared state into centralized stores, avoiding prop drilling across deeply nested components. Stores are singleton modules accessible from anywhere.",
+      "const store = useCounterStore();\nstore.increment();"
+    ],
+    "Persistence": [
+      "State persistence saves store data to localStorage or sessionStorage so it survives page reloads. Plugins like pinia-plugin-persistedstate automate serialization and hydration.",
+      "export const useStore = defineStore('main', {\n  state: () => ({ theme: 'dark' }),\n  persist: true\n});"
+    ]
+  },
+  "Forms": {
+    "v-model": [
+      "v-model provides two-way data binding on form inputs, select elements, and textareas. Vue 3's v-model can bind to multiple values and has customizable modifiers like .lazy and .trim.",
+      "<input v-model=\"username\" placeholder=\"Enter name\" />"
+    ],
+    "Validation": [
+      "Form validation in Vue can be manual with computed properties or use libraries like VeeValidate and Vuelidate. These provide declarative rules, error messages, and async validation.",
+      "<input v-model=\"email\" v-model:rules=\"[required, email]\"/>"
+    ],
+    "Form Libraries": [
+      "Libraries like FormKit or VeeValidate provide form building, validation, and submission handling with minimal boilerplate. They integrate with any UI component library and handle complex nested forms.",
+      "<FormKit type=\"form\" @submit=\"handleSubmit\">\n  <FormKit type=\"text\" name=\"email\" label=\"Email\" />\n</FormKit>"
+    ]
+  },
+  "Advanced": {
+    "Transitions": [
+      "Vue's transition system automatically applies CSS classes when elements enter or leave the DOM. It supports JavaScript hooks, custom transition classes, and reusable transition components.",
+      "<Transition name=\"fade\">\n  <p v-if=\"visible\">Animated content\n\n</Transition>"
+    ],
+    "Teleport": [
+      "Teleport allows rendering a component's template fragment outside its parent DOM hierarchy, useful for modals, tooltips, and toasts that need to break out of overflow containers.",
+      "<Teleport to=\"body\">\n  <Modal :open=\"showModal\" />\n</Teleport>"
+    ],
+    "Suspense": [
+      "Suspense manages async dependencies in the component tree, showing fallback content while nested async components resolve. It works with async setup(), dynamic imports, and async components.",
+      "<Suspense>\n  <template #default><AsyncComponent /></template>\n  <template #fallback><Spinner /></template>\n</Suspense>"
+    ]
+  },
+  "Composables": {
+    "useMouse": [
+      "Composables are functions that leverage the Composition API to encapsulate reusable stateful logic. A useMouse composable tracks mouse position with reactive coordinates that any component can consume.",
+      "export function useMouse() {\n  const x = ref(0);\n  const y = ref(0);\n  function update(e) { x.value = e.pageX; y.value = e.pageY; }\n  onMounted(() => window.addEventListener('mousemove', update));\n  onUnmounted(() => window.removeEventListener('mousemove', update));\n  return { x, y };\n}"
+    ],
+    "useLocalStorage": [
+      "Composables can wrap browser APIs like localStorage with reactive deserialization. The composable pattern allows sharing state across components without Pinia when the scope is small.",
+      "export function useLocalStorage(key, initial) {\n  const value = ref(JSON.parse(localStorage.getItem(key)) ?? initial);\n  watch(value, v => localStorage.setItem(key, JSON.stringify(v)));\n  return value;\n}"
+    ],
+    "Composable Contracts": [
+      "Well-designed composables follow predictable naming (useXxx), return a plain object or single ref, accept options via a single reactive object, and provide cleanup via onUnmounted.",
+      "export function useCounter(initial = 0) {\n  const count = ref(initial);\n  const increment = () => count.value++;\n  const decrement = () => count.value--;\n  const reset = () => count.value = initial;\n  return { count: readonly(count), increment, decrement, reset };\n}"
+    ]
+  },
+  "TypeScript": {
+    "Typed Props": [
+      "defineProps with TypeScript generics provides full type safety for component props. The generic syntax is the recommended approach over the runtime declaration for strict typing.",
+      "const props = defineProps<{\n  title: string\n  items?: { id: number; name: string }[]\n  onSelect?: (id: number) => void\n}>()"
+    ],
+    "Typed Emits": [
+      "defineEmits with TypeScript validates event payloads at compile time. The call signature syntax maps event names to their payload types for complete type coverage.",
+      "const emit = defineEmits<{\n  (e: 'update', id: number): void\n  (e: 'delete', payload: { id: number; reason: string }): void\n}>()"
+    ],
+    "Typed Refs": [
+      "Type parameters for ref, reactive, and computed enable strict type checking. Template refs use InstanceType to access the component type for direct method calls.",
+      "const count = ref<number>(0);\nconst user = reactive<{ name: string; age: number }>({ name: '', age: 0 });\nconst myForm = ref<InstanceType<typeof MyForm> | null>(null)"
+    ]
+  },
+  "Ecosystem": {
+    "VueUse": [
+      "VueUse is a collection of over 200 composable utilities for common patterns like geolocation, clipboard, dark mode, media queries, and fetch with reactive state management.",
+      "import { useDark, useToggle, useGeolocation } from '@vueuse/core';\nconst isDark = useDark();\nconst toggleDark = useToggle(isDark);\nconst { coords } = useGeolocation();"
+    ],
+    "Vue DevTools": [
+      "Vue DevTools is a browser extension providing component inspection, state editing, timeline profiling, route visualization, and Pinia store debugging with time-travel capabilities.",
+      "// Vue DevTools auto-detects Vue 3 apps in development\n// Timeline tab: track events, mutations, and performance\n// Components tab: browse hierarchy, inspect props/state, edit values live"
+    ],
+    "VitePress": [
+      "VitePress is a Vue-powered static site generator for documentation. It uses markdown content with Vue components, automatic search, and a default theme optimized for technical docs.",
+      "npm create vitepress@latest && npm run docs:dev\n# docs/.vitepress/config.ts\nexport default { title: 'My Docs', themeConfig: { nav: [{ text: 'Guide', link: '/guide' }] } }"
+    ]
+  },
+  "Vue 3 Composition API Deep Dive": {
+    "Composables & Reusable Logic": [
+      "Vue 3 Composition API enables logic reuse via composables — functions that use <code>ref</code>, <code>reactive</code>, <code>computed</code>, and lifecycle hooks. Composables replace mixins with better TypeScript support and no naming collisions. <code>watchEffect</code> automatically tracks dependencies. <code>provide</code>/<code>inject</code> with symbols for dependency injection. <code>toRefs</code> and <code>toRaw</code> convert between reactive and raw objects. <code>shallowRef</code> and <code>shallowReactive</code> optimize for large data structures. <code>triggerRef</code> manually triggers effects on shallowRef changes.",
+      "// Composable: useMousePosition\nimport { ref, onMounted, onUnmounted } from 'vue';\n\nexport function useMousePosition() {\n  const x = ref(0);\n  const y = ref(0);\n\n  function update(event: MouseEvent) {\n    x.value = event.clientX;\n    y.value = event.clientY;\n  }\n\n  onMounted(() => window.addEventListener('mousemove', update));\n  onUnmounted(() => window.removeEventListener('mousemove', update));\n\n  return { x, y };\n}\n\n// Composable: useDebouncedWatch\nimport { watch, ref, type Ref } from 'vue';\n\nexport function useDebouncedWatch<T>(\n  source: Ref<T>,\n  callback: (value: T) => void,\n  delay: number = 300\n) {\n  let timer: ReturnType<typeof setTimeout>;\n\n  watch(source, (val) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => callback(val), delay);\n  });\n}\n\n// Using composables in a component\n<script setup lang=\"ts\">\nimport { ref, computed } from 'vue';\nimport { useMousePosition } from './composables/useMouse';\nimport { useDebouncedWatch } from './composables/useDebounce';\n\nconst { x, y } = useMousePosition();\nconst search = ref('');\n\nuseDebouncedWatch(search, (val) => {\n  fetchResults(val);\n}, 500);\n\nconst cursorStyle = computed(() => ({\n  left: `${x.value}px`,\n  top: `${y.value}px`\n}));\n</script>\n\n<template>\n  <div class=\"cursor\" :style=\"cursorStyle\" />\n  <input v-model=\"search\" placeholder=\"Search...\" />\n</template>"
+    ],
+    "Vue Router & State Management (Pinia)": [
+      "Pinia is Vue's official state management library (replacing Vuex). It provides a simpler API: stores defined with <code>defineStore</code>, <code>state</code> as a function, <code>getters</code> for derived state, and <code>actions</code> for mutations. TypeScript is a first-class citizen. DevTools support shows state changes. Stores can be used outside components. Vue Router 4 (for Vue 3) supports lazy-loading via dynamic imports, navigation guards, route meta fields, and programmatic navigation. Route transitions use <code>Transition</code> component wrapping <code>RouterView</code>.",
+      "// Pinia store\nimport { defineStore } from 'pinia';\nimport { ref, computed } from 'vue';\n\nexport const useCartStore = defineStore('cart', () => {\n  // State\n  const items = ref<CartItem[]>([]);\n  const promoCode = ref<string | null>(null);\n\n  // Getters\n  const itemCount = computed(() => items.value.reduce((sum, i) => sum + i.quantity, 0));\n  const total = computed(() => {\n    let t = items.value.reduce((sum, i) => sum + i.price * i.quantity, 0);\n    return promoCode.value === 'SAVE10' ? t * 0.9 : t;\n  });\n\n  // Actions\n  function addItem(product: Product) {\n    const existing = items.value.find(i => i.id === product.id);\n    if (existing) {\n      existing.quantity++;\n    } else {\n      items.value.push({ ...product, quantity: 1 });\n    }\n  }\n\n  function removeItem(id: number) {\n    items.value = items.value.filter(i => i.id !== id);\n  }\n\n  function applyPromo(code: string) {\n    promoCode.value = code;\n  }\n\n  return { items, promoCode, itemCount, total, addItem, removeItem, applyPromo };\n});\n\n// Vue Router setup\n// router/index.ts\nimport { createRouter, createWebHistory } from 'vue-router';\n\nconst router = createRouter({\n  history: createWebHistory(),\n  routes: [\n    {\n      path: '/',\n      component: () => import('../pages/Home.vue'),\n      name: 'home'\n    },\n    {\n      path: '/products',\n      component: () => import('../pages/Products.vue'),\n      name: 'products',\n      beforeEnter: (to, from) => {\n        // Route-specific guard\n      }\n    },\n    {\n      path: '/products/:id',\n      component: () => import('../pages/ProductDetail.vue'),\n      props: true\n    }\n  ]\n});\n\n// Navigation guard (global)\nrouter.beforeEach(async (to, from) => {\n  const auth = useAuthStore();\n  if (to.meta.requiresAuth && !auth.isLoggedIn) {\n    return { name: 'login', query: { redirect: to.fullPath } };\n  }\n});\n\nexport default router;"
+    ]
+  }
+}

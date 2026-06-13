@@ -1,0 +1,23 @@
+{
+  "id": "c-error-handling",
+  "title": "C: Error Handling",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "error handling", "errno", "perror", "return codes"],
+  "description": "Implement a function that safely divides two numbers and returns error codes for division by zero.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Safe Division",
+      "description": "Write a function `int safe_divide(int a, int b, double *result)` that returns 0 on success and -1 on division by zero. Test with both valid and zero divisor.",
+      "hints": ["If b == 0, return -1 (error).", "Otherwise store a/(double)b in *result and return 0.", "Print 'Result: X' or 'Error: division by zero'."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint safe_divide(int a, int b, double *result) {\n    \n}\n\nint main() {\n    double res;\n    if (safe_divide(10, 3, &res) == 0)\n        printf(\"Result: %.2f\\n\", res);\n    else\n        printf(\"Error: division by zero\\n\");\n    if (safe_divide(10, 0, &res) != 0)\n        printf(\"Error: division by zero\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('3.33') && output.includes('Error')",
+        "successMessage": "Error handling works!",
+        "failureMessage": "Handle both valid division and division by zero"
+      }
+    }
+  ]
+}

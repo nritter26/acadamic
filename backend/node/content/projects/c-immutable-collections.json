@@ -1,0 +1,23 @@
+{
+  "id": "c-immutable-collections",
+  "title": "C: Immutable Collections (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "immutable", "persistent", "functional", "structs"],
+  "description": "Implement a simple immutable persistent data structure: a persistent stack where each push creates a new stack sharing structure with the old one.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Persistent Stack",
+      "description": "Define a `PStack` node with value and a pointer to the next node (the previous version). Write `PStack* pstack_push(PStack *old, int val)` that creates a new node pointing to old. Write `int pstack_peek(PStack *s)` and `PStack* pstack_pop(PStack *s)`. Demonstrate that old versions remain valid after push.",
+      "hints": ["Nodes are singly-linked and never modified.", "push: alloc new node with next=old.", "pop: return old->next.", "Old stack still exists after push."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct PStack { int val; struct PStack *next; } PStack;\n\nPStack* pstack_push(PStack *old, int val) {\n    PStack *n = malloc(sizeof(PStack));\n    n->val = val; n->next = old; return n;\n}\n\nint pstack_peek(PStack *s) { return s->val; }\nPStack* pstack_pop(PStack *s) { return s->next; }\n\nvoid pstack_print(PStack *s) {\n    while (s) { printf(\"%d \", s->val); s = s->next; }\n    printf(\"\\n\");\n}\n\nint main() {\n    PStack *s0 = NULL;\n    PStack *s1 = pstack_push(s0, 10);\n    PStack *s2 = pstack_push(s1, 20);\n    PStack *s3 = pstack_push(s2, 30);\n    printf(\"s3: \"); pstack_print(s3);\n    printf(\"s2: \"); pstack_print(s2);\n    printf(\"s1: \"); pstack_print(s1);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('30 20 10') && output.includes('20 10') && output.includes('10')",
+        "successMessage": "Immutable stack works!",
+        "failureMessage": "Old versions should remain valid after push"
+      }
+    }
+  ]
+}

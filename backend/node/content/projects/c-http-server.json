@@ -1,0 +1,35 @@
+{
+  "id": "c-http-server",
+  "title": "C: HTTP Server (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "HTTP", "server", "parsing", "responses"],
+  "description": "Simulate an HTTP server that parses HTTP request strings and generates HTTP responses.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse HTTP Request",
+      "description": "Write a function that parses an HTTP GET request string like 'GET /index.html HTTP/1.1' and extracts the method, path, and version. Print each part.",
+      "hints": ["Use `sscanf` to parse: `sscanf(req, \"%s %s %s\", method, path, version)`.", "Print method, path, and version separately.", "Test with 'GET /api/users HTTP/1.1'."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    char req[] = \"GET /index.html HTTP/1.1\";\n    char method[16], path[64], version[16];\n    sscanf(req, \"%s %s %s\", method, path, version);\n    printf(\"Method: %s\\n\", method);\n    printf(\"Path: %s\\n\", path);\n    printf(\"Version: %s\\n\", version);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('GET') && output.includes('/index.html') && output.includes('HTTP/1.1')",
+        "successMessage": "HTTP request parsing works!",
+        "failureMessage": "Parse and print method, path, and version"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Generate HTTP Response",
+      "description": "Write a function that generates a simple HTTP response: `HTTP/1.1 200 OK\\r\\nContent-Type: text/html\\r\\n\\r\\n<h1>Hello</h1>` for success, or `404 Not Found` for unknown routes. Test with '/' and '/unknown'.",
+      "hints": ["Use `sprintf` to build the response string.", "Simple routing: '/' returns 200, anything else returns 404.", "Print the full response including status line."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nvoid handle_request(char *method, char *path) {\n    char response[256];\n    if (strcmp(path, \"/\") == 0 || strcmp(path, \"/index.html\") == 0)\n        sprintf(response, \"HTTP/1.1 200 OK\\r\\n\\r\\n<html><body><h1>Hello</h1></body></html>\");\n    else\n        sprintf(response, \"HTTP/1.1 404 Not Found\\r\\n\\r\\n<html><body><h1>404 Not Found</h1></body></html>\");\n    printf(\"%s\\n\", response);\n}\n\nint main() {\n    handle_request(\"GET\", \"/\");\n    printf(\"---\\n\");\n    handle_request(\"GET\", \"/unknown\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('200 OK') && output.includes('404 Not Found')",
+        "successMessage": "HTTP response generation works!",
+        "failureMessage": "Return 200 for '/' and 404 for '/unknown'"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "c-testing-framework",
+  "title": "C: Mini Testing Framework",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "testing", "assertions", "macros", "test runner"],
+  "description": "Build a simple testing framework with assertions and a test runner.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Test Macros and Runner",
+      "description": "Define macros `ASSERT_EQ(a, b)` and `ASSERT_TRUE(c)` that print 'PASS' or 'FAIL' and increment global counts. Write a test runner that runs all registered tests. Create 3 tests: test_add, test_sub, test_fail.",
+      "hints": ["ASSERT_EQ: `if ((a) != (b)) { printf(\"FAIL\\n\"); fails++; } else printf(\"PASS\\n\"); passes++;`.", "Use `__FILE__` and `__LINE__` in macros.", "Global pass/fail counters."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint tests_pass = 0, tests_fail = 0;\n\n#define ASSERT_EQ(a, b) do { \\\n    if ((a) != (b)) { printf(\"FAIL (line %d)\\n\", __LINE__); tests_fail++; } \\\n    else { printf(\"PASS\\n\"); tests_pass++; } \\\n} while(0)\n\n#define ASSERT_TRUE(c) do { \\\n    if (!(c)) { printf(\"FAIL (line %d)\\n\", __LINE__); tests_fail++; } \\\n    else { printf(\"PASS\\n\"); tests_pass++; } \\\n} while(0)\n\nint add(int a, int b) { return a + b; }\nint sub(int a, int b) { return a - b; }\n\nint main() {\n    printf(\"Test add: \"); ASSERT_EQ(add(2, 3), 5);\n    printf(\"Test sub: \"); ASSERT_EQ(sub(5, 3), 2);\n    printf(\"Test true: \"); ASSERT_TRUE(1);\n    printf(\"\\nPassed: %d, Failed: %d\\n\", tests_pass, tests_fail);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('PASS') && output.includes('Passed: 3')",
+        "successMessage": "Testing framework works!",
+        "failureMessage": "Run all tests and print pass/fail counts"
+      }
+    }
+  ]
+}

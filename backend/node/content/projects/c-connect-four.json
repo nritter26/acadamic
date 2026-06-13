@@ -1,0 +1,23 @@
+{
+  "id": "c-connect-four",
+  "title": "C: Connect Four (Validation)",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "2D arrays", "game logic", "validation", "nested loops"],
+  "description": "Validate a Connect Four board: check for horizontal, vertical, and diagonal wins.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Check for Win",
+      "description": "Define a 6x7 Connect Four board as a 2D char array (0=empty, X=player1, O=player2). Write `int check_win(char board[6][7], char player)` that checks for 4-in-a-row in all directions. Test with a board that has a horizontal win for X.",
+      "hints": ["Check horizontal: scan each row for 4 consecutive.", "Check vertical: scan each column.", "Check diagonal: both directions (\\ and /).", "Return 1 if found, 0 otherwise."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nint check_win(char board[6][7], char player) {\n    // Horizontal\n    for (int r = 0; r < 6; r++)\n        for (int c = 0; c < 4; c++)\n            if (board[r][c]==player && board[r][c+1]==player &&\n                board[r][c+2]==player && board[r][c+3]==player) return 1;\n    // Vertical\n    for (int r = 0; r < 3; r++)\n        for (int c = 0; c < 7; c++)\n            if (board[r][c]==player && board[r+1][c]==player &&\n                board[r+2][c]==player && board[r+3][c]==player) return 1;\n    // Diagonal (\\ and /)\n    for (int r = 0; r < 3; r++)\n        for (int c = 0; c < 4; c++) {\n            if (board[r][c]==player && board[r+1][c+1]==player &&\n                board[r+2][c+2]==player && board[r+3][c+3]==player) return 1;\n            if (board[r][c+3]==player && board[r+1][c+2]==player &&\n                board[r+2][c+1]==player && board[r+3][c]==player) return 1;\n        }\n    return 0;\n}\n\nint main() {\n    char board[6][7] = {0};\n    board[3][0]='X'; board[3][1]='X'; board[3][2]='X'; board[3][3]='X';\n    board[0][3]='O';\n    printf(\"X wins: %d\\n\", check_win(board, 'X'));\n    printf(\"O wins: %d\\n\", check_win(board, 'O'));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('0')",
+        "successMessage": "Connect Four validation works!",
+        "failureMessage": "Check for X win (should be 1) and O win (should be 0)"
+      }
+    }
+  ]
+}

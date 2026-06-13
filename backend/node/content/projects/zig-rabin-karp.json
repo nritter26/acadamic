@@ -1,0 +1,116 @@
+{
+  "id": "zig-rabin-karp",
+  "title": "Rabin-Karp Search",
+  "description": "Write a Zig program that implements the Rabin-Karp string searching algorithm using rolling hash.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn search(text: []const u8, pattern: []const u8) void {\n    const d: u64 = 256;\n    const q: u64 = 101;\n    const m = pattern.len;\n    const n = text.len;\n    var p: u64 = 0;\n    var t: u64 = 0;\n    var h: u64 = 1;\n    \n    for (0..m - 1) |_| h = (h * d) % q;\n    for (0..m) |i| {\n        p = (d * p + pattern[i]) % q;\n        t = (d * t + text[i]) % q;\n    }\n    \n    for (0..n - m + 1) |i| {\n        if (p == t) {\n            var match = true;\n            for (0..m) |j| {\n                if (text[i + j] != pattern[j]) { match = false; break; }\n            }\n            if (match) std.debug.print(\"Found at {}\\n\", .{i});\n        }\n        if (i < n - m) {\n            t = (d * (t - text[i] * h) + text[i + m]) % q;\n            t +%= q;\n        }\n    }\n}\n\npub fn main() !void {\n    const text = \"ABCCDDAEFG\";\n    const pattern = \"CDD\";\n    search(text, pattern);\n}"
+  },
+  "verificationTest": "output.includes('Found at 3')",
+  "hints": [
+    "Rabin-Karp uses a rolling hash to compare substrings in O(1) time",
+    "The hash is computed as a base-d number modulo q (a prime)",
+    "When hashes match, verify with a character-by-character comparison",
+    "`+%= q` ensures the rolling hash stays non-negative"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "searching",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Rabin-Karp Search project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Rabin-Karp Search",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Rabin-Karp Search project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Rabin-Karp Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Rabin-Karp Search",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Rabin-Karp Search\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Rabin-Karp Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Rabin-Karp Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Rabin-Karp Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Rabin-Karp Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

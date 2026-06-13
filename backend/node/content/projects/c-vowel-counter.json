@@ -1,0 +1,23 @@
+{
+  "id": "c-vowel-counter",
+  "title": "C: Vowel Counter",
+  "difficulty": "beginner",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "strings", "loops", "conditionals", "printf"],
+  "description": "Count the number of vowels (a, e, i, o, u) in a given string and print the count.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Count Vowels",
+      "description": "Declare `char str[] = \"Hello, World!\"`. Loop through each character and count how many are vowels (a, e, i, o, u, both lowercase and uppercase). Print 'Vowel count: 3'.",
+      "hints": ["Use `strlen(str)` to get the length.", "Check each char: `str[i] == 'a' || str[i] == 'e'` etc.", "Use `tolower()` from <ctype.h> for case-insensitive check."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n\nint main() {\n    char str[] = \"Hello, World!\";\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Vowel counter works!",
+        "failureMessage": "Count vowels in 'Hello, World!' and print the count (3)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-match",
+  "title": "Rust: Match Expressions",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "match", "pattern matching", "arms"],
+  "description": "Use Rust's powerful match expression for pattern matching.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Match on Number",
+      "description": "Create a `number = 3` and match it: 1 -> \"one\", 2 -> \"two\", 3 -> \"three\", _ -> \"other\". Print the result.",
+      "hints": ["`match number { 1 => println!(\"one\"), 2 => println!(\"two\"), 3 => println!(\"three\"), _ => println!(\"other\") }`", "The `_` pattern catches all other values.", "Match must be exhaustive — cover all possibilities."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('three')",
+        "successMessage": "Basic match works!",
+        "failureMessage": "Print the English word for the number 3."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple Patterns",
+      "description": "Match a character `c = 'a'`: vowels (a, e, i, o, u) -> \"vowel\", other letters -> \"consonant\".",
+      "hints": ["Use `|` to match multiple patterns: `'a' | 'e' | 'i' | 'o' | 'u'`", "The `|` operator means \"or\" within a match arm.", "`_ => println!(\"consonant\")` catches the rest."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('vowel')",
+        "successMessage": "Multiple patterns work!",
+        "failureMessage": "Print 'vowel' for the character 'a'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Match with Ranges",
+      "description": "Match a `score = 85`: 90..=100 -> \"A\", 80..=89 -> \"B\", 70..=79 -> \"C\", 0..=69 -> \"F\", _ -> \"invalid\".",
+      "hints": ["Use `..=` for inclusive ranges: `90..=100`", "`85` falls in the `80..=89` range.", "Ranges in match must be exhaustive and non-overlapping."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('B')",
+        "successMessage": "Range patterns work!",
+        "failureMessage": "Print the grade for score 85."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Match as Expression",
+      "description": "Use match as an expression: match `day = 3` and assign the day name to a variable. Print the variable.",
+      "hints": ["`let day_name = match day { 1 => \"Monday\", 2 => \"Tuesday\", ... };`", "Match expressions return a value that can be assigned.", "Provide all 7 days and `_ => \"invalid\"` for the catch-all."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Wednesday') || output.includes('Tuesday')",
+        "successMessage": "Match as expression works!",
+        "failureMessage": "Print the day name for day 3."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Match with Guards",
+      "description": "Create a match on `number`: if number > 0 print \"positive\", if number < 0 print \"negative\". Use match guards with `if`.",
+      "hints": ["`match number { n if n > 0 => println!(\"positive\"), n if n < 0 => println!(\"negative\"), _ => println!(\"zero\") }`", "Guards add extra conditions to patterns.", "Use `_` as a catch-all for zero."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('positive') || output.includes('negative') || output.includes('zero')",
+        "successMessage": "Match guards work!",
+        "failureMessage": "Print whether number is positive, negative, or zero."
+      }
+    }
+  ]
+}

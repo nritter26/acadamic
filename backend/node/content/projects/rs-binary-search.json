@@ -1,0 +1,71 @@
+{
+  "id": "rs-binary-search",
+  "title": "Rust: Binary Search",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "binary search", "divide and conquer", "search algorithms"],
+  "description": "Implement binary search on sorted arrays using both iterative and recursive approaches.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Iterative Binary Search",
+      "description": "Write an iterative function `binary_search(arr: &[i32], target: i32) -> Option<usize>` that returns the index of target if found. Test with `[1, 3, 5, 7, 9]` searching for 5 and 6.",
+      "hints": ["Track `left` and `right` pointers.", "`while left <= right { let mid = (left + right) / 2; ... }`", "If arr[mid] == target return Some(mid), else adjust bounds."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('None')",
+        "successMessage": "Iterative binary search works!",
+        "failureMessage": "Find 5 (index 2) and 6 (not found — None)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Recursive Binary Search",
+      "description": "Write a recursive version `binary_search_rec(arr: &[i32], target: i32, left: usize, right: usize) -> Option<usize>`. Test with the same inputs.",
+      "hints": ["Base case: `if left > right { return None; }`", "Calculate mid, compare arr[mid] with target.", "Recursively call with updated left/right bounds."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('None')",
+        "successMessage": "Recursive binary search works!",
+        "failureMessage": "Find 5 and 6 using recursive binary search."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Generic Binary Search",
+      "description": "Make your binary search generic: `fn binary_search_gen<T: Ord>(arr: &[T], target: &T) -> Option<usize>`. Test with i32 slice and &str slice.",
+      "hints": ["`fn binary_search_gen<T: Ord>(arr: &[T], target: &T) -> Option<usize>`", "Use `<` and `>` for comparison (requires Ord trait).", "Test with numbers and strings."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('none') || output.includes('None')",
+        "successMessage": "Generic binary search works!",
+        "failureMessage": "Test with both i32 and &str slices."
+      }
+    },
+    {
+      "id": 4,
+      "title": "First/Last Occurrence",
+      "description": "Write functions `first_occurrence(arr: &[i32], target: i32) -> Option<usize>` and `last_occurrence(...)` for arrays with duplicates. Test with `[1, 2, 2, 2, 3, 4]`.",
+      "hints": ["For first: when arr[mid] == target, set right = mid (don't return yet).", "For last: when arr[mid] == target, set left = mid + 1.", "Look left/right further for the boundary."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('3')",
+        "successMessage": "First/last occurrence works!",
+        "failureMessage": "Find first (1) and last (3) occurrence of 2 in [1,2,2,2,3,4]."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Search Insert Position",
+      "description": "Write a function `search_insert(nums: &[i32], target: i32) -> usize` that returns the index where target should be inserted (like LeetCode 35). Test with `[1, 3, 5, 6]`, targets 5, 2, 7, 0.",
+      "hints": ["If found, return the index. If not found, return the insertion position (left pointer).", "The insertion point is where `left` ends up after the loop.", "5→2, 2→1, 7→4, 0→0"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('2') && output.includes('1') && output.includes('4') && output.includes('0')",
+        "successMessage": "Search insert position works!",
+        "failureMessage": "Print insert positions for [5,2,7,0]: 2,1,4,0."
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "go-rate-limiter",
+  "title": "Go: Rate Limiter",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 60,
+  "concepts": ["go", "rate limiting", "concurrency", "sync.Mutex", "time.Ticker"],
+  "description": "Build a production-grade rate limiter in Go with sliding window and token bucket algorithms using mutexes and timers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Atomic counter with mutex",
+      "description": "Create a `Counter` struct with `sync.Mutex` that tracks request counts within a time window. Implement `Increment()` and `Reset()` methods. In a loop, increment the counter 10 times, print the count after each increment, then reset and print the count again.",
+      "hints": [
+        "Embed `sync.Mutex` in the struct and guard reads/writes with `Lock()`/`Unlock()`",
+        "Use `defer c.Unlock()` after locking to ensure release",
+        "Print the count with `fmt.Printf(\"Count: %d\\n\", c.value)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Count:') && output.includes('0')",
+        "successMessage": "Thread-safe counter with mutex correctly tracks and resets counts!",
+        "failureMessage": "Print the count after each increment and after reset using fmt.Printf."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Sliding window log",
+      "description": "Implement a `SlidingWindow` limiter that stores timestamps of requests in a slice. On each request, remove timestamps older than the window duration and check if the count exceeds the limit. Print \"Allowed\" or \"Denied\" for 6 rapid requests with a limit of 3 per second.",
+      "hints": [
+        "Store `[]time.Time` in the struct and prune old entries with a helper method",
+        "Use `time.Now()` for the current timestamp and a configurable window duration",
+        "Use `time.Sleep(100 * time.Millisecond)` between some requests to demonstrate window sliding"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Allowed') && output.includes('Denied')",
+        "successMessage": "Sliding window log correctly allows within limit and denies excess requests!",
+        "failureMessage": "Print 'Allowed' for requests within the limit and 'Denied' for requests exceeding it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Token bucket algorithm",
+      "description": "Implement a `TokenBucket` with a capacity and refill rate. Use a goroutine with `time.Ticker` to periodically add tokens. The `Take()` method consumes a token and returns true, or false if the bucket is empty. Print the result of 8 consecutive `Take()` calls with a capacity of 5.",
+      "hints": [
+        "Create a `time.Ticker` that refills one token per tick up to capacity",
+        "Use a `chan struct{}` or a counter with mutex to track available tokens",
+        "Start the refill goroutine in `NewTokenBucket` and stop the ticker when done"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Token bucket fills over time and correctly rejects when empty!",
+        "failureMessage": "Print 'true' when Take() succeeds and 'false' when the bucket is empty."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Per-client rate limiter",
+      "description": "Build a `ClientLimiter` that manages separate token buckets per client ID using a `map[string]*TokenBucket` with a mutex. Implement `GetLimiter(clientID)` that creates a new bucket if one doesn't exist. Test with two clients making requests and print \"Client X: Allowed\" or \"Client X: Denied\".",
+      "hints": [
+        "Guard the map with `sync.RWMutex` — use `RLock()` for reads and `Lock()` for writes",
+        "Use `defer r.Unlock()` pattern consistently to avoid deadlocks",
+        "Print client-specific results so each client's limit is clearly visible"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Client') && output.includes('Allowed') && output.includes('Denied')",
+        "successMessage": "Per-client rate limiter isolates limits correctly between different clients!",
+        "failureMessage": "Print each request result with the client ID, e.g. 'Client A: Allowed'."
+      }
+    },
+    {
+      "id": 5,
+      "title": "HTTP middleware wrapper",
+      "description": "Create an `HTTPRateLimiter` middleware that wraps `http.Handler`. Use the per-client limiter keyed by IP address. For denied requests, write a 429 status and \"Rate limit exceeded\" response. Test with a simple handler and print the response status codes from multiple rapid requests.",
+      "hints": [
+        "Client IP can be extracted from `r.RemoteAddr`",
+        "Middleware signature: `func (rl *HTTPRateLimiter) Middleware(next http.Handler) http.Handler`",
+        "Use `http.StatusTooManyRequests` (429) for denied requests and `http.StatusOK` (200) for allowed"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('200') && output.includes('429')",
+        "successMessage": "HTTP middleware correctly returns 200 for allowed and 429 for rate-limited requests!",
+        "failureMessage": "Print the HTTP status codes returned for each request using fmt.Println."
+      }
+    }
+  ]
+}

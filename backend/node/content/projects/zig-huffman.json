@@ -1,0 +1,116 @@
+{
+  "id": "zig-huffman",
+  "title": "Huffman Coding",
+  "description": "Write a Zig program that builds a Huffman tree and generates codes for a set of characters with given frequencies.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst HuffNode = struct {\n    ch: u8,\n    freq: u32,\n    left: ?*HuffNode,\n    right: ?*HuffNode,\n};\n\npub fn main() !void {\n    var n_a = HuffNode{ .ch = 'a', .freq = 5, .left = null, .right = null };\n    var n_b = HuffNode{ .ch = 'b', .freq = 9, .left = null, .right = null };\n    var n_c = HuffNode{ .ch = 'c', .freq = 12, .left = null, .right = null };\n    var n_d = HuffNode{ .ch = 'd', .freq = 13, .left = null, .right = null };\n    var n_e = HuffNode{ .ch = 'e', .freq = 16, .left = null, .right = null };\n    var n_f = HuffNode{ .ch = 'f', .freq = 45, .left = null, .right = null };\n    \n    var n1 = HuffNode{ .ch = 0, .freq = n_a.freq + n_b.freq, .left = &n_a, .right = &n_b };\n    var n2 = HuffNode{ .ch = 0, .freq = n_c.freq + n_d.freq, .left = &n_c, .right = &n_d };\n    var n3 = HuffNode{ .ch = 0, .freq = n1.freq + n_e.freq, .left = &n1, .right = &n_e };\n    var n4 = HuffNode{ .ch = 0, .freq = n2.freq + n3.freq, .left = &n2, .right = &n3 };\n    var root = HuffNode{ .ch = 0, .freq = n4.freq + n_f.freq, .left = &n4, .right = &n_f };\n    \n    std.debug.print(\"Root freq: {}\\n\", .{root.freq});\n    std.debug.print(\"Left freq: {}\\n\", .{root.left.?.freq});\n    std.debug.print(\"Right freq: {}\\n\", .{root.right.?.freq});\n}"
+  },
+  "verificationTest": "output.includes('Root freq: 100') && output.includes('Left freq: 55') && output.includes('Right freq: 45')",
+  "hints": [
+    "Huffman coding assigns shorter codes to more frequent characters",
+    "Build the tree by repeatedly combining the two lowest-frequency nodes",
+    "Left/right branches correspond to 0/1 bits in the code",
+    "The root's frequency equals the sum of all character frequencies"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "greedy",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Huffman Coding project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Huffman Coding",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Huffman Coding project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Huffman Coding...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Huffman Coding",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Huffman Coding\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Huffman Coding...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Huffman Coding...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Huffman Coding...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Huffman Coding...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

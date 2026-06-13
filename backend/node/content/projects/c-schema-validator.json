@@ -1,0 +1,23 @@
+{
+  "id": "c-schema-validator",
+  "title": "C: Schema Validator",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "validation", "schemas", "structs", "type checking"],
+  "description": "Build a simple schema validator that checks if data fields match expected types and constraints.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Field Validation Rules",
+      "description": "Define a `FieldRule` struct with name, type (INT/STRING), min, max. Define a `Field` struct with name, an int value, and a string value. Write `int validate(FieldRule *rules, Field *fields, int count)` that checks each field against its rule.",
+      "hints": ["Use `typedef enum { INT, STRING } FieldType;`.", "For INT: check min <= value <= max.", "For STRING: check strlen between min and max.", "Print 'OK' or 'INVALID: reason' for each field."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\ntypedef enum { INT, STRING } FieldType;\n\ntypedef struct { char name[32]; FieldType type; int min; int max; } FieldRule;\ntypedef struct { char name[32]; FieldType type; int int_val; char str_val[64]; } Field;\n\nint validate(FieldRule *rules, Field *fields, int count) {\n    for (int i = 0; i < count; i++) {\n        int ok = 1;\n        if (fields[i].type == INT)\n            ok = fields[i].int_val >= rules[i].min && fields[i].int_val <= rules[i].max;\n        else if (fields[i].type == STRING) {\n            int len = strlen(fields[i].str_val);\n            ok = len >= rules[i].min && len <= rules[i].max;\n        }\n        printf(\"%s: %s\\n\", fields[i].name, ok ? \"OK\" : \"INVALID\");\n    }\n    return 0;\n}\n\nint main() {\n    FieldRule rules[2] = {{\"age\", INT, 0, 150}, {\"name\", STRING, 1, 50}};\n    Field fields[2] = {{\"age\", INT, .int_val=25}, {\"name\", STRING, .str_val=\"Alice\"}};\n    validate(rules, fields, 2);\n    fields[0].int_val = -5;\n    validate(rules, fields, 2);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('OK') && output.includes('INVALID')",
+        "successMessage": "Schema validator works!",
+        "failureMessage": "Validate fields and print OK or INVALID"
+      }
+    }
+  ]
+}

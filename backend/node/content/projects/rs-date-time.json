@@ -1,0 +1,71 @@
+{
+  "id": "rs-date-time",
+  "title": "Rust: Date and Time",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "chrono", "DateTime", "Duration", "time formatting"],
+  "description": "Work with dates, times, and durations using Rust's standard library.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Get Current Time",
+      "description": "Use `std::time::Instant::now()` to measure how long a computation takes. Compute sum of 1 to 1,000,000 and print the elapsed time.",
+      "hints": ["`let start = std::time::Instant::now();`", "Then do your computation.", "`let duration = start.elapsed(); println!(\"Took: {:?}\", duration);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Took') || output.includes('µs') || output.includes('ms')",
+        "successMessage": "Time measurement works!",
+        "failureMessage": "Measure and print how long the computation takes."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Duration Math",
+      "description": "Use `std::time::Duration` to represent time spans. Add 2 hours, 30 minutes, and 15 seconds together into one Duration. Convert to total seconds and print.",
+      "hints": ["`Duration::from_secs(2 * 3600)` for 2 hours.", "`Duration::from_secs(30 * 60)` for 30 minutes.", "Add with `+` operator: `h2 + m30 + s15 = 9015 seconds`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('9015') || output.includes('seconds')",
+        "successMessage": "Duration math works!",
+        "failureMessage": "Add 2h30m15s and print total seconds (9015)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "System Time (UNIX Timestamp)",
+      "description": "Get the current UNIX timestamp using `std::time::SystemTime::now()`. Convert to seconds since epoch and print it.",
+      "hints": ["`let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap();`", "`.as_secs()` returns the seconds.", "This is the current UNIX timestamp."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 0 && !isNaN(Number(output.trim()))",
+        "successMessage": "UNIX timestamp retrieved!",
+        "failureMessage": "Print the current UNIX timestamp (seconds since epoch)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Time Since a Date",
+      "description": "Calculate how many seconds have passed since `SystemTime::UNIX_EPOCH` + `Duration::from_secs(1_000_000_000)` (a specific date). Print the duration.",
+      "hints": ["`let target = std::time::UNIX_EPOCH + Duration::from_secs(1_000_000_000);`", "`let since = now.duration_since(target).unwrap();`", "This shows the time elapsed since Sep 9, 2001."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('secs') || output.includes('days') || output.includes('hours')",
+        "successMessage": "Time since date calculated!",
+        "failureMessage": "Print the duration since the Unix timestamp 1,000,000,000."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Timeout Simulation",
+      "description": "Simulate a timeout scenario: set a deadline `Instant::now() + Duration::from_millis(10)`. Loop checking `Instant::now() < deadline` and count iterations. Print the count.",
+      "hints": ["`let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);`", "`let mut count = 0; while Instant::now() < deadline { count += 1; }`", "This shows how many iterations fit in 10ms."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('count') || output.len() > 0",
+        "successMessage": "Timeout simulation works!",
+        "failureMessage": "Count iterations in a 10ms window."
+      }
+    }
+  ]
+}

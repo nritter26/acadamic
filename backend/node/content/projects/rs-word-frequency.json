@@ -1,0 +1,71 @@
+{
+  "id": "rs-word-frequency",
+  "title": "Rust: Word Frequency Analyzer",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "HashMap", "word frequency", "sorting", "analysis"],
+  "description": "Analyze word frequency in text using HashMap and sorting.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Tokenize Text into Words",
+      "description": "Write a function `tokenize(text: &str) -> Vec<&str>` that splits text into words (lowercase, remove punctuation). Test with `\"The quick brown fox jumps over the lazy dog!\"`.",
+      "hints": ["Use `.to_lowercase()` and `.split_whitespace()`.", "Trim punctuation: `.trim_matches(|c: char| !c.is_alphanumeric())`.", "Print each token on its own line."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('the') && output.includes('quick') && output.includes('dog')",
+        "successMessage": "Tokenization works!",
+        "failureMessage": "Tokenize the sentence and print all words."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Count Word Frequencies",
+      "description": "Write `count_frequencies(words: &[&str]) -> HashMap<&str, u32>` that counts occurrences. Print the frequency map for the sentence from step 1.",
+      "hints": ["`let mut freq = HashMap::new();`", "`*freq.entry(word).or_insert(0) += 1;`", "Print with `println!(\"{:?}\", freq);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('the: 2') || (output.includes('the') && output.includes('2'))",
+        "successMessage": "Frequency counting works!",
+        "failureMessage": "Print word frequencies (the should appear twice)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Sort by Frequency",
+      "description": "Sort the word-frequency pairs by count (descending). Convert HashMap to Vec of (word, count) tuples, sort, and print the top 3 words.",
+      "hints": ["`let mut items: Vec<_> = freq.into_iter().collect();`", "`items.sort_by(|a, b| b.1.cmp(&a.1));` (descending by count)", "Print first 3: `items.iter().take(3)`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('the') || output.includes('jumps')",
+        "successMessage": "Sort by frequency works!",
+        "failureMessage": "Print the top 3 most frequent words."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Total Word Statistics",
+      "description": "Compute total words, unique words, and average word length from a text. Print all three stats for a given sentence.",
+      "hints": ["Total words = tokenize and count.", "Unique words = freq.keys().len().", "Average length = total_chars / total_words. (Use f64)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('words') && output.includes('unique') && output.includes('average')",
+        "successMessage": "Word statistics computed!",
+        "failureMessage": "Print total, unique, and average word length."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Analyze Larger Text",
+      "description": "Analyze this longer text: `\"Rust is fast. Rust is safe. Rust is fun. Rust is productive. Rust is the future.\"` Print: total words, unique words, and the most frequent word.",
+      "hints": ["Tokenize, count frequencies, sort.", "Total words: ~12, Unique: ~8.", "Most frequent: 'Rust' and 'is' appear 5 times each."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust') && (output.includes('5') || output.includes('most'))",
+        "successMessage": "Text analysis complete!",
+        "failureMessage": "Analyze the text and print statistics."
+      }
+    }
+  ]
+}

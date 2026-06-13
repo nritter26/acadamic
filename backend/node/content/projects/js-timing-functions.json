@@ -1,0 +1,55 @@
+{
+  "id": "js-timing-functions",
+  "title": "JavaScript: Timing Functions",
+  "description": "Write a JavaScript program using setTimeout and setInterval for timed execution.",
+  "difficulty": "intermediate",
+  "languages": [
+    "js"
+  ],
+  "codeTemplate": {
+    "js": "console.log('Start');\n\nsetTimeout(() => {\n  console.log('Timeout after 10ms');\n}, 10);\n\nconsole.log('After scheduling timeout');\n\nlet count = 0;\nconst interval = setInterval(() => {\n  count++;\n  console.log('Tick ' + count);\n  if (count >= 3) {\n    clearInterval(interval);\n  }\n}, 5);\n\nsetTimeout(() => {\n  console.log('All done!');\n}, 30);"
+  },
+  "verificationTest": "output.includes('Start') && output.includes('After scheduling timeout') && output.includes('Tick 1') && output.includes('Tick 3')",
+  "hints": [
+    "`setTimeout(callback, delay)` runs a callback once after delay ms",
+    "`setInterval(callback, interval)` runs a callback repeatedly",
+    "Use `clearTimeout()` and `clearInterval()` to cancel pending timers"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "setTimeout basics",
+      "description": "Use setTimeout to print \"Hello after 2 seconds\" after a 2000ms delay.",
+      "hints": [
+        "setTimeout(callback, delayMs)",
+        "The callback is a function"
+      ],
+      "codeTemplate": {
+        "javascript": "setTimeout(() => {\n  console.log(\"Hello after 2 seconds\");\n}, 2000);\n\nconsole.log(\"This prints immediately\");\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Hello after 2 seconds\")",
+        "successMessage": "setTimeout works!",
+        "failureMessage": "Use setTimeout with 2000ms delay."
+      }
+    },
+    {
+      "id": 2,
+      "title": "setInterval counter",
+      "description": "Use setInterval to print a counter every second, stopping after 5 times with clearInterval.",
+      "hints": [
+        "let count = 0",
+        "Increment count each interval",
+        "If count >= 5, call clearInterval()"
+      ],
+      "codeTemplate": {
+        "javascript": "let count = 0;\nconst interval = setInterval(() => {\n  count++;\n  console.log(\"Count:\", count);\n  if (count >= 5) {\n    clearInterval(interval);\n  }\n}, 1000);\n"
+      },
+      "verification": {
+        "test": "output.includes(\"Count: 5\")",
+        "successMessage": "Interval counter works!",
+        "failureMessage": "Stop after 5 iterations with clearInterval()."
+      }
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "id": "express-ws-chat",
+  "title": "WebSocket Chat Server",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 30,
+  "concepts": ["websocket", "chat", "real-time", "message-history", "express-ws"],
+  "serverMode": true,
+  "description": "Build a real-time chat server with REST endpoints for sending messages and retrieving history, plus a WebSocket for live messaging.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Health check endpoint",
+      "description": "Create a GET /health endpoint that returns JSON with status ok.",
+      "hints": [
+        "Use app.get('/health', handler)",
+        "Return JSON: { status: 'ok' }",
+        "Listen on process.env.PORT or 3000"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "status"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Send message via REST",
+      "description": "Create a POST /chat/send endpoint that accepts JSON with a username and message, stores it, and returns 201.",
+      "hints": [
+        "Use app.post('/chat/send', handler) with express.json() middleware",
+        "Read req.body.username and req.body.message",
+        "Assign an id and store in an array, return 201"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet messages = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req, res) => {\n  const { username, message } = req.body;\n  const msg = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  res.status(201).json(msg);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Message {\n  id: number;\n  username: string;\n  message: string;\n  timestamp: string;\n}\n\nlet messages: Message[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req: Request, res: Response) => {\n  const { username, message } = req.body;\n  const msg: Message = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  res.status(201).json(msg);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ChatMessage(BaseModel):\n    username: str\n    message: str\n\nmessages = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/chat/send', status_code=201)\ndef send_message(msg: ChatMessage):\n    global next_id\n    new_msg = {'id': next_id, 'username': msg.username, 'message': msg.message, 'timestamp': datetime.now().isoformat()}\n    next_id += 1\n    messages.append(new_msg)\n    return new_msg\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Message struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tMessage   string `json:\"message\"`\n\tTimestamp string `json:\"timestamp\"`\n}\n\nvar (\n\tmessages []Message\n\tnextID   = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/chat/send\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tMessage  string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tmsg := Message{ID: nextID, Username: body.Username, Message: body.Message, Timestamp: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tmessages = append(messages, msg)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(msg)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/chat/send",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Retrieve message history",
+      "description": "Add a GET /chat/messages endpoint that returns all stored messages with status 200.",
+      "hints": [
+        "Use app.get('/chat/messages', handler)",
+        "Return the messages array as JSON",
+        "Keep all previous functionality intact"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet messages = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req, res) => {\n  const { username, message } = req.body;\n  const msg = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  res.status(201).json(msg);\n});\n\napp.get('/chat/messages', (req, res) => {\n  res.json(messages);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Message {\n  id: number;\n  username: string;\n  message: string;\n  timestamp: string;\n}\n\nlet messages: Message[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req: Request, res: Response) => {\n  const { username, message } = req.body;\n  const msg: Message = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  res.status(201).json(msg);\n});\n\napp.get('/chat/messages', (req: Request, res: Response) => {\n  res.json(messages);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ChatMessage(BaseModel):\n    username: str\n    message: str\n\nmessages = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/chat/send', status_code=201)\ndef send_message(msg: ChatMessage):\n    global next_id\n    new_msg = {'id': next_id, 'username': msg.username, 'message': msg.message, 'timestamp': datetime.now().isoformat()}\n    next_id += 1\n    messages.append(new_msg)\n    return new_msg\n\n@app.get('/chat/messages')\ndef get_messages():\n    return messages\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Message struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tMessage   string `json:\"message\"`\n\tTimestamp string `json:\"timestamp\"`\n}\n\nvar (\n\tmessages []Message\n\tnextID   = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/chat/send\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tMessage  string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tmsg := Message{ID: nextID, Username: body.Username, Message: body.Message, Timestamp: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tmessages = append(messages, msg)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(msg)\n\t})\n\n\thttp.HandleFunc(\"/chat/messages\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(messages)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/chat/messages",
+            "expectedStatus": 200,
+            "expectedBodyShape": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "WebSocket for real-time chat",
+      "description": "Add a WS /chat endpoint that upgrades to WebSocket and broadcasts messages to all connected clients.",
+      "hints": [
+        "Use express-ws or a ws library to handle WebSocket connections",
+        "Track all connected clients in a Set or array",
+        "On receiving a message, broadcast to all connected clients"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst expressWs = require('express-ws')(express());\nconst app = expressWs.app;\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet messages = [];\nlet nextId = 1;\nlet clients = new Set();\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req, res) => {\n  const { username, message } = req.body;\n  const msg = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  clients.forEach(c => c.send(JSON.stringify(msg)));\n  res.status(201).json(msg);\n});\n\napp.get('/chat/messages', (req, res) => {\n  res.json(messages);\n});\n\napp.ws('/chat', (ws, req) => {\n  clients.add(ws);\n  ws.on('close', () => clients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport expressWs from 'express-ws';\nconst app = express();\nexpressWs(app);\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Message {\n  id: number;\n  username: string;\n  message: string;\n  timestamp: string;\n}\n\nlet messages: Message[] = [];\nlet nextId = 1;\nlet clients = new Set<WebSocket>();\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.post('/chat/send', (req: Request, res: Response) => {\n  const { username, message } = req.body;\n  const msg: Message = { id: nextId++, username, message, timestamp: new Date().toISOString() };\n  messages.push(msg);\n  clients.forEach(c => c.send(JSON.stringify(msg)));\n  res.status(201).json(msg);\n});\n\napp.get('/chat/messages', (req: Request, res: Response) => {\n  res.json(messages);\n});\n\napp.ws('/chat', (ws, req) => {\n  clients.add(ws);\n  ws.on('close', () => clients.delete(ws));\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, WebSocket\nfrom pydantic import BaseModel\nfrom datetime import datetime\nfrom typing import List\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ChatMessage(BaseModel):\n    username: str\n    message: str\n\nmessages = []\nnext_id = 1\nactive_connections: List[WebSocket] = []\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/chat/send', status_code=201)\ndef send_message(msg: ChatMessage):\n    global next_id\n    new_msg = {'id': next_id, 'username': msg.username, 'message': msg.message, 'timestamp': datetime.now().isoformat()}\n    next_id += 1\n    messages.append(new_msg)\n    for conn in active_connections:\n        await conn.send_json(new_msg)\n    return new_msg\n\n@app.get('/chat/messages')\ndef get_messages():\n    return messages\n\n@app.websocket('/chat')\nasync def chat_websocket(websocket: WebSocket):\n    await websocket.accept()\n    active_connections.append(websocket)\n    try:\n        while True:\n            await websocket.receive_text()\n    except:\n        active_connections.remove(websocket)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n\t\"time\"\n\n\t\"github.com/gorilla/websocket\"\n)\n\ntype Message struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tMessage   string `json:\"message\"`\n\tTimestamp string `json:\"timestamp\"`\n}\n\nvar (\n\tmessages []Message\n\tnextID   = 1\n\tclients  = make(map[*websocket.Conn]bool)\n\tmu       sync.Mutex\n\tupgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}\n)\n\nfunc broadcast(msg Message) {\n\tmu.Lock()\n\tdefer mu.Unlock()\n\tdata, _ := json.Marshal(msg)\n\tfor conn := range clients {\n\t\tconn.WriteMessage(websocket.TextMessage, data)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/chat/send\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tMessage  string `json:\"message\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tmsg := Message{ID: nextID, Username: body.Username, Message: body.Message, Timestamp: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tmessages = append(messages, msg)\n\t\tbroadcast(msg)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(msg)\n\t})\n\n\thttp.HandleFunc(\"/chat/messages\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(messages)\n\t})\n\n\thttp.HandleFunc(\"/chat\", func(w http.ResponseWriter, r *http.Request) {\n\t\tconn, _ := upgrader.Upgrade(w, r, nil)\n\t\tmu.Lock()\n\t\tclients[conn] = true\n\t\tmu.Unlock()\n\t\tdefer func() {\n\t\t\tmu.Lock()\n\t\t\tdelete(clients, conn)\n\t\t\tmu.Unlock()\n\t\t\tconn.Close()\n\t\t}()\n\t\tfor {\n\t\t\t_, _, _ = conn.ReadMessage()\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/chat",
+            "expectedStatus": 101
+          }
+        ]
+      }
+    }
+  ]
+}

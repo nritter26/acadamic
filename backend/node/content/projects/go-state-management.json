@@ -1,0 +1,91 @@
+{
+  "id": "go-state-management",
+  "title": "Go: State Management Store",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "state management", "reducers", "middleware", "selectors", "time-travel"],
+  "description": "Build a Redux-inspired state store in Go with reducers, middleware chains, selectors, and time-travel debugging.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Store with state and reducer",
+      "description": "Implement a `Store` struct with `state interface{}`, `reducer func(state, action interface{}) interface{}`, and a subscriber system. Implement `Dispatch(action)` that calls the reducer, updates state, and notifies subscribers via channels. Create a counter reducer and print state after dispatching INCREMENT and DECREMENT actions.",
+      "hints": [
+        "Define action types: `type Action struct { Type string; Payload interface{} }`",
+        "Dispatch updates state: `s.state = s.reducer(s.state, action)` then notify subscribers",
+        "Subscribers receive state via `chan interface{}` — use a goroutine to send"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('state:') && (output.includes('INCREMENT') || output.includes('1'))",
+        "successMessage": "Store correctly dispatches actions through the reducer and updates state!",
+        "failureMessage": "Print 'state: <value>' after each dispatch showing the state change."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Dispatch with typed actions",
+      "description": "Define typed action constants and action creators. Implement a todos reducer that handles ADD_TODO, TOGGLE_TODO, and DELETE_TODO actions. The state is a Todo slice. Dispatch several actions and print the todo list state after each one.",
+      "hints": [
+        "Use Go constants: `const ADD_TODO = \"ADD_TODO\"` etc.",
+        "The reducer returns a new state — copy the slice before modifying",
+        "Print todos: `fmt.Printf(\"Todos: %+v\\n\", state)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Todos:') && (output.includes('ADD_TODO') || output.includes('done'))",
+        "successMessage": "Typed actions and reducer correctly manage a todo list state!",
+        "failureMessage": "Print 'Todos: <state>' after each dispatch showing the updated state."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Middleware type and chain",
+      "description": "Define a `Middleware` type: `type Middleware func(store *Store, next func(action interface{})) func(action interface{})`. Implement a `Logger` middleware that prints action type and state before/after. Implement `ApplyMiddleware(store, middlewares...)` that composes the middleware chain. Print the logger output.",
+      "hints": [
+        "Middleware wraps Dispatch — each middleware calls next(action) to continue the chain",
+        "Logger middleware: print action.Type before next, state after next",
+        "ApplyMiddleware chains middlewares: `m1(m2(m3(store.Dispatch)))`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Action:') && output.includes('before') && output.includes('after')",
+        "successMessage": "Middleware chain correctly wraps dispatch with logger instrumentation!",
+        "failureMessage": "Print 'Action: <type> before: <state>' and 'after: <state>' for each dispatch."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Async middleware",
+      "description": "Implement an `AsyncMiddleware` that handles actions with a Promise-like payload. When an action type is ASYNC_START, it executes the payload function in a goroutine and dispatches ASYNC_SUCCESS or ASYNC_FAILURE on completion. Use a simple counter with async increment to demonstrate.",
+      "hints": [
+        "Define `ASYNC_START`, `ASYNC_SUCCESS`, `ASYNC_FAILURE` action types",
+        "The async middleware intercepts ASYNC_START, launches `go fn()` and dispatches success/failure",
+        "Print 'Async started' and 'Async completed' with the result"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Async started') && output.includes('Async completed')",
+        "successMessage": "Async middleware handles async actions with goroutines and dispatches results!",
+        "failureMessage": "Print 'Async started' when async action begins and 'Async completed' when finished."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Selectors and time-travel debugging",
+      "description": "Implement a `Selector` type: `type Selector func(state interface{}) interface{}`. Create selectors like `GetTodos`, `GetCompletedCount`. Then implement time-travel by storing a history of states. Add `Undo()` and `Redo()` methods that navigate the history. Print history size and navigate back and forth through states.",
+      "hints": [
+        "History stores `[]interface{}` of past states with a current position index",
+        "`Undo` decrements position, `Redo` increments — dispatch appends and resets future",
+        "Print history: `fmt.Printf(\"History: %d states at position %d\\n\", len(h.states), h.pos)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Undo') && output.includes('Redo') && output.includes('history')",
+        "successMessage": "Selectors extract derived data and time-travel debugging navigates state history!",
+        "failureMessage": "Print the current state after Undo and Redo showing correct state restoration."
+      }
+    }
+  ]
+}

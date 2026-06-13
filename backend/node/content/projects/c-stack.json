@@ -1,0 +1,23 @@
+{
+  "id": "c-stack",
+  "title": "C: Stack (Array)",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "stack", "LIFO", "struct", "arrays"],
+  "description": "Implement a stack data structure using an array with push, pop, and peek operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Stack Operations",
+      "description": "Define a `Stack` struct with int array and top index. Implement `void push(Stack *s, int val)`, `int pop(Stack *s)`, and `int peek(Stack *s)`. Push 10, 20, 30, pop once, peek, and print results.",
+      "hints": ["Use `s->top == -1` for empty check.", "Push: `s->data[++s->top] = val`.", "Pop: `return s->data[s->top--]`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct { int data[100]; int top; } Stack;\n\nvoid push(Stack *s, int val) {\n    \n}\n\nint pop(Stack *s) {\n    \n}\n\nint peek(Stack *s) {\n    \n}\n\nint main() {\n    Stack s = {.top = -1};\n    push(&s, 10); push(&s, 20); push(&s, 30);\n    printf(\"Popped: %d\\n\", pop(&s));\n    printf(\"Peek: %d\\n\", peek(&s));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('20')",
+        "successMessage": "Stack operations work!",
+        "failureMessage": "Pop should return 30, Peek should return 20"
+      }
+    }
+  ]
+}

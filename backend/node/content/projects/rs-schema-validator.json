@@ -1,0 +1,71 @@
+{
+  "id": "rs-schema-validator",
+  "title": "Rust: Schema Validator",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "schema validation", "JSON schema", "validation rules"],
+  "description": "Build a JSON/YAML schema validator that checks data against a schema definition.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Schema Types",
+      "description": "Define a `Schema` enum: `StringType { min_len: Option<usize>, max_len: Option<usize> }`, `NumberType { min: Option<f64>, max: Option<f64> }`, `BoolType`, `ArrayType { items: Box<Schema> }`, `ObjectType { properties: HashMap<String, Schema> }`. Print a sample schema.",
+      "hints": ["`enum Schema { StringType { min_len, max_len }, NumberType { min, max }, BoolType, ... }`", "This defines what valid data looks like.", "ObjectType uses HashMap for named properties."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('StringType') && output.contains('NumberType')",
+        "successMessage": "Schema types defined!",
+        "failureMessage": "Create and print a sample schema."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Define Value Types",
+      "description": "Define a `Value` enum: `Str(String)`, `Num(f64)`, `Bool(bool)`, `Arr(Vec<Value>)`, `Obj(HashMap<String, Value>)`, `Null`. Create sample data that matches the schema.",
+      "hints": ["`enum Value { Str(String), Num(f64), Bool(bool), Arr(Vec<Value>), Obj(HashMap<String, Value>), Null }`", "Create a user object: name (Str), age (Num), active (Bool).", "This is like a simplified serde_json::Value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Str') && output.contains('num') || output.contains('Num')",
+        "successMessage": "Value types defined!",
+        "failureMessage": "Create sample data values and print them."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Basic Validation",
+      "description": "Implement `validate(schema: &Schema, value: &Value) -> Result<(), Vec<String>>` that checks: string length, number ranges, type matching. Validate a user object against a user schema.",
+      "hints": ["Match both schema and value types.", "StringType checks .len(), NumberType checks range.", "Return all errors, not just the first one."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('valid') || output.contains('error')",
+        "successMessage": "Basic validation works!",
+        "failureMessage": "Validate data against schema and print result."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested Object Validation",
+      "description": "Add recursive validation for ObjectType (validate each property) and ArrayType (validate each item). Test with nested objects and arrays.",
+      "hints": ["ObjectType: iterate properties, recursively validate each.", "ArrayType: iterate items, recursively validate each against items schema.", "Collect errors with path prefixes: `\"user.address.city: too long\"`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('user') || output.contains('address')",
+        "successMessage": "Nested validation works!",
+        "failureMessage": "Validate a nested object and print validation errors with paths."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Optional and Required Fields",
+      "description": "Add `required: Vec<String>` to ObjectType. Fields not in required are optional (missing values allowed). Validate against required field rules. Print errors for missing required fields.",
+      "hints": ["ObjectType gets new field: `required: Vec<String>`.", "If a property is not present and is in required → error.", "Optional fields can be missing (validated as Null)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('required') || output.contains('missing')",
+        "successMessage": "Required/optional field validation works!",
+        "failureMessage": "Validate data with missing required field and print the error."
+      }
+    }
+  ]
+}
