@@ -1,0 +1,71 @@
+{
+  "id": "rs-memory-allocator",
+  "title": "Rust: Simple Memory Allocator",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "memory allocator", "heap", "manual memory", "systems programming"],
+  "description": "Implement a simple bump allocator and free-list allocator in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Bump Allocator",
+      "description": "Create a `BumpAllocator` that manages a fixed-size buffer `[u8; 1024]`. Implement `allocate(&mut self, size: usize) -> Option<*mut u8>` that returns a pointer and bumps the offset. Print allocations.",
+      "hints": ["`struct BumpAllocator { memory: [u8; 1024], offset: usize }`", "`allocate`: if offset + size <= 1024, get pointer at offset, increment offset.", "Return None if out of memory."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('allocated') || output.contains('0x')",
+        "successMessage": "Bump allocator works!",
+        "failureMessage": "Allocate memory and print the pointer addresses."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Free List Allocator",
+      "description": "Implement a free-list allocator. When memory is freed, add it back to the free list. Use a linked list of free blocks stored inline. Test allocate + free + allocate again.",
+      "hints": ["Track free blocks as `Vec<(usize, usize)>` (offset, size).", "On `free`, add the block back to the free list and merge adjacent blocks.", "On `allocate`, find a free block large enough (first-fit)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('freed') || output.contains('free')",
+        "successMessage": "Free-list allocator works!",
+        "failureMessage": "Allocate, free, and re-allocate to show memory reuse."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Alignment Support",
+      "description": "Add alignment support: `allocate_aligned(&mut self, size: usize, align: usize) -> Option<*mut u8>`. Align the pointer to the specified boundary. Test with 4-byte and 8-byte alignment.",
+      "hints": ["Alignment: `(addr + align - 1) & !(align - 1)`", "Round up offset to the next aligned address.", "Bump allocator with alignment is 90% of real malloc behavior."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('aligned') || output.contains('4')",
+        "successMessage": "Alignment support works!",
+        "failureMessage": "Allocate with 4-byte and 8-byte alignment and print addresses."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Type-Safe Allocation",
+      "description": "Create a type-safe wrapper: `alloc<T>(&mut self, value: T) -> &mut T` that allocates space for T and writes the value. Also `dealloc<T>(&mut self, ptr: &mut T)`. Test with integers and strings.",
+      "hints": ["`let ptr = self.allocate(std::mem::size_of::<T>(), std::mem::align_of::<T>())?;`", "`unsafe { ptr::write(ptr as *mut T, value); &mut *ptr }`", "This is how custom allocators work in embedded systems."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('hello')",
+        "successMessage": "Type-safe allocation works!",
+        "failureMessage": "Allocate and use an i32 and String through the allocator."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Memory Statistics",
+      "description": "Add statistics tracking: total allocated, total freed, current usage, peak usage, allocation count. Print a statistics report after a series of operations.",
+      "hints": ["Track stats: `bytes_allocated: usize, bytes_freed: usize, allocation_count: u32`", "Print report: `println!(\"Used: {} bytes, Peak: {} bytes, Count: {}\", ...)`", "This is similar to what `/proc/meminfo` shows on Linux."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Used') || output.contains('bytes')",
+        "successMessage": "Memory statistics work!",
+        "failureMessage": "Print a memory statistics report."
+      }
+    }
+  ]
+}

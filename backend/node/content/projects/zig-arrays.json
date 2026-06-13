@@ -1,0 +1,23 @@
+{
+  "id": "zig-arrays",
+  "title": "Zig: Arrays",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "arrays", "iteration", "indexing"],
+  "description": "Declare an array and iterate over its elements in Zig.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Array Operations",
+      "description": "Declare const arr = [_]i32{ 10, 20, 30, 40, 50 } and print each element using a for loop.",
+      "hints": ["Use `[_]i32{...}` for array literal with inferred size.", "`for (arr) |val| { std.debug.print(\"{}\\n\", .{val}); }`", "Zig arrays are indexed with `arr[i]` starting at 0."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('30') && output.includes('50')",
+        "successMessage": "Array operations work!",
+        "failureMessage": "Print all 5 array elements"
+      }
+    }
+  ]
+}

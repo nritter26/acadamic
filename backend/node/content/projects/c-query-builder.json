@@ -1,0 +1,23 @@
+{
+  "id": "c-query-builder",
+  "title": "C: Query Builder (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "query builder", "SQL", "string builder", "simulation"],
+  "description": "Build a simple SQL query builder that constructs SELECT queries programmatically.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "SELECT Query Builder",
+      "description": "Define a `Query` struct that holds a char buffer and a length. Write functions `void q_select(Query *q, char *cols)`, `void q_from(Query *q, char *table)`, `void q_where(Query *q, char *condition)`. Build a query: SELECT name, age FROM users WHERE age > 18.",
+      "hints": ["Use `strcat` or `sprintf` to append to the buffer.", "Each q_ function appends to the query string.", "Start with empty buffer, append clauses in order."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\ntypedef struct { char buf[512]; int len; } Query;\n\nvoid q_init(Query *q) { q->buf[0] = '\\0'; q->len = 0; }\nvoid q_select(Query *q, char *cols) { q->len = sprintf(q->buf, \"SELECT %s\", cols); }\nvoid q_from(Query *q, char *table) { q->len += sprintf(q->buf + q->len, \" FROM %s\", table); }\nvoid q_where(Query *q, char *cond) { q->len += sprintf(q->buf + q->len, \" WHERE %s\", cond); }\n\nint main() {\n    Query q;\n    q_init(&q);\n    q_select(&q, \"name, age\");\n    q_from(&q, \"users\");\n    q_where(&q, \"age > 18\");\n    printf(\"%s\\n\", q.buf);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('SELECT name, age FROM users WHERE age > 18')",
+        "successMessage": "Query builder works!",
+        "failureMessage": "Build and print the SELECT query"
+      }
+    }
+  ]
+}

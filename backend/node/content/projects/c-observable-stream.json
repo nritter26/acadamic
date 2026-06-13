@@ -1,0 +1,23 @@
+{
+  "id": "c-observable-stream",
+  "title": "C: Observable Stream",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "observable", "stream", "callbacks", "pipeline"],
+  "description": "Create an observable data stream with transform operators (map, filter) that process data through a pipeline.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Observable with Map/Filter",
+      "description": "Define a `Stream` struct with a function pointer for the source and a next stream pointer. Implement `Stream* stream_from_array(int *arr, int len)`. Implement `Stream* stream_map(Stream *prev, int (*fn)(int))` and `Stream* stream_filter(Stream *prev, int (*pred)(int))`. Create a pipeline: array -> map(double) -> filter(>5) -> collect.",
+      "hints": ["Each stream node has a `next` pointer forming a pipeline.", "source stream iterates over the array.", "map transforms each value, filter skips values.", "Base stream type: struct with run function pointer."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Stream {\n    int (*next_val)(struct Stream*);\n    void *state;\n    struct Stream *next;\n} Stream;\n\ntypedef struct { int *arr; int len; int pos; } ArrayState;\n\nint array_next(Stream *s) {\n    ArrayState *st = (ArrayState*)s->state;\n    return st->pos < st->len ? st->arr[st->pos++] : -1;\n}\n\nStream* stream_from_array(int *arr, int len) {\n    Stream *s = malloc(sizeof(Stream));\n    ArrayState *st = malloc(sizeof(ArrayState));\n    st->arr = arr; st->len = len; st->pos = 0;\n    s->next_val = array_next; s->state = st; s->next = NULL;\n    return s;\n}\n\ntypedef struct { Stream *prev; int (*fn)(int); } MapState;\n\nint map_next(Stream *s) {\n    MapState *st = (MapState*)s->state;\n    int val = st->prev->next_val(st->prev);\n    return val == -1 ? -1 : st->fn(val);\n}\n\nStream* stream_map(Stream *prev, int (*fn)(int)) {\n    Stream *s = malloc(sizeof(Stream));\n    MapState *st = malloc(sizeof(MapState));\n    st->prev = prev; st->fn = fn;\n    s->next_val = map_next; s->state = st;\n    return s;\n}\n\nvoid stream_collect(Stream *s) {\n    int val;\n    while ((val = s->next_val(s)) != -1) printf(\"%d \", val);\n    printf(\"\\n\");\n}\n\nint main() {\n    int arr[] = {1, 2, 3, 4, 5};\n    Stream *s = stream_from_array(arr, 5);\n    stream_collect(s);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1 2 3 4 5')",
+        "successMessage": "Observable stream works!",
+        "failureMessage": "Collect and print all values from the stream"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "c-state-pattern",
+  "title": "C: State Pattern",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "state pattern", "design patterns", "function pointers", "polymorphism"],
+  "description": "Implement the State design pattern where an object changes behavior based on its internal state.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Document State Machine",
+      "description": "Define states: DRAFT, MODERATION, PUBLISHED. For each state, define function pointers for `edit`, `review`, and `publish` actions that return the next state. Start in DRAFT, edit -> stays DRAFT, review -> MODERATION, publish -> PUBLISHED.",
+      "hints": ["Each state is a set of function pointers in a struct.", "Functions take no args and return a State enum value.", "Call appropriate function based on current state."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { DRAFT, MODERATION, PUBLISHED } State;\n\nconst char* state_name(State s) {\n    switch(s) { case DRAFT: return \"Draft\"; case MODERATION: return \"Moderation\"; case PUBLISHED: return \"Published\"; }\n}\n\nState draft_edit() { printf(\"Editing draft\\n\"); return DRAFT; }\nState draft_review() { printf(\"Submitting for review\\n\"); return MODERATION; }\nState draft_publish() { printf(\"Must review first\\n\"); return DRAFT; }\n\nState mod_edit() { printf(\"Editing in moderation\\n\"); return MODERATION; }\nState mod_review() { printf(\"Already in review\\n\"); return MODERATION; }\nState mod_publish() { printf(\"Publishing\\n\"); return PUBLISHED; }\n\nState pub_edit() { printf(\"Unpublishing to edit\\n\"); return DRAFT; }\nState pub_review() { printf(\"Already published\\n\"); return PUBLISHED; }\nState pub_publish() { printf(\"Already published\\n\"); return PUBLISHED; }\n\nState handle(State s, int action) {\n    switch(s) {\n        case DRAFT: return action==0?draft_edit():action==1?draft_review():draft_publish();\n        case MODERATION: return action==0?mod_edit():action==1?mod_review():mod_publish();\n        case PUBLISHED: return action==0?pub_edit():action==1?pub_review():pub_publish();\n    }\n}\n\nint main() {\n    State s = DRAFT;\n    printf(\"State: %s\\n\", state_name(s));\n    s = handle(s, 1); printf(\"State: %s\\n\", state_name(s));\n    s = handle(s, 2); printf(\"State: %s\\n\", state_name(s));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Draft') && output.includes('Moderation') && output.includes('Published')",
+        "successMessage": "State pattern works!",
+        "failureMessage": "Transition through Draft -> Moderation -> Published"
+      }
+    }
+  ]
+}

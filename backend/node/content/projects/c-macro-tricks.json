@@ -1,0 +1,23 @@
+{
+  "id": "c-macro-tricks",
+  "title": "C: Macro Tricks",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "macros", "preprocessor", "printf"],
+  "description": "Create useful C preprocessor macros for min, max, assert, and array size.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Utility Macros",
+      "description": "Define macros: `#define MIN(a,b) ((a)<(b)?(a):(b))`, `#define MAX(a,b) ((a)>(b)?(a):(b))`, `#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))`. Test them: find min/max of 10 and 20, and the length of `{1,2,3,4,5}`.",
+      "hints": ["Wrap macro parameters in parentheses to avoid precedence issues.", "ARRAY_SIZE works on stack-allocated arrays only.", "Print each test result."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\n#define MIN(a,b) ((a)<(b)?(a):(b))\n#define MAX(a,b) ((a)>(b)?(a):(b))\n#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))\n\nint main() {\n    printf(\"Min: %d\\n\", MIN(10, 20));\n    printf(\"Max: %d\\n\", MAX(10, 20));\n    int arr[] = {1, 2, 3, 4, 5};\n    printf(\"Size: %zu\\n\", ARRAY_SIZE(arr));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20') && output.includes('5')",
+        "successMessage": "Macros work!",
+        "failureMessage": "Print min, max, and array size"
+      }
+    }
+  ]
+}

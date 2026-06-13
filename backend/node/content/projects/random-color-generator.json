@@ -1,0 +1,91 @@
+{
+  "id": "random-color-generator",
+  "title": "Random Color Generator",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["random generation", "color formats", "HSL", "palette"],
+  "description": "Build a random color generator that produces colors in RGB, hex, and HSL formats, creates palettes, and checks contrast.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "randomRGB function",
+      "description": "Write `randomRGB()` that returns a random RGB color as an object `{ r, g, b }` with values between 0 and 255.",
+      "hints": ["Use Math.random() * 256 for each component", "Use Math.floor() to get integers", "Return { r, g, b }"],
+      "codeTemplate": {
+        "javascript": "<div id=\"random-color\"></div>\n<script>\n  function randomRGB() {\n    // Your code here\n  }\n  console.log(JSON.stringify(randomRGB()));\n</script>\n",
+        "typescript": "<div id=\"random-color\"></div>\n<script>\n  interface RGB {\n    r: number;\n    g: number;\n    b: number;\n  }\n  function randomRGB(): RGB {\n    // Your code here\n  }\n  console.log(JSON.stringify(randomRGB()));\n</script>\n",
+        "python": "import random\n\ndef random_rgb():\n    # Your code here\n\nimport json\nprint(json.dumps(random_rgb()))\n"
+      },
+      "verification": {
+        "test": "output.includes('r') && output.includes('g') && output.includes('b')",
+        "successMessage": "Random RGB generated!",
+        "failureMessage": "Return { r, g, b } with values between 0-255."
+      }
+    },
+    {
+      "id": 2,
+      "title": "randomHex function",
+      "description": "Write `randomHex()` that returns a random hex color string (e.g., `#a3f5c9`).",
+      "hints": ["Generate 3 random 0-255 values", "Convert each to hex with .toString(16)", "Pad with leading zero if needed and prepend '#'"],
+      "codeTemplate": {
+        "javascript": "<div id=\"random-color\"></div>\n<script>\n  function randomHex() {\n    // Your code here\n  }\n  console.log(randomHex());\n  console.log(randomHex());\n</script>\n",
+        "typescript": "<div id=\"random-color\"></div>\n<script>\n  function randomHex(): string {\n    // Your code here\n  }\n  console.log(randomHex());\n  console.log(randomHex());\n</script>\n",
+        "python": "import random\n\ndef random_hex():\n    # Your code here\n\nprint(random_hex())\nprint(random_hex())\n"
+      },
+      "verification": {
+        "test": "output.match(/#[0-9a-fA-F]{6}/g) && output.match(/#[0-9a-fA-F]{6}/g).length >= 2",
+        "successMessage": "Random hex generated!",
+        "failureMessage": "Return a string like #a3f5c9."
+      }
+    },
+    {
+      "id": 3,
+      "title": "randomHSL function",
+      "description": "Write `randomHSL()` that returns a random HSL color as an object `{ h, s, l }`. H: 0-360, S/L: 0-100.",
+      "hints": ["Hue is Math.random() * 360", "Saturation is Math.random() * 100", "Lightness is Math.random() * 100"],
+      "codeTemplate": {
+        "javascript": "<div id=\"random-color\"></div>\n<script>\n  function randomHSL() {\n    // Your code here\n  }\n  console.log(JSON.stringify(randomHSL()));\n</script>\n",
+        "typescript": "<div id=\"random-color\"></div>\n<script>\n  interface HSL {\n    h: number;\n    s: number;\n    l: number;\n  }\n  function randomHSL(): HSL {\n    // Your code here\n  }\n  console.log(JSON.stringify(randomHSL()));\n</script>\n",
+        "python": "import random\n\ndef random_hsl():\n    # Your code here\n\nimport json\nprint(json.dumps(random_hsl()))\n"
+      },
+      "verification": {
+        "test": "output.includes('h') && output.includes('s') && output.includes('l')",
+        "successMessage": "Random HSL generated!",
+        "failureMessage": "Return { h, s, l } with correct ranges."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Palette of N colors",
+      "description": "Write `generatePalette(n)` that returns an array of `n` random hex color strings.",
+      "hints": ["Use a loop to call randomHex n times", "Push each result to an array", "Return the array"],
+      "codeTemplate": {
+        "javascript": "<div id=\"random-color\"></div>\n<script>\n  function generatePalette(n) {\n    // Your code here\n  }\n  console.log(JSON.stringify(generatePalette(5)));\n</script>\n",
+        "typescript": "<div id=\"random-color\"></div>\n<script>\n  function generatePalette(n: number): string[] {\n    // Your code here\n  }\n  console.log(JSON.stringify(generatePalette(5)));\n</script>\n",
+        "python": "import random\n\ndef generate_palette(n):\n    # Your code here\n\nimport json\nprint(json.dumps(generate_palette(5)))\n"
+      },
+      "verification": {
+        "test": "output.match(/#/g) && output.match(/#/g).length >= 5",
+        "successMessage": "Palette generated!",
+        "failureMessage": "Return an array of n hex color strings."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Contrast check",
+      "description": "Write `getContrastColor(hex)` that returns black (`#000000`) or white (`#ffffff`) depending on the luminance of the input color (for readability).",
+      "hints": ["Convert hex to RGB", "Calculate relative luminance: (0.299*r + 0.587*g + 0.114*b)", "If luminance > 128, return black; else return white"],
+      "codeTemplate": {
+        "javascript": "<div id=\"random-color\"></div>\n<script>\n  function getContrastColor(hex) {\n    // Your code here\n  }\n  console.log(getContrastColor('#000000'));\n  console.log(getContrastColor('#ffffff'));\n</script>\n",
+        "typescript": "<div id=\"random-color\"></div>\n<script>\n  function getContrastColor(hex: string): string {\n    // Your code here\n  }\n  console.log(getContrastColor('#000000'));\n  console.log(getContrastColor('#ffffff'));\n</script>\n",
+        "python": "def get_contrast_color(hex_str):\n    # Your code here\n\nprint(get_contrast_color('#000000'))\nprint(get_contrast_color('#ffffff'))\n"
+      },
+      "verification": {
+        "test": "output.includes('#ffffff') && output.includes('#000000')",
+        "successMessage": "Contrast check works!",
+        "failureMessage": "Return white for dark colors and black for light colors."
+      }
+    }
+  ]
+}

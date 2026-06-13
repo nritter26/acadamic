@@ -1,0 +1,23 @@
+{
+  "id": "zig-booleans",
+  "title": "Zig: Booleans & Logic",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "bool", "and", "or", "not"],
+  "description": "Use Zig's boolean operators: and, or, not.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Boolean Expressions",
+      "description": "Declare const a = true and const b = false. Compute and print a and b, a or b, not a, not b.",
+      "hints": ["Zig uses `and`, `or`, `!` (not) for boolean logic.", "Not `&&` and `||` — those are bitwise in Zig!", "Print with `std.debug.print(\"{}\\n\", .{a and b});`"],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const a = true;\n    const b = false;\n    \n}" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Booleans work!",
+        "failureMessage": "Print results of logical operations"
+      }
+    }
+  ]
+}

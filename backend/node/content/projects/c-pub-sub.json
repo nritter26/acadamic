@@ -1,0 +1,23 @@
+{
+  "id": "c-pub-sub",
+  "title": "C: Pub/Sub Broker",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "pub-sub", "messaging", "callbacks", "topics"],
+  "description": "Implement a publish/subscribe message broker that manages topics and delivers messages to subscribers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Topic Subscription",
+      "description": "Define a `Subscriber` struct with id and callback function pointer. Define a `Topic` struct with name, subscriber array, and count. Write `void topic_subscribe(Topic *t, Subscriber *s)` and `void topic_publish(Topic *t, char *msg)`. Test with a 'news' topic and 2 subscribers.",
+      "hints": ["Subscriber callback: `void (*on_message)(int id, char *msg)`.", "publish calls each subscriber's callback.", "Max 10 subscribers per topic."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\n#define MAX_SUBS 10\n\ntypedef struct { int id; void (*on_msg)(int, char*); } Subscriber;\n\ntypedef struct { char name[32]; Subscriber *subs[MAX_SUBS]; int count; } Topic;\n\nvoid topic_init(Topic *t, char *name) { strcpy(t->name, name); t->count = 0; }\nvoid topic_subscribe(Topic *t, Subscriber *s) {\n    if (t->count < MAX_SUBS) t->subs[t->count++] = s;\n}\nvoid topic_publish(Topic *t, char *msg) {\n    for (int i = 0; i < t->count; i++)\n        t->subs[i]->on_msg(t->subs[i]->id, msg);\n}\n\nvoid news_callback(int id, char *msg) { printf(\"Sub %d got: %s\\n\", id, msg); }\n\nint main() {\n    Topic news;\n    topic_init(&news, \"news\");\n    Subscriber s1 = {1, news_callback};\n    Subscriber s2 = {2, news_callback};\n    topic_subscribe(&news, &s1);\n    topic_subscribe(&news, &s2);\n    topic_publish(&news, \"Hello everyone!\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Sub 1') && output.includes('Sub 2') && output.includes('Hello')",
+        "successMessage": "Pub/Sub broker works!",
+        "failureMessage": "Publish a message and deliver to both subscribers"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "zig-strings",
+  "title": "Zig: Strings",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "strings", "arrays", "utf-8"],
+  "description": "Work with strings in Zig using string literals and arrays.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "String Declaration",
+      "description": "Declare `const greeting: []const u8 = \"Hello\"` and `const name: []const u8 = \"Zig\"`. Concatenate them using `std.mem.concat` or print them separately. Print the length of the combined string.",
+      "hints": ["Strings in Zig are `[]const u8` (slices of bytes).", "Use `std.fmt.allocPrint` or `std.mem.concat` for concatenation.", "Length: `greeting.len` gives the byte length."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('Hello') && output.includes('Zig')",
+        "successMessage": "Strings work!",
+        "failureMessage": "Print greeting and name strings"
+      }
+    }
+  ]
+}

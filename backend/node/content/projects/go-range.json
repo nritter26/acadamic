@@ -1,0 +1,71 @@
+{
+  "id": "go-range",
+  "title": "Go: Range",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 10,
+  "concepts": ["go", "range", "iteration", "slice", "map", "string-runes"],
+  "description": "Use for range to iterate over slices, maps, and strings.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Range Over Slice",
+      "description": "Create `fruits := []string{\"apple\", \"banana\", \"cherry\"}` and use `for range` to print each fruit.",
+      "hints": ["`for _, f := range fruits { fmt.Println(f) }`", "Use `_` to ignore the index.", "Print each on its own line."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana') && output.includes('cherry')",
+        "successMessage": "Range over slice works!",
+        "failureMessage": "Print each fruit from the fruits slice."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Range Over Map (Keys)",
+      "description": "Create a map `ages := map[string]int{\"Alice\": 30, \"Bob\": 25}` and iterate to print only the keys.",
+      "hints": ["`for name := range ages { fmt.Println(name) }`", "Only one variable gives you the key.", "Print each key."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('Bob')",
+        "successMessage": "Range over map keys works!",
+        "failureMessage": "Print all keys from the ages map."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Range Over Map (Key, Value)",
+      "description": "Using the same map, iterate with both key and value, printing `\"Alice: 30\"` and `\"Bob: 25\"`.",
+      "hints": ["`for name, age := range ages { fmt.Println(name, age) }`", "Or format with `fmt.Printf(\"%s: %d\\n\", name, age)`.", "Print each key-value pair."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30') && output.includes('Bob') && output.includes('25')",
+        "successMessage": "Range over map pairs works!",
+        "failureMessage": "Print all key-value pairs from the ages map."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Range with Index",
+      "description": "Create `colors := []string{\"red\", \"green\", \"blue\"}` and use range to print `\"0: red\"`, `\"1: green\"`, `\"2: blue\"`.",
+      "hints": ["`for i, c := range colors { fmt.Printf(\"%d: %s\\n\", i, c) }`", "The first variable from range is the index.", "Use both index and value."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0: red') && output.includes('1: green') && output.includes('2: blue')",
+        "successMessage": "Range with index works!",
+        "failureMessage": "Print '0: red', '1: green', '2: blue' using range."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Range Over String (Runes)",
+      "description": "Use `for range` over `\"Hello\"` to print each rune and its position.",
+      "hints": ["`for i, r := range \"Hello\" { fmt.Println(i, r) }`", "`i` is the byte index, `r` is the rune value.", "Print both index and rune for each character."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('1') && output.includes('2') && output.includes('3') && output.includes('4') && output.includes('72')",
+        "successMessage": "Range over string works!",
+        "failureMessage": "Print index and rune value for each character in 'Hello'."
+      }
+    }
+  ]
+}

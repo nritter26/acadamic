@@ -1,0 +1,23 @@
+{
+  "id": "c-heap",
+  "title": "C: Min Heap",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "heap", "priority queue", "tree", "array"],
+  "description": "Implement a min-heap data structure using an array with insert and extract-min operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Min Heap Operations",
+      "description": "Define a `Heap` struct with int array, size, and capacity. Implement `void heap_push(Heap *h, int val)` and `int heap_pop(Heap *h)` (returns the minimum). Test by inserting 5, 3, 8, 1, 9, 2 and extracting all.",
+      "hints": ["Push: add at end, then bubble up.", "Pop: swap root with last, remove last, bubble down.", "Child: 2*i+1, 2*i+2, Parent: (i-1)/2."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct { int *data; int size; int cap; } Heap;\n\nvoid heap_init(Heap *h, int cap) {\n    h->data = malloc(cap * sizeof(int)); h->size = 0; h->cap = cap;\n}\n\nvoid swap(int *a, int *b) { int t=*a; *a=*b; *b=t; }\n\nvoid heap_push(Heap *h, int val) {\n    int i = h->size++;\n    h->data[i] = val;\n    while (i > 0 && h->data[(i-1)/2] > h->data[i]) {\n        swap(&h->data[i], &h->data[(i-1)/2]);\n        i = (i-1)/2;\n    }\n}\n\nint heap_pop(Heap *h) {\n    int min = h->data[0];\n    h->data[0] = h->data[--h->size];\n    int i = 0;\n    while (1) {\n        int smallest = i;\n        int l = 2*i+1, r = 2*i+2;\n        if (l < h->size && h->data[l] < h->data[smallest]) smallest = l;\n        if (r < h->size && h->data[r] < h->data[smallest]) smallest = r;\n        if (smallest == i) break;\n        swap(&h->data[i], &h->data[smallest]);\n        i = smallest;\n    }\n    return min;\n}\n\nint main() {\n    Heap h; heap_init(&h, 20);\n    int vals[] = {5, 3, 8, 1, 9, 2};\n    for (int i = 0; i < 6; i++) heap_push(&h, vals[i]);\n    while (h.size > 0) printf(\"%d \", heap_pop(&h));\n    printf(\"\\n\");\n    free(h.data);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1 2 3 5 8 9')",
+        "successMessage": "Min heap works!",
+        "failureMessage": "Heapsort should output 1 2 3 5 8 9"
+      }
+    }
+  ]
+}

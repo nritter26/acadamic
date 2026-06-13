@@ -1,0 +1,87 @@
+{
+  "id": "express-gql-hello",
+  "title": "GraphQL Hello World",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 15,
+  "concepts": ["graphql", "query", "schema", "hello-world", "express", "fastapi"],
+  "description": "Build a simple GraphQL API with a hello query that returns a greeting, supporting both POST and GET queries.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Hello query via POST",
+      "description": "Create a POST /graphql endpoint that accepts a query { hello } and returns 200 with data.hello.",
+      "hints": [
+        "Use express-graphql or graphql-http to mount a GraphQL endpoint", "Define a schema with a Query type containing a hello field", "The resolver returns 'Hello, world!'"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!'\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: false\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!'\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: false\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, String, Schema\nfrom fastapi_gql import GQL\n\napp = FastAPI()\nport = 3000\n\nclass Query(ObjectType):\n    hello = String()\n\n    def resolve_hello(self, info):\n        return 'Hello, world!'\n\nschema = Schema(query=Query)\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar queryType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Query\",\n\tFields: graphql.Fields{\n\t\t\"hello\": &graphql.Field{\n\t\t\tType: graphql.String,\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\treturn \"Hello, world!\", nil\n\t\t\t},\n\t\t},\n\t},\n})\n\nvar schema, _ = graphql.NewSchema(graphql.SchemaConfig{Query: queryType})\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct {\n\t\t\tQuery string `json:\"query\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tresult := graphql.Do(graphql.Params{Schema: schema, RequestString: params.Query})\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Hello"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Query with argument",
+      "description": "Add a greet query that accepts a name argument: { greet(name: \"World\") } returning 'Hello, World!'.",
+      "hints": [
+        "Add a new field 'greet' to the Query type", "The field takes a String argument 'name'", "The resolver uses the name argument to return 'Hello, {name}!'"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n    greet(name: String!): String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!',\n  greet: ({ name }) => `Hello, ${name}!`\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: false\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n    greet(name: String!): String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!',\n  greet: ({ name }: { name: string }) => `Hello, ${name}!`\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: false\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, String, Schema, Argument\nfrom fastapi_gql import GQL\n\napp = FastAPI()\nport = 3000\n\nclass Query(ObjectType):\n    hello = String()\n    greet = String(name=Argument(String, required=True))\n\n    def resolve_hello(self, info):\n        return 'Hello, world!'\n\n    def resolve_greet(self, info, name):\n        return f'Hello, {name}!'\n\nschema = Schema(query=Query)\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"fmt\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar queryType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Query\",\n\tFields: graphql.Fields{\n\t\t\"hello\": &graphql.Field{\n\t\t\tType: graphql.String,\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\treturn \"Hello, world!\", nil\n\t\t\t},\n\t\t},\n\t\t\"greet\": &graphql.Field{\n\t\t\tType: graphql.String,\n\t\t\tArgs: graphql.FieldConfigArgument{\n\t\t\t\t\"name\": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},\n\t\t\t},\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\tname, _ := p.Args[\"name\"].(string)\n\t\t\t\treturn fmt.Sprintf(\"Hello, %s!\", name), nil\n\t\t\t},\n\t\t},\n\t},\n})\n\nvar schema, _ = graphql.NewSchema(graphql.SchemaConfig{Query: queryType})\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct {\n\t\t\tQuery string `json:\"query\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tresult := graphql.Do(graphql.Params{Schema: schema, RequestString: params.Query})\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "World"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "GET query support",
+      "description": "Support GET /graphql?query={hello} that returns the same result as the POST endpoint.",
+      "hints": [
+        "Parse query parameters from the URL when method is GET", "Extract the 'query' parameter from req.query", "Execute the query and return the result"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema, graphql } = require('graphql');\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n    greet(name: String!): String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!',\n  greet: ({ name }) => `Hello, ${name}!`\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: true\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nconst schema = buildSchema(`\n  type Query {\n    hello: String\n    greet(name: String!): String\n  }\n`);\n\nconst root = {\n  hello: () => 'Hello, world!',\n  greet: ({ name }: { name: string }) => `Hello, ${name}!`\n};\n\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use('/graphql', graphqlHTTP({\n  schema,\n  rootValue: root,\n  graphiql: true\n}));\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom graphene import ObjectType, String, Schema, Argument\nfrom fastapi_gql import GQL\n\napp = FastAPI()\nport = 3000\n\nclass Query(ObjectType):\n    hello = String()\n    greet = String(name=Argument(String, required=True))\n\n    def resolve_hello(self, info):\n        return 'Hello, world!'\n\n    def resolve_greet(self, info, name):\n        return f'Hello, {name}!'\n\nschema = Schema(query=Query)\nGQL(app, schema=schema)\n\n@app.get('/graphql')\nasync def graphql_get(query: str):\n    result = await schema.execute(query)\n    return result.data\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"fmt\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar queryType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Query\",\n\tFields: graphql.Fields{\n\t\t\"hello\": &graphql.Field{\n\t\t\tType: graphql.String,\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\treturn \"Hello, world!\", nil\n\t\t\t},\n\t\t},\n\t\t\"greet\": &graphql.Field{\n\t\t\tType: graphql.String,\n\t\t\tArgs: graphql.FieldConfigArgument{\n\t\t\t\t\"name\": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},\n\t\t\t},\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\tname, _ := p.Args[\"name\"].(string)\n\t\t\t\treturn fmt.Sprintf(\"Hello, %s!\", name), nil\n\t\t\t},\n\t\t},\n\t},\n})\n\nvar schema, _ = graphql.NewSchema(graphql.SchemaConfig{Query: queryType})\n\nfunc executeQuery(query string) *graphql.Result {\n\treturn graphql.Do(graphql.Params{Schema: schema, RequestString: query})\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar query string\n\t\tif r.Method == \"GET\" {\n\t\t\tquery = r.URL.Query().Get(\"query\")\n\t\t} else {\n\t\t\tvar params struct {\n\t\t\t\tQuery string `json:\"query\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\t\tquery = params.Query\n\t\t}\n\t\tresult := executeQuery(query)\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/graphql?query={hello}",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "Hello"
+          }
+        ]
+      }
+    }
+  ]
+}

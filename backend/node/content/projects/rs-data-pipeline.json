@@ -1,0 +1,71 @@
+{
+  "id": "rs-data-pipeline",
+  "title": "Rust: ETL Data Pipeline",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "ETL", "pipeline", "data processing", "futures"],
+  "description": "Build an ETL data pipeline with extract, transform, and load stages.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Extractor Stage",
+      "description": "Implement an `Extractor` that reads from a `Vec<String>` data source. Use `Iterator` trait. Create sample data: `[\"name,age\", \"Alice,30\", \"Bob,25\"]`. Print each line as it's extracted.",
+      "hints": ["`struct CsvExtractor { data: Vec<String>, pos: usize }`", "`impl Iterator for CsvExtractor { type Item = String; fn next(&mut self) -> Option<String> { ... } }`", "Return lines one by one."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('name,age') && output.contains('Alice')",
+        "successMessage": "Extractor works!",
+        "failureMessage": "Extract and print lines from the data source."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Transformer Stage",
+      "description": "Create a `Transformer` that wraps an iterator and applies transformations. Implement `map_fn<F>(self, f: F)` that transforms each item. Test by uppercasing all text.",
+      "hints": ["`struct Transformer<I, F> { iter: I, f: F }`", "`impl<I, F, T, U> Iterator for Transformer<I, F> where I: Iterator<Item=T>, F: Fn(T) -> U { type Item = U; fn next(&mut self) -> Option<U> { self.iter.next().map(&self.f) } }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('ALICE') && output.contains('BOB')",
+        "successMessage": "Transformer works!",
+        "failureMessage": "Uppercase all extracted data and print."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Filter Stage",
+      "description": "Add a `Filter` stage that only keeps items matching a predicate. Chain: Extractor → Filter (age > 25) → Print. Parse CSV, filter rows, print result.",
+      "hints": ["`.filter(|line| { let age: i32 = line.split(',').nth(1).unwrap_or(\"0\").parse().unwrap_or(0); age > 25 })`", "Chain: `extractor.filter(|line| age > 25).for_each(|line| println!(\"{}\", line))`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && !output.contains('Bob')",
+        "successMessage": "Filter stage works! Alice (30) passes, Bob (25) filtered out.",
+        "failureMessage": "Filter rows where age > 25 and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Pipeline with Error Handling",
+      "description": "Add error handling: parse lines as `Result<Record, String>`. Use `filter_map` to skip errors while continuing. Demonstrate with a CSV line that has invalid data.",
+      "hints": ["Parse `Ok(Record { name, age })` or `Err(\"Invalid line\")`.", "`filter_map(|line| parse_line(line).ok())` skips errors.", "Collect into `Result<Vec<_>, _>` and print errors also."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && output.contains('error') || output.contains('invalid')",
+        "successMessage": "Pipeline error handling works!",
+        "failureMessage": "Process data with some invalid lines, print valid data and errors."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Metrics and Reporting",
+      "description": "Add pipeline metrics: track rows processed, errors, transformation count. After pipeline execution, print a report with all metrics.",
+      "hints": ["Use a `Metrics` struct with atomic counters.", "`struct Metrics { rows: AtomicU64, errors: AtomicU64, ... }`", "Wrap the pipeline in a `MonitoredPipeline` that updates metrics."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('rows') && output.contains('errors')",
+        "successMessage": "Pipeline metrics work!",
+        "failureMessage": "Run the pipeline and print a metrics report."
+      }
+    }
+  ]
+}

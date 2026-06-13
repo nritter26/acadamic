@@ -1,0 +1,71 @@
+{
+  "id": "rs-pub-sub-broker",
+  "title": "Rust: Pub/Sub Message Broker",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "pub-sub", "messaging", "broadcast", "concurrency"],
+  "description": "Build a publish/subscribe message broker that manages topics, subscribers, and message routing.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Topic Manager",
+      "description": "Create a `Broker` struct that maintains a `HashMap<String, Vec<Sender<String>>>` mapping topic names to subscriber lists. Implement `create_topic` and `subscribe` methods.",
+      "hints": ["Use `std::collections::HashMap` for topic storage.", "Store `mpsc::Sender` handles for each subscriber.", "`subscribe` adds a sender to the topic's subscriber list."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('topic') || output.contains('subscribe')",
+        "successMessage": "Topic manager works!",
+        "failureMessage": "Create a topic and subscribe to it."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Message Publishing",
+      "description": "Implement a `publish` method that sends a message to all subscribers of a given topic. Each subscriber receives the message via their channel.",
+      "hints": ["Iterate over the subscriber list for the topic.", "Use `sender.send(msg.clone())` to broadcast.", "Handle `SendError` by removing disconnected subscribers."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('published') || output.contains('sent')",
+        "successMessage": "Message publishing works!",
+        "failureMessage": "Publish a message to a topic and print confirmation."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Wildcard Subscriptions",
+      "description": "Support wildcard topic patterns: `sports.*` matches `sports.football` and `sports.tennis`. Store patterns alongside exact topic names and match against published topics.",
+      "hints": ["Store `(String, Vec<Sender>)` where String can be a pattern.", "Check if topic matches pattern using `starts_with` or glob matching.", "Prefix patterns end with `.*`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('wildcard') || output.contains('matched')",
+        "successMessage": "Wildcard subscriptions work!",
+        "failureMessage": "Subscribe with a wildcard pattern and match a topic."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Message Filtering",
+      "description": "Add message filtering: subscribers can provide a filter function that determines which messages to receive. Implement as a `filter: fn(&str) -> bool` stored alongside the sender.",
+      "hints": ["Wrap `Sender` in a struct with a filter closure.", "Use `Box<dyn Fn(&str) -> bool>` for the filter type.", "Only forward messages that pass the filter."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('filter') || output.contains('skipped')",
+        "successMessage": "Message filtering works!",
+        "failureMessage": "Apply a filter that blocks certain messages and print results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Broker Simulation",
+      "description": "Combine all features: create a broker with topics, subscribe multiple clients (some with wildcards, some with filters), publish messages to various topics, and verify delivery. Print all deliveries.",
+      "hints": ["Create 3 topics: `sports.football`, `tech.rust`, `news.local`.", "Subscribe 5 clients with different patterns.", "Publish 4 messages and show which clients received each."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 50",
+        "successMessage": "Full broker simulation works!",
+        "failureMessage": "Simulate a complete pub/sub scenario and print deliveries."
+      }
+    }
+  ]
+}

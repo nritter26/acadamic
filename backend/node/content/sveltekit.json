@@ -1,0 +1,226 @@
+{
+  "Getting Started": {
+    "Sveltekit Introduction": {
+      "exp": "Introduction to Sveltekit and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "Project Setup": [
+      "Create a new SvelteKit project with the CLI, choosing from demo app, skeleton project, or minimal setup. The project includes Vite, TypeScript, ESLint, and Prettier out of the box.",
+      "npx sv create my-app && cd my-app && npm install"
+    ],
+    "Routing": [
+      "SvelteKit uses filesystem-based routing where files in src/routes map to URL paths. +page.svelte files define pages, +layout.svelte wraps nested routes, and dynamic params use [bracket] directories.",
+      "src/routes/blog/[slug]/+page.svelte"
+    ],
+    "Layouts": [
+      "Layout components wrap child routes with shared UI like headers and footers. Nested layouts inherit from parent layouts, and +layout.js can run data loading for an entire route segment.",
+      "<nav><a href=\"/\">Home</a></nav>\n<slot />"
+    ]
+  },
+  "Core Concepts": {
+    "Sveltekit Core Features": {
+      "exp": "Essential Sveltekit concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Sveltekit Components": {
+      "exp": "Building user interfaces with Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Sveltekit Routing": {
+      "exp": "Navigation and routing in Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Sveltekit State": {
+      "exp": "Managing application state in Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Sveltekit Data": {
+      "exp": "Working with data and APIs in Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Sveltekit Testing": {
+      "exp": "Testing strategies for Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Sveltekit Deployment": {
+      "exp": "Deploying Sveltekit applications.",
+      "code": "",
+      "exercises": []
+    },
+    "Adapters": [
+      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
+      "npm install --save-dev @sveltejs/adapter-node"
+    ],
+    "Vercel": [
+      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
+      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Netlify": [
+      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
+      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Node": [
+      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
+      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
+    ]
+  },
+  "Best Practices": {
+    "Sveltekit Best Practices": {
+      "exp": "Best practices for Sveltekit development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Sveltekit Advanced": {
+      "exp": "Advanced Sveltekit topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Loading": {
+    "load": [
+      "The load function runs before a page or layout renders, fetching data on the server during SSR and on the client during client-side navigation. It returns data passed to the page as $page.data.",
+      "export async function load({ fetch, params }) {\n  const res = await fetch(`/api/posts/${params.slug}`);\n  return { post: await res.json() };\n}"
+    ],
+    "Page Data": [
+      "Page data from load is available in +page.svelte via $page.data. Data is typed automatically when using TypeScript, and re-fetched reactively when load dependencies change via depends().",
+      "<script lang=\"ts\">\n  let { data } = $props();\n</script>\n<h1>{data.post.title}</h1>"
+    ],
+    "Layout Data": [
+      "Layout load functions in +layout.js combine data for all child routes using merge strategies, accessible from any child page or layout. This is ideal for fetching shared resources like user profiles.",
+      "export async function load({ fetch }) {\n  const user = await fetch('/api/user').then(r => r.json());\n  return { user };\n}"
+    ]
+  },
+  "Endpoints": {
+    "GET": [
+      "GET handlers in +server.js return data from the server, typically JSON. They receive request event with params, url, fetch, and locals, making them ideal for API routes.",
+      "export async function GET({ params }) {\n  const post = await db.getPost(params.slug);\n  return json(post);\n}"
+    ],
+    "POST": [
+      "POST handlers accept request bodies for creating resources, validating input, and returning appropriate status codes. They're used for REST APIs and can handle multipart uploads.",
+      "export async function POST({ request }) {\n  const body = await request.json();\n  const created = await db.createPost(body);\n  return json(created, { status: 201 });\n}"
+    ],
+    "API Routes": [
+      "API routes in SvelteKit are server-only endpoints defined alongside pages, sharing the same filesystem routing. They can use server-side secrets and databases without exposing them to the client.",
+      "export async function PUT({ params, request }) {\n  const body = await request.json();\n  await db.updatePost(params.slug, body);\n  return new Response(null, { status: 204 });\n}"
+    ],
+    "Form Actions": [
+      "Form actions handle POST form submissions with progressive enhancement, running on the server to mutate data and return validation errors or success responses without JavaScript required.",
+      "export const actions = {\n  default: async ({ request }) => {\n    const data = await request.formData();\n    const name = data.get('name');\n    if (!name) return { error: 'Name required' };\n    await db.createUser(name);\n    return { success: true };\n  }\n};"
+    ]
+  },
+  "SSR & SSG": {
+    "Rendering Modes": [
+      "SvelteKit supports SSR (default), prerendering (SSG), and CSR modes configurable per route or globally. SSR renders on the server on each request, SSG pre-builds static HTML at build time.",
+      "export const ssr = true;\nexport const prerender = 'auto';"
+    ],
+    "Prerendering": [
+      "Prerendering generates static HTML files at build time for routes that don't need server data, suitable for marketing pages and blogs. Prerendered routes can be served from CDN with zero server cost.",
+      "export const prerender = true;"
+    ],
+    "CSR": [
+      "Client-side rendering skips server rendering entirely, loading the page as a shell and fetching data on the client. Useful for authenticated dashboard pages or apps that need minimal server load.",
+      "export const ssr = false;\nexport const csr = true;"
+    ]
+  },
+  "Auth": {
+    "Session Management": [
+      "SvelteKit sessions can be managed with cookies, JWTs, or server-side stores accessible via the event.locals object in hooks. Authentication libraries like Lucia or Auth.js integrate seamlessly with the hooks pattern.",
+      "export async function handle({ event, resolve }) {\n  const session = await getSession(event.cookies.get('sid'));\n  event.locals.user = session?.user ?? null;\n  return resolve(event);\n}"
+    ],
+    "Cookies": [
+      "SvelteKit provides a cookies API in server contexts for reading, setting, and deleting cookies with configurable options for path, maxAge, secure, httpOnly, and sameSite.",
+      "event.cookies.set('session', token, {\n  httpOnly: true, secure: true, maxAge: 60 * 60 * 24, path: '/'\n});"
+    ],
+    "OAuth": [
+      "OAuth authentication flows are handled server-side using endpoints or form actions, redirecting users to providers and exchanging authorization codes for tokens. Libraries like Lucia provide OAuth adapters.",
+      "export async function GET({ cookies, url, locals }) {\n  const code = url.searchParams.get('code');\n  const { tokens } = await githubAuth.validateAuthorizationCode(code);\n  locals.user = await createUserFromGithub(tokens);\n  return new Response(null, { status: 302, headers: { location: '/' } });\n}"
+    ]
+  },
+  "Advanced": {
+    "Hooks": [
+      "Hooks are server-side middleware that intercept every request in handle, or module-level functions like handleError and handleFetch. They enable session management, redirects, and error tracking.",
+      "export async function handle({ event, resolve }) {\n  if (event.url.pathname.startsWith('/api')) {\n    event.request.headers.set('X-API-Key', process.env.API_KEY);\n  }\n  return resolve(event);\n}"
+    ],
+    "Params": [
+      "Params matchers validate and transform dynamic route parameters before load runs, preventing invalid requests from reaching data loading logic. Built-in matchers include int, uuid, and custom matchers.",
+      "export function match(param) {\n  return /^\\d+$/.test(param);\n}"
+    ],
+    "Error Handling": [
+      "SvelteKit provides structured error handling with error/is-error utility, custom error pages (+error.svelte), and the handleError hook for logging and monitoring integration.",
+      "import { error } from '@sveltejs/kit';\n\nif (!post) throw error(404, 'Post not found');"
+    ]
+  },
+  "View Transitions": {
+    "Client Navigation": [
+      "SvelteKit integrates with the View Transition API for smooth page transitions on client-side navigation. The onNavigate lifecycle runs before navigation, enabling transition setup.",
+      "export function onNavigate() {\n  document.startViewTransition ?\n    document.startViewTransition(() => {}) :\n    null;\n}"
+    ],
+    "Cross-document Transitions": [
+      "Cross-document view transitions work across full page loads by defining @view-transition CSS rules. SvelteKit handles the JavaScript enhancement for seamless cross-page animations.",
+      "/* global.css */\n@view-transition {\n  navigation: auto;\n}\n\n@keyframes fade-in {\n  from { opacity: 0; }\n}\n::view-transition-old(root) { animation: fade-in 0.3s reverse; }\n::view-transition-new(root) { animation: fade-in 0.3s; }"
+    ],
+    "Element-level Transitions": [
+      "Individual elements can have their own view-transition-name for independent animation. Paired with the View Transition API, elements morph smoothly between pages without layout shifts.",
+      ".avatar {\n  view-transition-name: avatar;\n  contain: layout;\n}"
+    ]
+  },
+  "Environment & Config": {
+    "$env/static/private": [
+      "$env/static/private provides build-time environment variables accessible only on the server. These are inlined at build time and reserved for secrets like API keys and database URLs.",
+      "import { API_KEY, DATABASE_URL } from '$env/static/private';\n// Only importable in server files (+page.server.js, +server.js, hooks.server.js)"
+    ],
+    "$env/static/public": [
+      "$env/static/public exposes build-time environment variables prefixed with PUBLIC_ to both client and server code. These are safe for the browser and inlined during build.",
+      "import { PUBLIC_API_URL } from '$env/static/public';\n// Accessible in any file (client or server)"
+    ],
+    "$env/dynamic": [
+      "$env/dynamic/private and $env/dynamic/public load environment variables at runtime instead of build time. Dynamic env vars are useful when the same build deploys to multiple environments.",
+      "import { env } from '$env/dynamic/public';\n// Runtime resolution: env.PUBLIC_API_URL"
+    ]
+  },
+  "Link Options": {
+    "data-sveltekit-preload-data": [
+      "Link options control prefetching behavior. data-sveltekit-preload-data=\"hover\" starts loading data when the user hovers over a link, reducing perceived navigation time.",
+      "<a href=\"/blog\" data-sveltekit-preload-data=\"hover\">Blog</a>\n<a href=\"/dashboard\" data-sveltekit-preload-data=\"tap\">Dashboard</a>"
+    ],
+    "data-sveltekit-reload": [
+      "data-sveltekit-reload forces a full page navigation instead of client-side routing, useful when the target page uses different global CSS or needs a clean JavaScript context.",
+      "<a href=\"/legacy\" data-sveltekit-reload>Legacy Page</a>"
+    ],
+    "data-sveltekit-keepfocus": [
+      "data-sveltekit-keepfocus preserves the currently focused element across navigation, improving accessibility for keyboard users on single-page applications.",
+      "<a href=\"/next\" data-sveltekit-keepfocus>Next Step</a>"
+    ]
+  },
+  "SvelteKit Advanced Patterns": {
+    "Form Actions & Progressive Enhancement": [
+      "SvelteKit form actions handle form submissions without JavaScript. Forms use <code>method=\"POST\"</code> (or PUT/DELETE) and the <code>use:enhance</code> action for progressive enhancement. Server-side <code>load</code> functions receive form data via <code>request.formData()</code>. Actions return <code>{success: true}</code> or <code>{error: string}</code>. <code>use:enhance</code> gracefully upgrades to JS: forms work without JS (full page reload) and enhance with JS (AJAX, loading states). <code>superforms</code> library adds validation. <code>fail()</code> function returns validation errors with preserved form data.",
+      "// SvelteKit form action\n// src/routes/contact/+page.server.ts\nimport { fail } from '@sveltejs/kit';\nimport type { Actions, PageServerLoad } from './$types';\n\nexport const load: PageServerLoad = async () => {\n  return { title: 'Contact Us' };\n};\n\nexport const actions: Actions = {\n  default: async ({ request, locals }) => {\n    const data = await request.formData();\n    const name = data.get('name') as string;\n    const email = data.get('email') as string;\n    const message = data.get('message') as string;\n\n    // Validation\n    const errors: Record<string, string> = {};\n    if (!name || name.length < 2) errors.name = 'Name must be at least 2 characters';\n    if (!email || !/^[^@]+@[^@]+$/.test(email)) errors.email = 'Invalid email address';\n    if (!message || message.length < 10) errors.message = 'Message must be at least 10 characters';\n\n    if (Object.keys(errors).length > 0) {\n      return fail(400, { errors, name, email, message });\n    }\n\n    // Process form\n    await sendEmail({ name, email, message });\n    return { success: true };\n  }\n};\n\n<!-- src/routes/contact/+page.svelte -->\n<script lang=\"ts\">\n  import { enhance } from '$app/forms';\n  \n  let { form, data } = $props();\n  let submitting = $state(false);\n</script>\n\n<h1>{data.title}</h1>\n\n<form method=\"POST\" use:enhance={() => {\n  submitting = true;\n  return async ({ result }) => {\n    submitting = false;\n    if (result.type === 'success') {\n      // Show success toast\n    }\n  };\n}}>\n  <input name=\"name\" value={form?.name ?? ''} placeholder=\"Name\" />\n  {#if form?.errors?.name}<p class=\"error\">{form.errors.name}\n{/if}\n  \n  <input name=\"email\" value={form?.email ?? ''} placeholder=\"Email\" />\n  {#if form?.errors?.email}<p class=\"error\">{form.errors.email}\n{/if}\n  \n  <textarea name=\"message\">{form?.message ?? ''}</textarea>\n  {#if form?.errors?.message}<p class=\"error\">{form.errors.message}\n{/if}\n  \n  <button disabled={submitting}>\n    {submitting ? 'Sending...' : 'Send Message'}\n  </button>\n</form>\n\n{#if form?.success}\n  <p class=\"success\">Message sent! We'll get back to you soon.\n\n{/if}"
+    ],
+    "SvelteKit Data Loading & Cache": [
+      "SvelteKit provides powerful data loading: <code>load</code> functions run on server for initial renders and client for navigation. <code>+page.server.ts</code> runs only on server, <code>+page.ts</code> runs on both. <code>+layout.server.ts</code> loads data for all child routes. <code>invalidate()</code> and <code>invalidateAll()</code> re-run load functions. <code>invalid</code> and <code>depends</code> control cache invalidation. Stream promises in load functions for progressive rendering. <code>entries</code> function generates static pages at build time (SSG). HTTP caching headers (<code>Cache-Control</code>, <code>ETag</code>) can be set in load functions.",
+      "// SvelteKit advanced data loading\n// src/routes/products/[slug]/+page.server.ts\nimport { error } from '@sveltejs/kit';\nimport type { PageServerLoad, EntryGenerator } from './$types';\n\nexport const load: PageServerLoad = async ({ params, locals, setHeaders, depends }) => {\n  depends('app:product');\n\n  const product = await db.product.findUnique({\n    where: { slug: params.slug },\n    include: {\n      reviews: { take: 10, orderBy: { createdAt: 'desc' } },\n      relatedProducts: { take: 4 }\n    }\n  });\n\n  if (!product) throw error(404, 'Product not found');\n\n  // Set HTTP caching headers\n  setHeaders({\n    'Cache-Control': 'public, max-age=60, s-maxage=300'\n  });\n\n  // Stream reviews (slow query)\n  const reviewsPromise = loadMoreReviews(product.id);\n\n  return {\n    product,\n    streamed: {\n      reviews: reviewsPromise\n    }\n  };\n};\n\n// Static generation for products (SSG)\nexport const entries: EntryGenerator = async () => {\n  const products = await db.product.findMany({\n    select: { slug: true }\n  });\n  return products.map(p => ({ slug: p.slug }));\n};\n\n// Client-side invalidation\n<script>\n  import { invalidate } from '$app/navigation';\n  \n  function refreshProduct() {\n    invalidate('app:product'); // Re-runs dependant load functions\n  }\n</script>"
+    ]
+  }
+}

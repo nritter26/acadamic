@@ -1,0 +1,23 @@
+{
+  "id": "c-memory-pool",
+  "title": "C: Memory Pool Allocator",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "memory management", "pool allocator", "malloc", "pointers"],
+  "description": "Implement a simple memory pool allocator that pre-allocates a block of memory and hands out chunks without calling malloc for each allocation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Pool Initialization and Allocation",
+      "description": "Define a `MemPool` struct with a char* buffer, size, and used count. Write `void pool_init(MemPool *p, int size)` that allocates a buffer. Write `void* pool_alloc(MemPool *p, int size)` that returns a chunk from the pool. Test by allocating 3 ints.",
+      "hints": ["Track `used` offset into the buffer.", "`pool_alloc` returns `p->buffer + p->used` and increments used.", "Overflow check: return NULL if not enough space."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct { char *buffer; int size; int used; } MemPool;\n\nvoid pool_init(MemPool *p, int size) {\n    \n}\n\nvoid* pool_alloc(MemPool *p, int size) {\n    \n}\n\nvoid pool_destroy(MemPool *p) {\n    free(p->buffer);\n}\n\nint main() {\n    MemPool pool;\n    pool_init(&pool, 1024);\n    int *a = (int*)pool_alloc(&pool, sizeof(int)*3);\n    a[0] = 10; a[1] = 20; a[2] = 30;\n    printf(\"%d %d %d\\n\", a[0], a[1], a[2]);\n    pool_destroy(&pool);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10 20 30')",
+        "successMessage": "Memory pool allocator works!",
+        "failureMessage": "Allocate 3 ints from the pool and print them"
+      }
+    }
+  ]
+}

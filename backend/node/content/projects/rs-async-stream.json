@@ -1,0 +1,71 @@
+{
+  "id": "rs-async-stream",
+  "title": "Rust: Async Streams",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "async", "stream", "futures", "tokio-stream"],
+  "description": "Work with async streams that yield values over time.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Stream Trait Basics",
+      "description": "Create a simple countdown stream that yields values 5, 4, 3, 2, 1. Implement using a manual approach with a channel or iterator.",
+      "hints": ["`let stream = futures::stream::iter(1..=5);`", "Collect: `stream.collect::<Vec<_>>().await`", "Print each item."],
+      "codeTemplate": { "rust": "fn main() {\n    for i in (1..=5).rev() {\n        println!(\"{}\", i);\n    }\n}" },
+      "verification": {
+        "test": "output.contains('5') && output.contains('1')",
+        "successMessage": "Countdown stream works!",
+        "failureMessage": "Print a countdown from 5 to 1."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Stream Transformation",
+      "description": "Take a stream of numbers, use `.map()` to double each, `.filter()` for >5, and collect. Print the result.",
+      "hints": ["`stream.iter([1,2,3,4,5,6]).map(|x| x*2).filter(|x| *x > 5).collect::<Vec<_>>()`", "Result: [6, 8, 10, 12]", "This demonstrates lazy streaming transformations."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('6') && output.contains('8')",
+        "successMessage": "Stream transformation works!",
+        "failureMessage": "Double, filter >5, and print [6, 8, 10, 12]."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Custom Stream Implementation",
+      "description": "Implement a `Stream` that yields random numbers by implementing `next()`. Generate 5 random numbers and print them.",
+      "hints": ["Use a custom struct that implements `next()`.", "Track state: count of remaining values.", "Yield values one at a time."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.length > 10",
+        "successMessage": "Custom stream works!",
+        "failureMessage": "Create and consume a custom stream."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Merging Streams",
+      "description": "Create two streams and merge them using `select!`. Stream A yields letters \"A\", \"B\", \"C\" and Stream B yields numbers 1, 2, 3. Interleave the output.",
+      "hints": ["Two separate streams that yield at different simulated intervals.", "Use a channel approach to send values to a combined receiver.", "Print each value as it arrives from either stream."],
+      "codeTemplate": { "rust": "fn main() {\n    let letters = vec![\"A\", \"B\", \"C\"];\n    let numbers = vec![\"1\", \"2\", \"3\"];\n    for pair in letters.iter().zip(numbers.iter()) {\n        println!(\"{}\", pair.0);\n        println!(\"{}\", pair.1);\n    }\n}" },
+      "verification": {
+        "test": "output.contains('A') && output.contains('1') && output.contains('C')",
+        "successMessage": "Stream merging works!",
+        "failureMessage": "Merge and print values from both streams."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Stream Error Handling",
+      "description": "Create a stream that can produce errors. Use `Result` items. Handle errors by either skipping them or collecting both Ok and Err values separately.",
+      "hints": ["Stream item type: `Result<i32, String>`.", "Use `.filter_map(|r| r.ok())` to skip errors.", "Collect both: partition `.collect::<Vec<_>>()` into success and error."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Ok') || output.contains('Err')",
+        "successMessage": "Stream error handling works!",
+        "failureMessage": "Process a stream with both success and error values."
+      }
+    }
+  ]
+}

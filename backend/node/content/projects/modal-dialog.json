@@ -1,0 +1,91 @@
+{
+  "id": "modal-dialog",
+  "title": "Modal Dialog",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["DOM manipulation", "event handling", "callbacks", "state management"],
+  "description": "Build a modal dialog component with open/close functionality, rendering, and confirm/cancel callbacks.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Modal data structure",
+      "description": "Create a modal object with `id`, `title`, `content`, and `visible` (boolean) properties.",
+      "hints": ["id should be a unique string like 'modal-1'", "content holds the main body text or HTML", "visible controls whether the modal is shown"],
+      "codeTemplate": {
+        "javascript": "<div id=\"modal-app\"></div>\n<script>\n  const modal = {\n    // Your code here\n  };\n  console.log(JSON.stringify(modal));\n</script>\n",
+        "typescript": "<div id=\"modal-app\"></div>\n<script>\n  interface Modal {\n    id: string;\n    title: string;\n    content: string;\n    visible: boolean;\n  }\n  const modal: Modal = {\n    // Your code here\n  };\n  console.log(JSON.stringify(modal));\n</script>\n",
+        "python": "modal = {\n    # Your code here\n}\nimport json\nprint(json.dumps(modal))\n"
+      },
+      "verification": {
+        "test": "output.includes('id') && output.includes('title') && output.includes('content') && output.includes('visible')",
+        "successMessage": "Modal data structure created!",
+        "failureMessage": "Include id, title, content, and visible keys."
+      }
+    },
+    {
+      "id": 2,
+      "title": "openModal function",
+      "description": "Write `openModal(modalId)` that sets `visible` to `true` for the matching modal and logs `'Opened: [title]'`.",
+      "hints": ["Find the modal by id in a modals array", "Set its visible property to true", "Log the modal title"],
+      "codeTemplate": {
+        "javascript": "<div id=\"modal-app\"></div>\n<script>\n  const modals = [\n    { id: 'modal-1', title: 'Settings', content: 'Settings content', visible: false },\n    { id: 'modal-2', title: 'Help', content: 'Help content', visible: false }\n  ];\n  function openModal(modalId) {\n    // Your code here\n  }\n  openModal('modal-1');\n  console.log(JSON.stringify(modals));\n</script>\n",
+        "typescript": "<div id=\"modal-app\"></div>\n<script>\n  interface Modal {\n    id: string;\n    title: string;\n    content: string;\n    visible: boolean;\n  }\n  const modals: Modal[] = [\n    { id: 'modal-1', title: 'Settings', content: 'Settings content', visible: false },\n    { id: 'modal-2', title: 'Help', content: 'Help content', visible: false }\n  ];\n  function openModal(modalId: string): void {\n    // Your code here\n  }\n  openModal('modal-1');\n  console.log(JSON.stringify(modals));\n</script>\n",
+        "python": "modals = [\n    {'id': 'modal-1', 'title': 'Settings', 'content': 'Settings content', 'visible': False},\n    {'id': 'modal-2', 'title': 'Help', 'content': 'Help content', 'visible': False}\n]\n\ndef open_modal(modal_id):\n    # Your code here\n\nopen_modal('modal-1')\nimport json\nprint(json.dumps(modals))\n"
+      },
+      "verification": {
+        "test": "output.includes('Settings') && output.includes('true') || output.includes('True')",
+        "successMessage": "Modal opens correctly!",
+        "failureMessage": "Set visible to true for the matching modal."
+      }
+    },
+    {
+      "id": 3,
+      "title": "closeModal function",
+      "description": "Write `closeModal(modalId)` that sets `visible` to `false` and logs `'Closed: [title]'`.",
+      "hints": ["Find the modal by id", "Set visible to false", "Log the title of the closed modal"],
+      "codeTemplate": {
+        "javascript": "<div id=\"modal-app\"></div>\n<script>\n  const modals = [\n    { id: 'modal-1', title: 'Settings', content: 'Settings content', visible: true },\n    { id: 'modal-2', title: 'Help', content: 'Help content', visible: false }\n  ];\n  function closeModal(modalId) {\n    // Your code here\n  }\n  closeModal('modal-1');\n  console.log(JSON.stringify(modals));\n</script>\n",
+        "typescript": "<div id=\"modal-app\"></div>\n<script>\n  interface Modal {\n    id: string;\n    title: string;\n    content: string;\n    visible: boolean;\n  }\n  const modals: Modal[] = [\n    { id: 'modal-1', title: 'Settings', content: 'Settings content', visible: true },\n    { id: 'modal-2', title: 'Help', content: 'Help content', visible: false }\n  ];\n  function closeModal(modalId: string): void {\n    // Your code here\n  }\n  closeModal('modal-1');\n  console.log(JSON.stringify(modals));\n</script>\n",
+        "python": "modals = [\n    {'id': 'modal-1', 'title': 'Settings', 'content': 'Settings content', 'visible': True},\n    {'id': 'modal-2', 'title': 'Help', 'content': 'Help content', 'visible': False}\n]\n\ndef close_modal(modal_id):\n    # Your code here\n\nclose_modal('modal-1')\nimport json\nprint(json.dumps(modals))\n"
+      },
+      "verification": {
+        "test": "output.includes('Settings') && output.includes('false') || output.includes('False')",
+        "successMessage": "Modal closes correctly!",
+        "failureMessage": "Set visible to false for the matching modal."
+      }
+    },
+    {
+      "id": 4,
+      "title": "renderModal function",
+      "description": "Write `renderModal(modal)` that returns an HTML string for the modal overlay with title, content, and close button. Only renders if `visible` is `true`.",
+      "hints": ["Return empty string if not visible", "Include a div for the overlay and one for the modal content", "Add a close button with '&times;'"],
+      "codeTemplate": {
+        "javascript": "<div id=\"modal-app\"></div>\n<script>\n  const modal = { id: 'modal-1', title: 'Confirm', content: 'Are you sure?', visible: true };\n  function renderModal(modal) {\n    // Your code here\n  }\n  console.log(renderModal(modal));\n</script>\n",
+        "typescript": "<div id=\"modal-app\"></div>\n<script>\n  interface Modal {\n    id: string;\n    title: string;\n    content: string;\n    visible: boolean;\n  }\n  const modal: Modal = { id: 'modal-1', title: 'Confirm', content: 'Are you sure?', visible: true };\n  function renderModal(modal: Modal): string {\n    // Your code here\n  }\n  console.log(renderModal(modal));\n</script>\n",
+        "python": "modal = {'id': 'modal-1', 'title': 'Confirm', 'content': 'Are you sure?', 'visible': True}\n\ndef render_modal(modal):\n    # Your code here\n\nprint(render_modal(modal))\n"
+      },
+      "verification": {
+        "test": "output.includes('Confirm') && output.includes('Are you sure')",
+        "successMessage": "Modal renders correctly!",
+        "failureMessage": "Return HTML with title and content when visible is true."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Confirm/cancel callbacks",
+      "description": "Add `onConfirm` and `onCancel` callbacks to the modal. Write `confirmModal(modalId)` and `cancelModal(modalId)` that invoke the callbacks and close the modal.",
+      "hints": ["Add onConfirm and onCancel function properties to modal", "confirmModal should call onConfirm then closeModal", "cancelModal should call onCancel then closeModal"],
+      "codeTemplate": {
+        "javascript": "<div id=\"modal-app\"></div>\n<script>\n  const modal = {\n    id: 'modal-1',\n    title: 'Delete',\n    content: 'Delete this item?',\n    visible: true,\n    onConfirm: () => console.log('Confirmed!'),\n    onCancel: () => console.log('Cancelled!')\n  };\n  function confirmModal(modal) {\n    // Your code here\n  }\n  function cancelModal(modal) {\n    // Your code here\n  }\n  confirmModal(modal);\n</script>\n",
+        "typescript": "<div id=\"modal-app\"></div>\n<script>\n  interface Modal {\n    id: string;\n    title: string;\n    content: string;\n    visible: boolean;\n    onConfirm: () => void;\n    onCancel: () => void;\n  }\n  const modal: Modal = {\n    id: 'modal-1',\n    title: 'Delete',\n    content: 'Delete this item?',\n    visible: true,\n    onConfirm: () => console.log('Confirmed!'),\n    onCancel: () => console.log('Cancelled!')\n  };\n  function confirmModal(modal: Modal): void {\n    // Your code here\n  }\n  function cancelModal(modal: Modal): void {\n    // Your code here\n  }\n  confirmModal(modal);\n</script>\n",
+        "python": "modal = {\n    'id': 'modal-1',\n    'title': 'Delete',\n    'content': 'Delete this item?',\n    'visible': True,\n    'on_confirm': lambda: print('Confirmed!'),\n    'on_cancel': lambda: print('Cancelled!')\n}\n\ndef confirm_modal(modal):\n    # Your code here\n\ndef cancel_modal(modal):\n    # Your code here\n\nconfirm_modal(modal)\n"
+      },
+      "verification": {
+        "test": "output.includes('Confirmed')",
+        "successMessage": "Confirm callback works!",
+        "failureMessage": "Invoke onConfirm callback and close the modal."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "express-auth-basic",
+  "title": "Basic Authentication",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["basic-auth", "base64", "middleware", "express", "authorization-header"],
+  "description": "Build an Express API that uses HTTP Basic Authentication to protect sensitive routes.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Public endpoint",
+      "description": "Create a GET /public endpoint that returns a welcome message accessible without authentication.",
+      "hints": [
+        "Define a simple GET route at /public",
+        "Return JSON with a message field",
+        "No auth headers required"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/public",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "message"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Secure endpoint with 401",
+      "description": "Add a GET /secure endpoint that returns 401 Unauthorized when no Authorization header is present.",
+      "hints": [
+        "Check for req.headers['authorization'] in the route handler",
+        "If missing, return 401 with { error: 'Unauthorized' }",
+        "The Authorization header format is: 'Basic base64(credentials)'"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/secure', (req, res) => {\n  const authHeader = req.headers['authorization'];\n  if (!authHeader) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  res.json({ message: 'You are authenticated!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/secure', (req: Request, res: Response) => {\n  const authHeader = req.headers['authorization'];\n  if (!authHeader) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  res.json({ message: 'You are authenticated!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n\n@app.get('/secure')\ndef secure(request: Request):\n    auth_header = request.headers.get('authorization')\n    if not auth_header:\n        return {'error': 'Unauthorized'}\n    return {'message': 'You are authenticated!'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.HandleFunc(\"/secure\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tauthHeader := r.Header.Get(\"Authorization\")\n\t\tif authHeader == \"\" {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Unauthorized\"})\n\t\t\treturn\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"You are authenticated!\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/secure",
+            "expectedStatus": 401,
+            "expectedBodySubstring": "Unauthorized"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Basic auth middleware",
+      "description": "Implement a basic auth middleware that decodes the base64 credentials from the Authorization header and validates against admin:password.",
+      "hints": [
+        "Parse the Authorization header: split on space to get 'Basic' and the encoded string",
+        "Decode the base64 string to get 'username:password'",
+        "Compare against the valid credentials: username='admin', password='password'",
+        "Return 401 if credentials don't match"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\nconst VALID_USERNAME = 'admin';\nconst VALID_PASSWORD = 'password';\n\nfunction basicAuthMiddleware(req, res, next) {\n  const authHeader = req.headers['authorization'];\n  if (!authHeader || !authHeader.startsWith('Basic ')) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  const base64 = authHeader.split(' ')[1];\n  const decoded = Buffer.from(base64, 'base64').toString('utf-8');\n  const [username, password] = decoded.split(':');\n  if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {\n    return res.status(401).json({ error: 'Invalid credentials' });\n  }\n  req.user = { username };\n  next();\n}\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/secure', basicAuthMiddleware, (req, res) => {\n  res.json({ message: 'You are authenticated!', user: req.user });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\nconst VALID_USERNAME = 'admin';\nconst VALID_PASSWORD = 'password';\n\ninterface AuthenticatedRequest extends Request {\n  user?: { username: string };\n}\n\nfunction basicAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {\n  const authHeader = req.headers['authorization'];\n  if (!authHeader || !authHeader.startsWith('Basic ')) {\n    res.status(401).json({ error: 'Unauthorized' });\n    return;\n  }\n  const base64 = authHeader.split(' ')[1];\n  const decoded = Buffer.from(base64, 'base64').toString('utf-8');\n  const [username, password] = decoded.split(':');\n  if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {\n    res.status(401).json({ error: 'Invalid credentials' });\n    return;\n  }\n  req.user = { username };\n  next();\n}\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/secure', basicAuthMiddleware, (req: AuthenticatedRequest, res: Response) => {\n  res.json({ message: 'You are authenticated!', user: req.user });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nimport base64\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nVALID_USERNAME = 'admin'\nVALID_PASSWORD = 'password'\n\ndef basic_auth_middleware(request: Request):\n    auth_header = request.headers.get('authorization')\n    if not auth_header or not auth_header.startswith('Basic '):\n        return JSONResponse(status_code=401, content={'error': 'Unauthorized'})\n    base64_str = auth_header.split(' ')[1]\n    decoded = base64.b64decode(base64_str).decode('utf-8')\n    username, password = decoded.split(':', 1)\n    if username != VALID_USERNAME or password != VALID_PASSWORD:\n        return JSONResponse(status_code=401, content={'error': 'Invalid credentials'})\n    request.state.user = {'username': username}\n    return None\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n\n@app.get('/secure')\ndef secure(request: Request):\n    err = basic_auth_middleware(request)\n    if err:\n        return err\n    return {'message': 'You are authenticated!', 'user': request.state.user}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/base64\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strings\"\n)\n\nconst (\n\tVALID_USERNAME = \"admin\"\n\tVALID_PASSWORD = \"password\"\n)\n\nfunc basicAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tauthHeader := r.Header.Get(\"Authorization\")\n\t\tif !strings.HasPrefix(authHeader, \"Basic \") {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Unauthorized\"})\n\t\t\treturn\n\t\t}\n\t\tbase64Str := strings.TrimPrefix(authHeader, \"Basic \")\n\t\tdecodedBytes, err := base64.StdEncoding.DecodeString(base64Str)\n\t\tif err != nil {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Invalid encoding\"})\n\t\t\treturn\n\t\t}\n\t\tdecoded := string(decodedBytes)\n\t\tparts := strings.SplitN(decoded, \":\", 2)\n\t\tif len(parts) != 2 || parts[0] != VALID_USERNAME || parts[1] != VALID_PASSWORD {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Invalid credentials\"})\n\t\t\treturn\n\t\t}\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.HandleFunc(\"/secure\", basicAuthMiddleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"You are authenticated!\"})\n\t}))\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/secure",
+            "headers": {
+              "Authorization": "Basic YWRtaW46cGFzc3dvcmQ="
+            },
+            "expectedStatus": 200,
+            "expectedBodySubstring": "authenticated"
+          },
+          {
+            "method": "GET",
+            "path": "/secure",
+            "headers": {
+              "Authorization": "Basic d3Jvbmc6Y3JlZHM="
+            },
+            "expectedStatus": 401,
+            "expectedBodySubstring": "Invalid"
+          },
+          {
+            "method": "GET",
+            "path": "/secure",
+            "expectedStatus": 401,
+            "expectedBodySubstring": "Unauthorized"
+          }
+        ]
+      }
+    }
+  ]
+}

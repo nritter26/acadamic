@@ -1,0 +1,71 @@
+{
+  "id": "go-variables",
+  "title": "Go: Variables and Constants",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "variables", "constants", "var", "short-assignment", "zero-values"],
+  "description": "Declare variables using var, :=, and const in Go.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Declare with var",
+      "description": "Declare a variable `city` of type `string` with value `\"Tokyo\"` using the `var` keyword and print it.",
+      "hints": ["Use `var city string = \"Tokyo\"`", "Then `fmt.Println(city)`", "The type goes after the variable name in Go."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Tokyo')",
+        "successMessage": "var declaration works!",
+        "failureMessage": "Declare city with var and print it."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Short Assignment :=",
+      "description": "Use the short assignment operator `:=` to declare `name := \"Gopher\"` and print it.",
+      "hints": ["`:=` declares and assigns in one step.", "Type inference figures out the type for you.", "`name := \"Gopher\"` then `fmt.Println(name)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Gopher')",
+        "successMessage": "Short assignment works!",
+        "failureMessage": "Use := to declare name and print it."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Multiple Variables",
+      "description": "Declare multiple variables `x, y int = 10, 20` on one line and print their sum.",
+      "hints": ["`var x, y int = 10, 20` declares both on one line.", "Or use `x, y := 10, 20`", "Print `x + y` or print each variable separately."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('30')",
+        "successMessage": "Multiple variables work!",
+        "failureMessage": "Declare x=10, y=20 and print their sum 30."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Constants with const",
+      "description": "Declare a constant `Greeting` with value `\"Hello\"` using `const` and print it.",
+      "hints": ["Use `const Greeting = \"Hello\"`", "Constants cannot use `:=`", "Print the constant with `fmt.Println(Greeting)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello')",
+        "successMessage": "Constants work!",
+        "failureMessage": "Use const to declare Greeting and print it."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Zero Values",
+      "description": "Declare `var number int` and `var flag bool` without assigning values, then print both to see their zero values.",
+      "hints": ["In Go, declared variables without initial values get zero values.", "`int` zero is `0`, `bool` zero is `false`.", "Print both: `fmt.Println(number, flag)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('false')",
+        "successMessage": "Zero values understood!",
+        "failureMessage": "Print an uninitialized int and bool to see '0 false'."
+      }
+    }
+  ]
+}

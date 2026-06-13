@@ -1,0 +1,23 @@
+{
+  "id": "c-diff-engine",
+  "title": "C: Diff Engine",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "diff", "LCS", "strings", "dynamic programming"],
+  "description": "Implement a simple line-based diff algorithm using the Longest Common Subsequence (LCS) approach.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "LCS Computation",
+      "description": "Write a function `void lcs(char *a, char *b)` that finds the longest common subsequence between two strings using dynamic programming. Print the LCS table and the common characters.",
+      "hints": ["DP table: `int dp[m+1][n+1]`.", "If chars match, dp[i][j] = dp[i-1][j-1] + 1.", "Else dp[i][j] = max(dp[i-1][j], dp[i][j-1])."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\n#define MAX 100\n\nvoid lcs(char *a, char *b) {\n    int m = strlen(a), n = strlen(b);\n    int dp[MAX][MAX] = {0};\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (a[i-1] == b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;\n            else dp[i][j] = (dp[i-1][j] > dp[i][j-1]) ? dp[i-1][j] : dp[i][j-1];\n        }\n    }\n    printf(\"LCS Length: %d\\n\", dp[m][n]);\n}\n\nint main() {\n    lcs(\"ABCBDAB\", \"BDCABA\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('4')",
+        "successMessage": "LCS computation works!",
+        "failureMessage": "Compute LCS length (should be 4)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "go-observable-stream",
+  "title": "Go: Observable Stream",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "observable", "reactive", "channels", "operators", "streams"],
+  "description": "Build a reactive observable stream library in Go using channels for async data flow with composable operators.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Observable with channel",
+      "description": "Implement an `Observable` struct backed by a `chan interface{}`. Provide `Subscribe()` that returns a receive-only channel, and `Unsubscribe(ch)` to close it. Create a simple observable that emits 5 integers, subscribe, and print each received value.",
+      "hints": [
+        "Observable stores `subscribers map[chan interface{}]struct{}` and a `sync.RWMutex`",
+        "`Subscribe()` creates `make(chan interface{}, buffer)` and stores it",
+        "Emitting sends to all subscriber channels in a goroutine to avoid blocking"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Received:') && output.length > 20",
+        "successMessage": "Observable correctly emits values to subscriber channels!",
+        "failureMessage": "Print each received value as 'Received: <value>' from the subscriber."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Factory methods: Of, From, Interval",
+      "description": "Implement `Of(values ...interface{}) *Observable` that emits each argument, `From(slice []interface{}) *Observable` that emits slice elements, and `Interval(d time.Duration) *Observable` that emits incrementing integers on a ticker. Test each factory and print the emitted values.",
+      "hints": [
+        "`Of` launches a goroutine that sends each value and closes the internal subject",
+        "`From` is similar but iterates over a slice",
+        "`Interval` uses `time.NewTicker` and sends incrementing integers until unsubscribed"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Of:') && output.includes('From:') && output.includes('Interval:')",
+        "successMessage": "Factory methods correctly create observables from values, slices, and timers!",
+        "failureMessage": "Print labeled output 'Of: <value>', 'From: <value>', and 'Interval: <value>'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Map and Filter operators via channels",
+      "description": "Implement `Map(fn func(interface{}) interface{}) *Observable` that creates a new observable transforming each value through a channel. Implement `Filter(pred func(interface{}) bool) *Observable` similarly. Chain `Of(1,2,3,4,5).Map(x2).Filter(even)` and print the result.",
+      "hints": [
+        "Operators create a new Observable with a goroutine that reads from source, transforms, and writes to output",
+        "Map creates a new output channel, reads from source, applies fn, sends to output",
+        "Filter reads from source, checks pred, only sends to output if true"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('4') && output.includes('10') && !output.includes('3')",
+        "successMessage": "Map and Filter operators chain correctly to transform async streams!",
+        "failureMessage": "Print the result of Map(x2).Filter(even) — should only show even doubled values."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Merge operator",
+      "description": "Implement a `Merge(observables ...*Observable) *Observable` that combines multiple observables into a single stream. Values from any source observable are forwarded to the merged output. Create two interval observables at different speeds, merge them, and print the interleaved values.",
+      "hints": [
+        "Merge launches one goroutine per source observable that forwards all values to a shared output channel",
+        "Use a `sync.WaitGroup` to track when all source observables complete",
+        "Print which source each value came from: `fmt.Printf(\"[%s] %v\\n\", sourceID, val)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('[source') && output.indexOf('0') >= 0 && output.indexOf('1') >= 0",
+        "successMessage": "Merge operator combines multiple observable streams into one interleaved stream!",
+        "failureMessage": "Print values with their source label, showing interleaved output from both sources."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Debounce with time.Ticker",
+      "description": "Implement a `Debounce(d time.Duration) *Observable` operator that emits a value only after a specified silence period. Use a `time.Timer` that resets on each new value. Test by emitting values in rapid succession (every 50ms for 5 values) with a 200ms debounce and show only the last value is emitted.",
+      "hints": [
+        "Each incoming value resets the timer: `timer.Reset(d)`",
+        "Only when the timer fires (no new values arrived) is the latest value forwarded",
+        "Use `time.NewTimer(d)` and a select between the source channel and timer channel"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('debounced') && output.length < 100",
+        "successMessage": "Debounce operator correctly suppresses rapid values and emits only after silence!",
+        "failureMessage": "Print 'debounced: <value>' showing only 1 value emitted from 5 rapid inputs."
+      }
+    }
+  ]
+}

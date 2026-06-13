@@ -1,0 +1,71 @@
+{
+  "id": "rs-feature-flags",
+  "title": "Rust: Feature Flag System",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "feature flags", "targeting", "A/B testing", "gradual rollout"],
+  "description": "Build a feature flag system with targeting rules and gradual rollouts.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Feature Flag",
+      "description": "Define a `FeatureFlag` struct with `name: String` and `enabled: bool`. Create a `FlagRegistry` with `HashMap<String, FeatureFlag>`. Implement `is_enabled(name)`. Test with a flag.",
+      "hints": ["`struct FeatureFlag { name: String, enabled: bool }`", "`struct FlagRegistry { flags: HashMap<String, FeatureFlag> }`", "`is_enabled(&self, name: &str) -> bool`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "Simple feature flags work!",
+        "failureMessage": "Enable one flag, disable another, print both states."
+      }
+    },
+    {
+      "id": 2,
+      "title": "User Targeting",
+      "description": "Add targeting: each flag can have a list of `user_ids: Vec<String>` that can see it. `is_enabled_for(name, user_id)` checks targeting first. Test with specific user targeting.",
+      "hints": ["Add `user_ids: Vec<String>` to FeatureFlag.", "`is_enabled_for(name, user_id)`: if user_ids is empty, use enabled. Otherwise check if user_id is in the list.", "Great for canary releases to beta users."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "User targeting works!",
+        "failureMessage": "Enable flag for user 'alice' but not 'bob', test both."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Percentage Rollout",
+      "description": "Add percentage rollout: `rollout_percentage: u8` (0-100). Users are hashed and if hash % 100 < rollout_percentage, they see the flag. Test with multiple users.",
+      "hints": ["Simple hash: `user_id.bytes().fold(0u8, |a, b| a.wrapping_add(b)) % 100`.", "If hash < rollout_percentage, flag is enabled for that user.", "This gives a deterministic experience per user."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('true') && output.contains('false')",
+        "successMessage": "Percentage rollout works!",
+        "failureMessage": "Set 50% rollout and check several users."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Environment-Based Flags",
+      "description": "Add environment support: flags can be enabled per environment (`dev`, `staging`, `prod`). A flag on dev might be enabled while disabled on prod.",
+      "hints": ["Add `environments: HashMap<String, bool>` to store per-env state.", "`is_enabled(name, ctx)` checks `ctx.environment`.", "If environment not specified, fall back to global `enabled`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('dev') && output.contains('prod')",
+        "successMessage": "Environment-based flags work!",
+        "failureMessage": "Enable on dev, disable on prod, test both."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Flag Evaluation Context and Audit",
+      "description": "Create a full `EvaluationContext` with user_id, environment, and custom attributes. Add audit logging: each flag evaluation is recorded with timestamp, user, and result. Print an audit log.",
+      "hints": ["`struct EvalContext { user_id: String, environment: String, attributes: HashMap<String, String> }`", "`struct AuditEntry { flag: String, user: String, result: bool, time: Instant }`", "Store entries in `Vec<AuditEntry>` and print the log."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('audit') || output.contains('evaluated')",
+        "successMessage": "Flag audit log works!",
+        "failureMessage": "Evaluate several flags and print the audit log."
+      }
+    }
+  ]
+}

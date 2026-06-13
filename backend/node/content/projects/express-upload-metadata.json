@@ -1,0 +1,67 @@
+{
+  "id": "express-upload-metadata",
+  "title": "File Upload with Metadata",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["file-upload", "metadata", "file-info", "multer", "multipart"],
+  "description": "Upload files and return metadata (name, size, type), list all uploaded files, and retrieve metadata by file ID.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Upload with metadata response",
+      "description": "Implement POST /upload that accepts a file and returns 200 with an object containing the file name, size, and type.",
+      "hints": ["Parse the multipart file upload", "Extract originalname, size, mimetype", "Return JSON with name, size, type fields"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\nconst fileMeta = {};\napp.post('/upload', upload.single('file'), (req, res) => {\n  const { originalname, mimetype, size } = req.file;\n  const id = fileId++;\n  fileMeta[id] = { id, name: originalname, size, type: mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\ninterface FileMeta { id: number; name: string; size: number; type: string; uploadedAt: string }\nconst fileMeta: Record<number, FileMeta> = {};\napp.post('/upload', upload.single('file'), (req: Request, res: Response) => {\n  const file = req.file!;\n  const id = fileId++;\n  fileMeta[id] = { id, name: file.originalname, size: file.size, type: file.mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom datetime import datetime\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfile_meta = {}\nfile_id = 1\n@app.post('/upload')\nasync def upload(file: UploadFile = File(...)):\n    global file_id\n    content = await file.read()\n    meta = {'id': file_id, 'name': file.filename, 'size': len(content), 'type': file.content_type, 'uploadedAt': datetime.utcnow().isoformat()}\n    file_meta[file_id] = meta\n    file_id += 1\n    return meta\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync/atomic\"\n\t\"time\"\n)\n\ntype FileMeta struct {\n\tID         int    `json:\"id\"`\n\tName       string `json:\"name\"`\n\tSize       int    `json:\"size\"`\n\tType       string `json:\"type\"`\n\tUploadedAt string `json:\"uploadedAt\"`\n}\n\nvar fileMeta = map[int]FileMeta{}\nvar fileID int64\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfh, header, _ := r.FormFile(\"file\")\n\t\tdefer fh.Close()\n\t\tdata, _ := io.ReadAll(fh)\n\t\tid := int(atomic.AddInt64(&fileID, 1))\n\t\tmeta := FileMeta{ID: id, Name: header.Filename, Size: len(data), Type: header.Header.Get(\"Content-Type\"), UploadedAt: time.Now().UTC().Format(time.RFC3339)}\n\t\tfileMeta[id] = meta\n\t\tjson.NewEncoder(w).Encode(meta)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/upload", "expectedStatus": 200, "expectedBodySubstring": "\"name\"" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "List uploaded files",
+      "description": "Implement GET /files that returns a JSON array of all uploaded file metadata objects.",
+      "hints": ["Return the entire file metadata map as an array", "Sort by id or uploadedAt", "Return empty array if no files"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\nconst fileMeta = {};\napp.post('/upload', upload.single('file'), (req, res) => {\n  const { originalname, mimetype, size } = req.file;\n  const id = fileId++;\n  fileMeta[id] = { id, name: originalname, size, type: mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.get('/files', (req, res) => {\n  res.json(Object.values(fileMeta));\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\ninterface FileMeta { id: number; name: string; size: number; type: string; uploadedAt: string }\nconst fileMeta: Record<number, FileMeta> = {};\napp.post('/upload', upload.single('file'), (req: Request, res: Response) => {\n  const file = req.file!;\n  const id = fileId++;\n  fileMeta[id] = { id, name: file.originalname, size: file.size, type: file.mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.get('/files', (_req: Request, res: Response) => {\n  res.json(Object.values(fileMeta));\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File\nfrom datetime import datetime\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfile_meta = {}\nfile_id = 1\n@app.post('/upload')\nasync def upload(file: UploadFile = File(...)):\n    global file_id\n    content = await file.read()\n    meta = {'id': file_id, 'name': file.filename, 'size': len(content), 'type': file.content_type, 'uploadedAt': datetime.utcnow().isoformat()}\n    file_meta[file_id] = meta\n    file_id += 1\n    return meta\n@app.get('/files')\ndef list_files():\n    return list(file_meta.values())\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync/atomic\"\n\t\"time\"\n)\n\ntype FileMeta struct {\n\tID         int    `json:\"id\"`\n\tName       string `json:\"name\"`\n\tSize       int    `json:\"size\"`\n\tType       string `json:\"type\"`\n\tUploadedAt string `json:\"uploadedAt\"`\n}\n\nvar fileMeta = map[int]FileMeta{}\nvar fileID int64\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfh, header, _ := r.FormFile(\"file\")\n\t\tdefer fh.Close()\n\t\tdata, _ := io.ReadAll(fh)\n\t\tid := int(atomic.AddInt64(&fileID, 1))\n\t\tmeta := FileMeta{ID: id, Name: header.Filename, Size: len(data), Type: header.Header.Get(\"Content-Type\"), UploadedAt: time.Now().UTC().Format(time.RFC3339)}\n\t\tfileMeta[id] = meta\n\t\tjson.NewEncoder(w).Encode(meta)\n\t})\n\n\thttp.HandleFunc(\"/files\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar list []FileMeta\n\t\tfor _, m := range fileMeta { list = append(list, m) }\n\t\tjson.NewEncoder(w).Encode(list)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "GET", "path": "/files", "expectedStatus": 200, "expectedBodySubstring": "[]" }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "File metadata by ID",
+      "description": "Implement GET /files/:id/metadata that returns the metadata object for a specific file by its numeric ID.",
+      "hints": ["Parse the id from the URL params", "Look up metadata by id in the map", "Return 404 if not found"],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst multer = require('multer');\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\nconst fileMeta = {};\napp.post('/upload', upload.single('file'), (req, res) => {\n  const { originalname, mimetype, size } = req.file;\n  const id = fileId++;\n  fileMeta[id] = { id, name: originalname, size, type: mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.get('/files', (req, res) => res.json(Object.values(fileMeta)));\napp.get('/files/:id/metadata', (req, res) => {\n  const meta = fileMeta[req.params.id];\n  if (!meta) return res.status(404).json({ error: 'Not found' });\n  res.json(meta);\n});\napp.listen(port);\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport multer from 'multer';\nconst app = express();\nconst port = process.env.PORT || 3000;\nconst upload = multer({ storage: multer.memoryStorage() });\nlet fileId = 1;\ninterface FileMeta { id: number; name: string; size: number; type: string; uploadedAt: string }\nconst fileMeta: Record<number, FileMeta> = {};\napp.post('/upload', upload.single('file'), (req: Request, res: Response) => {\n  const file = req.file!;\n  const id = fileId++;\n  fileMeta[id] = { id, name: file.originalname, size: file.size, type: file.mimetype, uploadedAt: new Date().toISOString() };\n  res.json(fileMeta[id]);\n});\napp.get('/files', (_req: Request, res: Response) => res.json(Object.values(fileMeta)));\napp.get('/files/:id/metadata', (req: Request, res: Response) => {\n  const meta = fileMeta[parseInt(req.params.id)];\n  if (!meta) return res.status(404).json({ error: 'Not found' });\n  res.json(meta);\n});\napp.listen(port);\n",
+        "python": "from fastapi import FastAPI, UploadFile, File, HTTPException\nfrom datetime import datetime\nimport os\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\nfile_meta = {}\nfile_id = 1\n@app.post('/upload')\nasync def upload(file: UploadFile = File(...)):\n    global file_id\n    content = await file.read()\n    meta = {'id': file_id, 'name': file.filename, 'size': len(content), 'type': file.content_type, 'uploadedAt': datetime.utcnow().isoformat()}\n    file_meta[file_id] = meta\n    file_id += 1\n    return meta\n@app.get('/files')\ndef list_files():\n    return list(file_meta.values())\n@app.get('/files/{id}/metadata')\ndef file_metadata(id: int):\n    meta = file_meta.get(id)\n    if not meta: raise HTTPException(status_code=404, detail='Not found')\n    return meta\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"sync/atomic\"\n\t\"time\"\n)\n\ntype FileMeta struct {\n\tID         int    `json:\"id\"`\n\tName       string `json:\"name\"`\n\tSize       int    `json:\"size\"`\n\tType       string `json:\"type\"`\n\tUploadedAt string `json:\"uploadedAt\"`\n}\n\nvar fileMeta = map[int]FileMeta{}\nvar fileID int64\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/upload\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method != \"POST\" { http.NotFound(w, r); return }\n\t\tr.ParseMultipartForm(32 << 20)\n\t\tfh, header, _ := r.FormFile(\"file\")\n\t\tdefer fh.Close()\n\t\tdata, _ := io.ReadAll(fh)\n\t\tid := int(atomic.AddInt64(&fileID, 1))\n\t\tmeta := FileMeta{ID: id, Name: header.Filename, Size: len(data), Type: header.Header.Get(\"Content-Type\"), UploadedAt: time.Now().UTC().Format(time.RFC3339)}\n\t\tfileMeta[id] = meta\n\t\tjson.NewEncoder(w).Encode(meta)\n\t})\n\n\thttp.HandleFunc(\"/files/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tpath := strings.TrimPrefix(r.URL.Path, \"/files/\")\n\t\tif strings.HasSuffix(path, \"/metadata\") {\n\t\t\tidStr := strings.TrimSuffix(path, \"/metadata\")\n\t\t\tid, _ := strconv.Atoi(strings.TrimSuffix(idStr, \"/\"))\n\t\t\tmeta, ok := fileMeta[id]\n\t\t\tif !ok { w.WriteHeader(404); json.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"}); return }\n\t\t\tjson.NewEncoder(w).Encode(meta)\n\t\t}\n\t})\n\n\thttp.HandleFunc(\"/files\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar list []FileMeta\n\t\tfor _, m := range fileMeta { list = append(list, m) }\n\t\tjson.NewEncoder(w).Encode(list)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n\t_ = fmt.Sprintf(\"%s\", \"\")\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          { "method": "POST", "path": "/upload", "expectedStatus": 200 },
+          { "method": "GET", "path": "/files/1/metadata", "expectedStatus": 200, "expectedBodySubstring": "\"name\"" }
+        ]
+      }
+    }
+  ]
+}

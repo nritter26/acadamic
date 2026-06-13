@@ -1,0 +1,83 @@
+{
+  "id": "go-web-router",
+  "title": "Go: Custom HTTP Router",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 45,
+  "concepts": ["go", "http", "routing", "path parameters", "middleware"],
+  "description": "Implement a custom HTTP router from scratch with method matching, path parameters, and middleware support.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Route registration",
+      "description": "Define a `Route` struct with fields `Method`, `Pattern`, and `Handler http.HandlerFunc`. Create a `Router` struct with a `routes []Route` slice and a `Handle(method, pattern string, handler http.HandlerFunc)` method. Register two routes and print them using `fmt.Printf`.",
+      "hints": ["Route stores the raw pattern string", "Handle appends to the routes slice", "Use the http.HandlerFunc type directly"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('registered') || (output.includes('GET') && output.includes('POST'))",
+        "successMessage": "Routes registered successfully!",
+        "failureMessage": "Print each registered route's method and pattern."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Method matching",
+      "description": "Implement `ServeHTTP(w http.ResponseWriter, r *http.Request)` on `Router` that iterates routes and matches both method and pattern. Return 405 Method Not Allowed if a path matches but method doesn't. Print the matched route using `fmt.Println`.",
+      "hints": ["Iterate routes and check r.Method equality first", "Track if any path matched (even if method didn't)", "Write status code with w.WriteHeader(http.StatusMethodNotAllowed)"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('matched') || output.includes('route') || output.includes('405')",
+        "successMessage": "Method matching works!",
+        "failureMessage": "Print the matched route or 405 status."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Path parameter extraction",
+      "description": "Add path parameter support using `:` prefix notation (e.g., `/users/:id`). Split both pattern and request path on `/`, match static segments, and extract dynamic ones into a `Params map[string]string`. Print extracted params using `fmt.Printf`.",
+      "hints": ["Split pattern and path with strings.Split", "Match non-empty segments pairwise", "Segments starting with ':' are dynamic params"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('id') || output.includes('params') || output.includes(':')",
+        "successMessage": "Path parameters extracted!",
+        "failureMessage": "Print extracted parameter names and values."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sub-routers with prefix",
+      "description": "Create a `Group(prefix string) *Router` method that returns a new Router with the prefix. When registering routes on the sub-router, the full pattern is prefix + pattern. Print all routes from both parent and sub-router using `fmt.Println`.",
+      "hints": ["Sub-router stores a reference to the parent or just the prefix", "Join prefix and pattern with fmt.Sprintf(\"%s%s\", prefix, pattern)", "Routes list should be aggregated for printing"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('/api') || output.includes('/v1') || output.includes('prefix')",
+        "successMessage": "Sub-routers with prefix work!",
+        "failureMessage": "Print routes showing the combined prefix+pattern."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Middleware per route group",
+      "description": "Add a `Use(middlewares ...Middleware)` method to `Router` that applies middlewares to all routes registered within that group. Define a `Middleware` type as `func(http.Handler) http.Handler`. Print middleware application order using `fmt.Printf`.",
+      "hints": ["Middleware type is the same as standard http middleware", "Store middlewares on the Router and apply in Handle", "Apply middlewares in reverse order: last added = outermost"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('middleware') || output.includes('order')",
+        "successMessage": "Middleware per route group works!",
+        "failureMessage": "Print the middleware application order."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Not Found handler",
+      "description": "Add a custom 404 handler to `Router` with a `NotFound(handler http.HandlerFunc)` method. When no route matches, use this handler instead of the default. Print the 404 response message using `fmt.Println`.",
+      "hints": ["Store a default NotFound handler field on Router", "Fall through to it after checking all routes", "Use http.StatusNotFound when writing response"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('404') || output.includes('not found')",
+        "successMessage": "Custom 404 handler works!",
+        "failureMessage": "Print the 404 response for unmatched routes."
+      }
+    }
+  ]
+}

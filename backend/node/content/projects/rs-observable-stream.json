@@ -1,0 +1,71 @@
+{
+  "id": "rs-observable-stream",
+  "title": "Rust: Observable Stream",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "observable", "stream", "reactive", "push-based"],
+  "description": "Implement a simple observable stream with push-based notifications.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Observable Trait",
+      "description": "Define a trait `Observable<T>` with `fn subscribe(&mut self, observer: Box<dyn Fn(&T)>)` and `fn unsubscribe(&mut self, id: u64)`. Create a `Subject<T>` that stores observers and notifies them. Test with string values.",
+      "hints": ["`trait Observable<T> { fn subscribe(&mut self, observer: Box<dyn Fn(&T)>); fn unsubscribe(&mut self, id: u64); }`", "`struct Subject<T> { observers: Vec<(u64, Box<dyn Fn(&T)>)>, next_id: u64 }`", "`notify(&self, value: &T)` calls all observers."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('received') || output.contains('value')",
+        "successMessage": "Observable stream works!",
+        "failureMessage": "Create a Subject, subscribe, and push a value."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Map Operator",
+      "description": "Create a `map` function that transforms a stream: `map(stream, |x| x * 2)` returns a new stream. Subscribe to the mapped stream and test with integer values.",
+      "hints": ["Create a new Subject internally.", "Subscribe to the source stream, transform the value, push to the new subject.", "`fn map<T, U, F>(source: &mut Subject<T>, f: F) -> Subject<U> where F: Fn(&T) -> U`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('2') && output.contains('4') && output.contains('6')",
+        "successMessage": "Map operator works!",
+        "failureMessage": "Push 1,2,3 through a map(x2) stream and print 2,4,6."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Filter Operator",
+      "description": "Create a `filter` operator: `filter(stream, |x| x > 5)` only pushes values matching the predicate. Push values [1, 7, 2, 9, 3] and print filtered results.",
+      "hints": ["Subscribe to source, check predicate, push to output if true.", "`fn filter<T, F>(source: &mut Subject<T>, predicate: F) -> Subject<T> where F: Fn(&T) -> bool`", "1,7,2,9,3 with filter >5 → 7,9"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('7') && output.contains('9') && !output.contains('1')",
+        "successMessage": "Filter operator works!",
+        "failureMessage": "Filter values >5 and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Debounce Operator",
+      "description": "Implement a `debounce` operator that only emits a value after a period of silence. If a new value arrives within the debounce period, reset the timer. Simulate with timestamps.",
+      "hints": ["Track `last_emit: Instant` in the debounce state.", "When a value arrives, check if enough time has passed since last emit.", "If not, skip the value (or schedule it)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('debounce') || output.contains('emitted')",
+        "successMessage": "Debounce operator works!",
+        "failureMessage": "Push rapid values and show only the last one emits."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Rx-Style Chain",
+      "description": "Chain operators: create a source stream, apply `map(|x| x * 2).filter(|x| x > 10)`, subscribe and print. Push [3, 7, 5, 9] and show the transformed output.",
+      "hints": ["Chain: `source.map(|x| x * 2).filter(|x| x > 10).subscribe(...)`", "Each operator returns a new Subject that can be further chained.", "3→6(skip), 7→14(emit), 5→10(skip), 9→18(emit) → 14, 18"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('14') && output.contains('18') && !output.contains('6')",
+        "successMessage": "Rx-style chaining works!",
+        "failureMessage": "Chain map then filter and print 14 and 18."
+      }
+    }
+  ]
+}

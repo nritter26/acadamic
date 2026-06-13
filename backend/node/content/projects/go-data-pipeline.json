@@ -1,0 +1,91 @@
+{
+  "id": "go-data-pipeline",
+  "title": "Go: ETL Data Pipeline",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 70,
+  "concepts": ["go", "ETL", "io.Reader", "io.Writer", "pipeline", "interfaces"],
+  "description": "Build an ETL data pipeline in Go using io.Reader and io.Writer interfaces with composable pipeline stages.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Extractor stage (source)",
+      "description": "Implement an `Extractor` that implements `io.Reader`. It reads from a `[]string` data source and returns data line by line. Implement the `Read(p []byte)` method. Create an extractor with sample CSV data and use `io.Copy(os.Stdout, extractor)` to print it.",
+      "hints": [
+        "Extractor struct holds `data []string` and `pos int` to track current line",
+        "`Read` copies the next line into `p` and returns the byte count",
+        "Return `io.EOF` when all lines have been read"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('name,age') || output.includes('Alice')",
+        "successMessage": "Extractor implements io.Reader and produces data line by line!",
+        "failureMessage": "Make sure io.Copy prints all lines from the extractor to stdout."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Transformer with map/filter",
+      "description": "Implement a `Transformer` that wraps an `io.Reader` and transforms data on the fly. Support a `Map` function (e.g. uppercase all text) and a `Filter` function (e.g. skip empty lines). Chain them: read from the extractor, transform, and print the output.",
+      "hints": [
+        "Transformer holds the underlying `reader io.Reader` and applies transformations via function fields",
+        "Read a line, apply Map function, then check Filter function before returning data",
+        "Functions can be of type `func(string) string` for Map and `func(string) bool` for Filter"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output === output.toUpperCase() && output.length > 10",
+        "successMessage": "Transformer correctly applies Map and Filter functions to the data stream!",
+        "failureMessage": "Print the transformed data — all text should be uppercase with empty lines removed."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Loader stage (sink)",
+      "description": "Implement a `Loader` that implements `io.Writer`. It accumulates written data into a `[]string` slice. Implement `Write(p []byte)` to collect data. Connect the transformer to the loader and verify the accumulated data by printing each item.",
+      "hints": [
+        "Loader struct has `data []string` protected by a mutex",
+        "Write splits input on newlines and appends non-empty strings to data",
+        "Provide a `GetData() []string` method to retrieve accumulated output"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('item') || output.includes('HELLO')",
+        "successMessage": "Loader correctly accumulates all written data into a slice!",
+        "failureMessage": "Print each item in the loader's accumulated data after writing."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Pipeline chaining with error handling",
+      "description": "Create a `Pipeline` struct that chains extractor, transformer, and loader stages together with `Run()` method that returns an error. Use `io.Pipe` to connect stages. Implement a `Retry` decorator that retries a stage up to 3 times on failure. Print pipeline status at each stage.",
+      "hints": [
+        "Use `io.Pipe()` to create synchronous in-memory pipes between stages",
+        "Run each stage in a separate goroutine and collect errors via a channel",
+        "The Retry decorator wraps a stage and retries with exponential backoff on error"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Pipeline') && (output.includes('complete') || output.includes('error'))",
+        "successMessage": "Pipeline chains stages together with proper error handling and retry!",
+        "failureMessage": "Print 'Pipeline stage X complete' for each successful stage."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Pipeline metrics and monitoring",
+      "description": "Extend the Pipeline with metrics collection. Implement a `Metrics` struct that tracks bytes processed, records processed, errors, and timing per stage using `time.Time`. After pipeline execution, print a metrics report with stage name, duration, records, and error count.",
+      "hints": [
+        "Wrap each stage with a metrics-gathering decorator that records start/end time",
+        "Use `sync/atomic` for counters shared across goroutines",
+        "Print a formatted report: `fmt.Printf(\"[%s] %d records in %v\\n\", name, records, duration)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('records') && output.includes('duration')",
+        "successMessage": "Pipeline metrics accurately track records, bytes, errors, and timing per stage!",
+        "failureMessage": "Print a metrics report for each pipeline stage with records and duration."
+      }
+    }
+  ]
+}

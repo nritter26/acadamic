@@ -1,0 +1,71 @@
+{
+  "id": "rs-dependency-injection",
+  "title": "Rust: Dependency Injection",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "dependency injection", "trait objects", "inversion of control"],
+  "description": "Implement dependency injection using traits and generic parameters in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Interface-Based DI",
+      "description": "Define a trait `Logger` with methods `info(&self, msg: &str)` and `error(&self, msg: &str)`. Create `ConsoleLogger` that prints to stdout. Create a `UserService` that takes `Box<dyn Logger>`.",
+      "hints": ["`struct UserService { logger: Box<dyn Logger> }`", "`UserService` calls `self.logger.info(...)` for operations.", "This decouples UserService from the logging implementation."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('User') || output.includes('created')",
+        "successMessage": "Interface-based DI works!",
+        "failureMessage": "Create a UserService with ConsoleLogger and perform an operation."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Constructor Injection",
+      "description": "Create a `Database` trait with `fn query(&self, sql: &str) -> Vec<String>`. Create `PostgresDb` and `SqliteDb` implementations. Create a `UserRepository` that takes `Box<dyn Database>` in its constructor.",
+      "hints": ["`struct UserRepository { db: Box<dyn Database> }`", "`impl UserRepository { fn new(db: Box<dyn Database>) -> Self { Self { db } } }`", "Constructor injection makes dependencies explicit."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('query') || output.includes('user')",
+        "successMessage": "Constructor injection works!",
+        "failureMessage": "Create UserRepository with database and run a query."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Generic Parameter DI",
+      "description": "Use generic parameters instead of trait objects: `struct Service<T: Logger> { logger: T }`. This has zero runtime overhead. Test with `Service<ConsoleLogger>`.",
+      "hints": ["`struct Service<T: Logger> { logger: T }`", "Generic DI is resolved at compile time (monomorphization).", "No heap allocation or dynamic dispatch needed."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Service') || output.includes('info')",
+        "successMessage": "Generic DI works (zero-cost abstraction)!",
+        "failureMessage": "Create Service<ConsoleLogger> and call its methods."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Service Container",
+      "description": "Create a simple DI container `ServiceContainer` that stores services in a `HashMap<String, Box<dyn Any>>`. Add `set<T: Any + 'static>(&mut self, service: T)` and `get<T: Any + 'static>(&self) -> Option<&T>` methods.",
+      "hints": ["`HashMap<String, Box<dyn std::any::Any>>`", "`set: services.insert(type_name, Box::new(service))`", "`get: services.get(type_name)?.downcast_ref::<T>()`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('service') || output.includes('container')",
+        "successMessage": "Service container works!",
+        "failureMessage": "Register and retrieve a service from the container."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Fully Wired Application",
+      "description": "Wire together Logger, Database, UserRepository, and UserService using constructor injection. Create a function `build_application() -> UserService` that assembles everything. Print the results of an operation.",
+      "hints": ["Compose: `Logger → Database → UserRepository → UserService`", "`let repo = UserRepository::new(Box::new(PostgresDb));`", "`let svc = UserService::new(Box::new(ConsoleLogger), repo);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('User') || output.includes('created') || output.includes('query')",
+        "successMessage": "Fully wired application works!",
+        "failureMessage": "Wire all dependencies and perform a complete operation."
+      }
+    }
+  ]
+}

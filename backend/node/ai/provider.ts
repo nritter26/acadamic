@@ -1,0 +1,415 @@
+import config from './config';
+import { runKeywordTutor } from './tutor-keywords';
+import { getTinyLLMResponse } from './template-matcher';
+import { llmCache } from './cache';
+
+export interface LLMMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+type StreamCallback = (chunk: string) => void;
+
+export interface ProviderOverride {
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+  endpoint?: string;
+}
+
+interface ProviderHandler {
+  buildBody(messages: LLMMessage[], stream: boolean): Record<string, unknown>;
+  buildHeaders(): Record<string, string>;
+  endpoint: string;
+  path: string;
+  nonStreamPath?: string;
+  parser(line: string): string | null;
+  responseParser(data: Record<string, unknown>): string | null;
+  stripSystem?: boolean;
+  apiKey: string;
+  model: string;
+  maxTokens: number;
+}
+
+async function streamSSEResponse(
+  response: Response,
+  onStream: StreamCallback,
+  parser: (line: string) => string | null,
+): Promise<string> {
+  if (!response.body) {
+    throw new Error('Response body is null — streaming not supported');
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let full = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data: ')) continue;
+      const data = trimmed.slice(6).trim();
+      if (data === '[DONE]') continue;
+      const content = parser(data);
+      if (content) {
+        full += content;
+        onStream(content);
+      }
+    }
+  }
+  return full;
+}
+
+function openAIParser(data: string): string | null {
+  try {
+    const parsed = JSON.parse(data);
+    return (parsed.choices?.[0]?.delta?.content as string) || null;
+  } catch {
+    return null;
+  }
+}
+
+function anthropicParser(data: string): string | null {
+  try {
+    const parsed = JSON.parse(data) as { type?: string; delta?: { text?: string } };
+    if (parsed.type === 'content_block_delta') {
+      return parsed.delta?.text || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function geminiParser(data: string): string | null {
+  try {
+    const parsed = JSON.parse(data);
+    return parsed.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch {
+    return null;
+  }
+}
+
+const PROVIDERS: Record<string, ProviderHandler> = {
+  gemini: {
+    endpoint: config.gemini.endpoint || 'https://generativelanguage.googleapis.com/v1beta',
+    path: '/models/:model:streamGenerateContent?alt=sse',
+    nonStreamPath: '/models/:model:generateContent',
+    buildBody(messages, stream) {
+      const systemMsgs = messages.filter(m => m.role === 'system');
+      const chatMsgs = messages.filter(m => m.role !== 'system');
+      const body: Record<string, unknown> = {
+        contents: chatMsgs.map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        })),
+      };
+      if (systemMsgs.length > 0) {
+        body.systemInstruction = { parts: [{ text: systemMsgs.map(s => s.content).join('\n') }] };
+      }
+      return body;
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey,
+      };
+    },
+    parser: geminiParser,
+    responseParser(data) {
+      const d = data as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+      return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    },
+    stripSystem: false,
+    get apiKey() { return config.gemini.apiKey; },
+    get model() { return config.gemini.model; },
+    get maxTokens() { return config.gemini.maxTokens; },
+  },
+  openai: {
+    endpoint: config.openai.endpoint || 'https://api.openai.com/v1',
+    path: '/chat/completions',
+    buildBody(messages, stream) {
+      return {
+        model: this.model,
+        messages: [{ role: 'system', content: config.systemPrompt }, ...messages],
+        max_tokens: this.maxTokens,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+      };
+    },
+    parser: openAIParser,
+    responseParser(data) {
+      const d = data as { choices?: { message?: { content?: string } }[] };
+      return d.choices?.[0]?.message?.content || null;
+    },
+    get apiKey() { return config.openai.apiKey; },
+    get model() { return config.openai.model; },
+    get maxTokens() { return config.openai.maxTokens; },
+  },
+  anthropic: {
+    endpoint: 'https://api.anthropic.com/v1',
+    path: '/messages',
+    buildBody(messages, stream) {
+      const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({
+        role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
+        content: m.content,
+      }));
+      return {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        system: config.systemPrompt,
+        messages: chatMessages,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'x-api-key': this.apiKey,
+        'anthropic-version': '2023-06-01',
+      };
+    },
+    parser: anthropicParser,
+    responseParser(data) {
+      const d = data as { content?: { text?: string }[] };
+      return d.content?.[0]?.text || null;
+    },
+    stripSystem: true,
+    get apiKey() { return config.anthropic.apiKey; },
+    get model() { return config.anthropic.model; },
+    get maxTokens() { return config.anthropic.maxTokens; },
+  },
+  local: {
+    endpoint: config.local.endpoint || 'http://localhost:11434/v1',
+    path: '/chat/completions',
+    buildBody(messages, stream) {
+      return {
+        model: this.model,
+        messages: [{ role: 'system' as const, content: config.systemPrompt }, ...messages],
+        max_tokens: this.maxTokens,
+        stream,
+      };
+    },
+    buildHeaders() {
+      return { 'Content-Type': 'application/json' };
+    },
+    parser: openAIParser,
+    responseParser(data) {
+      const d = data as { choices?: { message?: { content?: string } }[] };
+      return d.choices?.[0]?.message?.content || null;
+    },
+    get apiKey() { return ''; },
+    get model() { return config.local.model; },
+    get maxTokens() { return config.local.maxTokens; },
+  },
+};
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 2,
+): Promise<Response | null> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeout);
+      if (response.ok) return response;
+      if (response.status === 429 && i < retries) {
+        const retryAfter = parseInt(response.headers.get('Retry-After') || '', 10);
+        const delay = retryAfter ? retryAfter * 1000 : 1000 * Math.pow(2, i) + Math.random() * 500;
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      if (response.status < 500) return null;
+    } catch {
+      if (i === retries) return null;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i) + Math.random() * 500));
+    }
+  }
+  return null;
+}
+
+function overrideProvider(
+  base: ProviderHandler,
+  overrides: { model?: string; apiKey?: string; endpoint?: string },
+): ProviderHandler {
+  return {
+    ...base,
+    endpoint: overrides.endpoint || base.endpoint,
+    model: overrides.model || base.model,
+    apiKey: overrides.apiKey || base.apiKey,
+  };
+}
+
+async function callProvider(
+  provider: ProviderHandler,
+  messages: LLMMessage[],
+  onStream?: StreamCallback,
+  overrides?: { model?: string; apiKey?: string; endpoint?: string },
+): Promise<string | null> {
+  const p = overrides ? overrideProvider(provider, overrides) : provider;
+  const resolvedPath = (onStream ? p.path : (p.nonStreamPath || p.path))
+    .replace(':model', p.model);
+  const url = `${p.endpoint}${resolvedPath}`;
+  const body = p.buildBody(messages, !!onStream);
+  const headers = p.buildHeaders();
+
+  if (onStream) {
+    const response = await fetchWithRetry(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+    if (!response) return null;
+    return streamSSEResponse(response, onStream, provider.parser);
+  }
+
+  const response = await fetchWithRetry(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!response) return null;
+  const data = await response.json();
+  return provider.responseParser(data);
+}
+
+export async function runKeywordTutorFn(
+  message: string,
+  lang?: string,
+  topic?: string,
+  code?: string,
+  hasError?: boolean,
+): Promise<string | null> {
+  const result = runKeywordTutor(message, lang, topic, code, hasError);
+  return result ? result.response : null;
+}
+
+export async function runHybridLLM(
+  messages: LLMMessage[],
+  onStream?: StreamCallback,
+  lang?: string,
+  topic?: string,
+  code?: string,
+  hasError?: boolean,
+): Promise<string | null> {
+  const lastMsg = messages[messages.length - 1]?.content || '';
+
+  const keywordResult = runKeywordTutor(lastMsg, lang, topic, code, hasError);
+  if (keywordResult) {
+    if (onStream) {
+      const words = keywordResult.response.split(/(\s+)/);
+      for (const word of words) {
+        onStream(word);
+        await new Promise(r => setTimeout(r, 10));
+      }
+    }
+    return keywordResult.response;
+  }
+
+  try {
+    const llmResponse = await getTinyLLMResponse(messages, onStream);
+    if (llmResponse) return llmResponse;
+  } catch (e) {
+    console.error('[hybrid] Tiny LLM fallback failed:', e);
+  }
+
+  try {
+    console.log('[hybrid] Trying local LLM...');
+    const localResult = await callProvider(PROVIDERS.local, messages, onStream);
+    if (localResult) return localResult;
+  } catch (e) {
+    console.warn('[hybrid] Local LLM failed:', e);
+  }
+
+  if (config.openai.apiKey) {
+    try {
+      console.log('[hybrid] Trying OpenAI...');
+      const openaiResult = await callProvider(PROVIDERS.openai, messages, onStream);
+      if (openaiResult) return openaiResult;
+    } catch (e) {
+      console.warn('[hybrid] OpenAI failed:', e);
+    }
+  }
+
+  if (config.anthropic.apiKey) {
+    try {
+      console.log('[hybrid] Trying Anthropic...');
+      const anthropicResult = await callProvider(PROVIDERS.anthropic, messages, onStream);
+      if (anthropicResult) return anthropicResult;
+    } catch (e) {
+      console.warn('[hybrid] Anthropic failed:', e);
+    }
+  }
+
+  return null;
+}
+
+export async function askLLM(
+  messages: LLMMessage[],
+  onStream?: StreamCallback,
+  options?: { lang?: string; topic?: string; code?: string; hasError?: boolean; providerConfig?: ProviderOverride },
+): Promise<string | null> {
+  const provider = options?.providerConfig?.provider || config.provider;
+  const overrides = options?.providerConfig ? { model: options.providerConfig.model, apiKey: options.providerConfig.apiKey, endpoint: options.providerConfig.endpoint } : undefined;
+
+  const cacheKey = options?.providerConfig ? `${options.providerConfig.provider}|${options.providerConfig.model || ''}|${messages[messages.length - 1]?.content || ''}|${options?.lang || ''}|${options?.topic || ''}` : undefined;
+  const cached = cacheKey ? llmCache.get(messages, options?.lang, options?.topic) : llmCache.get(messages, options?.lang, options?.topic);
+  if (cached !== null) {
+    if (onStream) {
+      const words = cached.split(/(\s+)/);
+      for (const word of words) {
+        onStream(word);
+        await new Promise(r => setTimeout(r, 10));
+      }
+    }
+    return cached;
+  }
+
+  let response: string | null = null;
+
+  if (provider === 'hybrid') {
+    response = await runHybridLLM(
+      messages,
+      onStream,
+      options?.lang,
+      options?.topic,
+      options?.code,
+      options?.hasError,
+    );
+  } else if (provider === 'openai') {
+    response = await callProvider(PROVIDERS.openai, messages, onStream, overrides);
+  } else if (provider === 'anthropic') {
+    response = await callProvider(PROVIDERS.anthropic, messages, onStream, overrides);
+  } else if (provider === 'gemini') {
+    response = await callProvider(PROVIDERS.gemini, messages, onStream, overrides);
+  } else if (provider === 'local') {
+    response = await callProvider(PROVIDERS.local, messages, onStream, overrides);
+  } else if (provider === 'keyword') {
+    const { runKeywordTutor } = require('./tutor-keywords');
+    const lastMsg = messages[messages.length - 1]?.content || '';
+    const result = runKeywordTutor(lastMsg, options?.lang, options?.topic, options?.code, options?.hasError);
+    response = result ? result.response : null;
+  }
+
+  if (response !== null) {
+    llmCache.set(messages, response, options?.lang, options?.topic);
+  }
+
+  return response;
+}
+
+

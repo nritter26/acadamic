@@ -1,0 +1,124 @@
+{
+  "id": "typing-speed-test",
+  "title": "Typing Speed Test",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "strings",
+    "arrays",
+    "timing",
+    "statistics",
+    "user-input"
+  ],
+  "description": "Build a typing speed test that measures words per minute and accuracy. You'll display sample text, track input timing, calculate WPM, and show results.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Display sample text",
+      "description": "Create a `getSampleText` function that returns a predefined sentence, and a `displayText` function that splits the text into an array of words.",
+      "hints": [
+        "Store the sample text as a constant string",
+        "displayText should split the text by spaces: text.split(' ')",
+        "Return the array of words"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"typing-test\"><div id=\"text-display\"></div></div>\n<script>\nconst SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog';\n\nfunction getSampleText() {\n  return SAMPLE_TEXT;\n}\n\nfunction displayText() {\n  // Split the sample text into words and return the array\n}\n\nconsole.log(displayText());\n</script>\n",
+        "typescript": "<div id=\"typing-test\"><div id=\"text-display\"></div></div>\n<script>\nconst SAMPLE_TEXT: string = 'The quick brown fox jumps over the lazy dog';\n\nfunction getSampleText(): string {\n  return SAMPLE_TEXT;\n}\n\nfunction displayText(): string[] {\n  // Split the sample text into words and return the array\n}\n\nconsole.log(displayText());\n</script>\n",
+        "python": "SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog'\n\ndef getSampleText():\n  return SAMPLE_TEXT\n\ndef displayText():\n  # Split the sample text into words and return the array\n  pass\n\nprint(displayText())\n"
+      },
+      "verification": {
+        "test": "output.includes('quick') && output.includes('brown') && output.includes('fox')",
+        "successMessage": "Sample text is displayed as an array of words!",
+        "failureMessage": "Make sure displayText returns an array of individual words from the sample."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Track input",
+      "description": "Create a `startTimer` and `stopTimer` function pair that tracks elapsed time. Use a `startTime` variable and record the end time when input is complete.",
+      "hints": [
+        "startTimer should record Date.now() in a variable",
+        "stopTimer should return the difference in milliseconds between now and startTime",
+        "Store the startTime in a variable outside the functions"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nlet startTime = null;\n\nfunction startTimer() {\n  // Record the current time\n}\n\nfunction stopTimer() {\n  // Return elapsed time in seconds\n}\n\nstartTimer();\n// Simulate typing delay\nsetTimeout(() => {\n  const elapsed = stopTimer();\n  console.log('Time:', elapsed, 'seconds');\n}, 100);\n</script>\n",
+        "typescript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nlet startTime: number | null = null;\n\nfunction startTimer(): void {\n  // Record the current time\n}\n\nfunction stopTimer(): number {\n  // Return elapsed time in seconds\n}\n\nstartTimer();\n// Simulate typing delay\nsetTimeout(() => {\n  const elapsed = stopTimer();\n  console.log('Time:', elapsed, 'seconds');\n}, 100);\n</script>\n",
+        "python": "import time\n\nstartTime = None\n\ndef startTimer():\n  # Record the current time\n  pass\n\ndef stopTimer():\n  # Return elapsed time in seconds\n  pass\n\nstartTimer()\n# Simulate typing delay\nelapsed = stopTimer()\nprint('Time:', elapsed, 'seconds')\n"
+      },
+      "verification": {
+        "test": "output.includes('Time:') && output.includes('seconds')",
+        "successMessage": "Timer tracks elapsed time in seconds!",
+        "failureMessage": "Make sure startTimer records the start time and stopTimer returns elapsed seconds."
+      }
+    },
+    {
+      "id": 3,
+      "title": "WPM calculation",
+      "description": "Create a `calculateWPM` function that takes the number of typed characters and elapsed seconds, then returns words per minute. Standard: 5 characters = 1 word.",
+      "hints": [
+        "Calculate words: characterCount / 5",
+        "Calculate minutes: elapsedSeconds / 60",
+        "WPM = words / minutes = (chars / 5) / (seconds / 60)",
+        "Handle edge case: if no time has passed, return 0"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nfunction calculateWPM(charCount, elapsedSeconds) {\n  // Calculate words per minute\n}\n\nconsole.log(calculateWPM(50, 30));\nconsole.log(calculateWPM(100, 60));\nconsole.log(calculateWPM(0, 10));\n</script>\n",
+        "typescript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nfunction calculateWPM(charCount: number, elapsedSeconds: number): number {\n  // Calculate words per minute\n}\n\nconsole.log(calculateWPM(50, 30));\nconsole.log(calculateWPM(100, 60));\nconsole.log(calculateWPM(0, 10));\n</script>\n",
+        "python": "def calculateWPM(charCount, elapsedSeconds):\n  # Calculate words per minute\n  pass\n\nprint(calculateWPM(50, 30))\nprint(calculateWPM(100, 60))\nprint(calculateWPM(0, 10))\n"
+      },
+      "verification": {
+        "test": "output.includes('20') && output.includes('20') && output.includes('0')",
+        "successMessage": "WPM calculation works! 50 chars in 30s = 20 WPM, 100 chars in 60s = 20 WPM.",
+        "failureMessage": "Make sure calculateWPM returns correct WPM: chars/5 / (seconds/60)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Accuracy percentage",
+      "description": "Create a `calculateAccuracy` function that compares the user's typed input against the original text and returns the percentage of correct characters.",
+      "hints": [
+        "Compare each character of the typed text to the original at the same position",
+        "Count how many characters match (correctChars)",
+        "Accuracy = (correctChars / original.length) * 100, rounded to 1 decimal",
+        "Use Math.round(accuracy * 10) / 10 to round to 1 decimal"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nfunction calculateAccuracy(original, typed) {\n  // Calculate accuracy percentage\n}\n\nconsole.log(calculateAccuracy('hello', 'hello'));\nconsole.log(calculateAccuracy('hello', 'hxllo'));\nconsole.log(calculateAccuracy('hello', 'hrr'));\n</script>\n",
+        "typescript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nfunction calculateAccuracy(original: string, typed: string): number {\n  // Calculate accuracy percentage\n}\n\nconsole.log(calculateAccuracy('hello', 'hello'));\nconsole.log(calculateAccuracy('hello', 'hxllo'));\nconsole.log(calculateAccuracy('hello', 'hrr'));\n</script>\n",
+        "python": "def calculateAccuracy(original, typed):\n  # Calculate accuracy percentage\n  pass\n\nprint(calculateAccuracy('hello', 'hello'))\nprint(calculateAccuracy('hello', 'hxllo'))\nprint(calculateAccuracy('hello', 'hrr'))\n"
+      },
+      "verification": {
+        "test": "output.includes('100') && output.includes('80') && output.includes('40')",
+        "successMessage": "Accuracy calculation works! 100%, 80%, and 40% accuracy detected.",
+        "failureMessage": "Make sure calculateAccuracy returns the correct percentage with 1 decimal place."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Results stats",
+      "description": "Create a `getResults` function that combines everything: it takes the original text, typed text, and elapsed seconds, and returns an object with `wpm`, `accuracy`, `totalChars`, and `correctChars`.",
+      "hints": [
+        "Call calculateWPM and calculateAccuracy inside getResults",
+        "totalChars is the length of the typed text (but cap at original.length)",
+        "correctChars is the count of matching characters",
+        "Return an object with all four stats"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\nfunction calculateWPM(charCount, elapsedSeconds) {\n  if (elapsedSeconds <= 0) return 0;\n  return Math.round((charCount / 5) / (elapsedSeconds / 60));\n}\n\nfunction calculateAccuracy(original, typed) {\n  let correct = 0;\n  const len = Math.min(original.length, typed.length);\n  for (let i = 0; i < len; i++) {\n    if (original[i] === typed[i]) correct++;\n  }\n  return Math.round((correct / original.length) * 100 * 10) / 10;\n}\n\nfunction getResults(original, typed, elapsedSeconds) {\n  // Return { wpm, accuracy, totalChars, correctChars }\n}\n\nconst result = getResults('the quick brown fox', 'the quick brown fox', 30);\nconsole.log(JSON.stringify(result));\n</script>\n",
+        "typescript": "<div id=\"typing-test\"><div id=\"text-display\"></div><div id=\"results\"></div></div>\n<script>\ninterface TypingResult {\n  wpm: number;\n  accuracy: number;\n  totalChars: number;\n  correctChars: number;\n}\n\nfunction calculateWPM(charCount: number, elapsedSeconds: number): number {\n  if (elapsedSeconds <= 0) return 0;\n  return Math.round((charCount / 5) / (elapsedSeconds / 60));\n}\n\nfunction calculateAccuracy(original: string, typed: string): number {\n  let correct = 0;\n  const len = Math.min(original.length, typed.length);\n  for (let i = 0; i < len; i++) {\n    if (original[i] === typed[i]) correct++;\n  }\n  return Math.round((correct / original.length) * 100 * 10) / 10;\n}\n\nfunction getResults(original: string, typed: string, elapsedSeconds: number): TypingResult {\n  // Return { wpm, accuracy, totalChars, correctChars }\n}\n\nconst result = getResults('the quick brown fox', 'the quick brown fox', 30);\nconsole.log(JSON.stringify(result));\n</script>\n",
+        "python": "import json\n\ndef calculateWPM(charCount, elapsedSeconds):\n  if elapsedSeconds <= 0:\n    return 0\n  return round((charCount / 5) / (elapsedSeconds / 60))\n\ndef calculateAccuracy(original, typed):\n  correct = 0\n  length = min(len(original), len(typed))\n  for i in range(length):\n    if original[i] == typed[i]:\n      correct += 1\n  return round((correct / len(original)) * 100 * 10) / 10\n\ndef getResults(original, typed, elapsedSeconds):\n  # Return { wpm, accuracy, totalChars, correctChars }\n  pass\n\nresult = getResults('the quick brown fox', 'the quick brown fox', 30)\nprint(json.dumps(result))\n"
+      },
+      "verification": {
+        "test": "output.includes('wpm') && output.includes('accuracy') && output.includes('totalChars') && output.includes('correctChars')",
+        "successMessage": "Your typing speed test is complete! WPM, accuracy, and character stats are all calculated.",
+        "failureMessage": "Make sure getResults returns an object with wpm, accuracy, totalChars, and correctChars properties."
+      }
+    }
+  ]
+}

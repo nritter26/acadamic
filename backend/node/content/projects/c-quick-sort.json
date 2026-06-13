@@ -1,0 +1,23 @@
+{
+  "id": "c-quick-sort",
+  "title": "C: Quick Sort",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "quick sort", "divide and conquer", "recursion"],
+  "description": "Implement the quicksort algorithm using the divide-and-conquer approach.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Quick Sort Implementation",
+      "description": "Implement quicksort: `void quicksort(int arr[], int low, int high)` with Lomuto partitioning. Test with `{10, 7, 8, 9, 1, 5}`.",
+      "hints": ["Partition: choose last element as pivot.", "Elements less than pivot go left, greater go right.", "Recursively sort left and right partitions."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nvoid swap(int *a, int *b) { int t=*a; *a=*b; *b=t; }\n\nint partition(int arr[], int low, int high) {\n    int pivot = arr[high];\n    int i = low - 1;\n    for (int j = low; j < high; j++)\n        if (arr[j] <= pivot) { i++; swap(&arr[i], &arr[j]); }\n    swap(&arr[i+1], &arr[high]);\n    return i+1;\n}\n\nvoid quicksort(int arr[], int low, int high) {\n    if (low < high) {\n        int pi = partition(arr, low, high);\n        quicksort(arr, low, pi-1);\n        quicksort(arr, pi+1, high);\n    }\n}\n\nint main() {\n    int arr[] = {10, 7, 8, 9, 1, 5};\n    int n = sizeof(arr)/sizeof(arr[0]);\n    quicksort(arr, 0, n-1);\n    for (int i = 0; i < n; i++) printf(\"%d \", arr[i]);\n    printf(\"\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1 5 7 8 9 10')",
+        "successMessage": "Quick sort works!",
+        "failureMessage": "Sort and print the array"
+      }
+    }
+  ]
+}

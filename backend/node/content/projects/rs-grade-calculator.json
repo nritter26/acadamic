@@ -1,0 +1,71 @@
+{
+  "id": "rs-grade-calculator",
+  "title": "Rust: Grade Calculator",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "grades", "if-else", "conditionals", "score"],
+  "description": "Convert numerical scores to letter grades using conditionals.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Grade Function",
+      "description": "Write a function `letter_grade(score: i32) -> &'static str` that returns: >= 90 \"A\", >= 80 \"B\", >= 70 \"C\", >= 60 \"D\", else \"F\". Call with 85.",
+      "hints": ["Use `else if` chain in order from highest to lowest.", "`if score >= 90 { \"A\" } else if score >= 80 { \"B\" } ...`", "85 → 'B'"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('B')",
+        "successMessage": "Letter grade works!",
+        "failureMessage": "Convert 85 to letter grade B."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Multiple Grades",
+      "description": "Print grades for scores [95, 82, 73, 58, 100] using the letter_grade function in a loop.",
+      "hints": ["Loop through the array with a for loop.", "Call letter_grade for each score.", "95→A, 82→B, 73→C, 58→F, 100→A"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('A') && output.includes('B') && output.includes('C') && output.includes('F')",
+        "successMessage": "All grades work!",
+        "failureMessage": "Print letter grades for [95, 82, 73, 58, 100]."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Grade with +/-",
+      "description": "Add + and - modifiers: >= 97 = A+, >= 93 = A, >= 90 = A-, >= 87 = B+, etc. Call with 88 and 72.",
+      "hints": ["Check for + modifier: score % 10 >= 7", "Check for - modifier: score % 10 <= 3 (and not at boundary)", "Or check ranges: 97..=100 → A+, 93..=96 → A, 90..=92 → A-"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('B+') && output.includes('C-')",
+        "successMessage": "Grades with +/- work!",
+        "failureMessage": "Convert 88→B+ and 72→C-."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Pass/Fail Check",
+      "description": "Write a function `is_passing(score: i32) -> bool` that returns true if score >= 60. Test with scores [45, 75, 30, 90] and print which pass.",
+      "hints": ["Loop through scores, check each one.", "Print \"75 passes\" or \"45 fails\" for each.", "45 → fail, 75 → pass, 30 → fail, 90 → pass"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('pass') && output.includes('fail')",
+        "successMessage": "Pass/fail check works!",
+        "failureMessage": "Print which scores pass and which fail."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Class Average and Grade",
+      "description": "Given scores [88, 92, 75, 63, 98], calculate the class average and print the letter grade for the average.",
+      "hints": ["Use `.iter().sum::<i32>()` and divide by `.len()`", "Average = (88+92+75+63+98) / 5 = 416/5 = 83.2", "Average of 83 → 'B'"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('83') || output.includes('B')",
+        "successMessage": "Class average and grade work!",
+        "failureMessage": "Calculate average (83) and print its letter grade (B)."
+      }
+    }
+  ]
+}

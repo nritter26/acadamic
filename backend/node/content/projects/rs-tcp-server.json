@@ -1,0 +1,71 @@
+{
+  "id": "rs-tcp-server",
+  "title": "Rust: TCP Server (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "TCP", "networking", "socket", "client-server"],
+  "description": "Simulate a TCP server and client using in-memory communication patterns.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simulated TCP Listener",
+      "description": "Create a `SimulatedListener` that receives connections. Use a channel-based approach where `accept()` returns a connection from a queue. Print when a connection is received.",
+      "hints": ["Use `mpsc::channel` to simulate incoming connections.", "`struct SimListener { rx: Receiver<String> }`", "`fn accept(&self) -> Option<String> { self.rx.try_recv().ok() }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('connection') || output.contains('accepted')",
+        "successMessage": "Simulated listener works!",
+        "failureMessage": "Create a listener, accept a connection, and print."
+      }
+    },
+    {
+      "id": 2,
+      "title": "TCP Echo Server",
+      "description": "Create an echo server: read a message from the simulated connection and print the response. The server echoes back `Echo: ` + message. Simulate the full request-response cycle.",
+      "hints": ["Create a request/response pair using channels.", "Server receives request, creates echo response.", "Client sends message, receives echo back."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Echo: Hello') || output.contains('Hello')",
+        "successMessage": "Echo server works!",
+        "failureMessage": "Send 'Hello' and print the echo response."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Multi-Client Server",
+      "description": "Handle multiple clients concurrently. Spawn a thread for each connection that handles requests. Simulate 3 clients connecting and sending messages.",
+      "hints": ["Spawn a thread per connection using `thread::spawn`.", "Each thread reads from a dedicated channel.", "Print: `Client N: message`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Client') || output.contains('connection')",
+        "successMessage": "Multi-client server works!",
+        "failureMessage": "Handle 3 concurrent clients and print their messages."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Protocol Parser",
+      "description": "Create a simple text protocol: messages are newline-delimited. Write a `read_line` function that accumulates bytes until `\\n`. Parse a buffer and extract complete messages.",
+      "hints": ["Accumulate bytes in a buffer.", "When `\\n` is found, extract and return the line.", "This is how HTTP and Redis protocols work at a lower level."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('GET') || output.contains('message')",
+        "successMessage": "Protocol parser works!",
+        "failureMessage": "Parse a buffer into complete messages and print them."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Server Simulation",
+      "description": "Combine everything: a simulated server that accepts connections, reads messages, processes them, and sends responses. Simulate a key-value store with SET and GET commands.",
+      "hints": ["Server maintains a `HashMap<String, String>` for storage.", "Parse command format: `SET key value` or `GET key`.", "Client sends 3 SET and 2 GET commands, server responds."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('OK') || output.contains('value')",
+        "successMessage": "Full key-value server simulation works!",
+        "failureMessage": "Simulate SET and GET commands and print server responses."
+      }
+    }
+  ]
+}

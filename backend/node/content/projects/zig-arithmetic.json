@@ -1,0 +1,23 @@
+{
+  "id": "zig-arithmetic",
+  "title": "Zig: Arithmetic",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "arithmetic", "operators", "format"],
+  "description": "Perform basic arithmetic operations in Zig.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Arithmetic Operations",
+      "description": "Declare const a: i32 = 15, b: i32 = 4. Compute and print a + b, a - b, a * b, a / b, and @mod(a, b) for remainder.",
+      "hints": ["Use `@divTrunc` for integer division.", "Use `@mod` for modulus/remainder.", "Print with format: `std.debug.print(\"Sum: {}\\n\", .{a + b});`"],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const a: i32 = 15;\n    const b: i32 = 4;\n    \n}" },
+      "verification": {
+        "test": "output.includes('19') && output.includes('11') && output.includes('60')",
+        "successMessage": "Arithmetic works!",
+        "failureMessage": "Print sum, difference, product, quotient, and remainder"
+      }
+    }
+  ]
+}

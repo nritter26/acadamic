@@ -1,0 +1,71 @@
+{
+  "id": "rs-stack",
+  "title": "Rust: Stack (LIFO)",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "stack", "Vec", "LIFO", "push", "pop"],
+  "description": "Implement a stack data structure using Vec and the LIFO principle.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Stack Using Vec",
+      "description": "Create a `Vec<i32>` and use `.push()` to add 10, 20, 30. Print the Vec.",
+      "hints": ["`let mut stack: Vec<i32> = Vec::new();`", "`.push(value)` adds to the end.", "`.push(10); .push(20); .push(30);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('[10, 20, 30]') || (output.includes('10') && output.includes('30'))",
+        "successMessage": "Stack push works!",
+        "failureMessage": "Push 10, 20, 30 and print the Vec."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pop from Stack",
+      "description": "Pop elements from the stack using `.pop()` until it's empty. Print each popped value.",
+      "hints": ["`stack.pop()` returns `Option<T>` — `Some(value)` or `None`.", "Use `while let Some(value) = stack.pop() { println!(\"{}\", value); }`", "LIFO order: 30, 20, 10"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('10')",
+        "successMessage": "Pop works in LIFO order!",
+        "failureMessage": "Pop and print all elements (should be 30, 20, 10)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Peek at Top",
+      "description": "Show the top of the stack without removing it using `.last()` or `.peek()`. Push 1, 2, 3 and peek after each push.",
+      "hints": ["`stack.last()` returns `Option<&T>`.", "`.last()` peeks at the last element without removing.", "After pushing 1: top=1, after pushing 2: top=2, etc."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('3')",
+        "successMessage": "Peek works!",
+        "failureMessage": "Print the top of the stack after each push."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Check Balanced Parentheses",
+      "description": "Write a function `is_balanced(s: &str) -> bool` that checks if parentheses are balanced using a stack. Test with `\"()()\"`, `\"(()\"`, `\")(\"`.",
+      "hints": ["For '(' push, for ')' pop. If pop returns None, it's unbalanced.", "At the end, the stack should be empty.", "Use a Vec<char> as the stack."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.match(/true/gi)?.length >= 1 && output.match(/false/gi)?.length >= 2",
+        "successMessage": "Balanced parentheses check works!",
+        "failureMessage": "Check '()()' (true), '(()' (false), ')(' (false)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Custom Stack Struct",
+      "description": "Define a generic `Stack<T>` struct wrapping Vec<T> with methods `push`, `pop`, `peek`, `is_empty`, and `len`. Test by reversing a string using the stack.",
+      "hints": ["`struct Stack<T> { items: Vec<T> }`", "Reverse string: push all chars, then pop all chars.", "`\"hello\"` reversed is `\"olleh\"`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('olleh')",
+        "successMessage": "Custom Stack struct and string reversal work!",
+        "failureMessage": "Use your Stack to reverse 'hello' and print 'olleh'."
+      }
+    }
+  ]
+}

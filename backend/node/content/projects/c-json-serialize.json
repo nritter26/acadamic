@@ -1,0 +1,23 @@
+{
+  "id": "c-json-serialize",
+  "title": "C: JSON Serializer",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "JSON", "serialization", "structs", "sprintf"],
+  "description": "Serialize a struct to a JSON string using sprintf and string concatenation.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Serialize to JSON",
+      "description": "Define a `Person` struct with name (char[32]), age (int), and salary (double). Write `void to_json(Person *p, char *buf)` that creates a JSON string like `{\"name\":\"Alice\",\"age\":30,\"salary\":75000.50}`. Test it.",
+      "hints": ["Use `sprintf` to build the JSON string.", "Escape double quotes inside the string.", "Format: `{\\\"name\\\":\\\"%s\\\",\\\"age\\\":%d,\\\"salary\\\":%.2f}`"],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef struct { char name[32]; int age; double salary; } Person;\n\nvoid to_json(Person *p, char *buf) {\n    sprintf(buf, \"{\\\"name\\\":\\\"%s\\\",\\\"age\\\":%d,\\\"salary\\\":%.2f}\", p->name, p->age, p->salary);\n}\n\nint main() {\n    Person p = {\"Alice\", 30, 75000.50};\n    char json[128];\n    to_json(&p, json);\n    printf(\"%s\\n\", json);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Alice') && output.includes('30') && output.includes('75000')",
+        "successMessage": "JSON serializer works!",
+        "failureMessage": "Serialize the Person struct to JSON"
+      }
+    }
+  ]
+}

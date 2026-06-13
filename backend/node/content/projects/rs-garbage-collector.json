@@ -1,0 +1,71 @@
+{
+  "id": "rs-garbage-collector",
+  "title": "Rust: Mark-and-Sweep GC",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 40,
+  "concepts": ["rust", "garbage collection", "mark-and-sweep", "memory management", "GC"],
+  "description": "Implement a simple mark-and-sweep garbage collector in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Heap and Object Representation",
+      "description": "Define a `GcObject` enum: `Int(i64)`, `Pair(usize, usize)` (object references). Create a `Heap` with `objects: Vec<(GcObject, bool)>` (object + marked flag). Create some objects and print them.",
+      "hints": ["`enum GcObject { Int(i64), Pair(usize, usize) }`", "`struct Heap { objects: Vec<(GcObject, bool)> }`", "Each object has an index (handle) for reference."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Int') && output.contains('Pair')",
+        "successMessage": "Heap objects defined!",
+        "failureMessage": "Create heap with Int(42) and Pair(0, 1), print them."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Allocation and Roots",
+      "description": "Add `alloc(&mut self, obj: GcObject) -> usize` that adds an object and returns its index. Add `roots: Vec<usize>` (root pointers). Print heap stats after allocation.",
+      "hints": ["`fn alloc(&mut self, obj: GcObject) -> usize { self.objects.push((obj, false)); self.objects.len() - 1 }`", "Roots are references directly accessible (like stack variables).", "Roots are the starting point for marking."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('allocated') || output.contains('index')",
+        "successMessage": "Allocation works!",
+        "failureMessage": "Allocate objects and print their indices."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Mark Phase",
+      "description": "Implement `mark(&mut self)`: start from roots, recursively mark reachable objects. For Pair objects, follow both child references. Print the objects that were marked.",
+      "hints": ["Clear all marks first, then start from roots.", "For each root, call `mark_object(idx)` recursively.", "`mark_object(idx)`: set marked=true, if Pair, recursively mark both children."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('marked') || output.contains('reachable')",
+        "successMessage": "Mark phase works!",
+        "failureMessage": "Set roots, run mark, and print which objects are reachable."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Sweep Phase",
+      "description": "Implement `sweep(&mut self)`: iterate objects, remove unmarked ones. Return the number of freed objects. Print objects before and after sweep.",
+      "hints": ["`self.objects.retain(|(_, marked)| *marked);`", "After sweep, all remaining objects are marked=true.", "Print: `Freed N objects, N objects remaining`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Freed') || output.contains('remaining')",
+        "successMessage": "Sweep phase works!",
+        "failureMessage": "Run GC cycle and print freed vs remaining objects."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full GC Cycle",
+      "description": "Combine mark and sweep into `collect(&mut self)`. Create a scenario: allocate objects, set some as roots, run GC, and show which objects survive. Demonstrate that unreachable objects are freed.",
+      "hints": ["Allocate 5 objects, set first 2 as roots, rest are garbage.", "After GC: only 2 objects survive.", "Print: `Before: 5 objects, After: 2 objects, Freed: 3 objects`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('GC') || (output.contains('2') && output.contains('5'))",
+        "successMessage": "Full GC cycle works!",
+        "failureMessage": "Run a full GC cycle and print before/after stats."
+      }
+    }
+  ]
+}

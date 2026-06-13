@@ -1,0 +1,119 @@
+{
+  "id": "express-notes-crud",
+  "title": "Notes CRUD API",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["crud", "rest", "http", "json", "express", "fastapi"],
+  "description": "Build a complete CRUD API for managing notes with in-memory storage.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "List all notes",
+      "description": "Create a GET /notes endpoint that returns an array of notes. Start with an empty array.",
+      "hints": [
+        "Initialize an empty array in memory",
+        "Use app.get('/notes', handler) to respond with the array",
+        "Return res.json(notes) to send JSON"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet notes = [];\n\napp.get('/notes', (req, res) => {\n  res.json(notes);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Note {\n  id: number;\n  title: string;\n  content: string;\n}\n\nlet notes: Note[] = [];\n\napp.get('/notes', (req: Request, res: Response) => {\n  res.json(notes);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nnotes = []\n\n@app.get('/notes')\ndef list_notes():\n    return notes\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype Note struct {\n\tID      int    `json:\"id\"`\n\tTitle   string `json:\"title\"`\n\tContent string `json:\"content\"`\n}\n\nvar notes []Note\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/notes\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(notes)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/notes",
+            "expectedStatus": 200,
+            "expectedBodyShape": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create a note",
+      "description": "Add a POST /notes endpoint that accepts JSON body with \"title\" and \"content\", creates a note with a unique id, and returns 201 status.",
+      "hints": [
+        "Use app.post('/notes', handler)",
+        "Read body with req.body and assign an auto-increment id",
+        "Return res.status(201).json(newNote)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet notes = [];\nlet nextId = 1;\n\napp.get('/notes', (req, res) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req, res) => {\n  const { title, content } = req.body;\n  const note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Note {\n  id: number;\n  title: string;\n  content: string;\n}\n\nlet notes: Note[] = [];\nlet nextId = 1;\n\napp.get('/notes', (req: Request, res: Response) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const note: Note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass NoteIn(BaseModel):\n    title: str\n    content: str\n\nclass Note(NoteIn):\n    id: int\n\nnotes = []\nnext_id = 1\n\n@app.get('/notes')\ndef list_notes():\n    return notes\n\n@app.post('/notes', status_code=201)\ndef create_note(note: NoteIn):\n    global next_id\n    new_note = Note(id=next_id, **note.model_dump())\n    next_id += 1\n    notes.append(new_note)\n    return new_note\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"sync\"\n)\n\ntype Note struct {\n\tID      int    `json:\"id\"`\n\tTitle   string `json:\"title\"`\n\tContent string `json:\"content\"`\n}\n\nvar (\n\tnotes   []Note\n\tnextID  = 1\n\tmu      sync.Mutex\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/notes\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(notes)\n\t\tcase \"POST\":\n\t\t\tvar note Note\n\t\t\tjson.NewDecoder(r.Body).Decode(&note)\n\t\t\tmu.Lock()\n\t\t\tnote.ID = nextID\n\t\t\tnextID++\n\t\t\tnotes = append(notes, note)\n\t\t\tmu.Unlock()\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(note)\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/notes",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Get a single note",
+      "description": "Add a GET /notes/:id endpoint that returns a single note by its id. Return 404 if not found.",
+      "hints": [
+        "Use route parameter: app.get('/notes/:id', handler)",
+        "Parse id with parseInt(req.params.id, 10)",
+        "Use .find() to locate the note, respond with 404 if missing"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet notes = [];\nlet nextId = 1;\n\napp.get('/notes', (req, res) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req, res) => {\n  const { title, content } = req.body;\n  const note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.get('/notes/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const note = notes.find(n => n.id === id);\n  if (!note) return res.status(404).json({ error: 'Not found' });\n  res.json(note);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Note {\n  id: number;\n  title: string;\n  content: string;\n}\n\nlet notes: Note[] = [];\nlet nextId = 1;\n\napp.get('/notes', (req: Request, res: Response) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const note: Note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.get('/notes/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const note = notes.find(n => n.id === id);\n  if (!note) return res.status(404).json({ error: 'Not found' });\n  res.json(note);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass NoteIn(BaseModel):\n    title: str\n    content: str\n\nclass Note(NoteIn):\n    id: int\n\nnotes = []\nnext_id = 1\n\n@app.get('/notes')\ndef list_notes():\n    return notes\n\n@app.post('/notes', status_code=201)\ndef create_note(note: NoteIn):\n    global next_id\n    new_note = Note(id=next_id, **note.model_dump())\n    next_id += 1\n    notes.append(new_note)\n    return new_note\n\n@app.get('/notes/{note_id}')\ndef get_note(note_id: int):\n    for note in notes:\n        if note.id == note_id:\n            return note\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"sync\"\n)\n\ntype Note struct {\n\tID      int    `json:\"id\"`\n\tTitle   string `json:\"title\"`\n\tContent string `json:\"content\"`\n}\n\nvar (\n\tnotes   []Note\n\tnextID  = 1\n\tmu      sync.Mutex\n)\n\nfunc notesHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/notes\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(notes)\n\t\tcase \"POST\":\n\t\t\tvar note Note\n\t\t\tjson.NewDecoder(r.Body).Decode(&note)\n\t\t\tmu.Lock()\n\t\t\tnote.ID = nextID\n\t\t\tnextID++\n\t\t\tnotes = append(notes, note)\n\t\t\tmu.Unlock()\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(note)\n\t\t}\n\t\treturn\n\t}\n\n\tidStr := strings.TrimPrefix(path, \"/\")\n\tid, err := strconv.Atoi(idStr)\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tmu.Lock()\n\tdefer mu.Unlock()\n\tfor _, n := range notes {\n\t\tif n.ID == id {\n\t\t\tjson.NewEncoder(w).Encode(n)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/notes\", notesHandler)\n\thttp.HandleFunc(\"/notes/\", notesHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/notes/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Delete a note",
+      "description": "Add a DELETE /notes/:id endpoint that removes a note by id. Return 200 or 204 on success, 404 if not found.",
+      "hints": [
+        "Use app.delete('/notes/:id', handler)",
+        "Use .filter() or .splice() to remove the note from the array",
+        "Return res.status(204).send() for no content or res.json({ success: true })"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet notes = [];\nlet nextId = 1;\n\napp.get('/notes', (req, res) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req, res) => {\n  const { title, content } = req.body;\n  const note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.get('/notes/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const note = notes.find(n => n.id === id);\n  if (!note) return res.status(404).json({ error: 'Not found' });\n  res.json(note);\n});\n\napp.delete('/notes/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const index = notes.findIndex(n => n.id === id);\n  if (index === -1) return res.status(404).json({ error: 'Not found' });\n  notes.splice(index, 1);\n  res.status(204).send();\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Note {\n  id: number;\n  title: string;\n  content: string;\n}\n\nlet notes: Note[] = [];\nlet nextId = 1;\n\napp.get('/notes', (req: Request, res: Response) => {\n  res.json(notes);\n});\n\napp.post('/notes', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const note: Note = { id: nextId++, title, content };\n  notes.push(note);\n  res.status(201).json(note);\n});\n\napp.get('/notes/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const note = notes.find(n => n.id === id);\n  if (!note) return res.status(404).json({ error: 'Not found' });\n  res.json(note);\n});\n\napp.delete('/notes/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const index = notes.findIndex(n => n.id === id);\n  if (index === -1) return res.status(404).json({ error: 'Not found' });\n  notes.splice(index, 1);\n  res.status(204).send();\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass NoteIn(BaseModel):\n    title: str\n    content: str\n\nclass Note(NoteIn):\n    id: int\n\nnotes = []\nnext_id = 1\n\n@app.get('/notes')\ndef list_notes():\n    return notes\n\n@app.post('/notes', status_code=201)\ndef create_note(note: NoteIn):\n    global next_id\n    new_note = Note(id=next_id, **note.model_dump())\n    next_id += 1\n    notes.append(new_note)\n    return new_note\n\n@app.get('/notes/{note_id}')\ndef get_note(note_id: int):\n    for note in notes:\n        if note.id == note_id:\n            return note\n    return {'error': 'Not found'}\n\n@app.delete('/notes/{note_id}', status_code=204)\ndef delete_note(note_id: int):\n    global notes\n    notes = [n for n in notes if n.id != note_id]\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"sync\"\n)\n\ntype Note struct {\n\tID      int    `json:\"id\"`\n\tTitle   string `json:\"title\"`\n\tContent string `json:\"content\"`\n}\n\nvar (\n\tnotes   []Note\n\tnextID  = 1\n\tmu      sync.Mutex\n)\n\nfunc notesHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/notes\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(notes)\n\t\tcase \"POST\":\n\t\t\tvar note Note\n\t\t\tjson.NewDecoder(r.Body).Decode(&note)\n\t\t\tmu.Lock()\n\t\t\tnote.ID = nextID\n\t\t\tnextID++\n\t\t\tnotes = append(notes, note)\n\t\t\tmu.Unlock()\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(note)\n\t\t}\n\t\treturn\n\t}\n\n\tidStr := strings.TrimPrefix(path, \"/\")\n\tid, err := strconv.Atoi(idStr)\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tmu.Lock()\n\tdefer mu.Unlock()\n\n\tswitch r.Method {\n\tcase \"GET\":\n\t\tfor _, n := range notes {\n\t\t\tif n.ID == id {\n\t\t\t\tjson.NewEncoder(w).Encode(n)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\thttp.NotFound(w, r)\n\tcase \"DELETE\":\n\t\tfor i, n := range notes {\n\t\t\tif n.ID == id {\n\t\t\t\tnotes = append(notes[:i], notes[i+1:]...)\n\t\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\thttp.NotFound(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/notes\", notesHandler)\n\thttp.HandleFunc(\"/notes/\", notesHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "DELETE",
+            "path": "/notes/1",
+            "expectedStatus": 204
+          }
+        ]
+      }
+    }
+  ]
+}

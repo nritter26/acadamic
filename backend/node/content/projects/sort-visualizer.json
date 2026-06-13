@@ -1,0 +1,123 @@
+{
+  "id": "sort-visualizer",
+  "title": "Sort Algorithm Visualizer",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "sorting algorithms",
+    "arrays",
+    "algorithm analysis",
+    "visualization",
+    "step tracking"
+  ],
+  "description": "Build a sorting visualizer that generates random arrays, implements bubble and selection sort, and compares their performance.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Generate a random array",
+      "description": "Write a `generateArray` function that takes a `size` parameter and returns an array of random integers between 1 and 100. Log the generated array.",
+      "hints": [
+        "Use Math.floor(Math.random() * 100) + 1 for each element",
+        "Create an array of the given size using a loop or Array.from()",
+        "Log: 'Generated array of size ' + size + ': ' + JSON.stringify(arr)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"viz\"></div>\n<script>\nfunction generateArray(size) {\n  \n}\n\nconst arr = generateArray(10);\nconsole.log(\"Generated:\", JSON.stringify(arr));\ndocument.getElementById('viz').textContent = \"Array: [\" + arr.join(\", \") + \"]\";\n</script>\n",
+        "typescript": "<div id=\"viz\"></div>\n<script>\nfunction generateArray(size: number): number[] {\n  \n}\n\nconst arr: number[] = generateArray(10);\nconsole.log(\"Generated:\", JSON.stringify(arr));\ndocument.getElementById('viz').textContent = \"Array: [\" + arr.join(\", \") + \"]\";\n</script>\n",
+        "python": "import random\n\ndef generateArray(size):\n  \n\narr = generateArray(10)\nprint(\"Generated:\", arr)\n"
+      },
+      "verification": {
+        "test": "output.includes('Generated:') && output.includes(',') && !output.includes('undefined')",
+        "successMessage": "Random array generated with the specified number of elements!",
+        "failureMessage": "generateArray(10) should return an array of 10 random integers between 1 and 100."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement bubble sort",
+      "description": "Write a `bubbleSort` function that sorts an array in place using the bubble sort algorithm. Return the sorted array and log the result.",
+      "hints": [
+        "Use nested loops: outer loop from i = 0 to n-1, inner from j = 0 to n-i-1",
+        "If arr[j] > arr[j+1], swap them",
+        "Return the sorted array"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"viz\"></div>\n<script>\nlet arr = [64, 34, 25, 12, 22, 11, 90];\n\nfunction bubbleSort(array) {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(arr));\nconst sorted = bubbleSort(arr);\nconsole.log(\"After:\", JSON.stringify(sorted));\ndocument.getElementById('viz').innerHTML = \"<p>Before: [\" + [64, 34, 25, 12, 22, 11, 90].join(\", \") + \"]</p><p>After: [\" + sorted.join(\", \") + \"]</p>\";\n</script>\n",
+        "typescript": "<div id=\"viz\"></div>\n<script>\nlet arr: number[] = [64, 34, 25, 12, 22, 11, 90];\n\nfunction bubbleSort(array: number[]): number[] {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(arr));\nconst sorted = bubbleSort(arr);\nconsole.log(\"After:\", JSON.stringify(sorted));\ndocument.getElementById('viz').innerHTML = \"<p>Before: [\" + [64, 34, 25, 12, 22, 11, 90].join(\", \") + \"]</p><p>After: [\" + sorted.join(\", \") + \"]</p>\";\n</script>\n",
+        "python": "arr = [64, 34, 25, 12, 22, 11, 90]\n\ndef bubbleSort(array):\n  \n\nprint(\"Before:\", arr)\nsorted = bubbleSort(arr.copy())\nprint(\"After:\", sorted)\n"
+      },
+      "verification": {
+        "test": "output.includes('After:') && output.includes('11, 12, 22, 25, 34, 64, 90')",
+        "successMessage": "Bubble sort correctly sorts the array in ascending order!",
+        "failureMessage": "bubbleSort should sort [64, 34, 25, 12, 22, 11, 90] into [11, 12, 22, 25, 34, 64, 90]."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement selection sort",
+      "description": "Write a `selectionSort` function that sorts an array using the selection sort algorithm. Find the minimum element and place it at the beginning. Log the result.",
+      "hints": [
+        "Outer loop: for i = 0 to n-1, assume arr[i] is the minimum",
+        "Inner loop: find index of min element in the remaining unsorted portion",
+        "Swap arr[i] with arr[minIdx]"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"viz\"></div>\n<script>\nlet arr = [29, 10, 14, 37, 13, 33];\n\nfunction selectionSort(array) {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(arr));\nconst sorted = selectionSort(arr);\nconsole.log(\"After:\", JSON.stringify(sorted));\ndocument.getElementById('viz').innerHTML = \"<p>After: [\" + sorted.join(\", \") + \"]</p>\";\n</script>\n",
+        "typescript": "<div id=\"viz\"></div>\n<script>\nlet arr: number[] = [29, 10, 14, 37, 13, 33];\n\nfunction selectionSort(array: number[]): number[] {\n  \n}\n\nconsole.log(\"Before:\", JSON.stringify(arr));\nconst sorted = selectionSort(arr);\nconsole.log(\"After:\", JSON.stringify(sorted));\ndocument.getElementById('viz').innerHTML = \"<p>After: [\" + sorted.join(\", \") + \"]</p>\";\n</script>\n",
+        "python": "arr = [29, 10, 14, 37, 13, 33]\n\ndef selectionSort(array):\n  \n\nprint(\"Before:\", arr)\nsorted = selectionSort(arr.copy())\nprint(\"After:\", sorted)\n"
+      },
+      "verification": {
+        "test": "output.includes('After:') && output.includes('10, 13, 14, 29, 33, 37')",
+        "successMessage": "Selection sort correctly sorts the array in ascending order!",
+        "failureMessage": "selectionSort should sort [29, 10, 14, 37, 13, 33] into [10, 13, 14, 29, 33, 37]."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Track comparisons and swaps",
+      "description": "Modify your bubble sort to track and return the number of `comparisons` and `swaps` performed. Log the stats after sorting.",
+      "hints": [
+        "Initialize counters: let comparisons = 0; let swaps = 0;",
+        "Increment comparisons each time you compare two elements",
+        "Increment swaps each time you swap two elements",
+        "Return { sortedArray, comparisons, swaps }"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"viz\"></div>\n<script>\nlet arr = [64, 34, 25, 12, 22, 11, 90];\n\nfunction bubbleSortWithStats(array) {\n  \n}\n\nconst result = bubbleSortWithStats([...arr]);\nconsole.log(\"Sorted:\", JSON.stringify(result.sortedArray));\nconsole.log(\"Comparisons:\", result.comparisons);\nconsole.log(\"Swaps:\", result.swaps);\ndocument.getElementById('viz').textContent = \"Comparisons: \" + result.comparisons + \", Swaps: \" + result.swaps;\n</script>\n",
+        "typescript": "<div id=\"viz\"></div>\n<script>\ninterface SortResult {\n  sortedArray: number[];\n  comparisons: number;\n  swaps: number;\n}\n\nlet arr: number[] = [64, 34, 25, 12, 22, 11, 90];\n\nfunction bubbleSortWithStats(array: number[]): SortResult {\n  \n}\n\nconst result = bubbleSortWithStats([...arr]);\nconsole.log(\"Sorted:\", JSON.stringify(result.sortedArray));\nconsole.log(\"Comparisons:\", result.comparisons);\nconsole.log(\"Swaps:\", result.swaps);\ndocument.getElementById('viz').textContent = \"Comparisons: \" + result.comparisons + \", Swaps: \" + result.swaps;\n</script>\n",
+        "python": "arr = [64, 34, 25, 12, 22, 11, 90]\n\ndef bubbleSortWithStats(array):\n  \n\nresult = bubbleSortWithStats(arr.copy())\nprint(\"Sorted:\", result[\"sortedArray\"])\nprint(\"Comparisons:\", result[\"comparisons\"])\nprint(\"Swaps:\", result[\"swaps\"])\n"
+      },
+      "verification": {
+        "test": "output.includes('Comparisons:') && output.includes('Swaps:') && parseInt(output.match(/Comparisons: (\\d+)/)[1]) > 0",
+        "successMessage": "Bubble sort stats are tracked with positive comparison and swap counts!",
+        "failureMessage": "The function should track and return comparisons and swaps performed during sorting."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Compare algorithm performance",
+      "description": "Write a `compareSorts` function that generates a random array, sorts it with both algorithms, and returns an object with the time and stats for each. Log the comparison.",
+      "hints": [
+        "Generate a random array of size 50 using generateArray",
+        "Run bubbleSortWithStats on a copy, run selectionSort on another copy",
+        "Use performance.now() or time.time() to measure execution time",
+        "Return and log: { bubble: { time, comparisons, swaps }, selection: { time, comparisons, swaps } }"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"viz\"></div>\n<script>\nfunction generateArray(size) {\n  return Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1);\n}\n\nfunction bubbleSortWithStats(array) {\n  let comparisons = 0, swaps = 0;\n  const n = array.length;\n  for (let i = 0; i < n - 1; i++) {\n    for (let j = 0; j < n - i - 1; j++) {\n      comparisons++;\n      if (array[j] > array[j + 1]) {\n        [array[j], array[j + 1]] = [array[j + 1], array[j]];\n        swaps++;\n      }\n    }\n  }\n  return { sortedArray: array, comparisons, swaps };\n}\n\nfunction selectionSortWithStats(array) {\n  let comparisons = 0, swaps = 0;\n  const n = array.length;\n  for (let i = 0; i < n - 1; i++) {\n    let minIdx = i;\n    for (let j = i + 1; j < n; j++) {\n      comparisons++;\n      if (array[j] < array[minIdx]) minIdx = j;\n    }\n    if (minIdx !== i) {\n      [array[i], array[minIdx]] = [array[minIdx], array[i]];\n      swaps++;\n    }\n  }\n  return { sortedArray: array, comparisons, swaps };\n}\n\nfunction compareSorts() {\n  \n}\n\nconst comparison = compareSorts();\nconsole.log(\"Bubble:\", \"comparisons:\", comparison.bubble.comparisons, \"swaps:\", comparison.bubble.swaps);\nconsole.log(\"Selection:\", \"comparisons:\", comparison.selection.comparisons, \"swaps:\", comparison.selection.swaps);\ndocument.getElementById('viz').innerHTML = \"<p>Bubble: \" + comparison.bubble.comparisons + \" comparisons, \" + comparison.bubble.swaps + \" swaps</p><p>Selection: \" + comparison.selection.comparisons + \" comparisons, \" + comparison.selection.swaps + \" swaps</p>\";\n</script>\n",
+        "typescript": "<div id=\"viz\"></div>\n<script>\ninterface SortResult {\n  sortedArray: number[];\n  comparisons: number;\n  swaps: number;\n}\n\ninterface ComparisonResult {\n  bubble: SortResult;\n  selection: SortResult;\n}\n\nfunction generateArray(size: number): number[] {\n  return Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1);\n}\n\nfunction bubbleSortWithStats(array: number[]): SortResult {\n  let comparisons = 0, swaps = 0;\n  const n = array.length;\n  for (let i = 0; i < n - 1; i++) {\n    for (let j = 0; j < n - i - 1; j++) {\n      comparisons++;\n      if (array[j] > array[j + 1]) {\n        [array[j], array[j + 1]] = [array[j + 1], array[j]];\n        swaps++;\n      }\n    }\n  }\n  return { sortedArray: array, comparisons, swaps };\n}\n\nfunction selectionSortWithStats(array: number[]): SortResult {\n  let comparisons = 0, swaps = 0;\n  const n = array.length;\n  for (let i = 0; i < n - 1; i++) {\n    let minIdx = i;\n    for (let j = i + 1; j < n; j++) {\n      comparisons++;\n      if (array[j] < array[minIdx]) minIdx = j;\n    }\n    if (minIdx !== i) {\n      [array[i], array[minIdx]] = [array[minIdx], array[i]];\n      swaps++;\n    }\n  }\n  return { sortedArray: array, comparisons, swaps };\n}\n\nfunction compareSorts(): ComparisonResult {\n  \n}\n\nconst comparison = compareSorts();\nconsole.log(\"Bubble:\", \"comparisons:\", comparison.bubble.comparisons, \"swaps:\", comparison.bubble.swaps);\nconsole.log(\"Selection:\", \"comparisons:\", comparison.selection.comparisons, \"swaps:\", comparison.selection.swaps);\ndocument.getElementById('viz').innerHTML = \"<p>Bubble: \" + comparison.bubble.comparisons + \" comparisons, \" + comparison.bubble.swaps + \" swaps</p><p>Selection: \" + comparison.selection.comparisons + \" comparisons, \" + comparison.selection.swaps + \" swaps</p>\";\n</script>\n",
+        "python": "import random\nimport time\n\ndef generateArray(size):\n  return [random.randint(1, 100) for _ in range(size)]\n\ndef bubbleSortWithStats(array):\n  comparisons = 0\n  swaps = 0\n  n = len(array)\n  for i in range(n - 1):\n    for j in range(n - i - 1):\n      comparisons += 1\n      if array[j] > array[j + 1]:\n        array[j], array[j + 1] = array[j + 1], array[j]\n        swaps += 1\n  return {\"sortedArray\": array, \"comparisons\": comparisons, \"swaps\": swaps}\n\ndef selectionSortWithStats(array):\n  comparisons = 0\n  swaps = 0\n  n = len(array)\n  for i in range(n - 1):\n    minIdx = i\n    for j in range(i + 1, n):\n      comparisons += 1\n      if array[j] < array[minIdx]:\n        minIdx = j\n    if minIdx != i:\n      array[i], array[minIdx] = array[minIdx], array[i]\n      swaps += 1\n  return {\"sortedArray\": array, \"comparisons\": comparisons, \"swaps\": swaps}\n\ndef compareSorts():\n  \n\ncomparison = compareSorts()\nprint(\"Bubble: comparisons:\", comparison[\"bubble\"][\"comparisons\"], \"swaps:\", comparison[\"bubble\"][\"swaps\"])\nprint(\"Selection: comparisons:\", comparison[\"selection\"][\"comparisons\"], \"swaps:\", comparison[\"selection\"][\"swaps\"])\n"
+      },
+      "verification": {
+        "test": "output.includes('Bubble:') && output.includes('Selection:') && output.includes('comparisons:')",
+        "successMessage": "Algorithm comparison shows stats for both bubble sort and selection sort!",
+        "failureMessage": "compareSorts should return stats for both algorithms run on the same random array of size 50."
+      }
+    }
+  ]
+}

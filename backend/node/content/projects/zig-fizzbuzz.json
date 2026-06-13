@@ -1,0 +1,23 @@
+{
+  "id": "zig-fizzbuzz",
+  "title": "Zig: FizzBuzz",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "loops", "conditionals", "modulo"],
+  "description": "Classic FizzBuzz: print numbers 1-30, replacing multiples of 3 with Fizz, 5 with Buzz, and both with FizzBuzz.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "FizzBuzz in Zig",
+      "description": "Loop from 1 to 30. If divisible by 3 and 5 print 'FizzBuzz', by 3 print 'Fizz', by 5 print 'Buzz', else print the number.",
+      "hints": ["Use `@mod(n, 3) == 0` to check divisibility.", "Check both conditions first with `and`.", "Use `for (1..31)` for the range."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('Fizz') && output.includes('Buzz') && output.includes('FizzBuzz')",
+        "successMessage": "FizzBuzz works!",
+        "failureMessage": "Print FizzBuzz for numbers 1 to 30"
+      }
+    }
+  ]
+}

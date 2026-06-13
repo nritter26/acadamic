@@ -1,0 +1,23 @@
+{
+  "id": "c-pointers",
+  "title": "C: Pointer Basics",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "pointers", "address-of", "dereference", "printf"],
+  "description": "Learn pointer basics: declare a variable, get its address with &, and use a pointer to access and modify its value.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Pointer Declaration and Usage",
+      "description": "Declare `int x = 42`, then a pointer `int *ptr = &x`. Print the value of x, the address of x, the pointer value, and the dereferenced pointer. Then use the pointer to change x to 99 and print the new value.",
+      "hints": ["Use `&x` to get the address of x.", "Use `*ptr` to dereference the pointer.", "Print addresses with `%p` format specifier.", "`*ptr = 99;` changes x through the pointer."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    int x = 42;\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('99')",
+        "successMessage": "Pointer basics work!",
+        "failureMessage": "Print x's value, address, pointer value, and modify x through the pointer"
+      }
+    }
+  ]
+}

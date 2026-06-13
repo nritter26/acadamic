@@ -1,0 +1,91 @@
+{
+  "id": "movie-search",
+  "title": "Movie Search",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["search", "filtering", "sorting", "data manipulation"],
+  "description": "Build a movie search and filter system with case-insensitive title search, genre filtering, rating sorting, and combined queries.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Movie data array",
+      "description": "Create an array of movie objects with `title`, `year`, `genre`, and `rating` properties. Include at least 4 movies.",
+      "hints": ["Use different genres like Action, Comedy, Drama", "Ratings should be numbers (e.g., 8.5)", "Include varied years for realistic data"],
+      "codeTemplate": {
+        "javascript": "<div id=\"movie-search\"></div>\n<script>\n  const movies = [\n    // Your code here - at least 4 movies\n  ];\n  console.log(JSON.stringify(movies));\n</script>\n",
+        "typescript": "<div id=\"movie-search\"></div>\n<script>\n  interface Movie {\n    title: string;\n    year: number;\n    genre: string;\n    rating: number;\n  }\n  const movies: Movie[] = [\n    // Your code here - at least 4 movies\n  ];\n  console.log(JSON.stringify(movies));\n</script>\n",
+        "python": "movies = [\n    # Your code here - at least 4 movies\n]\nimport json\nprint(json.dumps(movies))\n"
+      },
+      "verification": {
+        "test": "output.includes('title') && output.includes('genre') && output.includes('rating')",
+        "successMessage": "Movie data created!",
+        "failureMessage": "Include title, year, genre, and rating for at least 4 movies."
+      }
+    },
+    {
+      "id": 2,
+      "title": "searchByTitle function",
+      "description": "Write `searchByTitle(movies, query)` that returns movies whose title contains the query string (case-insensitive).",
+      "hints": ["Convert both title and query to lowercase", "Use .filter() with .includes()", "Return the filtered array"],
+      "codeTemplate": {
+        "javascript": "<div id=\"movie-search\"></div>\n<script>\n  const movies = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'Matrix Reloaded', year: 2003, genre: 'Sci-Fi', rating: 7.2 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 }\n  ];\n  function searchByTitle(movies, query) {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchByTitle(movies, 'matrix')));\n</script>\n",
+        "typescript": "<div id=\"movie-search\"></div>\n<script>\n  const movies: Movie[] = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'Matrix Reloaded', year: 2003, genre: 'Sci-Fi', rating: 7.2 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 }\n  ];\n  function searchByTitle(movies: Movie[], query: string): Movie[] {\n    // Your code here\n  }\n  console.log(JSON.stringify(searchByTitle(movies, 'matrix')));\n</script>\n",
+        "python": "movies = [\n    {'title': 'The Matrix', 'year': 1999, 'genre': 'Sci-Fi', 'rating': 8.7},\n    {'title': 'Matrix Reloaded', 'year': 2003, 'genre': 'Sci-Fi', 'rating': 7.2},\n    {'title': 'The Dark Knight', 'year': 2008, 'genre': 'Action', 'rating': 9.0}\n]\n\ndef search_by_title(movies, query):\n    # Your code here\n\nimport json\nprint(json.dumps(search_by_title(movies, 'matrix')))\n"
+      },
+      "verification": {
+        "test": "output.includes('Matrix') && output.includes('Matrix Reloaded') && !output.includes('Dark Knight')",
+        "successMessage": "Title search works!",
+        "failureMessage": "Return movies whose title contains the query (case-insensitive)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "filterByGenre function",
+      "description": "Write `filterByGenre(movies, genre)` that returns movies matching the given genre (case-insensitive).",
+      "hints": ["Compare movie.genre with the filter value", "Use toLowerCase() on both sides", "Use .filter()"],
+      "codeTemplate": {
+        "javascript": "<div id=\"movie-search\"></div>\n<script>\n  const movies = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 },\n    { title: 'Inception', year: 2010, genre: 'Sci-Fi', rating: 8.8 }\n  ];\n  function filterByGenre(movies, genre) {\n    // Your code here\n  }\n  console.log(JSON.stringify(filterByGenre(movies, 'Sci-Fi')));\n</script>\n",
+        "typescript": "<div id=\"movie-search\"></div>\n<script>\n  function filterByGenre(movies: Movie[], genre: string): Movie[] {\n    // Your code here\n  }\n  const movies: Movie[] = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 },\n    { title: 'Inception', year: 2010, genre: 'Sci-Fi', rating: 8.8 }\n  ];\n  console.log(JSON.stringify(filterByGenre(movies, 'Sci-Fi')));\n</script>\n",
+        "python": "movies = [\n    {'title': 'The Matrix', 'year': 1999, 'genre': 'Sci-Fi', 'rating': 8.7},\n    {'title': 'The Dark Knight', 'year': 2008, 'genre': 'Action', 'rating': 9.0},\n    {'title': 'Inception', 'year': 2010, 'genre': 'Sci-Fi', 'rating': 8.8}\n]\n\ndef filter_by_genre(movies, genre):\n    # Your code here\n\nimport json\nprint(json.dumps(filter_by_genre(movies, 'Sci-Fi')))\n"
+      },
+      "verification": {
+        "test": "output.includes('Matrix') && output.includes('Inception') && !output.includes('Dark Knight')",
+        "successMessage": "Genre filter works!",
+        "failureMessage": "Return only movies that match the genre."
+      }
+    },
+    {
+      "id": 4,
+      "title": "sortByRating function",
+      "description": "Write `sortByRating(movies, order)` that sorts movies by rating. `order` is `'asc'` or `'desc'`.",
+      "hints": ["Use .sort() with a compare function", "For ascending: a.rating - b.rating", "For descending: b.rating - a.rating"],
+      "codeTemplate": {
+        "javascript": "<div id=\"movie-search\"></div>\n<script>\n  const movies = [\n    { title: 'Movie A', year: 2000, genre: 'Action', rating: 7.5 },\n    { title: 'Movie B', year: 2001, genre: 'Comedy', rating: 8.2 },\n    { title: 'Movie C', year: 2002, genre: 'Drama', rating: 6.9 }\n  ];\n  function sortByRating(movies, order) {\n    // Your code here\n  }\n  console.log(JSON.stringify(sortByRating(movies, 'desc')));\n</script>\n",
+        "typescript": "<div id=\"movie-search\"></div>\n<script>\n  function sortByRating(movies: Movie[], order: 'asc' | 'desc'): Movie[] {\n    // Your code here\n  }\n  const movies: Movie[] = [\n    { title: 'Movie A', year: 2000, genre: 'Action', rating: 7.5 },\n    { title: 'Movie B', year: 2001, genre: 'Comedy', rating: 8.2 },\n    { title: 'Movie C', year: 2002, genre: 'Drama', rating: 6.9 }\n  ];\n  console.log(JSON.stringify(sortByRating(movies, 'desc')));\n</script>\n",
+        "python": "movies = [\n    {'title': 'Movie A', 'year': 2000, 'genre': 'Action', 'rating': 7.5},\n    {'title': 'Movie B', 'year': 2001, 'genre': 'Comedy', 'rating': 8.2},\n    {'title': 'Movie C', 'year': 2002, 'genre': 'Drama', 'rating': 6.9}\n]\n\ndef sort_by_rating(movies, order):\n    # Your code here\n\nimport json\nprint(json.dumps(sort_by_rating(movies, 'desc')))\n"
+      },
+      "verification": {
+        "test": "output.indexOf('8.2') < output.indexOf('7.5') && output.indexOf('7.5') < output.indexOf('6.9')",
+        "successMessage": "Descending rating sort works!",
+        "failureMessage": "Sort movies by rating in the specified order."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Combined search + filter + sort",
+      "description": "Write `queryMovies(movies, options)` that combines title search, genre filter, and rating sort in a single function.",
+      "hints": ["Accept { query, genre, sortOrder } as options", "Chain search, filter, then sort", "Skip steps where criteria is empty or null"],
+      "codeTemplate": {
+        "javascript": "<div id=\"movie-search\"></div>\n<script>\n  const movies = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 },\n    { title: 'Inception', year: 2010, genre: 'Sci-Fi', rating: 8.8 },\n    { title: 'Matrix Reloaded', year: 2003, genre: 'Sci-Fi', rating: 7.2 }\n  ];\n  function queryMovies(movies, options) {\n    // Your code here\n  }\n  console.log(JSON.stringify(queryMovies(movies, { query: 'matrix', genre: 'Sci-Fi', sortOrder: 'desc' })));\n</script>\n",
+        "typescript": "<div id=\"movie-search\"></div>\n<script>\n  interface QueryOptions {\n    query?: string;\n    genre?: string;\n    sortOrder?: 'asc' | 'desc';\n  }\n  function queryMovies(movies: Movie[], options: QueryOptions): Movie[] {\n    // Your code here\n  }\n  const movies: Movie[] = [\n    { title: 'The Matrix', year: 1999, genre: 'Sci-Fi', rating: 8.7 },\n    { title: 'The Dark Knight', year: 2008, genre: 'Action', rating: 9.0 },\n    { title: 'Inception', year: 2010, genre: 'Sci-Fi', rating: 8.8 },\n    { title: 'Matrix Reloaded', year: 2003, genre: 'Sci-Fi', rating: 7.2 }\n  ];\n  console.log(JSON.stringify(queryMovies(movies, { query: 'matrix', genre: 'Sci-Fi', sortOrder: 'desc' })));\n</script>\n",
+        "python": "movies = [\n    {'title': 'The Matrix', 'year': 1999, 'genre': 'Sci-Fi', 'rating': 8.7},\n    {'title': 'The Dark Knight', 'year': 2008, 'genre': 'Action', 'rating': 9.0},\n    {'title': 'Inception', 'year': 2010, 'genre': 'Sci-Fi', 'rating': 8.8},\n    {'title': 'Matrix Reloaded', 'year': 2003, 'genre': 'Sci-Fi', 'rating': 7.2}\n]\n\ndef query_movies(movies, options):\n    # Your code here\n\nimport json\nprint(json.dumps(query_movies(movies, {'query': 'matrix', 'genre': 'Sci-Fi', 'sortOrder': 'desc'})))\n"
+      },
+      "verification": {
+        "test": "output.includes('The Matrix') && output.includes('Matrix Reloaded') && output.indexOf('The Matrix') < output.indexOf('Matrix Reloaded')",
+        "successMessage": "Combined query works!",
+        "failureMessage": "Filtering, searching, and sorting should all be applied."
+      }
+    }
+  ]
+}

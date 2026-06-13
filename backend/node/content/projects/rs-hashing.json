@@ -1,0 +1,71 @@
+{
+  "id": "rs-hashing",
+  "title": "Rust: Hashing and Password Storage",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "hashing", "hash map", "hash function", "password storage"],
+  "description": "Implement hashing algorithms and secure password storage concepts.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simple Hash Function",
+      "description": "Write a simple hash function `simple_hash(s: &str) -> u64` that sums the byte values and returns them mod 1000. Hash \"hello\" and \"world\" and print.",
+      "hints": ["`s.bytes().map(|b| b as u64).sum::<u64>() % 1000`", "This is NOT cryptographically secure — just for learning.", "hello → 532 % 1000 = 532"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 0",
+        "successMessage": "Simple hash function works!",
+        "failureMessage": "Print the hash of 'hello' and 'world'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Polynomial Rolling Hash",
+      "description": "Implement a polynomial rolling hash: `hash = Σ(s[i] * p^i) % m` where p=31, m=1_000_000_007. Hash \"rust\" and \"tusr\" (anagram) to show different hashes.",
+      "hints": ["`let mut h = 0u64; for (i, &b) in s.as_bytes().iter().enumerate() { h = h.wrapping_add((b as u64).wrapping_mul(P.pow(i as u32))); }`", "Anagrams produce different hashes (order matters).", "This is the type of hash used in Rabin-Karp string matching."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 10",
+        "successMessage": "Rolling hash works!",
+        "failureMessage": "Print polynomial hashes for 'rust' and 'tusr'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Hash Map from Scratch",
+      "description": "Implement a simple hash map with separate chaining (Vec of Vec of key-value pairs). Support `insert`, `get`, and `remove`. Test with several string→i32 mappings.",
+      "hints": ["`struct SimpleMap<K, V> { buckets: Vec<Vec<(K, V)>>, capacity: usize }`", "`insert`: compute hash, find bucket, add or update entry.", "`get`: find bucket, search for key, return value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('value')",
+        "successMessage": "Custom hash map works!",
+        "failureMessage": "Insert and retrieve values from your hash map."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Password Hashing with Salt",
+      "description": "Write a function `hash_password(password: &str, salt: &str) -> String` that combines password and salt and returns a hash. Demonstrate that same password with different salts produces different hashes.",
+      "hints": ["`fn hash_password(pw: &str, salt: &str) -> String { format!(\"{:x}\", simple_hash(&format!(\"{}{}\", salt, pw))) }`", "Same password + different salt = different hash.", "This prevents rainbow table attacks."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 20",
+        "successMessage": "Password hashing with salt works!",
+        "failureMessage": "Hash passwords with different salts to show different results."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Hash Collision Demo",
+      "description": "Find two strings that collide under `simple_hash` (same hash value mod 1000). Print both strings and their hash to demonstrate collisions.",
+      "hints": ["With mod 1000, collisions are guaranteed (pigeonhole principle).", "Brute force: try different strings until collision found.", "Or use a known collision: strings with same sum of byte values mod 1000."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.len() > 10",
+        "successMessage": "Collision demonstrated!",
+        "failureMessage": "Find and print two strings that produce the same hash."
+      }
+    }
+  ]
+}

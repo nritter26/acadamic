@@ -1,0 +1,23 @@
+{
+  "id": "c-enum-types",
+  "title": "C: Enum Types",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "enum", "constants", "switch"],
+  "description": "Define and use an enum for days of the week, with a function that returns a string name for each day.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Day of Week Printer",
+      "description": "Define an enum `Day { MON=1, TUE, WED, THU, FRI, SAT, SUN }`. Write `const char* day_name(Day d)` using switch-case. Print names for MON, WED, and SUN.",
+      "hints": ["Enum values auto-increment from MON=1 to SUN=7.", "Use `case MON: return \"Monday\";` etc.", "Include a `default: return \"Unknown\";` case."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { MON=1, TUE, WED, THU, FRI, SAT, SUN } Day;\n\nconst char* day_name(Day d) {\n    \n}\n\nint main() {\n    printf(\"%s\\n\", day_name(MON));\n    printf(\"%s\\n\", day_name(WED));\n    printf(\"%s\\n\", day_name(SUN));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Monday') && output.includes('Wednesday') && output.includes('Sunday')",
+        "successMessage": "Enum day names work!",
+        "failureMessage": "Print Monday, Wednesday, and Sunday"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "c-matrix-mult",
+  "title": "C: Matrix Multiplication",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "matrices", "nested loops", "2D arrays", "printf"],
+  "description": "Multiply two 3x3 matrices and print the result.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Multiply 3x3 Matrices",
+      "description": "Declare two 3x3 matrices A and B. Compute C = A * B using nested loops. Print the resulting matrix in a 3x3 grid format.",
+      "hints": ["Matrix multiplication: C[i][j] = sum over k of A[i][k] * B[k][j].", "Three nested loops: i, j, k.", "Use `\\t` for spacing between columns."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    int A[3][3] = {{1,2,3},{4,5,6},{7,8,9}};\n    int B[3][3] = {{9,8,7},{6,5,4},{3,2,1}};\n    int C[3][3] = {0};\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('84')",
+        "successMessage": "Matrix multiplication works!",
+        "failureMessage": "Print the resulting 3x3 matrix"
+      }
+    }
+  ]
+}

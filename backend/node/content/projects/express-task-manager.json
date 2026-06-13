@@ -1,0 +1,145 @@
+{
+  "id": "express-task-manager",
+  "title": "Task Manager API",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 35,
+  "concepts": ["crud", "validation", "filtering", "rest", "express", "fastapi"],
+  "description": "Build a task manager API with validation, status filtering, and full CRUD operations.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "List all tasks",
+      "description": "Create a GET /tasks endpoint that returns an array of tasks. Start with one sample task.",
+      "hints": [
+        "Initialize an array of task objects with id, title, completed, and createdAt fields",
+        "Use app.get('/tasks', handler) to respond with the array",
+        "Return res.json(tasks)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet tasks = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req, res) => {\n  res.json(tasks);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nlet tasks: Task[] = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req: Request, res: Response) => {\n  res.json(tasks);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass TaskIn(BaseModel):\n    title: str\n\nclass Task(BaseModel):\n    id: int\n    title: str\n    completed: bool = False\n    createdAt: datetime = datetime.now()\n\ntasks = [Task(id=1, title='Sample task')]\nnext_id = 2\n\n@app.get('/tasks')\ndef list_tasks():\n    return tasks\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Task struct {\n\tID        int       `json:\"id\"`\n\tTitle     string    `json:\"title\"`\n\tCompleted bool      `json:\"completed\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\nvar (\n\ttasks  = []Task{{ID: 1, Title: \"Sample task\", CreatedAt: time.Now()}}\n\tnextID = 2\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/tasks\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(tasks)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "title"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create a task with validation",
+      "description": "Add a POST /tasks endpoint that accepts JSON with a \"title\" field. Return 400 if title is missing, 201 on success.",
+      "hints": [
+        "Use app.post('/tasks', handler)", "Validate that req.body.title exists and is non-empty", "Return res.status(400).json({ error: 'Title is required' }) if invalid"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet tasks = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req, res) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req, res) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nlet tasks: Task[] = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req: Request, res: Response) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req: Request, res: Response) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task: Task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass TaskIn(BaseModel):\n    title: str\n\nclass Task(BaseModel):\n    id: int\n    title: str\n    completed: bool = False\n    createdAt: datetime = datetime.now()\n\ntasks = [Task(id=1, title='Sample task')]\nnext_id = 2\n\n@app.get('/tasks')\ndef list_tasks():\n    return tasks\n\n@app.post('/tasks', status_code=201)\ndef create_task(task: TaskIn):\n    global next_id\n    new_task = Task(id=next_id, title=task.title)\n    next_id += 1\n    tasks.append(new_task)\n    return new_task\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Task struct {\n\tID        int       `json:\"id\"`\n\tTitle     string    `json:\"title\"`\n\tCompleted bool      `json:\"completed\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\ntype ErrorResp struct {\n\tError string `json:\"error\"`\n}\n\nvar (\n\ttasks  = []Task{{ID: 1, Title: \"Sample task\", CreatedAt: time.Now()}}\n\tnextID = 2\n)\n\nfunc tasksHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tswitch r.Method {\n\tcase \"GET\":\n\t\tjson.NewEncoder(w).Encode(tasks)\n\tcase \"POST\":\n\t\tvar body struct {\n\t\t\tTitle string `json:\"title\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tif body.Title == \"\" {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\tjson.NewEncoder(w).Encode(ErrorResp{Error: \"Title is required\"})\n\t\t\treturn\n\t\t}\n\t\ttask := Task{ID: nextID, Title: body.Title, CreatedAt: time.Now()}\n\t\tnextID++\n\t\ttasks = append(tasks, task)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(task)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/tasks\", tasksHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "title"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Update a task",
+      "description": "Add a PUT /tasks/:id endpoint that updates the title and returns the updated task.",
+      "hints": [
+        "Use app.put('/tasks/:id', handler)",
+        "Find task by id, update its title, return updated task",
+        "Return 404 if task not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet tasks = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req, res) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req, res) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nlet tasks: Task[] = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req: Request, res: Response) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req: Request, res: Response) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task: Task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass TaskIn(BaseModel):\n    title: str\n\nclass Task(BaseModel):\n    id: int\n    title: str\n    completed: bool = False\n    createdAt: datetime = datetime.now()\n\ntasks = [Task(id=1, title='Sample task')]\nnext_id = 2\n\n@app.get('/tasks')\ndef list_tasks():\n    return tasks\n\n@app.post('/tasks', status_code=201)\ndef create_task(task: TaskIn):\n    global next_id\n    new_task = Task(id=next_id, title=task.title)\n    next_id += 1\n    tasks.append(new_task)\n    return new_task\n\n@app.put('/tasks/{task_id}')\ndef update_task(task_id: int, task: TaskIn):\n    for t in tasks:\n        if t.id == task_id:\n            t.title = task.title\n            return t\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Task struct {\n\tID        int       `json:\"id\"`\n\tTitle     string    `json:\"title\"`\n\tCompleted bool      `json:\"completed\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\ntype ErrorResp struct {\n\tError string `json:\"error\"`\n}\n\nvar (\n\ttasks  = []Task{{ID: 1, Title: \"Sample task\", CreatedAt: time.Now()}}\n\tnextID = 2\n)\n\nfunc tasksHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/tasks\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(tasks)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tTitle string `json:\"title\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tif body.Title == \"\" {\n\t\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\t\tjson.NewEncoder(w).Encode(ErrorResp{Error: \"Title is required\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\ttask := Task{ID: nextID, Title: body.Title, CreatedAt: time.Now()}\n\t\t\tnextID++\n\t\t\ttasks = append(tasks, task)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(task)\n\t\t}\n\t\treturn\n\t}\n\n\tidStr := strings.TrimPrefix(path, \"/\")\n\tid, err := strconv.Atoi(idStr)\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tfor i, t := range tasks {\n\t\tif t.ID == id {\n\t\t\tif r.Method == \"PUT\" {\n\t\t\t\tvar body struct {\n\t\t\t\t\tTitle string `json:\"title\"`\n\t\t\t\t}\n\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\ttasks[i].Title = body.Title\n\t\t\t\tjson.NewEncoder(w).Encode(tasks[i])\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/tasks\", tasksHandler)\n\thttp.HandleFunc(\"/tasks/\", tasksHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "PUT",
+            "path": "/tasks/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "title"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Mark task as complete",
+      "description": "Add a PATCH /tasks/:id/complete endpoint that sets completed to true and returns the updated task.",
+      "hints": [
+        "Use app.patch('/tasks/:id/complete', handler)",
+        "Find task by id and set task.completed = true",
+        "Return 404 if task not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet tasks = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req, res) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req, res) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.patch('/tasks/:id/complete', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.completed = true;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nlet tasks: Task[] = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req: Request, res: Response) => {\n  res.json(tasks);\n});\n\napp.post('/tasks', (req: Request, res: Response) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task: Task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.patch('/tasks/:id/complete', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.completed = true;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass TaskIn(BaseModel):\n    title: str\n\nclass Task(BaseModel):\n    id: int\n    title: str\n    completed: bool = False\n    createdAt: datetime = datetime.now()\n\ntasks = [Task(id=1, title='Sample task')]\nnext_id = 2\n\n@app.get('/tasks')\ndef list_tasks():\n    return tasks\n\n@app.post('/tasks', status_code=201)\ndef create_task(task: TaskIn):\n    global next_id\n    new_task = Task(id=next_id, title=task.title)\n    next_id += 1\n    tasks.append(new_task)\n    return new_task\n\n@app.put('/tasks/{task_id}')\ndef update_task(task_id: int, task: TaskIn):\n    for t in tasks:\n        if t.id == task_id:\n            t.title = task.title\n            return t\n    return {'error': 'Not found'}\n\n@app.patch('/tasks/{task_id}/complete')\ndef complete_task(task_id: int):\n    for t in tasks:\n        if t.id == task_id:\n            t.completed = True\n            return t\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Task struct {\n\tID        int       `json:\"id\"`\n\tTitle     string    `json:\"title\"`\n\tCompleted bool      `json:\"completed\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\ntype ErrorResp struct {\n\tError string `json:\"error\"`\n}\n\nvar (\n\ttasks  = []Task{{ID: 1, Title: \"Sample task\", CreatedAt: time.Now()}}\n\tnextID = 2\n)\n\nfunc tasksHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/tasks\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tjson.NewEncoder(w).Encode(tasks)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tTitle string `json:\"title\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tif body.Title == \"\" {\n\t\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\t\tjson.NewEncoder(w).Encode(ErrorResp{Error: \"Title is required\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\ttask := Task{ID: nextID, Title: body.Title, CreatedAt: time.Now()}\n\t\t\tnextID++\n\t\t\ttasks = append(tasks, task)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(task)\n\t\t}\n\t\treturn\n\t}\n\n\tparts := strings.Split(strings.Trim(path, \"/\"), \"/\")\n\tid, err := strconv.Atoi(parts[0])\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tfor i, t := range tasks {\n\t\tif t.ID == id {\n\t\t\tswitch r.Method {\n\t\t\tcase \"PUT\":\n\t\t\t\tif len(parts) == 1 {\n\t\t\t\t\tvar body struct {\n\t\t\t\t\t\tTitle string `json:\"title\"`\n\t\t\t\t\t}\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\ttasks[i].Title = body.Title\n\t\t\t\t\tjson.NewEncoder(w).Encode(tasks[i])\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\tcase \"PATCH\":\n\t\t\t\tif len(parts) >= 2 && parts[1] == \"complete\" {\n\t\t\t\t\ttasks[i].Completed = true\n\t\t\t\t\tjson.NewEncoder(w).Encode(tasks[i])\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(t)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/tasks\", tasksHandler)\n\thttp.HandleFunc(\"/tasks/\", tasksHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "PATCH",
+            "path": "/tasks/1/complete",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "completed"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Filter tasks by status",
+      "description": "Add query parameter support to GET /tasks so that ?status=completed returns only completed tasks.",
+      "hints": [
+        "Read req.query.status in the GET handler",
+        "Filter tasks array based on the status parameter",
+        "Support values: 'completed' for true, 'pending' for false"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet tasks = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req, res) => {\n  let result = tasks;\n  if (req.query.status === 'completed') {\n    result = tasks.filter(t => t.completed);\n  } else if (req.query.status === 'pending') {\n    result = tasks.filter(t => !t.completed);\n  }\n  res.json(result);\n});\n\napp.post('/tasks', (req, res) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.patch('/tasks/:id/complete', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.completed = true;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Task {\n  id: number;\n  title: string;\n  completed: boolean;\n  createdAt: Date;\n}\n\nlet tasks: Task[] = [\n  { id: 1, title: 'Sample task', completed: false, createdAt: new Date() }\n];\nlet nextId = 2;\n\napp.get('/tasks', (req: Request, res: Response) => {\n  let result = tasks;\n  if (req.query.status === 'completed') {\n    result = tasks.filter(t => t.completed);\n  } else if (req.query.status === 'pending') {\n    result = tasks.filter(t => !t.completed);\n  }\n  res.json(result);\n});\n\napp.post('/tasks', (req: Request, res: Response) => {\n  const { title } = req.body;\n  if (!title) return res.status(400).json({ error: 'Title is required' });\n  const task: Task = { id: nextId++, title, completed: false, createdAt: new Date() };\n  tasks.push(task);\n  res.status(201).json(task);\n});\n\napp.put('/tasks/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.title = req.body.title || task.title;\n  res.json(task);\n});\n\napp.patch('/tasks/:id/complete', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const task = tasks.find(t => t.id === id);\n  if (!task) return res.status(404).json({ error: 'Not found' });\n  task.completed = true;\n  res.json(task);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass TaskIn(BaseModel):\n    title: str\n\nclass Task(BaseModel):\n    id: int\n    title: str\n    completed: bool = False\n    createdAt: datetime = datetime.now()\n\ntasks = [Task(id=1, title='Sample task')]\nnext_id = 2\n\n@app.get('/tasks')\ndef list_tasks(status: str = None):\n    if status == 'completed':\n        return [t for t in tasks if t.completed]\n    elif status == 'pending':\n        return [t for t in tasks if not t.completed]\n    return tasks\n\n@app.post('/tasks', status_code=201)\ndef create_task(task: TaskIn):\n    global next_id\n    new_task = Task(id=next_id, title=task.title)\n    next_id += 1\n    tasks.append(new_task)\n    return new_task\n\n@app.put('/tasks/{task_id}')\ndef update_task(task_id: int, task: TaskIn):\n    for t in tasks:\n        if t.id == task_id:\n            t.title = task.title\n            return t\n    return {'error': 'Not found'}\n\n@app.patch('/tasks/{task_id}/complete')\ndef complete_task(task_id: int):\n    for t in tasks:\n        if t.id == task_id:\n            t.completed = True\n            return t\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Task struct {\n\tID        int       `json:\"id\"`\n\tTitle     string    `json:\"title\"`\n\tCompleted bool      `json:\"completed\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\ntype ErrorResp struct {\n\tError string `json:\"error\"`\n}\n\nvar (\n\ttasks  = []Task{{ID: 1, Title: \"Sample task\", CreatedAt: time.Now()}}\n\tnextID = 2\n)\n\nfunc tasksHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/tasks\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tswitch r.Method {\n\t\tcase \"GET\":\n\t\t\tstatus := r.URL.Query().Get(\"status\")\n\t\t\tif status == \"completed\" {\n\t\t\t\tvar filtered []Task\n\t\t\t\tfor _, t := range tasks {\n\t\t\t\t\tif t.Completed {\n\t\t\t\t\t\tfiltered = append(filtered, t)\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tjson.NewEncoder(w).Encode(filtered)\n\t\t\t\treturn\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(tasks)\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tTitle string `json:\"title\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tif body.Title == \"\" {\n\t\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\t\tjson.NewEncoder(w).Encode(ErrorResp{Error: \"Title is required\"})\n\t\t\t\treturn\n\t\t\t}\n\t\t\ttask := Task{ID: nextID, Title: body.Title, CreatedAt: time.Now()}\n\t\t\tnextID++\n\t\t\ttasks = append(tasks, task)\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(task)\n\t\t}\n\t\treturn\n\t}\n\n\tparts := strings.Split(strings.Trim(path, \"/\"), \"/\")\n\tid, err := strconv.Atoi(parts[0])\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tfor i, t := range tasks {\n\t\tif t.ID == id {\n\t\t\tswitch r.Method {\n\t\t\tcase \"PUT\":\n\t\t\t\tif len(parts) == 1 {\n\t\t\t\t\tvar body struct {\n\t\t\t\t\t\tTitle string `json:\"title\"`\n\t\t\t\t\t}\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\ttasks[i].Title = body.Title\n\t\t\t\t\tjson.NewEncoder(w).Encode(tasks[i])\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\tcase \"PATCH\":\n\t\t\t\tif len(parts) >= 2 && parts[1] == \"complete\" {\n\t\t\t\t\ttasks[i].Completed = true\n\t\t\t\t\tjson.NewEncoder(w).Encode(tasks[i])\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(t)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/tasks\", tasksHandler)\n\thttp.HandleFunc(\"/tasks/\", tasksHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/tasks?status=completed",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "completed"
+          }
+        ]
+      }
+    }
+  ]
+}

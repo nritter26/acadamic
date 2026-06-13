@@ -1,0 +1,23 @@
+{
+  "id": "c-inline-assembly",
+  "title": "C: Inline Assembly (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "assembly", "simulation", "low-level"],
+  "description": "Simulate inline assembly by writing C functions that model assembly operations: add, sub, mov, cmp, and jmp using function pointers and labels.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Simulated Assembly Operations",
+      "description": "Simulate a simple CPU with registers (int array of 4). Implement `mov(regs, dst, src)`, `add(regs, dst, src)`, `sub(regs, dst, src)` that manipulate the registers. Print register state after each operation.",
+      "hints": ["Registers: r0, r1, r2, r3 stored in an int array.", "mov: `regs[dst] = regs[src]`.", "add: `regs[dst] += regs[src]`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { R0, R1, R2, R3 } Reg;\n\nvoid mov(int *regs, Reg dst, Reg src) { regs[dst] = regs[src]; }\nvoid add(int *regs, Reg dst, Reg src) { regs[dst] += regs[src]; }\nvoid sub(int *regs, Reg dst, Reg src) { regs[dst] -= regs[src]; }\n\nvoid print(int *regs) {\n    printf(\"r0:%d r1:%d r2:%d r3:%d\\n\", regs[0], regs[1], regs[2], regs[3]);\n}\n\nint main() {\n    int regs[4] = {0};\n    regs[R0] = 10; regs[R1] = 5;\n    mov(regs, R2, R0);\n    add(regs, R2, R1);\n    sub(regs, R0, R1);\n    print(regs);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('15')",
+        "successMessage": "Simulated assembly works!",
+        "failureMessage": "Run the assembly simulation and print final register state"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "rs-state-machine",
+  "title": "Rust: Finite State Machine",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "state machine", "FSM", "transitions", "guards"],
+  "description": "Implement a flexible finite state machine with typed states, events, and guards.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define State and Event Types",
+      "description": "Define `State` and `Event` string types. Create a `Transition` struct with From, To states and Event. Define a document workflow (draft, review, published). Print the transitions.",
+      "hints": ["`type State = &'static str; type Event = &'static str;`", "`struct Transition { from: State, event: Event, to: State }`", "Draft → submit → Review → approve → Published, reject → Draft"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('draft') && output.contains('review') && output.contains('published')",
+        "successMessage": "FSM types defined!",
+        "failureMessage": "Print the workflow transitions."
+      }
+    },
+    {
+      "id": 2,
+      "title": "FSM with Transition Table",
+      "description": "Create an `FSM` struct with a `current: State` and transitions stored as `HashMap<State, HashMap<Event, State>>`. Implement `send(&mut self, event: Event) -> Result<(), String>`. Print state transitions.",
+      "hints": ["`transitions: HashMap<&'static str, HashMap<&'static str, &'static str>>`", "`send` looks up current state then event.", "Return error if no transition for current state + event."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('draft') && output.contains('review') && output.contains('published')",
+        "successMessage": "FSM transitions work!",
+        "failureMessage": "Transition from draft to review to published."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Guard Conditions",
+      "description": "Add guard support: `TransitionRule { to: State, guard: Option<Box<dyn Fn() -> bool>> }`. Implement a guard that checks if the user is authorized before approving. Print when blocked.",
+      "hints": ["Change transition values from State to TransitionRule.", "Evaluate guard before allowing the transition.", "Print 'Transition blocked by guard' when guard returns false."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('blocked') || output.contains('guard')",
+        "successMessage": "Guard conditions work!",
+        "failureMessage": "Show a transition being blocked by a guard."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Entry and Exit Actions",
+      "description": "Add entry and exit callbacks: `on_entry: HashMap<State, Vec<Box<dyn Fn()>>>` and `on_exit: HashMap<State, Vec<Box<dyn Fn()>>>`. Call them when entering/exiting states. Print action messages.",
+      "hints": ["Register: `fsm.on_entry(\"review\", Box::new(|| println!(\"Entering review\")))`", "Call exit actions of current state before transition.", "Call entry actions of new state after transition."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Entering') && output.contains('Exiting')",
+        "successMessage": "Entry/Exit actions work!",
+        "failureMessage": "Send an event and print the entry/exit action messages."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Hierarchical States",
+      "description": "Implement nested states. Create parent state `review` with substates `editing`, `reviewing`. Inherit parent transitions. Print the full state path (e.g., `review.editing`) after each transition.",
+      "hints": ["Store state as a path string like `\"review.editing\"`.", "Parent transitions apply to all substates.", "When entering parent, start in initial substate."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('.')",
+        "successMessage": "Hierarchical states work!",
+        "failureMessage": "Demonstrate nested states with dot-separated paths."
+      }
+    }
+  ]
+}

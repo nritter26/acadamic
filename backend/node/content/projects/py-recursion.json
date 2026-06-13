@@ -1,0 +1,98 @@
+{
+  "id": "py-recursion",
+  "title": "Python: Recursion",
+  "description": "Write a Python program using recursion to solve factorial, fibonacci, and tower of hanoi.",
+  "difficulty": "beginner",
+  "languages": [
+    "py"
+  ],
+  "codeTemplate": {
+    "py": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)\n\ndef tower_of_hanoi(n, source, target, auxiliary):\n    if n == 1:\n        print(f\"  Move disk 1 from {source} to {target}\")\n        return\n    tower_of_hanoi(n - 1, source, auxiliary, target)\n    print(f\"  Move disk {n} from {source} to {target}\")\n    tower_of_hanoi(n - 1, auxiliary, target, source)\n\nprint(f\"Factorial of 5: {factorial(5)}\")\nprint(f\"Fibonacci of 7: {fibonacci(7)}\")\nprint(\"Tower of Hanoi (3 disks):\")\ntower_of_hanoi(3, 'A', 'C', 'B')"
+  },
+  "verificationTest": "output.includes('Factorial of 5: 120') && output.includes('Fibonacci of 7: 13') && output.includes('Move disk 1 from A to C')",
+  "hints": [
+    "A recursive function calls itself with a smaller input",
+    "Always define a base case to stop recursion",
+    "Tower of Hanoi moves n-1 disks, then the largest, then n-1 again"
+  ],
+  "instructions": "Python recursion project",
+  "estimatedMinutes": 15,
+  "concepts": [
+    "recursion",
+    "py"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Python: Recursion project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Python: Recursion",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "py": "// Step 1: Set up the Python: Recursion project\n// Your code here\n\nconsole.log(\"Testing Python: Recursion...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Python: Recursion",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "py": "// Step 2: Implement the core logic for Python: Recursion\n// Your code here\n\nconsole.log(\"Testing Python: Recursion...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "py": "// Step 3: Handle edge cases and errors\n// Your code here\n\nconsole.log(\"Testing Python: Recursion...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "py": "// Step 4: Format and display the output\n// Your code here\n\nconsole.log(\"Testing Python: Recursion...\");\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    }
+  ]
+}

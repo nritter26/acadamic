@@ -1,0 +1,71 @@
+{
+  "id": "rs-for-loop",
+  "title": "Rust: For Loops and Ranges",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "for", "range", "iteration", "enumerate"],
+  "description": "Use for loops with ranges and iterators in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic For Loop",
+      "description": "Use a for loop with a range `1..=5` to print each number.",
+      "hints": ["`for i in 1..=5 { println!(\"{}\", i); }`", "`1..=5` is an inclusive range (includes 5).", "`1..5` would exclude 5 (1 to 4)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('5')",
+        "successMessage": "Basic for loop works!",
+        "failureMessage": "Print numbers 1 through 5 using a for loop."
+      }
+    },
+    {
+      "id": 2,
+      "title": "For with Exclusive Range",
+      "description": "Use `0..10` (exclusive range) to print all even numbers from 0 to 8.",
+      "hints": ["`0..10` includes up to 9 (excludes 10).", "Use `if i % 2 == 0` to filter even numbers.", "Even numbers: 0, 2, 4, 6, 8"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('2') && output.includes('8')",
+        "successMessage": "For loop with filter works!",
+        "failureMessage": "Print the even numbers from 0 to 8."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Iterate Over Array",
+      "description": "Create an array `let fruits = [\"apple\", \"banana\", \"cherry\"];` and use a for loop to print each fruit.",
+      "hints": ["`for fruit in fruits.iter() { println!(\"{}\", fruit); }`", "`for fruit in &fruits` also works (iterates by reference).", "Arrays have a fixed size in Rust."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana') && output.includes('cherry')",
+        "successMessage": "Array iteration works!",
+        "failureMessage": "Print each fruit in the array using a for loop."
+      }
+    },
+    {
+      "id": 4,
+      "title": "For with Enumerate",
+      "description": "Iterate over `[\"a\", \"b\", \"c\"]` with `.iter().enumerate()` to print the index and value of each element.",
+      "hints": ["`for (index, value) in items.iter().enumerate() { ... }`", "`.enumerate()` gives (index, value) pairs.", "Print like `println!(\"{}: {}\", index, value);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0:') && output.includes('1:') && output.includes('2:')",
+        "successMessage": "Enumerate works!",
+        "failureMessage": "Print index and value for each element."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Step By",
+      "description": "Use `.step_by(3)` to print every third number from 0 to 20.",
+      "hints": ["`for i in (0..=20).step_by(3) { println!(\"{}\", i); }`", "`.step_by(3)` advances by 3 each iteration.", "Output should be: 0, 3, 6, 9, 12, 15, 18"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('9') && output.includes('18')",
+        "successMessage": "Step_by works!",
+        "failureMessage": "Print every third number from 0 to 20."
+      }
+    }
+  ]
+}

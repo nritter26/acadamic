@@ -1,0 +1,83 @@
+{
+  "id": "go-template-engine",
+  "title": "Go: Template Engine",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 65,
+  "concepts": ["go", "templating", "parsing", "text processing"],
+  "description": "Build a template engine with custom delimiters, variables, loops, conditionals, and filters inspired by text/template.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse variable placeholders",
+      "description": "Write a `Parse(tmpl string) (*Template, error)` function that finds `{{var}}` patterns using regex and stores the variable names. Implement `Render(ctx map[string]string) string` to replace `{{var}}` with values from the context. Print the rendered output of `\"Hello {{name}}\"` with `ctx[\"name\"] = \"World\"`.",
+      "hints": ["Use `regexp.MustCompile(\\\"\\\\{\\\\{([^}]+)\\\\}\\\\}\\\")` to match placeholders.", "`Template` struct stores the raw template and parsed variable names.", "Use `strings.ReplaceAll` or `regexp.ReplaceAllString` for substitution."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello World')",
+        "successMessage": "Variable interpolation works.",
+        "failureMessage": "Expected 'Hello World' from {{var}} replacement."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Custom delimiters",
+      "description": "Extend `Parse` to accept custom `open` and `close` delimiters via `ParseWithDelims(tmpl, open, close string)`. Default to `{{` and `}}`. Print the result of parsing with `[%` and `%]` delimiters, e.g. `\"Hi [%name%]\"`.",
+      "hints": ["Store delimiters in the Template struct.", "Escape regex metacharacters in delimiters with `regexp.QuoteMeta`.", "Build the regex pattern dynamically: `open + \"([^\" + close[0:1] + \"]+)\" + close`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hi')",
+        "successMessage": "Custom delimiters work.",
+        "failureMessage": "Check that delimiters are regex-escaped correctly."
+      }
+    },
+    {
+      "id": 3,
+      "title": "If blocks",
+      "description": "Implement `{% if var %}...{% endif %}` blocks. Render the block content only if the variable is non-empty. Print the result of `\"A{% if show %}B{% endif %}C\"` with `show` set to `\"true\"` and then `\"\"` (empty).",
+      "hints": ["Parse nested blocks with stack-based or recursive descent parsing.", "Track `mode` in the parser: `text`, `if`, `endif`.", "Use `strings.Contains` on the rendered variable value for truthiness."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('ABC')",
+        "successMessage": "If blocks render conditionally.",
+        "failureMessage": "Check that empty/zero values skip the block."
+      }
+    },
+    {
+      "id": 4,
+      "title": "For loops",
+      "description": "Implement `{% for item in items %}...{% endfor %}` where `items` is a comma-separated string. Inside the loop, render `{{item}}` with each value. Print the result of `\"{% for x in list %}{{x}} {% endfor %}\"` with `list = \"a,b,c\"`.",
+      "hints": ["Split `items` by comma to get the slice.", "Replace `{{item}}` inside the loop body for each iteration.", "Build the full output by concatenating iteration results."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('a b c')",
+        "successMessage": "For loops iterate correctly.",
+        "failureMessage": "Expected 'a b c' from the loop output."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Custom filters (upper, lower)",
+      "description": "Extend variable syntax to support filters: `{{var | upper}}` and `{{var | lower}}`. Apply the filter to the value before interpolation. Print `\"{{name | upper}}\"` with `name = \"john\"` and `\"Hello {{name | lower}}\"` with `name = \"WORLD\"`.",
+      "hints": ["Parse filter names after `|` in the variable expression.", "Store a `map[string]func(string) string` of available filters.", "Chain multiple filters: split on `|`, apply left to right."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('JOHN') && output.includes('hello')",
+        "successMessage": "Filters transform values correctly.",
+        "failureMessage": "Check that 'upper' and 'lower' filters are registered and applied."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Template nesting and inheritance",
+      "description": "Implement `{% extends \"base\" %}` and `{% block name %}...{% endblock %}`. The base template contains `{% block body %}{% endblock %}` and child templates fill blocks. Render a child template that extends a simple base. Print the composed output.",
+      "hints": ["Maintain a `map[string]string` of registered templates.", "When parsing `{% extends %}`, load the base template and overlay block content.", "Use `strings.Replace` to substitute block content into the base."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Template inheritance works.",
+        "failureMessage": "Ensure the base template is loaded and blocks are overlaid."
+      }
+    }
+  ]
+}

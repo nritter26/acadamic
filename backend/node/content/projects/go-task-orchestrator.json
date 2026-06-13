@@ -1,0 +1,95 @@
+{
+  "id": "go-task-orchestrator",
+  "title": "Go: Task Orchestrator",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 70,
+  "concepts": ["go", "DAG", "topological sort", "Kahn's algorithm", "goroutines", "parallel execution"],
+  "description": "Build a DAG-based task orchestrator with topological sorting, parallel goroutine execution, error propagation, and retry logic.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Task and DAG structs",
+      "description": "Define `Task` with `ID string`, `Run func() error`, and `DependsOn []string` (task IDs). Define `DAG` with `Tasks map[string]*Task`. Implement `NewDAG() *DAG` and `AddTask(t *Task) error`. Print the number of registered tasks with `fmt.Println(len(dag.Tasks))`.",
+      "hints": ["Use `map[string]*Task` for O(1) lookup by ID.", "`AddTask` checks for duplicate IDs and returns an error if found.", "Initialize the map in the constructor."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "DAG registers tasks correctly.",
+        "failureMessage": "AddTask should add a task and increment the task count."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Dependency graph construction",
+      "description": "Enhance `AddTask` to validate that all `DependsOn` references exist. Implement `GetDependencies(taskID string) []string` and `GetDependents(taskID string) []string` by building a reverse edge map. Print the dependents of a root task.",
+      "hints": ["Build `reverse map[string][]string` (dependent → dependency).", "Also build `dependents map[string][]string` (dependency → dependent).", "Validate dependencies exist in `AddTask` before adding."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Dependency graph is built correctly.",
+        "failureMessage": "Dependents should list all tasks that depend on a given task."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Kahn's topological sort",
+      "description": "Implement `TopologicalSort() ([]string, error)` using Kahn's algorithm. Compute in-degree for each task, start with zero-in-degree nodes, process in order. Return an error if a cycle is detected. Print the sorted task IDs with `fmt.Println(order)`.",
+      "hints": ["Track in-degree in `map[string]int`.", "Use a queue (slice) for zero-in-degree tasks.", "If processed count != total tasks, there's a cycle."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Topological sort produces a valid order.",
+        "failureMessage": "Sort should return tasks in dependency order; error on cycles."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Parallel execution with goroutines",
+      "description": "Implement `Execute() error` that runs tasks in parallel respecting dependencies. Use channels to signal task completion. When a task finishes, check if any dependent tasks have all dependencies satisfied and launch them. Print `\"task X done\"` as each completes using `fmt.Printf(\"task %s done\\n\", taskID)`.",
+      "hints": ["Track `completed map[string]bool`.", "Use `sync.WaitGroup` or a channel-based approach to wait for tasks.", "A dispatcher goroutine checks which tasks are ready to run."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('done')",
+        "successMessage": "Tasks execute in correct dependency order.",
+        "failureMessage": "Each task should print 'done' as it completes."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Error propagation",
+      "description": "If any task's `Run()` returns an error, cancel all pending downstream tasks and propagate the error. Implement a cancellation context. Print `\"task X failed: <error>\"` and stop execution immediately without running dependents.",
+      "hints": ["Pass `context.Context` to Execute.", "Use `context.WithCancel` to propagate cancellation.", "Goroutines check `ctx.Done()` before starting new tasks."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('failed')",
+        "successMessage": "Errors propagate and cancel downstream tasks.",
+        "failureMessage": "A failing task should cancel all dependents and return the error."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Retry logic",
+      "description": "Add `MaxRetries int` to `Task`. If a task fails and `MaxRetries > 0`, retry up to that many times with exponential backoff. Print `\"retrying task X (attempt N)\"` on each retry using `fmt.Printf(\"retrying %s attempt %d\\n\", task.ID, attempt)`.",
+      "hints": ["Wrap `Run()` in a retry loop with `time.Sleep(backoff)` between attempts.", "Exponential backoff: `time.Duration(math.Pow(2, float64(attempt))) * time.Second`.", "Only retry if `attempt < task.MaxRetries`; otherwise propagate the error."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('retrying')",
+        "successMessage": "Retry logic re-executes failed tasks.",
+        "failureMessage": "A task with MaxRetries > 0 should retry on failure."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Execution report",
+      "description": "After `Execute()` completes (or fails), generate an `ExecutionReport` with task ID, duration, status (success/failed/skipped), and error. Print the report using `fmt.Printf(\"%s: %s (%v)\", r.TaskID, r.Status, r.Duration)` for each task.",
+      "hints": ["Track `startTime` and `endTime` for each task execution.", "`ExecutionReport` is a slice of `TaskResult` structs.", "Skipped tasks (due to upstream failure) have status `\"skipped\"`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('success') || output.includes('failed') || output.includes('skipped')",
+        "successMessage": "Execution report contains status for all tasks.",
+        "failureMessage": "Every registered task should have an entry in the execution report."
+      }
+    }
+  ]
+}

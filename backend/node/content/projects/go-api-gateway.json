@@ -1,0 +1,107 @@
+{
+  "id": "go-api-gateway",
+  "title": "Go: API Gateway",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 90,
+  "concepts": ["go", "API gateway", "routing", "caching", "rate limiting", "aggregation", "circuit breaker"],
+  "description": "Build an API gateway with route matching, path parameters, request transformation, service aggregation, caching, rate limiting, circuit breaker, and response composition.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Route registry with method and path",
+      "description": "Define a `Route` struct with `Method string`, `Path string`, and `Handler func(req map[string]string) (int, string)`. Create a `Gateway` with `routes []Route`. Implement `AddRoute(method, path string, handler func)`. Register a GET `/hello` route and print `\"route registered\"` with `fmt.Println(\"route registered\")`.",
+      "hints": ["Store routes in a slice; matching iterates in order.", "`Handler` receives parsed path params and returns status code + body.", "Use `strings.ToUpper(method)` for normalization."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('route registered')",
+        "successMessage": "Route is registered in the gateway.",
+        "failureMessage": "AddRoute should add to the routes slice."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Path matching with parameters",
+      "description": "Implement `match(path, pattern string) (map[string]string, bool)` that extracts path parameters. Pattern `/users/:id/posts/:postID` matches `/users/42/posts/7` returning `{\"id\": \"42\", \"postID\": \"7\"}`. Print the matched params for a sample request.",
+      "hints": ["Split both path and pattern by `/`.", "If a segment starts with `:`, it's a parameter — capture the value.", "If segments don't match and it's not a param, return false."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('7')",
+        "successMessage": "Path parameters are extracted correctly.",
+        "failureMessage": "/users/42/posts/7 should match /users/:id/posts/:postID."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Request transformation (headers)",
+      "description": "Add `TransformRequest func(headers map[string]string) map[string]string` to `Gateway`. Apply the transform to incoming headers before routing. For example, add `X-Gateway: true` to all requests. Print the transformed headers using `fmt.Printf(\"X-Gateway: %s\", headers[\"X-Gateway\"])`.",
+      "hints": ["Store `requestTransform` on the Gateway struct.", "Call transform after matching the route, before the handler.", "The handler receives the transformed headers."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('X-Gateway:')",
+        "successMessage": "Request headers are transformed before routing.",
+        "failureMessage": "TransformRequest should add/modify headers before the handler runs."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Service aggregation (fan-out)",
+      "description": "Implement `Aggregate(routes []string, params map[string]string) []AggregateResult` that fans out requests to multiple downstream handlers concurrently using goroutines and `sync.WaitGroup`. Return each result with route ID and response. Print all aggregated results.",
+      "hints": ["Use `sync.WaitGroup` to wait for all goroutines.", "Each goroutine calls the route handler and sends results via a channel.", "`AggregateResult` has `RouteID string`, `StatusCode int`, `Body string`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Service aggregation fans out and collects results.",
+        "failureMessage": "Aggregate should invoke multiple routes in parallel and collect responses."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Response caching with TTL",
+      "description": "Add a cache layer: `CacheGet(key string) (string, bool)` and `CacheSet(key, value string, ttl time.Duration)` using `map[string]cacheEntry` where `cacheEntry` has `Body string` and `ExpiresAt time.Time`. Check cache before calling the handler. Print `\"cache hit\"` or `\"cache miss\"` on each request.",
+      "hints": ["Compute cache key from method + path + sorted params.", "Check `time.Now().After(entry.ExpiresAt)` to detect expiry.", "Use `sync.RWMutex` for concurrent cache access."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('cache hit') || output.includes('cache miss')",
+        "successMessage": "Response caching with TTL works.",
+        "failureMessage": "First request should miss, subsequent requests within TTL should hit."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Rate limiting per route",
+      "description": "Implement per-route rate limiting with a token bucket algorithm. Add `RateLimit int` (requests per second) to `Route`. Create a bucket per route: `allowRequest(routeID string) bool`. Return 429 status when rate exceeded. Print `\"rate limited\"` when the limit is hit.",
+      "hints": ["Token bucket: refill tokens at rate per second, max burst capacity.", "Store `map[string]*TokenBucket` on the Gateway.", "`TokenBucket` has `tokens float64` and `lastRefill time.Time`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('rate limited')",
+        "successMessage": "Rate limiting blocks requests over the limit.",
+        "failureMessage": "Requests exceeding the rate limit should return 429."
+      }
+    },
+    {
+      "id": 7,
+      "title": "Response composition",
+      "description": "Implement a response composer that aggregates multiple route responses into a single JSON-like payload. `ComposeResponse(results []AggregateResult) string` wraps results in `{\"services\": [...]}`. Print the composed JSON response using `fmt.Println(composeResponse(results))`.",
+      "hints": ["Use `encoding/json` or manual string building for the JSON output.", "Each result becomes `{\"id\": \"...\", \"status\": N, \"body\": \"...\"}`.", "Wrap all results in an outer object with a `services` key."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('services') && output.includes('status')",
+        "successMessage": "Response composition produces valid JSON.",
+        "failureMessage": "Composed response should include all service results in a JSON structure."
+      }
+    },
+    {
+      "id": 8,
+      "title": "Add circuit breaker pattern",
+      "description": "Implement a circuit breaker for downstream service calls. Define states: `Closed` (normal), `Open` (failing — reject immediately), `HalfOpen` (testing). Track failure count, threshold (3 failures), and timeout (5 seconds before half-open). Add `CircuitBreaker` struct with `call(routeID string, fn func() (int, string)) (int, string)`. Print `\"circuit open\"` when rejecting, `\"circuit half-open\"` when testing, and `\"circuit closed\"` when recovered.",
+      "hints": ["Use `sync.Mutex` for thread safety on circuit state changes.", "Track consecutive failures — after threshold, transition to Open.", "After timeout in Open state, transition to HalfOpen — allow one request. If it succeeds, transition to Closed.", "If the HalfOpen probe fails, go back to Open."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('circuit closed') || output.includes('circuit open') || output.includes('half-open')",
+        "successMessage": "Circuit breaker correctly transitions between Closed, Open, and Half-Open states!",
+        "failureMessage": "Print the circuit state transitions: 'circuit closed' when healthy, 'circuit open' when failing, and 'circuit half-open' when testing recovery."
+      }
+    }
+  ]
+}

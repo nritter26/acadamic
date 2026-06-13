@@ -1,0 +1,162 @@
+{
+  "id": "express-social-api",
+  "title": "Social Media API",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 45,
+  "concepts": ["users", "social", "feed", "crud", "express", "fastapi", "rest"],
+  "description": "Build a social media API with users, posts, following, feed, and likes.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a user",
+      "description": "Create POST /api/users that accepts JSON with \"username\" and \"email\", assigns an id, and returns 201.",
+      "hints": [
+        "Use app.post('/api/users', handler)", "Read req.body.username and req.body.email", "Return res.status(201).json(newUser)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req, res) => {\n  const { username, email } = req.body;\n  const user = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  username: string;\n  email: string;\n  followers: number[];\n  following: number[];\n}\n\nlet users: User[] = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req: Request, res: Response) => {\n  const { username, email } = req.body;\n  const user: User = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    username: str\n    email: str\n\nclass User(BaseModel):\n    id: int\n    username: str\n    email: str\n    followers: list[int] = []\n    following: list[int] = []\n\nusers = []\nnext_user_id = 1\n\n@app.post('/api/users', status_code=201)\ndef create_user(u: UserIn):\n    global next_user_id\n    user = User(id=next_user_id, username=u.username, email=u.email)\n    next_user_id += 1\n    users.append(user)\n    return user\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\ntype User struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tEmail     string `json:\"email\"`\n\tFollowers []int  `json:\"followers\"`\n\tFollowing []int  `json:\"following\"`\n}\n\nvar (\n\tusers       []User\n\tnextUserID  = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tEmail    string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tuser := User{ID: nextUserID, Username: body.Username, Email: body.Email}\n\t\tnextUserID++\n\t\tusers = append(users, user)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(user)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/api/users",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "username"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Get user by id",
+      "description": "Add GET /api/users/:id that returns a user by id. Return 404 if not found.",
+      "hints": [
+        "Use app.get('/api/users/:id', handler)", "Find user by id in the users array", "Return 404 if not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req, res) => {\n  const { username, email } = req.body;\n  const user = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/api/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  username: string;\n  email: string;\n  followers: number[];\n  following: number[];\n}\n\nlet users: User[] = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req: Request, res: Response) => {\n  const { username, email } = req.body;\n  const user: User = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/api/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    username: str\n    email: str\n\nclass User(BaseModel):\n    id: int\n    username: str\n    email: str\n    followers: list[int] = []\n    following: list[int] = []\n\nusers = []\nnext_user_id = 1\n\n@app.post('/api/users', status_code=201)\ndef create_user(u: UserIn):\n    global next_user_id\n    user = User(id=next_user_id, username=u.username, email=u.email)\n    next_user_id += 1\n    users.append(user)\n    return user\n\n@app.get('/api/users/{user_id}')\ndef get_user(user_id: int):\n    for u in users:\n        if u.id == user_id:\n            return u\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tEmail     string `json:\"email\"`\n\tFollowers []int  `json:\"followers\"`\n\tFollowing []int  `json:\"following\"`\n}\n\nvar (\n\tusers       []User\n\tnextUserID  = 1\n)\n\nfunc usersHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/api/users\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tEmail    string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tuser := User{ID: nextUserID, Username: body.Username, Email: body.Email}\n\t\tnextUserID++\n\t\tusers = append(users, user)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(user)\n\t\treturn\n\t}\n\n\tidStr := strings.TrimPrefix(path, \"/\")\n\t// Check for follow action\n\tparts := strings.Split(idStr, \"/\")\n\tid, err := strconv.Atoi(parts[0])\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tfor _, u := range users {\n\t\tif u.ID == id {\n\t\t\tjson.NewEncoder(w).Encode(u)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/users\", usersHandler)\n\thttp.HandleFunc(\"/api/users/\", usersHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api/users/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "username"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Follow a user",
+      "description": "Add POST /api/users/:id/follow that accepts a body with \"userId\" (the follower). Add the follower to the target user's followers list.",
+      "hints": [
+        "Use app.post('/api/users/:id/follow', handler)", "Get target user from :id param, and follower from req.body.userId", "Update both users' followers/following lists"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req, res) => {\n  const { username, email } = req.body;\n  const user = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/api/users/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.post('/api/users/:id/follow', (req, res) => {\n  const targetId = parseInt(req.params.id, 10);\n  const followerId = req.body.userId;\n  const target = users.find(u => u.id === targetId);\n  const follower = users.find(u => u.id === followerId);\n  if (!target || !follower) return res.status(404).json({ error: 'User not found' });\n  if (!target.followers.includes(followerId)) target.followers.push(followerId);\n  if (!follower.following.includes(targetId)) follower.following.push(targetId);\n  res.json({ success: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  username: string;\n  email: string;\n  followers: number[];\n  following: number[];\n}\n\nlet users: User[] = [];\nlet nextUserId = 1;\n\napp.post('/api/users', (req: Request, res: Response) => {\n  const { username, email } = req.body;\n  const user: User = { id: nextUserId++, username, email, followers: [], following: [] };\n  users.push(user);\n  res.status(201).json(user);\n});\n\napp.get('/api/users/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const user = users.find(u => u.id === id);\n  if (!user) return res.status(404).json({ error: 'Not found' });\n  res.json(user);\n});\n\napp.post('/api/users/:id/follow', (req: Request, res: Response) => {\n  const targetId = parseInt(req.params.id, 10);\n  const followerId = req.body.userId;\n  const target = users.find(u => u.id === targetId);\n  const follower = users.find(u => u.id === followerId);\n  if (!target || !follower) return res.status(404).json({ error: 'User not found' });\n  if (!target.followers.includes(followerId)) target.followers.push(followerId);\n  if (!follower.following.includes(targetId)) follower.following.push(targetId);\n  res.json({ success: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    username: str\n    email: str\n\nclass FollowIn(BaseModel):\n    userId: int\n\nclass User(BaseModel):\n    id: int\n    username: str\n    email: str\n    followers: list[int] = []\n    following: list[int] = []\n\nusers = []\nnext_user_id = 1\n\n@app.post('/api/users', status_code=201)\ndef create_user(u: UserIn):\n    global next_user_id\n    user = User(id=next_user_id, username=u.username, email=u.email)\n    next_user_id += 1\n    users.append(user)\n    return user\n\n@app.get('/api/users/{user_id}')\ndef get_user(user_id: int):\n    for u in users:\n        if u.id == user_id:\n            return u\n    return {'error': 'Not found'}\n\n@app.post('/api/users/{user_id}/follow')\ndef follow_user(user_id: int, body: FollowIn):\n    target = next((u for u in users if u.id == user_id), None)\n    follower = next((u for u in users if u.id == body.userId), None)\n    if not target or not follower:\n        return {'error': 'User not found'}\n    if body.userId not in target.followers:\n        target.followers.append(body.userId)\n    if user_id not in follower.following:\n        follower.following.append(user_id)\n    return {'success': True}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tEmail     string `json:\"email\"`\n\tFollowers []int  `json:\"followers\"`\n\tFollowing []int  `json:\"following\"`\n}\n\nvar (\n\tusers       []User\n\tnextUserID  = 1\n)\n\nfunc usersHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/api/users\")\n\n\tif path == \"\" || path == \"/\" {\n\t\tvar body struct {\n\t\t\tUsername string `json:\"username\"`\n\t\t\tEmail    string `json:\"email\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tuser := User{ID: nextUserID, Username: body.Username, Email: body.Email}\n\t\tnextUserID++\n\t\tusers = append(users, user)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(user)\n\t\treturn\n\t}\n\n\tparts := strings.Split(strings.Trim(path, \"/\"), \"/\")\n\tid, err := strconv.Atoi(parts[0])\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tif len(parts) == 1 {\n\t\tfor _, u := range users {\n\t\t\tif u.ID == id {\n\t\t\t\tjson.NewEncoder(w).Encode(u)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tif len(parts) == 2 && parts[1] == \"follow\" {\n\t\tvar body struct {\n\t\t\tUserID int `json:\"userId\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tvar target, follower *User\n\t\tfor i := range users {\n\t\t\tif users[i].ID == id {\n\t\t\t\ttarget = &users[i]\n\t\t\t}\n\t\t\tif users[i].ID == body.UserID {\n\t\t\t\tfollower = &users[i]\n\t\t\t}\n\t\t}\n\t\tif target == nil || follower == nil {\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"User not found\"})\n\t\t\treturn\n\t\t}\n\t\tfound := false\n\t\tfor _, f := range target.Followers {\n\t\t\tif f == body.UserID {\n\t\t\t\tfound = true\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t\tif !found {\n\t\t\ttarget.Followers = append(target.Followers, body.UserID)\n\t\t}\n\t\tfound = false\n\t\tfor _, f := range follower.Following {\n\t\t\tif f == id {\n\t\t\t\tfound = true\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t\tif !found {\n\t\t\tfollower.Following = append(follower.Following, id)\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]bool{\"success\": true})\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/users\", usersHandler)\n\thttp.HandleFunc(\"/api/users/\", usersHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/api/users/1/follow",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "success"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Create a post",
+      "description": "Create POST /api/posts that accepts JSON with \"userId\" and \"content\". Assign an id and return 201.",
+      "hints": [
+        "Use app.post('/api/posts', handler)", "Create a post object with id, userId, content, likes, and createdAt", "Return res.status(201).json(post)"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [];\nlet nextUserId = 1;\nlet posts = [];\nlet nextPostId = 1;\n\napp.post('/api/posts', (req, res) => {\n  const { userId, content } = req.body;\n  const post = { id: nextPostId++, userId, content, likes: [], createdAt: new Date() };\n  posts.push(post);\n  res.status(201).json(post);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Post {\n  id: number;\n  userId: number;\n  content: string;\n  likes: number[];\n  createdAt: Date;\n}\n\nlet posts: Post[] = [];\nlet nextPostId = 1;\n\napp.post('/api/posts', (req: Request, res: Response) => {\n  const { userId, content } = req.body;\n  const post: Post = { id: nextPostId++, userId, content, likes: [], createdAt: new Date() };\n  posts.push(post);\n  res.status(201).json(post);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass PostIn(BaseModel):\n    userId: int\n    content: str\n\nclass Post(BaseModel):\n    id: int\n    userId: int\n    content: str\n    likes: list[int] = []\n    createdAt: datetime = datetime.now()\n\nposts = []\nnext_post_id = 1\n\n@app.post('/api/posts', status_code=201)\ndef create_post(p: PostIn):\n    global next_post_id\n    post = Post(id=next_post_id, userId=p.userId, content=p.content)\n    next_post_id += 1\n    posts.append(post)\n    return post\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Post struct {\n\tID        int       `json:\"id\"`\n\tUserID    int       `json:\"userId\"`\n\tContent   string    `json:\"content\"`\n\tLikes     []int     `json:\"likes\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\nvar (\n\tposts      []Post\n\tnextPostID = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/posts\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar body struct {\n\t\t\tUserID  int    `json:\"userId\"`\n\t\t\tContent string `json:\"content\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tpost := Post{ID: nextPostID, UserID: body.UserID, Content: body.Content, CreatedAt: time.Now()}\n\t\tnextPostID++\n\t\tposts = append(posts, post)\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(post)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/api/posts",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "content"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Get feed",
+      "description": "Add GET /api/feed that returns posts from users the current user follows. Accept a \"userId\" query parameter.",
+      "hints": [
+        "Read req.query.userId to identify the current user", "Get the list of user IDs they follow", "Filter posts to only those from followed users"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [\n  { id: 1, username: 'alice', email: 'alice@test.com', followers: [], following: [2] },\n  { id: 2, username: 'bob', email: 'bob@test.com', followers: [1], following: [] }\n];\nlet nextUserId = 3;\nlet posts = [\n  { id: 1, userId: 2, content: 'Hello from Bob!', likes: [], createdAt: new Date() }\n];\nlet nextPostId = 2;\n\napp.get('/api/feed', (req, res) => {\n  const userId = parseInt(req.query.userId);\n  const user = users.find(u => u.id === userId);\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  const feed = posts.filter(p => user.following.includes(p.userId));\n  res.json(feed);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface User {\n  id: number;\n  username: string;\n  email: string;\n  followers: number[];\n  following: number[];\n}\n\ninterface Post {\n  id: number;\n  userId: number;\n  content: string;\n  likes: number[];\n  createdAt: Date;\n}\n\nlet users: User[] = [\n  { id: 1, username: 'alice', email: 'alice@test.com', followers: [], following: [2] },\n  { id: 2, username: 'bob', email: 'bob@test.com', followers: [1], following: [] }\n];\nlet nextUserId = 3;\nlet posts: Post[] = [\n  { id: 1, userId: 2, content: 'Hello from Bob!', likes: [], createdAt: new Date() }\n];\nlet nextPostId = 2;\n\napp.get('/api/feed', (req: Request, res: Response) => {\n  const userId = parseInt(req.query.userId as string);\n  const user = users.find(u => u.id === userId);\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  const feed = posts.filter(p => user.following.includes(p.userId));\n  res.json(feed);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass UserIn(BaseModel):\n    username: str\n    email: str\n\nclass FollowIn(BaseModel):\n    userId: int\n\nclass User(BaseModel):\n    id: int\n    username: str\n    email: str\n    followers: list[int] = []\n    following: list[int] = []\n\nclass PostIn(BaseModel):\n    userId: int\n    content: str\n\nclass Post(BaseModel):\n    id: int\n    userId: int\n    content: str\n    likes: list[int] = []\n    createdAt: datetime = datetime.now()\n\nusers = [User(id=1, username='alice', email='alice@test.com', following=[2]), User(id=2, username='bob', email='bob@test.com', followers=[1])]\nnext_user_id = 3\nposts = [Post(id=1, userId=2, content='Hello from Bob!')]\nnext_post_id = 2\n\n@app.get('/api/feed')\ndef get_feed(userId: int):\n    user = next((u for u in users if u.id == userId), None)\n    if not user:\n        return {'error': 'User not found'}\n    return [p for p in posts if p.userId in user.following]\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"time\"\n)\n\ntype User struct {\n\tID        int    `json:\"id\"`\n\tUsername  string `json:\"username\"`\n\tEmail     string `json:\"email\"`\n\tFollowers []int  `json:\"followers\"`\n\tFollowing []int  `json:\"following\"`\n}\n\ntype Post struct {\n\tID        int       `json:\"id\"`\n\tUserID    int       `json:\"userId\"`\n\tContent   string    `json:\"content\"`\n\tLikes     []int     `json:\"likes\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\nvar (\n\tusers       = []User{{ID: 1, Username: \"alice\", Email: \"alice@test.com\", Following: []int{2}}, {ID: 2, Username: \"bob\", Email: \"bob@test.com\", Followers: []int{1}}}\n\tnextUserID  = 3\n\tposts       = []Post{{ID: 1, UserID: 2, Content: \"Hello from Bob!\", CreatedAt: time.Now()}}\n\tnextPostID  = 2\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/feed\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tuserIdStr := r.URL.Query().Get(\"userId\")\n\t\tuserId, err := strconv.Atoi(userIdStr)\n\t\tif err != nil {\n\t\t\thttp.NotFound(w, r)\n\t\t\treturn\n\t\t}\n\t\tvar user *User\n\t\tfor i := range users {\n\t\t\tif users[i].ID == userId {\n\t\t\t\tuser = &users[i]\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t\tif user == nil {\n\t\t\tw.WriteHeader(http.StatusNotFound)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"User not found\"})\n\t\t\treturn\n\t\t}\n\t\tvar feed []Post\n\t\tfor _, p := range posts {\n\t\t\tfor _, f := range user.Following {\n\t\t\t\tif p.UserID == f {\n\t\t\t\t\tfeed = append(feed, p)\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tjson.NewEncoder(w).Encode(feed)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/api/feed?userId=1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "content"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "Like a post",
+      "description": "Add POST /api/posts/:id/like that accepts body with \"userId\". Add the userId to the post's likes array.",
+      "hints": [
+        "Use app.post('/api/posts/:id/like', handler)", "Find post by id, add userId to likes array if not already present", "Return the updated post"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet users = [\n  { id: 1, username: 'alice', email: 'alice@test.com', followers: [], following: [2] },\n  { id: 2, username: 'bob', email: 'bob@test.com', followers: [1], following: [] }\n];\nlet nextUserId = 3;\nlet posts = [\n  { id: 1, userId: 2, content: 'Hello from Bob!', likes: [], createdAt: new Date() }\n];\nlet nextPostId = 2;\n\napp.get('/api/feed', (req, res) => {\n  const userId = parseInt(req.query.userId);\n  const user = users.find(u => u.id === userId);\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  const feed = posts.filter(p => user.following.includes(p.userId));\n  res.json(feed);\n});\n\napp.post('/api/posts/:id/like', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const { userId } = req.body;\n  const post = posts.find(p => p.id === id);\n  if (!post) return res.status(404).json({ error: 'Post not found' });\n  if (!post.likes.includes(userId)) post.likes.push(userId);\n  res.json(post);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Post {\n  id: number;\n  userId: number;\n  content: string;\n  likes: number[];\n  createdAt: Date;\n}\n\nlet posts: Post[] = [\n  { id: 1, userId: 2, content: 'Hello from Bob!', likes: [], createdAt: new Date() }\n];\nlet nextPostId = 2;\n\napp.post('/api/posts/:id/like', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const { userId } = req.body;\n  const post = posts.find(p => p.id === id);\n  if (!post) return res.status(404).json({ error: 'Post not found' });\n  if (!post.likes.includes(userId)) post.likes.push(userId);\n  res.json(post);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass LikeIn(BaseModel):\n    userId: int\n\nclass Post(BaseModel):\n    id: int\n    userId: int\n    content: str\n    likes: list[int] = []\n    createdAt: datetime = datetime.now()\n\nposts = [Post(id=1, userId=2, content='Hello from Bob!')]\nnext_post_id = 2\n\n@app.post('/api/posts/{post_id}/like')\ndef like_post(post_id: int, body: LikeIn):\n    for p in posts:\n        if p.id == post_id:\n            if body.userId not in p.likes:\n                p.likes.append(body.userId)\n            return p\n    return {'error': 'Post not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Post struct {\n\tID        int       `json:\"id\"`\n\tUserID    int       `json:\"userId\"`\n\tContent   string    `json:\"content\"`\n\tLikes     []int     `json:\"likes\"`\n\tCreatedAt time.Time `json:\"createdAt\"`\n}\n\nvar (\n\tposts      = []Post{{ID: 1, UserID: 2, Content: \"Hello from Bob!\", CreatedAt: time.Now()}}\n\tnextPostID = 2\n)\n\nfunc postsHandler(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tpath := strings.TrimPrefix(r.URL.Path, \"/api/posts\")\n\n\tparts := strings.Split(strings.Trim(path, \"/\"), \"/\")\n\tif len(parts) < 2 || parts[1] != \"like\" {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tid, err := strconv.Atoi(parts[0])\n\tif err != nil {\n\t\thttp.NotFound(w, r)\n\t\treturn\n\t}\n\n\tvar body struct {\n\t\tUserID int `json:\"userId\"`\n\t}\n\tjson.NewDecoder(r.Body).Decode(&body)\n\n\tfor i, p := range posts {\n\t\tif p.ID == id {\n\t\t\tfound := false\n\t\t\tfor _, l := range posts[i].Likes {\n\t\t\t\tif l == body.UserID {\n\t\t\t\t\tfound = true\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tif !found {\n\t\t\t\tposts[i].Likes = append(posts[i].Likes, body.UserID)\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(posts[i])\n\t\t\treturn\n\t\t}\n\t}\n\thttp.NotFound(w, r)\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/api/posts/\", postsHandler)\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/api/posts/1/like",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "likes"
+          }
+        ]
+      }
+    }
+  ]
+}

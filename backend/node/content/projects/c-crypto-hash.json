@@ -1,0 +1,23 @@
+{
+  "id": "c-crypto-hash",
+  "title": "C: Simple Hash Function",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "hashing", "bitwise", "cryptography", "simulation"],
+  "description": "Implement a simple non-cryptographic hash function (djb2) and a basic checksum utility.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "djb2 Hash",
+      "description": "Implement the djb2 hash function: `unsigned long djb2(char *str)` with hash = 5381, then for each char: `hash = hash * 33 + c`. Print the hash of 'hello', 'world', and 'hello' (should be same for identical strings).",
+      "hints": ["Start with `unsigned long hash = 5381;`.", "For each char: `hash = ((hash << 5) + hash) + c;`", "Print using `%lu` format specifier."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nunsigned long djb2(char *str) {\n    unsigned long hash = 5381;\n    int c;\n    while ((c = *str++)) hash = ((hash << 5) + hash) + c;\n    return hash;\n}\n\nint main() {\n    printf(\"hello: %lu\\n\", djb2(\"hello\"));\n    printf(\"world: %lu\\n\", djb2(\"world\"));\n    printf(\"hello: %lu\\n\", djb2(\"hello\"));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.split('hello:').length === 3 && output.includes('world:')",
+        "successMessage": "Hash function works!",
+        "failureMessage": "Print hashes of 'hello', 'world', and 'hello' again"
+      }
+    }
+  ]
+}

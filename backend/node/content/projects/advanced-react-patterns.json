@@ -1,0 +1,106 @@
+{
+  "id": "advanced-react-patterns",
+  "title": "Advanced React Patterns",
+  "difficulty": "advanced",
+  "languages": ["javascript", "typescript"],
+  "estimatedMinutes": 60,
+  "concepts": ["react", "compound-components", "render-props", "custom-hooks", "composition"],
+  "description": "Build advanced React patterns from scratch — compound components, render props, custom hooks composition, and higher-order components.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Compound component: Tabs",
+      "description": "Create a compound component pattern for a `Tabs` component. Export `Tabs`, `Tabs.Tab`, and `Tabs.Panel` — where `Tabs.Tab` toggles visibility of the matching `Tabs.Panel` by index. Use `React.Children.map` and `React.cloneElement` to pass shared state. Log the active tab index when it changes.",
+      "hints": [
+        "Tabs maintains activeIndex state via useState",
+        "Use React.Children.map to pass activeIndex and onSelect to Tabs.Tab children",
+        "Tabs.Panel shows its children only when its index matches activeIndex"
+      ],
+      "codeTemplate": {
+        "javascript": "function Tabs({ children }) {\n  const [activeIndex, setActiveIndex] = React.useState(0);\n  // Clone children and pass activeIndex + onSelect to Tab,\n  // and activeIndex to Panel\n  return <div className=\"tabs\">{children}</div>;\n}\n\nTabs.Tab = function Tab({ index, activeIndex, onSelect, children }) {\n  return (\n    <button\n      className={activeIndex === index ? 'tab-active' : ''}\n      onClick={() => onSelect(index)}\n    >\n      {children}\n    </button>\n  );\n};\n\nTabs.Panel = function Panel({ index, activeIndex, children }) {\n  if (activeIndex !== index) return null;\n  return <div className=\"tab-panel\">{children}</div>;\n};\n\n// Test it\nReactDOM.render(\n  <Tabs>\n    <Tabs.Tab>Tab 1</Tabs.Tab>\n    <Tabs.Tab>Tab 2</Tabs.Tab>\n    <Tabs.Panel>Content 1</Tabs.Panel>\n    <Tabs.Panel>Content 2</Tabs.Panel>\n  </Tabs>,\n  document.getElementById('root')\n);\n",
+        "typescript": "function Tabs({ children }: { children: React.ReactNode }) {\n  const [activeIndex, setActiveIndex] = React.useState(0);\n  return <div className=\"tabs\">{children}</div>;\n}\n\nTabs.Tab = function Tab({ index, activeIndex, onSelect, children }: {\n  index: number; activeIndex: number; onSelect: (i: number) => void; children: React.ReactNode\n}) {\n  return (\n    <button className={activeIndex === index ? 'tab-active' : ''} onClick={() => onSelect(index)}>\n      {children}\n    </button>\n  );\n};\n\nTabs.Panel = function Panel({ index, activeIndex, children }: {\n  index: number; activeIndex: number; children: React.ReactNode\n}) {\n  if (activeIndex !== index) return null;\n  return <div className=\"tab-panel\">{children}</div>;\n};\n\nReactDOM.render(\n  <Tabs>\n    <Tabs.Tab>Tab 1</Tabs.Tab>\n    <Tabs.Tab>Tab 2</Tabs.Tab>\n    <Tabs.Panel>Content 1</Tabs.Panel>\n    <Tabs.Panel>Content 2</Tabs.Panel>\n  </Tabs>,\n  document.getElementById('root')\n);\n"
+      },
+      "verification": {
+        "test": "output.includes('Tab') && output.includes('Content')",
+        "successMessage": "Compound Tabs component renders tabs and panels!",
+        "failureMessage": "Make sure Tabs renders both Tab buttons and Panel content areas."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Render props: DataFetcher",
+      "description": "Create a `DataFetcher` component that uses the render props pattern. It takes a `url` prop and calls a function as its child with `{ data, loading, error }`. Use setTimeout to simulate an async fetch. Render loading, error, and data states.",
+      "hints": [
+        "The component's child is a function: ({ data, loading, error }) => JSX",
+        "Use useState for { data, loading, error } states",
+        "Simulate fetch with setTimeout that resolves after 1 second"
+      ],
+      "codeTemplate": {
+        "javascript": "function DataFetcher({ url, children }) {\n  const [state, setState] = React.useState({\n    data: null, loading: true, error: null\n  });\n\n  React.useEffect(() => {\n    setState({ data: null, loading: true, error: null });\n    setTimeout(() => {\n      setState({\n        data: { id: 1, name: 'Sample Data', source: url },\n        loading: false,\n        error: null\n      });\n    }, 1000);\n  }, [url]);\n\n  return children(state);\n}\n\n// Usage (no need to modify, this is the test)\nReactDOM.render(\n  React.createElement(DataFetcher, { url: '/api/data' },\n    ({ data, loading, error }) => {\n      if (loading) return React.createElement('div', null, 'Loading...');\n      if (error) return React.createElement('div', null, 'Error: ' + error);\n      return React.createElement('div', null, 'Data: ' + JSON.stringify(data));\n    }\n  ),\n  document.getElementById('root')\n);\n",
+        "typescript": "interface DataState<T> {\n  data: T | null;\n  loading: boolean;\n  error: string | null;\n}\n\nfunction DataFetcher<T>({ url, children }: {\n  url: string;\n  children: (state: DataState<T>) => React.ReactNode;\n}) {\n  const [state, setState] = React.useState<DataState<T>>({\n    data: null, loading: true, error: null\n  });\n\n  React.useEffect(() => {\n    setState({ data: null, loading: true, error: null });\n    setTimeout(() => {\n      setState({\n        data: { id: 1, name: 'Sample Data', source: url } as T,\n        loading: false,\n        error: null\n      });\n    }, 1000);\n  }, [url]);\n\n  return children(state);\n}\n\nReactDOM.render(\n  React.createElement(DataFetcher, { url: '/api/data' },\n    ({ data, loading, error }) => {\n      if (loading) return React.createElement('div', null, 'Loading...');\n      if (error) return React.createElement('div', null, 'Error: ' + error);\n      return React.createElement('div', null, 'Data: ' + JSON.stringify(data));\n    }\n  ),\n  document.getElementById('root')\n);\n"
+      },
+      "verification": {
+        "test": "output.includes('Loading') || output.includes('Data') || output.includes('Sample')",
+        "successMessage": "Render props pattern works!",
+        "failureMessage": "DataFetcher should render its children as a function with data/loading/error state."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Custom hook: useLocalStorage",
+      "description": "Create a `useLocalStorage(key, initialValue)` custom hook that syncs state with localStorage. Read from localStorage on mount, update localStorage on change, and provide a setter. Print the stored value to verify.",
+      "hints": [
+        "Use useState with a lazy initializer that reads from localStorage",
+        "Wrap the setter to also write to localStorage",
+        "Handle JSON parse errors gracefully with a try/catch"
+      ],
+      "codeTemplate": {
+        "javascript": "function useLocalStorage(key, initialValue) {\n  const [storedValue, setStoredValue] = React.useState(() => {\n    try {\n      const item = localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.error(error);\n      return initialValue;\n    }\n  });\n\n  const setValue = (value) => {\n    try {\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\n      setStoredValue(valueToStore);\n      localStorage.setItem(key, JSON.stringify(valueToStore));\n    } catch (error) {\n      console.error(error);\n    }\n  };\n\n  return [storedValue, setValue];\n}\n\n// Test the hook in a component\nfunction LocalStorageDemo() {\n  const [name, setName] = useLocalStorage('name', 'Guest');\n  return React.createElement('div', null,\n    React.createElement('p', null, 'Stored name: ' + name),\n    React.createElement('input', {\n      value: name,\n      onChange: (e) => setName(e.target.value)\n    })\n  );\n}\n\nReactDOM.render(\n  React.createElement(LocalStorageDemo),\n  document.getElementById('root')\n);\n",
+        "typescript": "function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {\n  const [storedValue, setStoredValue] = React.useState<T>(() => {\n    try {\n      const item = localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.error(error);\n      return initialValue;\n    }\n  });\n\n  const setValue = (value: T | ((prev: T) => T)) => {\n    try {\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\n      setStoredValue(valueToStore);\n      localStorage.setItem(key, JSON.stringify(valueToStore));\n    } catch (error) {\n      console.error(error);\n    }\n  };\n\n  return [storedValue, setValue];\n}\n\nfunction LocalStorageDemo() {\n  const [name, setName] = useLocalStorage('name', 'Guest');\n  return React.createElement('div', null,\n    React.createElement('p', null, 'Stored name: ' + name),\n    React.createElement('input', {\n      value: name,\n      onChange: (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)\n    })\n  );\n}\n\nReactDOM.render(\n  React.createElement(LocalStorageDemo),\n  document.getElementById('root')\n);\n"
+      },
+      "verification": {
+        "test": "output.includes('Stored name:') || output.includes('Guest')",
+        "successMessage": "useLocalStorage hook reads from and writes to localStorage!",
+        "failureMessage": "Render a component that uses useLocalStorage and displays the stored value."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Compose hooks: useUserPreferences",
+      "description": "Create a `useUserPreferences` hook that composes `useLocalStorage` to manage theme ('light'|'dark'), fontSize (number), and language preferences. Return an object with all preferences and individual setters. Log the preferences to the console.",
+      "hints": [
+        "Call useLocalStorage three times with different keys",
+        "Return { theme, setTheme, fontSize, setFontSize, language, setLanguage }",
+        "Print the preferences object with console.log"
+      ],
+      "codeTemplate": {
+        "javascript": "function useLocalStorage(key, initialValue) {\n  const [storedValue, setStoredValue] = React.useState(() => {\n    try {\n      const item = localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.error(error);\n      return initialValue;\n    }\n  });\n\n  const setValue = (value) => {\n    try {\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\n      setStoredValue(valueToStore);\n      localStorage.setItem(key, JSON.stringify(valueToStore));\n    } catch (error) {\n      console.error(error);\n    }\n  };\n\n  return [storedValue, setValue];\n}\n\nfunction useUserPreferences() {\n  const [theme, setTheme] = useLocalStorage('theme', 'light');\n  const [fontSize, setFontSize] = useLocalStorage('fontSize', 16);\n  const [language, setLanguage] = useLocalStorage('language', 'en');\n\n  return {\n    theme, setTheme,\n    fontSize, setFontSize,\n    language, setLanguage\n  };\n}\n\n// Test\nconst prefs = useUserPreferences();\nconsole.log(JSON.stringify({ theme: prefs.theme, fontSize: prefs.fontSize, language: prefs.language }));\n",
+        "typescript": "function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {\n  const [storedValue, setStoredValue] = React.useState<T>(() => {\n    try {\n      const item = localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.error(error);\n      return initialValue;\n    }\n  });\n\n  const setValue = (value: T | ((prev: T) => T)) => {\n    try {\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\n      setStoredValue(valueToStore);\n      localStorage.setItem(key, JSON.stringify(valueToStore));\n    } catch (error) {\n      console.error(error);\n    }\n  };\n\n  return [storedValue, setValue];\n}\n\ninterface UserPreferences {\n  theme: string;\n  setTheme: (v: string) => void;\n  fontSize: number;\n  setFontSize: (v: number) => void;\n  language: string;\n  setLanguage: (v: string) => void;\n}\n\nfunction useUserPreferences(): UserPreferences {\n  const [theme, setTheme] = useLocalStorage('theme', 'light');\n  const [fontSize, setFontSize] = useLocalStorage('fontSize', 16);\n  const [language, setLanguage] = useLocalStorage('language', 'en');\n  return { theme, setTheme, fontSize, setFontSize, language, setLanguage };\n}\n\nconst prefs = useUserPreferences();\nconsole.log(JSON.stringify({ theme: prefs.theme, fontSize: prefs.fontSize, language: prefs.language }));\n"
+      },
+      "verification": {
+        "test": "output.includes('theme') && output.includes('fontSize') && output.includes('language')",
+        "successMessage": "Composed hooks provide a clean preferences API!",
+        "failureMessage": "useUserPreferences should return theme, fontSize, and language with their setters."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Error boundary with HOC pattern",
+      "description": "Create an `withErrorBoundary(WrappedComponent, fallbackUI)` higher-order component that wraps a component with error catching. If the wrapped component throws, render the fallback UI instead. Test by creating a component that intentionally throws.",
+      "hints": [
+        "Use React's componentDidCatch or static getDerivedStateFromError",
+        "The HOC returns a new class component with error state",
+        "fallbackUI is a render function called with the error object"
+      ],
+      "codeTemplate": {
+        "javascript": "function withErrorBoundary(WrappedComponent, fallbackUI) {\n  return class ErrorBoundary extends React.Component {\n    constructor(props) {\n      super(props);\n      this.state = { hasError: false, error: null };\n    }\n\n    static getDerivedStateFromError(error) {\n      return { hasError: true, error };\n    }\n\n    render() {\n      if (this.state.hasError) {\n        return fallbackUI(this.state.error);\n      }\n      return React.createElement(WrappedComponent, this.props);\n    }\n  };\n}\n\n// Test: a component that throws\nfunction BuggyComponent() {\n  throw new Error('Something broke!');\n}\n\nconst SafeComponent = withErrorBoundary(BuggyComponent, (error) => {\n  return React.createElement('div', { style: { color: 'red' } },\n    'Error caught: ' + error.message\n  );\n});\n\nReactDOM.render(\n  React.createElement(SafeComponent),\n  document.getElementById('root')\n);\n",
+        "typescript": "function withErrorBoundary<P extends object>(\n  WrappedComponent: React.ComponentType<P>,\n  fallbackUI: (error: Error) => React.ReactNode\n): React.ComponentType<P> {\n  return class ErrorBoundary extends React.Component<P, { hasError: boolean; error: Error | null }> {\n    constructor(props: P) {\n      super(props);\n      this.state = { hasError: false, error: null };\n    }\n\n    static getDerivedStateFromError(error: Error) {\n      return { hasError: true, error };\n    }\n\n    render() {\n      if (this.state.hasError) {\n        return fallbackUI(this.state.error!);\n      }\n      return React.createElement(WrappedComponent, this.props);\n    }\n  };\n}\n\nfunction BuggyComponent() {\n  throw new Error('Something broke!');\n}\n\nconst SafeComponent = withErrorBoundary(BuggyComponent, (error) => {\n  return React.createElement('div', { style: { color: 'red' } },\n    'Error caught: ' + error.message\n  );\n});\n\nReactDOM.render(\n  React.createElement(SafeComponent),\n  document.getElementById('root')\n);\n"
+      },
+      "verification": {
+        "test": "output.includes('Error caught') || output.includes('broke')",
+        "successMessage": "Error boundary HOC catches and displays errors gracefully!",
+        "failureMessage": "The error boundary should catch the thrown error and render the fallback UI."
+      }
+    }
+  ]
+}

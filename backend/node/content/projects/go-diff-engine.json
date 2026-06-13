@@ -1,0 +1,83 @@
+{
+  "id": "go-diff-engine",
+  "title": "Go: Diff Engine",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 70,
+  "concepts": ["go", "diff", "LCS", "Myers algorithm", "patch"],
+  "description": "Implement the Myers diff algorithm for line-by-line and word-level text diffs with unified format output.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "LCS table computation",
+      "description": "Implement `LCS(a, b []string) [][]int` that builds the Longest Common Subsequence length table using dynamic programming. Print the LCS length for `[]string{\"a\", \"b\", \"c\"}` and `[]string{\"a\", \"c\", \"b\"}` with `fmt.Println(table[len(a)][len(b)])`.",
+      "hints": ["DP table of size `(len(a)+1) x (len(b)+1)`.", "If `a[i-1] == b[j-1]`, `dp[i][j] = dp[i-1][j-1] + 1`; else `max(dp[i-1][j], dp[i][j-1])`.", "The bottom-right cell holds the LCS length."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('2')",
+        "successMessage": "LCS length computed correctly.",
+        "failureMessage": "Expected LCS length of 2 for 'abc' vs 'acb'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Edit script generation",
+      "description": "Using the LCS table, implement `Diff(a, b []string) []Edit` where `Edit` has `Op rune` (`' '`, `'-'`, `'+'`) and `Line string`. Backtrack through the table to produce the edit script. Print each edit line with `fmt.Printf(\"%c %s\\n\", e.Op, e.Line)`.",
+      "hints": ["Start at `dp[len(a)][len(b)]` and backtrack to `dp[0][0]`.", "If strings match → diagonal (keep); if from top → delete; if from left → insert.", "Collect edits in reverse, then reverse the slice at the end."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes(' a')",
+        "successMessage": "Edit script generated correctly.",
+        "failureMessage": "Check backtracking through the LCS table produces correct edits."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Line-by-line diff with markers",
+      "description": "Format the edit script as a line-by-line diff with `+` and `-` markers. Implement `FormatEdits(edits []Edit) string` that produces a human-readable diff. Print the formatted diff for two short poems or text snippets.",
+      "hints": ["Prefix unchanged lines with `\" \"`, added lines with `\"+\"`, removed lines with `\"-\"`.", "Join with `\\n` to produce the final string.", "Use `strings.Builder` for efficient concatenation."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('-') || output.includes('+')",
+        "successMessage": "Line-by-line diff with +/- markers works.",
+        "failureMessage": "Ensure format includes '+' for additions and '-' for deletions."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Unified diff format",
+      "description": "Generate unified diff output: `@@ -start,count +start,count @@` header followed by context lines. Add 3 lines of context around changes. Print the unified diff for two multi-line strings.",
+      "hints": ["Group edits into hunks with surrounding context.", "Each hunk header: `@@ -oldStart,oldCount +newStart,newCount @@`.", "Context lines (unchanged) appear before and after each change cluster."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('@@')",
+        "successMessage": "Unified diff format with hunk headers works.",
+        "failureMessage": "The diff must include @@ hunk headers with line numbers."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Patch application",
+      "description": "Implement `ApplyPatch(original []string, edits []Edit) []string` that applies the edit script to the original text and returns the result. Verify that `ApplyPatch(a, Diff(a, b))` equals `b`. Print `\"patch applied\"` on success.",
+      "hints": ["Apply edits in reverse order (bottom-up) to preserve line indices.", "For deletions, remove the line; for insertions, add the line at position.", "After application, compare with expected using `reflect.DeepEqual`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('patch applied')",
+        "successMessage": "Patch applies correctly.",
+        "failureMessage": "ApplyPatch should transform 'a' into 'b' using the edit script."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Word-level diff",
+      "description": "Adapt the algorithm for word-level diff. Split text `\"hello world foo\"` into words with `strings.Fields`. Compute word-level edits and display them using `fmt.Printf(\"[-%s-] [+%s+]\", oldWord, newWord)` for changed words.",
+      "hints": ["Split both strings by whitespace using `strings.Fields`.", "Run the same Diff algorithm on the word slices.", "Group consecutive word edits into phrases for readable output."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('[-') || output.includes('[+')",
+        "successMessage": "Word-level diff shows word changes.",
+        "failureMessage": "Word diff should show deletions with [- -] and additions with [+ +]."
+      }
+    }
+  ]
+}

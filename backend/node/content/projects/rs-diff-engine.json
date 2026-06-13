@@ -1,0 +1,71 @@
+{
+  "id": "rs-diff-engine",
+  "title": "Rust: Diff Engine",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "diff", "LCS", "string comparison", "patience diff"],
+  "description": "Build a text diff engine that compares two strings line by line.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Line-Based Diff",
+      "description": "Write a function `diff_lines(old: &str, new: &str) -> Vec<(&str, &str)>` that splits both texts into lines and compares them pairwise. Print lines as `\" same\"`, `\"-old\"`, `\"+new\"`.",
+      "hints": ["Split both by `\\n`.", "If line i is same in both → `(\" \", line)`.", "If different → `(\"-\", old_line)`, `(\"+\", new_line)`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('-') && output.contains('+')",
+        "successMessage": "Basic line diff works!",
+        "failureMessage": "Diff two strings and print the result."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Longest Common Subsequence",
+      "description": "Implement LCS algorithm to find the longest subsequence common to two strings. Given `\"ABCBDAB\"` and `\"BDCAB\"`, print the LCS length and the sequence itself.",
+      "hints": ["Use dynamic programming table of size (n+1) × (m+1).", "`if a[i-1] == b[j-1] { table[i][j] = table[i-1][j-1] + 1 } else { table[i][j] = max(table[i-1][j], table[i][j-1]) }`", "Backtrack to find the actual LCS."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('BCAB') || output.contains('BDAB')",
+        "successMessage": "LCS algorithm works!",
+        "failureMessage": "Find and print the LCS of 'ABCBDAB' and 'BDCAB'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Myers Diff Algorithm",
+      "description": "Implement Myers' diff algorithm for computing minimal edits. Given texts A and B, produce edit operations (Delete, Insert, Keep). Print the edit script.",
+      "hints": ["Myers' algorithm finds the shortest edit path through the edit graph.", "Operations: Keep (same line), Delete (only in A), Insert (only in B).", "Much more efficient than LCS for large texts."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Keep') || output.contains('Delete') || output.contains('Insert')",
+        "successMessage": "Myers diff algorithm works!",
+        "failureMessage": "Run Myers diff and print the edit operations."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Unified Diff Format",
+      "description": "Generate unified diff format (like `git diff`): show 3 lines of context around changes. Format: `@@ -start,count +start,count @@` header, then context/added/removed lines.",
+      "hints": ["Group changes into hunks.", "Each hunk has a header `@@ -s,c +s,c @@`.", "Context lines start with ` `, added with `+`, removed with `-`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('@@') && (output.contains('+') || output.contains('-'))",
+        "successMessage": "Unified diff format works!",
+        "failureMessage": "Generate and print a unified diff."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Word-Level Diff",
+      "description": "Implement word-level diff: split lines into words, run LCS on words, and produce a colored/annotated output showing word-level changes within a line.",
+      "hints": ["Split line into words by whitespace.", "Run LCS on word sequences.", "Print: `same word`, `[-removed-]`, `{+added+}`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('[-') || output.contains('{+')",
+        "successMessage": "Word-level diff works!",
+        "failureMessage": "Diff two similar sentences and show word-level changes."
+      }
+    }
+  ]
+}

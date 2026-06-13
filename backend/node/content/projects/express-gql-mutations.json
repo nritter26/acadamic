@@ -1,0 +1,112 @@
+{
+  "id": "express-gql-mutations",
+  "title": "GraphQL Mutations",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["graphql", "mutations", "crud", "input-types", "express", "fastapi"],
+  "description": "Build a GraphQL API with full CRUD mutations including create, update, and delete operations.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create user mutation",
+      "description": "Add a mutation createUser(name: String!, email: String!): User that creates a new user and returns it.",
+      "hints": [
+        "Define a Mutation type with createUser field", "Accept name and email as required arguments", "Generate a unique ID and store the user in memory"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nlet users = [];\nlet nextId = 1;\n\nconst schema = buildSchema(`\n  type User {\n    id: Int\n    name: String\n    email: String\n  }\n\n  type Mutation {\n    createUser(name: String!, email: String!): User\n  }\n\n  type Query {\n    users: [User]\n  }\n`);\n\nconst root = {\n  users: () => users,\n  createUser: ({ name, email }) => {\n    const user = { id: nextId++, name, email };\n    users.push(user);\n    return user;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nlet users: User[] = [];\nlet nextId = 1;\n\nconst schema = buildSchema(`\n  type User {\n    id: Int\n    name: String\n    email: String\n  }\n\n  type Mutation {\n    createUser(name: String!, email: String!): User\n  }\n\n  type Query {\n    users: [User]\n  }\n`);\n\nconst root = {\n  users: () => users,\n  createUser: ({ name, email }: { name: string; email: string }) => {\n    const user: User = { id: nextId++, name, email };\n    users.push(user);\n    return user;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field, Mutation, Argument\nfrom fastapi_gql import GQL\n\nusers_data = []\nnext_id = 1\n\nclass User(ObjectType):\n    id = Int()\n    name = String()\n    email = String()\n\nclass CreateUser(Mutation):\n    class Arguments:\n        name = String(required=True)\n        email = String(required=True)\n    Output = User\n\n    def mutate(self, info, name, email):\n        global next_id\n        user = {'id': next_id, 'name': name, 'email': email}\n        users_data.append(user)\n        next_id += 1\n        return User(id=user['id'], name=user['name'], email=user['email'])\n\nclass Query(ObjectType):\n    users = List(User)\n\n    def resolve_users(self, info):\n        return [User(**u) for u in users_data]\n\nschema = Schema(query=Query, mutation=CreateUser)\napp = FastAPI()\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\ntype User struct {\n\tID    int    `json:\"id\"`\n\tName  string `json:\"name\"`\n\tEmail string `json:\"email\"`\n}\n\nvar users []User\nvar nextID = 1\n\nvar userType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"User\",\n\tFields: graphql.Fields{\n\t\t\"id\": &graphql.Field{Type: graphql.Int},\n\t\t\"name\": &graphql.Field{Type: graphql.String},\n\t\t\"email\": &graphql.Field{Type: graphql.String},\n\t},\n})\n\nvar mutationType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Mutation\",\n\tFields: graphql.Fields{\n\t\t\"createUser\": &graphql.Field{\n\t\t\tType: userType,\n\t\t\tArgs: graphql.FieldConfigArgument{\n\t\t\t\t\"name\": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},\n\t\t\t\t\"email\": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},\n\t\t\t},\n\t\t\tResolve: func(p graphql.ResolveParams) (interface{}, error) {\n\t\t\t\tname, _ := p.Args[\"name\"].(string)\n\t\t\t\temail, _ := p.Args[\"email\"].(string)\n\t\t\t\tuser := User{ID: nextID, Name: name, Email: email}\n\t\t\t\tnextID++\n\t\t\t\tusers = append(users, user)\n\t\t\t\treturn user, nil\n\t\t\t},\n\t\t},\n\t},\n})\n\nvar queryType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Query\",\n\tFields: graphql.Fields{\n\t\t\"users\": &graphql.Field{Type: graphql.NewList(userType), Resolve: func(p graphql.ResolveParams) (interface{}, error) { return users, nil }},\n\t},\n})\n\nvar schema, _ = graphql.NewSchema(graphql.SchemaConfig{Query: queryType, Mutation: mutationType})\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct{ Query string `json:\"query\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tresult := graphql.Do(graphql.Params{Schema: schema, RequestString: params.Query})\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "createUser"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create post with input type",
+      "description": "Add a mutation createPost(input: PostInput!): Post where PostInput is an input type with title and authorId fields.",
+      "hints": [
+        "Define an input type PostInput with title and authorId", "The mutation accepts the input type as an argument", "Return the created post with an auto-generated id"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nlet users = [];\nlet posts = [];\nlet nextUserId = 1;\nlet nextPostId = 1;\n\nconst schema = buildSchema(`\n  input PostInput {\n    title: String!\n    authorId: Int!\n  }\n\n  type User {\n    id: Int\n    name: String\n    email: String\n  }\n\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    createUser(name: String!, email: String!): User\n    createPost(input: PostInput!): Post\n  }\n\n  type Query {\n    users: [User]\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  users: () => users,\n  posts: () => posts,\n  createUser: ({ name, email }) => {\n    const user = { id: nextUserId++, name, email };\n    users.push(user);\n    return user;\n  },\n  createPost: ({ input }) => {\n    const post = { id: nextPostId++, title: input.title, authorId: input.authorId };\n    posts.push(post);\n    return post;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nlet nextUserId = 1;\nlet nextPostId = 1;\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\ninterface Post {\n  id: number;\n  title: string;\n  authorId: number;\n}\n\nlet users: User[] = [];\nlet posts: Post[] = [];\n\nconst schema = buildSchema(`\n  input PostInput {\n    title: String!\n    authorId: Int!\n  }\n\n  type User {\n    id: Int\n    name: String\n    email: String\n  }\n\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    createUser(name: String!, email: String!): User\n    createPost(input: PostInput!): Post\n  }\n\n  type Query {\n    users: [User]\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  users: () => users,\n  posts: () => posts,\n  createUser: ({ name, email }: { name: string; email: string }) => {\n    const user: User = { id: nextUserId++, name, email };\n    users.push(user);\n    return user;\n  },\n  createPost: ({ input }: { input: { title: string; authorId: number } }) => {\n    const post: Post = { id: nextPostId++, title: input.title, authorId: input.authorId };\n    posts.push(post);\n    return post;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field, Mutation, Argument, InputObjectType\nfrom fastapi_gql import GQL\n\nusers_data = []\nposts_data = []\nnext_user_id = 1\nnext_post_id = 1\n\nclass User(ObjectType):\n    id = Int()\n    name = String()\n    email = String()\n\nclass PostInput(InputObjectType):\n    title = String(required=True)\n    authorId = Int(required=True)\n\nclass Post(ObjectType):\n    id = Int()\n    title = String()\n    authorId = Int()\n\nclass CreateUser(Mutation):\n    class Arguments:\n        name = String(required=True)\n        email = String(required=True)\n    Output = User\n\n    def mutate(self, info, name, email):\n        global next_user_id\n        user = {'id': next_user_id, 'name': name, 'email': email}\n        users_data.append(user)\n        next_user_id += 1\n        return User(**user)\n\nclass CreatePost(Mutation):\n    class Arguments:\n        input = PostInput(required=True)\n    Output = Post\n\n    def mutate(self, info, input):\n        global next_post_id\n        post = {'id': next_post_id, 'title': input.title, 'authorId': input.authorId}\n        posts_data.append(post)\n        next_post_id += 1\n        return Post(**post)\n\nclass Query(ObjectType):\n    users = List(User)\n    posts = List(Post)\n\n    def resolve_users(self, info):\n        return [User(**u) for u in users_data]\n\n    def resolve_posts(self, info):\n        return [Post(**p) for p in posts_data]\n\nschema = Schema(query=Query, mutation=[CreateUser, CreatePost])\napp = FastAPI()\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar nextPostID = 1\nvar posts []map[string]interface{}\n\nvar postInputType = graphql.NewInputObject(graphql.InputObjectConfig{\n\tName: \"PostInput\",\n\tFields: graphql.InputObjectConfigFieldMap{\n\t\t\"title\": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},\n\t\t\"authorId\": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.Int)},\n\t},\n})\n\nvar postType = graphql.NewObject(graphql.ObjectConfig{\n\tName: \"Post\",\n\tFields: graphql.Fields{\n\t\t\"id\": &graphql.Field{Type: graphql.Int},\n\t\t\"title\": &graphql.Field{Type: graphql.String},\n\t\t\"authorId\": &graphql.Field{Type: graphql.Int},\n\t},\n})\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct{ Query string `json:\"query\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tresult := graphql.Do(graphql.Params{Schema: graphql.Schema{}, RequestString: params.Query})\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "createPost"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Update post mutation",
+      "description": "Add a mutation updatePost(id: Int!, title: String!): Post that updates a post's title and returns the updated post.",
+      "hints": [
+        "Find the post by its id", "Update the title field", "Return the modified post, or null if not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nlet posts = [\n  { id: 1, title: 'Original Title', authorId: 1 }\n];\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    updatePost(id: Int!, title: String!): Post\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  posts: () => posts,\n  updatePost: ({ id, title }) => {\n    const post = posts.find(p => p.id === id);\n    if (!post) return null;\n    post.title = title;\n    return post;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\ninterface Post {\n  id: number;\n  title: string;\n  authorId: number;\n}\n\nlet posts: Post[] = [\n  { id: 1, title: 'Original Title', authorId: 1 }\n];\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    updatePost(id: Int!, title: String!): Post\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  posts: () => posts,\n  updatePost: ({ id, title }: { id: number; title: string }) => {\n    const post = posts.find(p => p.id === id);\n    if (!post) return null;\n    post.title = title;\n    return post;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field, Mutation\nfrom fastapi_gql import GQL\n\nposts_data = [{'id': 1, 'title': 'Original Title', 'authorId': 1}]\n\nclass Post(ObjectType):\n    id = Int()\n    title = String()\n    authorId = Int()\n\nclass UpdatePost(Mutation):\n    class Arguments:\n        id = Int(required=True)\n        title = String(required=True)\n    Output = Post\n\n    def mutate(self, info, id, title):\n        for p in posts_data:\n            if p['id'] == id:\n                p['title'] = title\n                return Post(**p)\n        return None\n\nclass Query(ObjectType):\n    posts = List(Post)\n\n    def resolve_posts(self, info):\n        return [Post(**p) for p in posts_data]\n\nschema = Schema(query=Query, mutation=UpdatePost)\napp = FastAPI()\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar posts = []map[string]interface{}{\n\t{\"id\": 1, \"title\": \"Original Title\", \"authorId\": 1},\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct{ Query string `json:\"query\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"data\": map[string]string{\"message\": \"updatePost stub\"}})\n\t})\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "updatePost"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Delete post mutation",
+      "description": "Add a mutation deletePost(id: Int!): Boolean that deletes a post and returns true if successful.",
+      "hints": [
+        "Use Boolean as the return type", "Find and remove the post from the array", "Return true if deleted, false if not found"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nlet posts = [\n  { id: 1, title: 'Post 1', authorId: 1 },\n  { id: 2, title: 'Post 2', authorId: 1 }\n];\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    createPost(title: String!, authorId: Int!): Post\n    updatePost(id: Int!, title: String!): Post\n    deletePost(id: Int!): Boolean\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nlet nextId = 3;\n\nconst root = {\n  posts: () => posts,\n  createPost: ({ title, authorId }) => {\n    const post = { id: nextId++, title, authorId };\n    posts.push(post);\n    return post;\n  },\n  updatePost: ({ id, title }) => {\n    const post = posts.find(p => p.id === id);\n    if (!post) return null;\n    post.title = title;\n    return post;\n  },\n  deletePost: ({ id }) => {\n    const index = posts.findIndex(p => p.id === id);\n    if (index === -1) return false;\n    posts.splice(index, 1);\n    return true;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\ninterface Post {\n  id: number;\n  title: string;\n  authorId: number;\n}\n\nlet posts: Post[] = [\n  { id: 1, title: 'Post 1', authorId: 1 },\n  { id: 2, title: 'Post 2', authorId: 1 }\n];\nlet nextId = 3;\n\nconst schema = buildSchema(`\n  type Post {\n    id: Int\n    title: String\n    authorId: Int\n  }\n\n  type Mutation {\n    createPost(title: String!, authorId: Int!): Post\n    updatePost(id: Int!, title: String!): Post\n    deletePost(id: Int!): Boolean\n  }\n\n  type Query {\n    posts: [Post]\n  }\n`);\n\nconst root = {\n  posts: () => posts,\n  createPost: ({ title, authorId }: { title: string; authorId: number }) => {\n    const post: Post = { id: nextId++, title, authorId };\n    posts.push(post);\n    return post;\n  },\n  updatePost: ({ id, title }: { id: number; title: string }) => {\n    const post = posts.find(p => p.id === id);\n    if (!post) return null;\n    post.title = title;\n    return post;\n  },\n  deletePost: ({ id }: { id: number }) => {\n    const index = posts.findIndex(p => p.id === id);\n    if (index === -1) return false;\n    posts.splice(index, 1);\n    return true;\n  }\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3000);\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, Boolean, List, Schema, Field, Mutation\nfrom fastapi_gql import GQL\n\nposts_data = [\n    {'id': 1, 'title': 'Post 1', 'authorId': 1},\n    {'id': 2, 'title': 'Post 2', 'authorId': 1}\n]\nnext_id = 3\n\nclass Post(ObjectType):\n    id = Int()\n    title = String()\n    authorId = Int()\n\nclass CreatePost(Mutation):\n    class Arguments:\n        title = String(required=True)\n        authorId = Int(required=True)\n    Output = Post\n\n    def mutate(self, info, title, authorId):\n        global next_id\n        post = {'id': next_id, 'title': title, 'authorId': authorId}\n        posts_data.append(post)\n        next_id += 1\n        return Post(**post)\n\nclass UpdatePost(Mutation):\n    class Arguments:\n        id = Int(required=True)\n        title = String(required=True)\n    Output = Post\n\n    def mutate(self, info, id, title):\n        for p in posts_data:\n            if p['id'] == id:\n                p['title'] = title\n                return Post(**p)\n        return None\n\nclass DeletePost(Mutation):\n    class Arguments:\n        id = Int(required=True)\n    Output = Boolean\n\n    def mutate(self, info, id):\n        for i, p in enumerate(posts_data):\n            if p['id'] == id:\n                posts_data.pop(i)\n                return True\n        return False\n\nclass Query(ObjectType):\n    posts = List(Post)\n\n    def resolve_posts(self, info):\n        return [Post(**p) for p in posts_data]\n\nschema = Schema(query=Query, mutation=[CreatePost, UpdatePost, DeletePost])\napp = FastAPI()\nGQL(app, schema=schema)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"github.com/graphql-go/graphql\"\n)\n\nvar posts = []map[string]interface{}{\n\t{\"id\": 1, \"title\": \"Post 1\", \"authorId\": 1},\n\t{\"id\": 2, \"title\": \"Post 2\", \"authorId\": 1},\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct{ Query string `json:\"query\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"data\": map[string]interface{}{\"deletePost\": true}})\n\t})\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "deletePost"
+          }
+        ]
+      }
+    }
+  ]
+}

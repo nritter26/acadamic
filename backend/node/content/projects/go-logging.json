@@ -1,0 +1,91 @@
+{
+  "id": "go-logging",
+  "title": "Go: Logging",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 20,
+  "concepts": ["go", "logging", "log"],
+  "description": "Use Go's log package for structured logging, custom loggers, and output control.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "log.Println",
+      "description": "Use `log.Println(\"Application started\")` to print a log message. Print also `log.Printf(\"User %s logged in\", \"Alice\")`. Note the default timestamp prefix.",
+      "hints": [
+        "`log.Println` works like fmt.Println but adds timestamp",
+        "`log.Printf` supports format strings",
+        "Output includes date and time automatically"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Application started') && output.includes('Alice')",
+        "successMessage": "Basic logging with timestamps works!",
+        "failureMessage": "Use log.Println and log.Printf to print messages."
+      }
+    },
+    {
+      "id": 2,
+      "title": "log.Fatalf",
+      "description": "Write a function `connectDB(dsn string)` that calls `log.Fatalf(\"Failed to connect: %s\", err)` if the dsn is empty. Call with an empty string and note the exit behavior.",
+      "hints": [
+        "`log.Fatalf` prints the message and calls `os.Exit(1)`",
+        "This terminates the program immediately",
+        "It's useful for fatal initialization errors"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Failed to connect')",
+        "successMessage": "Fatalf logged and exited on fatal error!",
+        "failureMessage": "Call log.Fatalf with a format string and arguments."
+      }
+    },
+    {
+      "id": 3,
+      "title": "SetPrefix and SetFlags",
+      "description": "Configure the default logger: set prefix to \"[MYAPP] \" using `log.SetPrefix` and set flags to `log.Lshortfile | log.Ltime` using `log.SetFlags`. Then log \"Configuration loaded\".",
+      "hints": [
+        "`log.SetPrefix(\"[MYAPP] \")` adds a custom prefix",
+        "`log.SetFlags(log.Lshortfile | log.Ltime)` shows file:line and time",
+        "Available flags: Ldate, Ltime, Lmicroseconds, Llongfile, Lshortfile, LUTC"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('[MYAPP]') && output.includes('Configuration loaded')",
+        "successMessage": "Custom log prefix and flags applied!",
+        "failureMessage": "Set prefix and flags before calling the log function."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Log to a file",
+      "description": "Create a file \"app.log\" using `os.Create`. Create a logger with `log.New(file, \"LOG: \", log.LstdFlags)`. Log 3 messages: \"Starting\", \"Processing\", and \"Done\". Print \"Logged to app.log\".",
+      "hints": [
+        "`log.New(io.Writer, prefix, flags)` creates a custom logger",
+        "Open the file with os.Create or os.OpenFile",
+        "Each log message goes to the file, not stdout"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Logged to app.log')",
+        "successMessage": "Custom logger writes to file!",
+        "failureMessage": "Use log.New with the file handle as the writer."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Custom logger with io.Writer",
+      "description": "Create a custom logger that writes to multiple destinations using `io.MultiWriter`. Write to both stdout and a file. Log \"Multi-writer log\" and verify it appears in both.",
+      "hints": [
+        "`multiWriter := io.MultiWriter(os.Stdout, file)`",
+        "`logger := log.New(multiWriter, \"\", log.LstdFlags)`",
+        "The message appears on both outputs"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Multi-writer log')",
+        "successMessage": "Multi-writer logger sends to stdout and file!",
+        "failureMessage": "Use io.MultiWriter to combine multiple writers."
+      }
+    }
+  ]
+}

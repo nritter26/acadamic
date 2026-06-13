@@ -1,0 +1,71 @@
+{
+  "id": "rs-arrays",
+  "title": "Rust: Arrays and Slices",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "arrays", "slices", "indexing", "len"],
+  "description": "Create and use fixed-size arrays and slices in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create an Array",
+      "description": "Create an array `numbers: [i32; 5] = [1, 2, 3, 4, 5]` and print all elements using `{:?}`.",
+      "hints": ["`let numbers: [i32; 5] = [1, 2, 3, 4, 5];`", "Use `println!(\"{:?}\", numbers);` to debug-print the array.", "The type `[i32; 5]` means 5 i32 elements."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('5')",
+        "successMessage": "Array created!",
+        "failureMessage": "Create and print the array."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Access Elements",
+      "description": "Access and print the first (`[0]`), third (`[2]`), and last (`[len-1]`) elements of `[10, 20, 30, 40, 50]`.",
+      "hints": ["Array indexing starts at 0.", "`arr[0]` gets the first element.", "Use `arr.len()` to get the length, then `arr[arr.len() - 1]` for the last."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('30') && output.includes('50')",
+        "successMessage": "Array indexing works!",
+        "failureMessage": "Print the 1st, 3rd, and last elements."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Create with Default Value",
+      "description": "Create an array of 10 zeros using `[0; 10]` syntax and modify the first element to `42`. Print the array.",
+      "hints": ["`let mut arr = [0; 10];` creates [0, 0, 0, 0, 0, 0, 0, 0, 0, 0].", "The array must be `mut` to modify elements.", "`arr[0] = 42;` changes the first element."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('0')",
+        "successMessage": "Array with default value works!",
+        "failureMessage": "Create [0; 10], change first to 42, and print."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Array Slice",
+      "description": "Create an array `[1, 2, 3, 4, 5]` and print a slice of the first 3 elements using `&arr[0..3]`.",
+      "hints": ["`let slice = &arr[0..3];` creates a reference to elements 0, 1, 2.", "Slices are views into arrays (not copies).", "Print with `println!(\"{:?}\", slice);`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('2') && output.includes('3')",
+        "successMessage": "Array slicing works!",
+        "failureMessage": "Print the slice of the first 3 elements."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Mutable Slice",
+      "description": "Create a mutable array `[1, 2, 3, 4, 5]` and modify the middle 3 elements through a mutable slice `&mut arr[1..4]`. Print the modified array.",
+      "hints": ["`let slice = &mut arr[1..4];` creates a mutable slice.", "`slice[0] = 10;` changes element at index 1 of the original array.", "The original array is modified through the slice."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') || output.includes('1')",
+        "successMessage": "Mutable slice works!",
+        "failureMessage": "Modify elements through a mutable slice and print the array."
+      }
+    }
+  ]
+}

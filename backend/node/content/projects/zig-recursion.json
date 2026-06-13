@@ -1,0 +1,23 @@
+{
+  "id": "zig-recursion",
+  "title": "Zig: Recursion",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "recursion", "factorial"],
+  "description": "Write a recursive function to compute factorial in Zig.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Recursive Factorial",
+      "description": "Write a function `fn factorial(n: u64) u64` that computes n! recursively. Call with n=6 and print the result (720).",
+      "hints": ["Base case: `if (n <= 1) return 1;`", "Recursive: `return n * factorial(n - 1);`", "Zig supports recursion like C."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\nfn factorial(n: u64) u64 {\n    \n}\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('720')",
+        "successMessage": "Recursive factorial works!",
+        "failureMessage": "Compute factorial(6) = 720"
+      }
+    }
+  ]
+}

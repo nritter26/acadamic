@@ -1,0 +1,23 @@
+{
+  "id": "c-command-pattern",
+  "title": "C: Command Pattern",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "design patterns", "command", "function pointers", "undo"],
+  "description": "Implement the Command design pattern using function pointers to support execute and undo operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Command Interface",
+      "description": "Define a `Command` struct with function pointers for `execute` and `undo`. Implement concrete commands: `AddCommand` that adds two numbers and `PrintCommand` that prints a message. Create a command history array and execute 2 commands.",
+      "hints": ["Command struct: `void (*execute)(void*); void (*undo)(void*); void *state;`.", "AddCommand stores the operands and result in its state.", "PrintCommand stores the message string."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct {\n    void (*execute)(void*);\n    void (*undo)(void*);\n    void *state;\n} Command;\n\ntypedef struct { int a, b, result; } AddState;\n\nvoid add_execute(void *s) {\n    AddState *st = (AddState*)s;\n    st->result = st->a + st->b;\n    printf(\"Add: %d + %d = %d\\n\", st->a, st->b, st->result);\n}\n\nvoid add_undo(void *s) {\n    AddState *st = (AddState*)s;\n    printf(\"Undo add: %d\\n\", st->result);\n}\n\nint main() {\n    AddState *as = malloc(sizeof(AddState));\n    as->a = 10; as->b = 20;\n    Command cmd = {add_execute, add_undo, as};\n    cmd.execute(cmd.state);\n    cmd.undo(cmd.state);\n    free(as);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('30') && output.includes('Undo')",
+        "successMessage": "Command pattern works!",
+        "failureMessage": "Execute and undo the add command"
+      }
+    }
+  ]
+}

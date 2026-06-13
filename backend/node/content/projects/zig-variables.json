@@ -1,0 +1,23 @@
+{
+  "id": "zig-variables",
+  "title": "Zig: Variables",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "variables", "const", "var", "types"],
+  "description": "Declare variables of different types in Zig and print them.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Declare and Print Variables",
+      "description": "Declare const age: u8 = 25, var price: f64 = 9.99, const grade: u8 = 'A'. Print each using std.debug.print with the proper format specifier.",
+      "hints": ["Use `const` for immutable, `var` for mutable.", "Format: `\"age: {}\"` with `.{age}` argument.", "For chars: `'{c}'` or print the ASCII value."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('25') && output.includes('9.99')",
+        "successMessage": "Variables printed correctly!",
+        "failureMessage": "Print age (25), price (9.99), and grade (A)"
+      }
+    }
+  ]
+}

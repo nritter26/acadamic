@@ -1,0 +1,71 @@
+{
+  "id": "rs-if-else",
+  "title": "Rust: If/Else Conditionals",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "if", "else", "else if", "conditional"],
+  "description": "Use if, else if, and else to make decisions in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic If",
+      "description": "Declare `number = 10`. If it's greater than 5, print `\"Greater than 5\"`.",
+      "hints": ["`if number > 5 { println!(\"...\"); }`", "The condition must be a bool (no truthy/falsy like JS).", "Rust does not require parentheses around conditions."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Greater than 5')",
+        "successMessage": "Basic if works!",
+        "failureMessage": "Print 'Greater than 5' when number > 5."
+      }
+    },
+    {
+      "id": 2,
+      "title": "If/Else",
+      "description": "Declare `age = 16`. If age >= 18 print `\"Adult\"`, otherwise print `\"Minor\"`.",
+      "hints": ["`if age >= 18 { ... } else { ... }`", "The `else` block runs when the if condition is false.", "Test with age = 16 to see the else branch."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Minor')",
+        "successMessage": "If/else works!",
+        "failureMessage": "Print 'Minor' when age is 16."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Else If Chain",
+      "description": "Set `score = 85`. Print `\"A\"` if >= 90, `\"B\"` if >= 80, `\"C\"` if >= 70, else `\"F\"`.",
+      "hints": ["Use `if score >= 90 { ... } else if score >= 80 { ... } else { ... }`", "Conditions are checked in order, first match wins.", "With score = 85, it should print \"B\"."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('B')",
+        "successMessage": "Else if chain works!",
+        "failureMessage": "Print the correct grade for score = 85."
+      }
+    },
+    {
+      "id": 4,
+      "title": "If in a let Statement",
+      "description": "Declare a variable using if/else as an expression: `let result = if x > 0 { \"positive\" } else { \"non-positive\" };` with `x = 7`. Print result.",
+      "hints": ["In Rust, `if` is an expression and can be used on the right side of `let`.", "Both arms must return the same type.", "`let status = if x > 0 { \"positive\" } else { \"non-positive\" };`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('positive')",
+        "successMessage": "If as expression works!",
+        "failureMessage": "Print the result of if expression with x = 7."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Nested Conditions",
+      "description": "Given `x = 15` and `y = 20`, determine if x is even AND y is a multiple of 5. Use nested if statements. Print the result.",
+      "hints": ["Check `x % 2 == 0` for even.", "Check `y % 5 == 0` for multiple of 5.", "Nest the second if inside the first if block."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('15') || output.includes('even') || output.includes('multiple')",
+        "successMessage": "Nested conditions work!",
+        "failureMessage": "Print whether x is even and y is a multiple of 5."
+      }
+    }
+  ]
+}

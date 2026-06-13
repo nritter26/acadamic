@@ -1,0 +1,23 @@
+{
+  "id": "zig-hello-world",
+  "title": "Zig: Hello World",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 5,
+  "concepts": ["zig", "hello world", "std.debug.print"],
+  "description": "Write your first Zig program — print 'Hello, World!' to the console.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print Hello World",
+      "description": "Write a Zig program that prints 'Hello, World!' using std.debug.print. Import the std library and use the pub fn main() entry point.",
+      "hints": ["Use `const std = @import(\"std\");`", "`std.debug.print(\"Hello, World!\\n\", .{});`", "The main function is `pub fn main() !void`"],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('Hello, World!')",
+        "successMessage": "Hello World prints correctly!",
+        "failureMessage": "Print exactly 'Hello, World!'"
+      }
+    }
+  ]
+}

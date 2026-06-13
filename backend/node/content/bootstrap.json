@@ -1,0 +1,220 @@
+{
+  "Getting Started": {
+    "Bootstrap Introduction": {
+      "exp": "Introduction to Bootstrap and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "What is Bootstrap": [
+      "Bootstrap is the world's most popular front-end component library, providing a responsive grid system, pre-built UI components, and utility classes. It uses a mobile-first approach with 12-column grid, five responsive breakpoints (xs, sm, md, lg, xl), and Sass variables for customization. Bootstrap 5 dropped jQuery dependency and uses vanilla JavaScript for interactive components.",
+      "<!-- Bootstrap CSS via CDN -->\n<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n\n<!-- Bootstrap JS bundle -->\n<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js\"></script>\n\n<!-- Basic starter template -->\n<div class=\"container\">\n  <h1>Hello, Bootstrap!</h1>\n  <button class=\"btn btn-primary\">Primary</button>\n</div>"
+    ],
+    "Grid System": [
+      "Bootstrap's grid uses flexbox with 12 columns across five breakpoints. Rows are wrappers for columns; columns specify width via col-{breakpoint}-{size}. Equal-width columns use col. Auto-layout with col-{breakpoint} adjusts per breakpoint. Nest rows inside columns. Offsets push columns right. Gutters control spacing via g-* classes.",
+      "<div class=\"container\">\n  <div class=\"row\">\n    <div class=\"col-12 col-md-8\">Main content</div>\n    <div class=\"col-6 col-md-4\">Sidebar</div>\n  </div>\n  <div class=\"row mt-3\">\n    <div class=\"col-sm\">Auto width</div>\n    <div class=\"col-sm\">Auto width</div>\n    <div class=\"col-sm\">Auto width</div>\n  </div>\n  <div class=\"row mt-3\">\n    <div class=\"col-md-4 offset-md-2\">Offset column</div>\n  </div>\n</div>"
+    ],
+    "Breakpoints & Containers": [
+      "Bootstrap provides five breakpoints: xs (<576px), sm (≥576px), md (≥768px), lg (≥992px), xl (≥1200px), xxl (≥1400px). Containers center content horizontally: .container (max-width per breakpoint), .container-fluid (full width), .container-{breakpoint} (full width until breakpoint). Use d-* display utilities to show/hide elements per breakpoint.",
+      "<div class=\"container-sm\">100% wide until sm breakpoint</div>\n<div class=\"container-md\">100% wide until md breakpoint</div>\n<div class=\"container-lg\">100% wide until lg breakpoint</div>\n<div class=\"container-xl\">100% wide until xl breakpoint</div>\n<div class=\"container-xxl\">100% wide until xxl breakpoint</div>\n<div class=\"container-fluid\">Always full width</div>\n\n<!-- Responsive utilities -->\n<div class=\"d-none d-md-block\">Visible on md and up</div>\n<div class=\"d-lg-none\">Hidden on lg and up</div>"
+    ]
+  },
+  "Core Concepts": {
+    "Bootstrap Core Features": {
+      "exp": "Essential Bootstrap concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Bootstrap Components": {
+      "exp": "Building user interfaces with Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Bootstrap Routing": {
+      "exp": "Navigation and routing in Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Bootstrap State": {
+      "exp": "Managing application state in Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Bootstrap Data": {
+      "exp": "Working with data and APIs in Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Bootstrap Testing": {
+      "exp": "Testing strategies for Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Bootstrap Deployment": {
+      "exp": "Deploying Bootstrap applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Bootstrap Best Practices": {
+      "exp": "Best practices for Bootstrap development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Bootstrap Advanced": {
+      "exp": "Advanced Bootstrap topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Layout": {
+    "Columns & Gutters": [
+      "Columns use 12-unit system. Column classes: col-{breakpoint}-{size} or col-{size} without breakpoint. Use .row-cols-* to control number of columns per row on all breakpoints. Gutters: g-0 (no gap), g-1 through g-5 (increasing), gx-* (horizontal), gy-* (vertical). Column wrapping happens when more than 12 units are used in a row.",
+      "<div class=\"container\">\n  <!-- Row with 3 equal columns -->\n  <div class=\"row row-cols-3\">\n    <div class=\"col\">Column 1</div>\n    <div class=\"col\">Column 2</div>\n    <div class=\"col\">Column 3</div>\n  </div>\n  <!-- Variable width with gutters -->\n  <div class=\"row g-4 mt-3\">\n    <div class=\"col-7\">7 units</div>\n    <div class=\"col-5\">5 units</div>\n  </div>\n  <!-- No gutters -->\n  <div class=\"row g-0 mt-3\">\n    <div class=\"col-6\">No gutter</div>\n    <div class=\"col-6\">No gutter</div>\n  </div>\n</div>"
+    ],
+    "Alignment & Ordering": [
+      "Flexbox alignment classes for rows and columns. Vertical: align-items-start/center/end, align-self-*. Horizontal: justify-content-start/center/end/around/between. Column ordering with order-{breakpoint}-{number}. First and last with order-first/order-last. Margin auto with me-auto/ms-auto centers in flex containers.",
+      "<div class=\"container\">\n  <!-- Vertical center -->\n  <div class=\"row align-items-center\" style=\"height:200px\">\n    <div class=\"col\">Centered vertically</div>\n  </div>\n  <!-- Horizontal center -->\n  <div class=\"row justify-content-center\">\n    <div class=\"col-4\">Centered column</div>\n  </div>\n  <!-- Column ordering -->\n  <div class=\"row mt-3\">\n    <div class=\"col order-3\">Third in DOM</div>\n    <div class=\"col order-1\">First visually</div>\n    <div class=\"col order-2\">Second visually</div>\n  </div>\n</div>"
+    ]
+  },
+  "Components": {
+    "Buttons & Button Groups": [
+      "Bootstrap buttons use .btn with contextual classes: btn-primary, btn-secondary, btn-success, btn-danger, btn-warning, btn-info, btn-light, btn-dark, btn-link. Outline variants with btn-outline-*. Sizes: btn-lg, btn-sm. States: active, disabled. Button groups with .btn-group for horizontal grouping, .btn-group-vertical for vertical. Toolbars combine multiple groups.",
+      "<button type=\"button\" class=\"btn btn-primary\">Primary</button>\n<button type=\"button\" class=\"btn btn-outline-danger\">Danger Outline</button>\n<button type=\"button\" class=\"btn btn-success btn-lg\">Large Success</button>\n<button type=\"button\" class=\"btn btn-secondary btn-sm\" disabled>Disabled</button>\n\n<div class=\"btn-group\" role=\"group\">\n  <button class=\"btn btn-outline-primary\">Left</button>\n  <button class=\"btn btn-primary\">Middle</button>\n  <button class=\"btn btn-outline-primary\">Right</button>\n</div>"
+    ],
+    "Cards": [
+      "Cards are flexible content containers with optional header, body, footer. Build with .card, .card-body, .card-title, .card-text, .card-img-top. Card groups (.card-group) display as attached equal-width cards. Card decks (.card-deck deprecated — use row + cols instead). Horizontal cards with .row.g-0 > .col-md-4 + .col-md-8 inside card.",
+      "<div class=\"card\" style=\"width: 18rem;\">\n  <img src=\"...\" class=\"card-img-top\" alt=\"...\">\n  <div class=\"card-body\">\n    <h5 class=\"card-title\">Card title</h5>\n    <p class=\"card-text\">Some quick example text.\n\n    <a href=\"#\" class=\"btn btn-primary\">Go somewhere</a>\n  </div>\n</div>\n\n<!-- Card group -->\n<div class=\"card-group mt-3\">\n  <div class=\"card\"><div class=\"card-body\"><h5>Card 1</h5></div></div>\n  <div class=\"card\"><div class=\"card-body\"><h5>Card 2</h5></div></div>\n  <div class=\"card\"><div class=\"card-body\"><h5>Card 3</h5></div></div>\n</div>"
+    ],
+    "Navbar & Navigation": [
+      "Navbar is a responsive navigation header. Base: .navbar with .navbar-expand{-breakpoint}. Brand: .navbar-brand. Nav links: .navbar-nav with .nav-item and .nav-link. Toggler for mobile with data-bs-toggle=collapse. Supports dropdowns, forms, text, and color schemes (navbar-light/dark with bg-*). Sticky-top and fixed-top positions.",
+      "<nav class=\"navbar navbar-expand-lg navbar-dark bg-dark\">\n  <div class=\"container-fluid\">\n    <a class=\"navbar-brand\" href=\"#\">Brand</a>\n    <button class=\"navbar-toggler\" type=\"button\"\n            data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">\n      <span class=\"navbar-toggler-icon\"></span>\n    </button>\n    <div class=\"collapse navbar-collapse\" id=\"navbarNav\">\n      <ul class=\"navbar-nav me-auto\">\n        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"#\">Home</a></li>\n        <li class=\"nav-item\"><a class=\"nav-link\" href=\"#\">Features</a></li>\n        <li class=\"nav-item dropdown\">\n          <a class=\"nav-link dropdown-toggle\" href=\"#\" data-bs-toggle=\"dropdown\">Dropdown</a>\n          <ul class=\"dropdown-menu\"><li><a class=\"dropdown-item\" href=\"#\">Action</a></li></ul>\n        </li>\n      </ul>\n      <form class=\"d-flex\">\n        <input class=\"form-control me-2\" type=\"search\" placeholder=\"Search\">\n        <button class=\"btn btn-outline-light\" type=\"submit\">Search</button>\n      </form>\n    </div>\n  </div>\n</nav>"
+    ],
+    "Modals & Alerts": [
+      "Modals are dialog boxes built with HTML, CSS, and JavaScript. Structure: modal, modal-dialog, modal-content (header + body + footer). Trigger with data-bs-toggle=modal and data-bs-target. Sizes: modal-sm, modal-lg, modal-xl. Centered with modal-dialog-centered. Scrollable with modal-dialog-scrollable. Alerts: .alert with .alert-{color}. Dismissible with .alert-dismissible + data-bs-dismiss=alert.",
+      "<!-- Button trigger modal -->\n<button type=\"button\" class=\"btn btn-primary\"\n        data-bs-toggle=\"modal\" data-bs-target=\"#exampleModal\">\n  Launch demo modal\n</button>\n\n<!-- Modal -->\n<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <h5 class=\"modal-title\">Modal title</h5>\n        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n      </div>\n      <div class=\"modal-body\">Modal body text goes here.</div>\n      <div class=\"modal-footer\">\n        <button class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n        <button class=\"btn btn-primary\">Save changes</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Alert -->\n<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">\n  <strong>Error!</strong> Something went wrong.\n  <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>\n</div>"
+    ],
+    "List Group & Badges": [
+      "List groups display series of content. Base .list-group with .list-group-item. Active, disabled, links, buttons, flush (borderless), numbered variants. Badges: .badge with .bg-{color}, .rounded-pill for pill shape. Position badges with position-relative + position-absolute. Badges scale to parent font size.",
+      "<ul class=\"list-group\">\n  <li class=\"list-group-item active\">Active item</li>\n  <li class=\"list-group-item disabled\">Disabled item</li>\n  <li class=\"list-group-item d-flex justify-content-between align-items-center\">\n    With badge\n    <span class=\"badge bg-primary rounded-pill\">14</span>\n  </li>\n</ul>\n\n<!-- Link list group -->\n<div class=\"list-group mt-3\">\n  <a href=\"#\" class=\"list-group-item list-group-item-action\">Link item</a>\n  <button class=\"list-group-item list-group-item-action\">Button item</button>\n</div>\n\n<!-- Badge alone -->\n<span class=\"badge bg-success\">Success</span>\n<span class=\"badge bg-warning text-dark\">Warning</span>"
+    ],
+    "Forms & Input Groups": [
+      "Form controls: .form-control (text, number, file, etc.), .form-select (dropdown), .form-check (checkboxes/radios), .form-range (sliders), .form-floating (floating labels). Input groups extend form controls with .input-group and .input-group-text. Validation with .is-valid/.is-invalid and .invalid-feedback/.valid-feedback. Layout with .row + .col-* and .form-label.",
+      "<form class=\"row g-3\">\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">Email</label>\n    <input type=\"email\" class=\"form-control\" placeholder=\"name@example.com\">\n  </div>\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">State</label>\n    <select class=\"form-select\">\n      <option selected>Choose...</option>\n      <option>California</option>\n    </select>\n  </div>\n  <div class=\"col-12\">\n    <div class=\"form-check\">\n      <input class=\"form-check-input\" type=\"checkbox\">\n      <label class=\"form-check-label\">Remember me</label>\n    </div>\n  </div>\n  <div class=\"col-12\">\n    <div class=\"input-group\">\n      <span class=\"input-group-text\">@</span>\n      <input class=\"form-control\" placeholder=\"Username\">\n    </div>\n  </div>\n  <div class=\"col-12\">\n    <button class=\"btn btn-primary\" type=\"submit\">Submit</button>\n  </div>\n</form>"
+    ]
+  },
+  "Utilities": {
+    "Spacing & Sizing": [
+      "Margin and padding use m{p}-{sides}-{size} notation. Sides: t (top), b (bottom), s (start/left), e (end/right), x (horizontal), y (vertical), blank (all). Sizes: 0 through 5 and auto. Responsive: {property}{sides}-{breakpoint}-{size}. Width: w-25/50/75/100, w-auto. Height: h-25/50/75/100, h-auto. Max-width: mw-100. Viewport: min-vw-100, min-vh-100.",
+      "<div class=\"container\">\n  <!-- Margin examples -->\n  <div class=\"mt-3 mb-3\">Margin top and bottom (1rem)</div>\n  <div class=\"mx-auto\" style=\"width:200px\">Horizontally centered</div>\n  <div class=\"p-4\">Padding all sides (1.5rem)</div>\n  <div class=\"py-2 px-4\">Vertical + horizontal padding</div>\n\n  <!-- Responsive margin -->\n  <div class=\"mt-0 mt-md-3 mt-lg-5\">\n    Responsive margin: 0 on xs, 1rem on md, 3rem on lg\n  </div>\n\n  <!-- Sizing -->\n  <div class=\"w-50 bg-secondary text-white p-2\">50% width</div>\n  <div style=\"height:100px\">\n    <div class=\"h-75 bg-info\">75% height of parent</div>\n  </div>\n</div>"
+    ],
+    "Typography & Text": [
+      "Text alignment: text-start, text-center, text-end, text-{breakpoint}-{alignment}. Text transform: text-lowercase, text-uppercase, text-capitalize. Font weight: fw-bold, fw-semibold, fw-normal, fw-light. Font style: fst-italic. Text decoration: text-decoration-none, text-decoration-underline, text-decoration-line-through. Text truncation with text-truncate. Word break with text-break. Monospace with font-monospace.",
+      "<p class=\"text-start\">Start aligned text\n\n<p class=\"text-center text-md-end\">Center on xs, end on md+\n\n<p class=\"text-uppercase fw-bold\">Uppercase bold\n\n<p class=\"text-lowercase fst-italic\">lowercase italic\n\n<p class=\"text-truncate\" style=\"max-width:200px\">\n  This long text will be truncated with an ellipsis.\n\n\n<p class=\"font-monospace\">Monospace text\n\n<p class=\"text-decoration-line-through\">Strikethrough"
+    ],
+    "Colors & Backgrounds": [
+      "Text colors: text-primary, text-secondary, text-success, text-danger, text-warning, text-info, text-light, text-dark, text-body, text-muted, text-white, text-black-50, text-white-50. Background colors: bg-primary, bg-secondary, bg-success, bg-danger, bg-warning, bg-info, bg-light, bg-dark, bg-body, bg-white, bg-transparent. Opacity: bg-opacity-10 through bg-opacity-75. Gradients: bg-gradient.",
+      "<p class=\"text-primary\">.text-primary\n\n<p class=\"text-success\">.text-success\n\n<p class=\"text-danger\">.text-danger\n\n<p class=\"text-warning bg-dark\">.text-warning on dark bg\n\n<p class=\"text-muted\">.text-muted\n\n\n<div class=\"p-3 mb-2 bg-primary text-white\">Primary background</div>\n<div class=\"p-3 mb-2 bg-danger bg-opacity-25\">25% opacity danger</div>\n<div class=\"p-3 mb-2 bg-warning bg-gradient\">Warning with gradient</div>"
+    ],
+    "Display & Flex": [
+      "Display: d-{value} (none, inline, inline-block, block, grid, table, flex, inline-flex). Responsive: d-{breakpoint}-{value}. Flex utilities: flex-row/column, flex-wrap/nowrap, justify-content-*, align-items-*, align-self-*, flex-fill, flex-grow-*, flex-shrink-*. Gap: gap-0 through gap-5. Order: order-0 through order-5, order-first, order-last.",
+      "<div class=\"d-flex justify-content-between align-items-center p-3 bg-light\">\n  <div>Flex item 1</div>\n  <div>Flex item 2</div>\n  <div>Flex item 3</div>\n</div>\n\n<div class=\"d-none d-md-block\">\n  Hidden on mobile, visible on md+\n</div>\n\n<div class=\"d-flex flex-wrap gap-3 mt-3\">\n  <div class=\"p-2 bg-primary text-white\">Wrap item 1</div>\n  <div class=\"p-2 bg-primary text-white\">Wrap item 2</div>\n  <div class=\"p-2 bg-primary text-white\">Wrap item 3</div>\n</div>\n\n<div class=\"d-flex mt-3\">\n  <div class=\"flex-grow-1 bg-info\">Grow</div>\n  <div class=\"bg-warning\">Fixed</div>\n</div>"
+    ],
+    "Borders & Shadows": [
+      "Borders: border, border-{side} (top/end/bottom/start), border-0, border-{side}-0. Border color: border-primary, border-secondary, etc. Border width: border-1 through border-5. Border radius: rounded, rounded-{size} (0/1/2/3/pill/circle), rounded-{side}-*. Shadows: shadow-none, shadow-sm, shadow, shadow-lg. Opacity: opacity-25/50/75/100. Overflow: overflow-auto/hidden/visible/scroll. Position: position-relative/absolute/fixed/sticky. Top/start/end/bottom: translate-middle.",
+      "<div class=\"d-flex gap-3 flex-wrap\">\n  <div class=\"border border-primary p-3 rounded\">Primary border</div>\n  <div class=\"border border-3 border-success p-3 rounded-3\">Thick success</div>\n  <div class=\"border-top border-4 border-danger p-3\">Top border only</div>\n  <div class=\"shadow p-3 rounded-2\">Regular shadow</div>\n  <div class=\"shadow-lg p-3 rounded-pill\">Large shadow + pill</div>\n  <div class=\"border border-info p-3 rounded-circle\">\n    <span>Circle</span>\n  </div>\n</div>"
+    ]
+  },
+  "Content": {
+    "Typography & Headings": [
+      "HTML headings h1-h6 with .h1-.h6 classes for non-heading elements. Display headings: display-1 through display-6 (larger, lighter). Lead paragraph: .lead. Inline text: <mark>, <small>, <s>, <u>, <strong>, <em>, <abbr>, <blockquote>, <code>, <kbd>, <pre>. Description list: <dl>, <dt>, <dd>.",
+      "<h1>h1 heading</h1>\n<h2>h2 heading</h2>\n<p class=\"h3\">Using h3 class on a paragraph\n\n<h1 class=\"display-1\">Display 1</h1>\n<h4 class=\"display-6\">Display 6</h4>\n<p class=\"lead\">This is a lead paragraph that stands out.\n\nYou can use <mark>highlighted</mark> text, <kbd>Ctrl+C</kbd> keyboard,\n<code>inline code</code>, and <abbr title=\"HyperText Markup Language\">HTML</abbr> abbreviations.\n\n<blockquote class=\"blockquote\">\n  A well-known quote.\n\n  <footer class=\"blockquote-footer\">Someone famous</footer>\n</blockquote>"
+    ],
+    "Images & Figures": [
+      "Responsive images: .img-fluid (max-width:100% + height:auto). Thumbnail: .img-thumbnail. Image alignment: .float-start, .float-end, .mx-auto.d-block. Picture element support. Figures with <figure> + .figure, .figure-img, .figure-caption. Rounded corners: .rounded. Aspect ratios via ratio and ratio-{x}x{y} helpers for embedded content.",
+      "<img src=\"...\" class=\"img-fluid\" alt=\"Responsive image\">\n\n<div class=\"d-flex gap-3 my-3\">\n  <img src=\"...\" class=\"img-thumbnail\" alt=\"Thumbnail\" width=\"150\">\n  <img src=\"...\" class=\"rounded-circle\" alt=\"Circle\" width=\"150\">\n  <img src=\"...\" class=\"rounded\" alt=\"Rounded\" width=\"150\">\n</div>\n\n<figure class=\"figure\">\n  <img src=\"...\" class=\"figure-img img-fluid rounded\" alt=\"...\">\n  <figcaption class=\"figure-caption text-end\">A caption for the image</figcaption>\n</figure>\n\n<div class=\"ratio ratio-16x9\">\n  <iframe src=\"https://www.youtube.com/embed/...\"></iframe>\n</div>"
+    ],
+    "Tables": [
+      "Base .table. Variants: table-striped, table-hover, table-bordered, table-borderless, table-sm (compact). Contextual rows/headers: table-{active|primary|secondary|success|danger|warning|info|light|dark}. Responsive tables: wrap in .table-responsive (or .table-responsive-{breakpoint}). Table dark with .table-dark. Align top with align-middle/align-top.",
+      "<div class=\"table-responsive\">\n  <table class=\"table table-striped table-hover\">\n    <thead class=\"table-dark\">\n      <tr>\n        <th>#</th>\n        <th>Name</th>\n        <th>Email</th>\n        <th>Status</th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr>\n        <td>1</td>\n        <td>Alice</td>\n        <td>alice@example.com</td>\n        <td><span class=\"badge bg-success\">Active</span></td>\n      </tr>\n      <tr class=\"table-warning\">\n        <td>2</td>\n        <td>Bob</td>\n        <td>bob@example.com</td>\n        <td><span class=\"badge bg-warning text-dark\">Pending</span></td>\n      </tr>\n    </tbody>\n  </table>\n</div>"
+    ]
+  },
+  "Forms": {
+    "Form Controls & Inputs": [
+      "Form controls use .form-control on <input>, <textarea>, and <select>. Supported inputs: text, password, email, number, tel, url, search, date, time, datetime-local, month, week, color, file. Sizing with .form-control-lg, .form-control-sm. Readonly with readonly attribute. Disabled with disabled attribute. Plain text with .form-control-plaintext for displaying values as text.",
+      "<div class=\"mb-3\">\n  <label for=\"email\" class=\"form-label\">Email address</label>\n  <input type=\"email\" class=\"form-control\" id=\"email\" placeholder=\"name@example.com\">\n</div>\n<div class=\"mb-3\">\n  <label for=\"bio\" class=\"form-label\">Bio</label>\n  <textarea class=\"form-control\" id=\"bio\" rows=\"3\"></textarea>\n</div>\n<div class=\"mb-3\">\n  <label for=\"file\" class=\"form-label\">File input</label>\n  <input class=\"form-control\" type=\"file\" id=\"file\">\n</div>\n<div class=\"mb-3\">\n  <label for=\"color\" class=\"form-label\">Color picker</label>\n  <input type=\"color\" class=\"form-control form-control-color\" id=\"color\" value=\"#563d7c\">\n</div>\n<div class=\"mb-3\">\n  <label class=\"form-label\">Readonly input</label>\n  <input class=\"form-control\" type=\"text\" value=\"Readonly value\" readonly>\n</div>"
+    ],
+    "Select & Checks": [
+      "Custom select with .form-select. Sizing: form-select-lg, form-select-sm. Multiple select with multiple attribute. Checkboxes: .form-check-input wrapped in .form-check with .form-check-label. Radios same pattern. Inline with .form-check-inline. Switch type: .form-check-input type=checkbox role=switch. Disabled states supported on all.",
+      "<select class=\"form-select mb-3\" aria-label=\"Default select\">\n  <option selected>Open this select menu</option>\n  <option value=\"1\">One</option>\n  <option value=\"2\">Two</option>\n</select>\n\n<select class=\"form-select form-select-lg mb-3\">\n  <option>Large select</option>\n</select>\n\n<div class=\"mb-3\">\n  <div class=\"form-check form-check-inline\">\n    <input class=\"form-check-input\" type=\"checkbox\" id=\"chk1\">\n    <label class=\"form-check-label\" for=\"chk1\">Checkbox 1</label>\n  </div>\n  <div class=\"form-check form-check-inline\">\n    <input class=\"form-check-input\" type=\"radio\" name=\"radioGroup\" id=\"radio1\">\n    <label class=\"form-check-label\" for=\"radio1\">Radio 1</label>\n  </div>\n</div>\n\n<div class=\"form-check form-switch\">\n  <input class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"switch\">\n  <label class=\"form-check-label\" for=\"switch\">Toggle switch</label>\n</div>"
+    ],
+    "Validation": [
+      "Form validation uses .was-validated on <form> after submission or .needs-validation for custom validation. HTML5 validation constraints: required, minlength, maxlength, min, max, type, pattern. Visual feedback: .is-valid, .is-invalid, .valid-feedback, .invalid-feedback. Tooltip style: .valid-tooltip, .invalid-tooltip. Server-side validation by adding classes manually.",
+      "<form class=\"row g-3 needs-validation\" novalidate>\n  <div class=\"col-md-4\">\n    <label class=\"form-label\">First name</label>\n    <input type=\"text\" class=\"form-control\" required>\n    <div class=\"valid-feedback\">Looks good!</div>\n    <div class=\"invalid-feedback\">Please enter a name.</div>\n  </div>\n  <div class=\"col-md-4\">\n    <label class=\"form-label\">City</label>\n    <input type=\"text\" class=\"form-control is-invalid\">\n    <div class=\"invalid-feedback\">Please provide a valid city.</div>\n  </div>\n  <div class=\"col-md-4\">\n    <label class=\"form-label\">ZIP code</label>\n    <input type=\"text\" class=\"form-control\" pattern=\"[0-9]{5}\" required>\n    <div class=\"invalid-feedback\">Five-digit number required.</div>\n  </div>\n  <div class=\"col-12\">\n    <button class=\"btn btn-primary\" type=\"submit\">Submit</button>\n  </div>\n</form>"
+    ],
+    "Floating Labels": [
+      "Floating labels use .form-floating wrapper around form-control and label. Supports inputs and textareas. The label sits inside the input moving to a floating position on focus or when filled. Browser autofill is handled automatically. Works with selects and validation states. Ideal for streamlined forms.",
+      "<div class=\"form-floating mb-3\">\n  <input type=\"email\" class=\"form-control\" id=\"floatingInput\" placeholder=\"name@example.com\">\n  <label for=\"floatingInput\">Email address</label>\n</div>\n<div class=\"form-floating mb-3\">\n  <input type=\"password\" class=\"form-control\" id=\"floatingPassword\" placeholder=\"Password\">\n  <label for=\"floatingPassword\">Password</label>\n</div>\n<div class=\"form-floating\">\n  <textarea class=\"form-control\" id=\"floatingTextarea\" style=\"height:100px\"></textarea>\n  <label for=\"floatingTextarea\">Comments</label>\n</div>"
+    ]
+  },
+  "Customize": {
+    "Sass Variables & Maps": [
+      "Bootstrap uses Sass variables and maps for customization. Key variable file: _variables.scss. Override before importing Bootstrap. Theme colors map: $theme-colors. Grid: $grid-breakpoints, $container-max-widths, $grid-columns. Spacing: $spacer with $spacers map. Utility API generates utility classes from Sass maps. Root variables via $prefix and CSS custom properties.",
+      "// Custom Bootstrap (custom.scss)\n// 1. Override variables BEFORE importing Bootstrap\n$primary: #6f42c1;\n$success: #20c997;\n$font-family-sans-serif: 'Inter', sans-serif;\n$border-radius: 0.5rem;\n\n// 2. Add a custom color\n$custom-colors: (\n  'custom-color': #ff6b6b\n);\n$theme-colors: map-merge($theme-colors, $custom-colors);\n\n// 3. Custom spacer\n$spacers: map-merge($spacers, (\n  6: $spacer * 4,\n  7: $spacer * 5\n));\n\n// 4. Import Bootstrap\n@import 'bootstrap/scss/bootstrap';"
+    ],
+    "CSS Custom Properties": [
+      "Bootstrap 5 sets many CSS custom properties on :root and components. Root: --bs-primary, --bs-body-color, --bs-border-radius, etc. Component-level: --bs-accordion-bg, --bs-modal-width. Override at runtime via CSS or JavaScript. Disable with $enable-css-variables: false. This enables dynamic theming without rebuilding Sass.",
+      ":root {\n  --bs-primary: #6f42c1;\n  --bs-body-bg: #f8f9fa;\n  --bs-body-color: #212529;\n  --bs-border-radius: 0.5rem;\n}\n\n/* Override per component instance */\n.custom-card {\n  --bs-card-bg: #2d2d2d;\n  --bs-card-color: #fff;\n  --bs-card-border-color: #444;\n}\n\n/* Dark theme via CSS vars */\n[data-bs-theme=\"dark\"] {\n  --bs-body-bg: #212529;\n  --bs-body-color: #dee2e6;\n  --bs-border-color: #495057;\n}\n\n/* JavaScript: document.documentElement.setAttribute('data-bs-theme', 'dark') */"
+    ],
+    "Components & Theming": [
+      "Bootstrap offers multiple component Sass variants: accordion, alerts, badges, buttons, cards, carousel, dropdowns, forms, list group, modal, nav, navbar, offcanvas, pagination, popovers, progress, scrollspy, spinners, toasts, tooltips. Enable/disable components via $enable-* variables: $enable-button-pointers, $enable-caret, $enable-rounded, $enable-shadows, $enable-gradients, $enable-transitions, $enable-reduced-motion, $enable-smooth-scroll, $enable-grid-classes, $enable-container-classes, $enable-cssgrid, $enable-validation-icons.",
+      "// _custom.scss — component toggles\n$enable-rounded: true;\n$enable-shadows: true;\n$enable-gradients: false;\n$enable-transitions: true;\n$enable-reduced-motion: true;\n$enable-smooth-scroll: true;\n$enable-grid-classes: true;\n$enable-cssgrid: false;\n$enable-button-pointers: true;\n$enable-validation-icons: true;\n$enable-negative-margins: true;\n\n// Example: custom button theme\n$btn-padding-y-lg: 1rem;\n$btn-padding-x-lg: 2rem;\n$btn-border-radius-lg: 50rem;  // pill buttons\n\n@import 'bootstrap/scss/bootstrap';"
+    ]
+  },
+  "JavaScript": {
+    "Modal & Offcanvas": [
+      "Modal via data-bs-toggle=\"modal\" or JavaScript API: new bootstrap.Modal(element).show(). Methods: show, hide, toggle, dispose, handleUpdate. Events: show.bs.modal, shown.bs.modal, hide.bs.modal, hidden.bs.modal. Options: backdrop (true/static/false), keyboard, focus. Static backdrop prevents close on backdrop click. Offcanvas similar API: offcanvas-start/end/top/bottom.",
+      "// JavaScript API\nconst myModal = new bootstrap.Modal(\n  document.getElementById('myModal'),\n  { backdrop: 'static', keyboard: false }\n);\nmyModal.show();\n\n// Events\ndocument.getElementById('myModal').addEventListener('shown.bs.modal', function () {\n  console.log('Modal shown');\n});\n\n// Offcanvas\nconst offcanvas = new bootstrap.Offcanvas(\n  document.getElementById('myOffcanvas')\n);\noffcanvas.show();\n\n// Static backdrop modal\n<button class=\"btn btn-primary\"\n  data-bs-toggle=\"modal\" data-bs-target=\"#staticBackdrop\"\n  data-bs-backdrop=\"static\" data-bs-keyboard=\"false\">\n  Launch static modal\n</button>"
+    ],
+    "Tooltip & Popover": [
+      "Tooltips use Popper for positioning. Initialize with data-bs-toggle=\"tooltip\" or JavaScript. Options: animation, container, delay, html, placement (top/bottom/left/right/auto), sanitize, selector, template, title, trigger (click/hover/focus/manual). Popovers extend tooltips with header + body content. Initialize: new bootstrap.Popover(element). Both need manual initialization for dynamically added elements.",
+      "<!-- HTML markup -->\n<button type=\"button\" class=\"btn btn-secondary\"\n  data-bs-toggle=\"tooltip\" data-bs-placement=\"top\"\n  title=\"Tooltip on top\">\n  Hover me\n</button>\n\n<button type=\"button\" class=\"btn btn-lg btn-danger\"\n  data-bs-toggle=\"popover\" title=\"Popover title\"\n  data-bs-content=\"And here's some content.\">\n  Click for popover\n</button>\n\n// Initialize all\nconst tooltipTriggerList = [].slice.call(\n  document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')\n);\ntooltipTriggerList.map(el => new bootstrap.Tooltip(el));\n\nconst popoverTriggerList = [].slice.call(\n  document.querySelectorAll('[data-bs-toggle=\"popover\"]')\n);\npopoverTriggerList.map(el => new bootstrap.Popover(el));\n\n// With custom options\nnew bootstrap.Tooltip(element, {\n  delay: { show: 500, hide: 100 },\n  html: true\n});"
+    ],
+    "Collapse & Accordion": [
+      "Collapse toggles content visibility: data-bs-toggle=\"collapse\", data-bs-target=\"#id\". Accordion groups collapses with .accordion + .accordion-item structure. Accordion flush removes borders/background. Stay-open variant with data-bs-parent=\"#accordion\" removed. Methods: show, hide, toggle. Events: show.bs.collapse, shown.bs.collapse, hide.bs.collapse, hidden.bs.collapse.",
+      "<div class=\"accordion\" id=\"accordionExample\">\n  <div class=\"accordion-item\">\n    <h2 class=\"accordion-header\">\n      <button class=\"accordion-button\" type=\"button\"\n        data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\">\n        Accordion Item #1\n      </button>\n    </h2>\n    <div id=\"collapseOne\" class=\"accordion-collapse collapse show\"\n         data-bs-parent=\"#accordionExample\">\n      <div class=\"accordion-body\">Content for item 1.</div>\n    </div>\n  </div>\n  <div class=\"accordion-item\">\n    <h2 class=\"accordion-header\">\n      <button class=\"accordion-button collapsed\" type=\"button\"\n        data-bs-toggle=\"collapse\" data-bs-target=\"#collapseTwo\">\n        Accordion Item #2\n      </button>\n    </h2>\n    <div id=\"collapseTwo\" class=\"accordion-collapse collapse\"\n         data-bs-parent=\"#accordionExample\">\n      <div class=\"accordion-body\">Content for item 2.</div>\n    </div>\n  </div>\n</div>"
+    ],
+    "Carousel & Toast": [
+      "Carousel cycles through images with previous/next controls and indicators. Base: .carousel.slide with .carousel-inner > .carousel-item. Options: interval, pause, wrap, keyboard, touch. Crossfade with .carousel-fade. Methods: cycle, pause, prev, next, dispose. Toasts: lightweight notification component with .toast. Auto-hide with data-bs-delay or options. Trigger manually via Bootstrap.Toast.",
+      "<div id=\"carouselExample\" class=\"carousel slide\" data-bs-ride=\"carousel\">\n  <div class=\"carousel-indicators\">\n    <button data-bs-target=\"#carouselExample\" data-bs-slide-to=\"0\" class=\"active\"></button>\n    <button data-bs-target=\"#carouselExample\" data-bs-slide-to=\"1\"></button>\n  </div>\n  <div class=\"carousel-inner\">\n    <div class=\"carousel-item active\">\n      <img src=\"...\" class=\"d-block w-100\" alt=\"...\">\n    </div>\n    <div class=\"carousel-item\">\n      <img src=\"...\" class=\"d-block w-100\" alt=\"...\">\n    </div>\n  </div>\n  <button class=\"carousel-control-prev\" data-bs-slide=\"prev\">\n    <span class=\"carousel-control-prev-icon\"></span>\n  </button>\n  <button class=\"carousel-control-next\" data-bs-slide=\"next\">\n    <span class=\"carousel-control-next-icon\"></span>\n  </button>\n</div>\n\n<!-- Toast -->\n<div class=\"toast\" role=\"alert\" data-bs-delay=\"3000\">\n  <div class=\"toast-header\">\n    <strong class=\"me-auto\">Notification</strong>\n    <button class=\"btn-close\" data-bs-dismiss=\"toast\"></button>\n  </div>\n  <div class=\"toast-body\">Hello, Bootstrap!</div>\n</div>\n\n<script>new bootstrap.Toast(document.querySelector('.toast')).show();</script>"
+    ],
+    "ScrollSpy & Tabs": [
+      "ScrollSpy auto-activates nav links based on scroll position. Add data-bs-spy=\"scroll\" to the scrollable element with data-bs-target=\"#navId\". Works with nav, list-group, or simple links. Tab component toggles content panes: nav-tabs + tab-content with tab-pane. Active via show class. Fade with fade class. Methods: show, dispose. Events: show.bs.tab, shown.bs.tab.",
+      "<!-- ScrollSpy -->\n<nav id=\"navbar-spy\" class=\"navbar navbar-light bg-light px-3 mb-3\">\n  <ul class=\"nav nav-pills\">\n    <li class=\"nav-item\"><a class=\"nav-link\" href=\"#section1\">Section 1</a></li>\n    <li class=\"nav-item\"><a class=\"nav-link\" href=\"#section2\">Section 2</a></li>\n  </ul>\n</nav>\n<div data-bs-spy=\"scroll\" data-bs-target=\"#navbar-spy\"\n     data-bs-offset=\"0\" tabindex=\"0\" style=\"height:200px;overflow-y:scroll\">\n  <h4 id=\"section1\">Section 1</h4>Content...\n\n  <h4 id=\"section2\">Section 2</h4>Content...\n\n</div>\n\n<!-- Tabs -->\n<ul class=\"nav nav-tabs\" id=\"myTab\">\n  <li class=\"nav-item\">\n    <button class=\"nav-link active\" data-bs-toggle=\"tab\" data-bs-target=\"#home\">Home</button>\n  </li>\n  <li class=\"nav-item\">\n    <button class=\"nav-link\" data-bs-toggle=\"tab\" data-bs-target=\"#profile\">Profile</button>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"myTabContent\">\n  <div class=\"tab-pane fade show active\" id=\"home\">Home content</div>\n  <div class=\"tab-pane fade\" id=\"profile\">Profile content</div>\n</div>"
+    ]
+  },
+  "Helpers & Advanced": {
+    "Sticky & Fixed Positioning": [
+      "Fixed top: .fixed-top (position:fixed + top:0). Fixed bottom: .fixed-bottom. Sticky top: .sticky-top (position:sticky + top:0). Sticky bottom: .sticky-bottom. Responsive sticky: .sticky-{breakpoint}-top. Z-index utilities: z-index utilities via z-* classes. Stacking context-aware. Sticky elements stay in flow until scroll threshold, unlike fixed elements removed from flow.",
+      "<nav class=\"navbar navbar-dark bg-dark fixed-top\">\n  Fixed top navbar\n</nav>\n\n<nav class=\"navbar navbar-light bg-light sticky-top\">\n  Sticky top — scrolls until hits top then sticks\n</nav>\n\n<div class=\"sticky-sm-top\">Sticks on sm and up</div>\n\n<!-- Use with offset spacing -->\n<body style=\"padding-top: 56px;\">\n  <!-- Content offset for fixed navbar -->\n</body>\n\n<!-- Z-index utilities -->\n<div class=\"z-1 position-relative\">z-index 1</div>\n<div class=\"z-3 position-absolute\">z-index 3</div>"
+    ],
+    "Screen Readers & Accessibility": [
+      "Screen reader utilities: .visually-hidden (visually hide, still accessible), .visually-hidden-focusable (hide until focused). Focus ring with .focus-ring. Focus ring utilities: .focus-ring-{color}. Reduced motion: prefers-reduced-motion media query respected by Bootstrap. Color contrast ratios meet WCAG AA. ARIA attributes: role, aria-label, aria-hidden, aria-expanded, aria-controls.",
+      "<a class=\"visually-hidden-focusable\" href=\"#content\">Skip to content</a>\n\n<div class=\"d-grid gap-2\">\n  <button class=\"btn btn-primary\"\n    aria-label=\"Close dialog\"\n    aria-expanded=\"false\">\n    <span aria-hidden=\"true\">&times;</span>\n    <span class=\"visually-hidden\">Close</span>\n  </button>\n</div>\n\n<!-- Focus ring custom -->\n<button class=\"btn btn-primary focus-ring focus-ring-success\">\n  Custom focus ring\n</button>\n\n<!-- Respect user motion preferences -->\n@media (prefers-reduced-motion: reduce) {\n  .carousel { --bs-carousel-transition: none; }\n}"
+    ]
+  }
+}

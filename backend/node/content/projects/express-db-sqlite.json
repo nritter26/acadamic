@@ -1,0 +1,106 @@
+{
+  "id": "express-db-sqlite",
+  "title": "SQLite Database Integration",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 25,
+  "concepts": ["sqlite", "database", "crud", "express", "better-sqlite3"],
+  "description": "Connect to a SQLite database, create tables, and build CRUD endpoints for items.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Database connection and health check",
+      "description": "Create a SQLite database connection on startup, create an items table, and expose GET /health that returns 200 when the database is ready.",
+      "hints": [
+        "Use better-sqlite3 (synchronous) for simplicity",
+        "Create the items table with id (INTEGER PRIMARY KEY), name (TEXT), and quantity (INTEGER) columns",
+        "Return { status: 'ok', db: 'connected' } from /health"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)')\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'db': 'connected'}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\", \"db\": \"connected\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "connected"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create item endpoint",
+      "description": "Implement POST /items that accepts a JSON body with name and quantity, inserts a row into the items table, and returns the created item with its id.",
+      "hints": [
+        "Use db.prepare('INSERT INTO items ...').run() in JS",
+        "Return the inserted row id and the provided data",
+        "Respond with 201 status code"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\napp.post('/items', (req, res) => {\n  const { name, quantity } = req.body;\n  const result = db.prepare('INSERT INTO items (name, quantity) VALUES (?, ?)').run(name, quantity);\n  res.status(201).json({ id: result.lastInsertRowid, name, quantity });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\ninterface ItemBody {\n  name: string;\n  quantity: number;\n}\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, quantity } = req.body as ItemBody;\n  const result = db.prepare('INSERT INTO items (name, quantity) VALUES (?, ?)').run(name, quantity);\n  res.status(201).json({ id: result.lastInsertRowid, name, quantity });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)')\n\nclass ItemBody(BaseModel):\n    name: str\n    quantity: int\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'db': 'connected'}\n\n@app.post('/items', status_code=201)\ndef create_item(body: ItemBody):\n    cursor = db.execute('INSERT INTO items (name, quantity) VALUES (?, ?)', (body.name, body.quantity))\n    db.commit()\n    return {'id': cursor.lastrowid, 'name': body.name, 'quantity': body.quantity}\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\", \"db\": \"connected\"})\n\t})\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tif r.Method == \"POST\" {\n\t\t\tvar body struct {\n\t\t\t\tName     string `json:\"name\"`\n\t\t\t\tQuantity int    `json:\"quantity\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tresult, _ := db.Exec(\"INSERT INTO items (name, quantity) VALUES (?, ?)\", body.Name, body.Quantity)\n\t\t\tid, _ := result.LastInsertId()\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"id\": id, \"name\": body.Name, \"quantity\": body.Quantity})\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/items",
+            "body": { "name": "test-item", "quantity": 5 },
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "List items endpoint",
+      "description": "Implement GET /items that queries all rows from the items table and returns them as a JSON array. Return an empty array if no items exist.",
+      "hints": [
+        "Use db.prepare('SELECT * FROM items').all() in JS",
+        "Return the array directly from the endpoint",
+        "Make sure each item includes id, name, and quantity fields"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst Database = require('better-sqlite3');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\napp.post('/items', (req, res) => {\n  const { name, quantity } = req.body;\n  const result = db.prepare('INSERT INTO items (name, quantity) VALUES (?, ?)').run(name, quantity);\n  res.status(201).json({ id: result.lastInsertRowid, name, quantity });\n});\n\napp.get('/items', (req, res) => {\n  const items = db.prepare('SELECT * FROM items').all();\n  res.json(items);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport Database from 'better-sqlite3';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst db = new Database(':memory:');\ndb.exec('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)');\n\napp.get('/health', (_req: Request, res: Response) => {\n  res.json({ status: 'ok', db: 'connected' });\n});\n\ninterface Item {\n  id: number;\n  name: string;\n  quantity: number;\n}\n\napp.post('/items', (req: Request, res: Response) => {\n  const { name, quantity } = req.body as Item;\n  const result = db.prepare('INSERT INTO items (name, quantity) VALUES (?, ?)').run(name, quantity);\n  res.status(201).json({ id: result.lastInsertRowid, name, quantity });\n});\n\napp.get('/items', (_req: Request, res: Response) => {\n  const items = db.prepare('SELECT * FROM items').all() as Item[];\n  res.json(items);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport sqlite3\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\ndb = sqlite3.connect(':memory:', check_same_thread=False)\ndb.executescript('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)')\n\nclass ItemBody(BaseModel):\n    name: str\n    quantity: int\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok', 'db': 'connected'}\n\n@app.post('/items', status_code=201)\ndef create_item(body: ItemBody):\n    cursor = db.execute('INSERT INTO items (name, quantity) VALUES (?, ?)', (body.name, body.quantity))\n    db.commit()\n    return {'id': cursor.lastrowid, 'name': body.name, 'quantity': body.quantity}\n\n@app.get('/items')\ndef list_items():\n    cursor = db.execute('SELECT * FROM items')\n    rows = cursor.fetchall()\n    return [{'id': row[0], 'name': row[1], 'quantity': row[2]} for row in rows]\n",
+        "go": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\n\t_ \"github.com/mattn/go-sqlite3\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\tdb, _ := sql.Open(\"sqlite3\", \":memory:\")\n\tdb.Exec(\"CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)\")\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\", \"db\": \"connected\"})\n\t})\n\n\thttp.HandleFunc(\"/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tswitch r.Method {\n\t\tcase \"POST\":\n\t\t\tvar body struct {\n\t\t\t\tName     string `json:\"name\"`\n\t\t\t\tQuantity int    `json:\"quantity\"`\n\t\t\t}\n\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\tresult, _ := db.Exec(\"INSERT INTO items (name, quantity) VALUES (?, ?)\", body.Name, body.Quantity)\n\t\t\tid, _ := result.LastInsertId()\n\t\t\tw.WriteHeader(http.StatusCreated)\n\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"id\": id, \"name\": body.Name, \"quantity\": body.Quantity})\n\t\tcase \"GET\":\n\t\t\trows, _ := db.Query(\"SELECT id, name, quantity FROM items\")\n\t\t\tvar items []map[string]interface{}\n\t\t\tfor rows.Next() {\n\t\t\t\tvar id int\n\t\t\t\tvar name string\n\t\t\t\tvar quantity int\n\t\t\t\trows.Scan(&id, &name, &quantity)\n\t\t\t\titems = append(items, map[string]interface{}{\"id\": id, \"name\": name, \"quantity\": quantity})\n\t\t\t}\n\t\t\tjson.NewEncoder(w).Encode(items)\n\t\t}\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/items",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "["
+          },
+          {
+            "method": "POST",
+            "path": "/items",
+            "body": { "name": "apple", "quantity": 10 },
+            "expectedStatus": 201
+          },
+          {
+            "method": "GET",
+            "path": "/items",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "apple"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -15,6 +15,7 @@
   import { getEditorState } from '$lib/stores/editor.svelte.js';
   import { getExecutionState } from '$lib/stores/execution.svelte.js';
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import { applySavedLanguage } from '$lib/lib/translate.js';
   import '../app.css';
 
   const STANDALONE_ROUTES = new Set(['tutorial', 'game', 'git', 'legacy']);
@@ -41,6 +42,9 @@
   }
 
   onMount(() => {
+    // Apply saved language preference
+    applySavedLanguage();
+
     const handlers = {
       'toggle-kodex': () => showKodex = !showKodex,
       'toggle-lang': () => showLang = !showLang,
@@ -76,8 +80,7 @@
       e.preventDefault();
       ai.togglePanel();
     }
-  }
-</script>
+  }</script>
 
 <svelte:window onkeydown={handleKeydown} />
 

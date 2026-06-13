@@ -1,0 +1,35 @@
+{
+  "id": "c-linked-list",
+  "title": "C: Singly Linked List",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "linked list", "malloc", "pointers", "structs"],
+  "description": "Implement a singly linked list with insert, delete, and print operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Insert at Head",
+      "description": "Define a `Node` struct with int data and Node* next. Write `void insert_head(Node **head, int val)` that inserts at the front. Insert 30, 20, 10 and print the list (should output: 10 20 30).",
+      "hints": ["New node's next = current head.", "Update head to point to new node.", "Print by traversing until NULL."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node {\n    int data;\n    struct Node *next;\n} Node;\n\nvoid insert_head(Node **head, int val) {\n    \n}\n\nvoid print_list(Node *head) {\n    while (head) { printf(\"%d \", head->data); head = head->next; }\n    printf(\"\\n\");\n}\n\nint main() {\n    Node *head = NULL;\n    insert_head(&head, 30);\n    insert_head(&head, 20);\n    insert_head(&head, 10);\n    print_list(head);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10 20 30')",
+        "successMessage": "Linked list insert works!",
+        "failureMessage": "Print list after inserting 30, 20, 10 at head"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Delete by Value",
+      "description": "Write `void delete_value(Node **head, int val)` that removes the first node with the given value. Test by inserting 10, 20, 30, 40, then deleting 20 and printing.",
+      "hints": ["Handle empty list case.", "Handle deleting the head node specially.", "Track prev pointer while traversing."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node { int data; struct Node *next; } Node;\n\nvoid insert_head(Node **head, int val) {\n    Node *n = malloc(sizeof(Node));\n    n->data = val; n->next = *head; *head = n;\n}\n\nvoid delete_value(Node **head, int val) {\n    \n}\n\nvoid print_list(Node *head) {\n    while (head) { printf(\"%d \", head->data); head = head->next; }\n    printf(\"\\n\");\n}\n\nint main() {\n    Node *head = NULL;\n    int vals[] = {40, 30, 20, 10};\n    for (int i = 0; i < 4; i++) insert_head(&head, vals[i]);\n    delete_value(&head, 20);\n    print_list(head);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10 30 40')",
+        "successMessage": "Delete by value works!",
+        "failureMessage": "Delete 20 and print the list (should be 10 30 40)"
+      }
+    }
+  ]
+}

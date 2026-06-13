@@ -1,0 +1,23 @@
+{
+  "id": "c-bmi-calculator",
+  "title": "C: BMI Calculator",
+  "difficulty": "beginner",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "arithmetic", "conditionals", "printf"],
+  "description": "Calculate BMI from weight (kg) and height (m) and classify it into categories.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Calculate and Classify BMI",
+      "description": "Declare `double weight = 70.0, height = 1.75`. Compute BMI = weight / (height * height). Classify: <18.5 Underweight, 18.5-24.9 Normal, 25-29.9 Overweight, 30+ Obese. Print both BMI and category.",
+      "hints": ["BMI formula: `weight / (height * height)`.", "Use `%.1f` for BMI formatting.", "Use if-else for classification ranges."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint main() {\n    double weight = 70.0, height = 1.75;\n    \n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('22.9') || output.includes('Normal') || output.includes('normal')",
+        "successMessage": "BMI calculator works!",
+        "failureMessage": "Compute BMI and print the category"
+      }
+    }
+  ]
+}

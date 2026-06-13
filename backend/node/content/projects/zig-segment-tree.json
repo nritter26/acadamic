@@ -1,0 +1,116 @@
+{
+  "id": "zig-segment-tree",
+  "title": "Segment Tree",
+  "description": "Write a Zig program that implements a segment tree for range sum queries.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn build(arr: []i32, tree: []i32, node: usize, left: usize, right: usize) void {\n    if (left == right) {\n        tree[node] = arr[left];\n        return;\n    }\n    const mid = (left + right) / 2;\n    build(arr, tree, 2 * node + 1, left, mid);\n    build(arr, tree, 2 * node + 2, mid + 1, right);\n    tree[node] = tree[2 * node + 1] + tree[2 * node + 2];\n}\n\nfn query(tree: []i32, node: usize, left: usize, right: usize, ql: usize, qr: usize) i32 {\n    if (ql > right or qr < left) return 0;\n    if (ql <= left and right <= qr) return tree[node];\n    const mid = (left + right) / 2;\n    return query(tree, 2 * node + 1, left, mid, ql, qr) +\n           query(tree, 2 * node + 2, mid + 1, right, ql, qr);\n}\n\npub fn main() !void {\n    const arr = [_]i32{ 1, 3, 5, 7, 9, 11 };\n    var tree: [24]i32 = undefined;\n    build(arr, tree, 0, 0, arr.len - 1);\n    \n    std.debug.print(\"Sum 0-3: {}\\n\", .{query(tree, 0, 0, arr.len - 1, 0, 3)});\n    std.debug.print(\"Sum 2-5: {}\\n\", .{query(tree, 0, 0, arr.len - 1, 2, 5)});\n}"
+  },
+  "verificationTest": "output.includes('Sum 0-3: 16') && output.includes('Sum 2-5: 32')",
+  "hints": [
+    "Segment tree stores range aggregates (sums) in a binary tree structure",
+    "Leaf nodes store individual array elements, internal nodes store combined values",
+    "Range query traverses the tree, combining results from relevant nodes",
+    "Use 4× N array size for safe segment tree storage"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "binary tree",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Segment Tree project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Segment Tree",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Segment Tree project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Segment Tree...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Segment Tree",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Segment Tree\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Segment Tree...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Segment Tree...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Segment Tree...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Segment Tree...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

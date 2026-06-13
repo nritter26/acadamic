@@ -1,0 +1,91 @@
+{
+  "id": "go-http-server",
+  "title": "Go: HTTP Server",
+  "difficulty": "intermediate",
+  "languages": ["go"],
+  "estimatedMinutes": 30,
+  "concepts": ["go", "HTTP", "net/http"],
+  "description": "Build a basic HTTP server with routes, query parameters, POST handling, and JSON responses.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "HandleFunc route",
+      "description": "Use `http.HandleFunc(\"/hello\", handler)` to register a handler that writes \"Hello, World!\" as the response using `w.Write([]byte(...))`. Then `http.ListenAndServe(\":8080\", nil)` starts the server. Print \"Server listening on :8080\".",
+      "hints": [
+        "Handler signature: `func(w http.ResponseWriter, r *http.Request)`",
+        "Use `w.Write([]byte(\"Hello, World!\"))` to send a response",
+        "`ListenAndServe` blocks — print the message before calling it"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello, World!') || output.includes('Server listening')",
+        "successMessage": "Basic HTTP server route works!",
+        "failureMessage": "Make sure the handler writes a response and the server starts."
+      }
+    },
+    {
+      "id": 2,
+      "title": "http.ListenAndServe",
+      "description": "Create a server on port 8080 that handles `/` by returning \"Home page\" and `/about` returning \"About page\". Start the server.",
+      "hints": [
+        "Register multiple handlers with HandleFunc",
+        "The second argument to ListenAndServe is nil (using DefaultServeMux)",
+        "Be careful — listen on a specific address like `\":8080\"`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Home page') || output.includes('About page') || output.includes('Server')",
+        "successMessage": "Two routes registered and working!",
+        "failureMessage": "Register both / and /about routes."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Read query params",
+      "description": "Create a `/greet` handler that reads a `name` query parameter and responds with \"Hello, <name>!\". If name is empty, respond with \"Hello, stranger!\".",
+      "hints": [
+        "Use `r.URL.Query().Get(\"name\")` to read query parameters",
+        "Check if the value is empty string to apply the default",
+        "Test with: `http://localhost:8080/greet?name=Go`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello') || output.includes('Server')",
+        "successMessage": "Query parameter parsing works!",
+        "failureMessage": "Use r.URL.Query().Get() to extract the name parameter."
+      }
+    },
+    {
+      "id": 4,
+      "title": "POST handler",
+      "description": "Create a `/data` handler that only accepts POST. Read the body with `r.Body` using `io.ReadAll`. Return the body content as the response prefixed with \"Received: \".",
+      "hints": [
+        "Check `r.Method != \"POST\"` and return 405 Method Not Allowed",
+        "Read body: `body, _ := io.ReadAll(r.Body)` then `defer r.Body.Close()`",
+        "Write back: `w.Write([]byte(\"Received: \" + string(body)))`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Received:') || output.includes('Server')",
+        "successMessage": "POST handler reads the request body!",
+        "failureMessage": "Read the request body with io.ReadAll(r.Body)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Serve JSON response",
+      "description": "Create a `/api/status` handler that returns a JSON response: `{\"status\":\"ok\",\"uptime\":123}`. Set `Content-Type` header to `application/json`. Use `json.Marshal` on a struct.",
+      "hints": [
+        "Create a struct `type Status struct { Status string; Uptime int }`",
+        "Set header: `w.Header().Set(\"Content-Type\", \"application/json\")`",
+        "Use `json.Marshal` and write to the response"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('status') && output.includes('uptime') || output.includes('Server')",
+        "successMessage": "JSON response served with correct Content-Type!",
+        "failureMessage": "Set the Content-Type header before writing the JSON body."
+      }
+    }
+  ]
+}

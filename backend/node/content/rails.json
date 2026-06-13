@@ -1,0 +1,131 @@
+{
+  "Getting Started": {
+    "Rails Introduction": {
+      "exp": "Introduction to Rails and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "What is Rails": [
+      "Ruby on Rails (often just Rails) is a full-stack web application framework written in Ruby by David Heinemeier Hansson (DHH). It follows the Model-View-Controller (MVC) architectural pattern and emphasizes convention over configuration, DRY (Don't Repeat Yourself), and rapid development. Rails includes everything needed to build database-backed web applications: ORM (ActiveRecord), routing, templating, testing, asset pipeline, and more. First released in 2004, Rails popularized many modern web development practices.",
+      "# Install Rails\ngem install rails\nrails --version\n\n# Create new app\nrails new myapp\ncd myapp\n\n# Generate scaffold (model + views + controller + migrations)\nrails generate scaffold Post title:string body:text\n\n# Run migrations\nrails db:migrate\n\n# Start server\nrails server\n# Visit http://localhost:3000/posts"
+    ],
+    "MVC Architecture": [
+      "Rails follows the Model-View-Controller pattern. Models (ActiveRecord) handle data and business logic. Views (ActionView) render HTML/JSON templates. Controllers (ActionController) process requests, interact with models, and render views. The router maps URLs to controller actions. Additional layers: mailers, helpers, channels, jobs, libraries.",
+      "# Request lifecycle:\n# Browser -> Router -> Controller -> Model -> View -> Response\n\n# app/models/post.rb\nclass Post < ApplicationRecord\n  validates :title, presence: true\nend\n\n# app/controllers/posts_controller.rb\nclass PostsController < ApplicationController\n  def index\n    @posts = Post.all\n  end\n\n  def show\n    @post = Post.find(params[:id])\n  end\nend\n\n# app/views/posts/index.html.erb\n<h1>Posts</h1>\n<% @posts.each do |post| %>\n  <h2><%= post.title %></h2>\n<% end %>"
+    ],
+    "Project Structure": [
+      "A Rails project has a standardized directory structure. app/ contains models, views, controllers, helpers, jobs, mailers, channels. config/ has routes, database, environments. db/ holds migrations and schema. public/ serves static assets. test/ (or spec/) for tests. Gemfile lists dependencies. The rails command and Rake tasks handle most development operations.",
+      "myapp/\n├── app/\n│   ├── controllers/    # Request handlers\n│   ├── models/         # Business logic & data\n│   ├── views/          # Templates (ERB, Haml, Slim)\n│   ├── helpers/        # View helper methods\n│   ├── jobs/           # Background jobs (ActiveJob)\n│   ├── mailers/        # Email sending\n│   └── channels/       # WebSocket (ActionCable)\n├── config/\n│   ├── routes.rb       # URL routing\n│   ├── database.yml    # Database config\n│   └── environments/   # dev, test, production\n├── db/\n│   └── migrate/        # Database migrations\n├── test/               # Tests (Minitest)\n├── Gemfile             # Dependencies\n├── Gemfile.lock        # Locked versions\n└── Rakefile            # Rake tasks"
+    ]
+  },
+  "Core Concepts": {
+    "Rails Core Features": {
+      "exp": "Essential Rails concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Rails Components": {
+      "exp": "Building user interfaces with Rails.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Rails Routing": {
+      "exp": "Navigation and routing in Rails.",
+      "code": "",
+      "exercises": []
+    },
+    "Routes & Resources": [
+      "config/routes.rb defines URL patterns. The router maps HTTP verbs + paths to controller actions. resources generates RESTful routes (index, show, new, create, edit, update, destroy). singular_resource for non-ID routes. Nested resources for hierarchical data. Member and collection routes for custom actions. Concerns share reusable route groups.",
+      "# config/routes.rb\nRails.application.routes.draw do\n  # RESTful resources\n  resources :posts\n  resources :users\n\n  # Nested resources\n  resources :posts do\n    resources :comments\n  end\n\n  # Custom routes\n  get \"/about\", to: \"pages#about\"\n  get \"/search\", to: \"search#show\"\n\n  # Namespaced (admin area)\n  namespace :admin do\n    resources :users\n  end\n\n  # Member and collection\n  resources :posts do\n    member do\n      post :publish\n    end\n    collection do\n      get :drafts\n    end\n  end\n\n  # Root route\n  root \"posts#index\"\nend\n\n# Generated routes:\n# GET    /posts           posts#index\n# GET    /posts/new       posts#new\n# POST   /posts           posts#create\n# GET    /posts/:id       posts#show\n# GET    /posts/:id/edit  posts#edit\n# PATCH  /posts/:id       posts#update\n# DELETE /posts/:id       posts#destroy\n\n# Check routes: rails routes"
+    ]
+  },
+  "State Management": {
+    "Rails State": {
+      "exp": "Managing application state in Rails.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Rails Data": {
+      "exp": "Working with data and APIs in Rails.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Rails Testing": [
+      "Rails supports Minitest natively (test/ directory) and RSpec (via gem). Test types: unit tests (models), functional tests (controllers), integration tests (full stack), system tests (browser with Capybara). Fixtures and factories (FactoryBot) for test data. Assertions: assert_equal, assert_response, assert_redirected_to, assert_select, assert_difference.",
+      "# test/models/post_test.rb (Minitest)\nrequire \"test_helper\"\n\nclass PostTest < ActiveSupport::TestCase\n  test \"should not save without title\" do\n    post = Post.new\n    assert_not post.save, \"Saved without a title\"\n  end\n\n  test \"should have comments counter\" do\n    post = posts(:one)\n    assert_difference(\"post.comments.count\", 1) do\n      post.comments.create!(body: \"Nice!\", user: users(:alice))\n    end\n  end\nend\n\n# test/controllers/posts_controller_test.rb\nclass PostsControllerTest < ActionDispatch::IntegrationTest\n  setup do\n    @post = posts(:one)\n  end\n\n  test \"should get index\" do\n    get posts_url\n    assert_response :success\n  end\n\n  test \"should create post\" do\n    assert_difference(\"Post.count\") do\n      post posts_url, params: {\n        post: { title: \"Test\", body: \"Body\" }\n      }\n    end\n    assert_redirected_to post_path(Post.last)\n  end\nend\n\n# Run: rails test\n# Run: rails test:system"
+    ]
+  },
+  "Deployment": {
+    "Rails Deployment": {
+      "exp": "Deploying Rails applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Rails Best Practices": {
+      "exp": "Best practices for Rails development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Rails Advanced": {
+      "exp": "Advanced Rails topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "ActiveRecord": {
+    "Models & ORM": [
+      "ActiveRecord is Rails' Object-Relational Mapping (ORM) layer. Each model class maps to a database table. Instances map to rows. Columns become attributes automatically. Convention: table names are plural snake_case, model names are singular CamelCase. Foreign keys: user_id. Primary keys: id (auto-increment). ActiveRecord handles CRUD, validations, associations, queries, and migrations.",
+      "# app/models/user.rb\nclass User < ApplicationRecord\n  # Automatically maps to 'users' table\n  # Columns 'id', 'name', 'email', 'created_at', 'updated_at'\nend\n\n# Create\nuser = User.create(name: \"Alice\", email: \"alice@example.com\")\n\n# Read\nuser = User.find(1)\nusers = User.where(active: true)\nuser = User.find_by(email: \"alice@example.com\")\n\n# Update\nuser.update(name: \"Alice Smith\")\n\n# Delete\nuser.destroy\n\n# Query methods\nUser.where(\"created_at > ?\", 1.week.ago)\nUser.order(name: :asc).limit(10)\nUser.select(:id, :name).distinct\nUser.includes(:posts).all  # Eager loading"
+    ],
+    "Validations": [
+      "Validations ensure data integrity before saving to the database. Common validators: presence, uniqueness, length, format, numericality, inclusion, acceptance, confirmation. Custom validations via validate or custom validator classes. Validations run automatically on create/save/update. Check validity with valid?/invalid? which populate errors.errors.full_messages.",
+      "class User < ApplicationRecord\n  validates :name, presence: true\n  validates :email, presence: true,\n                   uniqueness: { case_sensitive: false },\n                   format: { with: URI::MailTo::EMAIL_REGEXP }\n  validates :age, numericality: { greater_than: 0, less_than: 150 }\n  validates :terms, acceptance: true\n  validates :password, length: { minimum: 8, maximum: 128 }\n\n  # Custom validation\n  validate :email_domain_allowed\n\n  private\n\n  def email_domain_allowed\n    allowed = [\"example.com\", \"rails.org\"]\n    domain = email&.split(\"@\")&.last\n    if domain && !allowed.include?(domain)\n      errors.add(:email, \"domain not allowed\")\n    end\n  end\nend\n\n# Usage\nuser = User.new(email: \"test@invalid.com\")\nunless user.valid?\n  puts user.errors.full_messages\nend"
+    ],
+    "Associations": [
+      "ActiveRecord associations define relationships between models. Types: belongs_to, has_many, has_one, has_many :through, has_one :through, has_and_belongs_to_many (HABTM). Polymorphic associations allow a model to belong to multiple models. Dependent options: :destroy, :delete_all, :nullify, :restrict_with_error. Counter cache for performance.",
+      "class Post < ApplicationRecord\n  belongs_to :author, class_name: \"User\"\n  has_many :comments, dependent: :destroy\n  has_many :tags, through: :taggings\n  has_one :featured_image, as: :imageable  # polymorphic\nend\n\nclass Comment < ApplicationRecord\n  belongs_to :post, counter_cache: true\n  belongs_to :user\nend\n\nclass User < ApplicationRecord\n  has_many :posts, foreign_key: :author_id\n  has_many :comments\nend\n\nclass Tag < ApplicationRecord\n  has_many :taggings\n  has_many :posts, through: :taggings\nend\n\n# Usage\npost = Post.first\npost.author          # User object\npost.comments        # Collection of comments\npost.tags            # Tags through taggings\n\nuser = User.first\nuser.posts           # User's posts (via author_id)\n\n# Eager loading\nposts = Post.includes(:author, :comments).all"
+    ],
+    "Migrations": [
+      "Migrations are versioned changes to the database schema. Rails tracks which migrations have run via schema_migrations table. Key generators: rails generate migration, rails generate model. Migration methods: create_table, change_table, add_column, remove_column, change_column, add_index, remove_index, create_join_table, add_reference, change_table. Rollback with rails db:rollback.",
+      "# Generate a migration\n# rails generate migration AddPublishedToPosts published:boolean\n\nclass AddPublishedToPosts < ActiveRecord::Migration[7.0]\n  def change\n    add_column :posts, :published, :boolean, default: false\n    add_index :posts, :published\n  end\nend\n\n# Create table\n# rails generate migration CreateCategories name:string slug:string:uniq\n\nclass CreateCategories < ActiveRecord::Migration[7.0]\n  def change\n    create_table :categories do |t|\n      t.string :name, null: false\n      t.string :slug, null: false\n      t.text :description\n      t.timestamps\n    end\n    add_index :categories, :slug, unique: true\n  end\nend\n\n# Commands\n# rails db:migrate         # Run pending\n# rails db:rollback        # Undo last\n# rails db:migrate:status  # Show status\n# rails db:schema:dump     # Update schema.rb"
+    ]
+  },
+  "Controllers": {
+    "ActionController": [
+      "Controllers process HTTP requests. Each public method is an action. params hash contains request data (query string, form data, URL segments). Strong parameters protect against mass assignment. Filters (before_action, after_action, around_action) run before/after actions. Flash messages for user notifications. Session and cookies for state. Respond_to for content negotiation.",
+      "class PostsController < ApplicationController\n  before_action :set_post, only: [:show, :edit, :update, :destroy]\n  before_action :authenticate_user!, except: [:index, :show]\n\n  def index\n    @posts = Post.published.order(created_at: :desc)\n  end\n\n  def show\n  end\n\n  def new\n    @post = Post.new\n  end\n\n  def create\n    @post = current_user.posts.build(post_params)\n    if @post.save\n      redirect_to @post, notice: \"Post created!\"\n    else\n      render :new, status: :unprocessable_entity\n    end\n  end\n\n  def update\n    if @post.update(post_params)\n      redirect_to @post, notice: \"Post updated!\"\n    else\n      render :edit, status: :unprocessable_entity\n    end\n  end\n\n  def destroy\n    @post.destroy\n    redirect_to posts_path, notice: \"Post deleted!\"\n  end\n\n  private\n\n  def set_post\n    @post = Post.find(params[:id])\n  end\n\n  def post_params\n    params.require(:post).permit(:title, :body, :published)\n  end\nend"
+    ],
+    "Strong Parameters": [
+      "Strong Parameters protect against mass assignment vulnerabilities. params.require(:model) ensures the key exists. .permit(:field1, :field2) whitelists allowed attributes. Nested parameters require nested permit. Arrays, hashes, and scalars have different permit syntax. Never trust user input — always whitelist permitted parameters.",
+      "class UsersController < ApplicationController\n  def create\n    @user = User.new(user_params)\n    # ...\n  end\n\n  private\n\n  def user_params\n    params.require(:user).permit(\n      :name, :email, :password, :password_confirmation,\n      :avatar, :bio,\n      role_ids: [],\n      address_attributes: [:street, :city, :zip]\n    )\n  end\nend\n\n# Fetch params hash\n# params = ActionController::Parameters.new({\n#   user: { name: \"Alice\", admin: true }\n# })\n# user_params would return { name: \"Alice\" }\n# (admin is NOT permitted)"
+    ]
+  },
+  "Views & Templates": {
+    "ERB Templates": [
+      "ActionView renders templates. Default template engine is ERB (.html.erb). <% %> executes Ruby code without output. <%= %> executes and outputs. Layouts wrap templates (yield). Partials (_partial.html.erb) share reusable view fragments. Helpers keep templates clean. Content_for yields named content. Link_to, form_for, image_tag are common view helpers.",
+      "# app/views/layouts/application.html.erb\n<!DOCTYPE html>\n<html>\n<head>\n  <title><%= yield :title %></title>\n  <%= csrf_meta_tags %>\n  <%= csp_meta_tag %>\n  <%= stylesheet_link_tag \"application\" %>\n  <%= javascript_importmap_tags %>\n</head>\n<body>\n  <nav>\n    <%= link_to \"Home\", root_path %>\n    <%= link_to \"Posts\", posts_path %>\n  </nav>\n  <p class=\"notice\"><%= notice %>\n\n  <%= yield %>\n</body>\n</html>\n\n# app/views/posts/index.html.erb\n<% content_for :title, \"All Posts\" %>\n\n<h1>Posts</h1>\n\n<% @posts.each do |post| %>\n  <div class=\"post\">\n    <h2><%= link_to post.title, post %></h2>\n    <%= truncate(post.body, length: 200) %>\n\n    <small>By <%= post.author.name %></small>\n  </div>\n<% end %>\n\n<%= link_to \"New Post\", new_post_path %>\n\n# Partial: app/views/posts/_post.html.erb\n# <%= render @posts %>\n# <%= render partial: \"post\", collection: @posts, locals: { show_meta: true } %>"
+    ],
+    "Form Helpers": [
+      "Rails form helpers generate HTML forms with CSRF protection, error handling, and correct field names. form_for / form_with (Rails 5.1+). form_with can work with models or URLs. Collection helpers: collection_select, collection_check_boxes. Date/time select helpers. Fields for nested attributes. Strong parameters integration.",
+      "# Model-backed form with form_with\n<%= form_with model: @post, local: true do |f| %>\n  <% if @post.errors.any? %>\n    <div id=\"error_explanation\">\n      <h2><%= pluralize(@post.errors.count, \"error\") %></h2>\n      <ul>\n        <% @post.errors.full_messages.each do |msg| %>\n          <li><%= msg %></li>\n        <% end %>\n      </ul>\n    </div>\n  <% end %>\n\n  <div class=\"field\">\n    <%= f.label :title %>\n    <%= f.text_field :title %>\n  </div>\n\n  <div class=\"field\">\n    <%= f.label :body %>\n    <%= f.text_area :body, rows: 10 %>\n  </div>\n\n  <div class=\"field\">\n    <%= f.label :category_id %>\n    <%= f.collection_select :category_id, Category.all, :id, :name %>\n  </div>\n\n  <div class=\"actions\">\n    <%= f.submit %>\n  </div>\n<% end %>\n\n# Simple search form (no model)\n<%= form_with url: search_path, method: :get do |f| %>\n  <%= f.text_field :q, placeholder: \"Search...\" %>\n  <%= f.submit \"Search\" %>\n<% end %>"
+    ]
+  },
+  "Rails Advanced Patterns": {
+    "Rails API Mode & GraphQL": [
+      "Rails API mode (<code>rails new app --api</code>) strips browser middleware for JSON APIs. Serializers: ActiveModelSerializers, jsonapi-rb, or jbuilder. GraphQL-Ruby gem integrates GraphQL into Rails. Authentication with devise-jwt or doorkeeper (OAuth). Rate limiting with rack-attack. Versioning via namespaced routes (<code>namespace :api { namespace :v1 { ... } }</code>). Testing with RSpec + FactoryBot. Background jobs with Sidekiq. API documentation with Rswag (OpenAPI).",
+      "# Rails API with GraphQL\n# Gemfile\ngem 'graphql'\ngem 'graphiql-rails', group: :development\ngem 'rack-attack'\ngem 'devise'\ngem 'doorkeeper'\n\n# app/graphql/types/query_type.rb\nmodule Types\n  class QueryType < Types::BaseObject\n    field :products, [Types::ProductType], null: false,\n      description: \"Returns a paginated list of products\" do\n      argument :category, String, required: false\n      argument :page, Integer, required: false, default_value: 1\n    end\n\n    def products(category: nil, page: 1)\n      scope = Product.all\n      scope = scope.where(category: category) if category\n      scope.page(page).per(20)\n    end\n\n    field :product, Types::ProductType, null: true do\n      argument :id, ID, required: true\n    end\n\n    def product(id:)\n      Product.find(id)\n    rescue ActiveRecord::RecordNotFound\n      GraphQL::ExecutionError.new(\"Product not found\")\n    end\n  end\nend\n\n# app/graphql/types/product_type.rb\nmodule Types\n  class ProductType < Types::BaseObject\n    field :id, ID, null: false\n    field :name, String, null: false\n    field :price, Float, null: false\n    field :reviews, [Types::ReviewType], null: true\n    field :average_rating, Float, null: true\n\n    def average_rating\n      object.reviews.average(:rating)&.round(1)\n    end\n  end\nend\n\n# config/initializers/rack_attack.rb\nclass Rack::Attack\n  throttle('api/ip', limit: 100, period: 1.minute) do |req|\n    req.ip if req.path.start_with?('/graphql')\n  end\nend"
+    ]
+  }
+}

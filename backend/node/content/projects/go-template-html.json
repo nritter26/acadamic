@@ -1,0 +1,83 @@
+{
+  "id": "go-template-html",
+  "title": "Go: HTML Templates",
+  "difficulty": "advanced",
+  "languages": ["go"],
+  "estimatedMinutes": 40,
+  "concepts": ["go", "html/template", "templates", "FuncMap", "nested templates"],
+  "description": "Master Go's html/template package with template parsing, data rendering, nested templates, and custom functions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse and execute a template",
+      "description": "Create a template string `Hello {{.Name}}!` and parse it with `template.New(\"hello\").Parse(tmplStr)`. Execute with `tmpl.Execute(os.Stdout, data)` where data is a struct with a `Name` field. Print the parsed template name using `fmt.Println`.",
+      "hints": ["template.New creates a new template with a name", "Parse can fail with invalid syntax", "Execute writes output to the writer (use os.Stdout)"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Hello') && output.includes('template')",
+        "successMessage": "Template parsed and executed!",
+        "failureMessage": "Print 'Hello {name}' with the template."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Template data with structs and maps",
+      "description": "Create a template that renders a struct with `Name`, `Age`, and `Items []string`. Use `{{range .Items}} {{.}} {{end}}` to iterate. Print the rendered output using `fmt.Printf(\"Rendered: %s\\n\", buf.String())` after writing to `bytes.Buffer`.",
+      "hints": ["bytes.Buffer implements io.Writer for Execute", "{{range}} iterates over slices; {{.}} is the loop variable", "Struct fields must be exported to be accessible"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Rendered:') && output.includes('Item')",
+        "successMessage": "Struct and range rendering works!",
+        "failureMessage": "Print the rendered template output."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Conditional rendering",
+      "description": "Add `{{if .IsAdmin}}` and `{{else}}` blocks to a template. Also use `{{with .Profile}}` to scope the context. Print both branches using `fmt.Printf(\"Admin: %t\\n\", ...)` to verify conditional logic works.",
+      "hints": ["{{if}} evaluates truthiness (nil, 0, false, empty are false)", "{{with}} sets dot to the value and executes block if non-empty", "{{else}} switches to alternate content"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Admin') || output.includes('Profile') || output.includes('with')",
+        "successMessage": "Conditional rendering works!",
+        "failureMessage": "Print the admin status and profile information."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested templates",
+      "description": "Use `{{define \"name\"}}` and `{{template \"name\" .}}` to create a base layout with a content block. Parse multiple templates with `template.ParseFiles` or template strings. Print the combined rendered output using `fmt.Printf`.",
+      "hints": ["Define templates inside the same Parse call", "{{template \"name\" pipeline}} executes a named template with pipeline", "Use {{block \"name\" pipeline}} for default content"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('layout') || output.includes('content') || output.includes('block')",
+        "successMessage": "Nested templates work!",
+        "failureMessage": "Print the rendered layout with embedded content."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Template functions with FuncMap",
+      "description": "Create a `template.FuncMap` with functions like `upper` (strings.ToUpper), `lower` (strings.ToLower), and `date` (time.Format). Register it with `template.New(\"funcs\").Funcs(funcMap)`. Print results using `fmt.Printf(\"Upper: %s\\n\", ...)`.",
+      "hints": ["FuncMap is map[string]interface{} where values are functions", "Functions must have 1-2 return values (second is error)", "Call functions in template as {{upper \"hello\"}}"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Upper:') || output.includes('LOWER') || output.includes('HELLO')",
+        "successMessage": "Custom template functions work!",
+        "failureMessage": "Print results of upper, lower, and date functions."
+      }
+    },
+    {
+      "id": 6,
+      "title": "HTML escaping and safe content",
+      "description": "Demonstrate auto-escaping: render `\"<script>alert('xss')</script>\"` and show it's escaped. Use `template.HTML` type to render trusted HTML. Use `template.URL` for safe URLs. Print both escaped and raw output using `fmt.Printf`.",
+      "hints": ["html/template auto-escapes by default", "template.HTML marks a string as safe HTML", "template.URL marks a string as safe URL"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('&lt;script&gt;') || output.includes('escaped') || output.includes('safe')",
+        "successMessage": "HTML escaping and safe content work!",
+        "failureMessage": "Print both escaped and safe HTML content."
+      }
+    }
+  ]
+}

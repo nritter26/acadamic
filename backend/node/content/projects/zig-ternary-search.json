@@ -1,0 +1,116 @@
+{
+  "id": "zig-ternary-search",
+  "title": "Ternary Search",
+  "description": "Write a Zig program that implements ternary search on a sorted array to find a target value.",
+  "difficulty": "advanced",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nfn ternarySearch(arr: []const i32, left: usize, right: usize, target: i32) ?usize {\n    if (right < left) return null;\n    const mid1 = left + (right - left) / 3;\n    const mid2 = right - (right - left) / 3;\n    if (arr[mid1] == target) return mid1;\n    if (arr[mid2] == target) return mid2;\n    if (target < arr[mid1]) return ternarySearch(arr, left, mid1 -| 1, target);\n    if (target > arr[mid2]) return ternarySearch(arr, mid2 + 1, right, target);\n    return ternarySearch(arr, mid1 + 1, mid2 -| 1, target);\n}\n\npub fn main() !void {\n    const arr = [_]i32{ 1, 5, 12, 18, 25, 33, 42, 56, 71, 89 };\n    const target: i32 = 42;\n    if (ternarySearch(&arr, 0, arr.len - 1, target)) |idx| {\n        std.debug.print(\"Found {} at index {}\\n\", .{target, idx});\n    }\n}"
+  },
+  "verificationTest": "output.includes('Found 42 at index 6')",
+  "hints": [
+    "Ternary search divides the array into 3 parts using 2 mid points",
+    "Use `mid1 = left + (right - left) / 3` and `mid2 = right - (right - left) / 3`",
+    "Use `-|` for saturating subtraction to avoid underflow when mid1 = 0",
+    "The function returns `?usize` (optional) for the found index"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "sorting",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Implement bubble sort",
+      "description": "Write a function that sorts an array using the bubble sort algorithm. Repeatedly step through the array, comparing adjacent elements and swapping them if they are in the wrong order.",
+      "hints": [
+        "Use nested loops: outer loop for passes, inner loop for comparisons",
+        "After each pass, the largest element bubbles to the end",
+        "Optimize: stop early if no swaps occur in a pass"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Implement bubble sort\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Ternary Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.includes('sorted') || output.includes('[1')",
+        "successMessage": "Bubble sort implementation works!",
+        "failureMessage": "Implement bubble sort and display the sorted array."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement selection sort",
+      "description": "Write a selection sort function that divides the array into sorted and unsorted regions, repeatedly selecting the smallest element from the unsorted region and adding it to the sorted region.",
+      "hints": [
+        "Find the minimum element in the unsorted portion",
+        "Swap it with the first unsorted element",
+        "Advance the boundary between sorted and unsorted regions"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement selection sort\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Ternary Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Selection sort works correctly!",
+        "failureMessage": "Implement selection sort and display the sorted array."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement merge sort",
+      "description": "Write a merge sort function that recursively divides the array into halves, sorts each half, and merges them back together. This is a classic divide-and-conquer algorithm.",
+      "hints": [
+        "Base case: arrays with 0 or 1 elements are already sorted",
+        "Split the array in half and recursively sort each half",
+        "The merge function combines two sorted arrays into one"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Implement merge sort\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Ternary Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Merge sort works correctly!",
+        "failureMessage": "Implement merge sort (divide, conquer, merge)."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Implement quick sort",
+      "description": "Write a quick sort function that picks a pivot element, partitions the array around it, and recursively sorts the sub-arrays. Quick sort is one of the most efficient sorting algorithms.",
+      "hints": [
+        "Choose a pivot (last element, first element, or median-of-three)",
+        "Partition: rearrange so elements < pivot come before it, > pivot after",
+        "Recursively sort the sub-arrays on either side of the pivot"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Implement quick sort\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Ternary Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Quick sort works correctly!",
+        "failureMessage": "Implement quick sort with partitioning and recursion."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Compare sorting algorithm performance",
+      "description": "Create a test that generates a large random array and times each sorting algorithm. Display the time each algorithm takes and verify all produce the same sorted result.",
+      "hints": [
+        "Generate a random array of at least 1000 elements",
+        "Copy the array before sorting (sorting modifies in-place)",
+        "Use timing functions to measure execution time"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Compare sorting algorithm performance\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Ternary Search...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All sorting algorithms implemented and compared!",
+        "failureMessage": "Test all algorithms with timing comparison."
+      }
+    }
+  ]
+}

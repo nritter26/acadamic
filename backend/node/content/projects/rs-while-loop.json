@@ -1,0 +1,71 @@
+{
+  "id": "rs-while-loop",
+  "title": "Rust: While Loop",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "while", "loop", "iteration"],
+  "description": "Use while loops to repeat code in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Count Down",
+      "description": "Start with `count = 5` and use a while loop to print each value down to 0.",
+      "hints": ["`while count >= 0 { println!(\"{}\", count); count -= 1; }`", "Don't forget to decrement `count` inside the loop!", "Without decrementing, the loop runs forever."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('0')",
+        "successMessage": "While loop counts down!",
+        "failureMessage": "Print numbers from 5 down to 0 using a while loop."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Sum of Numbers",
+      "description": "Use a while loop to calculate the sum of numbers from 1 to 10. Print the result.",
+      "hints": ["Initialize `sum = 0` and `i = 1`.", "While `i <= 10`, add `i` to `sum` and increment `i`.", "The final sum should be 55."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('55')",
+        "successMessage": "While loop sum works!",
+        "failureMessage": "Print the sum of 1 to 10 (should be 55)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Loop Until Condition",
+      "description": "Start with `x = 1`. Double x until it exceeds 100 using a while loop. Print each value of x.",
+      "hints": ["`while x <= 100 { println!(\"{}\", x); x *= 2; }`", "Start with 1, then 2, 4, 8, 16, 32, 64.", "The sequence stops at 128 (exceeds 100)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('64') && output.includes('128')",
+        "successMessage": "Geometric progression works!",
+        "failureMessage": "Print values as x doubles from 1 until exceeding 100."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nested While Loops",
+      "description": "Use nested while loops to print a 3x3 grid of coordinates like `(0,0) (0,1) ...`",
+      "hints": ["Outer loop for rows (i), inner loop for columns (j).", "Print `({},{})` format for each pair.", "Both loops go from 0 to 2."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('(0,0)') && output.includes('(2,2)')",
+        "successMessage": "Nested while loops work!",
+        "failureMessage": "Print all 9 coordinate pairs from (0,0) to (2,2)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Loop with break",
+      "description": "Use `loop { }` (Rust's infinite loop) with a `break` statement. Start at `1`, count up, and break when you reach `10`. Print each value.",
+      "hints": ["`loop { println!(\"{}\", i); if i >= 10 { break; } i += 1; }`", "`loop` is Rust's keyword for infinite loops.", "Use `break` to exit the loop when a condition is met."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('1')",
+        "successMessage": "Loop with break works!",
+        "failureMessage": "Print numbers 1 to 10 using loop with break."
+      }
+    }
+  ]
+}

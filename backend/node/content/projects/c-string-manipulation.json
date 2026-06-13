@@ -1,0 +1,47 @@
+{
+  "id": "c-string-manipulation",
+  "title": "C: String Manipulation",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "strings", "pointers", "string.h", "printf"],
+  "description": "Implement string utility functions: uppercase, lowercase, reverse, and check if two strings are anagrams.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "String to Uppercase",
+      "description": "Write a function `void to_upper(char *s)` that converts all lowercase letters in a string to uppercase in-place. Test with 'Hello World!' and print the result.",
+      "hints": ["Use `s[i] >= 'a' && s[i] <= 'z'` to detect lowercase.", "Subtract 32 from lowercase ASCII to get uppercase.", "Iterate until `s[i] != '\\0'`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nvoid to_upper(char *s) {\n    \n}\n\nint main() {\n    char str[] = \"Hello World!\";\n    to_upper(str);\n    printf(\"%s\\n\", str);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('HELLO WORLD!')",
+        "successMessage": "to_upper works!",
+        "failureMessage": "Convert 'Hello World!' to uppercase"
+      }
+    },
+    {
+      "id": 2,
+      "title": "String Reverse",
+      "description": "Write a function `void reverse(char *s)` that reverses a string in-place. Test with 'C Programming'.",
+      "hints": ["Two-pointer technique: start and end.", "Swap characters at both ends and move inward.", "Stop when start >= end."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nvoid reverse(char *s) {\n    \n}\n\nint main() {\n    char str[] = \"C Programming\";\n    reverse(str);\n    printf(\"%s\\n\", str);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('gnimmargorP C')",
+        "successMessage": "Reverse works!",
+        "failureMessage": "Reverse 'C Programming'"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Anagram Checker",
+      "description": "Write a function `int is_anagram(char *a, char *b)` that returns 1 if strings are anagrams, 0 otherwise. Test with 'listen' and 'silent'.",
+      "hints": ["Use an int array of size 26 to count character frequencies.", "Increment for string a, decrement for string b.", "If all counts are 0, they are anagrams."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\nint is_anagram(char *a, char *b) {\n    \n}\n\nint main() {\n    printf(\"%d\\n\", is_anagram(\"listen\", \"silent\"));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "Anagram checker works!",
+        "failureMessage": "Return 1 for anagrams 'listen' and 'silent'"
+      }
+    }
+  ]
+}
