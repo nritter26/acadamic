@@ -1,107 +1,107 @@
 {
   "Fundamentals": {
     "Introduction": {
-      "exp": "<p>Introduction to Kotlin.</p>",
+      "exp": "Introduction to Kotlin.",
       "code": "",
       "exercises": []
     },
     "Variables & Types": {
-      "exp": "<p>Variables and data types in Kotlin.</p>",
+      "exp": "Variables and data types in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Operators": {
-      "exp": "<p>Operators in Kotlin.</p>",
+      "exp": "Operators in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Control Flow": {
-      "exp": "<p>Control flow statements in Kotlin.</p>",
+      "exp": "Control flow statements in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Functions": {
-      "exp": "<p>Functions in Kotlin.</p>",
+      "exp": "Functions in Kotlin.",
       "code": "",
       "exercises": []
     }
   },
   "Data Structures": {
     "Arrays & Collections": {
-      "exp": "<p>Working with collections in Kotlin.</p>",
+      "exp": "Working with collections in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Strings": {
-      "exp": "<p>String manipulation in Kotlin.</p>",
+      "exp": "String manipulation in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Maps & Dictionaries": {
-      "exp": "<p>Key-value data structures in Kotlin.</p>",
+      "exp": "Key-value data structures in Kotlin.",
       "code": "",
       "exercises": []
     }
   },
   "Object-Oriented Programming": {
     "Classes & Objects": {
-      "exp": "<p>OOP concepts in Kotlin.</p>",
+      "exp": "OOP concepts in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Inheritance": {
-      "exp": "<p>Inheritance patterns in Kotlin.</p>",
+      "exp": "Inheritance patterns in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Interfaces": {
-      "exp": "<p>Interfaces and contracts in Kotlin.</p>",
+      "exp": "Interfaces and contracts in Kotlin.",
       "code": "",
       "exercises": []
     }
   },
   "Error Handling": {
     "Exceptions": {
-      "exp": "<p>Exception handling in Kotlin.</p>",
+      "exp": "Exception handling in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Debugging": {
-      "exp": "<p>Debugging Kotlin code.</p>",
+      "exp": "Debugging Kotlin code.",
       "code": "",
       "exercises": []
     }
   },
   "I/O & File System": {
     "File Operations": {
-      "exp": "<p>File I/O in Kotlin.</p>",
+      "exp": "File I/O in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Input/Output": {
-      "exp": "<p>Input and output operations in Kotlin.</p>",
+      "exp": "Input and output operations in Kotlin.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Concurrency": {
-      "exp": "<p>Concurrency in Kotlin.</p>",
+      "exp": "Concurrency in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Modules": {
-      "exp": "<p>Modular programming in Kotlin.</p>",
+      "exp": "Modular programming in Kotlin.",
       "code": "",
       "exercises": []
     },
     "Best Practices": {
-      "exp": "<p>Best practices for Kotlin.</p>",
+      "exp": "Best practices for Kotlin.",
       "code": "",
       "exercises": []
     },
     "Performance": {
-      "exp": "<p>Optimizing Kotlin code.</p>",
+      "exp": "Optimizing Kotlin code.",
       "code": "",
       "exercises": []
     }
@@ -509,7 +509,7 @@
     ],
     "Type-Safe Builders & @DslMarker": [
       "Type-safe builders use lambdas with receivers for declarative construction. @DslMarker restricts implicit receiver access to prevent ambiguity with nested builder contexts. Common: HTML builders, Gradle DSL, Compose UI. Builder pattern with apply/also. Context receivers (Kotlin 1.6+) for multiple receivers in scope.",
-      "import kotlin.DslMarker\n\n@DslMarker\nannotation class HtmlDsl\n\n@HtmlDsl\nclass Html {\n    private val children = mutableListOf<String>()\n    fun body(init: Body.() -> Unit) {\n        children.add(Body().apply(init).toString())\n    }\n    override fun toString() = \"<html>${children.joinToString(\"\")}</html>\"\n}\n\n@HtmlDsl\nclass Body {\n    private val children = mutableListOf<String>()\n    fun h1(text: String) { children.add(\"<h1>$text</h1>\") }\n    fun p(init: P.() -> Unit) { children.add(P().apply(init).render()) }\n    override fun toString() = \"<body>${children.joinToString(\"\")}</body>\"\n}\n\nclass P {\n    var text: String = \"\"\n    var style: String = \"\"\n    fun render() = if (style.isNotEmpty())\n        \"<p style=\\\"$style\\\">$text</p>\" else \"<p>$text</p>\"\n}\n\nfun html(init: Html.() -> Unit): Html = Html().apply(init)\n\nfun main() {\n    val doc = html {\n        body {\n            h1(\"Hello\")\n            p { text = \"World\" }\n            p { text = \"Styled\"; style = \"color:red\" }\n        }\n    }\n    println(doc)\n}"
+      "import kotlin.DslMarker\n\n@DslMarker\nannotation class HtmlDsl\n\n@HtmlDsl\nclass Html {\n    private val children = mutableListOf<String>()\n    fun body(init: Body.() -> Unit) {\n        children.add(Body().apply(init).toString())\n    }\n    override fun toString() = \"<html>${children.joinToString(\"\")}</html>\"\n}\n\n@HtmlDsl\nclass Body {\n    private val children = mutableListOf<String>()\n    fun h1(text: String) { children.add(\"<h1>$text</h1>\") }\n    fun p(init: P.() -> Unit) { children.add(P().apply(init).render()) }\n    override fun toString() = \"<body>${children.joinToString(\"\")}</body>\"\n}\n\nclass P {\n    var text: String = \"\"\n    var style: String = \"\"\n    fun render() = if (style.isNotEmpty())\n        \"<p style=\\\"$style\\\">$text\n\" else \"$text\n\"\n}\n\nfun html(init: Html.() -> Unit): Html = Html().apply(init)\n\nfun main() {\n    val doc = html {\n        body {\n            h1(\"Hello\")\n            p { text = \"World\" }\n            p { text = \"Styled\"; style = \"color:red\" }\n        }\n    }\n    println(doc)\n}"
     ],
     "SAM Conversion": [
       "Single Abstract Method (SAM) conversion lets you pass a lambda where a Java functional interface is expected. Kotlin has built-in function types, so SAM conversion mainly applies to Java interop. From Head First Kotlin.",

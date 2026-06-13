@@ -1,0 +1,605 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "<p>Introduction to TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "<p>Variables and data types in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "<p>Operators in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "<p>Control flow statements in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "<p>Functions in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "What is TypeScript": [
+      "TypeScript is JavaScript with types — not a new language. Baumgartner in 'TypeScript in 50 Lessons' emphasizes: 'TypeScript is about describing the shape of data, not about strict rules'. It adds a compile-time type system on top of JS that's erased at runtime. The key insight: TypeScript's type system is structural (shapes match if they have the same properties) NOT nominal (like Java/C# where names matter). This means you can pass an object matching an interface without explicitly implementing it — it 'fits' the shape. Think of types as documentation that the compiler enforces.",
+      "const message: string = 'Hello TypeScript'; // declares variable with explicit type\nconsole.log(message); // outputs message to developer console\n\n// Structural typing — shapes, not names\ninterface Point { x: number; y: number; } // defines object shape contract\nconst coord = { x: 10, y: 20, z: 30 }; // extra property OK\nconst pt: Point = coord; // structural match\n\n// TypeScript's job: catch mistakes at compile time\n// NOT: change how JavaScript runs at runtime"
+    ],
+    "Type Annotations": [
+      "Annotations tell TypeScript what type you expect. Baumgartner advises: 'let TypeScript infer where it can, annotate where it needs to'. Inference works for initialization (let x = 5 → number) and return types. Annotate function parameters always (they can't be inferred from the caller) and complex return types for documentation. A key lesson from 'TypeScript in 50 Lessons': annotating too much is as problematic as annotating too little — let inference work, but be explicit at module boundaries (exports, API contracts).",
+      "// Annotate parameters (can't be inferred)\nfunction greet(name: string): string { // defines reusable function block\n  return 'Hello, ' + name; // returns value to calling code\n}\n\n// Inference works here:\nlet count = 5; // inferred as number\nconst name = 'Alice'; // inferred as 'Alice' (literal)\n\n// The 'return type' is a contract — annotate at boundaries\nexport function calculateTotal(items: number[]): number { // exports member for external use\n  return items.reduce((a, b) => a + b, 0); // returns value to calling code\n}\n\n// Let inference work internally (in the function body)\nconst doubled = items.map(i => i * 2); // inferred as number[]\n\n// Common mistake: over-annotating\n// const x: number = 5; // redundant — let infer!\n// const x = 5; // better"
+    ],
+    "Basic Types": [
+      "TypeScript's basic types mirror JavaScript: string, number, boolean, null, undefined, void, never, any, bigint, symbol. void means the function returns nothing useful (actually returns undefined). never means the function never returns (always throws or infinite loop). Common mistake: assuming null/undefined are assignable to every type — with strictNullChecks, they must be explicitly unioned. Best practice: enable strictNullChecks; use void for callback return types that may be ignored; use never for exhaustive checks in switch statements.",
+      "let name: string = 'Alice';\nlet age: number = 30;\nlet isActive: boolean = true;\nlet big: bigint = 100n;\nlet sym: symbol = Symbol('key');\n\n// void vs never\nfunction logMsg(): void { console.log('done'); }  // returns undefined\nfunction throwErr(): never { throw new Error('fail'); }  // never returns\n\n// strictNullChecks requires explicit unions\nlet maybe: string | null = null;  // OK with strictNullChecks"
+    ],
+    "unknown vs any": [
+      "any disables type checking entirely — it's an escape hatch that should be avoided. unknown is the type-safe counterpart: you must narrow it via typeof, instanceof, or type guards before use. Common mistake: using any instead of unknown when the type truly isn't known.",
+      "let data: unknown = JSON.parse('{\"a\":1}'); // declares variable with explicit type\n// data.a; // Error: Object is of type 'unknown'\nif (typeof data === 'object' && data !== null) { // conditionally executes following block\n  console.log(data); // outputs message to developer console\n}\n// any: let x: any = 5; x(); // no error"
+    ],
+    "Enums": [
+      "Enums define named constants. Numeric enums auto-increment from 0 and have reverse mappings (value → name). String enums require explicit values and have no reverse mapping. const enum is inlined at compile time (zero runtime cost) but can't be used with isolatedModules or bundlers. Common mistake: assuming enums are just strings — numeric enums have bidirectional mappings which adds runtime code. Best practice: prefer string enums for readability and serialization; use const enum for performance-critical numeric constants; consider union of string literals as a simpler alternative.",
+      "enum Direction {\n  Up,     // 0\n  Down,   // 1\n  Left,   // 2\n  Right   // 3\n}\nconsole.log(Direction.Up);  // 0\nconsole.log(Direction[0]);  // 'Up' (reverse mapping)\n\nenum Status {\n  Success = 'SUCCESS',\n  Failure = 'FAILURE'\n}\n\n// const enum — no runtime code\nconst enum Size { Small = 1, Medium = 2, Large = 3 }\nconsole.log(Size.Medium);  // compiled to: console.log(2 /* Medium */)"
+    ],
+    "Type Inference": [
+      "TypeScript infers types from values when no annotation is given. Inference works for variable initialization, return values, and generic calls. A common mistake is assuming inference is always correct — complex scenarios may need explicit annotations for clarity.",
+      "let count = 0;           // inferred as number\nconst name = 'Alice';     // inferred as 'Alice' (literal type)\nfunction add(a: number, b: number) { // defines reusable function block\n  return a + b;            // inferred as number\n}\nlet items = [];           // inferred as never[] — may need annotation"
+    ],
+    "Literal Types": [
+      "Literal types restrict a variable to an exact string, number, or boolean value. Combine with union types for constrained options. A common mistake is thinking any string matching the literal format is assignable — the value must be exactly the literal.",
+      "type Direction = 'up' | 'down' | 'left' | 'right'; // creates reusable type alias\nlet dir: Direction = 'up'; // declares variable with explicit type\ndir = 'diagonal'; // Error\n\ntype Port = 80 | 443 | 8080; // creates reusable type alias\nconst port: Port = 443; // declares variable with explicit type"
+    ],
+    "Strict Mode": [
+      "Enable strict: true in tsconfig to activate all strict checks: noImplicitAny, strictNullChecks, strictFunctionTypes, strictBindCallApply, strictPropertyInitialization, noImplicitThis, and alwaysStrict. A common mistake is starting a project without strict mode and adding it later — much harder to migrate.",
+      "// tsconfig.json\n{\n  \"compilerOptions\": {\n    \"strict\": true\n  }\n}\n// With strictNullChecks:\nlet x: string | null = null; // declares variable with explicit type\nx.length; // Error: Object is possibly 'null'"
+    ]
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "<p>Working with collections in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "<p>String manipulation in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "<p>Key-value data structures in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "<p>OOP concepts in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "<p>Inheritance patterns in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "<p>Interfaces and contracts in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "<p>Exception handling in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "<p>Debugging TypeScript code.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Typed Error Classes": [
+      "Create custom Error subclasses with typed properties. Set the name property for proper instanceof checks. A common mistake is forgetting to set error.name — without it, instanceof may work inconsistently across inheritance chains.",
+      "class ValidationError extends Error { // defines a class blueprint\n  constructor( // initializes new class instance\n    message: string,\n    public field: string, // declares access-controlled member\n    public code: number // declares access-controlled member\n  ) {\n    super(message); // calls parent class constructor\n    this.name = 'ValidationError'; // assigns to instance property\n  }\n}\n\nclass NetworkError extends Error { // defines a class blueprint\n  constructor( // initializes new class instance\n    message: string,\n    public statusCode: number // declares access-controlled member\n  ) {\n    super(message); // calls parent class constructor\n    this.name = 'NetworkError'; // assigns to instance property\n  }\n}\n\ntry { // attempts code that might throw\n  throw new ValidationError('Invalid email', 'email', 400); // intentionally raises an error\n} catch (err) {\n  if (err instanceof ValidationError) { // conditionally executes following block\n    console.log(err.field, err.code); // outputs message to developer console\n  }\n}"
+    ],
+    "Try/Catch with unknown": [
+      "In strict mode, catch variables are unknown, not any. Narrow them with instanceof, typeof, or custom guards. A common mistake is accessing err.message without checking — TypeScript will error with 'Object is of type unknown'.",
+      "try { // attempts code that might throw\n  riskyOperation(); // calls function with arguments\n} catch (err: unknown) {\n  if (err instanceof Error) { // conditionally executes following block\n    console.log(err.message); // outputs message to developer console\n  } else if (typeof err === 'string') {\n    console.log(err); // outputs message to developer console\n  } else if (err && typeof err === 'object' && 'message' in err) {\n    console.log((err as { message: string }).message); // outputs message to developer console\n  } else {\n    console.log('Unexpected error type'); // outputs message to developer console\n  }\n}"
+    ],
+    "Result Types": [
+      "Result types model success/failure without exceptions using a discriminated union. This forces callers to handle both paths explicitly. A common mistake is using exceptions for expected failure modes instead of modeling them in the type system.",
+      "type Result<T, E = Error> = // creates reusable type alias\n  | { ok: true; data: T }\n  | { ok: false; error: E };\n\nfunction divide(a: number, b: number): Result<number, string> { // defines reusable function block\n  if (b === 0) return { ok: false, error: 'Division by zero' }; // conditionally executes following block\n  return { ok: true, data: a / b }; // returns value to calling code\n}\n\nconst result = divide(10, 2); // declares variable; type inferred\nif (result.ok) { // conditionally executes following block\n  console.log(result.data); // number\n} else {\n  console.error(result.error); // string\n}"
+    ],
+    "Definite Assignment Assertions": [
+      "Use the ! assertion (!:) to tell TypeScript that a variable is definitely assigned, even when the compiler can't prove it. Common in class properties initialized in constructor helpers or lifecycle methods. A common mistake is overusing it to silence warnings instead of restructuring code.",
+      "class Component { // defines a class blueprint\n  private data!: string[]; // Definite assignment\n  init(): void { // defines class method\n    this.data = ['a', 'b', 'c']; // assigns to instance property\n  }\n  process(): void { // defines class method\n    console.log(this.data.length); // OK\n  }\n}\n// Without !:, TS would error: Property 'data' not initialized\n\n// Better: initialize at declaration\nclass Better { // defines a class blueprint\n  private data: string[] = []; // declares access-controlled member\n}"
+    ],
+    "Null Checks": [
+      "With strictNullChecks, null and undefined are distinct types. Use optional chaining (?.), nullish coalescing (??), and type guards to handle nullable values safely. A common mistake is using || instead of ?? for defaults — || treats empty string and 0 as falsy.",
+      "interface Config { // defines object shape contract\n  timeout?: number;\n  url?: string;\n  retries?: number;\n}\nfunction process(config: Config) { // defines reusable function block\n  const timeout = config.timeout ?? 5000; // 0 is a valid value\n  const url = config.url?.toLowerCase(); // declares variable; type inferred\n  const retries = config.retries ?? 3; // declares variable; type inferred\n  // With ||: timeout would use default even if config.timeout = 0\n  if (config.url) { // conditionally executes following block\n    console.log(config.url); // narrowed to string\n  }\n}"
+    ],
+    "Result Pattern & Discriminated Unions": [
+      "Functional error handling with Result types: `type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E }`. Pattern match on `.ok`. Never type for exhaustive checks. Discriminated unions for domain errors. Either type from fp-ts or custom. Combine with type guards. Avoids try/catch sprawl — composable error handling. Use branded types for compile-time safety.",
+      "// Result type\ntype Result<T, E = Error> =\n  | { ok: true; value: T }\n  | { ok: false; error: E }\n\n// Discriminated union for domain errors\ntype DomainError =\n  | { kind: \"not-found\"; id: string }\n  | { kind: \"validation\"; field: string; message: string }\n  | { kind: \"rate-limited\"; retryAfter: number }\n\n// Type guard\nfunction isNotFound(err: DomainError): err is { kind: \"not-found\"; id: string } {\n  return err.kind === \"not-found\"\n}\n\n// Safe function\nfunction parseUser(json: string): Result<User, DomainError> {\n  try {\n    const parsed = JSON.parse(json)\n    if (!parsed.name) {\n      return { ok: false, error: { kind: \"validation\", field: \"name\", message: \"Required\" } }\n    }\n    return { ok: true, value: { id: parsed.id, name: parsed.name, email: parsed.email } }\n  } catch {\n    return { ok: false, error: { kind: \"validation\", field: \"json\", message: \"Invalid JSON\" } }\n  }\n}\n\n// Usage\nconst result = parseUser('{\"id\": 1, \"name\": \"Alice\"}')\n\nif (result.ok) {\n  console.log(result.value.name)  // TypeScript knows value is User\n} else {\n  // Exhaustive check\n  switch (result.error.kind) {\n    case \"not-found\":\n      console.log(`Missing: ${result.error.id}`)\n      break\n    case \"validation\":\n      console.log(`${result.error.field}: ${result.error.message}`)\n      break\n    case \"rate-limited\":\n      console.log(`Wait ${result.error.retryAfter}s`)\n      break\n  }\n}\n\n// Never type for exhaustiveness\nfunction assertNever(x: never): never {\n  throw new Error(\"Unhandled case: \" + x)\n}"
+    ]
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "<p>File I/O in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "<p>Input and output operations in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "<p>Concurrency in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "<p>Modular programming in TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "<p>Best practices for TypeScript.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "<p>Optimizing TypeScript code.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Type System": {
+    "Union Types": [
+      "Unions express 'either this type OR that type'. Baumgartner says: 'union types are TypeScript's most powerful feature — they model reality where data comes in multiple shapes'. The best part: TypeScript forces you to NARROW the type before using type-specific operations. This eliminates entire categories of runtime errors. Narrowing happens through typeof, instanceof, in, discriminated property checks, or custom type guards. A key insight from 'TypeScript in 50 Lessons': always use discriminated unions (a common literal property like kind) for clear, exhaustive type narrowing — they're the backbone of TypeScript error handling patterns.",
+      "// Basic union\nlet id: string | number; // declares variable with explicit type\nid = 'abc123';\nid = 42;\n\n// TypeScript forces narrowing\n// id.toUpperCase(); // Error: not on number\nif (typeof id === 'string') { // conditionally executes following block\n  id.toUpperCase(); // OK — narrowed\n}\n\n// Discriminated union — the real power\ntype Shape = // creates reusable type alias\n  | { kind: 'circle'; radius: number }\n  | { kind: 'square'; side: number }\n  | { kind: 'triangle'; base: number; height: number };\n\nfunction area(s: Shape): number { // defines reusable function block\n  switch (s.kind) { // branches execution on value match\n    case 'circle': return Math.PI * s.radius ** 2; // matches and handles specific value\n    case 'square': return s.side ** 2; // matches and handles specific value\n    case 'triangle': return (s.base * s.height) / 2; // matches and handles specific value\n  }\n}\n\n// Exhaustiveness check — never ignore a case\nfunction assertNever(x: never): never { // defines reusable function block\n  throw new Error('Unexpected case'); // intentionally raises an error\n}"
+    ],
+    "Intersection Types": [
+      "Intersection types combine multiple types into one, requiring all properties from each type. Use & to merge object types. A common mistake is intersecting primitives (like string & number), which results in never.",
+      "type HasName = { name: string }; // creates reusable type alias\ntype HasAge = { age: number }; // creates reusable type alias\ntype Person = HasName & HasAge; // creates reusable type alias\nconst p: Person = { name: 'Alice', age: 30 }; // declares variable with explicit type\n// type Impossible = string & number; // never"
+    ],
+    "Type Aliases": [
+      "Type aliases name a type for reuse. Baumgartner: 'use type for unions, intersections, and tuples; use interface for object shapes you might extend'. type can represent anything (primitives, unions, tuples, objects); interface is restricted to objects. The key difference: interfaces can be declaration-merged (reopened and extended), types cannot. A lesson from 'TypeScript in 50 Lessons': prefer interface for public API contracts (they're more discoverable in editor tooltips and error messages), use type for complex type expressions.",
+      "// Type alias — can name ANY type\ntype Point = { x: number; y: number }; // creates reusable type alias\ntype ID = string | number;        // union\ntype Pair<T> = [T, T];             // generic tuple\ntype Callback = (data: string) => void; // function\ntype ReadonlyPoint = { readonly [K in keyof Point]: Point[K] }; // mapped\n\n// Interface — only objects, but extendable\ninterface User { name: string; } // defines object shape contract\ninterface User { age: number; } // merged! User now has both\n\n// When to use what:\n// - API response shape → interface\n// - Complex transformations → type\n// - Union/intersection → type\n// - Can't decide → interface (more discoverable)"
+    ],
+    "Interfaces": [
+      "Interfaces define the shape of objects. Baumgartner in 'TypeScript in 50 Lessons' highlights: 'interfaces are open — they can be extended via declaration merging'. This makes them ideal for library types that users might want to augment. Interfaces also extend cleanly (extends), can be implemented in classes, and produce better error messages. A critical insight: interfaces evaluate lazily (they don't resolve all members immediately), while type aliases evaluate eagerly. This matters for recursive types — interfaces handle them naturally, types need explicit indirection.",
+      "// Interface declaration\ninterface User { // defines object shape contract\n  name: string;\n  age: number;\n}\n\n// Extension\ninterface Admin extends User { // defines object shape contract\n  role: string;\n}\n\n// Declaration merging — open for extension\ninterface User { email?: string; } // defines object shape contract\n// User now has: name, age, and optional email\n\n// Interface with methods\ninterface Logger { // defines object shape contract\n  log(message: string): void; // declares method signature\n  error(message: string): void; // declares method signature\n}\n\n// Classes implement interfaces\nclass ConsoleLogger implements Logger { // defines a class blueprint\n  log(m: string) { console.log(m); } // defines class method\n  error(m: string) { console.error(m); } // defines class method\n}\n\n// Recursive interfaces work naturally\ninterface TreeNode<T> { // defines object shape contract\n  value: T;\n  children: TreeNode<T>[];\n}"
+    ],
+    "Structural Typing": [
+      "TypeScript uses structural (duck) typing: type compatibility is determined by shape, not name. Two types with identical members are interchangeable. A common mistake is expecting nominal typing behavior where type names should differ.",
+      "interface Point { x: number; y: number; } // defines object shape contract\ninterface Coord { x: number; y: number; } // defines object shape contract\nconst p: Point = { x: 1, y: 2 }; // declares variable with explicit type\nconst c: Coord = p; // OK: same structure\n\nclass Car { drive() {} } // defines a class blueprint\nclass Boat { drive() {} } // defines a class blueprint\nconst v: Car = new Boat(); // OK: same shape"
+    ],
+    "Type Assertions": [
+      "Type assertions (as) tell TypeScript you know more about a type than it does. They do not perform runtime checks. A common mistake is using assertions to silence errors instead of fixing the real type issue. Prefer 'as' over angle-bracket syntax in JSX.",
+      "const input = document.getElementById('myInput') as HTMLInputElement; // declares variable with type assertion\ninput.value = 'hello';\n\nconst value = JSON.parse('42') as number; // declares variable with type assertion\n// No runtime check — if JSON is wrong, assertion lies"
+    ],
+    "Branded Types": [
+      "Branded types add a phantom property to simulate nominal typing. This prevents mixing structurally compatible types like UserId and OrderId. A common mistake is forgetting that brands are compile-time only — they have no runtime effect.",
+      "type UserId = string & { readonly __brand: 'UserId' }; // creates reusable type alias\ntype OrderId = string & { readonly __brand: 'OrderId' }; // creates reusable type alias\nfunction getUser(id: UserId) { /* ... */ } // defines reusable function block\nconst uid = 'abc123' as UserId; // declares variable with type assertion\ngetUser(uid); // calls function with arguments\n// getUser('abc123'); // Error: not branded"
+    ],
+    "satisfies Operator": [
+      "The satisfies operator validates that a value matches a type without widening the inferred type. This preserves the narrowest type for autocomplete and type-checking. A common mistake is using a type annotation instead, which widens the type.",
+      "const palette = { // declares variable; type inferred\n  red: [255, 0, 0],\n  green: '#00ff00',\n} satisfies Record<string, string | number[]>;\n// palette.red inferred as number[], not string | number[]\npalette.red.map(x => x); // OK, typed as number[]"
+    ]
+  },
+  "Type Guards & Narrowing": {
+    "typeof Type Guards": [
+      "typeof narrows primitive types in conditional blocks. TypeScript understands typeof returning 'string', 'number', 'boolean', 'symbol', 'bigint', 'undefined', 'object', and 'function'. A common mistake is checking typeof null which returns 'object' — use value === null instead.",
+      "function narrow(value: string | number | null) {\n  if (typeof value === 'string') {\n    console.log(value.toUpperCase());\n  } else if (typeof value === 'number') {\n    console.log(value.toFixed(2));\n  } else {\n    console.log('null');\n  }\n}"
+    ],
+    "instanceof Type Guards": [
+      "instanceof narrows types based on constructor/prototype chain. Works with classes and built-in constructors like Date, Error, RegExp. A common mistake is using instanceof with interfaces — they are compile-time only and erased at runtime.",
+      "class Dog { bark() { return 'woof'; } }\nclass Cat { meow() { return 'meow'; } }\nfunction speak(animal: Dog | Cat) {\n  if (animal instanceof Dog) {\n    console.log(animal.bark());\n  } else {\n    console.log(animal.meow());\n  }\n}"
+    ],
+    "Equality Narrowing": [
+      "Equality checks (===, !==) narrow types by excluding mismatched values. Switch statements and strict equality against literal types narrow to the matching branch. A common mistake is using == instead of === which allows type coercion.",
+      "function move(dir: 'up' | 'down' | 'left' | 'right') {\n  if (dir === 'up') return 1;\n  if (dir === 'down') return -1;\n}\nfunction compare(a: string | number, b: string | boolean) {\n  if (a === b) {\n    console.log(a.toUpperCase()); // narrowed to string\n  }\n}"
+    ],
+    "Truthiness Narrowing": [
+      "Truthiness checks (if, &&, ||, !) narrow types by excluding falsy values: false, 0, '', null, undefined, NaN. A common mistake is forgetting that empty string '' and 0 are falsy — use ?? for null/undefined only.",
+      "function foo(x?: string | null) {\n  if (x) {\n    console.log(x.toUpperCase());\n  }\n}\nfunction getLen(s?: string) {\n  return s?.length ?? 0;\n}"
+    ],
+    "Type Predicates": [
+      "Type predicates (parameterName is Type) are custom type guard return types. They tell TypeScript what a value is when the function returns true. A common mistake is writing a predicate that doesn't actually check — TypeScript trusts your predicate blindly.",
+      "function isFish(pet: Fish | Bird): pet is Fish {\n  return (pet as Fish).swim !== undefined;\n}\nfunction feed(pet: Fish | Bird) {\n  if (isFish(pet)) {\n    pet.swim();\n  }\n}"
+    ],
+    "Discriminated Unions": [
+      "Discriminated unions use a common literal property (the discriminant) to narrow each variant. TypeScript understands switch/case and if/else checks on the discriminant. A common mistake is not using a literal type as the discriminant.",
+      "type Shape =\n  | { kind: 'circle'; radius: number }\n  | { kind: 'square'; side: number }\n  | { kind: 'triangle'; base: number; height: number };\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case 'circle': return Math.PI * s.radius ** 2;\n    case 'square': return s.side ** 2;\n    case 'triangle': return (s.base * s.height) / 2;\n  }\n}"
+    ]
+  },
+  "Functions": {
+    "Function Types": [
+      "Function types describe callable signatures: parameter types and return type. Use type aliases or inline syntax. A common mistake is forgetting that callbacks can have optional parameters and void return types are assignable from any return value.",
+      "type BinaryFn = (a: number, b: number) => number; // creates reusable type alias\nconst add: BinaryFn = (x, y) => x + y; // declares variable with explicit type\n\ntype LogFn = (msg: string) => void; // creates reusable type alias\nconst log: LogFn = (msg) => console.log(msg); // declares variable with explicit type"
+    ],
+    "Optional & Default Parameters": [
+      "Mark parameters as optional with ? or provide default values. Optional params must follow required ones. Default parameters are always optional and infer their type from the default value. A common mistake is mixing up order — optional params can't precede required ones.",
+      "function greet(name?: string): string { // defines reusable function block\n  return `Hello, ${name ?? 'Guest'}`; // returns value to calling code\n}\nfunction multiply(a: number, b: number = 1): number { // defines reusable function block\n  return a * b; // returns value to calling code\n}\ngreet();      // 'Hello, Guest'\nmultiply(5);  // 5"
+    ],
+    "Generic Functions": [
+      "Generics preserve type information through functions. Baumgartner: 'generics are about describing relationships between types'. The classic example: Array<T> — the type parameter T flows from creation through every method. TypeScript infers T from arguments 90% of the time. Constrain T with extends when you need specific capabilities (like T extends HasLength). A key insight from 'TypeScript in 50 Lessons': 'generics are contagious' — once you add a type parameter to a function, every function that wraps it likely needs one too. Use multiple type parameters for complex relationships.",
+      "// Basic generic — captures caller's type\nfunction first<T>(arr: T[]): T | undefined { // defines reusable function block\n  return arr[0]; // returns value to calling code\n}\nconst num = first([1, 2, 3]); // T → number\nconst str = first(['a', 'b']); // T → string\n\n// Constrained generic — T must extend something\ninterface HasLength { length: number } // defines object shape contract\nfunction logLength<T extends HasLength>(arg: T): number { // defines reusable function block\n  return arg.length; // returns value to calling code\n}\nlogLength('hello'); // OK — string has length\nlogLength([1, 2]);  // OK — array has length\n// logLength(123);   // Error — number lacks length\n\n// Multiple type parameters for relationships\nfunction zip<T, U>(a: T[], b: U[]): [T, U][] { // defines reusable function block\n  return a.map((val, i) => [val, b[i]]); // returns value to calling code\n}\nconst zipped = zip([1, 2], ['a', 'b']); // [number, string][]\n\n// Inference from multiple args\nfunction merge<T, U>(a: T, b: U): T & U { // defines reusable function block\n  return { ...a, ...b }; // returns value to calling code\n}\nconst merged = merge({ name: 'Doge' }, { age: 5 }); // declares variable; type inferred\n// merged: { name: string } & { age: number }\n\n// The Good Parts: generics let the CALLER decide the type"
+    ],
+    "Function Overloads": [
+      "Overloads declare multiple call signatures for a single implementation. The implementation signature must be compatible with all overloads but is not callable directly. A common mistake is having an implementation signature that can't satisfy all overloads.",
+      "function combine(a: string, b: string): string; // defines reusable function block\nfunction combine(a: number, b: number): number; // defines reusable function block\nfunction combine(a: any, b: any): any { // defines reusable function block\n  return a + b; // returns value to calling code\n}\ncombine('a', 'b'); // string\ncombine(1, 2);     // number\n// combine(1, 'b'); // Error: no matching overload"
+    ],
+    "Rest Parameters": [
+      "Rest parameters collect remaining arguments into an array. Type them as an array type. TypeScript also supports typed tuples for rest parameters in variadic patterns. A common mistake is thinking rest must be the last parameter — it must be the only last parameter.",
+      "function sum(...numbers: number[]): number { // defines reusable function block\n  return numbers.reduce((a, b) => a + b, 0); // returns value to calling code\n}\nsum(1, 2, 3, 4); // 10\n\nfunction logValues(...args: [string, ...number[]]) { // defines reusable function block\n  console.log(args[0], args.slice(1)); // outputs message to developer console\n}\nlogValues('scores', 95, 87); // calls function with arguments"
+    ],
+    "this Parameters": [
+      "TypeScript uses a fake first parameter named 'this' to type the function's context. This catches errors where 'this' is used incorrectly, common in callbacks and event handlers. A common mistake is forgetting to bind 'this' or using arrow functions when a dynamic 'this' is needed.",
+      "function onClick(this: HTMLButtonElement, event: MouseEvent) { // defines reusable function block\n  this.disabled = true; // assigns to instance property\n}\ndocument.querySelector('button')!.addEventListener('click', onClick); // invokes method on object\n\nconst obj = { // declares variable; type inferred\n  data: [1, 2, 3],\n  process(this: { data: number[] }) { // defines class method\n    return this.data.map(x => x * 2); // returns value to calling code\n  }\n};"
+    ],
+    "Async Functions": [
+      "Async functions always return Promise<T> where T is the resolved type. Annotate the return type as Promise<T> for clarity. A common mistake is forgetting that async functions wrap the returned value in Promise — you must await or .then() to get the value.",
+      "async function fetchData(): Promise<{ id: number }> { // defines async function returning promise\n  const res = await fetch('/api/data'); // declares variable; type inferred\n  return res.json(); // returns value to calling code\n}\n// Return type is Promise<{ id: number }>, not { id: number }\nfetchData().then(data => console.log(data.id)); // calls function with arguments"
+    ],
+    "void & never Return Types": [
+      "void means the function completes normally but returns nothing meaningful (actually returns undefined). never means the function never completes — it always throws or loops forever. A common mistake is assigning void to something expecting a value, or thinking never is the same as void.",
+      "function log(msg: string): void { // defines reusable function block\n  console.log(msg); // outputs message to developer console\n  // returns undefined implicitly\n}\nfunction fail(msg: string): never { // defines reusable function block\n  throw new Error(msg); // intentionally raises an error\n}\nfunction infinite(): never { // defines reusable function block\n  while (true) {} // loops while condition remains true\n}\n// never is assignable to every type; void is not"
+    ],
+    "Nested Loops": [
+      "Nested loops in TypeScript work like JavaScript but benefit from type safety — the compiler tracks array element types, ensures indices are valid numbers, and catches out-of-bounds when using array types with literal index access. Use for...of with destructuring for cleaner 2D iteration. Prefer flat() and flatMap() for transforming nested structures over manual nested loops when possible.",
+      "// 2D matrix with types\nconst matrix: number[][] = [ // declares variable with explicit type\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\n\n// Nested for loops — element is typed as number\nfor (let row = 0; row < matrix.length; row++) { // iterates with counter variable\n  for (let col = 0; col < matrix[row].length; col++) { // iterates with counter variable\n    console.log(matrix[row][col].toFixed(2)); // typed number\n  }\n}\n\n// for...of with destructuring — cleaner\nfor (const [rowIdx, row] of matrix.entries()) { // iterates with counter variable\n  for (const [colIdx, value] of row.entries()) { // iterates with counter variable\n    console.log(`[${rowIdx}][${colIdx}] = ${value}`); // outputs message to developer console\n  }\n}\n\n// Typed labeled break\ntype SearchResult = { found: boolean; pos: [number, number] }; // creates reusable type alias\nfunction findValue(matrix: number[][], target: number): SearchResult { // defines reusable function block\n  outer: for (let i = 0; i < matrix.length; i++) {\n    for (let j = 0; j < matrix[i].length; j++) { // iterates with counter variable\n      if (matrix[i][j] === target) { // conditionally executes following block\n        return { found: true, pos: [i, j] }; // returns value to calling code\n      }\n    }\n  }\n  return { found: false, pos: [-1, -1] }; // returns value to calling code\n}\n\n// Prefer flatMap over nested loops for transformations\nconst pairs = [1, 2, 3].flatMap(x => [2, 3, 4].map(y => [x, y])); // declares variable; type inferred\n// [[1,2],[1,3],[1,4],[2,2],...]"
+    ]
+  },
+  "Classes & OOP": {
+    "Classes": [
+      "TypeScript classes add type annotations to fields, constructors, and methods. Fields must be declared with types or initialized. A common mistake is forgetting to initialize a field or declare it — the strictPropertyInitialization check will catch this.",
+      "class Person { // defines a class blueprint\n  name: string;\n  age: number;\n  constructor(name: string, age: number) { // initializes new class instance\n    this.name = name; // assigns to instance property\n    this.age = age; // assigns to instance property\n  }\n  greet(): string { // defines class method\n    return `Hi, I'm ${this.name}`; // returns value to calling code\n  }\n}"
+    ],
+    "Inheritance": [
+      "Use extends to create subclasses. Call super() before accessing this in the constructor. A common mistake is forgetting super() entirely or calling super() after accessing this. Use the override keyword to explicitly mark method overrides.",
+      "class Animal { // defines a class blueprint\n  constructor(public name: string) {} // initializes new class instance\n  speak(): void { // defines class method\n    console.log(`${this.name} makes a sound`); // outputs message to developer console\n  }\n}\nclass Dog extends Animal { // defines a class blueprint\n  constructor(name: string, public breed: string) { // initializes new class instance\n    super(name); // calls parent class constructor\n  }\n  override speak(): void { // overrides parent class method\n    console.log(`${this.name} barks`); // outputs message to developer console\n  }\n}"
+    ],
+    "Access Modifiers": [
+      "public (default), private, and protected control member visibility. private prevents access outside the class; protected allows access in subclasses. A common mistake is relying on these for runtime security — they are compile-time only and erased at runtime.",
+      "class BankAccount { // defines a class blueprint\n  private balance: number = 0; // declares access-controlled member\n  protected owner: string; // declares access-controlled member\n  constructor(owner: string) { this.owner = owner; } // initializes new class instance\n  deposit(amount: number): void { // defines class method\n    this.balance += amount;\n  }\n  getBalance(): number { // defines class method\n    return this.balance; // returns value to calling code\n  }\n}\n// Also: readonly prevents reassignment but not mutation"
+    ],
+    "Abstract Classes": [
+      "Abstract classes define shared behavior with abstract methods that subclasses must implement. They cannot be instantiated directly. A common mistake is trying to use new on an abstract class or forgetting to implement all abstract methods in a subclass.",
+      "abstract class Shape { // abstract class; cannot be instantiated\n  abstract getArea(): number;\n  describe(): string { // defines class method\n    return `Area: ${this.getArea()}`; // returns value to calling code\n  }\n}\nclass Circle extends Shape { // defines a class blueprint\n  constructor(private radius: number) { super(); } // initializes new class instance\n  getArea(): number { // defines class method\n    return Math.PI * this.radius ** 2; // returns value to calling code\n  }\n}\n// new Shape(); // Error: cannot instantiate abstract class"
+    ],
+    "Interfaces with Classes": [
+      "Classes can implement interfaces to guarantee a shape. A class can implement multiple interfaces. Unlike extends, implements doesn't inherit implementation, only enforces shape. A common mistake is thinking implements provides default implementations — it only enforces type contracts.",
+      "interface Serializable { // defines object shape contract\n  serialize(): string; // declares method signature\n}\ninterface Loggable { // defines object shape contract\n  log(): void; // declares method signature\n}\nclass User implements Serializable, Loggable { // defines a class blueprint\n  constructor(private name: string) {} // initializes new class instance\n  serialize(): string { // defines class method\n    return JSON.stringify({ name: this.name }); // returns value to calling code\n  }\n  log(): void { // defines class method\n    console.log(this.name); // outputs message to developer console\n  }\n}"
+    ],
+    "Static Members": [
+      "Static properties and methods belong to the class, not instances. Access them via ClassName.property. A common mistake is trying to access static members through an instance or using this inside a static method to access instance members.",
+      "class Config { // defines a class blueprint\n  static apiUrl: string = 'https://api.example.com';\n  static getTimeout(): number { // defines static member on class\n    return 5000; // returns value to calling code\n  }\n  static isProduction(): boolean { // defines static member on class\n    return Config.apiUrl.includes('production'); // returns value to calling code\n  }\n}\nconsole.log(Config.apiUrl); // outputs message to developer console\nconsole.log(Config.getTimeout()); // outputs message to developer console\n// const c = new Config();\n// c.apiUrl; // Error"
+    ],
+    "Parameter Properties": [
+      "Parameter properties combine declaration and assignment in one step. Prefix a constructor parameter with public, private, protected, or readonly to auto-create the field. A common mistake is forgetting that the access modifier is required — without it, it's just a regular parameter, not a property.",
+      "class Person { // defines a class blueprint\n  constructor( // initializes new class instance\n    public name: string, // declares access-controlled member\n    private age: number, // declares access-controlled member\n    protected id: string, // declares access-controlled member\n    readonly email: string // makes property read-only\n  ) {}\n}\n// Equivalent to:\n// class Person {\n//   public name: string;\n//   private age: number;\n//   protected id: string;\n//   readonly email: string;\n//   constructor(name: string, age: number, id: string, email: string) {\n//     this.name = name; this.age = age; this.id = id; this.email = email;\n//   }\n// }"
+    ],
+    "Mixins": [
+      "Mixins compose behavior from multiple classes using constructor type patterns. TypeScript doesn't support multiple inheritance, but mixins provide a composable alternative. A common mistake is not properly typing the constructor return type or forgetting to call super in a mixin.",
+      "type Constructor<T = {}> = new (...args: any[]) => T; // creates reusable type alias\n\nfunction Timestamped<TBase extends Constructor>(Base: TBase) { // defines reusable function block\n  return class extends Base { // returns value to calling code\n    timestamp = new Date();\n  };\n}\nfunction Activatable<TBase extends Constructor>(Base: TBase) { // defines reusable function block\n  return class extends Base { // returns value to calling code\n    isActive = false;\n    toggle() { this.isActive = !this.isActive; } // defines class method\n  };\n}\nclass User { name: string = ''; } // defines a class blueprint\nconst TimestampedUser = Timestamped(Activatable(User)); // declares variable; type inferred\nconst user = new TimestampedUser(); // declares variable; type inferred\nconsole.log(user.timestamp, user.isActive); // outputs message to developer console"
+    ]
+  },
+  "Generics": {
+    "Generic Types": [
+      "Generic types parameterize types with type variables, enabling reusable, type-safe containers. Type variables are placeholders for actual types determined at use. A common mistake is not providing enough type parameters or omitting them entirely when inference fails.",
+      "type Box<T> = { value: T }; // creates reusable type alias\ntype Pair<T, U> = { first: T; second: U }; // creates reusable type alias\ntype Result<T> = { data: T; error?: string }; // creates reusable type alias\n\nconst box: Box<number> = { value: 42 }; // declares variable with explicit type\nconst pair: Pair<string, number> = { first: 'a', second: 1 }; // declares variable with explicit type"
+    ],
+    "Constraints": [
+      "Use extends to constrain type parameters to types with specific properties. This allows the generic implementation to safely access those properties. A common mistake is not constraining when you need to call methods on the generic value.",
+      "interface HasLength { length: number } // defines object shape contract\nfunction logLength<T extends HasLength>(arg: T): number { // defines reusable function block\n  console.log(arg.length); // outputs message to developer console\n  return arg.length; // returns value to calling code\n}\nlogLength('hello');     // 5\nlogLength([1, 2, 3]);   // 3\n// logLength(123); // Error: number doesn't have length"
+    ],
+    "Utility Types": [
+      "TypeScript provides built-in utility types: Partial<T>, Required<T>, Readonly<T>, Record<K,T>, Pick<T,K>, Omit<T,K>, Exclude<T,U>, Extract<T,U>, NonNullable<T>, and more. They reduce boilerplate for common type transformations.",
+      "interface User { // defines object shape contract\n  name: string;\n  age: number;\n  email: string;\n}\ntype PartialUser = Partial<User>;    // all optional\ntype JustName = Pick<User, 'name'>;   // { name: string }\ntype WithoutEmail = Omit<User, 'email'>; // creates reusable type alias\ntype NameOrAge = Pick<User, 'name' | 'age'>; // creates reusable type alias\nconst record: Record<string, number> = { a: 1, b: 2 }; // declares variable with explicit type"
+    ],
+    "Generic Classes": [
+      "Generic classes maintain type parameters across all members and methods. The type parameter is fixed at construction time. A common mistake is not specifying the type parameter when creating an instance, causing inference from the constructor args.",
+      "class Stack<T> { // defines a class blueprint\n  private items: T[] = []; // declares access-controlled member\n  push(item: T): void { // defines class method\n    this.items.push(item); // invokes method on object\n  }\n  pop(): T | undefined { // defines class method\n    return this.items.pop(); // returns value to calling code\n  }\n  peek(): T | undefined { // defines class method\n    return this.items[this.items.length - 1]; // returns value to calling code\n  }\n}\nconst numStack = new Stack<number>(); // declares variable; type inferred\nnumStack.push(1); // invokes method on object\n// numStack.push('a'); // Error"
+    ],
+    "Conditional Types": [
+      "Conditional types select between types based on a condition. Baumgartner calls them 'TypeScript's if/else at the type level'. The structure T extends U ? X : Y. A critical behavior: they DISTRIBUTE over unions — if T is string | number, the conditional applies to each member separately and the results are unioned. The infer keyword captures a type from within a larger type. A lesson from 'TypeScript in 50 Lessons': 'conditional types are the foundation of all advanced TypeScript patterns' — they power ReturnType, Extract, Exclude, and NonNullable. Use them to build type transformations that adapt to the input type.",
+      "// Basic conditional\n type IsString<T> = T extends string ? true : false; // creates reusable type alias\n type A = IsString<'hello'>; // true\n type B = IsString<42>;       // false\n\n // Distribution over unions\n type C = IsString<string | number>; // creates reusable type alias\n // true | false = boolean (distributes)\n\n // infer — capture a type\n type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never; // creates reusable type alias\n type Fn = (x: number) => string; // creates reusable type alias\n type R = ReturnType<Fn>; // string\n\n // Real-world: unwrap promises\n type PromiseValue<T> = T extends Promise<infer V> ? V : T; // creates reusable type alias\n type PV = PromiseValue<Promise<number>>; // number\n type PV2 = PromiseValue<string>; // string (pass-through)\n\n // Filter types with conditional\n type NonNullable<T> = T extends null | undefined ? never : T; // creates reusable type alias\n type Clean = NonNullable<string | null | undefined>; // string\n\n // Chained conditionals (like if/else if/else)\n type TypeName<T> = // creates reusable type alias\n   T extends string ? 'string' :\n   T extends number ? 'number' :\n   T extends boolean ? 'boolean' :\n   T extends undefined ? 'undefined' :\n   T extends Function ? 'function' :\n   'object';"
+    ],
+    "Mapped Types": [
+      "Mapped types transform each property of a type using { [K in keyof T]: T[K] }. Add modifiers like ? and readonly to create variations. A common mistake is forgetting that mapped types preserve modifiers by default — use -? and -readonly to remove them.",
+      "type Nullable<T> = { // creates reusable type alias\n  [K in keyof T]: T[K] | null;\n};\ntype Mutable<T> = { // creates reusable type alias\n  -readonly [K in keyof T]: T[K];\n};\ninterface Point { x: number; y: number; } // defines object shape contract\ntype NullablePoint = Nullable<Point>; // creates reusable type alias\n// { x: number | null; y: number | null }"
+    ],
+    "Template Literal Types": [
+      "Template literal types construct string types at the type level using embedded type placeholders. Combined with union types, they generate all possible combinations. A common mistake is thinking they work at runtime — they are purely compile-time constructs.",
+      "type EventName<T extends string> = `on${Capitalize<T>}`; // creates reusable type alias\ntype Color = 'red' | 'green' | 'blue'; // creates reusable type alias\ntype DarkColor = `dark-${Color}`; // creates reusable type alias\n// 'dark-red' | 'dark-green' | 'dark-blue'\ntype ClickEvent = EventName<'click'>; // 'onClick'\ntype Events = EventName<'click' | 'focus'>; // creates reusable type alias\n// 'onClick' | 'onFocus'"
+    ],
+    "infer Keyword": [
+      "The infer keyword introduces a type variable within a conditional type's extends clause, capturing a type from a larger structure. It powers most advanced utility types like ReturnType. A common mistake is using infer outside a conditional type — it's only valid in the extends clause.",
+      "type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never; // creates reusable type alias\ntype Fn = (x: number) => string; // creates reusable type alias\ntype R = ReturnType<Fn>; // string\n\ntype FirstParam<T> = T extends (first: infer F, ...args: any[]) => any ? F : never; // creates reusable type alias\ntype P = FirstParam<(name: string, age: number) => void>; // string\n\ntype PromiseValue<T> = T extends Promise<infer V> ? V : T; // creates reusable type alias\ntype PV = PromiseValue<Promise<number>>; // number"
+    ]
+  },
+  "Utility Types": {
+    "Partial<T>": [
+      "Partial<T> makes all properties of T optional. Useful for update operations where you only supply changed fields. A common mistake is applying Partial to deeply nested objects — it only affects the top level.",
+      "interface User { name: string; age: number; email: string; }\ntype PartialUser = Partial<User>;\nfunction updateUser(id: number, updates: Partial<User>) {}"
+    ],
+    "Required<T>": [
+      "Required<T> makes all properties of T required (removes optionality). Useful for transforming optional configs into full required types. A common mistake is forgetting Required does not affect nested optional properties.",
+      "interface Config { url?: string; timeout?: number; }\ntype StrictConfig = Required<Config>;"
+    ],
+    "Readonly<T>": [
+      "Readonly<T> makes all properties of T readonly. Useful for immutable objects and configs. A common mistake is thinking Readonly prevents deep mutation — use as const or DeepReadonly for nested immutability.",
+      "interface Point { x: number; y: number; }\ntype ReadonlyPoint = Readonly<Point>;\nconst origin: ReadonlyPoint = { x: 0, y: 0 };"
+    ],
+    "Record<K,T>": [
+      "Record<K,T> creates an object type with keys K and values T. K is usually a union of string literals. A common mistake is using Record<string, T> when you know the specific keys — prefer a mapped type for better autocomplete.",
+      "type Page = 'home' | 'about' | 'contact';\ntype Routes = Record<Page, string>;\nconst routes: Routes = {\n  home: '/',\n  about: '/about',\n  contact: '/contact'\n};"
+    ],
+    "Pick<T,K>": [
+      "Pick<T,K> creates a type with only the specified keys K from T. Useful for creating lightweight view types from full data types. A common mistake is picking keys that don't exist on T — TypeScript catches this at compile time.",
+      "interface User { id: number; name: string; email: string; password: string; }\ntype PublicUser = Pick<User, 'id' | 'name' | 'email'>;"
+    ],
+    "Omit<T,K>": [
+      "Omit<T,K> creates a type without the specified keys K from T. The inverse of Pick. Useful for excluding sensitive fields. A common mistake is using Omit when you want to exclude by value type rather than key name.",
+      "interface User { id: number; name: string; email: string; password: string; }\ntype SafeUser = Omit<User, 'password'>;"
+    ],
+    "Exclude<T,U>": [
+      "Exclude<T,U> removes types from T that are assignable to U. Works with union types. A common mistake is using Exclude for object properties when you should use Omit — Exclude works on union members, not object keys.",
+      "type T = string | number | boolean;\ntype WithoutString = Exclude<T, string>;"
+    ],
+    "Extract<T,U>": [
+      "Extract<T,U> extracts types from T that are assignable to U. The opposite of Exclude. Useful for filtering union types to a subset. A common mistake is expecting Extract to filter object properties — use Pick instead.",
+      "type T = string | number | boolean;\ntype OnlyString = Extract<T, string>;"
+    ],
+    "NonNullable<T>": [
+      "NonNullable<T> removes null and undefined from T. Useful for cleaning up after validation. A common mistake is using NonNullable on object types expecting it to remove null properties from fields.",
+      "type T = string | number | null | undefined;\ntype Clean = NonNullable<T>;"
+    ],
+    "ReturnType<T>": [
+      "ReturnType<T> extracts the return type of a function type T. Uses conditional types with infer internally. A common mistake is passing a function value instead of a type — use typeof to get the type first.",
+      "function greet(name: string): string { return `Hello`; }\ntype R = ReturnType<typeof greet>;\ntype Fn = (a: number) => number;\ntype FR = ReturnType<Fn>;"
+    ],
+    "Parameters<T>": [
+      "Parameters<T> extracts the parameter types of a function type T as a tuple. Useful for forwarding argument types to wrappers. A common mistake is forgetting Parameters returns a tuple, not a union.",
+      "function log(name: string, age: number): void {}\ntype P = Parameters<typeof log>;"
+    ],
+    "Awaited<T>": [
+      "Awaited<T> unwraps Promise types recursively. Useful for getting the resolved type of async functions. A common mistake is using Awaited on non-Promise types — it passes them through unchanged.",
+      "type AsyncData = Promise<string>;\ntype Data = Awaited<AsyncData>;\ntype Nested = Promise<Promise<number>>;\ntype Unwrapped = Awaited<Nested>;"
+    ]
+  },
+  "Advanced Types": {
+    "Conditional Types": [
+      "Advanced conditional types enable type-level branching and filtering. They distribute over unions unless wrapped with brackets. Use them for building utilities like Exclude and Extract. A common mistake is assuming conditionals work at runtime — they are purely compile-time.",
+      "type IsArray<T> = T extends any[] ? true : false; // creates reusable type alias\ntype Check = IsArray<string | number[]>; // boolean (distributed)\n\ntype NonNullable<T> = T extends null | undefined ? never : T; // creates reusable type alias\ntype Clean = NonNullable<string | null | undefined>; // string\n\ntype ElementType<T> = T extends (infer U)[] ? U : never; // creates reusable type alias\ntype E = ElementType<string[]>; // string"
+    ],
+    "Mapped Types": [
+      "Advanced mapped types iterate over object keys with keyof. Use the as clause for key remapping and combine with conditional types to filter keys. A common mistake is not accounting for readonly and optional modifiers that are preserved by default.",
+      "type Getters<T> = { // creates reusable type alias\n  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]\n};\ninterface Person { name: string; age: number; } // defines object shape contract\ntype PersonGetters = Getters<Person>; // creates reusable type alias\n// { getName: () => string; getAge: () => number; }\n\ntype OnlyString<T> = { // creates reusable type alias\n  [K in keyof T as T[K] extends string ? K : never]: T[K]\n};"
+    ],
+    "Indexed Access Types": [
+      "Indexed access types (T[K]) retrieve the type of a property at key K. Use T[keyof T] for all values or T[number] for array elements. A common mistake is using a key that doesn't exist on the type, which produces a compile-time error.",
+      "interface Person { // defines object shape contract\n  name: string;\n  age: number;\n  address: { city: string; zip: string };\n}\ntype NameType = Person['name'];              // string\ntype AgeOrName = Person['name' | 'age'];      // string | number\ntype AddressType = Person['address'];         // { city: string; zip: string }\ntype Values = Person[keyof Person];           // string | number | { city: string; zip: string }\ntype Element = string[number];                  // string"
+    ],
+    "Type Guards": [
+      "Type guards narrow types in conditional blocks using x is T predicates. Use typeof, instanceof, or custom functions. A common mistake is writing guards that are too broad or forgetting that in operator also acts as a type guard in TS 5.5+.",
+      "function isString(value: unknown): value is string { // defines reusable function block\n  return typeof value === 'string'; // returns value to calling code\n}\nfunction isError(err: unknown): err is Error { // defines reusable function block\n  return err instanceof Error; // returns value to calling code\n}\nfunction process(value: string | number) { // defines reusable function block\n  if (isString(value)) { // conditionally executes following block\n    console.log(value.toUpperCase()); // narrowed to string\n  }\n}\n// 'value is string' tells TS the predicate; without it, narrowing fails"
+    ],
+    "Variadic Tuple Types": [
+      "Variadic tuple types use spread in tuple positions to capture variable-length patterns. They enable strongly typed concatenation, partial application, and parameter forwarding. A common mistake is forgetting that spreads in tuples create new tuple types.",
+      "type Concat<T extends any[], U extends any[]> = [...T, ...U]; // creates reusable type alias\ntype Result = Concat<[string, number], [boolean]>; // creates reusable type alias\n// [string, number, boolean]\n\nfunction partialCall<T extends any[], U extends any[], R>( // defines reusable function block\n  fn: (...args: [...T, ...U]) => R,\n  ...args: T\n): (...args: U) => R {\n  return (...rest) => fn(...args, ...rest); // returns value to calling code\n}"
+    ],
+    "Recursive Types": [
+      "Recursive types reference themselves to model nested structures like JSON, trees, or linked lists. TypeScript supports recursive type aliases but has depth limits to prevent infinite expansion. A common mistake is creating infinitely recursive types without a base case.",
+      "type JSONValue = // creates reusable type alias\n  | string\n  | number\n  | boolean\n  | null\n  | JSONValue[]\n  | { [key: string]: JSONValue };\n\ntype TreeNode<T> = { // creates reusable type alias\n  value: T;\n  children: TreeNode<T>[];\n};\nconst tree: TreeNode<number> = { // declares variable with explicit type\n  value: 1,\n  children: [\n    { value: 2, children: [] }\n  ]\n};"
+    ],
+    "Discriminated Unions": [
+      "Discriminated unions are TypeScript's most important pattern for modeling state. Baumgartner: 'they make impossible states impossible'. A discriminated union has a common literal property (the discriminant, like kind or status) that tells TypeScript which variant is active. Inside a switch on the discriminant, TypeScript narrows the type to the specific variant. This eliminates entire classes of runtime errors (wrong property access, missing cases). 'TypeScript in 50 Lessons' emphasizes: 'model your data as discriminated unions, not optional fields' — instead of optional error/loading/data fields, use a single union with { status: 'loading' } | { status: 'success', data: T } | { status: 'error', error: string }.",
+      "// ❌ Bad: scattered optionals\ninterface AsyncStateBad { // defines object shape contract\n  loading: boolean;\n  data?: Data;\n  error?: string;\n}\n// You can have loading=true AND data at the same time — invalid!\n\n// ✅ Good: discriminated union\n type AsyncState<T> = // creates reusable type alias\n   | { status: 'loading' }\n   | { status: 'success'; data: T }\n   | { status: 'error'; error: string };\n\n function handleState(state: AsyncState<Data>) { // defines reusable function block\n   switch (state.status) { // branches execution on value match\n     case 'loading': // matches and handles specific value\n       console.log('Loading...'); // outputs message to developer console\n       break;\n     case 'success': // matches and handles specific value\n       console.log(state.data); // typed as Data\n       break;\n     case 'error': // matches and handles specific value\n       console.error(state.error); // typed as string\n       break;\n   }\n }\n\n // Exhaustive check — compiler warns on new variants\n function assertNever(x: never): never { // defines reusable function block\n   throw new Error('Unexpected variant'); // intentionally raises an error\n }\n\n // Another example: form state\n type FormState<T> = // creates reusable type alias\n   | { kind: 'idle' }\n   | { kind: 'dirty'; values: Partial<T> }\n   | { kind: 'submitting'; values: T }\n   | { kind: 'submitted'; response: Response }\n   | { kind: 'error'; error: string; values: Partial<T> };"
+    ],
+    "keyof & typeof Operators": [
+      "keyof T produces a union of the keys of T. typeof x extracts the type of a value at compile time. Combine them for dynamic property access patterns. A common mistake is using typeof at runtime instead of compile-time — typeof at runtime is JavaScript's typeof.",
+      "interface Person { // defines object shape contract\n  name: string;\n  age: number;\n  email: string;\n}\ntype PersonKeys = keyof Person; // 'name' | 'age' | 'email'\n\nconst config = { // declares variable; type inferred\n  url: 'https://api.example.com',\n  timeout: 5000,\n} as const;\ntype ConfigType = typeof config; // creates reusable type alias\n// { readonly url: string; readonly timeout: number; }\n\ntype ValueOf<T> = T[keyof T]; // creates reusable type alias\ntype PersonValues = ValueOf<Person>; // string | number"
+    ]
+  },
+  "Modules & Tooling": {
+    "ESM Imports": [
+      "TypeScript supports ES module import/export syntax. Use import type for type-only imports to avoid runtime overhead. A common mistake is mixing default and named imports incorrectly, or forgetting that type-only imports are erased at compile time.",
+      "// math.ts\nexport function add(a: number, b: number): number { return a + b; } // exports member for external use\nexport type Operation = 'add' | 'subtract'; // exports member for external use\n\n// app.ts\nimport { add } from './math.js';          // value import\nimport type { Operation } from './math.js'; // type-only\nimport { type Operation } from './math.js'; // inline type (TS 5.0+)"
+    ],
+    "Namespaces": [
+      "Namespaces group related code under a global namespace. They are legacy constructs — prefer ES modules for new code. Still useful for ambient declarations and library definitions. A common mistake is mixing namespace and module imports.",
+      "namespace Validation {\n  export interface StringValidator { // exports member for external use\n    isValid(s: string): boolean; // declares method signature\n  }\n  export class LettersOnlyValidator implements StringValidator { // exports member for external use\n    isValid(s: string): boolean { // defines class method\n      return /^[A-Za-z]+$/.test(s); // returns value to calling code\n    }\n  }\n}\nconst v = new Validation.LettersOnlyValidator(); // declares variable; type inferred\nconsole.log(v.isValid('Hello')); // true"
+    ],
+    "Decorators": [
+      "Decorators modify classes, methods, properties, or parameters. They are experimental in TypeScript (enable experimentalDecorators). Use them for metaprogramming, logging, and dependency injection. A common mistake is forgetting that decorator evaluation order matters.",
+      "function logMethod( // defines reusable function block\n  target: any,\n  propertyKey: string,\n  descriptor: PropertyDescriptor\n) {\n  const original = descriptor.value; // declares variable; type inferred\n  descriptor.value = function (...args: any[]) {\n    console.log(`Called ${propertyKey} with`, args); // outputs message to developer console\n    return original.apply(this, args); // returns value to calling code\n  };\n}\nclass Calculator { // defines a class blueprint\n  @logMethod // applies decorator to class member\n  add(a: number, b: number): number { // defines class method\n    return a + b; // returns value to calling code\n  }\n}\n// tsconfig: { \"experimentalDecorators\": true }"
+    ],
+    "tsconfig": [
+      "tsconfig.json configures the TypeScript compiler. Key options: target, module, strict, outDir, rootDir, and lib. A common mistake is not including files in the project or using conflicting module and moduleResolution settings.",
+      "{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"module\": \"ESNext\",\n    \"moduleResolution\": \"bundler\",\n    \"strict\": true,\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\",\n    \"lib\": [\"ES2022\", \"DOM\"],\n    \"skipLibCheck\": true\n  },\n  \"include\": [\"src/**/*\"],\n  \"exclude\": [\"node_modules\", \"dist\"]\n}"
+    ],
+    "Declaration Files": [
+      "Declaration files (.d.ts) describe JavaScript module shapes without implementation. Use declare module for third-party libs and declare global for augmenting globals. A common mistake is writing implementation code in .d.ts files — they should only contain type declarations.",
+      "// my-lib.d.ts\ndeclare module 'my-lib' {\n  export function doStuff(options: { timeout: number }): Promise<string>; // exports member for external use\n  export const version: string; // exports member for external use\n}\n\ndeclare global {\n  interface Window { // defines object shape contract\n    myApp: { version: string };\n  }\n}"
+    ],
+    "Triple-Slash Directives": [
+      "Triple-slash directives are single-line comments referencing other files. Used in declaration files for legacy reference management. Types, path, and lib directives exist. A common mistake is using these in modern projects — prefer ESM imports instead.",
+      "/// <reference types=\"vite/client\" />\n/// <reference path=\"./types.d.ts\" />\n/// <reference lib=\"es2022\" />\n\n// Use cases:\n// types: pulls in global types from a package\n// path: relative path to another declaration file\n// lib: includes a built-in lib definition"
+    ]
+  },
+  "Asynchronous TypeScript": {
+    "Promise Types": [
+      "Promise<T> represents an asynchronous value. The type parameter T is the resolved type. A common mistake is treating Promise<T> as T — you must await or .then() to unwrap the value. Promise<void> is common for fire-and-forget async operations.",
+      "function fetchUser(id: string): Promise<{ name: string }> { // defines reusable function block\n  return fetch(`/users/${id}`) // returns value to calling code\n    .then(r => r.json() as Promise<{ name: string }>); // invokes method on object\n}\nfetchUser('1').then(user => { // calls function with arguments\n  console.log(user.name); // typed as string\n});\n\nconst p: Promise<number> = Promise.resolve(42); // declares variable with explicit type\n// p is not number, it's Promise<number>"
+    ],
+    "Async/Await": [
+      "Async functions always return Promise<T>. Await unwraps the promise inside an async function. TypeScript tracks types through await. A common mistake is forgetting to await a promise or wrapping an already-async function in another Promise unnecessarily.",
+      "async function getData(): Promise<number> { // defines async function returning promise\n  const response = await fetch('/api/data'); // declares variable; type inferred\n  const json: { value: number } = await response.json(); // declares variable with explicit type\n  return json.value; // returns value to calling code\n}\n\n// Common mistake: forgetting await\nconst value = getData(); // Promise<number>, not number\n\n// Proper usage:\nconst result = await getData(); // number"
+    ],
+    "Async Iterators": [
+      "Async iterators (AsyncIterable<T>) produce values asynchronously. Use for await...of to consume them. Useful for streaming data, paginated APIs, and event streams. A common mistake is using for...of (sync) on an async iterable, which causes a runtime error.",
+      "async function* generateNumbers(): AsyncIterable<number> { // defines async function returning promise\n  for (let i = 0; i < 3; i++) { // iterates with counter variable\n    await new Promise(r => setTimeout(r, 100)); // waits for promise to resolve\n    yield i; // emits next value from generator\n  }\n}\n\nasync function consume() { // defines async function returning promise\n  for await (const num of generateNumbers()) {\n    console.log(num); // 0, 1, 2\n  }\n}\n// for...of would fail — must use for await...of"
+    ],
+    "Typed Event Emitters": [
+      "Typed event emitters use generics to map event names to payload types. This provides type-safe on/emit patterns. A common mistake is not typing the event map, resulting in any-typed event data throughout the codebase.",
+      "interface EventMap { // defines object shape contract\n  login: { userId: string };\n  logout: { userId: string; timestamp: number };\n  error: { message: string; code: number };\n}\n\nclass TypedEmitter<T extends Record<string, any>> { // defines a class blueprint\n  private handlers = new Map<keyof T, Set<Function>>(); // declares access-controlled member\n  on<K extends keyof T>(event: K, handler: (data: T[K]) => void): void {}\n  emit<K extends keyof T>(event: K, data: T[K]): void {}\n}\nconst emitter = new TypedEmitter<EventMap>(); // declares variable; type inferred\nemitter.on('login', data => console.log(data.userId)); // typed"
+    ],
+    "Promise Combinators": [
+      "Promise.all, Promise.race, Promise.allSettled, and Promise.any have typed return values. TypeScript infers tuples/unions from the input array. A common mistake is assuming Promise.all returns a loose array — it returns a tuple when given a tuple literal.",
+      "const p1 = Promise.resolve(42); // declares variable; type inferred\nconst p2 = Promise.resolve('hello'); // declares variable; type inferred\nconst p3 = Promise.resolve(true); // declares variable; type inferred\n\nconst all = Promise.all([p1, p2, p3]); // declares variable; type inferred\n//    ^? Promise<[number, string, boolean]>\n\nconst settled = Promise.allSettled([p1, p2, p3]); // declares variable; type inferred\n//    ^? Promise<PromiseSettledResult<number | string | boolean>[]>\n\nconst any = Promise.any([p1, p2, p3]); // declares variable; type inferred\n//    ^? Promise<number | string | boolean>"
+    ],
+    "Error Handling in Async Code": [
+      "Async errors require try/catch. In strict mode, caught errors are typed as unknown — you must narrow them. A common mistake is assuming the error is always an Error instance or not handling non-Error throws like strings or objects.",
+      "async function safeFetch(url: string): Promise<unknown> { // defines async function returning promise\n  try { // attempts code that might throw\n    const res = await fetch(url); // declares variable; type inferred\n    if (!res.ok) throw new Error(`HTTP ${res.status}`); // conditionally executes following block\n    return await res.json(); // returns value to calling code\n  } catch (error: unknown) {\n    if (error instanceof Error) { // conditionally executes following block\n      console.error(error.message); // outputs message to developer console\n    } else if (typeof error === 'string') {\n      console.error(error); // outputs message to developer console\n    } else {\n      console.error('Unknown error', error); // outputs message to developer console\n    }\n    return null; // returns value to calling code\n  }\n}"
+    ]
+  },
+  "Modern Patterns": {
+    "Template Literal Types": [
+      "Template literal types construct string types at compile time using embedded type expressions. Combined with unions, they generate all possible string combinations automatically. A common mistake is assuming these can be used at runtime — they're erased during compilation.",
+      "type EventName = `on${Capitalize<'click' | 'focus' | 'blur'>}`; // creates reusable type alias\n// 'onClick' | 'onFocus' | 'onBlur'\n\ntype CSSValue = `${number}px` | `${number}rem` | `${number}%`; // creates reusable type alias\nconst size: CSSValue = '16px'; // declares variable with explicit type\n// const bad: CSSValue = '10'; // Error\n\ntype ExtractParams<S extends string> = // creates reusable type alias\n  S extends `${string}:${infer P}/${infer Rest}` ? P | ExtractParams<Rest> : never;"
+    ],
+    "satisfies Operator": [
+      "satisfies validates a value's type while preserving the narrowest inferred type for autocomplete. Unlike type annotations, it doesn't widen. A common mistake is using a type annotation instead of satisfies, which loses the specific types of individual properties.",
+      "const config = { // declares variable; type inferred\n  api: 'https://api.example.com',\n  timeout: 5000,\n  retries: 3,\n} satisfies Record<string, string | number>;\n// config.api is string, not string | number\nconfig.api.toUpperCase(); // OK\n\nconst rgb = { // declares variable; type inferred\n  r: [255, 0, 0],\n  g: '#00ff00',\n} satisfies Record<string, string | number[]>;\n// rgb.r inferred as number[], not string | number[]"
+    ],
+    "Assertion Functions": [
+      "Assertion functions use the asserts return type to narrow types after a call. They throw if the assertion fails, making subsequent code safe. A common mistake is writing assertion functions without the asserts keyword, which prevents TypeScript from narrowing.",
+      "function assertDefined<T>(value: T): asserts value is NonNullable<T> { // defines reusable function block\n  if (value === null || value === undefined) { // conditionally executes following block\n    throw new Error('Value is null or undefined'); // intentionally raises an error\n  }\n}\nconst x: string | null = Math.random() > 0.5 ? 'hello' : null; // declares variable with explicit type\nassertDefined(x); // calls function with arguments\nconsole.log(x.toUpperCase()); // x narrowed to string\n\nfunction assertString(value: unknown): asserts value is string { // defines reusable function block\n  if (typeof value !== 'string') throw new Error('Not a string'); // conditionally executes following block\n}"
+    ],
+    "Branded Types": [
+      "Branded types add a unique phantom property to create distinguishable types from structurally identical ones. This prevents mixing values like emails and phone numbers. A common mistake is forgetting to cast at the boundary — brands are not automatically applied.",
+      "type Email = string & { readonly __brand: 'Email' }; // creates reusable type alias\ntype Phone = string & { readonly __brand: 'Phone' }; // creates reusable type alias\n\nfunction sendEmail(to: Email, body: string): void { // defines reusable function block\n  console.log(`Sending to ${to}`); // outputs message to developer console\n}\n\nconst addr = 'user@example.com' as Email; // declares variable with type assertion\nsendEmail(addr, 'hello'); // calls function with arguments\n\nconst phone = '555-0100' as Phone; // declares variable with type assertion\n// sendEmail(phone, 'hello'); // Error: Phone not assignable to Email\n\n// Factory function as safer boundary:\nfunction createEmail(s: string): Email { // defines reusable function block\n  if (!s.includes('@')) throw new Error('Invalid email'); // conditionally executes following block\n  return s as Email; // returns value to calling code\n}"
+    ],
+    "Nominal Typing": [
+      "TypeScript uses structural typing by default. To simulate nominal typing (type identity matters), use brands, enum discriminants, or intersection with unique class types. A common mistake is expecting structural typing to catch nominal mismatches automatically.",
+      "class Nominal<T> { // defines a class blueprint\n  private readonly _brand!: T; // declares access-controlled member\n}\n\ntype USD = Nominal<{ readonly __type: 'USD' }> & number; // creates reusable type alias\ntype EUR = Nominal<{ readonly __type: 'EUR' }> & number; // creates reusable type alias\n\nfunction addMoney(a: USD, b: USD): USD { // defines reusable function block\n  return (a + b) as USD; // returns value to calling code\n}\n\nconst dollars = 100 as USD; // declares variable with type assertion\nconst euros = 200 as EUR; // declares variable with type assertion\naddMoney(dollars, dollars); // OK\n// addMoney(dollars, euros); // Error: types don't match"
+    ],
+    "Covariance & Contravariance": [
+      "Covariance preserves assignment direction (Dog[] is Animal[]). Contravariance reverses it (function parameters). TypeScript is covariant for most types but checks function parameters bivariantly by default — strictFunctionTypes fixes this. A common mistake is expecting array invariance.",
+      "class Animal {} // defines a class blueprint\nclass Dog extends Animal {} // defines a class blueprint\n\nconst dogs: Dog[] = [new Dog()]; // declares variable with explicit type\nconst animals: Animal[] = dogs; // Covariant: OK (but unsound)\n\n// Functions are contravariant in params with strictFunctionTypes:\ntype Handler = (animal: Animal) => void; // creates reusable type alias\nconst handleDog: Handler = (dog: Dog) => {}; // Error with strictFunctionTypes\n\n// Methods are bivariant:\ninterface Container { // defines object shape contract\n  handle(animal: Animal): void; // method syntax — bivariant\n}"
+    ]
+  },
+  "DOM & TypeScript": {
+    "Typed DOM APIs": [
+      "TypeScript includes DOM type definitions. Use specific element types (HTMLInputElement, HTMLCanvasElement) instead of generic Element for type-safe property access. A common mistake is using querySelector without the generic parameter, resulting in an Element type.",
+      "const button = document.querySelector<HTMLButtonElement>('.submit'); // declares variable; type inferred\nif (button) { // conditionally executes following block\n  button.disabled = true;\n  button.textContent = 'Loading...';\n}\nconst canvas = document.getElementById('canvas') as HTMLCanvasElement; // declares variable with type assertion\nconst ctx = canvas.getContext('2d'); // typed as CanvasRenderingContext2D | null\n\n// Without generic: button is Element — no .disabled access\nconst bad = document.querySelector('.submit'); // Element | null"
+    ],
+    "Event Typing": [
+      "DOM events have specific types (MouseEvent, KeyboardEvent, FocusEvent, SubmitEvent) with typed properties. Use addEventListener's generic for proper typing. A common mistake is typing all events as Event, losing access to event-specific properties like clientX or key.",
+      "const input = document.querySelector('input')!; // declares variable; type inferred\ninput.addEventListener('input', (e: Event) => { // invokes method on object\n  const target = e.target as HTMLInputElement; // declares variable with type assertion\n  console.log(target.value); // outputs message to developer console\n});\n\nconst div = document.querySelector('div')!; // declares variable; type inferred\ndiv.addEventListener('mouseenter', (e: MouseEvent) => { // invokes method on object\n  console.log(e.clientX, e.clientY); // outputs message to developer console\n});\n\ndocument.addEventListener('keydown', (e: KeyboardEvent) => { // invokes method on object\n  console.log(e.key, e.ctrlKey); // outputs message to developer console\n});"
+    ],
+    "Form Typing": [
+      "Type form access with HTMLFormElement and HTMLInputElement. FormData provides key-value access. A common mistake is forgetting to check if a form element exists before accessing it, or not casting data.get() results.",
+      "const form = document.querySelector('form')!; // declares variable; type inferred\nform.addEventListener('submit', (e: SubmitEvent) => { // invokes method on object\n  e.preventDefault(); // invokes method on object\n  const data = new FormData(form); // declares variable; type inferred\n  const name = data.get('username'); // declares variable; type inferred\n  if (typeof name === 'string') { // conditionally executes following block\n    console.log(name.toUpperCase()); // outputs message to developer console\n  }\n  const email = data.get('email') as string | null; // declares variable; type inferred\n});\n\ninterface FormFields { // defines object shape contract\n  username: string;\n  age: number;\n}"
+    ],
+    "Fetch Typing": [
+      "The fetch API returns Promise<Response>. Parse the body with json(), text(), etc. Type the parsed data, not the fetch call. A common mistake is not checking res.ok or assuming JSON parsing always succeeds.",
+      "interface User { // defines object shape contract\n  id: number;\n  name: string;\n  email: string;\n}\n\nasync function getUser(id: number): Promise<User> { // defines async function returning promise\n  const res = await fetch(`/api/users/${id}`); // declares variable; type inferred\n  if (!res.ok) { // conditionally executes following block\n    throw new Error(`HTTP ${res.status}: ${res.statusText}`); // intentionally raises an error\n  }\n  return res.json() as Promise<User>; // returns value to calling code\n}\n\n// Generic fetch wrapper:\nasync function fetchJSON<T>(url: string): Promise<T> { // defines async function returning promise\n  const res = await fetch(url); // declares variable; type inferred\n  if (!res.ok) throw new Error(`HTTP ${res.status}`); // conditionally executes following block\n  return res.json() as Promise<T>; // returns value to calling code\n}\nconst users = await fetchJSON<User[]>('/api/users'); // declares variable; type inferred"
+    ],
+    "Typed Fetch & API Clients": [
+      "Typed fetch wrappers enhance type safety. Generic response typing: `fetch<T>(url): Promise<T>`. Zod for runtime validation: `z.union([z.string(), z.number()])`. Axios with generics: `axios.get<MyType>(url)`. Error handling with typed errors. Interceptors for auth/logging. Type-safe query params, headers, and bodies. Parse JSON to discriminated unions with pattern matching.",
+      "// Typed fetch wrapper\ntype User = {\n  id: number\n  name: string\n  email: string\n}\n\nasync function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {\n  const res = await fetch(url, init)\n  if (!res.ok) {\n    throw new ApiError(res.status, await res.text())\n  }\n  return res.json() as Promise<T>\n}\n\nclass ApiError extends Error {\n  constructor(\n    public status: number,\n    public body: string,\n  ) {\n    super(`API ${status}: ${body}`)\n  }\n}\n\nasync function getUsers(): Promise<User[]> {\n  return fetchJSON<User[]>(\"/api/users\")\n}\n\n// With query params\nasync function searchUsers(q: string, page = 1): Promise<{ users: User[]; total: number }> {\n  const params = new URLSearchParams({ q, page: String(page) })\n  return fetchJSON(`/api/users?${params}`)\n}\n\n// Runtime validation with Zod\nimport { z } from \"zod\"\n\nconst UserSchema = z.object({\n  id: z.number(),\n  name: z.string(),\n  email: z.string().email(),\n})\n\nconst UsersSchema = z.array(UserSchema)\n\nasync function getUsersSafe(): Promise<User[]> {\n  const data = await fetchJSON<unknown>(\"/api/users\")\n  return UsersSchema.parse(data)  // Throws if invalid\n}\n\n// Axios with generics\n// import axios from \"axios\"\n// const { data } = await axios.get<User[]>(\"/api/users\")\n\n// Interceptors for auth\n// api.interceptors.request.use((config) => {\n//   config.headers.Authorization = `Bearer ${token}`\n//   return config\n// })"
+    ]
+  },
+  "Ecosystem": {
+    "Formatting (Prettier)": [
+      "Prettier is the standard TypeScript formatter handling semicolons, quotes, trailing commas, and indentation. Integrate with editor format-on-save and CI checks. A common mistake is Prettier conflicting with ESLint — use eslint-config-prettier to disable formatting rules in ESLint.",
+      "{\n  \"semi\": true,\n  \"singleQuote\": true,\n  \"trailingComma\": \"all\",\n  \"printWidth\": 100\n}"
+    ],
+    "Linting (ESLint)": [
+      "ESLint with @typescript-eslint catches TypeScript-specific issues like unused variables, unsafe assertions, and promise handling errors. A common mistake is disabling strict rules like no-explicit-any — prefer incremental fixing.",
+      "module.exports = {\n  parser: '@typescript-eslint/parser',\n  plugins: ['@typescript-eslint'],\n  extends: [\n    'eslint:recommended',\n    'plugin:@typescript-eslint/recommended'\n  ]\n};"
+    ],
+    "DefinitelyTyped & @types": [
+      "DefinitelyTyped is the community repository of TypeScript type definitions. Install with @types/package-name. Most popular libraries now include bundled types. A common mistake is installing @types for a package that already ships its own types.",
+      "npm install -D @types/lodash @types/react\n\ndeclare module 'my-untyped-lib' {\n  export function doStuff(): void;\n}"
+    ],
+    "Build Tools": [
+      "Modern TypeScript projects often skip tsc for building and use bundlers instead. Vite, tsup, and SWC are popular choices. Use tsc --noEmit for type-checking only and a bundler for output. A common mistake is using tsc for both checking and bundling.",
+      "// vite.config.ts\nimport { defineConfig } from 'vite';\nexport default defineConfig({\n  esbuild: { tsconfigRaw: { compilerOptions: { target: 'es2022' } } }\n});\n\n// tsup — zero-config TS bundler\ntsup src/index.ts --format esm,cjs --dts"
+    ],
+    "Bun Runtime & Tools": [
+      "Bun is a fast JavaScript runtime, bundler, test runner, and package manager. Node.js compatible with built-in TypeScript, JSX, ESM, and CommonJS support. Key features: `bun run` (faster than npm), `bun test` (Jest-compatible), `bun build` (bundler), `bunx` (npx replacement). Native APIs: Bun.file(), Bun.write(), Bun.serve() for HTTP servers. SQLite3 built-in: `Bun.sqlite`. Watch mode: `bun --watch`.",
+      "// Bun runtime features\n\n// HTTP server\nBun.serve({\n  port: 3000,\n  fetch(req: Request) {\n    return new Response(`Hello from Bun! Path: ${req.url}`)\n  },\n})\n\n// File I/O (fast)\nconst file = Bun.file(\"data.json\")\nconst exists = await file.exists()\nconst text = await file.text()\nconst json = await file.json()\n\n// Write\nawait Bun.write(\"output.txt\", \"Hello\")\n\n// SQLite built-in\nimport { Database } from \"bun:sqlite\"\nconst db = new Database(\":memory:\")\ndb.run(\"CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)\")\ndb.run(\"INSERT INTO users (name) VALUES (?)\", \"Alice\")\nconst users = db.query(\"SELECT * FROM users\").all()\nconsole.log(users)\n\n// Environment variables\nconsole.log(Bun.env.PORT)\n\n// Bun test (Jest-compatible)\n// import { describe, test, expect } from \"bun:test\"\n// describe(\"math\", () => {\n//   test(\"addition\", () => {\n//     expect(1 + 1).toBe(2)\n//   })\n// })\n\n// Run: bun run server.ts\n// Test: bun test\n// Bundle: bun build ./src/index.ts --outdir ./dist\n// Package: bun add zod\n// Execute: bunx esbuild"
+    ]
+  },
+  "Configuration & Build": {
+    "Strict Compiler Options": [
+      "Beyond strict: true, individual strict flags include noImplicitAny, strictNullChecks, strictFunctionTypes, strictBindCallApply, strictPropertyInitialization, noImplicitThis, and alwaysStrict. Additional safety: noUncheckedIndexedAccess and exactOptionalPropertyTypes.",
+      "{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"noImplicitAny\": true,\n    \"strictNullChecks\": true,\n    \"strictFunctionTypes\": true,\n    \"noUncheckedIndexedAccess\": true,\n    \"exactOptionalPropertyTypes\": true\n  }\n}"
+    ],
+    "Module Resolution": [
+      "moduleResolution controls how TypeScript resolves imports: classic, node, node16, nodenext, or bundler. bundler is best for modern bundlers like Vite and esbuild. A common mistake is using node with ESNext module output, causing resolution mismatches.",
+      "{\n  \"compilerOptions\": {\n    \"module\": \"ESNext\",\n    \"moduleResolution\": \"bundler\",\n    \"allowImportingTsExtensions\": true,\n    \"noEmit\": true\n  }\n}\n\n// With nodenext:\nimport { foo } from './bar.js'; // must include .js extension"
+    ],
+    "Path Aliases": [
+      "Path aliases allow cleaner imports by mapping directories to short prefixes. Configure in tsconfig paths and sync with your bundler. A common mistake is setting baseUrl but forgetting to configure the bundler's resolve alias to match.",
+      "{\n  \"compilerOptions\": {\n    \"baseUrl\": \".\",\n    \"paths\": {\n      \"@components/*\": [\"./src/components/*\"],\n      \"@utils/*\": [\"./src/utils/*\"],\n      \"@types/*\": [\"./src/types/*\"]\n    }\n  }\n}\n// Usage: import { Button } from '@components/Button';"
+    ],
+    "Project References": [
+      "Project references split a codebase into independently buildable sub-projects. Each has a tsconfig with composite: true. Improves build performance via incremental compilation and enforces module boundaries. A common mistake is circular references between projects.",
+      "// tsconfig.json (root)\n{\n  \"references\": [\n    { \"path\": \"./packages/core\" },\n    { \"path\": \"./packages/utils\" },\n    { \"path\": \"./packages/app\" }\n  ]\n}\n\n// packages/core/tsconfig.json\n{\n  \"compilerOptions\": {\n    \"composite\": true,\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\"\n  }\n}"
+    ],
+    "Build Modes": [
+      "Use tsc -b for build mode with project references. It builds all referenced projects in dependency order with incremental compilation. --clean removes build artifacts. A common mistake is running plain tsc instead of tsc -b in a monorepo with references.",
+      "// Build all projects\ntsc -b\n\n// Build specific project\ntsc -b packages/core\n\n// Clean builds\ntsc -b --clean\n\n// tsconfig with incremental\n{\n  \"compilerOptions\": {\n    \"incremental\": true,\n    \"tsBuildInfoFile\": \"./.tsbuildinfo\"\n  }\n}"
+    ],
+    "ESM vs CJS Deep": [
+      "ECMAScript Modules (ESM) vs CommonJS (CJS). ESM: `import/export`, static analysis, tree-shaking, top-level await, `import.meta.url`. CJS: `require/module.exports`, dynamic loading, `__dirname`, `__filename`. Package.json `type: \"module\"` for ESM. `.mjs`/.cjs` extensions force module type. Dual package hazard: `exports` map in package.json for conditional exports. Interop: CJS can `import()` ESM; ESM imports CJS as default export.",
+      "// package.json — Dual module package\n// {\n//   \"type\": \"module\",\n//   \"exports\": {\n//     \".\": {\n//       \"import\": \"./dist/esm/index.js\",\n//       \"require\": \"./dist/cjs/index.js\"\n//     }\n//   }\n// }\n\n// ESM (index.mjs or .js with \"type\": \"module\")\nimport { readFile } from \"node:fs/promises\"\nimport { fileURLToPath } from \"node:url\"\nimport { dirname } from \"node:path\"\n\n// Top-level await (ESM only)\nconst data = await readFile(\"./data.json\", \"utf-8\")\n\n// __dirname replacement in ESM\nconst __filename = fileURLToPath(import.meta.url)\nconst __dirname = dirname(__filename)\n\n// Dynamic import (works in both)\nconst lodash = await import(\"lodash\")\n\n// Named exports\n// Named exports in CJS require special handling\n// export function foo() {}  // ESM\n// module.exports.foo = foo  // CJS\n\n// Conditional export (common pattern)\nlet impl: Awaited<typeof import(\"./native\")>\nif (process.platform === \"win32\") {\n  impl = await import(\"./windows\")\n} else {\n  impl = await import(\"./unix\")\n}\n\n// CJS (CommonJS) — .cjs extension\n// const fs = require(\"fs\")\n// module.exports = { myFunc }\n\n// Tree-shaking example:\n// import { onlyWhatINeed } from \"./big-module\"\n// Dead code is eliminated at build time (ESM only benefit)\n\n// TypeScript config\n// {\n//   \"compilerOptions\": {\n//     \"module\": \"NodeNext\",     // Or \"Node16\"\n//     \"moduleResolution\": \"NodeNext\"\n//   }\n// }"
+    ]
+  },
+  "AI & LLMs in TypeScript": {
+    "LLM API Integration": [
+      "Call OpenAI/Claude from Node.js with full type safety. Use zod for response validation, handle streaming with AsyncIterable, manage rate limits with p-limit. Common mistake: not validating LLM responses at runtime — JSON parse can fail; always use a schema-based parser.",
+      "import OpenAI from 'openai';\nimport { z } from 'zod';\nimport { zodResponseFormat } from 'openai/helpers/zod';\n\nconst client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Basic completion\nasync function complete(prompt: string): Promise<string> {\n  const response = await client.chat.completions.create({\n    model: 'gpt-4o-mini',\n    messages: [{ role: 'user', content: prompt }],\n  });\n  return response.choices[0]?.message?.content ?? '';\n}\n\n// Structured output with Zod\nconst SentimentSchema = z.object({\n  sentiment: z.enum(['positive', 'negative', 'neutral']),\n  confidence: z.number().min(0).max(1),\n});\ntype Sentiment = z.infer<typeof SentimentSchema>;\n\nasync function analyzeSentiment(text: string): Promise<Sentiment> {\n  const response = await client.beta.chat.completions.parse({\n    model: 'gpt-4o-mini',\n    messages: [\n      { role: 'system', content: 'Analyze sentiment.' },\n      { role: 'user', content: text },\n    ],\n    response_format: zodResponseFormat(SentimentSchema, 'sentiment'),\n  });\n  return response.choices[0]?.message?.parsed as Sentiment;\n}\n\n// Streaming\nasync function* streamCompletion(prompt: string): AsyncIterable<string> {\n  const stream = await client.chat.completions.create({\n    model: 'gpt-4o-mini',\n    messages: [{ role: 'user', content: prompt }],\n    stream: true,\n  });\n  for await (const chunk of stream) {\n    yield chunk.choices[0]?.delta?.content ?? '';\n  }\n}\n\n// Rate limiting with p-limit\nimport pLimit from 'p-limit';\nconst limit = pLimit(5);\nconst results = await Promise.all(\n  texts.map((t) => limit(() => analyzeSentiment(t)))\n);"
+    ],
+    "LangChain.js": [
+      "LangChain.js brings chains, agents, and retrieval to Node.js/TypeScript with full type safety. Supports OpenAI, Anthropic, Google, local models, vector stores, and tool integration. Common mistake: not typing chain inputs/outputs — use RunnableWithMessageHistory for typed conversations.",
+      "import { ChatOpenAI } from '@langchain/openai';\nimport { PromptTemplate } from '@langchain/core/prompts';\nimport { StringOutputParser } from '@langchain/core/output_parsers';\nimport { RunnableSequence } from '@langchain/core/runnables';\nimport { ChatPromptTemplate } from '@langchain/core/prompts';\n\nconst llm = new ChatOpenAI({\n  model: 'gpt-4o-mini',\n  temperature: 0,\n});\n\n// Simple chain\nconst prompt = PromptTemplate.fromTemplate(\n  'Explain {concept} in simple terms.'\n);\nconst chain = RunnableSequence.from([\n  prompt,\n  llm,\n  new StringOutputParser(),\n]);\n\nconst result = await chain.invoke({ concept: 'RAG' });\nconsole.log(result);\n\n// Typed chain with Zod\nimport { z } from 'zod';\n\nconst OutlineSchema = z.object({\n  title: z.string(),\n  sections: z.array(z.object({\n    heading: z.string(),\n    points: z.array(z.string()),\n  })),\n});\n\nconst structuredLLM = llm.withStructuredOutput(OutlineSchema);\nconst outline = await structuredLLM.invoke(\n  'Create an outline about TypeScript generics'\n);\nconsole.log(outline.title);\n\n// RAG chain\nimport { MemoryVectorStore } from 'langchain/vectorstores/memory';\nimport { OpenAIEmbeddings } from '@langchain/openai';\n\nconst vectorStore = await MemoryVectorStore.fromTexts(\n  ['TypeScript is typed JS', 'Python is dynamically typed'],\n  [{ id: 1 }, { id: 2 }],\n  new OpenAIEmbeddings()\n);\n\nconst retriever = vectorStore.asRetriever({ k: 1 });\nconst ragChain = RunnableSequence.from([\n  { context: retriever.pipe((docs) => docs.map((d) => d.pageContent).join('\\n')), question: (input) => input.question },\n  ChatPromptTemplate.fromMessages([\n    ['system', 'Answer using context:\\n{context}'],\n    ['human', '{question}'],\n  ]),\n  llm,\n  new StringOutputParser(),\n]);\n\nconsole.log(await ragChain.invoke({ question: 'What is TypeScript?' }));"
+    ],
+    "Vercel AI SDK": [
+      "Vercel AI SDK provides React/Vue/Svelte hooks for streaming LLM responses, tool calling, and structured generation. Framework-agnostic core with React/Vue/Svelte adapters. Handles streaming, abort controllers, error boundaries. Common mistake: using it only with Vercel — it works with any Node.js framework (Express, Fastify).",
+      "import { openai } from '@ai-sdk/openai';\nimport { generateText, streamText, tool } from 'ai';\nimport { z } from 'zod';\n\n// Server-side generation\nexport async function generateSummary(text: string) {\n  const { text: summary, usage } = await generateText({\n    model: openai('gpt-4o-mini'),\n    system: 'Summarize concisely.',\n    prompt: text,\n  });\n  console.log(`Tokens: ${usage.totalTokens}`);\n  return summary;\n}\n\n// Streaming (for API routes)\nexport async function POST(req: Request) {\n  const { messages } = await req.json();\n\n  const result = streamText({\n    model: openai('gpt-4o-mini'),\n    messages,\n    tools: {\n      getWeather: tool({\n        description: 'Get weather for a city',\n        parameters: z.object({\n          city: z.string(),\n          unit: z.enum(['C', 'F']).default('C'),\n        }),\n        execute: async ({ city, unit }) => {\n          // Call weather API\n          return { temperature: 22, unit, conditions: 'sunny' };\n        },\n      }),\n    },\n    maxSteps: 5,\n  });\n\n  return result.toTextStreamResponse();\n}\n\n// Client-side (React)\n// import { useChat } from 'ai/react';\n// function Chat() {\n//   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();\n//   return (\n//     <div>\n//       {messages.map((m) => (\n//         <div key={m.id}>{m.role}: {m.content}</div>\n//       ))}\n//       <form onSubmit={handleSubmit}>\n//         <input value={input} onChange={handleInputChange} disabled={isLoading} />\n//       </form>\n//     </div>\n//   );\n// }"
+    ],
+    "Embeddings & Vector Search in JS": [
+      "Generate embeddings from JS (OpenAI, Transformers.js) and search them in vector databases. Chroma.js for local use, pgvector for Postgres, Pinecone for managed. Use worker_threads to avoid blocking the event loop for embedding generation. Common mistake: recomputing embeddings on every query — cache results.",
+      "import OpenAI from 'openai';\nimport { ChromaClient } from 'chromadb';\n\nconst openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Generate embeddings\nasync function embed(texts: string[]): Promise<number[][]> {\n  const response = await openai.embeddings.create({\n    model: 'text-embedding-3-small',\n    input: texts,\n  });\n  return response.data.map((d) => d.embedding);\n}\n\n// Store and search with Chroma.js\nconst client = new ChromaClient();\nconst collection = await client.createCollection({ name: 'docs' });\n\nconst documents = [\n  'TypeScript adds static types to JavaScript',\n  'Vector databases enable semantic search',\n  'Node.js runs JavaScript on the server',\n];\nconst embeddings = await embed(documents);\n\nawait collection.add({\n  ids: documents.map((_, i) => `doc${i}`),\n  embeddings,\n  documents,\n});\n\n// Semantic search\nasync function search(query: string, n: number = 2) {\n  const [queryEmb] = await embed([query]);\n  const results = await collection.query({\n    queryEmbeddings: [queryEmb],\n    nResults: n,\n  });\n  return results.documents[0];\n}\n\n// Cosine similarity manual implementation\nfunction cosineSimilarity(a: number[], b: number[]): number {\n  const dot = a.reduce((sum, ai, i) => sum + ai * b[i], 0);\n  const magA = Math.sqrt(a.reduce((sum, ai) => sum + ai * ai, 0));\n  const magB = Math.sqrt(b.reduce((sum, bi) => sum + bi * bi, 0));\n  return dot / (magA * magB);\n}\n\nconsole.log(await search('type safety'));\n\n// pgvector (Postgres)\n// import { sql } from 'your-postgres-client';\n// await sql`SELECT * FROM docs ORDER BY embedding <=> ${queryEmb}::vector LIMIT 5`;"
+    ],
+    "Transformers.js": [
+      "Run Hugging Face models directly in the browser or Node.js with Transformers.js. No GPU, no Python — pure ONNX runtime in JS. Supports text classification, embeddings, token generation, image classification, speech-to-text. Common mistake: downloading full model weights on every page load — use IndexedDB caching via quantized models.",
+      "import { pipeline, env } from '@huggingface/transformers';\n\n// Use quantized models for browser (smaller downloads)\nenv.allowLocalModels = false;\n\n// Sentiment analysis\nasync function classifySentiment(text: string) {\n  const classifier = await pipeline('sentiment-analysis');\n  const result = await classifier(text);\n  return result;\n}\n\nconsole.log(await classifySentiment('Transformers.js is amazing!'));\n// [{ label: 'POSITIVE', score: 0.999 }]\n\n// Feature extraction (embeddings)\nasync function getEmbedding(text: string): Promise<number[]> {\n  const extractor = await pipeline('feature-extraction', {\n    model: 'Xenova/all-MiniLM-L6-v2',\n  });\n  const result = await extractor(text, { pooling: 'mean', normalize: true });\n  return Array.from(result.data);\n}\n\n// Text generation (small models)\nasync function generate(prompt: string) {\n  const generator = await pipeline('text-generation', {\n    model: 'Xenova/gpt2',\n  });\n  const result = await generator(prompt, {\n    max_new_tokens: 50,\n    temperature: 0.7,\n  });\n  return result[0].generated_text;\n}\n\nconsole.log(await generate('Once upon a time'));\n\n// Zero-shot classification\nasync function zeroShot(text: string, labels: string[]) {\n  const classifier = await pipeline('zero-shot-classification');\n  return classifier(text, labels);\n}\n\nconsole.log(\n  await zeroShot('I love programming', ['technology', 'food', 'sports'])\n);\n// { labels: ['technology', 'sports', 'food'], scores: [0.95, 0.03, 0.02] }"
+    ],
+    "Browser ML (WebGPU/WebNN)": [
+      "Run ML models in the browser with hardware acceleration. TensorFlow.js for training/inference; ONNX Runtime for cross-framework model deployment; MediaPipe for vision/audio pipelines; WebGPU for GPU compute. Common mistake: assuming all devices support WebGPU — always provide WebGL fallback.",
+      "// TensorFlow.js\nimport * as tf from '@tensorflow/tfjs';\nimport '@tensorflow/tfjs-backend-webgl';\n\nawait tf.setBackend('webgl');\nconsole.log(`Backend: ${tf.getBackend()}`);\n\n// Simple model in browser\nconst model = tf.sequential();\nmodel.add(tf.layers.dense({ units: 32, activation: 'relu', inputShape: [10] }));\nmodel.add(tf.layers.dense({ units: 2, activation: 'softmax' }));\nmodel.compile({\n  optimizer: 'adam',\n  loss: 'categoricalCrossentropy',\n  metrics: ['accuracy'],\n});\n\n// Training data\nconst xs = tf.randomNormal([100, 10]);\nconst ys = tf.randomNormal([100, 2]);\n\nawait model.fit(xs, ys, {\n  epochs: 5,\n  batchSize: 16,\n  callbacks: {\n    onEpochEnd: (epoch, logs) => console.log(`Epoch ${epoch}: loss=${logs?.loss.toFixed(4)}`),\n  },\n});\n\n// ONNX Runtime Web\n// import * as ort from 'onnxruntime-web';\n// const session = await ort.InferenceSession.create('./model.onnx');\n// const feeds = { input: new ort.Tensor('float32', data, [1, 3, 224, 224]) };\n// const results = await session.run(feeds);\n\n// MediaPipe (vision)\n// import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';\n// const vision = await FilesetResolver.forVisionTasks('/wasm');\n// const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {\n//   baseOptions: { modelAssetPath: '/face_landmarker.task' },\n// });\n\n// WebGPU check\nconst hasWebGPU = navigator.gpu !== undefined;\nconsole.log(`WebGPU: ${hasWebGPU ? 'available' : 'unavailable'}`);"
+    ],
+    "Structured LLM Output with Zod": [
+      "Combine Zod schemas with LLM calls for type-safe, validated structured output. Zod's discriminated unions power conditional LLM responses; refine/transform validate complex business rules. Integrates with OpenAI structured outputs, Vercel AI SDK tool calls, LangChain withStructuredOutput. Common mistake: making schemas too strict — LLMs need room for variation.",
+      "import { z } from 'zod';\nimport OpenAI from 'openai';\nimport { zodResponseFormat } from 'openai/helpers/zod';\n\nconst client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Complex nested schema\nconst SupportTicketSchema = z.object({\n  priority: z.enum(['low', 'medium', 'high', 'critical']),\n  category: z.enum(['bug', 'feature', 'question', 'billing']),\n  summary: z.string().min(10).max(200),\n  stepsToReproduce: z.array(z.string()).optional(),\n  metadata: z.object({\n    userId: z.string(),\n    browser: z.string().optional(),\n    os: z.string().optional(),\n  }),\n});\n\ntype SupportTicket = z.infer<typeof SupportTicketSchema>;\n\nasync function parseSupportTicket(text: string): Promise<SupportTicket> {\n  const response = await client.beta.chat.completions.parse({\n    model: 'gpt-4o-mini',\n    messages: [\n      { role: 'system', content: 'Extract support ticket details as structured data.' },\n      { role: 'user', content: text },\n    ],\n    response_format: zodResponseFormat(SupportTicketSchema, 'ticket'),\n  });\n\n  return response.choices[0]?.message?.parsed as SupportTicket;\n}\n\n// Discriminated union for conditional extraction\nconst PaymentEvent = z.discriminatedUnion('type', [\n  z.object({ type: z.literal('completed'), amount: z.number(), currency: z.string() }),\n  z.object({ type: z.literal('failed'), reason: z.string(), code: z.string() }),\n  z.object({ type: z.literal('refunded'), amount: z.number(), reason: z.string() }),\n]);\n\ntype PaymentEvent = z.infer<typeof PaymentEvent>;\n\nasync function parseEvent(text: string): Promise<PaymentEvent> {\n  const response = await client.beta.chat.completions.parse({\n    model: 'gpt-4o-mini',\n    messages: [{ role: 'user', content: text }],\n    response_format: zodResponseFormat(PaymentEvent, 'event'),\n  });\n  return response.choices[0]?.message?.parsed as PaymentEvent;\n}\n\n// Custom refinement\nconst CodeReviewSchema = z.object({\n  issues: z.array(z.object({\n    severity: z.enum(['error', 'warning', 'info']),\n    line: z.number().int().positive(),\n    message: z.string(),\n  })).refine((issues) => issues.length <= 10, {\n    message: 'Max 10 issues per review',\n  }),\n  overallScore: z.number().min(0).max(100),\n});"
+    ],
+    "Streaming & Real-time AI": [
+      "Stream LLM responses over Server-Sent Events or WebSocket for real-time UX. AbortController for cancellation, backpressure handling, reconnection logic. Use ReadableStream for Node.js-to-browser streaming. Common mistake: buffering entire response before sending — defeats purpose of streaming.",
+      "// Server-Sent Events with Express\nimport express from 'express';\nimport OpenAI from 'openai';\n\nconst app = express();\nconst client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\napp.get('/chat', async (req, res) => {\n  const { prompt } = req.query;\n\n  res.setHeader('Content-Type', 'text/event-stream');\n  res.setHeader('Cache-Control', 'no-cache');\n  res.setHeader('Connection', 'keep-alive');\n\n  const stream = await client.chat.completions.create({\n    model: 'gpt-4o-mini',\n    messages: [{ role: 'user', content: prompt as string }],\n    stream: true,\n  });\n\n  for await (const chunk of stream) {\n    const content = chunk.choices[0]?.delta?.content || '';\n    if (content) {\n      res.write(`data: ${JSON.stringify({ content })}\\n\\n`);\n    }\n  }\n\n  res.write('data: [DONE]\\n\\n');\n  res.end();\n\n  req.on('close', () => {\n    stream.controller?.abort(); // cleanup on disconnect\n  });\n});\n\n// WebSocket with ws library\nimport { WebSocketServer } from 'ws';\n\nconst wss = new WebSocketServer({ port: 8080 });\n\nwss.on('connection', (ws) => {\n  const controller = new AbortController();\n\n  ws.on('message', async (data) => {\n    const { prompt } = JSON.parse(data.toString());\n\n    const stream = await client.chat.completions.create({\n      model: 'gpt-4o-mini',\n      messages: [{ role: 'user', content: prompt }],\n      stream: true,\n    });\n\n    for await (const chunk of stream) {\n      if (controller.signal.aborted) break;\n      const content = chunk.choices[0]?.delta?.content || '';\n      if (content) {\n        ws.send(JSON.stringify({ type: 'chunk', content }));\n      }\n    }\n\n    ws.send(JSON.stringify({ type: 'done' }));\n  });\n\n  ws.on('close', () => controller.abort());\n});\n\n// Client (browser)\n// const eventSource = new EventSource('/chat?prompt=hello');\n// eventSource.onmessage = (event) => {\n//   if (event.data === '[DONE]') { eventSource.close(); return; }\n//   console.log(JSON.parse(event.data).content);\n// };"
+    ],
+    "AI-Powered Search": [
+      "Build semantic search with embeddings + vector DB. Hybrid search combines keyword (BM25) with semantic (vector) for best results. Rerank results with cross-encoders. Use Result type pattern for type-safe search responses. Common mistake: ignoring keyword search — pure semantic search misses exact matches.",
+      "import OpenAI from 'openai';\nimport { z } from 'zod';\n\nconst openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Types\ninterface SearchResult {\n  id: string;\n  content: string;\n  score: number;\n  source: 'semantic' | 'keyword' | 'hybrid';\n}\n\n// Embedding cache\nconst embeddingCache = new Map<string, number[]>();\n\nasync function getEmbedding(text: string): Promise<number[]> {\n  if (embeddingCache.has(text)) return embeddingCache.get(text)!;\n  const response = await openai.embeddings.create({\n    model: 'text-embedding-3-small',\n    input: text,\n  });\n  const emb = response.data[0].embedding;\n  embeddingCache.set(text, emb);\n  return emb;\n}\n\n// Cosine similarity\nfunction cosineSim(a: number[], b: number[]): number {\n  const dot = a.reduce((s, ai, i) => s + ai * b[i], 0);\n  const ma = Math.sqrt(a.reduce((s, ai) => s + ai * ai, 0));\n  const mb = Math.sqrt(b.reduce((s, bi) => s + bi * bi, 0));\n  return ma && mb ? dot / (ma * mb) : 0;\n}\n\n// BM25-like keyword scoring (simplified)\nfunction keywordScore(query: string, doc: string): number {\n  const terms = query.toLowerCase().split(/\\\\s+/);\n  const docLower = doc.toLowerCase();\n  return terms.filter((t) => docLower.includes(t)).length / terms.length;\n}\n\n// Hybrid search\nasync function hybridSearch(\n  query: string,\n  documents: string[],\n  alpha: number = 0.5\n): Promise<SearchResult[]> {\n  const queryEmb = await getEmbedding(query);\n  const docEmbeddings = await Promise.all(documents.map(getEmbedding));\n\n  const results: SearchResult[] = documents.map((content, i) => {\n    const semantic = cosineSim(queryEmb, docEmbeddings[i]);\n    const keyword = keywordScore(query, content);\n    const score = alpha * semantic + (1 - alpha) * keyword;\n    return { id: `doc${i}`, content, score, source: score === semantic ? 'semantic' : 'hybrid' };\n  });\n\n  return results.sort((a, b) => b.score - a.score).slice(0, 5);\n}\n\n// Rerank with cross-encoder via LLM\ntype RerankedResult = { id: string; content: string; relevanceScore: number };\n\nasync function rerank(query: string, results: SearchResult[]): Promise<RerankedResult[]> {\n  const response = await openai.chat.completions.create({\n    model: 'gpt-4o-mini',\n    messages: [\n      {\n        role: 'system',\n        content: 'Rerank these results by relevance to the query. Output as JSON array with scores.',\n      },\n      {\n        role: 'user',\n        content: JSON.stringify({ query, results }),\n      },\n    ],\n    response_format: { type: 'json_object' },\n  });\n\n  return JSON.parse(response.choices[0].message.content || '[]');\n}"
+    ],
+    "Building AI Agents in TypeScript": [
+      "Build AI agents with tool-use, memory, and planning in TypeScript. Use the ReAct pattern (Thought → Action → Observation), maintain conversation history, and execute tools safely. TypeScript's discriminated unions model agent state perfectly. Common mistake: infinite loops — always cap iterations and depth.",
+      "import OpenAI from 'openai';\nimport { z } from 'zod';\n\nconst client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Tool definitions (typed)\ninterface Tool {\n  name: string;\n  description: string;\n  parameters: z.ZodTypeAny;\n  execute: (args: unknown) => Promise<string>;\n}\n\nconst tools: Tool[] = [\n  {\n    name: 'calculator',\n    description: 'Evaluate a math expression',\n    parameters: z.object({ expression: z.string() }),\n    execute: async ({ expression }) => String(eval(expression)),\n  },\n  {\n    name: 'current_time',\n    description: 'Get the current date and time',\n    parameters: z.object({}),\n    execute: async () => new Date().toISOString(),\n  },\n];\n\n// Agent state\ninterface AgentMessage {\n  role: 'system' | 'user' | 'assistant' | 'tool';\n  content: string;\n  tool_call_id?: string;\n  name?: string;\n}\n\nclass Agent {\n  private messages: AgentMessage[] = [];\n\n  constructor(systemPrompt: string) {\n    this.messages.push({ role: 'system', content: systemPrompt });\n  }\n\n  async run(userInput: string, maxSteps: number = 5): Promise<string> {\n    this.messages.push({ role: 'user', content: userInput });\n\n    for (let step = 0; step < maxSteps; step++) {\n      const response = await client.chat.completions.create({\n        model: 'gpt-4o-mini',\n        messages: this.messages,\n        tools: this.toolsToOpenAI(),\n        tool_choice: 'auto',\n      });\n\n      const msg = response.choices[0].message;\n      this.messages.push({ role: 'assistant', content: msg.content || '' });\n\n      if (!msg.tool_calls || msg.tool_calls.length === 0) {\n        return msg.content || 'No response';\n      }\n\n      for (const tc of msg.tool_calls) {\n        const tool = tools.find((t) => t.name === tc.function.name);\n        if (!tool) continue;\n\n        const args = JSON.parse(tc.function.arguments);\n        const result = await tool.execute(args);\n\n        this.messages.push({\n          role: 'tool',\n          content: result,\n          tool_call_id: tc.id,\n          name: tc.function.name,\n        });\n      }\n    }\n\n    return 'Max steps reached';\n  }\n\n  private toolsToOpenAI(): OpenAI.Chat.Completions.ChatCompletionTool[] {\n    return tools.map((t) => ({\n      type: 'function' as const,\n      function: {\n        name: t.name,\n        description: t.description,\n        parameters: t.parameters as unknown as Record<string, unknown>,\n      },\n    }));\n  }\n}\n\n// Usage\nconst agent = new Agent('You are a helpful assistant with tools.');\nconst answer = await agent.run('What time is it? And calculate 2 + 2 * 3');\nconsole.log(answer);"
+    ]
+  }
+}

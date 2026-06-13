@@ -1,0 +1,332 @@
+{
+ "CI/CD Fundamentals": {
+  "What is CI/CD?": {
+   "exp": "<p>Introduction to Continuous Integration and Continuous Deployment.</p>",
+   "code": "CI/CD pipeline concepts, benefits, and the DevOps lifecycle.",
+   "exercises": []
+  },
+  "Version Control with Git": {
+   "exp": "<p>Git fundamentals for CI/CD.</p>",
+   "code": "Branching strategies (Git Flow, trunk-based), pull requests, merge conflicts.",
+   "exercises": []
+  },
+  "Build Automation": {
+   "exp": "<p>Automating the build process.</p>",
+   "code": "Compilation, dependency resolution, asset bundling, artifact creation.",
+   "exercises": []
+  },
+  "Artifact Management": {
+   "exp": "<p>Storing and versioning build artifacts.</p>",
+   "code": "Artifact repositories (Nexus, Artifactory), versioning strategies.",
+   "exercises": []
+  },
+  "Environment Management": {
+   "exp": "<p>Managing development, staging, and production environments.</p>",
+   "code": "Environment parity, configuration management, secrets management.",
+   "exercises": []
+  },
+  "What is CI/CD": [
+   "<p><strong>CI/CD</strong> stands for <strong>Continuous Integration</strong> and <strong>Continuous Delivery/Deployment</strong>. It is a method of frequently delivering apps to customers by introducing automation into the stages of app development. CI/CD bridges the gap between development and operations teams by automating build, test, and deployment processes.</p><p><strong>Continuous Integration</strong> ensures every code change is automatically built and tested, catching bugs early. <strong>Continuous Delivery</strong> extends CI by automatically deploying code to production-like environments for testing. <strong>Continuous Deployment</strong> takes it further — every change that passes all stages of the pipeline is automatically released to production.</p>",
+   "name: CI Pipeline\non: [push]\n\njobs:\n  ci:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm ci\n      - run: npm test"
+  ],
+  "Pipeline Architecture": [
+   "<p>A <strong>CI/CD pipeline</strong> is a series of automated steps that code goes through from commit to deployment. The typical stages are:</p><ul><li><strong>Source</strong> — code is pushed to version control (Git)</li><li><strong>Build</strong> — code is compiled and dependencies are resolved</li><li><strong>Test</strong> — automated tests (unit, integration, e2e) are run</li><li><strong>Analyze</strong> — static analysis, linting, and security scanning</li><li><strong>Package</strong> — artifacts (binaries, containers) are built and stored</li><li><strong>Deploy</strong> — artifacts are deployed to staging or production</li></ul><p>Each stage must pass before the next begins — this is called a <strong>gated pipeline</strong>. Modern pipelines run stages in parallel where possible for speed.</p>",
+   "stages:\n  - build\n  - test\n  - deploy\n\nbuild:\n  stage: build\n  script: npm run build\n\ntest:\n  stage: test\n  script: npm test\n\ndeploy:\n  stage: deploy\n  script: npm run deploy"
+  ],
+  "Benefits of CI/CD": [
+   "<p>Adopting CI/CD brings several key benefits:</p><ul><li><strong>Faster releases</strong> — automate manual steps to ship code multiple times a day</li><li><strong>Reduced risk</strong> — catch bugs early with automated testing in every commit</li><li><strong>Higher quality</strong> — consistent testing and code analysis standards</li><li><strong>Developer productivity</strong> — less time spent on manual deployments and debugging</li><li><strong>Auditability</strong> — every change is tracked, tested, and logged</li><li><strong>Team confidence</strong> — automated validation means safer deployments</li></ul><p>Companies practicing CI/CD deploy code 208x more frequently than those that don't (DORA State of DevOps report).</p>",
+   "# DORA metrics tracking\n# Deploy frequency: 10x/day\n# Lead time: < 1 hour\n# MTTR: < 30 min\n# Change failure rate: < 5%"
+  ]
+ },
+ "Continuous Integration": {
+  "CI Pipeline Design": {
+   "exp": "<p>Designing effective CI pipelines.</p>",
+   "code": "Pipeline stages, parallel execution, caching, failure handling.",
+   "exercises": []
+  },
+  "Automated Testing in CI": {
+   "exp": "<p>Running tests in CI pipelines.</p>",
+   "code": "Unit tests, integration tests, linting, code coverage, quality gates.",
+   "exercises": []
+  },
+  "GitHub Actions": {
+   "exp": "<p>CI/CD with GitHub Actions.</p>",
+   "code": "Workflows, jobs, steps, actions, matrix builds, triggers.",
+   "exercises": []
+  },
+  "GitLab CI": {
+   "exp": "<p>CI/CD with GitLab CI/CD.</p>",
+   "code": ".gitlab-ci.yml, runners, stages, artifacts, environments.",
+   "exercises": []
+  },
+  "Jenkins": {
+   "exp": "<p>Self-hosted CI/CD with Jenkins.</p>",
+   "code": "Jenkinsfile, pipelines, plugins, distributed builds.",
+   "exercises": []
+  },
+  "CircleCI": {
+   "exp": "<p>Cloud CI/CD with CircleCI.</p>",
+   "code": "Config.yml, orbs, caching, parallelism, workflows.",
+   "exercises": []
+  },
+  "Build Automation": [
+   "<p><strong>Build automation</strong> is the process of automating the compilation of source code into executable artifacts. Every commit should produce a build to verify the code compiles correctly.</p><p>Common build tools by language:</p><ul><li><strong>JavaScript/TypeScript</strong> — npm, yarn, pnpm, vite, webpack</li><li><strong>Java</strong> — Maven, Gradle</li><li><strong>Python</strong> — setuptools, poetry, pipenv</li><li><strong>Go</strong> — go build</li><li><strong>Rust</strong> — cargo build</li><li><strong>C/C++</strong> — CMake, Make, GCC</li></ul><p>The build stage should be fast (under 5 minutes) to provide quick feedback. Cache dependencies between builds to speed up execution.</p>",
+   "{\n  \"scripts\": {\n    \"build\": \"vite build\",\n    \"test\": \"vitest run\",\n    \"lint\": \"eslint .\"\n  }\n}"
+  ],
+  "Automated Testing": [
+   "<p>Testing is the heart of CI. Every pipeline should run multiple levels of tests:</p><ul><li><strong>Unit tests</strong> — test individual functions and methods (fastest, most coverage)</li><li><strong>Integration tests</strong> — test interactions between components (database, API, services)</li><li><strong>End-to-end tests</strong> — test the full system from user perspective (slowest, least coverage)</li></ul><p>The <strong>test pyramid</strong> suggests many unit tests, fewer integration tests, and few e2e tests. Tests should be deterministic — always pass or fail the same way given the same code. Flaky tests undermine CI trust.</p>",
+   "npm run test:unit\nnpm run test:integration\nnpm run test:e2e\nnpm run coverage"
+  ],
+  "Code Quality & Linting": [
+   "<p>Automated code quality checks are essential in CI/CD. These include:</p><ul><li><strong>Linters</strong> — ESLint (JS/TS), Ruff/Flake8 (Python), Clippy (Rust), golangci-lint (Go)</li><li><strong>Formatters</strong> — Prettier, Black, gofmt, rustfmt</li><li><strong>Static analysis</strong> — SonarQube, CodeQL, Coverity</li><li><strong>Type checking</strong> — TypeScript (tsc), mypy (Python), Flow</li></ul><p>These checks should fail the pipeline if thresholds are not met (e.g., code coverage &lt; 80%, lint errors, type errors). Many teams enforce formatting with pre-commit hooks and reserve CI for deeper analysis.</p>",
+   "{\n  \"extends\": [\"eslint:recommended\"],\n  \"rules\": {\n    \"no-unused-vars\": \"error\",\n    \"no-console\": \"warn\"\n  }\n}"
+  ]
+ },
+ "Continuous Deployment": {
+  "Deployment Strategies": {
+   "exp": "<p>Different approaches to deploying software.</p>",
+   "code": "Blue-green, canary, rolling, feature flags, A/B testing.",
+   "exercises": []
+  },
+  "Infrastructure as Code": {
+   "exp": "<p>Managing infrastructure through code.</p>",
+   "code": "Terraform, CloudFormation, Pulumi; declarative vs imperative IaC.",
+   "exercises": []
+  },
+  "Configuration Management": {
+   "exp": "<p>Managing system configuration.</p>",
+   "code": "Ansible, Puppet, Chef; idempotency, desired state.",
+   "exercises": []
+  },
+  "Secrets Management": {
+   "exp": "<p>Securely managing sensitive configuration.</p>",
+   "code": "HashiCorp Vault, AWS Secrets Manager, encrypted environment variables.",
+   "exercises": []
+  },
+  "Container CI/CD": {
+   "exp": "<p>CI/CD for containerized applications.</p>",
+   "code": "Docker builds, Kubernetes deployments, Helm charts, container registries.",
+   "exercises": []
+  }
+ },
+ "Containerization & Orchestration": {
+  "Docker Deep Dive": {
+   "exp": "<p>Advanced Docker concepts.</p>",
+   "code": "Multi-stage builds, Docker networks, volumes, Docker Compose.",
+   "exercises": []
+  },
+  "Kubernetes Basics": {
+   "exp": "<p>Container orchestration with Kubernetes.</p>",
+   "code": "Pods, services, deployments, ConfigMaps, secrets, namespaces.",
+   "exercises": []
+  },
+  "Helm Charts": {
+   "exp": "<p>Kubernetes package management.</p>",
+   "code": "Charts, templates, values, releases, repositories.",
+   "exercises": []
+  },
+  "Kubernetes Advanced": {
+   "exp": "<p>Advanced Kubernetes concepts.</p>",
+   "code": "Operators, CRDs, service mesh (Istio), horizontal pod autoscaling.",
+   "exercises": []
+  }
+ },
+ "Monitoring & Observability": {
+  "Logging": {
+   "exp": "<p>Centralized logging for applications.</p>",
+   "code": "ELK Stack (Elasticsearch, Logstash, Kibana), Loki, Fluentd.",
+   "exercises": []
+  },
+  "Metrics": {
+   "exp": "<p>Collecting and analyzing metrics.</p>",
+   "code": "Prometheus, Grafana, metrics types (counter, gauge, histogram).",
+   "exercises": []
+  },
+  "Tracing": {
+   "exp": "<p>Distributed tracing for microservices.</p>",
+   "code": "Jaeger, Zipkin, OpenTelemetry; trace context propagation.",
+   "exercises": []
+  },
+  "Alerting": {
+   "exp": "<p>Setting up alerts and notifications.</p>",
+   "code": "Alertmanager, PagerDuty, on-call rotations, escalation policies.",
+   "exercises": []
+  },
+  "SLOs & SLIs": {
+   "exp": "<p>Service Level Objectives and Indicators.</p>",
+   "code": "Defining reliability targets, error budgets, burn rates.",
+   "exercises": []
+  },
+  "Pipeline Metrics": [
+   "<p>Track these key metrics to measure CI/CD pipeline health:</p><ul><li><strong>Pipeline duration</strong> — time from commit to deployment. Target: under 15 minutes total.</li><li><strong>Build failure rate</strong> — percentage of builds that fail. Target: under 10%.</li><li><strong>Deployment frequency</strong> — how often you deploy to production. Elite teams deploy multiple times per day.</li><li><strong>Mean Time to Recover (MTTR)</strong> — time from detecting a failure to recovery. Target: under 1 hour.</li><li><strong>Change failure rate</strong> — percentage of deployments causing incidents. Target: under 5%.</li></ul><p>These are the <strong>DORA metrics</strong> — the industry standard for measuring DevOps and CI/CD performance.</p>",
+   "# Pipeline duration (histogram)\npipeline_duration_seconds_bucket{status=\"success\",le=\"60\"} 120\n# Deployment frequency (counter)\ndeployments_total{environment=\"production\"} 450"
+  ],
+  "Pipeline Notifications": [
+   "<p>Keep teams informed about pipeline status with automated notifications:</p><ul><li><strong>Slack/Discord</strong> — send messages on failure, success, or deployment events. Include links to the pipeline run.</li><li><strong>Email</strong> — send summaries for failed pipelines or approval requests</li><li><strong>Status badges</strong> — embed pipeline status (passing/failing) in README files</li><li><strong>PR comments</strong> — post test results, coverage changes, and deployment URLs directly in PRs</li></ul><p>Most CI/CD platforms have built-in notification integrations. Focus on actionable alerts — don't spam teams with every successful build.</p>",
+   "curl -X POST -H 'Content-type: application/json' \\\n  --data '{\"text\":\"Pipeline failed!\"}' \\\n  https://hooks.slack.com/services/T00/B00/xxx"
+  ],
+  "Incident Response": [
+   "<p>When a CI/CD pipeline failure or production incident occurs, a structured response process is essential:</p><ol><li><strong>Detect</strong> — automated monitoring and alerts detect the failure</li><li><strong>Stop the bleeding</strong> — rollback the deployment or block the pipeline</li><li><strong>Triage</strong> — determine severity, impact, and affected teams</li><li><strong>Investigate</strong> — review logs, metrics, and pipeline output to find root cause</li><li><strong>Remediate</strong> — fix the issue and push the fix through the same CI/CD pipeline</li><li><strong>Review</strong> — post-mortem to prevent recurrence</li></ol><p>CI/CD pipelines themselves should be treated as critical infrastructure with their own monitoring, redundancy, and incident response plans.</p>",
+   "# Rollback to previous version\nkubectl rollout undo deployment/myapp\n# Or using Git\n git revert HEAD --no-edit\n git push origin main"
+  ]
+ },
+ "Security in CI/CD": {
+  "DevSecOps": {
+   "exp": "<p>Integrating security into the pipeline.</p>",
+   "code": "Shift-left security, automated scanning, compliance as code.",
+   "exercises": []
+  },
+  "SAST & DAST": [
+   "<p>Security testing should be integrated into every pipeline:</p><ul><li><strong>SAST (Static Application Security Testing)</strong> — analyzes source code for vulnerabilities without running it. Tools: <strong>SonarQube</strong>, <strong>CodeQL</strong>, <strong>Semgrep</strong>, <strong>Checkmarx</strong>. Runs early in the pipeline (build stage).</li><li><strong>DAST (Dynamic Application Security Testing)</strong> — tests running applications for vulnerabilities. Tools: <strong>OWASP ZAP</strong>, <strong>Burp Suite</strong>. Runs against staging environments later in the pipeline.</li></ul><p>SAST catches issues early (shift left), while DAST catches runtime vulnerabilities. Both should be gated — fail the pipeline on high-severity findings.</p>",
+   "# GitHub CodeQL analysis\n- uses: github/codeql-action/init@v3\n  with:\n    languages: javascript\n- uses: github/codeql-action/analyze@v3"
+  ],
+  "Container Security": {
+   "exp": "<p>Securing container images and runtime.</p>",
+   "code": "Image scanning, minimal base images, runtime security (Falco).",
+   "exercises": []
+  },
+  "Supply Chain Security": {
+   "exp": "<p>Securing the software supply chain.</p>",
+   "code": "SBOM, signed commits, dependency verification, SLSA framework.",
+   "exercises": []
+  },
+  "Secret Scanning": [
+   "<p>Accidentally committing secrets (API keys, passwords, tokens) is one of the most common CI/CD security issues. Prevent and detect with:</p><ul><li><strong>Pre-commit hooks</strong> — tools like <strong>talisman</strong>, <strong>git-secrets</strong>, and <strong>detect-secrets</strong> scan before commits</li><li><strong>CI scanning</strong> — <strong>GitHub Secret Scanning</strong>, <strong>GitLab Secret Detection</strong>, <strong>TruffleHog</strong> scan in the pipeline</li><li><strong>Secret managers</strong> — HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager</li></ul><p>CI/CD configs should reference secrets from the CI platform's built-in secrets store (GitHub Actions secrets, GitLab CI variables, Jenkins credentials), never hardcode them.</p>",
+   "# TruffleHog scan\ntrufflehog filesystem --directory=. --json | jq '.[].Raw'\n# git-secrets\n git secrets --scan"
+  ],
+  "SBOM & Supply Chain": [
+   "<p>Software supply chain security is critical in 2026:</p><ul><li><strong>SBOM (Software Bill of Materials)</strong> — a machine-readable inventory of all components in your software. Generated by tools like <strong>CycloneDX</strong> and <strong>Syft</strong>.</li><li><strong>Dependency scanning</strong> — <strong>Dependabot</strong>, <strong>Renovate</strong>, <strong>Snyk</strong> automatically detect and update vulnerable dependencies</li><li><strong>Artifact signing</strong> — sign container images and binaries with <strong>Cosign</strong> to verify authenticity</li><li><strong>Attestations</strong> — create signed metadata about how and where artifacts were built</li></ul><p>AI-generated code increases the importance of SBOM scanning. Every CI/CD pipeline should generate and verify SBOMs before deployment.</p>",
+   "# Generate SBOM with Syft\nsyft packages . -o cyclonedx-json > sbom.json\n# Sign with Cosign\ncosign sign --key cosign.key myapp:latest"
+  ]
+ },
+ "Version Control & Git Integration": {
+  "Git Hooks": [
+   "<p><strong>Git hooks</strong> are scripts that run automatically before or after Git events like commit, push, or merge. They are stored in the <code>.git/hooks</code> directory and can enforce policies locally before code reaches the remote repository.</p><p>Common CI/CD use cases include:</p><ul><li><strong>pre-commit</strong> — run linters, format code, check for secrets</li><li><strong>pre-push</strong> — run unit tests before pushing</li><li><strong>commit-msg</strong> — enforce conventional commit format</li><li><strong>post-merge</strong> — install new dependencies after pulling</li></ul><p>Tools like <strong>Husky</strong> and <strong>lint-staged</strong> make managing hooks easier across teams.</p>",
+   "#!/bin/sh\n# .git/hooks/pre-commit\nnpm run lint\nnpm run format:check"
+  ],
+  "Branching Strategies": [
+   "<p>CI/CD pipelines work hand-in-hand with branching strategies. Common approaches include:</p><ul><li><strong>GitFlow</strong> — main, develop, feature, release, and hotfix branches. Good for scheduled releases but complex.</li><li><strong>GitHub Flow</strong> — single main branch with feature branches and pull requests. Simpler, ideal for continuous deployment.</li><li><strong>Trunk-based Development</strong> — short-lived feature branches merged to main multiple times a day. Best for CI/CD with automated testing.</li></ul><p>CI/CD pipelines typically trigger on push to specific branches (e.g., <code>main</code>) and on pull requests for validation before merge.</p>",
+   "# Create a feature branch\ngit checkout -b feature/user-auth\n# Merge via PR\ngit checkout main\ngit merge --no-ff feature/user-auth"
+  ],
+  "Pull Request Workflows": [
+   "<p>Pull requests (PRs) are at the heart of modern CI/CD. A typical PR workflow:</p><ol><li>Developer creates a feature branch, commits changes, and pushes</li><li>PR is opened, triggering a <strong>CI pipeline</strong> that runs tests and analysis</li><li>PR checks report status (pass/fail) directly in the PR view</li><li>Team reviews code; additional commits trigger re-runs</li><li>Once approved and all checks pass, the PR is merged</li><li>Merge triggers a <strong>CD pipeline</strong> to build and deploy</li></ol><p>Tools like <strong>GitHub Actions</strong>, <strong>GitLab CI</strong>, and <strong>Azure DevOps</strong> integrate PR checks natively with status badges and required checks.</p>",
+   "name: PR Checks\non: pull_request\njobs:\n  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm ci && npm test"
+  ]
+ },
+ "CI/CD Tools": {
+  "GitHub Actions": [
+   "<p><strong>GitHub Actions</strong> is GitHub's built-in CI/CD platform. Workflows are defined as YAML files in <code>.github/workflows/</code>. It offers deep GitHub integration, a large marketplace of pre-built actions, and supports Linux, macOS, Windows, and containers.</p><p>Key concepts: <strong>workflows</strong> (automated processes), <strong>jobs</strong> (sets of steps), <strong>steps</strong> (individual tasks), <strong>runners</strong> (execution environments). GitHub provides free minutes for public repositories and paid minutes for private ones.</p>",
+   "name: CI\non: [push, pull_request]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm ci\n      - run: npm test"
+  ],
+  "Jenkins": [
+   "<p><strong>Jenkins</strong> is the most widely used open-source automation server. It supports hundreds of plugins for building, deploying, and automating projects. Jenkins pipelines can be defined as code using <strong>Jenkinsfile</strong> with Declarative or Scripted pipeline syntax.</p><p>Strengths: extreme flexibility, massive plugin ecosystem, mature community. Weaknesses: requires server management, UI can feel dated, plugin compatibility issues. Best for complex enterprise environments needing fine-grained control.</p>",
+   "pipeline {\n  agent any\n  stages {\n    stage('Build') { steps { sh 'npm build' } }\n    stage('Test') { steps { sh 'npm test' } }\n    stage('Deploy') { steps { sh 'npm deploy' } }\n  }\n}"
+  ],
+  "CircleCI": [
+   "<p><strong>CircleCI</strong> is a cloud-native CI/CD platform known for speed and reliability. Pipelines are configured in a <code>.circleci/config.yml</code> file. CircleCI supports parallelism, caching, and <strong>Orbs</strong> — reusable configuration packages that simplify complex pipelines.</p><p>Key features: Docker layer caching, SSH debugging for troubleshooting, dynamic configuration via pipeline parameters, and optimized resource classes (CPU/RAM per job). CircleCI offers a generous free tier for individual developers and open-source projects.</p>",
+   "version: 2.1\njobs:\n  build:\n    docker:\n      - image: cimg/node:20.0\n    steps:\n      - checkout\n      - run: npm ci && npm test"
+  ],
+  "Azure DevOps": [
+   "<p><strong>Azure DevOps</strong> is Microsoft's full DevSecOps platform providing a complete toolchain: <strong>Azure Pipelines</strong> (CI/CD), <strong>Azure Boards</strong> (work tracking), <strong>Azure Repos</strong> (Git repos), <strong>Azure Artifacts</strong> (package management), and <strong>Azure Test Plans</strong> (testing).</p><p>Azure Pipelines supports any language, platform, and cloud. Key strengths: deep Azure integration, deployment groups for multi-machine rollouts, Kubernetes integration, and YAML or classic editor pipeline definitions. Free tier includes 1,800 minutes per month.</p>",
+   "trigger:\n  - main\npool:\n  vmImage: ubuntu-latest\nsteps:\n  - task: NodeTool@0\n    inputs:\n      versionSpec: '20'\n  - script: npm ci && npm test"
+  ]
+ },
+ "GitLab CI/CD": {
+  "GitLab CI/CD Overview": [
+   "<p><strong>GitLab CI/CD</strong> is GitLab's built-in continuous integration, delivery, and deployment system. Pipelines are defined declaratively in a <code>.gitlab-ci.yml</code> file at the repository root. GitLab CI/CD is deeply integrated into the GitLab platform, providing a unified experience for source control, CI/CD, container registry, package registry, and deployment.</p><p>Key strengths: single application for the entire DevOps lifecycle, built-in auto-scaling runners, review apps for per-branch environments, and a generous free tier for both public and private repositories.</p>",
+   "stages:\n  - build\n  - test\n  - deploy\n\ncache:\n  key: ${CI_COMMIT_REF_SLUG}\n  paths:\n    - node_modules/\n\njob:\n  stage: test\n  script:\n    - npm ci\n    - npm test"
+  ],
+  "GitLab CI Pipeline Configuration": [
+   "<p>GitLab CI pipelines are defined in YAML with these core concepts:</p><ul><li><strong>Stages</strong> — groups of jobs that run in order (e.g., build, test, deploy). Jobs in the same stage run in parallel.</li><li><strong>Jobs</strong> — define what to run (script, image, dependencies). Each job belongs to a stage.</li><li><strong>Runners</strong> — agents that execute jobs. GitLab provides shared runners (Linux, Windows, macOS) and you can register your own.</li><li><strong>Variables</strong> — environment variables for configuration. Can be set at project, group, or instance level.</li><li><strong>Cache & Artifacts</strong> — cache speeds up dependency installs; artifacts pass build outputs between stages.</li></ul><p>Example pipeline: lint → test → build → deploy. Jobs can run conditionally based on branch, tags, or changes to specific files.</p>",
+   "include:\n  - template: Auto-DevOps.gitlab-ci.yml\n\nvariables:\n  DEPLOY_ENVIRONMENT: staging\n  KUBE_NAMESPACE: myapp-\n\nreview:\n  environment:\n    name: review/\n    url: https://-.example.com"
+  ],
+  "GitLab Auto DevOps": [
+   "<p><strong>Auto DevOps</strong> is GitLab's zero-configuration CI/CD pipeline. When enabled, GitLab automatically detects your application language and builds a complete pipeline including:</p><ul><li>Code quality analysis (SonarQube)</li><li>SAST and Dependency Scanning</li><li>Container scanning and DAST</li><li>License compliance review</li><li>Automatic deployment to staging and production</li><li>Review Apps (temporary environments per merge request)</li><li>Performance testing and browser testing</li></ul><p>Auto DevOps uses a <strong>Dockerfile</strong> or <strong>buildpack</strong> to build your app. It's ideal for teams new to CI/CD who want instant value without writing pipeline config.</p>",
+   "# Enable Auto DevOps in project settings\n# Or add to .gitlab-ci.yml:\ninclude:\n  - template: Auto-DevOps.gitlab-ci.yml\n\nvariables:\n  STAGING_ENABLED: 'true'\n  CODE_QUALITY_ENABLED: 'true'"
+  ],
+  "GitLab Runners & Scaling": [
+   "<p><strong>GitLab Runners</strong> are the agents that execute CI/CD jobs. Types include:</p><ul><li><strong>Shared runners</strong> — GitLab-hosted, available to all projects (Linux, Windows, macOS)</li><li><strong>Group runners</strong> — available to all projects in a group</li><li><strong>Project runners</strong> — dedicated to a single project</li><li><strong>Specific runners</strong> — locked to specific projects or tags</li></ul><p>Scaling strategies: use <strong>Docker autoscaling</strong> with Docker Machine or <strong>Kubernetes</strong> with the GitLab Runner Helm chart to spin up runners dynamically based on job demand. GitLab Runner supports executors including Docker, Kubernetes, SSH, and VirtualBox.</p>",
+   "# Register a runner\ngitlab-runner register \\\n  --url https://gitlab.com \\\n  --registration-token TOKEN \\\n  --executor docker \\\n  --description 'Docker Runner'\n\n# Start runner\n gitlab-runner run"
+  ]
+ },
+ "Continuous Delivery & Deployment": {
+  "Deployment Strategies": [
+   "<p>Different deployment strategies balance risk, speed, and user impact:</p><ul><li><strong>Rolling Update</strong> — gradually replaces instances of the old version with the new one. Zero downtime, easy rollback.</li><li><strong>Blue/Green</strong> — run two identical environments. Switch traffic from blue (current) to green (new) instantly. Instant rollback by switching back.</li><li><strong>Canary</strong> — route a small percentage of traffic to the new version, then gradually increase. Real user validation with minimal risk.</li><li><strong>Feature Flags</strong> — deploy code hidden behind toggles, then enable for specific users. Separates deployment from release.</li></ul><p>Modern CD pipelines use a combination of these strategies depending on the application and risk tolerance.</p>",
+   "# Blue/Green switch\nkubectl patch service myapp -p '{\"spec\":{\"selector\":{\"version\":\"green\"}}}'\n# Canary (20% traffic)\nkubectl scale deploy/myapp-canary --replicas=2"
+  ],
+  "Rollback & Recovery": [
+   "<p>Even the best pipelines can fail in production. CD systems must support fast, reliable rollback:</p><ul><li><strong>Automated rollback</strong> — if health checks fail after deployment, automatically revert to the last known-good version</li><li><strong>Database rollbacks</strong> — use reversible migrations (up/down) to safely revert schema changes</li><li><strong>Version pinning</strong> — always tag deployed versions (git tags, container tags) for easy identification</li><li><strong>Audit trail</strong> — every deployment should log who deployed what, when, and the result</li></ul><p>The golden rule: <strong>if it hurts, do it more often</strong>. Frequent, small deployments are easier to roll back than rare, large ones.</p>",
+   "# Rollback Kubernetes deployment\nkubectl rollout undo deployment/myapp\nkubectl rollout status deployment/myapp\n# Docker rollback\ndocker pull myapp:previous-tag\ndocker-compose up -d"
+  ],
+  "Release Management": [
+   "<p>Release management in CI/CD coordinates how changes move through environments:</p><ul><li><strong>Environment promotion</strong> — code flows: dev → staging → production, with gates at each stage</li><li><strong>Semantic versioning</strong> — MAJOR.MINOR.PATCH (e.g., 2.1.0) based on change impact</li><li><strong>Changelogs</strong> — auto-generated from conventional commits</li><li><strong>Release branches</strong> — for scheduled releases, create a release branch from main</li><li><strong>Approval gates</strong> — manual approval steps before production deployment (compliance, QA sign-off)</li></ul><p>Tools like <strong>Release Please</strong>, <strong>Semantic Release</strong>, and <strong>Changesets</strong> automate versioning and changelog generation.</p>",
+   "# semantic-release config\n{\n  \"branches\": [\"main\"],\n  \"plugins\": [\n    \"@semantic-release/commit-analyzer\",\n    \"@semantic-release/release-notes-generator\",\n    \"@semantic-release/npm\"\n  ]\n}"
+  ]
+ },
+ "Infrastructure as Code CI/CD": {
+  "Terraform in CI/CD": [
+   "<p>Applying Infrastructure as Code (IaC) through CI/CD brings infrastructure changes under the same governance as application changes.</p><p>Terraform CI/CD best practices:</p><ul><li>Run <code>terraform fmt</code> and <code>terraform validate</code> in CI to check formatting and syntax</li><li>Use <code>terraform plan</code> in PRs to show infrastructure changes without applying them</li><li>Store state remotely (S3, Terraform Cloud) with state locking</li><li>Apply only after PR approval and plan review</li><li>Use workspaces or directories for environment separation</li></ul><p>The <strong>terraform plan</strong> output in a PR comment is one of the most valuable CI/CD practices for infrastructure teams.</p>",
+   "terraform init\nterraform validate\nterraform plan -out=tfplan\nterraform apply tfplan"
+  ],
+  "Configuration Management": [
+   "<p>Configuration management tools maintain consistent system state across environments:</p><ul><li><strong>Ansible</strong> — agentless, push-based, YAML playbooks. Great for app deployment and server configuration.</li><li><strong>Chef</strong> — Ruby-based DSL, pull-based with Chef Client and Server. Good for large-scale server fleets.</li><li><strong>Puppet</strong> — declarative DSL, pull-based. Strong in enterprise environments.</li></ul><p>In CI/CD, run config management as part of the deployment stage to ensure servers match the desired state after deployment.</p>",
+   "# Ansible playbook.yml\n---\n- hosts: webservers\n  tasks:\n    - name: Install Nginx\n      apt:\n        name: nginx\n        state: present\n    - name: Start service\n      service:\n        name: nginx\n        state: started"
+  ],
+  "Policy as Code": [
+   "<p><strong>Policy as Code</strong> (PaC) enforces rules automatically in the pipeline:</p><ul><li><strong>Open Policy Agent (OPA)</strong> — general-purpose policy engine. Enforce rules like \"all S3 buckets must be encrypted\" before apply.</li><li><strong>Sentinel</strong> — HashiCorp's policy framework for Terraform and Vault.</li><li><strong>Checkov</strong> — static analysis for IaC to find misconfigurations (open ports, hardcoded secrets).</li><li><strong>Conftest</strong> — test configuration files against OPA policies in CI.</li></ul><p>PaC shifts security left — catching policy violations before infrastructure is provisioned.</p>",
+   "# OPA policy (terraform.rego)\npackage terraform\n\ndeny[msg] {\n  resource := input.resource_changes[_]\n  resource.type == \"aws_s3_bucket\"\n  not resource.change.after.encryption\n  msg := \"S3 bucket must have encryption enabled\"\n}"
+  ]
+ },
+ "Container CI/CD": {
+  "Docker Build Pipelines": [
+   "<p>Container-based CI/CD pipelines use Docker throughout the pipeline:</p><ul><li>Build stage produces a <strong>Docker image</strong> with the application and all dependencies</li><li>Tag images with commit SHA, branch name, and semantic version</li><li>Push to a <strong>container registry</strong> (Docker Hub, ECR, GCR, GHCR)</li><li>Use <strong>multi-stage builds</strong> to minimize image size</li><li>Scan images for vulnerabilities (Trivy, Snyk, Docker Scout)</li></ul><p>The same image built in CI is deployed everywhere — no \"works on my machine\" problems. Images are immutable and versioned.</p>",
+   "# Multi-stage Dockerfile\nFROM node:20 AS build\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=build /app/dist /usr/share/nginx/html"
+  ],
+  "Kubernetes Deployments": [
+   "<p>Deploying to Kubernetes from CI/CD involves:</p><ul><li>Update the <strong>deployment manifest</strong> (YAML) with the new image tag</li><li>Use <strong>kubectl set image</strong> or patch the deployment</li><li>Apply with <strong>kubectl apply</strong> to trigger rolling update</li><li>Use <strong>Helm</strong> for templated releases — pass the image tag as a value</li><li>Monitor rollout with <strong>kubectl rollout status</strong></li></ul><p>Advanced setups use <strong>ArgoCD</strong> or <strong>Flux</strong> (GitOps) where the CD system watches a Git repository for manifest changes and synchronizes the cluster automatically.</p>",
+   "# CI/CD deploy step\nkubectl set image deployment/myapp \\\n  myapp=myregistry/myapp:$CI_COMMIT_SHA\nkubectl rollout status deployment/myapp\nkubectl annotate deployment/myapp \\\n  kubernetes.io/change-cause=\"deploy $CI_COMMIT_SHA\""
+  ],
+  "GitOps": [
+   "<p><strong>GitOps</strong> is a deployment model where the Git repository is the single source of truth for both application code and infrastructure. Changes are made via PRs, and an operator synchronizes the live environment to match the repository state.</p><p>Key tools:</p><ul><li><strong>ArgoCD</strong> — Kubernetes-native CD tool. Syncs clusters to a Git repository with automatic or manual sync policies.</li><li><strong>Flux</strong> — GitOps operator from Weaveworks. Supports multi-tenancy, image updates, and Kustomize/Helm.</li></ul><p>Benefits: complete audit trail (every change is a Git commit), easy rollback (revert commit), and a single workflow for both dev and ops.</p>",
+   "# ArgoCD Application\napiVersion: argoproj.io/v1alpha1\nkind: Application\nmetadata:\n  name: myapp\nspec:\n  source:\n    repoURL: https://github.com/org/myapp.git\n    path: manifests\n    targetRevision: main\n  destination:\n    server: https://kubernetes.default.svc\n    namespace: production\n  syncPolicy:\n    automated:\n      prune: true\n      selfHeal: true"
+  ]
+ },
+ "Advanced CI/CD Tools": {
+  "GitHub Actions Deep Dive": [
+   "GitHub Actions provides CI/CD directly in GitHub repositories. Workflows are YAML files in `.github/workflows/`. Key concepts: events (push, PR, schedule, workflow_dispatch), jobs (run in parallel by default), steps (individual commands), actions (reusable units), and runners (GitHub-hosted or self-hosted). Matrix builds test multiple OS/node versions. Composite actions package reusable step sequences. Self-hosted runners enable custom hardware/software. GitHub Actions has a free tier: 2000 minutes/month for private repos, unlimited for public. Caching with `actions/cache` speeds up dependency installation.",
+   "# Matrix build workflow\nname: Matrix Build\non: [push, pull_request]\n\njobs:\n  test:\n    runs-on: ${{ matrix.os }}\n    strategy:\n      matrix:\n        os: [ubuntu-latest, windows-latest, macos-latest]\n        node: [18, 20, 22]\n        include:\n          - os: ubuntu-latest\n            node: 20\n            coverage: true\n      fail-fast: false\n\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: ${{ matrix.node }}\n          cache: 'npm'\n\n      - run: npm ci\n      - run: npm run lint\n      - run: npm test\n\n      - if: matrix.coverage\n        uses: codecov/codecov-action@v4\n        with:\n          token: ${{ secrets.CODECOV_TOKEN }}\n\n  # Reusable workflow call (in separate file: .github/workflows/deploy.yml)\n  deploy:\n    needs: test\n    if: github.ref == 'refs/heads/main'\n    uses: ./.github/workflows/deploy.yml\n    secrets: inherit"
+  ],
+  "GitLab CI/CD Deep Dive": [
+   "GitLab CI/CD is built into GitLab repositories. Configuration in `.gitlab-ci.yml`. Key concepts: stages (sequential groups of jobs), runners (executors for jobs), artifacts (files passed between stages), environments (tracking deployments), and variables (key-value config). GitLab CI/CD features include auto DevOps, review apps (ephemeral environments per MR), protected environments with manual approval gates, and CI/CD for GitLab Pages. GitLab runners can be shared, group, or specific. The `.gitlab-ci.yml` supports includes for reusing config from other files/templates.",
+   "# .gitlab-ci.yml example\nstages:\n  - lint\n  - test\n  - build\n  - review\n  - staging\n  - production\n\nvariables:\n  DOCKER_DRIVER: overlay2\n  NODE_VERSION: '20'\n\ncache:\n  key: ${CI_COMMIT_REF_SLUG}\n  paths:\n    - node_modules/\n\nnode-lint:\n  stage: lint\n  image: node:${NODE_VERSION}\n  script:\n    - npm ci\n    - npm run lint\n\nnode-test:\n  stage: test\n  image: node:${NODE_VERSION}\n  services:\n    - postgres:16-alpine\n    - redis:7-alpine\n  variables:\n    DATABASE_URL: 'postgres://postgres:password@postgres:5432/test'\n  script:\n    - npm ci\n    - npm run test:ci\n  coverage: '/All files[|]\\d+\\.\\d+/'\n  artifacts:\n    reports:\n      junit: junit.xml\n      coverage_report:\n        coverage_format: cobertura\n        path: coverage/cobertura-coverage.xml\n\ndocker-build:\n  stage: build\n  image: docker:24\n  services:\n    - docker:24-dind\n  script:\n    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .\n    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA\n  only:\n    - main\n\nreview-deploy:\n  stage: review\n  script:\n    - kubectl set image deployment/app app=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA\n  environment:\n    name: review/$CI_MERGE_REQUEST_IID\n    url: https://review-$CI_MERGE_REQUEST_IID.example.com\n    on_stop: stop-review\n  only:\n    - merge_requests\n\nstop-review:\n  stage: review\n  script:\n    - kubectl delete deployment review-$CI_MERGE_REQUEST_IID\n  environment:\n    name: review/$CI_MERGE_REQUEST_IID\n    action: stop\n  when: manual\n  only:\n    - merge_requests\n\nproduction-deploy:\n  stage: production\n  script:\n    - kubectl apply -f k8s/\n  environment:\n    name: production\n    url: https://app.example.com\n  when: manual\n  needs:\n    - docker-build\n  only:\n    - main"
+  ],
+  "Jenkins Pipeline as Code": [
+   "Jenkins automates CI/CD with declarative or scripted pipelines defined in `Jenkinsfile`. Declarative pipelines are structured with `pipeline {}` block containing stages, steps, post-actions, and agent directives. Key features: parallel execution, shared libraries for reusable code, credentials binding, and pipeline syntax generation. Jenkins integrates with all major SCM tools (Git, SVN), build tools (Maven, Gradle, npm), and artifact repositories (Nexus, Artifactory). Blue Ocean provides a modern UI. Jenkins offers extensive plugin ecosystem and runs on-premises for full control.",
+   "// Declarative Jenkinsfile\npipeline {\n    agent any\n\n    tools {\n        nodejs 'node-20'\n        docker 'docker-latest'\n    }\n\n    environment {\n        REGISTRY = 'docker.io/myorg'\n        APP_NAME = 'backend-api'\n    }\n\n    stages {\n        stage('Checkout') {\n            steps {\n                checkout scmGit(\n                    branches: [[name: '*/main']],\n                    extensions: [\n                        [$class: 'CleanBeforeCheckout'],\n                        [$class: 'LocalBranch', localBranch: '**']\n                    ],\n                    userRemoteConfigs: [[url: 'https://github.com/myorg/backend.git']]\n                )\n            }\n        }\n\n        stage('Test') {\n            parallel {\n                stage('Unit Tests') {\n                    steps {\n                        sh '''\n                            npm ci\n                            npm run test:unit\n                        '''\n                    }\n                }\n                stage('Lint & Format') {\n                    steps {\n                        sh '''\n                            npm run lint\n                            npm run format:check\n                        '''\n                    }\n                }\n                stage('Security Scan') {\n                    steps {\n                        sh '''\n                            npm audit --audit-level=high\n                            trivy fs --severity HIGH,CRITICAL .\n                        '''\n                    }\n                }\n            }\n        }\n\n        stage('Build & Package') {\n            steps {\n                sh '''\n                    docker build -t ${REGISTRY}/${APP_NAME}:${BUILD_NUMBER} .\n                    docker tag ${REGISTRY}/${APP_NAME}:${BUILD_NUMBER} ${REGISTRY}/${APP_NAME}:latest\n                '''\n            }\n        }\n\n        stage('Deploy to Staging') {\n            steps {\n                withKubeConfig([credentialsId: 'k8s-staging']) {\n                    sh '''\n                        kubectl set image deployment/${APP_NAME} \\\n                            ${APP_NAME}=${REGISTRY}/${APP_NAME}:${BUILD_NUMBER}\n                    '''\n                }\n            }\n        }\n    }\n\n    post {\n        success {\n            emailext(\n                to: 'team@example.com',\n                subject: \"Pipeline Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}\",\n                body: \"Pipeline completed successfully. See ${env.BUILD_URL}\"\n            )\n        }\n        failure {\n            slackSend(\n                color: 'danger',\n                message: \"Pipeline Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER} (${env.BUILD_URL})\"\n            )\n        }\n    }\n}"
+  ]
+ },
+ "Deployment Strategies & Rollbacks": {
+  "Blue-Green Deployment": [
+   "Blue-green deployment reduces downtime by running two identical production environments (blue and green). Traffic is routed to the active environment while the inactive one is updated. Switch traffic via load balancer/router to activate the new version. Benefits: instant rollback (switch traffic back), zero-downtime deployments, and easy testing in production-like environment. Drawbacks: 2x infrastructure cost, requires stateless applications or DB migration handling, and database schema changes need backward compatibility. Service meshes (Istio) simplify this pattern with traffic routing rules.",
+   "# Kubernetes blue-green deployment\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: app-blue\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: myapp\n      version: blue\n  template:\n    metadata:\n      labels:\n        app: myapp\n        version: blue\n    spec:\n      containers:\n        - name: app\n          image: myapp:1.0.0\n          ports:\n            - containerPort: 8080\n---\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: app-green\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: myapp\n      version: green\n  template:\n    metadata:\n      labels:\n        app: myapp\n        version: green\n    spec:\n      containers:\n        - name: app\n          image: myapp:1.1.0\n          ports:\n            - containerPort: 8080\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: app-service\nspec:\n  selector:\n    app: myapp\n    version: blue  # Changed to 'green' when switching\n  ports:\n    - port: 80\n      targetPort: 8080\n\n# Switch traffic: kubectl patch service app-service -p '{\"spec\":{\"selector\":{\"version\":\"green\"}}}'"
+  ],
+  "Canary Deployments": [
+   "Canary deployment incrementally routes a percentage of traffic to a new version, monitoring for issues. Starts with low traffic (1-5%), gradually increases if metrics are healthy, and either fully promotes or rolls back. Requires sophisticated traffic routing (service mesh, feature flags, or weighted DNS). Metrics to monitor: error rate, latency p95/p99, CPU/memory, business metrics (conversion rate, signups). Feature flags complement canary by enabling feature toggling independently of deployment. Argo Rollouts provides automated canary analysis with metric providers (Prometheus, Datadog).",
+   "# Argo Rollouts canary deployment\napiVersion: argoproj.io/v1alpha1\nkind: Rollout\nmetadata:\n  name: app-rollout\nspec:\n  replicas: 10\n  strategy:\n    canary:\n      steps:\n        - setWeight: 5\n        - pause: { duration: 2m }\n        - setWeight: 25\n        - pause: { duration: 5m }\n        - setWeight: 50\n        - pause: { duration: 10m }\n        - setWeight: 75\n        - pause: { duration: 5m }\n        - setWeight: 100\n      analysis:\n        templates:\n          - templateName: success-rate\n        startingStep: 0\n        args:\n          - name: canary-hash\n            valueFrom:\n              podTemplateHashValue: Latest\n---\napiVersion: argoproj.io/v1alpha1\nkind: AnalysisTemplate\nmetadata:\n  name: success-rate\nspec:\n  args:\n    - name: canary-hash\n  metrics:\n    - name: success-rate\n      interval: 1m\n      successCondition: result >= 0.95\n      failureLimit: 3\n      provider:\n        prometheus:\n          query: |\n            sum(rate(http_requests_total{status!~\"5..\", canary=\"${args.canary-hash}\"}[1m]))\n            /\n            sum(rate(http_requests_total{canary=\"${args.canary-hash}\"}[1m]))"
+  ],
+  "Rollback & Recovery Strategies": [
+   "Rollback strategies restore service after a bad deployment. Rollback types: instant (revert traffic/artifact), gradual (automated canary regression), and database rollback (schema migration revert). Versioned artifacts (Docker tags, npm packages) enable precise rollback targets. Database rollbacks require backward-compatible migrations: add columns before using them, use feature flags to gate new code paths, and test rollbacks in staging. Git revert + CI/CD re-deploy is the safest rollback. Keep release notes to track what changed per deployment. Practice rollbacks in chaos engineering drills.",
+   "# Database migration with rollback support\n# 20240610_add_user_preferences.sql\n\n-- Migrate: UP\nALTER TABLE users ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}';\n\n-- Wrap new feature in try/catch for backward compatibility\n-- Application code accesses preferences safely:\napp.get('/api/user/preferences', async (req, res) => {\n  try {\n    const user = await db.users.findById(req.user.id);\n    // preferences column may not exist during rolling deployment\n    const prefs = user.preferences || {};\n    res.json(prefs);\n  } catch (err) {\n    if (err.code === '42703') { // undefined_column\n      logger.warn('preferences column not available yet');\n      return res.json({});\n    }\n    throw err;\n  }\n});\n\n-- Migrate: DOWN\nALTER TABLE users DROP COLUMN IF EXISTS preferences;\n\n# Kubernetes rollback\n# kubectl rollout undo deployment/app\n# kubectl rollout undo deployment/app --to-revision=3\n\n# Docker rollback\n# docker pull myapp:previous-stable-tag\n# docker-compose up -d"
+  ]
+ },
+ "Security in CI/CD Pipelines": {
+  "SAST, DAST & SCA Scanning": [
+   "Application security testing in CI/CD: SAST (Static Analysis) scans source code for vulnerabilities without executing it. DAST (Dynamic Analysis) tests running applications. SCA (Software Composition Analysis) scans dependencies for known CVEs. Integrate SAST early in PRs, DAST in staging environments, and SCA on every build. Tools: SonarQube/SonarCloud, Snyk, Trivy, Checkmarx, Semgrep, OWASP ZAP, Docker Scout. Use fail thresholds: fail build on CRITICAL vulns, warn on HIGH, and allow MEDIUM/LOW with SLA tracking. DAST should be non-blocking for speed.",
+   "# GitHub Actions security scanning\nname: Security Scan\non: [push, pull_request]\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: github/codeql-action/init@v3\n        with:\n          languages: javascript, typescript\n          queries: security-extended,security-and-quality\n      - uses: github/codeql-action/analyze@v3\n        with:\n          category: '/language:javascript-typescript'\n\n  sca:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Snyk Security Scan\n        uses: snyk/actions/node@master\n        env:\n          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}\n        with:\n          args: '--severity-threshold=high'\n      - name: Trivy vulnerability scanner\n        uses: aquasecurity/trivy-action@master\n        with:\n          scan-type: 'fs'\n          scan-ref: '.'\n          format: 'sarif'\n          output: 'trivy-results.sarif'\n          severity: 'CRITICAL,HIGH'\n\n  secrets:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: TruffleHog Secrets Scan\n        uses: trufflesecurity/trufflehog@main\n        with:\n          path: ./\n          base: ${{ github.event.repository.default_branch }}\n          head: ${{ github.head_ref }}"
+  ],
+  "Supply Chain Security (SLSA/SBOM)": [
+   "Software supply chain security protects against compromised dependencies and build processes. SLSA (Supply-chain Levels for Software Artifacts) defines build integrity levels (L1-L4). SBOM (Software Bill of Materials) lists all components in your software. Standards: SPDX and CycloneDX for SBOM format. Generate SBOM during builds and store in artifact registry. Sign artifacts with cosign and verify before deployment. Use isolated build environments, trusted builders, and non-ephemeral provenance tracking. Key practices: pin dependencies to specific versions, verify package signatures, use lockfiles, and scan for malicious packages.",
+   "# SBOM generation and artifact signing\n# Generate SBOM with Syft\nsyft packages . -o cyclonedx-json > sbom.cdx.json\n\n# Sign container image with Cosign\ncosign generate-key-pair\ncosign sign --key cosign.key myapp:latest\n\n# Verify before deployment\ncosign verify --key cosign.pub myapp:latest\n\necho 'SBOM and signature verification passed'\n\n# GitHub Actions SBOM generation\n- name: Generate SBOM\n  uses: anchore/sbom-action@v0\n  with:\n    path: ./\n    format: cyclonedx-json\n    output-file: sbom.cdx.json\n\n- name: Upload SBOM\n  uses: actions/upload-artifact@v4\n  with:\n    name: sbom\n    path: sbom.cdx.json\n\n# SLSA provenance generation\n- name: Generate SLSA provenance\n  uses: slsa-framework/slsa-github-generator@v1.9.0\n  with:\n    artifact_source: .\n    artifact_name: myapp\n    upload_attestations: true"
+  ]
+ }
+}

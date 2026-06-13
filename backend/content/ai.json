@@ -1,350 +1,350 @@
 {
   "AI Fundamentals": {
     "What is Artificial Intelligence?": {
-      "exp": "<p>Introduction to AI, ML, and deep learning. AI vs ML vs DL, narrow vs general AI, history of AI, real-world applications across industries including healthcare, finance, transportation, and entertainment.</p>",
+      "exp": "Introduction to AI, ML, and deep learning. AI vs ML vs DL, narrow vs general AI, history of AI, real-world applications across industries including healthcare, finance, transportation, and entertainment.",
       "code": "# AI is transforming every industry\n# Key areas: machine learning, NLP, computer vision, robotics\n\nprint(\"Welcome to AI!\")\nprint(\"Artificial Intelligence is the simulation of human intelligence by machines\")",
       "exercises": []
     },
     "Types of AI": {
-      "exp": "<p>Different categories of AI systems based on capability: Reactive Machines (limited memory), Theory of Mind, Self-Aware AI. Also categorized by functionality: Narrow AI (specialized), General AI (human-level), and Super AI (beyond human).</p>",
+      "exp": "Different categories of AI systems based on capability: Reactive Machines (limited memory), Theory of Mind, Self-Aware AI. Also categorized by functionality: Narrow AI (specialized), General AI (human-level), and Super AI (beyond human).",
       "code": "# Categories of AI\nai_types = {\n    \"narrow\": \"Specialized task performance\",\n    \"general\": \"Human-level intelligence\",\n    \"super\": \"Beyond human capability\"\n}\nfor t, desc in ai_types.items():\n    print(f\"{t}: {desc}\")",
       "exercises": []
     },
     "AI Problem Solving": {
-      "exp": "<p>Fundamental approaches to AI problems including search algorithms, constraint satisfaction, optimization, and decision theory. Covers breadth-first search, depth-first search, A*, hill climbing, and genetic algorithms.</p>",
+      "exp": "Fundamental approaches to AI problems including search algorithms, constraint satisfaction, optimization, and decision theory. Covers breadth-first search, depth-first search, A*, hill climbing, and genetic algorithms.",
       "code": "# Simple search algorithm example\ndef bfs(graph, start, goal):\n    visited = set()\n    queue = [[start]]\n    while queue:\n        path = queue.pop(0)\n        node = path[-1]\n        if node == goal:\n            return path\n        if node not in visited:\n            visited.add(node)\n            for neighbor in graph.get(node, []):\n                new_path = list(path)\n                new_path.append(neighbor)\n                queue.append(new_path)\n    return None",
       "exercises": []
     },
     "Data in AI": {
-      "exp": "<p>The role of data in AI systems. Structured vs unstructured data, data quality, data preprocessing techniques, feature engineering, data augmentation, handling missing values, and the importance of diverse and representative datasets.</p>",
+      "exp": "The role of data in AI systems. Structured vs unstructured data, data quality, data preprocessing techniques, feature engineering, data augmentation, handling missing values, and the importance of diverse and representative datasets.",
       "code": "import pandas as pd\nimport numpy as np\n\n# Sample data preprocessing\ndata = pd.DataFrame({\n    'age': [25, 30, np.nan, 35, 28],\n    'income': [50000, 60000, 55000, None, 52000]\n})\n# Handle missing values\ndata['age'].fillna(data['age'].mean(), inplace=True)\ndata['income'].fillna(data['income'].median(), inplace=True)\nprint(data.describe())",
       "exercises": []
     },
     "Ethics in AI": {
-      "exp": "<p>Ethical considerations in AI development: bias, fairness, transparency, accountability, privacy, responsible AI practices. Understanding algorithmic bias, fairness metrics, interpretability, and regulatory frameworks like GDPR and AI Act.</p>",
+      "exp": "Ethical considerations in AI development: bias, fairness, transparency, accountability, privacy, responsible AI practices. Understanding algorithmic bias, fairness metrics, interpretability, and regulatory frameworks like GDPR and AI Act.",
       "code": "# Example: checking for bias in a simple model\nimport numpy as np\n\n# Simulated predictions across demographic groups\ngroup_a = np.random.binomial(1, 0.85, 1000)  # 85% approval\ngroup_b = np.random.binomial(1, 0.65, 1000)  # 65% approval\n\nbias_gap = abs(group_a.mean() - group_b.mean())\nprint(f\"Approval rate gap: {bias_gap:.2%}\")\nprint(\"Goal: minimize demographic parity gap\")",
       "exercises": []
     }
   },
   "Mathematics for AI": {
     "Linear Algebra": {
-      "exp": "<p>Essential linear algebra concepts for AI: vectors, matrices, matrix operations, eigenvalues, eigenvectors, singular value decomposition (SVD). These are fundamental to neural network computations, dimensionality reduction, and data transformations.</p>",
+      "exp": "Essential linear algebra concepts for AI: vectors, matrices, matrix operations, eigenvalues, eigenvectors, singular value decomposition (SVD). These are fundamental to neural network computations, dimensionality reduction, and data transformations.",
       "code": "import numpy as np\n\n# Matrix operations for neural networks\nA = np.array([[1, 2], [3, 4]])\nB = np.array([[5, 6], [7, 8]])\n\n# Dot product (core neural network operation)\nC = np.dot(A, B)\nprint(\"Matrix multiplication result:\")\nprint(C)\n\n# Eigenvalues and eigenvectors\neigenvalues, eigenvectors = np.linalg.eig(A)\nprint(f\"Eigenvalues: {eigenvalues}\")",
       "exercises": []
     },
     "Calculus": {
-      "exp": "<p>Calculus concepts essential for machine learning: derivatives, partial derivatives, gradients, the chain rule (critical for backpropagation), and optimization. Understanding how gradients enable model training through gradient descent.</p>",
+      "exp": "Calculus concepts essential for machine learning: derivatives, partial derivatives, gradients, the chain rule (critical for backpropagation), and optimization. Understanding how gradients enable model training through gradient descent.",
       "code": "import numpy as np\n\n# Simple gradient descent example\ndef gradient_descent(x_start, learning_rate=0.1, n_iterations=100):\n    x = x_start\n    history = []\n    for _ in range(n_iterations):\n        gradient = 2 * x  # derivative of f(x) = x^2\n        x = x - learning_rate * gradient\n        history.append(x)\n    return x, history\n\nx_min, _ = gradient_descent(10.0)\nprint(f\"Minimum found at x = {x_min:.6f}\")",
       "exercises": []
     },
     "Probability & Statistics": {
-      "exp": "<p>Probability theory fundamentals for AI: probability distributions (normal, binomial, Poisson), Bayes theorem, maximum likelihood estimation, hypothesis testing, confidence intervals, and statistical significance.</p>",
+      "exp": "Probability theory fundamentals for AI: probability distributions (normal, binomial, Poisson), Bayes theorem, maximum likelihood estimation, hypothesis testing, confidence intervals, and statistical significance.",
       "code": "import numpy as np\nfrom scipy import stats\n\n# Bayes Theorem example\n# P(disease|positive) = P(positive|disease) * P(disease) / P(positive)\np_disease = 0.01  # 1% prevalence\np_positive_given_disease = 0.99  # test sensitivity\np_positive = 0.05  # overall positive rate\n\np_disease_given_positive = (\n    p_positive_given_disease * p_disease / p_positive\n)\nprint(f\"Probability of having disease given positive test: {p_disease_given_positive:.2%}\")",
       "exercises": []
     },
     "Information Theory": {
-      "exp": "<p>Information theory concepts.</p>",
+      "exp": "Information theory concepts.",
       "code": "Entropy, cross-entropy, KL divergence, mutual information.",
       "exercises": []
     },
     "Optimization": {
-      "exp": "<p>Optimization algorithms for machine learning training: gradient descent variants (SGD, Adam, RMSprop), learning rate schedules, momentum, second-order methods. Understanding the optimization landscape, local vs global minima, and convergence.</p>",
+      "exp": "Optimization algorithms for machine learning training: gradient descent variants (SGD, Adam, RMSprop), learning rate schedules, momentum, second-order methods. Understanding the optimization landscape, local vs global minima, and convergence.",
       "code": "import numpy as np\n\n# Adam optimizer simplified\nclass SimpleAdam:\n    def __init__(self, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8):\n        self.lr = lr\n        self.beta1 = beta1\n        self.beta2 = beta2\n        self.eps = eps\n        self.m = 0\n        self.v = 0\n        self.t = 0\n    \n    def update(self, param, grad):\n        self.t += 1\n        self.m = self.beta1 * self.m + (1 - self.beta1) * grad\n        self.v = self.beta2 * self.v + (1 - self.beta2) * grad**2\n        m_hat = self.m / (1 - self.beta1**self.t)\n        v_hat = self.v / (1 - self.beta2**self.t)\n        return param - self.lr * m_hat / (np.sqrt(v_hat) + self.eps)",
       "exercises": []
     }
   },
   "Machine Learning": {
     "Supervised Learning": {
-      "exp": "<p>Supervised learning: training models on labeled data. Covers regression (linear, polynomial, ridge, lasso) and classification (logistic regression, decision trees, SVM, k-nearest neighbors). Understanding bias-variance tradeoff and model capacity.</p>",
+      "exp": "Supervised learning: training models on labeled data. Covers regression (linear, polynomial, ridge, lasso) and classification (logistic regression, decision trees, SVM, k-nearest neighbors). Understanding bias-variance tradeoff and model capacity.",
       "code": "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import mean_squared_error\nimport numpy as np\n\n# Simple linear regression\nX = np.random.randn(100, 1) * 10\ny = 2 * X.squeeze() + 1 + np.random.randn(100) * 2\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\npredictions = model.predict(X_test)\nmse = mean_squared_error(y_test, predictions)\nprint(f\"Slope: {model.coef_[0]:.3f}, Intercept: {model.intercept_:.3f}\")\nprint(f\"Test MSE: {mse:.3f}\")",
       "exercises": []
     },
     "Unsupervised Learning": {
-      "exp": "<p>Unsupervised learning: finding patterns in unlabeled data. Covers clustering (K-means, DBSCAN, hierarchical clustering, Gaussian mixture models) and dimensionality reduction (PCA, t-SNE, UMAP). Applications in customer segmentation and anomaly detection.</p>",
+      "exp": "Unsupervised learning: finding patterns in unlabeled data. Covers clustering (K-means, DBSCAN, hierarchical clustering, Gaussian mixture models) and dimensionality reduction (PCA, t-SNE, UMAP). Applications in customer segmentation and anomaly detection.",
       "code": "from sklearn.cluster import KMeans\nfrom sklearn.datasets import make_blobs\nimport matplotlib.pyplot as plt\n\n# Generate sample data\nX, y_true = make_blobs(n_samples=300, centers=4, cluster_std=0.60, random_state=0)\n\n# Apply K-means\nkmeans = KMeans(n_clusters=4, random_state=0)\nkmeans.fit(X)\nprint(f\"Cluster centers:\\n{kmeans.cluster_centers_}\")\nprint(f\"Inertia: {kmeans.inertia_:.2f}\")",
       "exercises": []
     },
     "Model Evaluation": {
-      "exp": "<p>Evaluating machine learning models: train/test split, cross-validation (k-fold, stratified), confusion matrix, precision, recall, F1-score, ROC curves, AUC, bias-variance decomposition, overfitting vs underfitting detection.</p>",
+      "exp": "Evaluating machine learning models: train/test split, cross-validation (k-fold, stratified), confusion matrix, precision, recall, F1-score, ROC curves, AUC, bias-variance decomposition, overfitting vs underfitting detection.",
       "code": "from sklearn.model_selection import cross_val_score\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.datasets import make_classification\n\nX, y = make_classification(n_samples=1000, n_features=20, random_state=42)\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\n\n# 5-fold cross-validation\nscores = cross_val_score(model, X, y, cv=5, scoring='accuracy')\nprint(f\"Cross-validation scores: {scores}\")\nprint(f\"Mean accuracy: {scores.mean():.3f} +/- {scores.std():.3f}\")",
       "exercises": []
     },
     "Ensemble Methods": {
-      "exp": "<p>Combining multiple models for better performance: bagging (Random Forests), boosting (AdaBoost, Gradient Boosting, XGBoost, LightGBM), stacking, voting classifiers. Understanding ensemble diversity and bias-variance reduction.</p>",
+      "exp": "Combining multiple models for better performance: bagging (Random Forests), boosting (AdaBoost, Gradient Boosting, XGBoost, LightGBM), stacking, voting classifiers. Understanding ensemble diversity and bias-variance reduction.",
       "code": "from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.datasets import make_classification\n\nX, y = make_classification(n_samples=1000, random_state=42)\n\n# Create ensemble\nrf = RandomForestClassifier(n_estimators=100)\ngb = GradientBoostingClassifier(n_estimators=100)\nensemble = VotingClassifier([('rf', rf), ('gb', gb)], voting='soft')\nensemble.fit(X, y)\nprint(f\"Ensemble trained with {len(ensemble.estimators_)} estimators\")",
       "exercises": []
     },
     "Feature Engineering": {
-      "exp": "<p>Creating and selecting features for ML models: feature extraction, feature selection methods (filter, wrapper, embedded), normalization and standardization, one-hot encoding, handling categorical variables, polynomial features, and automated feature engineering.</p>",
+      "exp": "Creating and selecting features for ML models: feature extraction, feature selection methods (filter, wrapper, embedded), normalization and standardization, one-hot encoding, handling categorical variables, polynomial features, and automated feature engineering.",
       "code": "from sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom sklearn.compose import ColumnTransformer\nimport pandas as pd\n\n# Feature engineering pipeline\ndata = pd.DataFrame({\n    'age': [25, 30, 35],\n    'city': ['NYC', 'LA', 'SF'],\n    'income': [50000, 60000, 70000]\n})\n\npreprocessor = ColumnTransformer(\n    transformers=[\n        ('num', StandardScaler(), ['age', 'income']),\n        ('cat', OneHotEncoder(), ['city'])\n    ])\nX_processed = preprocessor.fit_transform(data)\nprint(f\"Processed feature shape: {X_processed.shape}\")",
       "exercises": []
     },
     "Regularization": {
-      "exp": "<p>Preventing overfitting.</p>",
+      "exp": "Preventing overfitting.",
       "code": "L1 (Lasso), L2 (Ridge), ElasticNet, dropout, early stopping.",
       "exercises": []
     }
   },
   "Deep Learning": {
     "Neural Networks": {
-      "exp": "<p>Building neural networks from scratch: perceptron algorithm, activation functions (ReLU, sigmoid, tanh, softmax), forward propagation, backpropagation, loss functions (MSE, cross-entropy), and the universal approximation theorem.</p>",
+      "exp": "Building neural networks from scratch: perceptron algorithm, activation functions (ReLU, sigmoid, tanh, softmax), forward propagation, backpropagation, loss functions (MSE, cross-entropy), and the universal approximation theorem.",
       "code": "import torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\n# Simple neural network\nclass SimpleNN(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc1 = nn.Linear(10, 64)\n        self.fc2 = nn.Linear(64, 32)\n        self.fc3 = nn.Linear(32, 1)\n    \n    def forward(self, x):\n        x = F.relu(self.fc1(x))\n        x = F.relu(self.fc2(x))\n        x = torch.sigmoid(self.fc3(x))\n        return x\n\nmodel = SimpleNN()\nprint(f\"Neural network with {sum(p.numel() for p in model.parameters())} parameters\")",
       "exercises": []
     },
     "CNNs": {
-      "exp": "<p>Convolutional Neural Networks for image data: convolution operations, filters, stride, padding, pooling layers, feature maps. Major architectures: LeNet, AlexNet, VGG, ResNet, Inception, EfficientNet. Transfer learning with pre-trained CNNs.</p>",
+      "exp": "Convolutional Neural Networks for image data: convolution operations, filters, stride, padding, pooling layers, feature maps. Major architectures: LeNet, AlexNet, VGG, ResNet, Inception, EfficientNet. Transfer learning with pre-trained CNNs.",
       "code": "import torch.nn as nn\n\n# Simple CNN for image classification\nclass SimpleCNN(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv1 = nn.Conv2d(3, 32, 3, padding=1)\n        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)\n        self.pool = nn.MaxPool2d(2, 2)\n        self.fc1 = nn.Linear(64 * 8 * 8, 128)\n        self.fc2 = nn.Linear(128, 10)\n    \n    def forward(self, x):\n        x = self.pool(F.relu(self.conv1(x)))\n        x = self.pool(F.relu(self.conv2(x)))\n        x = x.view(-1, 64 * 8 * 8)\n        x = F.relu(self.fc1(x))\n        x = self.fc2(x)\n        return x\n\n# Print architecture summary\nmodel = SimpleCNN()\nprint(\"CNN model created with convolution and pooling layers\")",
       "exercises": []
     },
     "RNNs & LSTMs": {
-      "exp": "<p>Recurrent networks for sequential data.</p>",
+      "exp": "Recurrent networks for sequential data.",
       "code": "RNN cells, LSTM gates, GRU, vanishing gradients, sequence-to-sequence models.",
       "exercises": []
     },
     "Autoencoders": {
-      "exp": "<p>Unsupervised learning with autoencoders.</p>",
+      "exp": "Unsupervised learning with autoencoders.",
       "code": "Encoder-decoder architecture, latent space, denoising, variational autoencoders.",
       "exercises": []
     },
     "GANs": {
-      "exp": "<p>Generative adversarial networks.</p>",
+      "exp": "Generative adversarial networks.",
       "code": "Generator, discriminator, adversarial training, GAN variants (DCGAN, StyleGAN).",
       "exercises": []
     },
     "Transformers": {
-      "exp": "<p>The transformer architecture that powers modern AI: self-attention mechanism, multi-head attention, positional encoding, layer normalization, feed-forward networks. Understanding encoder-decoder architecture and how transformers process sequences.</p>",
+      "exp": "The transformer architecture that powers modern AI: self-attention mechanism, multi-head attention, positional encoding, layer normalization, feed-forward networks. Understanding encoder-decoder architecture and how transformers process sequences.",
       "code": "import torch\nimport torch.nn as nn\nimport math\n\nclass SimpleAttention(nn.Module):\n    def __init__(self, d_model=64):\n        super().__init__()\n        self.d_model = d_model\n        self.query = nn.Linear(d_model, d_model)\n        self.key = nn.Linear(d_model, d_model)\n        self.value = nn.Linear(d_model, d_model)\n    \n    def forward(self, x):\n        Q = self.query(x)\n        K = self.key(x)\n        V = self.value(x)\n        scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.d_model)\n        attention = torch.softmax(scores, dim=-1)\n        return torch.matmul(attention, V)\n\nattn = SimpleAttention()\nprint(\"Self-attention mechanism initialized\")",
       "exercises": []
     },
     "Transfer Learning": {
-      "exp": "<p>Leveraging pre-trained models: fine-tuning, feature extraction, domain adaptation. Using models pre-trained on large datasets (ImageNet, GPT, BERT) for new tasks with limited data. Understanding when to freeze layers vs fine-tune.</p>",
+      "exp": "Leveraging pre-trained models: fine-tuning, feature extraction, domain adaptation. Using models pre-trained on large datasets (ImageNet, GPT, BERT) for new tasks with limited data. Understanding when to freeze layers vs fine-tune.",
       "code": "import torchvision.models as models\nimport torch.nn as nn\n\n# Load pre-trained ResNet and fine-tune\nmodel = models.resnet18(pretrained=True)\n\n# Freeze feature extraction layers\nfor param in model.parameters():\n    param.requires_grad = False\n\n# Replace final classification layer for new task\nnum_features = model.fc.in_features\nmodel.fc = nn.Linear(num_features, 5)  # 5 new classes\n\nprint(f\"Pre-trained ResNet adapted for {5} classes\")\nprint(\"Only the final layer will be trained\")",
       "exercises": []
     },
     "PyTorch": {
-      "exp": "<p>PyTorch deep learning framework: tensors, autograd for automatic differentiation, neural network module (nn.Module), optimizers (SGD, Adam), data loaders, GPU acceleration with CUDA, saving and loading models.</p>",
+      "exp": "PyTorch deep learning framework: tensors, autograd for automatic differentiation, neural network module (nn.Module), optimizers (SGD, Adam), data loaders, GPU acceleration with CUDA, saving and loading models.",
       "code": "import torch\nimport torch.nn as nn\nimport torch.optim as optim\n\n# Training loop pattern\nmodel = nn.Linear(10, 1)\ncriterion = nn.MSELoss()\noptimizer = optim.Adam(model.parameters(), lr=0.001)\n\n# Synthetic data\nX = torch.randn(100, 10)\ny = torch.randn(100, 1)\n\n# Training loop\nfor epoch in range(10):\n    optimizer.zero_grad()\n    outputs = model(X)\n    loss = criterion(outputs, y)\n    loss.backward()\n    optimizer.step()\n    if epoch % 2 == 0:\n        print(f\"Epoch {epoch}, Loss: {loss.item():.4f}\")",
       "exercises": []
     },
     "TensorFlow": {
-      "exp": "<p>TensorFlow deep learning framework.</p>",
+      "exp": "TensorFlow deep learning framework.",
       "code": "Keras API, eager execution, tf.data, SavedModel, TensorFlow Lite.",
       "exercises": []
     }
   },
   "Large Language Models": {
     "LLM Architecture": {
-      "exp": "<p>Understanding large language models: GPT architecture, transformer decoder-only design, scaling laws (Kaplan, Chinchilla), emergent abilities, in-context learning. How LLMs process and generate text at massive scale.</p>",
+      "exp": "Understanding large language models: GPT architecture, transformer decoder-only design, scaling laws (Kaplan, Chinchilla), emergent abilities, in-context learning. How LLMs process and generate text at massive scale.",
       "code": "# LLM architecture concepts\nprint(\"Large Language Model Components:\")\nprint(\"1. Token Embedding Layer\")\nprint(\"2. Positional Encoding\")\nprint(\"3. Transformer Decoder Blocks\")\nprint(\"4. Layer Normalization\")\nprint(\"5. Feed-Forward Networks\")\nprint(\"6. Output Projection Layer\")\nprint(\"7. Softmax for Token Prediction\")",
       "exercises": []
     },
     "Attention Mechanisms": {
-      "exp": "<p>Deep dive into attention mechanisms: self-attention, causal/masked attention (for autoregressive generation), cross-attention (for encoder-decoder models), multi-head attention, sparse attention, FlashAttention for efficiency, and grouped-query attention.</p>",
+      "exp": "Deep dive into attention mechanisms: self-attention, causal/masked attention (for autoregressive generation), cross-attention (for encoder-decoder models), multi-head attention, sparse attention, FlashAttention for efficiency, and grouped-query attention.",
       "code": "import torch\nimport torch.nn.functional as F\nimport math\n\n# Implement scaled dot-product attention\ndef scaled_dot_product_attention(Q, K, V, mask=None):\n    d_k = Q.size(-1)\n    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)\n    if mask is not None:\n        scores = scores.masked_fill(mask == 0, float('-inf'))\n    attention_weights = F.softmax(scores, dim=-1)\n    return torch.matmul(attention_weights, V), attention_weights\n\n# Example usage\nbatch, heads, seq_len, d_k = 1, 1, 4, 8\nQ = torch.randn(batch, heads, seq_len, d_k)\nK = torch.randn(batch, heads, seq_len, d_k)\nV = torch.randn(batch, heads, seq_len, d_k)\n\noutput, weights = scaled_dot_product_attention(Q, K, V)\nprint(f\"Attention output shape: {output.shape}\")\nprint(f\"Attention weights shape: {weights.shape}\")",
       "exercises": []
     },
     "Pre-training": {
-      "exp": "<p>Training LLMs from scratch: training data collection and filtering, tokenization (BPE, WordPiece, SentencePiece), next-token prediction objective, compute requirements, distributed training, data parallelism, model parallelism, and pipeline parallelism.</p>",
+      "exp": "Training LLMs from scratch: training data collection and filtering, tokenization (BPE, WordPiece, SentencePiece), next-token prediction objective, compute requirements, distributed training, data parallelism, model parallelism, and pipeline parallelism.",
       "code": "# Pre-training concepts\nprint(\"LLM Pre-training Pipeline:\")\nprint()\nprint(\"1. Data Collection: web crawl, books, code\")\nprint(\"2. Data Cleaning: deduplication, filtering\")\nprint(\"3. Tokenization: BPE with ~50K tokens\")\nprint(\"4. Objective: next-token prediction\")\nprint(\"5. Loss: cross-entropy on predicted tokens\")\nprint()\nprint(\"Scale example:\")\nprint(\"- GPT-3: 175B parameters, 570GB data\")\nprint(\"- LLaMA-2: 70B parameters, 2T tokens\")",
       "exercises": []
     },
     "Fine-tuning": {
-      "exp": "<p>Adapting pre-trained LLMs for specific tasks: supervised fine-tuning (SFT) on instruction datasets, reinforcement learning from human feedback (RLHF), direct preference optimization (DPO), instruction tuning, and multi-task fine-tuning.</p>",
+      "exp": "Adapting pre-trained LLMs for specific tasks: supervised fine-tuning (SFT) on instruction datasets, reinforcement learning from human feedback (RLHF), direct preference optimization (DPO), instruction tuning, and multi-task fine-tuning.",
       "code": "# Fine-tuning approaches\nprint(\"Fine-tuning Methods:\")\nprint()\nprint(\"1. Supervised Fine-Tuning (SFT)\")\nprint(\"   - Train on instruction-response pairs\")\nprint(\"   - Standard cross-entropy loss\")\nprint()\nprint(\"2. RLHF (Reinforcement Learning from Human Feedback)\")\nprint(\"   - Train reward model on human preferences\")\nprint(\"   - Optimize policy with PPO algorithm\")\nprint()\nprint(\"3. DPO (Direct Preference Optimization)\")\nprint(\"   - Directly optimize from preferences\")\nprint(\"   - No explicit reward model needed\")",
       "exercises": []
     },
     "PEFT": {
-      "exp": "<p>Parameter-efficient fine-tuning methods: LoRA (Low-Rank Adaptation), QLoRA (quantized LoRA), Adapters, Prefix Tuning, Prompt Tuning. These methods enable fine-tuning large models with consumer-grade hardware by updating only a small fraction of parameters.</p>",
+      "exp": "Parameter-efficient fine-tuning methods: LoRA (Low-Rank Adaptation), QLoRA (quantized LoRA), Adapters, Prefix Tuning, Prompt Tuning. These methods enable fine-tuning large models with consumer-grade hardware by updating only a small fraction of parameters.",
       "code": "# LoRA concept illustration\nimport numpy as np\n\n# A weight matrix W of size d x k\nW = np.random.randn(768, 768)\n\n# LoRA decomposes the update: W' = W + BA\n# where B is d x r and A is r x k (r is rank, typically 8-64)\n\nr = 8\nB = np.random.randn(768, r)\nA = np.random.randn(r, 768)\n\n# Only B and A are trained (768*8 + 8*768 = 12,288 parameters)\n# Instead of the full update (768*768 = 589,824 parameters)\n\npeft_params = 768 * r + r * 768\nfull_params = 768 * 768\nprint(f\"LoRA parameters: {peft_params:,}\")\nprint(f\"Full update parameters: {full_params:,}\")\nprint(f\"Reduction ratio: {full_params / peft_params:.1f}x\")",
       "exercises": []
     },
     "Prompt Engineering": {
-      "exp": "<p>Crafting effective prompts for LLMs: zero-shot, few-shot, chain-of-thought (CoT) prompting, tree-of-thought (ToT), system prompts, role prompting, output formatting, temperature and top-p sampling parameters.</p>",
+      "exp": "Crafting effective prompts for LLMs: zero-shot, few-shot, chain-of-thought (CoT) prompting, tree-of-thought (ToT), system prompts, role prompting, output formatting, temperature and top-p sampling parameters.",
       "code": "# Prompt engineering patterns\nprint(\"Prompt Engineering Techniques:\")\nprint()\nprint(\"1. Zero-shot: 'Translate to French: Hello'\")\nprint()\nprint(\"2. Few-shot: Provide 2-3 examples before the task\")\nprint()\nprint(\"3. Chain-of-Thought: 'Let's think step by step'\")\nprint()\nprint(\"4. System Prompts: Define role and constraints\")\nprint()\nprint(\"5. Structured Output: 'Respond with JSON: {...}'\")\nprint()\nprint(\"Parameters:\")\nprint(\"- temperature: 0 (deterministic) to 2 (creative)\")\nprint(\"- top_p: nucleus sampling threshold\")",
       "exercises": []
     },
     "RAG": {
-      "exp": "<p>Retrieval-Augmented Generation: connecting LLMs to external knowledge sources. Vector databases for semantic search, document chunking strategies, embedding models, retrieval strategies (dense, sparse, hybrid), reranking, and context injection.</p>",
+      "exp": "Retrieval-Augmented Generation: connecting LLMs to external knowledge sources. Vector databases for semantic search, document chunking strategies, embedding models, retrieval strategies (dense, sparse, hybrid), reranking, and context injection.",
       "code": "# RAG pipeline outline\nprint(\"RAG (Retrieval-Augmented Generation) Pipeline:\")\nprint()\nprint(\"1. Document Processing\")\nprint(\"   - Chunk documents into passages\")\nprint(\"   - Generate embeddings for each chunk\")\nprint(\"   - Store in vector database\")\nprint()\nprint(\"2. Query Time\")\nprint(\"   - Embed user query\")\nprint(\"   - Search for similar chunks\")\nprint(\"   - Retrieve top-k relevant passages\")\nprint()\nprint(\"3. Generation\")\nprint(\"   - Inject retrieved context into prompt\")\nprint(\"   - LLM generates answer with context\")",
       "exercises": []
     },
     "LLM Evaluation": {
-      "exp": "<p>Evaluating LLM outputs: benchmark datasets (MMLU, HumanEval, GSM8K, HellaSwag), automated metrics (BLEU, ROUGE, perplexity), human evaluation, hallucination detection, factual accuracy, and model comparison methodologies.</p>",
+      "exp": "Evaluating LLM outputs: benchmark datasets (MMLU, HumanEval, GSM8K, HellaSwag), automated metrics (BLEU, ROUGE, perplexity), human evaluation, hallucination detection, factual accuracy, and model comparison methodologies.",
       "code": "# Evaluation metrics overview\nprint(\"LLM Evaluation Methods:\")\nprint()\nprint(\"Benchmarks:\")\nprint(\"- MMLU: Multi-task language understanding\")\nprint(\"- HumanEval: Code generation\")\nprint(\"- GSM8K: Math reasoning\")\nprint(\"- HellaSwag: Commonsense inference\")\nprint()\nprint(\"Automated Metrics:\")\nprint(\"- Perplexity: model confidence\")\nprint(\"- BLEU: text similarity to references\")\nprint(\"- ROUGE: recall-oriented overlap\")\nprint()\nprint(\"Qualitative:\")\nprint(\"- Human evaluation (likert scale)\")\nprint(\"- A/B comparison\")\nprint(\"- Hallucination rate\")",
       "exercises": []
     },
     "LLM Safety": {
-      "exp": "<p>Safety and alignment in LLMs.</p>",
+      "exp": "Safety and alignment in LLMs.",
       "code": "Red teaming, content filtering, jailbreak prevention, constitutional AI.",
       "exercises": []
     },
     "Hugging Face Ecosystem": {
-      "exp": "<p>Hugging Face tools and libraries.</p>",
+      "exp": "Hugging Face tools and libraries.",
       "code": "Transformers library, Datasets, PEFT, Tokenizers, Hub, Spaces.",
       "exercises": []
     }
   },
   "AI Agents": {
     "Agent Architecture": {
-      "exp": "<p>Building autonomous AI agents: goal-oriented agents, reactive vs deliberative agents, hybrid architectures. Understanding the perception-action loop, environment interaction, and how agents make decisions to achieve goals.</p>",
+      "exp": "Building autonomous AI agents: goal-oriented agents, reactive vs deliberative agents, hybrid architectures. Understanding the perception-action loop, environment interaction, and how agents make decisions to achieve goals.",
       "code": "# Simple agent framework\nclass AIAgent:\n    def __init__(self, name, system_prompt):\n        self.name = name\n        self.system_prompt = system_prompt\n        self.memory = []\n    \n    def think(self, input_text):\n        # Core reasoning loop\n        self.memory.append({\"role\": \"user\", \"content\": input_text})\n        # In practice: call LLM with context\n        response = f\"[{self.name}] Processing: {input_text}\"\n        self.memory.append({\"role\": \"assistant\", \"content\": response})\n        return response\n    \n    def act(self, tool_name, params):\n        # Execute a tool/action\n        return f\"Executed {tool_name} with {params}\"\n\nagent = AIAgent(\"Helper\", \"You are a helpful assistant\")\nprint(agent.think(\"What's the weather like?\"))",
       "exercises": []
     },
     "Tool Use": {
-      "exp": "<p>Giving AI agents access to tools and APIs: function calling, tool definitions with OpenAI/Anthropic APIs, search capabilities, code execution, calculator, database queries. Understanding tool selection, argument generation, and error handling.</p>",
+      "exp": "Giving AI agents access to tools and APIs: function calling, tool definitions with OpenAI/Anthropic APIs, search capabilities, code execution, calculator, database queries. Understanding tool selection, argument generation, and error handling.",
       "code": "# Tool definition pattern\nimport json\n\ndef define_tool():\n    return {\n        \"type\": \"function\",\n        \"function\": {\n            \"name\": \"search_web\",\n            \"description\": \"Search the web for information\",\n            \"parameters\": {\n                \"type\": \"object\",\n                \"properties\": {\n                    \"query\": {\n                        \"type\": \"string\",\n                        \"description\": \"Search query\"\n                    }\n                },\n                \"required\": [\"query\"]\n            }\n        }\n    }\n\ntool = define_tool()\nprint(json.dumps(tool, indent=2))",
       "exercises": []
     },
     "Multi-Agent Systems": {
-      "exp": "<p>Coordinating multiple AI agents to solve complex tasks: agent communication protocols, task decomposition, role assignment, hierarchical vs flat organization, orchestration patterns, and conflict resolution between agents.</p>",
+      "exp": "Coordinating multiple AI agents to solve complex tasks: agent communication protocols, task decomposition, role assignment, hierarchical vs flat organization, orchestration patterns, and conflict resolution between agents.",
       "code": "# Multi-agent system concept\nclass MultiAgentSystem:\n    def __init__(self):\n        self.agents = {}\n        self.orchestrator = None\n    \n    def add_agent(self, name, role, capabilities):\n        self.agents[name] = {\n            \"role\": role,\n            \"capabilities\": capabilities\n        }\n    \n    def delegate_task(self, task):\n        print(f\"Orchestrator: Breaking down task: {task}\")\n        for name, agent in self.agents.items():\n            print(f\"  - Assigned to {name} ({agent['role']})\")\n\nsystem = MultiAgentSystem()\nsystem.add_agent(\"Researcher\", \"information gatherer\", [\"web_search\", \"read_docs\"])\nsystem.add_agent(\"Coder\", \"code writer\", [\"write_code\", \"debug\"])\nsystem.add_agent(\"Reviewer\", \"quality assurance\", [\"code_review\", \"test\"])\nsystem.delegate_task(\"Build a web application\")",
       "exercises": []
     },
     "Reasoning & Planning": {
-      "exp": "<p>Advanced reasoning patterns for AI agents: ReAct (Reasoning + Acting) pattern, chain-of-thought reasoning, plan-and-execute architecture, self-reflection, task decomposition trees, and recursive reasoning for complex multi-step problems.</p>",
+      "exp": "Advanced reasoning patterns for AI agents: ReAct (Reasoning + Acting) pattern, chain-of-thought reasoning, plan-and-execute architecture, self-reflection, task decomposition trees, and recursive reasoning for complex multi-step problems.",
       "code": "# ReAct pattern outline\nprint(\"ReAct (Reasoning + Acting) Pattern:\")\nprint()\nprint(\"1. Thought: What do I need to do?\")\nprint(\"2. Action: Execute a specific action/tool\")\nprint(\"3. Observation: Observe the result\")\nprint(\"4. Repeat: Think again based on observation\")\nprint()\nprint(\"Example:\")\nprint(\"Thought: I need to find the current stock price\")\nprint(\"Action: search_web(query='AAPL stock price today')\")\nprint(\"Observation: AAPL is trading at $172.50\")\nprint(\"Thought: I have the answer, now I can respond\")",
       "exercises": []
     },
     "Memory Systems": {
-      "exp": "<p>Memory for AI agents.</p>",
+      "exp": "Memory for AI agents.",
       "code": "Short-term vs long-term memory, vector memory, conversation history, summarization.",
       "exercises": []
     },
     "Agent Frameworks": {
-      "exp": "<p>Popular frameworks for building AI agents: LangChain (chains, agents, retrievers), AutoGen (multi-agent conversations), CrewAI (role-based agents), OpenAI Assistants API, Anthropic tool use, and custom agent implementations. Comparing frameworks and choosing the right one.</p>",
+      "exp": "Popular frameworks for building AI agents: LangChain (chains, agents, retrievers), AutoGen (multi-agent conversations), CrewAI (role-based agents), OpenAI Assistants API, Anthropic tool use, and custom agent implementations. Comparing frameworks and choosing the right one.",
       "code": "# Framework comparison\nprint(\"AI Agent Frameworks:\")\nprint()\nprint(\"1. LangChain/LangGraph\")\nprint(\"   - Chains, agents, tools, memory\")\nprint(\"   - Graph-based state management\")\nprint()\nprint(\"2. AutoGen (Microsoft)\")\nprint(\"   - Multi-agent conversations\")\nprint(\"   - Code execution sandbox\")\nprint()\nprint(\"3. CrewAI\")\nprint(\"   - Role-based agent teams\")\nprint(\"   - Task delegation patterns\")\nprint()\nprint(\"4. OpenAI Assistants API\")\nprint(\"   - Managed agent infrastructure\")\nprint(\"   - Built-in code interpreter, RAG\")",
       "exercises": []
     }
   },
   "MLOps & Production": {
     "Model Deployment": {
-      "exp": "<p>Deploying ML models to production: model serving with FastAPI, TorchServe, TensorFlow Serving, Triton Inference Server. Serverless deployment, edge deployment, containerization with Docker, and API design for ML services.</p>",
+      "exp": "Deploying ML models to production: model serving with FastAPI, TorchServe, TensorFlow Serving, Triton Inference Server. Serverless deployment, edge deployment, containerization with Docker, and API design for ML services.",
       "code": "# ML model serving with FastAPI\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport torch\nimport torch.nn as nn\n\napp = FastAPI()\n\n# Load model\nclass PredictRequest(BaseModel):\n    features: list\n\nclass PredictResponse(BaseModel):\n    prediction: float\n    confidence: float\n\n@app.post(\"/predict\", response_model=PredictResponse)\nasync def predict(request: PredictRequest):\n    # Placeholder inference\n    prediction = sum(request.features) / len(request.features)\n    confidence = 0.95\n    return PredictResponse(prediction=prediction, confidence=confidence)",
       "exercises": []
     },
     "ML Pipelines": {
-      "exp": "<p>Building production ML pipelines: data validation (Great Expectations), feature pipelines, training pipelines, model registry (MLflow), pipeline orchestration (Airflow, Kubeflow), and automated retraining triggers.</p>",
+      "exp": "Building production ML pipelines: data validation (Great Expectations), feature pipelines, training pipelines, model registry (MLflow), pipeline orchestration (Airflow, Kubeflow), and automated retraining triggers.",
       "code": "# ML pipeline stages\nprint(\"Production ML Pipeline:\")\nprint()\nprint(\"1. Data Ingestion\")\nprint(\"   - Collect from sources\")\nprint(\"   - Validate with Great Expectations\")\nprint()\nprint(\"2. Feature Engineering\")\nprint(\"   - Transform raw data to features\")\nprint(\"   - Store in feature store\")\nprint()\nprint(\"3. Model Training\")\nprint(\"   - Train with tracked parameters\")\nprint(\"   - Log to MLflow registry\")\nprint()\nprint(\"4. Model Evaluation\")\nprint(\"   - Validate against test data\")\nprint(\"   - Compare with current production model\")",
       "exercises": []
     },
     "Model Monitoring": {
-      "exp": "<p>Monitoring ML models in production: data drift detection (population stability index, KS test), concept drift, model decay, prediction monitoring, performance metrics tracking, alerting systems, and automated rollback and retraining workflows.</p>",
+      "exp": "Monitoring ML models in production: data drift detection (population stability index, KS test), concept drift, model decay, prediction monitoring, performance metrics tracking, alerting systems, and automated rollback and retraining workflows.",
       "code": "# Model monitoring concepts\nprint(\"Model Monitoring Strategies:\")\nprint()\nprint(\"1. Data Drift\")\nprint(\"   - Monitor input distributions\")\nprint(\"   - PSI (Population Stability Index)\")\nprint(\"   - KS test for distribution comparison\")\nprint()\nprint(\"2. Concept Drift\")\nprint(\"   - Monitor prediction vs actual\")\nprint(\"   - Track accuracy over time windows\")\nprint()\nprint(\"3. Infrastructure\")\nprint(\"   - Prediction latency\")\nprint(\"   - Throughput (QPS)\")\nprint(\"   - Error rates\")",
       "exercises": []
     },
     "Experiment Tracking": {
-      "exp": "<p>Tracking ML experiments systematically: MLflow, Weights & Biases, Neptune.ai. Logging parameters, metrics, artifacts, and model versions. Experiment comparison, reproducibility, and collaboration features.</p>",
+      "exp": "Tracking ML experiments systematically: MLflow, Weights & Biases, Neptune.ai. Logging parameters, metrics, artifacts, and model versions. Experiment comparison, reproducibility, and collaboration features.",
       "code": "# Experiment tracking with MLflow pattern\nimport mlflow\n\n# Start experiment tracking\nwith mlflow.start_run(run_name=\"experiment_1\"):\n    # Log parameters\n    mlflow.log_param(\"learning_rate\", 0.001)\n    mlflow.log_param(\"batch_size\", 32)\n    mlflow.log_param(\"model\", \"resnet50\")\n    \n    # Log metrics\n    for epoch in range(10):\n        train_loss = 0.5 * (0.9 ** epoch)\n        val_acc = 0.7 + 0.03 * epoch\n        mlflow.log_metric(\"train_loss\", train_loss, step=epoch)\n        mlflow.log_metric(\"val_accuracy\", val_acc, step=epoch)\n    \n    # Log model artifact\n    mlflow.log_artifact(\"model.pkl\")\n    \n    print(f\"Experiment logged: {mlflow.active_run().info.run_id}\")",
       "exercises": []
     },
     "A/B Testing": {
-      "exp": "<p>Testing model versions in production.</p>",
+      "exp": "Testing model versions in production.",
       "code": "Shadow deployment, canary deployment, statistical significance, metrics tracking.",
       "exercises": []
     },
     "Model Versioning": {
-      "exp": "<p>Versioning models and datasets.</p>",
+      "exp": "Versioning models and datasets.",
       "code": "DVC, model registries, dataset versioning, reproducibility.",
       "exercises": []
     }
   },
   "Computer Vision": {
     "Image Classification": {
-      "exp": "<p>Classifying images with CNNs.</p>",
+      "exp": "Classifying images with CNNs.",
       "code": "ImageNet, ResNet, EfficientNet, data augmentation, transfer learning.",
       "exercises": []
     },
     "Object Detection": {
-      "exp": "<p>Detecting objects in images.</p>",
+      "exp": "Detecting objects in images.",
       "code": "YOLO, SSD, Faster R-CNN, anchor boxes, NMS, mAP evaluation.",
       "exercises": []
     },
     "Image Segmentation": {
-      "exp": "<p>Pixel-level image understanding.</p>",
+      "exp": "Pixel-level image understanding.",
       "code": "Semantic segmentation, instance segmentation, U-Net, Mask R-CNN.",
       "exercises": []
     },
     "Image Generation": {
-      "exp": "<p>Generating images with AI.</p>",
+      "exp": "Generating images with AI.",
       "code": "GANs, diffusion models (Stable Diffusion, DALL-E), text-to-image, inpainting.",
       "exercises": []
     },
     "Video Analysis": {
-      "exp": "<p>Analyzing video with AI.</p>",
+      "exp": "Analyzing video with AI.",
       "code": "Action recognition, video tracking, optical flow, video summarization.",
       "exercises": []
     }
   },
   "Natural Language Processing": {
     "Text Preprocessing": {
-      "exp": "<p>Preparing text for NLP.</p>",
+      "exp": "Preparing text for NLP.",
       "code": "Tokenization, stemming, lemmatization, stop word removal, TF-IDF, embeddings.",
       "exercises": []
     },
     "Text Classification": {
-      "exp": "<p>Classifying text documents.</p>",
+      "exp": "Classifying text documents.",
       "code": "Sentiment analysis, topic classification, spam detection, BERT for classification.",
       "exercises": []
     },
     "Named Entity Recognition": {
-      "exp": "<p>Extracting entities from text.</p>",
+      "exp": "Extracting entities from text.",
       "code": "Person, organization, location; BiLSTM-CRF, BERT-based NER.",
       "exercises": []
     },
     "Machine Translation": {
-      "exp": "<p>Translating text between languages.</p>",
+      "exp": "Translating text between languages.",
       "code": "Seq2seq models, attention, transformer-based translation.",
       "exercises": []
     },
     "Speech Recognition": {
-      "exp": "<p>Converting speech to text.</p>",
+      "exp": "Converting speech to text.",
       "code": "ASR, CTC loss, Whisper, wav2vec, speaker diarization.",
       "exercises": []
     },
     "Text-to-Speech": {
-      "exp": "<p>Converting text to speech.</p>",
+      "exp": "Converting text to speech.",
       "code": "TTS, WaveNet, Tacotron, speaker embedding, voice cloning.",
       "exercises": []
     }
   },
   "AI Tools & Frameworks": {
     "LangChain": {
-      "exp": "<p>Building LLM-powered applications with LangChain: chains, agents, retrievers, memory systems, document loaders, output parsers, streaming. Understanding the LangChain expression language and LangGraph for stateful agent orchestration.</p>",
+      "exp": "Building LLM-powered applications with LangChain: chains, agents, retrievers, memory systems, document loaders, output parsers, streaming. Understanding the LangChain expression language and LangGraph for stateful agent orchestration.",
       "code": "from langchain.chat_models import ChatOpenAI\nfrom langchain.schema import SystemMessage, HumanMessage\n\n# Initialize chat model\nllm = ChatOpenAI(model=\"gpt-4\", temperature=0.7)\n\n# Create messages\nmessages = [\n    SystemMessage(content=\"You are a helpful AI assistant.\"),\n    HumanMessage(content=\"What is machine learning?\")\n]\n\n# In practice, this would call the actual API\nprint(\"LangChain initialized with GPT-4 model\")\nprint(\"Ready to create chains, agents, and RAG systems\")",
       "exercises": []
     },
     "LlamaIndex": {
-      "exp": "<p>Data framework for LLM applications.</p>",
+      "exp": "Data framework for LLM applications.",
       "code": "Index structures, retrievers, query engines, document parsing.",
       "exercises": []
     },
     "Vector Databases": {
-      "exp": "<p>Vector databases for semantic search and RAG: Pinecone (managed), ChromaDB (local), Weaviate (hybrid), Milvus (distributed), Qdrant (Rust-based). Understanding embeddings, ANN indexes (HNSW, IVF), similarity metrics (cosine, dot product, euclidean).</p>",
+      "exp": "Vector databases for semantic search and RAG: Pinecone (managed), ChromaDB (local), Weaviate (hybrid), Milvus (distributed), Qdrant (Rust-based). Understanding embeddings, ANN indexes (HNSW, IVF), similarity metrics (cosine, dot product, euclidean).",
       "code": "# Vector database concepts\nprint(\"Vector Database Comparison:\")\nprint()\nprint(\"1. Pinecone\")\nprint(\"   - Fully managed serverless\")\nprint(\"   - HNSW index, low latency\")\nprint()\nprint(\"2. ChromaDB\")\nprint(\"   - Local/embedded, open source\")\nprint(\"   - Simple API, good for prototyping\")\nprint()\nprint(\"3. Weaviate\")\nprint(\"   - Hybrid (vector + keyword)\")\nprint(\"   - Built-in modules, graphql API\")\nprint()\nprint(\"4. Qdrant\")\nprint(\"   - Rust-based, high performance\")\nprint(\"   - Rich filtering, payload indexing\")",
       "exercises": []
     },
     "Ollama": {
-      "exp": "<p>Running LLMs locally with Ollama: model management (pull, run, stop), OpenAI-compatible API, custom Modelfiles, quantization (Q4, Q5, Q8), GPU acceleration, and building local AI applications without cloud dependencies.</p>",
+      "exp": "Running LLMs locally with Ollama: model management (pull, run, stop), OpenAI-compatible API, custom Modelfiles, quantization (Q4, Q5, Q8), GPU acceleration, and building local AI applications without cloud dependencies.",
       "code": "# Ollama commands\nprint(\"Ollama Local LLM Management:\")\nprint()\nprint(\"Pull a model:\")\nprint(\"  ollama pull llama3.2:3b\")\nprint()\nprint(\"Run a model (interactive):\")\nprint(\"  ollama run llama3.2:3b\")\nprint()\nprint(\"Create custom model with Modelfile:\")\nprint(\"  FROM llama3.2:3b\")\nprint(\"  SYSTEM 'You are a coding assistant'\")\nprint(\"  PARAMETER temperature 0.2\")\nprint()\nprint(\"API usage (OpenAI-compatible):\")\nprint(\"  POST /api/chat with 'model: llama3.2:3b'\")",
       "exercises": []
     },
     "vLLM": {
-      "exp": "<p>High-performance LLM serving.</p>",
+      "exp": "High-performance LLM serving.",
       "code": "PagedAttention, continuous batching, tensor parallelism, quantization.",
       "exercises": []
     },
     "OpenAI API": {
-      "exp": "<p>Using OpenAI models via API: chat completions, embeddings, function calling, vision capabilities, text-to-speech, assistants API, fine-tuning API. Understanding token pricing, rate limits, streaming, and best practices.</p>",
+      "exp": "Using OpenAI models via API: chat completions, embeddings, function calling, vision capabilities, text-to-speech, assistants API, fine-tuning API. Understanding token pricing, rate limits, streaming, and best practices.",
       "code": "# OpenAI API usage pattern\nimport openai\n\n# Configuration\nclient = openai.OpenAI(api_key=\"sk-...\")\n\n# Chat completion\nresponse = client.chat.completions.create(\n    model=\"gpt-4\",\n    messages=[\n        {\"role\": \"system\", \"content\": \"You are helpful.\"},\n        {\"role\": \"user\", \"content\": \"Explain AI in 3 sentences\"}\n    ],\n    temperature=0.7,\n    max_tokens=150\n)\n\n# OpenAI client initialized and ready\nprint(\"OpenAI API client configured\")\nprint(\"Models available: GPT-4, GPT-4o, GPT-3.5-Turbo\")",
       "exercises": []
     },
     "Anthropic API": {
-      "exp": "<p>Using Claude models via API.</p>",
+      "exp": "Using Claude models via API.",
       "code": "Messages API, tool use, extended thinking, safety features.",
       "exercises": []
     },
     "Hugging Face": {
-      "exp": "<p>The Hugging Face ecosystem: Transformers library for model access, Datasets for data handling, PEFT for efficient fine-tuning, Tokenizers for text processing, Hub for model sharing, Spaces for demos, and AutoClasses for model agnostic code.</p>",
+      "exp": "The Hugging Face ecosystem: Transformers library for model access, Datasets for data handling, PEFT for efficient fine-tuning, Tokenizers for text processing, Hub for model sharing, Spaces for demos, and AutoClasses for model agnostic code.",
       "code": "from transformers import AutoTokenizer, AutoModelForCausalLM\nimport torch\n\n# Load model from Hugging Face Hub\nmodel_name = \"microsoft/phi-2\"  # Small but capable model\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModelForCausalLM.from_pretrained(\n    model_name,\n    torch_dtype=torch.float16,\n    device_map=\"auto\"\n)\n\n# Generate text\nprompt = \"Machine learning is\"\ninputs = tokenizer(prompt, return_tensors=\"pt\")\noutputs = model.generate(**inputs, max_length=50)\nresponse = tokenizer.decode(outputs[0], skip_special_tokens=True)\n\nprint(f\"Loaded model: {model_name}\")\nprint(f\"Model parameters: {model.num_parameters() / 1e9:.1f}B\")",
       "exercises": []
     }

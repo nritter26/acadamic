@@ -1,0 +1,163 @@
+{
+  "Getting Started": {
+    "Graphql Introduction": {
+      "exp": "<p>Introduction to graphql and its ecosystem.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "Schema": [
+      "A GraphQL schema defines the shape of available data and operations using the Schema Definition Language (SDL). It acts as a contract between client and server, specifying types, queries, and mutations.",
+      "type Query {\n  user(id: ID!): User\n  users: [User!]!\n}\n\ntype Mutation {\n  createUser(name: String!, email: String!): User!\n}\n\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  posts: [Post!]!\n}"
+    ],
+    "Queries": [
+      "Queries are read-only operations that request specific fields from the server. Clients specify exactly which fields they need, eliminating over- and under-fetching common in REST APIs.",
+      "query GetUser {\n  user(id: \"1\") {\n    name\n    email\n    posts {\n      title\n    }\n  }\n}"
+    ],
+    "Mutations": [
+      "Mutations are write operations that create, update, or delete data. They follow the same field-selection pattern as queries but guarantee sequential execution and can return the modified state.",
+      "mutation CreateUser {\n  createUser(name: \"Alice\", email: \"alice@example.com\") {\n    id\n    name\n    email\n  }\n}"
+    ]
+  },
+  "Core Concepts": {
+    "Graphql Basics": {
+      "exp": "<p>Core graphql concepts.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Configuration": {
+    "Graphql Config": {
+      "exp": "<p>Configuring graphql for your project.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Graphql Best Practices": {
+      "exp": "<p>Best practices for using graphql.</p>",
+      "code": "",
+      "exercises": []
+    },
+    "N+1 Problem": [
+      "The N+1 problem occurs when resolving related fields triggers one query per parent item. DataLoader batches these into single queries, while inspecting query plans and using JOIN-based resolvers provide further optimization.",
+      "// Problem: N+1 queries\nUser: {\n  posts: async (user) => {\n    // Runs 1 query per user = N+1 queries\n    return db.posts.findAll({ where: { userId: user.id } });\n  }\n}\n\n// Solution 1: DataLoader\nUser: {\n  posts: async (user, _, { loaders }) => {\n    return loaders.postLoader.load(user.id);\n  }\n}\n\n// Solution 2: Look-ahead (query parsing)\nUser: {\n  posts: async (user, _, { db }, info) => {\n    const requestedFields = parseProjection(info);\n    return db.posts.findAll({ where: { userId: user.id }, attributes: requestedFields });\n  }\n}\n\n// Solution 3: Batch resolve in parent\nQuery: {\n  users: async (_, { ids }) => {\n    const users = await db.users.findAll({ where: { id: ids } });\n    const posts = await db.posts.findAll({ where: { userId: ids } });\n    return users.map(u => ({ ...u, posts: posts.filter(p => p.userId === u.id) }));\n  }\n}"
+    ],
+    "Security": [
+      "GraphQL security involves query depth limiting, complexity analysis, rate limiting, authentication, authorization, and persistent whitelisted queries. These prevent malicious queries from overloading the server.",
+      "const { createComplexityLimitRule } = require('graphql-validation-complexity');\n\n// Query depth limiting\nconst depthLimit = require('graphql-depth-limit');\n\nconst server = new ApolloServer({\n  typeDefs,\n  resolvers,\n  validationRules: [\n    depthLimit(10),\n    createComplexityLimitRule(1000, {\n      onCost: cost => console.log('Query cost:', cost),\n      formatErrorMessage: cost => `Query too complex: ${cost}. Max: 1000`\n    })\n  ]\n});\n\n// Rate limiting in context\nconst context = async ({ req }) => {\n  const ip = req.ip;\n  const key = `gql:${ip}:${Math.floor(Date.now() / 60000)}`;\n  const count = await redis.incr(key);\n  if (count === 1) await redis.expire(key, 60);\n  \n  if (count > 100) {\n    throw new Error('Rate limit exceeded');\n  }\n  \n  return { user: await authenticate(req) };\n};\n\n// Persistent queries (whitelist)\n// Only allow pre-registered queries for production APIs"
+    ],
+    "Pagination": [
+      "Cursor-based pagination is the GraphQL standard using `after`/`before` with `first`/`last` arguments. It provides consistent results even when data changes, unlike offset-based pagination which can skip or duplicate items.",
+      "type Query {\n  users(first: Int!, after: String): UserConnection!\n}\n\ntype UserConnection {\n  edges: [UserEdge!]!\n  pageInfo: PageInfo!\n  totalCount: Int!\n}\n\ntype UserEdge {\n  node: User!\n  cursor: String!\n}\n\ntype PageInfo {\n  hasNextPage: Boolean!\n  hasPreviousPage: Boolean!\n  startCursor: String\n  endCursor: String\n}\n\n// Resolver\nusers: async (_, { first, after }, { db }) => {\n  const afterId = after ? Buffer.from(after, 'base64').toString() : null;\n  \n  const users = await db.users.findAll({\n    limit: first + 1,\n    where: afterId ? { id: { [Op.gt]: afterId } } : {},\n    order: [['id', 'ASC']]\n  });\n  \n  const hasNextPage = users.length > first;\n  const nodes = hasNextPage ? users.slice(0, first) : users;\n  \n  return {\n    edges: nodes.map(user => ({\n      node: user,\n      cursor: Buffer.from(String(user.id)).toString('base64')\n    })),\n    pageInfo: {\n      hasNextPage,\n      hasPreviousPage: !!after,\n      startCursor: nodes[0] && Buffer.from(String(nodes[0].id)).toString('base64'),\n      endCursor: nodes[nodes.length - 1] && Buffer.from(String(nodes[nodes.length - 1].id)).toString('base64')\n    },\n    totalCount: await db.users.count()\n  };\n}"
+    ]
+  },
+  "Advanced Usage": {
+    "Graphql Advanced": {
+      "exp": "<p>Advanced graphql techniques and patterns.</p>",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Type System": {
+    "Scalars": [
+      "GraphQL's built-in scalar types are Int, Float, String, Boolean, and ID. Custom scalars (Date, JSON, URL) can be defined for domain-specific data with custom validation and serialization logic.",
+      "scalar Date\nscalar JSON\nscalar URL\n\ntype Event {\n  id: ID!\n  name: String!\n  date: Date!\n  metadata: JSON\n  website: URL\n  attendees: Int\n  isActive: Boolean\n}\n\n// Custom scalar implementation\nconst { GraphQLScalarType, Kind } = require('graphql');\n\nconst dateScalar = new GraphQLScalarType({\n  name: 'Date',\n  serialize(value) { return value.toISOString(); },\n  parseValue(value) { return new Date(value); },\n  parseLiteral(ast) {\n    return ast.kind === Kind.STRING ? new Date(ast.value) : null;\n  }\n});"
+    ],
+    "Objects": [
+      "Object types represent complex data structures with named fields, each returning a specific type. Fields can be required (`!`), have default values, and accept arguments for filtering or transformation.",
+      "type Product {\n  id: ID!\n  name: String!\n  description: String\n  price: Float!\n  inStock: Boolean!\n  categories: [Category!]!\n  reviews: [Review!]!\n  createdAt: String!\n}\n\ntype Category {\n  id: ID!\n  name: String!\n  products: [Product!]!\n}\n\ntype Review {\n  id: ID!\n  rating: Int!\n  comment: String\n  author: User!\n}"
+    ],
+    "Enums": [
+      "Enums define a fixed set of allowed values, providing type safety and self-documentation. They are ideal for status fields, categories, roles, and any field with a constrained set of options.",
+      "enum Role {\n  ADMIN\n  MODERATOR\n  USER\n  GUEST\n}\n\nenum OrderStatus {\n  PENDING\n  CONFIRMED\n  SHIPPED\n  DELIVERED\n  CANCELLED\n}\n\ntype Order {\n  id: ID!\n  status: OrderStatus!\n  items: [OrderItem!]!\n}\n\nenum Color {\n  RED\n  GREEN\n  BLUE\n}"
+    ],
+    "Interfaces": [
+      "Interfaces define common fields that multiple object types must implement. They enable polymorphic queries where a field can return different object types sharing the same base interface.",
+      "interface Node {\n  id: ID!\n  createdAt: String!\n  updatedAt: String!\n}\n\ntype User implements Node {\n  id: ID!\n  createdAt: String!\n  updatedAt: String!\n  name: String!\n  email: String!\n}\n\ntype Post implements Node {\n  id: ID!\n  createdAt: String!\n  updatedAt: String!\n  title: String!\n  content: String!\n}\n\nunion SearchResult = User | Post\n\ntype Query {\n  search(query: String!): [SearchResult!]!\n}"
+    ]
+  },
+  "Queries": {
+    "Fields": [
+      "Clients specify exactly which fields to retrieve, enabling efficient data fetching. Fields can be nested to traverse relationships, and aliases allow requesting the same field with different arguments.",
+      "query {\n  user(id: \"1\") {\n    name\n    email\n    profile {\n      bio\n      avatar\n    }\n  }\n}\n\n// Field aliases\nquery {\n  firstUser: user(id: \"1\") {\n    name\n  }\n  secondUser: user(id: \"2\") {\n    name\n  }\n}"
+    ],
+    "Arguments": [
+      "Every field can accept arguments for filtering, sorting, or formatting. Arguments are strongly typed and can be required or optional with default values, enabling precise data retrieval.",
+      "type Query {\n  users(\n    limit: Int = 10\n    offset: Int = 0\n    sort: String = \"createdAt\"\n    filter: UserFilter\n  ): [User!]!\n}\n\ninput UserFilter {\n  nameContains: String\n  minAge: Int\n  isActive: Boolean\n}\n\nquery {\n  users(limit: 5, sort: \"name\", filter: { isActive: true }) {\n    id\n    name\n  }\n}"
+    ],
+    "Aliases": [
+      "Aliases let you rename the result of a field to avoid naming conflicts when requesting the same field multiple times. They are essential for comparing data or fetching multiple resources in one query.",
+      "query {\n  alice: user(id: \"1\") {\n    name\n    email\n  }\n  bob: user(id: \"2\") {\n    name\n    email\n  }\n  allUsers: users {\n    id\n    name\n  }\n}\n\n// Result:\n// {\n//   \"alice\": { \"name\": \"Alice\", \"email\": \"alice@...\" },\n//   \"bob\": { \"name\": \"Bob\", \"email\": \"bob@...\" },\n//   \"allUsers\": [...]\n// }"
+    ],
+    "Fragments": [
+      "Fragments are reusable units of field selections that reduce duplication in queries. They can spread across multiple query operations and support conditional inclusion with `... on Type` for union/interface types.",
+      "fragment UserFields on User {\n  id\n  name\n  email\n  avatar\n  createdAt\n}\n\nquery {\n  user(id: \"1\") {\n    ...UserFields\n    posts {\n      title\n      ...PostFields\n    }\n  }\n}\n\nfragment PostFields on Post {\n  id\n  title\n  excerpt\n  createdAt\n}\n\n// Conditional fragment for interfaces\nquery {\n  search(query: \"alice\") {\n    ... on User { name email }\n    ... on Post { title content }\n  }\n}"
+    ]
+  },
+  "Mutations": {
+    "Input Types": [
+      "Input types encapsulate mutation arguments as structured objects, enabling complex nested data inputs. They are defined with the `input` keyword and support required fields, defaults, and nested input types.",
+      "input CreateUserInput {\n  name: String!\n  email: String!\n  age: Int\n  address: AddressInput\n}\n\ninput AddressInput {\n  street: String!\n  city: String!\n  country: String!\n  zipCode: String\n}\n\ntype Mutation {\n  createUser(input: CreateUserInput!): User!\n  updateUser(id: ID!, input: UpdateUserInput!): User!\n}\n\nmutation {\n  createUser(input: {\n    name: \"Alice\",\n    email: \"alice@example.com\",\n    address: { street: \"123 Main St\", city: \"NYC\", country: \"US\" }\n  }) {\n    id\n    name\n  }\n}"
+    ],
+    "Return Types": [
+      "Mutations return modified or created objects to allow clients to update their local state immediately. Returning the full object is a best practice, and error information can be included via union types.",
+      "type Mutation {\n  createUser(input: CreateUserInput!): UserPayload!\n  deleteUser(id: ID!): DeleteUserPayload!\n}\n\ntype UserPayload {\n  user: User\n  errors: [Error!]\n}\n\ntype DeleteUserPayload {\n  deletedId: ID!\n  success: Boolean!\n}\n\ntype Error {\n  field: String\n  message: String!\n}\n\nmutation {\n  createUser(input: { name: \"Bob\", email: \"invalid\" }) {\n    user { id name }\n    errors { field message }\n  }\n}"
+    ],
+    "Error Handling": [
+      "GraphQL returns errors in a standardized `errors` array alongside partial data. Structured error handling with error codes, field-level validation, and union types provides better client diagnostics.",
+      "// Schema\nunion CreateUserResult = User | ValidationError\n\ntype ValidationError {\n  field: String!\n  message: String!\n  code: ErrorCode!\n}\n\nenum ErrorCode {\n  REQUIRED\n  INVALID_FORMAT\n  DUPLICATE\n  NOT_FOUND\n}\n\ntype Mutation {\n  createUser(input: CreateUserInput!): CreateUserResult!\n}\n\n// Resolver\ncreateUser: async (_, { input }) => {\n  const existing = await db.findByEmail(input.email);\n  if (existing) {\n    return { __typename: 'ValidationError', field: 'email', message: 'Email already in use', code: 'DUPLICATE' };\n  }\n  const user = await db.createUser(input);\n  return { __typename: 'User', ...user };\n}"
+    ]
+  },
+  "Resolvers": {
+    "Root Resolver": [
+      "Root resolvers are functions that resolve each field in the Query and Mutation types. They receive four arguments: parent, args, context, and info, and can perform any async operation.",
+      "const resolvers = {\n  Query: {\n    user: async (_, { id }, { db }) => {\n      return db.users.findByPk(id);\n    },\n    users: async (_, { limit, offset }, { db }) => {\n      return db.users.findAll({ limit, offset });\n    }\n  },\n  Mutation: {\n    createUser: async (_, { input }, { db }) => {\n      return db.users.create(input);\n    }\n  },\n  User: {\n    posts: async (parent, _, { db }) => {\n      return db.posts.findAll({ where: { userId: parent.id } });\n    }\n  }\n};\n\nconst server = new ApolloServer({ typeDefs, resolvers });"
+    ],
+    "DataLoader": [
+      "DataLoader batches and caches database queries to solve the N+1 problem in GraphQL. It coalesces individual requests within a single event-loop tick into a single batched query.",
+      "const DataLoader = require('dataloader');\n\n// Batch function\nconst batchUsers = async (ids) => {\n  const users = await db.users.findAll({ where: { id: ids } });\n  return ids.map(id => users.find(u => u.id === id));\n};\n\n// Context factory\nconst context = () => ({\n  loaders: {\n    userLoader: new DataLoader(batchUsers),\n    postLoader: new DataLoader(async (ids) => {\n      const posts = await db.posts.findAll({ where: { userId: ids } });\n      return ids.map(id => posts.filter(p => p.userId === id));\n    })\n  }\n});\n\n// Resolver using DataLoader\nconst resolvers = {\n  Post: {\n    author: async (post, _, { loaders }) => {\n      return loaders.userLoader.load(post.userId);\n    }\n  },\n  User: {\n    posts: async (user, _, { loaders }) => {\n      return loaders.postLoader.load(user.id);\n    }\n  }\n};"
+    ],
+    "Batching": [
+      "Batching extends DataLoader to group multiple similar operations. It's especially useful for external API calls, database queries, and compute-intensive operations where combining requests improves performance.",
+      "// Custom batching with DataLoader\nconst batchFetch = async (urls) => {\n  const results = await Promise.all(\n    urls.map(url => fetch(url).then(r => r.json()))\n  );\n  return results;\n};\n\nconst apiLoader = new DataLoader(batchFetch, {\n  maxBatchSize: 10,\n  cache: true\n});\n\n// Usage in resolver\nconst resolvers = {\n  User: {\n    githubProfile: async (user, _, { loaders }) => {\n      return loaders.apiLoader.load(`https://api.github.com/users/${user.githubLogin}`);\n    }\n  }\n};\n\n// Manual batching example\nconst batch = (items, batchSize, fn) => {\n  const batches = [];\n  for (let i = 0; i < items.length; i += batchSize) {\n    batches.push(fn(items.slice(i, i + batchSize)));\n  }\n  return Promise.all(batches).then(results => results.flat());\n};"
+    ]
+  },
+  "Subscriptions": {
+    "WebSocket": [
+      "GraphQL subscriptions enable real-time communication over WebSockets. The `graphql-ws` library handles the WebSocket protocol, allowing clients to subscribe to events and receive push updates.",
+      "// Server setup with WebSocket\nconst { ApolloServer } = require('apollo-server-express');\nconst { createServer } = require('http');\nconst { WebSocketServer } = require('ws');\nconst { useServer } = require('graphql-ws/lib/use/ws');\n\nconst httpServer = createServer(app);\n\nconst wsServer = new WebSocketServer({\n  server: httpServer,\n  path: '/graphql'\n});\n\nuseServer({ schema, context }, wsServer);\n\nconst server = new ApolloServer({ schema });\nawait server.start();\nserver.applyMiddleware({ app });\nhttpServer.listen(4000);"
+    ],
+    "Event-based": [
+      "Subscriptions use an async iterator pattern with a publish-subscribe mechanism. Events are triggered by mutations or external sources, and the PubSub system broadcasts data to all active subscribers.",
+      "const { PubSub } = require('graphql-subscriptions');\nconst pubsub = new PubSub();\n\nconst typeDefs = `\n  type Subscription {\n    messageAdded(roomId: ID!): Message!\n    userOnline: User!\n  }\n`;\n\nconst resolvers = {\n  Subscription: {\n    messageAdded: {\n      subscribe: (_, { roomId }) => pubsub.asyncIterator(`MESSAGE_ADDED_${roomId}`)\n    },\n    userOnline: {\n      subscribe: () => pubsub.asyncIterator('USER_ONLINE')\n    }\n  },\n  Mutation: {\n    sendMessage: async (_, { roomId, content }, { db, user }) => {\n      const message = await db.messages.create({ roomId, content, userId: user.id });\n      pubsub.publish(`MESSAGE_ADDED_${roomId}`, { messageAdded: message });\n      return message;\n    }\n  }\n};"
+    ],
+    "Real-time": [
+      "Real-time features like live chat, notifications, collaborative editing, and live dashboards are powered by subscriptions. Filtering, authentication, and connection management are critical for production use.",
+      "// Filtered subscription - only receive relevant events\nconst resolvers = {\n  Subscription: {\n    notificationReceived: {\n      subscribe: withFilter(\n        () => pubsub.asyncIterator('NOTIFICATION'),\n        (payload, variables, context) => {\n          return payload.notificationReceived.userId === context.user.id;\n        }\n      )\n    },\n    priceUpdate: {\n      subscribe: withFilter(\n        () => pubsub.asyncIterator('PRICE_UPDATE'),\n        (payload, { symbols }) => {\n          return symbols.includes(payload.priceUpdate.symbol);\n        }\n      )\n    }\n  }\n};\n\n// Client subscription\nconst subscription = gql`\n  subscription OnPriceUpdate($symbols: [String!]!) {\n    priceUpdate(symbols: $symbols) {\n      symbol\n      price\n      change\n    }\n  }\n`;\n\nclient.subscribe({ query: subscription, variables: { symbols: ['AAPL', 'GOOGL'] } })"
+    ]
+  },
+  "Apollo": {
+    "Apollo Server": [
+      "Apollo Server is a production-ready GraphQL server that integrates with Express, Fastify, Lambda, and other frameworks. It provides schema stitching, caching, error handling, and Apollo Studio integration out of the box.",
+      "const { ApolloServer } = require('apollo-server-express');\nconst { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');\n\nconst server = new ApolloServer({\n  typeDefs,\n  resolvers,\n  csrfPrevention: true,\n  cache: 'bounded',\n  plugins: [\n    ApolloServerPluginDrainHttpServer({ httpServer }),\n    {\n      async requestDidStart(requestContext) {\n        console.log('Request started:', requestContext.request.operationName);\n      }\n    }\n  ],\n  context: async ({ req }) => ({\n    user: await authenticate(req),\n    db\n  }),\n  formatError: (err) => ({\n    message: err.message,\n    code: err.extensions?.code || 'INTERNAL_ERROR',\n    locations: err.locations,\n    path: err.path\n  })\n});\n\nawait server.start();\nserver.applyMiddleware({ app, path: '/graphql' });"
+    ],
+    "Apollo Client": [
+      "Apollo Client manages GraphQL state on the client side, handling caching, loading states, optimistic updates, and error handling. It works with React, Vue, Angular, and plain JavaScript applications.",
+      "import { ApolloClient, InMemoryCache, gql, useQuery } from '@apollo/client';\n\nconst client = new ApolloClient({\n  uri: 'http://localhost:4000/graphql',\n  cache: new InMemoryCache({\n    typePolicies: {\n      User: {\n        keyFields: ['id'],\n        fields: {\n          posts: {\n            merge(existing = [], incoming) {\n              return [...existing, ...incoming];\n            }\n          }\n        }\n      }\n    }\n  })\n});\n\n// React component\nfunction UserProfile({ userId }) {\n  const { loading, error, data } = useQuery(GET_USER, {\n    variables: { id: userId },\n    pollInterval: 30000\n  });\n\n  if (loading) return <Spinner />;\n  if (error) return <Error message={error.message} />;\n\n  return <div>{data.user.name}</div>;\n}\n\nconst GET_USER = gql`\n  query GetUser($id: ID!) {\n    user(id: $id) { id name email }\n  }\n`;"
+    ],
+    "Cache": [
+      "Apollo's InMemoryCache normalizes data by type and ID, allowing automatic deduplication and cache updates after mutations. Policies like `cache-first`, `network-only`, and `cache-and-network` control fetch behavior for optimal UX.",
+      "const cache = new InMemoryCache({\n  typePolicies: {\n    Query: {\n      fields: {\n        users: {\n          // Pagination helper\n          keyArgs: ['filter'],\n          merge(existing = [], incoming) {\n            return [...existing, ...incoming];\n          },\n          read(existing) {\n            return existing;\n          }\n        }\n      }\n    },\n    Mutation: {\n      // Update cache after mutation\n      update(cache, { data: { createUser } }) {\n        cache.modify({\n          fields: {\n            users(existingUsers = []) {\n              const newUserRef = cache.writeFragment({\n                data: createUser,\n                fragment: gql`fragment NewUser on User { id name email }`\n              });\n              return [...existingUsers, newUserRef];\n            }\n          }\n        });\n      }\n    }\n  }\n});\n\n// Optimistic update\nconst [createUser] = useMutation(CREATE_USER, {\n  optimisticResponse: {\n    __typename: 'Mutation',\n    createUser: { __typename: 'User', id: -1, name: input.name, email: input.email }\n  },\n  update: (cache, { data }) => { /* update cache */ }\n});"
+    ]
+  },
+  "GraphQL Federation & Microservices": {
+    "Apollo Federation": [
+      "Apollo Federation composes multiple GraphQL services into a single schema. Each service is a subgraph with its own schema and resolvers. The gateway (Apollo Router/Rust-based) stitches them together. Federation 2 uses <code>@key</code>, <code>@requires</code>, <code>@provides</code>, and <code>@shareable</code> directives. Entities are types with a <code>@key</code> that can be resolved across services. <code>@external</code> marks fields defined elsewhere. Supergraph schema is the composed result. Rover CLI manages schema composition. Managed federation pushes schema from Apollo Studio.",
+      "# Apollo Federation 2 example\n# subgraph/users/schema.graphql\ntype User @key(fields: \"id\") {\n  id: ID!\n  name: String!\n  email: String! @shareable\n  reviews: [Review] @requires(fields: \"id\")\n}\n\ntype Review @key(fields: \"id\") {\n  id: ID!\n  body: String!\n  author: User @provides(fields: \"name\")\n}\n\n# subgraph/reviews/schema.graphql\ntype Review @key(fields: \"id\") {\n  id: ID!\n  productId: ID!\n  rating: Int!\n}\n\ntype User @key(fields: \"id\") @extends {\n  id: ID! @external\n  reviews: [Review]\n}\n\ntype Query {\n  reviews(productId: ID!): [Review]\n}\n\n// Users subgraph resolver\nconst resolvers = {\n  User: {\n    __resolveReference(ref) {\n      return db.users.findById(ref.id);\n    },\n    reviews(user) {\n      return db.reviews.findAllByUser(user.id);\n    }\n  },\n  Review: {\n    __resolveReference(ref) {\n      return { id: ref.id };\n    },\n    author(review) {\n      return { __typename: 'User', id: review.authorId };\n    }\n  },\n  Query: {\n    users: () => db.users.findAll()\n  }\n};\n\n// Rover compose command\n// rover supergraph compose --config ./supergraph.yaml > supergraph.graphql"
+    ],
+    "GraphQL Performance & Security": [
+      "GraphQL performance optimization: DataLoader batches and caches database queries (N+1 problem). <code>dataloader</code> library coalesces individual loads into batch requests. Query depth limiting prevents deeply nested malicious queries. Query cost analysis assigns weights to fields, rejects expensive queries. Persisted queries (APQ) allow only pre-registered queries. Rate limiting per API key. Secure: validate complex queries, mask internal errors, use allow-lists for production. <code>graphql-query-complexity</code> for cost analysis. <code>graphql-depth-limit</code> for depth limiting.",
+      "// DataLoader for N+1 prevention\nimport DataLoader from 'dataloader';\n\nconst userLoader = new DataLoader(async (ids) => {\n  const users = await db.users.findByIds(ids);\n  return ids.map(id => users.find(u => u.id === id) || null);\n});\n\nconst resolvers = {\n  Query: {\n    posts: async () => {\n      const posts = await db.posts.findAll();\n      return posts;\n    }\n  },\n  Post: {\n    author: async (post, _, { loaders }) => {\n      return loaders.user.load(post.authorId);\n    }\n  }\n};\n\n// Server setup with security\nimport { createServer } from '@graphql-yoga/node';\nimport { createComplexityRule, simpleEstimator } from 'graphql-query-complexity';\nimport depthLimit from 'graphql-depth-limit';\n\nconst server = createServer({\n  schema,\n  validationRules: [\n    depthLimit(10),\n    createComplexityRule({\n      estimators: [simpleEstimator({ defaultComplexity: 1 })],\n      maximumComplexity: 1000,\n    }),\n  ],\n  context: ({ request }) => ({\n    loaders: {\n      user: userLoader,\n      product: productLoader,\n    },\n    user: authenticate(request),\n  }),\n});\n\n// Persisted queries (APQ)\n// Client sends query hash instead of full query\n// Server only executes if hash is in allow-list\nconst persistedQueries = new Map([\n  ['abc123', 'query { currentUser { id name } }'],\n  ['def456', `query ($id: ID!) { product(id: $id) { name price } }`],\n]);"
+    ]
+  }
+}

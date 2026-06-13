@@ -21,7 +21,7 @@
   import { runPipeline, highlightCode, renderTokens, renderAST, renderStats } from '$lib/lib/compiler.js';
 
   const LANGUAGE_MODES = ['asm','htmlcss','bash','c','cs','cpp','db','go','java','js','kt','lua','php','py','rb','rs','scala','swift','ts','wasm','zig'];
-  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend'];
+  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend', 'ai', 'debugging'];
   const CUSTOM_WORKSPACE_MODES = ['compiler', 'schema', 'styling', 'challenge', 'quiz'];
   const STANDALONE_MODES = ['dblab', 'projects'];
 

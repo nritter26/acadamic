@@ -1,7 +1,7 @@
 {
   "Getting Started": {
     "Flask Introduction": {
-      "exp": "<p>Introduction to Flask and its ecosystem.</p>",
+      "exp": "Introduction to Flask and its ecosystem.",
       "code": "",
       "exercises": []
     },
@@ -20,49 +20,49 @@
   },
   "Core Concepts": {
     "Flask Core Features": {
-      "exp": "<p>Essential Flask concepts and features.</p>",
+      "exp": "Essential Flask concepts and features.",
       "code": "",
       "exercises": []
     }
   },
   "Components & UI": {
     "Flask Components": {
-      "exp": "<p>Building user interfaces with Flask.</p>",
+      "exp": "Building user interfaces with Flask.",
       "code": "",
       "exercises": []
     }
   },
   "Routing": {
     "Flask Routing": {
-      "exp": "<p>Navigation and routing in Flask.</p>",
+      "exp": "Navigation and routing in Flask.",
       "code": "",
       "exercises": []
     }
   },
   "State Management": {
     "Flask State": {
-      "exp": "<p>Managing application state in Flask.</p>",
+      "exp": "Managing application state in Flask.",
       "code": "",
       "exercises": []
     }
   },
   "Data & APIs": {
     "Flask Data": {
-      "exp": "<p>Working with data and APIs in Flask.</p>",
+      "exp": "Working with data and APIs in Flask.",
       "code": "",
       "exercises": []
     }
   },
   "Testing": {
     "Flask Testing": {
-      "exp": "<p>Testing strategies for Flask.</p>",
+      "exp": "Testing strategies for Flask.",
       "code": "",
       "exercises": []
     }
   },
   "Deployment": {
     "Flask Deployment": {
-      "exp": "<p>Deploying Flask applications.</p>",
+      "exp": "Deploying Flask applications.",
       "code": "",
       "exercises": []
     },
@@ -73,14 +73,14 @@
   },
   "Best Practices": {
     "Flask Best Practices": {
-      "exp": "<p>Best practices for Flask development.</p>",
+      "exp": "Best practices for Flask development.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Flask Advanced": {
-      "exp": "<p>Advanced Flask topics and patterns.</p>",
+      "exp": "Advanced Flask topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -102,7 +102,7 @@
   "Templates (Jinja2)": {
     "Jinja2 Templates": [
       "Flask uses Jinja2 as its default template engine. Templates go in the templates/ folder. Use {{ }} for expressions, {% %} for control flow, {# #} for comments. Template inheritance with {% extends %} and {% block %}. Include partials with {% include %}. Special variables: config, request, session, g, url_for, get_flashed_messages. Autoescaping is enabled for .html templates. Filters: safe, capitalize, lower, upper, title, trim, striptags, escape, default, length, join, round, format, truncate.",
-      "<!-- templates/base.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{% block title %}Flask App{% endblock %}</title>\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/style.css') }}\">\n</head>\n<body>\n    <nav>\n        <a href=\"{{ url_for('main.index') }}\">Home</a>\n        <a href=\"{{ url_for('main.about') }}\">About</a>\n        {% if current_user.is_authenticated %}\n            <a href=\"{{ url_for('auth.logout') }}\">Logout</a>\n        {% else %}\n            <a href=\"{{ url_for('auth.login') }}\">Login</a>\n        {% endif %}\n    </nav>\n\n    {% with messages = get_flashed_messages(with_categories=true) %}\n        {% if messages %}\n            {% for category, message in messages %}\n                <div class=\"alert alert-{{ category }}\">{{ message }}</div>\n            {% endfor %}\n        {% endif %}\n    {% endwith %}\n\n    <main>\n        {% block content %}{% endblock %}\n    </main>\n</body>\n</html>\n\n<!-- templates/index.html -->\n{% extends 'base.html' %}\n{% block title %}Home{% endblock %}\n{% block content %}\n    <h1>Welcome to Flask!</h1>\n    {% if current_user.is_authenticated %}\n        <p>Hello, {{ current_user.username }}!</p>\n    {% endif %}\n{% endblock %}"
+      "<!-- templates/base.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{% block title %}Flask App{% endblock %}</title>\n    <link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/style.css') }}\">\n</head>\n<body>\n    <nav>\n        <a href=\"{{ url_for('main.index') }}\">Home</a>\n        <a href=\"{{ url_for('main.about') }}\">About</a>\n        {% if current_user.is_authenticated %}\n            <a href=\"{{ url_for('auth.logout') }}\">Logout</a>\n        {% else %}\n            <a href=\"{{ url_for('auth.login') }}\">Login</a>\n        {% endif %}\n    </nav>\n\n    {% with messages = get_flashed_messages(with_categories=true) %}\n        {% if messages %}\n            {% for category, message in messages %}\n                <div class=\"alert alert-{{ category }}\">{{ message }}</div>\n            {% endfor %}\n        {% endif %}\n    {% endwith %}\n\n    <main>\n        {% block content %}{% endblock %}\n    </main>\n</body>\n</html>\n\n<!-- templates/index.html -->\n{% extends 'base.html' %}\n{% block title %}Home{% endblock %}\n{% block content %}\n    <h1>Welcome to Flask!</h1>\n    {% if current_user.is_authenticated %}\n        Hello, {{ current_user.username }}!\n\n    {% endif %}\n{% endblock %}"
     ],
     "Static Files": [
       "Static files (CSS, JS, images) are served from the static/ folder. Use url_for('static', filename='...') to generate URLs. Flask automatically serves static files in development. In production, use a web server (Nginx) or CDN. Flask-Assets or webpack can bundle and minify assets. Custom static URL path via app's static_url_path. Multiple static folders possible with Blueprint static_folder or via send_from_directory.",
@@ -130,7 +130,7 @@
     ],
     "Form Templates": [
       "Forms are rendered in templates with form.field() or manually. CSRF token via form.hidden_tag() or {{ form.csrf_token }}. Flash messages for feedback. Form validation errors displayed per field. Macro-based form rendering reduces repetition. Bootstrap-friendly rendering with formnovalidate for client-side validation can coexist. File upload requires enctype=multipart/form-data on the form.",
-      "<!-- Manual form rendering -->\n<form method=\"POST\" action=\"\">\n    {{ form.hidden_tag() }}\n    <p>\n        {{ form.username.label }}<br>\n        {{ form.username(size=32) }}<br>\n        {% for error in form.username.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    </p>\n    <p>\n        {{ form.email.label }}<br>\n        {{ form.email(size=32) }}<br>\n        {% for error in form.email.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    </p>\n    <p>\n        {{ form.password.label }}<br>\n        {{ form.password(size=32) }}<br>\n        {% for error in form.password.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    </p>\n    <p>{{ form.submit() }}</p>\n</form>\n\n<!-- With Bootstrap classes -->\n<form method=\"POST\" novalidate>\n    {{ form.hidden_tag() }}\n    <div class=\"mb-3\">\n        {{ form.username.label(class=\"form-label\") }}\n        {{ form.username(class=\"form-control\" + (\" is-invalid\" if form.username.errors else \"\")) }}\n        {% for error in form.username.errors %}\n            <div class=\"invalid-feedback\">{{ error }}</div>\n        {% endfor %}\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n</form>\n\n\n# View handling\nfrom flask import render_template, redirect, url_for, flash\n\n@bp.route('/register', methods=['GET', 'POST'])\ndef register():\n    form = RegistrationForm()\n    if form.validate_on_submit():\n        # process form\n        username = form.username.data\n        flash(f'Welcome, {username}!', 'success')\n        return redirect(url_for('main.index'))\n    return render_template('register.html', form=form)"
+      "<!-- Manual form rendering -->\n<form method=\"POST\" action=\"\">\n    {{ form.hidden_tag() }}\n    \n        {{ form.username.label }}<br>\n        {{ form.username(size=32) }}<br>\n        {% for error in form.username.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    \n\n    \n        {{ form.email.label }}<br>\n        {{ form.email(size=32) }}<br>\n        {% for error in form.email.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    \n\n    \n        {{ form.password.label }}<br>\n        {{ form.password(size=32) }}<br>\n        {% for error in form.password.errors %}\n            <span style=\"color: red;\">[{{ error }}]</span><br>\n        {% endfor %}\n    \n\n    {{ form.submit() }}\n\n</form>\n\n<!-- With Bootstrap classes -->\n<form method=\"POST\" novalidate>\n    {{ form.hidden_tag() }}\n    <div class=\"mb-3\">\n        {{ form.username.label(class=\"form-label\") }}\n        {{ form.username(class=\"form-control\" + (\" is-invalid\" if form.username.errors else \"\")) }}\n        {% for error in form.username.errors %}\n            <div class=\"invalid-feedback\">{{ error }}</div>\n        {% endfor %}\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n</form>\n\n\n# View handling\nfrom flask import render_template, redirect, url_for, flash\n\n@bp.route('/register', methods=['GET', 'POST'])\ndef register():\n    form = RegistrationForm()\n    if form.validate_on_submit():\n        # process form\n        username = form.username.data\n        flash(f'Welcome, {username}!', 'success')\n        return redirect(url_for('main.index'))\n    return render_template('register.html', form=form)"
     ]
   },
   "Authentication": {

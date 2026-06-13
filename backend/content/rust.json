@@ -1,73 +1,73 @@
 {
   "Fundamentals": {
     "Introduction": {
-      "exp": "<p>Introduction to Rust.</p>",
+      "exp": "Introduction to Rust.",
       "code": "",
       "exercises": []
     },
     "Variables & Types": {
-      "exp": "<p>Variables and data types in Rust.</p>",
+      "exp": "Variables and data types in Rust.",
       "code": "",
       "exercises": []
     },
     "Operators": {
-      "exp": "<p>Operators in Rust.</p>",
+      "exp": "Operators in Rust.",
       "code": "",
       "exercises": []
     },
     "Control Flow": {
-      "exp": "<p>Control flow statements in Rust.</p>",
+      "exp": "Control flow statements in Rust.",
       "code": "",
       "exercises": []
     },
     "Functions": {
-      "exp": "<p>Functions in Rust.</p>",
+      "exp": "Functions in Rust.",
       "code": "",
       "exercises": []
     }
   },
   "Data Structures": {
     "Arrays & Collections": {
-      "exp": "<p>Working with collections in Rust.</p>",
+      "exp": "Working with collections in Rust.",
       "code": "",
       "exercises": []
     },
     "Strings": {
-      "exp": "<p>String manipulation in Rust.</p>",
+      "exp": "String manipulation in Rust.",
       "code": "",
       "exercises": []
     },
     "Maps & Dictionaries": {
-      "exp": "<p>Key-value data structures in Rust.</p>",
+      "exp": "Key-value data structures in Rust.",
       "code": "",
       "exercises": []
     }
   },
   "Object-Oriented Programming": {
     "Classes & Objects": {
-      "exp": "<p>OOP concepts in Rust.</p>",
+      "exp": "OOP concepts in Rust.",
       "code": "",
       "exercises": []
     },
     "Inheritance": {
-      "exp": "<p>Inheritance patterns in Rust.</p>",
+      "exp": "Inheritance patterns in Rust.",
       "code": "",
       "exercises": []
     },
     "Interfaces": {
-      "exp": "<p>Interfaces and contracts in Rust.</p>",
+      "exp": "Interfaces and contracts in Rust.",
       "code": "",
       "exercises": []
     }
   },
   "Error Handling": {
     "Exceptions": {
-      "exp": "<p>Exception handling in Rust.</p>",
+      "exp": "Exception handling in Rust.",
       "code": "",
       "exercises": []
     },
     "Debugging": {
-      "exp": "<p>Debugging Rust code.</p>",
+      "exp": "Debugging Rust code.",
       "code": "",
       "exercises": []
     },
@@ -106,34 +106,34 @@
   },
   "I/O & File System": {
     "File Operations": {
-      "exp": "<p>File I/O in Rust.</p>",
+      "exp": "File I/O in Rust.",
       "code": "",
       "exercises": []
     },
     "Input/Output": {
-      "exp": "<p>Input and output operations in Rust.</p>",
+      "exp": "Input and output operations in Rust.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Concurrency": {
-      "exp": "<p>Concurrency in Rust.</p>",
+      "exp": "Concurrency in Rust.",
       "code": "",
       "exercises": []
     },
     "Modules": {
-      "exp": "<p>Modular programming in Rust.</p>",
+      "exp": "Modular programming in Rust.",
       "code": "",
       "exercises": []
     },
     "Best Practices": {
-      "exp": "<p>Best practices for Rust.</p>",
+      "exp": "Best practices for Rust.",
       "code": "",
       "exercises": []
     },
     "Performance": {
-      "exp": "<p>Optimizing Rust code.</p>",
+      "exp": "Optimizing Rust code.",
       "code": "",
       "exercises": []
     }
@@ -416,7 +416,7 @@
       "use std::sync::mpsc;\nuse std::thread;\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send(\"hello\").unwrap();\n});\nlet msg = rx.recv().unwrap();\nprintln!(\"{}\", msg);"
     ],
     "Pinning & Pin<P>": [
-      "Pin<P> ensures a value won't be moved in memory. Essential for self-referential structs (e.g., async Futures). `Pin<Box<T>>` (heap-pinned), `Pin<&mut T>` (stack-pinned via `pin!` macro). Once pinned, cannot safely move. `Unpin` auto-trait: most types are Unpin (move OK). Async blocks/futures are `!Unpin` (not Unpin). Unsafe `get_unchecked_mut` to mutate pinned data. PhantomPinned marker make a type !Unpin.",
+      "Pin ensures a value won't be moved in memory. Essential for self-referential structs (e.g., async Futures). `Pin<Box<T>>` (heap-pinned), `Pin<&mut T>` (stack-pinned via `pin!` macro). Once pinned, cannot safely move. `Unpin` auto-trait: most types are Unpin (move OK). Async blocks/futures are `!Unpin` (not Unpin). Unsafe `get_unchecked_mut` to mutate pinned data. PhantomPinned marker make a type !Unpin.",
       "use std::marker::PhantomPinned;\nuse std::pin::Pin;\n\n// Self-referential struct (must be !Unpin)\nstruct SelfReferential {\n    data: String,\n    ptr: *const String,  // Points to self.data\n    _pin: PhantomPinned,  // Make !Unpin\n}\n\nimpl SelfReferential {\n    fn new(data: String) -> Pin<Box<Self>> {\n        let mut s = Self {\n            ptr: std::ptr::null(),\n            data,\n            _pin: PhantomPinned,\n        };\n        let mut pinned = Box::pin(s);\n        // SAFETY: We never move after setting ptr\n        unsafe {\n            let mut_ref = Pin::as_mut(&mut pinned);\n            mut_ref.get_unchecked_mut().ptr = &mut_ref.get_unchecked_mut().data;\n        }\n        pinned\n    }\n\n    fn get_ptr(&self) -> &String {\n        unsafe { &*self.ptr }\n    }\n}\n\n// Stack pinning (nightly or with pin-utils)\n// use pin_utils::pin_mut;\n// let val = String::from(\"hello\");\n// pin_mut!(val);\n\n// Async futures are !Unpin\nasync fn example() -> i32 {\n    42\n}\n\nfn main() {\n    let pinned = SelfReferential::new(\"Hello\".to_string());\n    println!(\"{}\", pinned.get_ptr());  // Hello\n    \n    // This would not compile:\n    // let moved = *pinned;  // Error: cannot move out of Pin\n    \n    // Futures are not Unpin\n    let fut = example();\n    // Pin<&mut dyn Future> is needed for .await\n    // Box::pin(fut).await;\n    \n    println!(\"Self-referential pointer OK\");\n}"
     ]
   },

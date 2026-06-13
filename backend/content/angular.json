@@ -1,7 +1,7 @@
 {
   "Getting Started": {
     "Angular Introduction": {
-      "exp": "<p>Introduction to Angular and its ecosystem.</p>",
+      "exp": "Introduction to Angular and its ecosystem.",
       "code": "",
       "exercises": []
     },
@@ -20,21 +20,21 @@
   },
   "Core Concepts": {
     "Angular Core Features": {
-      "exp": "<p>Essential Angular concepts and features.</p>",
+      "exp": "Essential Angular concepts and features.",
       "code": "",
       "exercises": []
     }
   },
   "Components & UI": {
     "Angular Components": {
-      "exp": "<p>Building user interfaces with Angular.</p>",
+      "exp": "Building user interfaces with Angular.",
       "code": "",
       "exercises": []
     }
   },
   "Routing": {
     "Angular Routing": {
-      "exp": "<p>Navigation and routing in Angular.</p>",
+      "exp": "Navigation and routing in Angular.",
       "code": "",
       "exercises": []
     },
@@ -53,21 +53,21 @@
   },
   "State Management": {
     "Angular State": {
-      "exp": "<p>Managing application state in Angular.</p>",
+      "exp": "Managing application state in Angular.",
       "code": "",
       "exercises": []
     }
   },
   "Data & APIs": {
     "Angular Data": {
-      "exp": "<p>Working with data and APIs in Angular.</p>",
+      "exp": "Working with data and APIs in Angular.",
       "code": "",
       "exercises": []
     }
   },
   "Testing": {
     "Angular Testing": {
-      "exp": "<p>Testing strategies for Angular.</p>",
+      "exp": "Testing strategies for Angular.",
       "code": "",
       "exercises": []
     },
@@ -86,21 +86,21 @@
   },
   "Deployment": {
     "Angular Deployment": {
-      "exp": "<p>Deploying Angular applications.</p>",
+      "exp": "Deploying Angular applications.",
       "code": "",
       "exercises": []
     }
   },
   "Best Practices": {
     "Angular Best Practices": {
-      "exp": "<p>Best practices for Angular development.</p>",
+      "exp": "Best practices for Angular development.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Angular Advanced": {
-      "exp": "<p>Advanced Angular topics and patterns.</p>",
+      "exp": "Advanced Angular topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -224,7 +224,7 @@
   "Deferrable Views": {
     "@defer": [
       "Deferrable views (introduced in Angular 17) lazy-load component dependencies with @defer blocks. They improve initial bundle size by deferring heavy components until a specified trigger.",
-      "@defer (on viewport) {\n  <heavy-chart />\n} @placeholder {\n  <div>Chart loading...</div>\n} @loading {\n  <spinner />\n} @error {\n  <p>Failed to load chart</p>\n}"
+      "@defer (on viewport) {\n  <heavy-chart />\n} @placeholder {\n  <div>Chart loading...</div>\n} @loading {\n  <spinner />\n} @error {\n  Failed to load chart\n\n}"
     ],
     "Defer Triggers": [
       "Defer triggers control when lazy content loads: on viewport (enters viewport), on interaction (user clicks), on immediate, on idle (browser idle), or on a custom timer.",
@@ -248,7 +248,7 @@
   "Angular Signals & New Control Flow": {
     "Angular Signals Deep Dive": [
       "Angular Signals provide reactive state management with fine-grained reactivity. Unlike Zone.js-based change detection (which checks the entire component tree), Signals track dependencies automatically and update only affected consumers. Key APIs: <code>signal()</code> creates a writable signal, <code>computed()</code> creates derived values, <code>effect()</code> runs side effects when signal values change. The new control flow (<code>@if</code>, <code>@for</code>, <code>@switch</code>) replaces <code>*ngIf</code>, <code>*ngFor</code>, and <code>ngSwitch</code> with better type narrowing and performance. Standalone components are now the default — NgModules are optional.",
-      "// Angular Signals\nimport { Component, signal, computed, effect } from '@angular/core';\nimport { CommonModule } from '@angular/common';\n\n@Component({\n  selector: 'app-counter',\n  standalone: true,\n  template: `\n    <h2>Count: {{ count() }}</h2>\n    <h3>Doubled: {{ doubled() }}</h3>\n    <h4>Status: {{ status() }}</h4>\n    <button (click)=\"decrement()\">-</button>\n    <button (click)=\"increment()\">+</button>\n\n    <!-- New control flow -->\n    @if (count() > 10) {\n      <p>You've clicked many times!</p>\n    } @else if (count() > 5) {\n      <p>Keep going!</p>\n    } @else {\n      <p>Click more to start</p>\n    }\n\n    <ul>\n      @for (item of items(); track item.id; let i = $index) {\n        <li>{{ i + 1 }}. {{ item.name }}</li>\n      } @empty {\n        <li>No items yet</li>\n      }\n    </ul>\n  `\n})\nexport class CounterComponent {\n  private readonly count = signal(0);\n  readonly doubled = computed(() => this.count() * 2);\n  readonly status = computed(() => this.count() >= 10 ? 'high' : 'low');\n  readonly items = signal<{ id: number; name: string }[]>([]);\n\n  constructor() {\n    effect(() => {\n      console.log(`Count changed to: ${this.count()}`);\n      // Auto-logging for debugging\n    });\n  }\n\n  increment() { this.count.update(c => c + 1); }\n  decrement() { this.count.update(c => c - 1); }\n}"
+      "// Angular Signals\nimport { Component, signal, computed, effect } from '@angular/core';\nimport { CommonModule } from '@angular/common';\n\n@Component({\n  selector: 'app-counter',\n  standalone: true,\n  template: `\n    <h2>Count: {{ count() }}</h2>\n    <h3>Doubled: {{ doubled() }}</h3>\n    <h4>Status: {{ status() }}</h4>\n    <button (click)=\"decrement()\">-</button>\n    <button (click)=\"increment()\">+</button>\n\n    <!-- New control flow -->\n    @if (count() > 10) {\n      You've clicked many times!\n\n    } @else if (count() > 5) {\n      Keep going!\n\n    } @else {\n      Click more to start\n\n    }\n\n    <ul>\n      @for (item of items(); track item.id; let i = $index) {\n        <li>{{ i + 1 }}. {{ item.name }}</li>\n      } @empty {\n        <li>No items yet</li>\n      }\n    </ul>\n  `\n})\nexport class CounterComponent {\n  private readonly count = signal(0);\n  readonly doubled = computed(() => this.count() * 2);\n  readonly status = computed(() => this.count() >= 10 ? 'high' : 'low');\n  readonly items = signal<{ id: number; name: string }[]>([]);\n\n  constructor() {\n    effect(() => {\n      console.log(`Count changed to: ${this.count()}`);\n      // Auto-logging for debugging\n    });\n  }\n\n  increment() { this.count.update(c => c + 1); }\n  decrement() { this.count.update(c => c - 1); }\n}"
     ],
     "Angular Routing & Lazy Loading": [
       "Angular Router enables SPA navigation with lazy-loaded feature modules/routes. Routes are defined as an array of <code>Route</code> objects with <code>path</code>, <code>component</code> or <code>loadComponent</code> (standalone) / <code>loadChildren</code> (modules). <code>canActivate</code>, <code>canDeactivate</code>, and <code>canLoad</code> guards protect routes. <code>Resolve</code> fetches data before route activation. Route params (<code>paramMap</code>, <code>queryParamMap</code>) are accessible via <code>ActivatedRoute</code>. PreloadingStrategy (PreloadAllModules, custom strategies) balances initial bundle size with subsequent navigation speed. Router events (NavigationStart, NavigationEnd, NavigationError) enable loading indicators.",
@@ -266,7 +266,7 @@
     ],
     "Angular Performance Optimization": [
       "Angular performance optimization: <code>ChangeDetectionStrategy.OnPush</code> reduces change detection to only when inputs change or events fire. <code>trackBy</code> in <code>@for</code>/<code>ngFor</code> prevents unnecessary DOM re-creation. Lazy loading reduces initial bundle size. <code>@defer</code> (Angular 17+) defers loading of heavy components until viewport or interaction. <code>provideZoneFlush</code> with <code>NoopZone</code> enables zoneless change detection with signals. <code>pure</code> pipes prevent recalculation. Server-Side Rendering (SSR) with Angular Universal improves initial load. Core Web Vitals (LCP, CLS, INP) guide performance targets.",
-      "// Angular 17+ @defer for lazy loading\n@Component({\n  selector: 'app-heavy',\n  template: `\n    <h1>Main content (loaded immediately)</h1>\n\n    <!-- Defer expensive component until visible -->\n    @defer (on viewport) {\n      <app-expensive-chart />\n    } @placeholder {\n      <div class=\"chart-placeholder\">Chart loading...</div>\n    } @loading (minimum 500ms) {\n      <app-spinner />\n    } @error {\n      <p>Failed to load chart</p>\n    }\n\n    <!-- Defer until interaction -->\n    @defer (on interaction) {\n      <app-comment-section />\n    } @placeholder {\n      <button>Load comments</button>\n    }\n\n    <!-- Defer with conditions -->\n    @defer (when isVisible()) {\n      <app-data-table [data]=\"tableData()\" />\n    }\n  `\n})\nexport class DashboardComponent {\n  isVisible = signal(false);\n  tableData = signal<DataRow[]>([]);\n\n  constructor() {\n    // Load table data eagerly, but render deferred\n    this.loadData();\n  }\n}\n\n// Performance monitoring\n@Component({\n  selector: 'app-root',\n  template: '...',\n  host: {\n    '[class.lcp-loaded]': 'lcpLoaded()'\n  }\n})\nexport class AppComponent {\n  private perf = inject(PerformanceService);\n  lcpLoaded = signal(false);\n\n  constructor() {\n    new PerformanceObserver((list) => {\n      for (const entry of list.getEntries()) {\n        if (entry.entryType === 'largest-contentful-paint') {\n          this.lcpLoaded.set(true);\n          console.log('LCP:', entry.startTime);\n        }\n      }\n    }).observe({ type: 'largest-contentful-paint', buffered: true });\n  }\n}"
+      "// Angular 17+ @defer for lazy loading\n@Component({\n  selector: 'app-heavy',\n  template: `\n    <h1>Main content (loaded immediately)</h1>\n\n    <!-- Defer expensive component until visible -->\n    @defer (on viewport) {\n      <app-expensive-chart />\n    } @placeholder {\n      <div class=\"chart-placeholder\">Chart loading...</div>\n    } @loading (minimum 500ms) {\n      <app-spinner />\n    } @error {\n      Failed to load chart\n\n    }\n\n    <!-- Defer until interaction -->\n    @defer (on interaction) {\n      <app-comment-section />\n    } @placeholder {\n      <button>Load comments</button>\n    }\n\n    <!-- Defer with conditions -->\n    @defer (when isVisible()) {\n      <app-data-table [data]=\"tableData()\" />\n    }\n  `\n})\nexport class DashboardComponent {\n  isVisible = signal(false);\n  tableData = signal<DataRow[]>([]);\n\n  constructor() {\n    // Load table data eagerly, but render deferred\n    this.loadData();\n  }\n}\n\n// Performance monitoring\n@Component({\n  selector: 'app-root',\n  template: '...',\n  host: {\n    '[class.lcp-loaded]': 'lcpLoaded()'\n  }\n})\nexport class AppComponent {\n  private perf = inject(PerformanceService);\n  lcpLoaded = signal(false);\n\n  constructor() {\n    new PerformanceObserver((list) => {\n      for (const entry of list.getEntries()) {\n        if (entry.entryType === 'largest-contentful-paint') {\n          this.lcpLoaded.set(true);\n          console.log('LCP:', entry.startTime);\n        }\n      }\n    }).observe({ type: 'largest-contentful-paint', buffered: true });\n  }\n}"
     ]
   }
 }

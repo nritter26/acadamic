@@ -1,0 +1,25 @@
+[package]
+name = "kodex-sql"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+kodex-core = { path = "../kodex-core" }
+rusqlite = { workspace = true }
+r2d2 = { workspace = true }
+r2d2_sqlite = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tokio-postgres = { version = "0.7", features = ["with-serde_json-1"], optional = true }
+mysql_async = { version = "0.34", optional = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[features]
+default = []
+postgres = ["tokio-postgres"]
+mysql = ["mysql_async"]
+all-sql = ["postgres", "mysql"]

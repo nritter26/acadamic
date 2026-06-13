@@ -1,7 +1,7 @@
 {
   "Getting Started": {
     "Svelte Introduction": {
-      "exp": "<p>Introduction to Svelte and its ecosystem.</p>",
+      "exp": "Introduction to Svelte and its ecosystem.",
       "code": "",
       "exercises": []
     },
@@ -15,47 +15,47 @@
     ],
     "Logic": [
       "Svelte provides logic blocks ({#if}, {:else if}, {:else}) and loops ({#each}, {:else}) within templates. Loops support destructuring and index tracking without special directives.",
-      "{#if user.loggedIn}\n  <p>Welcome back!</p>\n{:else}\n  <p>Please log in</p>\n{/if}"
+      "{#if user.loggedIn}\n  Welcome back!\n\n{:else}\n  Please log in\n\n{/if}"
     ]
   },
   "Core Concepts": {
     "Svelte Core Features": {
-      "exp": "<p>Essential Svelte concepts and features.</p>",
+      "exp": "Essential Svelte concepts and features.",
       "code": "",
       "exercises": []
     }
   },
   "Components & UI": {
     "Svelte Components": {
-      "exp": "<p>Building user interfaces with Svelte.</p>",
+      "exp": "Building user interfaces with Svelte.",
       "code": "",
       "exercises": []
     }
   },
   "Routing": {
     "Svelte Routing": {
-      "exp": "<p>Navigation and routing in Svelte.</p>",
+      "exp": "Navigation and routing in Svelte.",
       "code": "",
       "exercises": []
     }
   },
   "State Management": {
     "Svelte State": {
-      "exp": "<p>Managing application state in Svelte.</p>",
+      "exp": "Managing application state in Svelte.",
       "code": "",
       "exercises": []
     }
   },
   "Data & APIs": {
     "Svelte Data": {
-      "exp": "<p>Working with data and APIs in Svelte.</p>",
+      "exp": "Working with data and APIs in Svelte.",
       "code": "",
       "exercises": []
     }
   },
   "Testing": {
     "Svelte Testing": {
-      "exp": "<p>Testing strategies for Svelte.</p>",
+      "exp": "Testing strategies for Svelte.",
       "code": "",
       "exercises": []
     },
@@ -70,21 +70,21 @@
   },
   "Deployment": {
     "Svelte Deployment": {
-      "exp": "<p>Deploying Svelte applications.</p>",
+      "exp": "Deploying Svelte applications.",
       "code": "",
       "exercises": []
     }
   },
   "Best Practices": {
     "Svelte Best Practices": {
-      "exp": "<p>Best practices for Svelte development.</p>",
+      "exp": "Best practices for Svelte development.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Svelte Advanced": {
-      "exp": "<p>Advanced Svelte topics and patterns.</p>",
+      "exp": "Advanced Svelte topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -96,7 +96,7 @@
     ],
     "Slots": [
       "Slots allow parent components to inject content into a child's layout. Named slots and slot props enable flexible component composition and scoped content distribution.",
-      "<slot name=\"footer\">\n  <p>Default footer</p>\n</slot>"
+      "<slot name=\"footer\">\n  Default footer\n\n</slot>"
     ],
     "Events": [
       "Svelte uses the createEventDispatcher helper to forward custom events from child to parent components. DOM events are bound directly with on: directives like on:click.",
@@ -146,7 +146,7 @@
     ],
     "Transitions": [
       "Svelte's built-in transitions (fade, slide, scale, fly) and custom transition functions provide declarative enter/exit animations. They work with the transition: directive and support in/out modifiers.",
-      "<div transition:slide>\n  <p>Sliding content</p>\n</div>"
+      "<div transition:slide>\n  Sliding content\n\n</div>"
     ],
     "Animations": [
       "Svelte's animate: directive enables FLIP-based animations for list reordering, automatically calculating position changes and animating elements to their new positions smoothly.",
@@ -184,11 +184,11 @@
   "Svelte 5 Runes": {
     "Runes: $state, $derived, $effect": [
       "Svelte 5 introduces runes — explicit reactive primitives that replace the Svelte 4 <code>let</code> / <code>export let</code> / <code>$:</code> magic. <code>$state()</code> creates reactive state. <code>$derived()</code> creates derived values that update automatically. <code>$effect()</code> runs side effects when tracked dependencies change. <code>$props()</code> explicitly declares component props. Runes work both in <code>.svelte</code> files and <code>.svelte.js</code>/<code>.svelte.ts</code> modules, enabling shared reactive logic outside components. <code>$bindable()</code> creates two-way bindable props. Runes make reactivity explicit and TypeScript-friendly.",
-      "<script>\n  // Svelte 5 runes\n  let count = $state(0);\n  let doubled = $derived(count * 2);\n  let items = $state([1, 2, 3]);\n  \n  // Props\n  let { name, initialCount = 0 } = $props();\n  \n  // Effects\n  $effect(() => {\n    console.log(`Count changed to ${count}`);\n    \n    // Return cleanup function\n    return () => {\n      console.log('Effect cleaning up');\n    };\n  });\n  \n  function increment() {\n    count += 1;\n  }\n  \n  function addItem() {\n    items.push(items.length + 1);\n  }\n</script>\n\n<h1>Hello {name}!</h1>\n<p>Count: {count}</p>\n<p>Doubled: {doubled}</p>\n\n<button onclick={increment}>+</button>\n<button onclick={() => count--}>-</button>\n<button onclick={addItem}>Add Item</button>\n\n<ul>\n  {#each items as item, i}\n    <li>{i}: {item}</li>\n  {/each}\n</ul>"
+      "<script>\n  // Svelte 5 runes\n  let count = $state(0);\n  let doubled = $derived(count * 2);\n  let items = $state([1, 2, 3]);\n  \n  // Props\n  let { name, initialCount = 0 } = $props();\n  \n  // Effects\n  $effect(() => {\n    console.log(`Count changed to ${count}`);\n    \n    // Return cleanup function\n    return () => {\n      console.log('Effect cleaning up');\n    };\n  });\n  \n  function increment() {\n    count += 1;\n  }\n  \n  function addItem() {\n    items.push(items.length + 1);\n  }\n</script>\n\n<h1>Hello {name}!</h1>\nCount: {count}\n\nDoubled: {doubled}\n\n\n<button onclick={increment}>+</button>\n<button onclick={() => count--}>-</button>\n<button onclick={addItem}>Add Item</button>\n\n<ul>\n  {#each items as item, i}\n    <li>{i}: {item}</li>\n  {/each}\n</ul>"
     ],
     "Svelte 5 Snippets & Event Handling": [
       "Svelte 5 introduces snippets (<code>{#snippet}</code>) for reusable template fragments, replacing slots in many cases. Event handlers use callbacks (<code>onclick={handler}</code>) instead of <code>on:click</code>. Event modifiers are attached with function calls. Cross-component state uses runes in <code>.svelte.ts</code> files. <code>onMount</code>/<code>onDestroy</code> lifecycle functions are now imported. <code>bind:value</code> works with <code>$bindable()</code> for two-way bindings. <code>class</code> and <code>style</code> attributes support objects and arrays.",
-      "<script>\n  import { onMount } from 'svelte';\n  \n  let items = $state(['Apple', 'Banana', 'Cherry']);\n  let selected = $state<string | null>(null);\n  let search = $state('');\n  \n  let filtered = $derived(\n    items.filter(i => i.toLowerCase().includes(search.toLowerCase()))\n  );\n  \n  function handleItemClick(item: string) {\n    selected = item;\n  }\n  \n  onMount(() => {\n    console.log('Component mounted');\n  });\n</script>\n\n<!-- Two-way binding with $bindable prop -->\n<input bind:value={search} placeholder=\"Search...\" />\n\n<!-- Event handler with callback syntax -->\n{#snippet item(item: string, index: number)}\n  <button\n    class:active={selected === item}\n    onclick={() => handleItemClick(item)}\n  >\n    {index + 1}. {item}\n  </button>\n{/snippet}\n\n{#each filtered as item, i}\n  {@render item(item, i)}\n{:else}\n  <p>No items match \"{search}\"</p>\n{/each}\n\n<!-- Reactive shared state from .svelte.ts -->\n<script>\n  // shared-state.svelte.ts\n  export const counter = $state({ value: 0 });\n</script>"
+      "<script>\n  import { onMount } from 'svelte';\n  \n  let items = $state(['Apple', 'Banana', 'Cherry']);\n  let selected = $state<string | null>(null);\n  let search = $state('');\n  \n  let filtered = $derived(\n    items.filter(i => i.toLowerCase().includes(search.toLowerCase()))\n  );\n  \n  function handleItemClick(item: string) {\n    selected = item;\n  }\n  \n  onMount(() => {\n    console.log('Component mounted');\n  });\n</script>\n\n<!-- Two-way binding with $bindable prop -->\n<input bind:value={search} placeholder=\"Search...\" />\n\n<!-- Event handler with callback syntax -->\n{#snippet item(item: string, index: number)}\n  <button\n    class:active={selected === item}\n    onclick={() => handleItemClick(item)}\n  >\n    {index + 1}. {item}\n  </button>\n{/snippet}\n\n{#each filtered as item, i}\n  {@render item(item, i)}\n{:else}\n  No items match \"{search}\"\n\n{/each}\n\n<!-- Reactive shared state from .svelte.ts -->\n<script>\n  // shared-state.svelte.ts\n  export const counter = $state({ value: 0 });\n</script>"
     ]
   },
   "Snippets": {
@@ -202,7 +202,7 @@
     ],
     "Children Snippet": [
       "The implicit children snippet captures default content between component tags. It provides a cleaner alternative to the default slot for wrapping content in layout components.",
-      "// Parent\n<Card>\n  <p>Card content here</p>\n</Card>\n\n// Card.svelte\nlet { children } = $props();\n<div class=\"card\">\n  {@render children()}\n</div>"
+      "// Parent\n<Card>\n  Card content here\n\n</Card>\n\n// Card.svelte\nlet { children } = $props();\n<div class=\"card\">\n  {@render children()}\n</div>"
     ]
   }
 }

@@ -1,74 +1,74 @@
 {
   "React Fundamentals": {
     "JSX": {
-      "exp": "<p>JavaScript XML syntax extension.</p>",
+      "exp": "JavaScript XML syntax extension.",
       "code": "JSX expressions, embedding expressions, attributes, children, fragments.",
       "exercises": []
     },
     "Components": {
-      "exp": "<p>Building UI with components.</p>",
+      "exp": "Building UI with components.",
       "code": "Functional components, component composition, props, children.",
       "exercises": []
     },
     "Props": {
-      "exp": "<p>Passing data between components.</p>",
+      "exp": "Passing data between components.",
       "code": "Prop types, default props, children prop, prop drilling.",
       "exercises": []
     },
     "State": {
-      "exp": "<p>Managing component state.</p>",
+      "exp": "Managing component state.",
       "code": "useState hook, state updates, batching, immutable updates.",
       "exercises": []
     },
     "Events": {
-      "exp": "<p>Handling events in React.</p>",
+      "exp": "Handling events in React.",
       "code": "Event handlers, synthetic events, event pooling, passing arguments.",
       "exercises": []
     },
     "Conditional Rendering": {
-      "exp": "<p>Rendering based on conditions.</p>",
+      "exp": "Rendering based on conditions.",
       "code": "Ternary operator, && operator, if/else, conditional rendering patterns.",
       "exercises": []
     },
     "Lists & Keys": {
-      "exp": "<p>Rendering lists in React.</p>",
+      "exp": "Rendering lists in React.",
       "code": "map(), filter(), keys, key requirements, index as key pitfalls.",
       "exercises": []
     }
   },
   "Hooks": {
     "useEffect": {
-      "exp": "<p>Side effects in React components.</p>",
+      "exp": "Side effects in React components.",
       "code": "Effect dependencies, cleanup, lifecycle mapping, common use cases.",
       "exercises": []
     },
     "useRef": {
-      "exp": "<p>Mutable references in React.</p>",
+      "exp": "Mutable references in React.",
       "code": "DOM refs, storing mutable values, forwardRef, callback refs.",
       "exercises": []
     },
     "useMemo": {
-      "exp": "<p>Memoizing computed values.</p>",
+      "exp": "Memoizing computed values.",
       "code": "Dependencies, performance optimization, when to use memo.",
       "exercises": []
     },
     "useCallback": {
-      "exp": "<p>Memoizing function references.</p>",
+      "exp": "Memoizing function references.",
       "code": "Dependencies, preventing re-renders, stable callbacks.",
       "exercises": []
     },
     "useContext": {
-      "exp": "<p>Consuming React context.</p>",
+      "exp": "Consuming React context.",
       "code": "Context creation, provider, consumer, useContext hook.",
       "exercises": []
     },
     "useReducer": {
-      "exp": "<p>Complex state management.</p>",
+      "exp": "Complex state management.",
       "code": "Reducer functions, dispatch, action types, state shape.",
       "exercises": []
     },
     "Custom Hooks": {
-      "exp": "<p>Creating reusable hook logic.</p>",
+      "exp": "Creating reusable hook logic.",
       "code": "Hook composition, naming conventions, shared stateful logic.",
       "exercises": []
     }
@@ -87,36 +87,36 @@
       "const useStore = create((set) => ({\n  count: 0,\n  increment: () => set((state) => ({ count: state.count + 1 }))\n}));"
     ],
     "React Query": {
-      "exp": "<p>Server state management.</p>",
+      "exp": "Server state management.",
       "code": "Queries, mutations, caching, refetching, optimistic updates.",
       "exercises": []
     },
     "State Patterns": {
-      "exp": "<p>State management patterns.</p>",
+      "exp": "State management patterns.",
       "code": "Lifting state up, colocation, state normalization.",
       "exercises": []
     }
   },
   "Routing & Navigation": {
     "React Router": {
-      "exp": "<p>Client-side routing in React.</p>",
+      "exp": "Client-side routing in React.",
       "code": "BrowserRouter, Routes, Route, Link, useParams, useNavigate.",
       "exercises": []
     },
     "Nested Routes": {
-      "exp": "<p>Organizing routes hierarchically.</p>",
+      "exp": "Organizing routes hierarchically.",
       "code": "Outlet, relative links, layout routes, index routes.",
       "exercises": []
     },
     "Route Guards": {
-      "exp": "<p>Protecting routes.</p>",
+      "exp": "Protecting routes.",
       "code": "Authentication check, redirects, lazy loading, error boundaries.",
       "exercises": []
     }
   },
   "Performance": {
     "React.memo": {
-      "exp": "<p>Preventing unnecessary re-renders.</p>",
+      "exp": "Preventing unnecessary re-renders.",
       "code": "Props comparison, custom comparator, when to memoize.",
       "exercises": []
     },
@@ -125,12 +125,12 @@
       "const LazyComponent = React.lazy(() => import('./HeavyComponent'));"
     ],
     "Virtualization": {
-      "exp": "<p>Rendering large lists efficiently.</p>",
+      "exp": "Rendering large lists efficiently.",
       "code": "react-window, react-virtualized, windowing techniques.",
       "exercises": []
     },
     "Profiling": {
-      "exp": "<p>Measuring React performance.</p>",
+      "exp": "Measuring React performance.",
       "code": "React DevTools profiler, flame graphs, render count optimization.",
       "exercises": []
     },
@@ -145,17 +145,17 @@
   },
   "Testing React": {
     "React Testing Library": {
-      "exp": "<p>Testing React components.</p>",
+      "exp": "Testing React components.",
       "code": "render, screen, fireEvent, queries, async testing.",
       "exercises": []
     },
     "Component Tests": {
-      "exp": "<p>Testing component behavior.</p>",
+      "exp": "Testing component behavior.",
       "code": "Props, state, events, async behavior, mock services.",
       "exercises": []
     },
     "Integration Tests": {
-      "exp": "<p>Testing component interactions.</p>",
+      "exp": "Testing component interactions.",
       "code": "User flows, context providers, router integration.",
       "exercises": []
     }
@@ -283,7 +283,7 @@
   "React Server Components & Suspense": {
     "React Server Components (RSC)": [
       "React Server Components render on the server, reducing client bundle size by sending only the rendered output. RSC can directly access databases, files, and backend services without exposing secrets to the client. <code>'use client'</code> directive marks client components. Server components cannot use hooks, event handlers, or browser APIs. App Router (Next.js 13+) uses RSC by default. Benefits: direct backend access, zero client JS for static content, automatic code splitting, and streaming HTML. Streaming with Suspense sends UI progressively as data loads, improving perceived performance.",
-      "// React Server Component (Next.js App Router)\n// app/products/page.tsx\nimport { ProductCard } from '@/components/product-card';\nimport { Suspense } from 'react';\n\n// Server Component — no \"use client\" directive\nasync function ProductList() {\n  // Direct database access (no API route needed)\n  const db = await connectDB();\n  const products = await db.query(`\n    SELECT p.*, AVG(r.rating) as avg_rating\n    FROM products p\n    LEFT JOIN reviews r ON r.product_id = p.id\n    GROUP BY p.id\n    ORDER BY p.created_at DESC\n    LIMIT 20\n  `);\n\n  return (\n    <div className=\"grid grid-cols-3 gap-4\">\n      {products.map(product => (\n        <ProductCard key={product.id} product={product} />\n      ))}\n    </div>\n  );\n}\n\n// Parent page with streaming\nexport default function ProductsPage() {\n  return (\n    <div>\n      <h1>Products</h1>\n      {/* Static content renders immediately */}\n      <p>Browse our latest products below.</p>\n\n      {/* ProductList streams in as data loads */}\n      <Suspense fallback={<div className=\"spinner\">Loading products...</div>}>\n        <ProductList />\n      </Suspense>\n\n      {/* Independent sections load in parallel */}\n      <Suspense fallback={<div>Loading featured...</div>}>\n        <FeaturedProducts />\n      </Suspense>\n    </div>\n  );\n}\n\n// Client Component — interactive parts\n'use client';\n// app/components/ProductCard.tsx\nexport function ProductCard({ product }: { product: Product }) {\n  const [added, setAdded] = useState(false);\n\n  return (\n    <div className=\"card\">\n      <h3>{product.name}</h3>\n      <p>${product.price}</p>\n      <p>Rating: {product.avg_rating?.toFixed(1) || 'N/A'}</p>\n      <button onClick={() => { addToCart(product.id); setAdded(true); }}>\n        {added ? '✓ Added' : 'Add to Cart'}\n      </button>\n    </div>\n  );\n}"
+      "// React Server Component (Next.js App Router)\n// app/products/page.tsx\nimport { ProductCard } from '@/components/product-card';\nimport { Suspense } from 'react';\n\n// Server Component — no \"use client\" directive\nasync function ProductList() {\n  // Direct database access (no API route needed)\n  const db = await connectDB();\n  const products = await db.query(`\n    SELECT p.*, AVG(r.rating) as avg_rating\n    FROM products p\n    LEFT JOIN reviews r ON r.product_id = p.id\n    GROUP BY p.id\n    ORDER BY p.created_at DESC\n    LIMIT 20\n  `);\n\n  return (\n    <div className=\"grid grid-cols-3 gap-4\">\n      {products.map(product => (\n        <ProductCard key={product.id} product={product} />\n      ))}\n    </div>\n  );\n}\n\n// Parent page with streaming\nexport default function ProductsPage() {\n  return (\n    <div>\n      <h1>Products</h1>\n      {/* Static content renders immediately */}\n      Browse our latest products below.\n\n\n      {/* ProductList streams in as data loads */}\n      <Suspense fallback={<div className=\"spinner\">Loading products...</div>}>\n        <ProductList />\n      </Suspense>\n\n      {/* Independent sections load in parallel */}\n      <Suspense fallback={<div>Loading featured...</div>}>\n        <FeaturedProducts />\n      </Suspense>\n    </div>\n  );\n}\n\n// Client Component — interactive parts\n'use client';\n// app/components/ProductCard.tsx\nexport function ProductCard({ product }: { product: Product }) {\n  const [added, setAdded] = useState(false);\n\n  return (\n    <div className=\"card\">\n      <h3>{product.name}</h3>\n      ${product.price}\n\n      Rating: {product.avg_rating?.toFixed(1) || 'N/A'}\n\n      <button onClick={() => { addToCart(product.id); setAdded(true); }}>\n        {added ? '✓ Added' : 'Add to Cart'}\n      </button>\n    </div>\n  );\n}"
     ],
     "React Hooks Advanced": [
       "Advanced React hooks for complex state management: <code>useReducer</code> for state with complex transitions (like Redux without the boilerplate). <code>useCallback</code> memoizes functions to prevent child re-renders. <code>useMemo</code> memoizes expensive computations. <code>useRef</code> stores mutable values across renders without causing re-renders. <code>useLayoutEffect</code> runs synchronously after DOM mutations. <code>useTransition</code> marks state updates as non-urgent. <code>useDeferredValue</code> debounces rapidly-changing values. Custom hooks compose these primitives. The React Compiler (React Forget) automatically memoizes values, making explicit memoization optional.",

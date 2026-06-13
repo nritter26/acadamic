@@ -1,7 +1,7 @@
 {
   "Getting Started": {
     "Remix Introduction": {
-      "exp": "<p>Introduction to Remix and its ecosystem.</p>",
+      "exp": "Introduction to Remix and its ecosystem.",
       "code": "",
       "exercises": []
     },
@@ -20,49 +20,49 @@
   },
   "Core Concepts": {
     "Remix Core Features": {
-      "exp": "<p>Essential Remix concepts and features.</p>",
+      "exp": "Essential Remix concepts and features.",
       "code": "",
       "exercises": []
     }
   },
   "Components & UI": {
     "Remix Components": {
-      "exp": "<p>Building user interfaces with Remix.</p>",
+      "exp": "Building user interfaces with Remix.",
       "code": "",
       "exercises": []
     }
   },
   "Routing": {
     "Remix Routing": {
-      "exp": "<p>Navigation and routing in Remix.</p>",
+      "exp": "Navigation and routing in Remix.",
       "code": "",
       "exercises": []
     }
   },
   "State Management": {
     "Remix State": {
-      "exp": "<p>Managing application state in Remix.</p>",
+      "exp": "Managing application state in Remix.",
       "code": "",
       "exercises": []
     }
   },
   "Data & APIs": {
     "Remix Data": {
-      "exp": "<p>Working with data and APIs in Remix.</p>",
+      "exp": "Working with data and APIs in Remix.",
       "code": "",
       "exercises": []
     }
   },
   "Testing": {
     "Remix Testing": {
-      "exp": "<p>Testing strategies for Remix.</p>",
+      "exp": "Testing strategies for Remix.",
       "code": "",
       "exercises": []
     }
   },
   "Deployment": {
     "Remix Deployment": {
-      "exp": "<p>Deploying Remix applications.</p>",
+      "exp": "Deploying Remix applications.",
       "code": "",
       "exercises": []
     },
@@ -85,14 +85,14 @@
   },
   "Best Practices": {
     "Remix Best Practices": {
-      "exp": "<p>Best practices for Remix development.</p>",
+      "exp": "Best practices for Remix development.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Remix Advanced": {
-      "exp": "<p>Advanced Remix topics and patterns.</p>",
+      "exp": "Advanced Remix topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -212,7 +212,7 @@
     ],
     "Typed Actions": [
       "useActionData provides type-safe access to action return values. Combine with typeof action for compile-time checking of error messages, form data, and mutation results.",
-      "import { useActionData } from '@remix-run/react';\nimport type { action } from './route';\n\nconst actionData = useActionData<typeof action>();\n{actionData?.error && <p>{actionData.error}</p>}"
+      "import { useActionData } from '@remix-run/react';\nimport type { action } from './route';\n\nconst actionData = useActionData<typeof action>();\n{actionData?.error && {actionData.error}\n}"
     ],
     "serialize Type": [
       "Remix's SerializeFrom type unwraps Promise and Response types from loaders, providing a cleaner type for client-side hooks when the loader uses async patterns.",
@@ -222,7 +222,7 @@
   "Remix Advanced Patterns": {
     "Nested Routes & Layouts": [
       "Remix provides nested routing with shared layouts. Files in <code>app/routes/</code> follow directory-based routing. <code>app/root.tsx</code> is the root layout. <code>_layout.tsx</code> files create shared layouts. Outlets render child routes. Nested routes load data in parallel via <code>loader</code> functions. <code>useLoaderData</code>, <code>useRouteLoaderData</code>, and <code>useMatches</code> access data from any route. <code>shouldRevalidate</code> optimizes data reloads. Error boundaries per route (<code>ErrorBoundary</code>). Pending UI with <code>useNavigation</code>. Optimistic UI with <code>useFetcher</code> form submissions.",
-      "// Remix nested routes structure\n// app/routes/products._layout.tsx (shared layout for /products)\nimport { Outlet, NavLink } from '@remix-run/react';\n\nexport default function ProductsLayout() {\n  return (\n    <div className=\"flex gap-8\">\n      <nav className=\"w-48 space-y-2\">\n        <NavLink to=\"/products\" end className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          All Products\n        </NavLink>\n        <NavLink to=\"/products/new\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          New Product\n        </NavLink>\n        <NavLink to=\"/products/categories\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          Categories\n        </NavLink>\n      </nav>\n      <main className=\"flex-1\">\n        <Outlet />\n      </main>\n    </div>\n  );\n}\n\n// app/routes/products.$productId.tsx\nimport { json, type LoaderFunctionArgs } from '@remix-run/node';\nimport { useLoaderData, useNavigate } from '@remix-run/react';\n\nexport async function loader({ params, context }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.productId },\n    include: { reviews: true }\n  });\n  \n  if (!product) {\n    throw new Response('Not Found', { status: 404 });\n  }\n  \n  return json({ product });\n}\n\nexport function ErrorBoundary() {\n  return <div className=\"error\">Failed to load product</div>;\n}\n\nexport default function ProductDetail() {\n  const { product } = useLoaderData<typeof loader>();\n  const navigate = useNavigate();\n  \n  return (\n    <div>\n      <button onClick={() => navigate(-1)}>Back</button>\n      <h1>{product.name}</h1>\n      <p>{product.description}</p>\n    </div>\n  );\n}"
+      "// Remix nested routes structure\n// app/routes/products._layout.tsx (shared layout for /products)\nimport { Outlet, NavLink } from '@remix-run/react';\n\nexport default function ProductsLayout() {\n  return (\n    <div className=\"flex gap-8\">\n      <nav className=\"w-48 space-y-2\">\n        <NavLink to=\"/products\" end className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          All Products\n        </NavLink>\n        <NavLink to=\"/products/new\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          New Product\n        </NavLink>\n        <NavLink to=\"/products/categories\" className={({ isActive }) => isActive ? 'font-bold' : ''}>\n          Categories\n        </NavLink>\n      </nav>\n      <main className=\"flex-1\">\n        <Outlet />\n      </main>\n    </div>\n  );\n}\n\n// app/routes/products.$productId.tsx\nimport { json, type LoaderFunctionArgs } from '@remix-run/node';\nimport { useLoaderData, useNavigate } from '@remix-run/react';\n\nexport async function loader({ params, context }: LoaderFunctionArgs) {\n  const product = await db.product.findUnique({\n    where: { id: params.productId },\n    include: { reviews: true }\n  });\n  \n  if (!product) {\n    throw new Response('Not Found', { status: 404 });\n  }\n  \n  return json({ product });\n}\n\nexport function ErrorBoundary() {\n  return <div className=\"error\">Failed to load product</div>;\n}\n\nexport default function ProductDetail() {\n  const { product } = useLoaderData<typeof loader>();\n  const navigate = useNavigate();\n  \n  return (\n    <div>\n      <button onClick={() => navigate(-1)}>Back</button>\n      <h1>{product.name}</h1>\n      {product.description}\n\n    </div>\n  );\n}"
     ],
     "Remix Resource Routes & Webhooks": [
       "Remix resource routes return non-HTML responses: JSON APIs, files, redirects, and webhooks. Resource routes don't render components — they only export <code>loader</code> (GET) and <code>action</code> (POST/PUT/DELETE). <code>app/routes/api.products.$id.tsx</code> becomes <code>/api/products/:id</code>. Webhook handlers verify signatures and process events. File uploads with <code>unstable_parseMultipartFormData</code>. RSS feeds, sitemaps, and PDF generation. <code>response</code> helpers: <code>json</code>, <code>redirect</code>, <code>defer</code> (streaming). CORS headers for public API routes.",

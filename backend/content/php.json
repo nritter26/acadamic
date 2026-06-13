@@ -1,61 +1,61 @@
 {
   "Fundamentals": {
     "Introduction": {
-      "exp": "<p>Introduction to PHP.</p>",
+      "exp": "Introduction to PHP.",
       "code": "",
       "exercises": []
     },
     "Variables & Types": {
-      "exp": "<p>Variables and data types in PHP.</p>",
+      "exp": "Variables and data types in PHP.",
       "code": "",
       "exercises": []
     },
     "Operators": {
-      "exp": "<p>Operators in PHP.</p>",
+      "exp": "Operators in PHP.",
       "code": "",
       "exercises": []
     },
     "Control Flow": {
-      "exp": "<p>Control flow statements in PHP.</p>",
+      "exp": "Control flow statements in PHP.",
       "code": "",
       "exercises": []
     },
     "Functions": {
-      "exp": "<p>Functions in PHP.</p>",
+      "exp": "Functions in PHP.",
       "code": "",
       "exercises": []
     }
   },
   "Data Structures": {
     "Arrays & Collections": {
-      "exp": "<p>Working with collections in PHP.</p>",
+      "exp": "Working with collections in PHP.",
       "code": "",
       "exercises": []
     },
     "Strings": {
-      "exp": "<p>String manipulation in PHP.</p>",
+      "exp": "String manipulation in PHP.",
       "code": "",
       "exercises": []
     },
     "Maps & Dictionaries": {
-      "exp": "<p>Key-value data structures in PHP.</p>",
+      "exp": "Key-value data structures in PHP.",
       "code": "",
       "exercises": []
     }
   },
   "Object-Oriented Programming": {
     "Classes & Objects": {
-      "exp": "<p>OOP concepts in PHP.</p>",
+      "exp": "OOP concepts in PHP.",
       "code": "",
       "exercises": []
     },
     "Inheritance": {
-      "exp": "<p>Inheritance patterns in PHP.</p>",
+      "exp": "Inheritance patterns in PHP.",
       "code": "",
       "exercises": []
     },
     "Interfaces": {
-      "exp": "<p>Interfaces and contracts in PHP.</p>",
+      "exp": "Interfaces and contracts in PHP.",
       "code": "",
       "exercises": []
     }
@@ -66,7 +66,7 @@
       "<?php\ntry {\n    $file = file_get_contents('nonexistent.txt');\n    if ($file === false) {\n        throw new Exception('File not found');\n    }\n} catch (Exception $e) {\n    echo 'Caught: ' . $e->getMessage();\n    echo 'File: ' . $e->getFile();\n    echo 'Line: ' . $e->getLine();\n} finally {\n    echo \"This always runs\";\n}\n\n// Multiple catch\n// } catch (PDOException $e) {\n//     echo \"Database error\";\n// } catch (Exception $e) {\n//     echo \"General error\";\n// }"
     ],
     "Debugging": {
-      "exp": "<p>Debugging PHP code.</p>",
+      "exp": "Debugging PHP code.",
       "code": "",
       "exercises": []
     },
@@ -89,34 +89,34 @@
   },
   "I/O & File System": {
     "File Operations": {
-      "exp": "<p>File I/O in PHP.</p>",
+      "exp": "File I/O in PHP.",
       "code": "",
       "exercises": []
     },
     "Input/Output": {
-      "exp": "<p>Input and output operations in PHP.</p>",
+      "exp": "Input and output operations in PHP.",
       "code": "",
       "exercises": []
     }
   },
   "Advanced Topics": {
     "Concurrency": {
-      "exp": "<p>Concurrency in PHP.</p>",
+      "exp": "Concurrency in PHP.",
       "code": "",
       "exercises": []
     },
     "Modules": {
-      "exp": "<p>Modular programming in PHP.</p>",
+      "exp": "Modular programming in PHP.",
       "code": "",
       "exercises": []
     },
     "Best Practices": {
-      "exp": "<p>Best practices for PHP.</p>",
+      "exp": "Best practices for PHP.",
       "code": "",
       "exercises": []
     },
     "Performance": {
-      "exp": "<p>Optimizing PHP code.</p>",
+      "exp": "Optimizing PHP code.",
       "code": "",
       "exercises": []
     }
@@ -152,7 +152,7 @@
     ],
     "PHP Tags & Output": [
       "Multiple ways to output: echo (language construct), print (returns 1), printf (formatted), var_dump (debug info). Short echo tag <?= is shorthand for <?php echo. Always available in PHP 5.4+.",
-      "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<p><?= \"Hello from short tag\" ?></p>"
+      "<?php\necho \"Hello\";\nprint \"World\";\nprintf(\"Value: %s\", \"test\");\n\n$arr = [1, 2, 3];\nvar_dump($arr);\n\n// Short echo tag\n?>\n<?= \"Hello from short tag\" ?>"
     ]
   },
   "Control Flow": {
@@ -182,7 +182,7 @@
     ],
     "Alternative Syntax": [
       "PHP provides alternative syntax for control structures using colons and endif/endwhile/endfor/endforeach/endswitch. This is commonly used in templates to mix PHP with HTML cleanly.",
-      "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    <p>Welcome back!</p>\n<?php else: ?>\n    <p>Please log in</p>\n<?php endif; ?>"
+      "<?php $items = ['Apple', 'Banana', 'Cherry']; ?>\n\n<ul>\n<?php foreach ($items as $item): ?>\n    <li><?= $item ?></li>\n<?php endforeach; ?>\n</ul>\n\n<?php $isLoggedIn = true; ?>\n<?php if ($isLoggedIn): ?>\n    Welcome back!\n\n<?php else: ?>\n    Please log in\n\n<?php endif; ?>"
     ]
   },
   "Functions": {
@@ -396,7 +396,7 @@
     ],
     "Multi-byte Strings": [
       "Standard PHP string functions assume single-byte characters. Use mb_* (multi-byte) functions for UTF-8 and other encodings: mb_strlen(), mb_substr(), mb_strpos(), mb_strtolower(), etc. Enable mbstring extension. Always use mb_* for user input and international text. Check encoding with mb_detect_encoding().",
-      "<?php\n// Multi-byte strings (UTF-8)\n$text = 'Hëllö Wörld';\n\necho strlen($text);    // 15 (byte count)\necho mb_strlen($text); // 11 (character count)\n\necho substr($text, 0, 3);    // 'Hë' (may corrupt if multi-byte)\necho mb_substr($text, 0, 3); // 'Hël'\n\n$html = '<p>über</p>';\necho strip_tags($html);       // OK: 'über'\necho mb_strtolower($text);    // 'hëllö wörld'\n\n// Encoding detection\n$enc = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1']);\necho $enc;  // 'UTF-8'\n\n// Convert encoding\n$latin = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');\n\n// Always use mb_ for user input\nmb_regex_encoding('UTF-8');"
+      "<?php\n// Multi-byte strings (UTF-8)\n$text = 'Hëllö Wörld';\n\necho strlen($text);    // 15 (byte count)\necho mb_strlen($text); // 11 (character count)\n\necho substr($text, 0, 3);    // 'Hë' (may corrupt if multi-byte)\necho mb_substr($text, 0, 3); // 'Hël'\n\n$html = 'über\n';\necho strip_tags($html);       // OK: 'über'\necho mb_strtolower($text);    // 'hëllö wörld'\n\n// Encoding detection\n$enc = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1']);\necho $enc;  // 'UTF-8'\n\n// Convert encoding\n$latin = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');\n\n// Always use mb_ for user input\nmb_regex_encoding('UTF-8');"
     ]
   },
   "Testing": {

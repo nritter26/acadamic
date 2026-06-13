@@ -212,6 +212,46 @@ const CURRICULA = {
     },
   },
 
+  // ── Debugging ──
+  debugging: {
+    'Console & DevTools': {
+      'Console API Methods': ['The Console API provides methods for logging, tables, groups, timers, and more in browser DevTools.', 'console.log, console.table, console.time, console.group, console.assert', []],
+      'Browser DevTools Panels': ['Overview of Elements, Console, Sources, Network, Memory, Performance, and Application panels.', 'DevTools panels for debugging different aspects: DOM, JS, network, memory, performance', []],
+      'Line Breakpoints': ['Pause execution at specific lines in the Sources panel to inspect program state.', 'Click line number gutter in Sources to set breakpoints', []],
+      'Conditional Breakpoints': ['Breakpoints that only trigger when a condition is true — great for specific cases.', 'Right-click gutter > Add conditional breakpoint', []],
+      'DOM & Event Breakpoints': ['Break on DOM changes, XHR requests, and specific event types.', 'DOM change, XHR/Fetch, and Event Listener breakpoints in Sources panel', []],
+      'Exception Breakpoints & debugger': ['Pause on exceptions and use the debugger statement for programmatic breakpoints.', 'Stop sign icon for exceptions; debugger; statement for code-level breaks', []],
+    },
+    'Debugging Workflow': {
+      'Call Stack Navigation': ['Step Over, Step Into, Step Out, Resume, and Drop Frame controls.', 'F10/F11/Shift+F11/F8 for stepping through code execution', []],
+      'Scope & Watch Expressions': ['Inspect local/closure/global variables and create expressions that evaluate on pause.', 'Scope pane and Watch pane in Sources panel', []],
+      'Async Stack Traces': ['Preserved call chains across async operations and event loop understanding.', 'Async call stacks show the full chain across awaits and promises', []],
+    },
+    'Network & Storage': {
+      'Network Panel Inspection': ['Monitor all HTTP requests, inspect headers, payload, timing, and initiator.', 'Network panel: filter, preserve log, throttling, initiator trace', []],
+      'Storage & Application Inspection': ['Inspect LocalStorage, SessionStorage, Cookies, IndexedDB, and Service Workers.', 'Application panel for all browser storage and service worker management', []],
+      'Memory Profiling': ['Heap snapshots, allocation timelines, and CPU profiling for finding leaks and bottlenecks.', 'Memory panel: heap snapshots, allocation timelines; Performance panel: flame charts', []],
+    },
+    'Python Debugging': {
+      'print() & f-strings': ['Simple debugging with print(), f-strings, and pprint for complex data.', 'f"{var=}" syntax, pprint, __repr__ for debugging Python code', []],
+      'pdb & breakpoint()': ['Python\'s built-in debugger with breakpoint(), step commands, and post-mortem inspection.', 'breakpoint(), pdb commands: l, n, s, c, p, pp, w, u, d; pdb.pm() for post-mortem', []],
+      'Logging Module': ['Hierarchical loggers, multiple handlers, formatters, and configurable levels for production.', 'logging module: basicConfig, handlers, formatters, logger hierarchy', []],
+      'Exception Hooks & Tracebacks': ['sys.excepthook, traceback module, inspect module for stack inspection.', 'Global exception handlers, traceback.format_exc, inspect.stack()', []],
+      'IDE & Remote Debugging': ['VS Code/PyCharm debugging, debugpy for remote debugging, pytest --pdb.', 'VS Code launch.json, debugpy.listen(), pytest --pdb -x', []],
+    },
+    'Advanced Debugging': {
+      'Source Maps': ['Map compiled JS back to original TypeScript source code for easier debugging.', 'sourceMap: true in tsconfig; upload source maps to Sentry/Bugsnag for production', []],
+      'Workspace Overrides & Pretty-Printing': ['Edit files directly in DevTools with persistent changes and pretty-print minified code.', 'Sources > Filesystem > Add folder; { } button for pretty-printing', []],
+      'REPL & Node.js Remote Debugging': ['Node.js --inspect debugging and interactive REPL for debugging.', 'node --inspect-brk; chrome://inspect; REPL .help, .break, .save, .load', []],
+      'Memory Leak Patterns': ['Common leak patterns: intervals, detached DOM, globals, closures, event listeners.', 'Use Memory panel > Heap snapshots to detect detached elements and retained objects', []],
+    },
+    'Production Debugging': {
+      'Error Tracking & Monitoring': ['Sentry, LogRocket, Datadog RUM integration with global error handlers and source maps.', 'window.onerror, unhandledrejection, error tracking SDK integration', []],
+      'Network Mocking & Blocking': ['Block/mock network requests in DevTools, emulate offline mode and custom latency.', 'Network panel: block request URL, offline emulation, throttling profiles', []],
+      'Go Debugging': ['Delve debugger, race detector, pprof profiling, and execution tracing for Go programs.', 'dlv debug, go run -race, pprof, go tool trace for Go debugging', []],
+    },
+  },
+
   // ── Backend Development ──
   backend: {
     'Internet & HTTP Fundamentals': {
