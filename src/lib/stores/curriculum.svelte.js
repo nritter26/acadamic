@@ -1,4 +1,7 @@
+import { getCurrentLang } from '$lib/lib/translate.js';
+
 let _lang = $state('js');
+let _uiLang = $state('en'); // 'en' or 'th' — controls curriculum language
 let _phase = $state('');
 let _topic = $state('');
 let _level = $state('all');
@@ -13,6 +16,14 @@ export function getCurriculumState() {
   return {
     get lang() { return _lang; },
     set lang(v) { _lang = v; },
+    get uiLang() { return _uiLang; },
+    set uiLang(v) {
+      if (v === 'en' || v === 'th') {
+        _uiLang = v;
+        // Reload current language data with new UI language
+        this.loadLangData(_lang);
+      }
+    },
     get phase() { return _phase; },
     set phase(v) { _phase = v; },
     get topic() { return _topic; },
@@ -52,14 +63,34 @@ export function getCurriculumState() {
       _loadVersion++;
       const version = _loadVersion;
       _curriculumLoading = true;
+
+      // Determine filename based on UI language and programming language
+      const isThai = _uiLang === 'th';
+      let filename;
+      const langMap = { rs: 'rust', wasm: 'wasm', asm: 'asm' };
+      const baseName = langMap[lang] || lang;
+      filename = isThai ? `${baseName}_th` : baseName;
+
       if (typeof courseData !== 'undefined' && courseData[lang]) {
         _topicData = courseData;
         _curriculumLoading = false;
         return;
       }
-      const filename = lang === 'rs' ? 'rust' : lang === 'wasm' ? 'wasm' : lang === 'asm' ? 'asm' : lang;
       try {
         const r = await fetch(`/api/content/${filename}`);
+        if (!r.ok) {
+          // Fallback to English if Thai content not available yet
+          if (isThai) {
+            const r2 = await fetch(`/api/content/${baseName}`);
+            const res2 = await r2.json();
+            if (version !== _loadVersion) return;
+            const cd = _topicData || {};
+            cd[lang] = res2.data;
+            _topicData = cd;
+          }
+          _curriculumLoading = false;
+          return;
+        }
         const res = await r.json();
         if (version !== _loadVersion) return;
         const cd = _topicData || {};
