@@ -1,0 +1,211 @@
+{
+  "เริ่มต้นใช้งาน": {
+    "K8s Introduction": {
+      "exp": "Introduction to k8s and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "Architecture": [
+      "Kubernetes clusters consist of a control plane managing worker nodes. The control plane runs the API server, scheduler, controller manager, and etcd as core components.",
+      "kubectl get nodes\nkubectl cluster-info"
+    ],
+    "Pods": [
+      "Pods are the smallest deployable units, containing one or more containers with shared storage and network. Each pod gets a unique cluster IP.",
+      "apiVersion: v1\nkind: Pod\nmetadata:\n  name: nginx\nspec:\n  containers:\n  - name: nginx\n    image: nginx:latest"
+    ],
+    "kubectl Basics": [
+      "kubectl is the CLI for controlling Kubernetes clusters. Common commands manage resources, view logs, exec into containers, and port-forward.",
+      "kubectl create deployment myapp --image=nginx\nkubectl get pods -o wide\nkubectl logs pod-name\nkubectl exec -it pod-name -- /bin/sh"
+    ],
+    "เนมสเปซ (Namespace)": [
+      "Namespaces provide virtual cluster isolation for multi-tenant environments. Resources in one namespace are invisible to other namespaces by default.",
+      "kubectl create namespace staging\nkubectl get pods --namespace=staging\nkubectl config set-context --current --namespace=staging"
+    ]
+  },
+  "Core Concepts": {
+    "K8s Basics": {
+      "exp": "Core k8s concepts.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Configuration": {
+    "K8s Config": {
+      "exp": "Configuring k8s for your project.",
+      "code": "",
+      "exercises": []
+    },
+    "ConfigMaps": [
+      "ConfigMaps store non-sensitive configuration data as key-value pairs or files that pods consume as environment variables or volumes.",
+      "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: app-config\ndata:\n  APP_ENV: production\n  APP_DEBUG: \"false\""
+    ],
+    "Secrets": [
+      "Secrets store sensitive data like passwords and API keys base64-encoded. They are injected into pods as environment variables or mounted volumes.",
+      "apiVersion: v1\nkind: Secret\ntype: Opaque\ndata:\n  DB_PASSWORD: cGFzc3dvcmQxMjM=\n\nkubectl create secret generic db-pass --from-literal=password=password123"
+    ],
+    "Environment Variables": [
+      "Environment variables in pods reference ConfigMaps and Secrets directly or via configMapKeyRef and secretKeyRef selectors.",
+      "containers:\n- name: app\n  env:\n  - name: APP_ENV\n    valueFrom:\n      configMapKeyRef:\n        name: app-config\n        key: APP_ENV\n  - name: DB_PASSWORD\n    valueFrom:\n      secretKeyRef:\n        name: db-secret\n        key: password"
+    ],
+    "ResourceQuotas": [
+      "ResourceQuotas limit total resource consumption per namespace, preventing any single team or app from exhausting cluster resources.",
+      "apiVersion: v1\nkind: ResourceQuota\nspec:\n  hard:\n    requests.cpu: \"10\"\n    requests.memory: 20Gi\n    limits.cpu: \"20\"\n    limits.memory: 40Gi\n    pods: \"50\"\n    persistentvolumeclaims: \"10\""
+    ],
+    "LimitRanges": [
+      "LimitRanges set minimum and maximum resource constraints per pod or container within a namespace, preventing runaway resource usage.",
+      "apiVersion: v1\nkind: LimitRange\nspec:\n  limits:\n  - max:\n      cpu: \"2\"\n      memory: 2Gi\n    min:\n      cpu: \"100m\"\n      memory: 256Mi\n    type: Container"
+    ]
+  },
+  "Best Practices": {
+    "K8s Best Practices": {
+      "exp": "Best practices for using k8s.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Usage": {
+    "K8s Advanced": {
+      "exp": "Advanced k8s techniques and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Workloads": {
+    "Deployments": [
+      "Deployments manage ReplicaSets and provide declarative updates with rolling updates, rollbacks, and scaling capabilities.",
+      "apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: nginx\n  template:\n    metadata:\n      labels:\n        app: nginx\n    spec:\n      containers:\n      - name: nginx\n        image: nginx:1.21"
+    ],
+    "StatefulSets": [
+      "StatefulSets manage stateful applications with stable network identities, ordered deployment, and persistent storage per pod.",
+      "apiVersion: apps/v1\nkind: StatefulSet\nspec:\n  serviceName: \"db\"\n  replicas: 3\n  template:\n    spec:\n      containers:\n      - name: postgres\n        image: postgres:13\n        volumeMounts:\n        - name: data\n          mountPath: /var/lib/postgresql/data"
+    ],
+    "DaemonSets": [
+      "DaemonSets ensure all or selected nodes run a copy of a pod, ideal for logging, monitoring, and networking agents that run on every node.",
+      "apiVersion: apps/v1\nkind: DaemonSet\nspec:\n  selector:\n    matchLabels:\n      app: fluentd\n  template:\n    spec:\n      containers:\n      - name: fluentd\n        image: fluent/fluentd:v1.16"
+    ],
+    "Jobs & CronJobs": [
+      "Jobs run a pod to completion, useful for batch processing and migrations. CronJobs run jobs on a recurring schedule using cron syntax.",
+      "apiVersion: batch/v1\nkind: Job\nspec:\n  template:\n    spec:\n      containers:\n      - name: migrate\n        image: myapp:latest\n        command: [\"node\", \"migrate.js\"]\n      restartPolicy: Never\n---\napiVersion: batch/v1\nkind: CronJob\nspec:\n  schedule: \"0 2 * * *\"\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          containers:\n          - name: cleanup\n            image: alpine\n            command: [\"sh\", \"-c\", \"find /data -delete\"]"
+    ]
+  },
+  "Services & Networking": {
+    "ClusterIP": [
+      "ClusterIP exposes a service on an internal cluster IP accessible only within the cluster. It is the default Service type for internal communication.",
+      "apiVersion: v1\nkind: Service\nspec:\n  type: ClusterIP\n  selector:\n    app: nginx\n  ports:\n  - port: 80\n    targetPort: 80"
+    ],
+    "NodePort": [
+      "NodePort exposes a service on each node's IP at a static port, making it accessible externally via nodeIP:nodePort.",
+      "apiVersion: v1\nkind: Service\nspec:\n  type: NodePort\n  ports:\n  - port: 80\n    nodePort: 30080"
+    ],
+    "LoadBalancer": [
+      "LoadBalancer provisions an external load balancer from cloud providers and assigns a public IP for internet-facing services.",
+      "apiVersion: v1\nkind: Service\nspec:\n  type: LoadBalancer\n  ports:\n  - port: 80\n    targetPort: 8080"
+    ],
+    "Ingress": [
+      "Ingress exposes HTTP/S routes to services with host/path-based routing, TLS termination, and virtual hosting.",
+      "apiVersion: networking.k8s.io/v1\nkind: Ingress\nspec:\n  rules:\n  - host: myapp.com\n    http:\n      paths:\n      - path: /\n        pathType: Prefix\n        backend:\n          service:\n            name: myapp\n            port:\n              number: 80"
+    ],
+    "Network Policies": [
+      "Network Policies control traffic flow between pods using label selectors and port rules. By default all pod-to-pod traffic is allowed.",
+      "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nspec:\n  podSelector:\n    matchLabels:\n      app: api\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    - podSelector:\n        matchLabels:\n          app: frontend\n    ports:\n    - port: 8080"
+    ]
+  },
+  "Storage": {
+    "Volumes": [
+      "Container volumes provide temporary or persistent storage attached to pods. Volume types include emptyDir, hostPath, and cloud disks.",
+      "volumes:\n- name: data\n  emptyDir: {}\ncontainers:\n- name: app\n  volumeMounts:\n  - mountPath: /data\n    name: data"
+    ],
+    "PersistentVolumes": [
+      "PersistentVolumes are cluster-wide storage resources provisioned by administrators or dynamically via StorageClass.",
+      "apiVersion: v1\nkind: PersistentVolume\nspec:\n  capacity:\n    storage: 10Gi\n  accessModes:\n  - ReadWriteOnce\n  hostPath:\n    path: /mnt/data"
+    ],
+    "PVCs": [
+      "PersistentVolumeClaims request storage resources from a PersistentVolume, binding to matching volumes based on capacity and access modes.",
+      "apiVersion: v1\nkind: PersistentVolumeClaim\nspec:\n  accessModes:\n  - ReadWriteOnce\n  resources:\n    requests:\n      storage: 5Gi"
+    ],
+    "StorageClass": [
+      "StorageClass provisions PersistentVolumes dynamically based on cloud provider storage types like SSD, HDD, or custom parameters.",
+      "apiVersion: storage.k8s.io/v1\nkind: StorageClass\nprovisioner: kubernetes.io/gce-pd\nparameters:\n  type: pd-ssd"
+    ]
+  },
+  "Autoscaling": {
+    "HPA": [
+      "Horizontal Pod Autoscaler automatically scales pod replicas based on CPU, memory, or custom metrics from Prometheus.",
+      "apiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: web\n  minReplicas: 3\n  maxReplicas: 20\n  metrics:\n  - type: Resource\n    resource:\n      name: cpu\n      target:\n        type: Utilization\n        averageUtilization: 70\n  - type: Pods\n    pods:\n      metric:\n        name: requests_per_second\n      target:\n        type: AverageValue\n        averageValue: 1000"
+    ],
+    "VPA": [
+      "Vertical Pod Autoscaler adjusts CPU and memory requests for pods based on actual usage, improving resource efficiency.",
+      "apiVersion: autoscaling.k8s.io/v1\nkind: VerticalPodAutoscaler\nspec:\n  targetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: app\n  updatePolicy:\n    updateMode: Auto\n  resourcePolicy:\n    containerPolicies:\n    - containerName: '*'\n      minAllowed:\n        cpu: 100m\n        memory: 256Mi\n      maxAllowed:\n        cpu: \"4\"\n        memory: 8Gi"
+    ],
+    "Cluster Autoscaler": [
+      "Cluster Autoscaler automatically adds or removes nodes in a cloud provider's node group based on pending pod resource requests.",
+      "# Cluster Autoscaler scales the node group when pods can't be scheduled\n# AWS: deploy to EKS with IAM role\n# GCP: enable node auto-provisioning\n# Azure: enable cluster autoscaler in AKS\n\nkubectl get nodes # Check current nodes"
+    ]
+  },
+  "Package Management": {
+    "Helm Basics": [
+      "Helm is the Kubernetes package manager. Charts package YAML templates into reusable, configurable releases with versioning.",
+      "helm repo add bitnami https://charts.bitnami.com/bitnami\nhelm install my-release bitnami/nginx\nhelm list\nhelm uninstall my-release"
+    ],
+    "Chart Structure": [
+      "Helm charts follow a standard directory structure. Values.yaml provides defaults, and templates use Go templating for dynamic resource generation.",
+      "mychart/\n  Chart.yaml          # Metadata: name, version, description\n  values.yaml         # Default configuration values\n  templates/          # Go template YAML files\n    deployment.yaml\n    service.yaml\n    _helpers.tpl       # Named templates (partials)\n  charts/             # Subchart dependencies\n  crds/               # Custom Resource Definitions"
+    ],
+    "Values & Templates": [
+      "Helm templates use Go template syntax with Sprig functions. Values are injected from values.yaml or --set CLI flags.",
+      "# templates/deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: {{ .Values.replicaCount }}\n  template:\n    spec:\n      containers:\n      - name: {{ .Chart.Name }}\n        image: \"{{ .Values.image.repository }}:{{ .Values.image.tag }}\"\n        resources:\n          {{- toYaml .Values.resources | nindent 10 }}"
+    ],
+    "Helm Hooks": [
+      "Hooks run actions at specific points in a release lifecycle: pre/post install, upgrade, delete. Useful for database migrations and validation.",
+      "apiVersion: batch/v1\nkind: Job\nmetadata:\n  annotations:\n    helm.sh/hook: pre-upgrade\n    helm.sh/hook-weight: \"-5\"\n    helm.sh/hook-delete-policy: hook-succeeded\nspec:\n  template:\n    spec:\n      containers:\n      - name: migrate\n        image: myapp:latest\n        command: [\"node\", \"migrate.js\"]"
+    ]
+  },
+  "Extending Kubernetes": {
+    "CRDs": [
+      "Custom Resource Definitions extend the Kubernetes API with custom resources that behave like built-in objects.",
+      "apiVersion: apiextensions.k8s.io/v1\nkind: CustomResourceDefinition\nspec:\n  group: example.com\n  names:\n    kind: Database\n    plural: databases\n  scope: Namespaced\n  versions:\n  - name: v1\n    served: true\n    storage: true\n    schema:\n      openAPIV3Schema:\n        type: object\n        properties:\n          spec:\n            type: object\n            properties:\n              engine:\n                type: string\n              version:\n                type: string"
+    ],
+    "โอเปอเรเตอร์": [
+      "Operators automate application management by extending Kubernetes with custom controllers. They watch CRD resources and reconcile desired state.",
+      "// Operator SDK pattern\n// 1. Define CRD (what the user creates)\n// 2. Controller watches CRD events\n// 3. Reconcile loop creates/deletes Kubernetes resources\n// 4. Reports status back to the CR\n\n// Popular operators:\n// - prometheus-operator\n// - cert-manager\n// - postgres-operator\n// - strimzi (Kafka)\n// https://operatorhub.io/"
+    ],
+    "Service Mesh": [
+      "Service meshes like Istio provide traffic management, security, and observability for microservices. They use sidecar proxies to intercept network traffic.",
+      "# Istio features:\napiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nspec:\n  hosts:\n  - myapp\n  http:\n  - match:\n    - uri:\n        prefix: /v2\n    route:\n    - destination:\n        host: myapp-v2\n  - route:\n    - destination:\n        host: myapp-v1\n\n# Traffic splitting (canary)\nkind: DestinationRule\nspec:\n  subsets:\n  - name: v1\n    labels:\n      version: v1\n  - name: v2\n    labels:\n      version: v2"
+    ]
+  },
+  "Security": {
+    "RBAC": [
+      "Role-Based Access Control restricts API access via Roles (namespace-scoped) and ClusterRoles (cluster-scoped) bound to users or ServiceAccounts.",
+      "apiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nrules:\n- apiGroups: [\"\"]\n  resources: [\"pods\"]\n  verbs: [\"get\", \"list\", \"watch\"]"
+    ],
+    "ServiceAccounts": [
+      "ServiceAccounts provide identities for pods to authenticate with the Kubernetes API, used with RBAC for fine-grained permissions.",
+      "apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: my-app-sa\n---\n# Pod using the SA\nspec:\n  serviceAccountName: my-app-sa"
+    ],
+    "Pod Security": [
+      "Pod Security Standards (restricted, baseline, privileged) enforce security contexts at the namespace level, preventing privileged containers.",
+      "apiVersion: v1\nkind: Namespace\nmetadata:\n  labels:\n    pod-security.kubernetes.io/enforce: restricted\n    pod-security.kubernetes.io/audit: baseline\n    pod-security.kubernetes.io/warn: baseline"
+    ]
+  },
+  "Monitoring & Observability": {
+    "Metrics Server": [
+      "Metrics Server collects resource utilization data from kubelet and exposes it via the Metrics API, enabling kubectl top and HPA.",
+      "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml\nkubectl top pods"
+    ],
+    "Prometheus": [
+      "Prometheus monitors Kubernetes with time-series metrics collection, alerting, and Grafana dashboards for visualization.",
+      "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts\nhelm install prometheus prometheus-community/kube-prometheus-stack"
+    ],
+    "Logging": [
+      "Logging in Kubernetes uses fluentd or Loki to collect container logs and forward them to Elasticsearch, Loki, or cloud logging services.",
+      "# View logs\nkubectl logs -l app=myapp --tail=100\nkubectl logs pod-name --previous\n\n# Structured logging\n# Use JSON log format in applications\n# Deploy fluent-bit DaemonSet to collect logs\n# Send to Elasticsearch or Loki"
+    ]
+  },
+  "Kubernetes Security & Policy": {
+    "Pod Security & Network Policies": [
+      "Kubernetes security: RBAC (Role-Based Access Control) for API permissions, Pod Security Standards (Privileged, Baseline, Restricted) for pod capabilities, NetworkPolicies for traffic isolation, and OPA/Gatekeeper for admission control. ServiceAccounts should have minimal permissions. Secrets encrypted with KMS. Pod Security Admission (PSA) replaces PSP (deprecated in 1.21). NetworkPolicy defines ingress/egress rules with pod/namespace selectors. Seccomp, AppArmor profiles restrict syscalls.",
+      "# RBAC configuration\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata: { namespace: app, name: pod-manager }\nrules:\n  - apiGroups: [\"\"]\n    resources: [\"pods\"]\n    verbs: [\"get\", \"list\", \"create\", \"update\", \"delete\"]\n  - apiGroups: [\"apps\"]\n    resources: [\"deployments\"]\n    verbs: [\"get\", \"list\"]\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata: { namespace: app, name: dev-pod-manager }\nsubjects:\n  - kind: User\n    name: dev@example.com\n    apiGroup: rbac.authorization.k8s.io\nroleRef:\n  kind: Role\n  name: pod-manager\n  apiGroup: rbac.authorization.k8s.io\n\n# NetworkPolicy: deny all ingress by default\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata: { name: deny-all-ingress, namespace: app }\nspec:\n  podSelector: {}\n  policyTypes: [\"Ingress\"]\n---\n# NetworkPolicy: allow API to DB\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata: { name: api-to-db, namespace: app }\nspec:\n  podSelector:\n    matchLabels: { app: postgres }\n  ingress:\n    - from:\n        - podSelector:\n            matchLabels: { app: api }\n      ports:\n        - port: 5432\n\n# OPA Gatekeeper constraint\ntrivy:\n  apiVersion: constraints.gatekeeper.sh/v1beta1\n  kind: K8sRequiredLabels\n  metadata: { name: require-app-label }\n  spec:\n    match: { kinds: [{ apiGroups: [\"\"], kinds: [\"Pod\"] }] }\n    parameters: { labels: [\"app\"] }"
+    ]
+  }
+}

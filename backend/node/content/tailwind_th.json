@@ -1,0 +1,204 @@
+{
+  "เริ่มต้นใช้งาน": {
+    "Tailwind Introduction": {
+      "exp": "Introduction to Tailwind and its ecosystem.",
+      "code": "",
+      "exercises": []
+    },
+    "Utility-First": [
+      "Tailwind's utility-first approach uses small, composable classes for styling directly in HTML. Instead of writing custom CSS, you combine utilities like flex, text-center, and p-4 to build designs.",
+      "<div class='flex items-center justify-between p-4 bg-gray-100 rounded-lg'>\n  <h1 class='text-xl font-bold text-gray-800'>Hello</h1>\n</div>"
+    ],
+    "Setup": [
+      "Tailwind is installed via npm and configured through tailwind.config.js. The PostCSS plugin processes the CSS directives, scanning your source files for class usage to generate the final stylesheet.",
+      "npm install -D tailwindcss postcss autoprefixer\nnpx tailwindcss init -p"
+    ],
+    "Configuration": [
+      "The tailwind.config.js file controls content paths, theme extensions, variants, and plugins. Custom values can extend the default theme without overriding the complete design system.",
+      "module.exports = {\n  content: ['./src/**/*.{html,js}'],\n  theme: { extend: { colors: { brand: '#ff7849' } } },\n  plugins: [],\n};"
+    ]
+  },
+  "Core Concepts": {
+    "Tailwind Core Features": {
+      "exp": "Essential Tailwind concepts and features.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Components & UI": {
+    "Tailwind Components": {
+      "exp": "Building user interfaces with Tailwind.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Routing": {
+    "Tailwind Routing": {
+      "exp": "Navigation and routing in Tailwind.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Tailwind State": {
+      "exp": "Managing application state in Tailwind.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Tailwind Data": {
+      "exp": "Working with data and APIs in Tailwind.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Tailwind Testing": {
+      "exp": "Testing strategies for Tailwind.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Tailwind Deployment": {
+      "exp": "Deploying Tailwind applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Best Practices": {
+    "Tailwind Best Practices": {
+      "exp": "Best practices for Tailwind development.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Tailwind Advanced": {
+      "exp": "Advanced Tailwind topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Layout": {
+    "Flexbox": [
+      "Tailwind provides comprehensive flexbox utilities including flex-direction, justify-content, align-items, and flex-wrap. Responsive variants allow different flex behaviors at each breakpoint.",
+      "<div class='flex flex-col md:flex-row items-center gap-4'>\n  <div class='flex-1'>Item 1</div>\n  <div class='flex-1'>Item 2</div>\n</div>"
+    ],
+    "Grid": [
+      "Tailwind's grid utilities enable CSS Grid layouts with grid-cols, grid-rows, and gap classes. Items can span multiple columns or rows using col-span and row-span utilities.",
+      "<div class='grid grid-cols-1 md:grid-cols-3 gap-6'>\n  <div class='md:col-span-2'>Main Content</div>\n  <div>Sidebar</div>\n</div>"
+    ],
+    "Spacing": [
+      "Spacing in Tailwind uses a consistent scale for margin, padding, and gap classes. The scale ranges from 0 to 96, with values like p-4 (1rem), mx-auto (auto margins), and gap-8 (2rem).",
+      "<div class='p-6 mx-auto max-w-4xl space-y-4'>\n  <div class='mt-2 mb-4'>Spaced content</div>\n</div>"
+    ],
+    "Sizing": [
+      "Width and height utilities follow the spacing scale plus fractional and viewport values. Classes like w-full, h-screen, max-w-7xl, and min-h-screen handle common sizing needs.",
+      "<div class='w-full h-64 max-w-md mx-auto'>\n  <div class='w-1/2 h-full bg-blue-500'></div>\n</div>"
+    ]
+  },
+  "Typography": {
+    "Font": [
+      "Tailwind provides font-family, font-size, font-weight, and font-style utilities. Classes like font-sans, text-lg, font-bold, and italic compose to create typographic styles.",
+      "<p class='font-sans text-base leading-relaxed text-gray-700'>Body text\n\n<h1 class='font-serif text-4xl font-bold tracking-tight'>Heading</h1>"
+    ],
+    "Text": [
+      "Text utilities cover alignment, decoration, transform, and overflow. Truncation, line-clamping, and text wrapping classes handle common text layout challenges.",
+      "<p class='text-center text-ellipsis overflow-hidden whitespace-nowrap'>Truncated text\n\n<p class='line-clamp-3'>Clamped to 3 lines"
+    ],
+    "Alignment": [
+      "Tailwind's text alignment and vertical alignment classes work alongside flex and grid for precise text positioning. Text can be aligned left, center, right, or justified.",
+      "<div class='text-left sm:text-center lg:text-right'>\n  <p class='align-middle'>Responsive alignment\n\n</div>"
+    ],
+    "Lists": [
+      "List style utilities control markers, position, and indentation. Tailwind provides list-none, list-disc, list-decimal, and list-inside/list-outside for ordered and unordered lists.",
+      "<ul class='list-disc list-inside space-y-1'>\n  <li class='marker:text-blue-500'>First item</li>\n  <li>Second item</li>\n</ul>"
+    ]
+  },
+  "Colors": {
+    "Custom Colors": [
+      "Custom colors are added through the theme.extend.colors configuration. Tailwind generates shades from 50 to 900 automatically, or you can define exact hex values for each shade.",
+      "module.exports = {\n  theme: { extend: { colors: { primary: { 50: '#eff6ff', 500: '#3b82f6', 900: '#1e3a5f' } } } }\n};"
+    ],
+    "Color Palette": [
+      "Tailwind's default palette includes eight color families (gray, red, yellow, green, blue, indigo, purple, pink) each with 11 shades. Colors are applied via bg-*, text-*, border-*, and ring-* utilities.",
+      "<div class='bg-blue-500 text-white hover:bg-blue-700 border-2 border-blue-300'>Colored element</div>"
+    ],
+    "Dark Mode": [
+      "Dark mode is enabled via the darkMode config option. The dark: prefix applies styles only when dark mode is active, either via class strategy or media query.",
+      "// tailwind.config.js\nmodule.exports = { darkMode: 'class' };\n<div class='bg-white dark:bg-gray-900 text-black dark:text-white'>Theme toggle</div>"
+    ]
+  },
+  "Responsive": {
+    "Breakpoints": [
+      "Tailwind uses five default breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px), and 2xl (1536px). Breakpoint prefixes conditionally apply styles at specific viewport widths.",
+      "<div class='text-sm md:text-base lg:text-lg xl:text-xl'>Responsive text size</div>"
+    ],
+    "Mobile-First": [
+      "Tailwind follows a mobile-first approach where unprefixed utilities apply to all screen sizes. Larger screen overrides use breakpoint prefixes like md: or lg: to modify the base styles.",
+      "<div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>\n  <!-- Mobile: 1 col, Tablet: 2 cols, Desktop: 4 cols -->\n</div>"
+    ],
+    "Responsive Patterns": [
+      "Common responsive patterns include stacking on mobile and side-by-side on desktop, hiding/showing elements per breakpoint, and adjusting spacing or typography across viewports.",
+      "<div class='flex flex-col md:flex-row'>\n  <div class='hidden md:block w-64'>Desktop sidebar</div>\n  <div class='flex-1'>Main content</div>\n</div>"
+    ]
+  },
+  "Components": {
+    "Buttons": [
+      "Tailwind buttons combine padding, colors, borders, and hover states. Focus rings ensure accessibility, and disabled states convey inactive buttons with reduced opacity.",
+      "<button class='px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50'>\n  Click me\n</button>"
+    ],
+    "Cards": [
+      "Cards are built with rounded corners, shadows, padding, and dividers. Tailwind's utility classes compose to create consistent card components with header, body, and footer sections.",
+      "<div class='bg-white rounded-xl shadow-md overflow-hidden'>\n  <img class='w-full h-48 object-cover' src='...' />\n  <div class='p-6'>\n    <h2 class='text-xl font-semibold'>Card Title</h2>\n    <p class='mt-2 text-gray-600'>Card content\n\n  </div>\n</div>"
+    ],
+    "Modals": [
+      "Modals use fixed positioning, backdrop overlays, and z-index utilities. Transitions and transforms create smooth open/close animations using Tailwind's transition utilities.",
+      "<div class='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>\n  <div class='bg-white rounded-lg p-6 max-w-md w-full mx-4'>\n    <h3 class='text-lg font-medium'>Modal Title</h3>\n    <p class='mt-2'>Modal body\n\n    <button class='mt-4 px-4 py-2 bg-gray-100 rounded'>Close</button>\n  </div>\n</div>"
+    ],
+    "Forms": [
+      "Form elements are styled with consistent padding, borders, and focus states. Tailwind provides form-specific classes for inputs, selects, textareas, checkboxes, and radio buttons.",
+      "<input class='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500' />\n<select class='block w-full mt-1 rounded-md border-gray-300 shadow-sm'>\n  <option>Option 1</option>\n</select>"
+    ]
+  },
+  "Advanced": {
+    "Custom Plugins": [
+      "Tailwind plugins allow adding new utilities, components, or base styles programmatically. Plugins use the addUtilities, addComponents, addBase, and matchUtilities API functions.",
+      "const plugin = require('tailwindcss/plugin');\nmodule.exports = {\n  plugins: [\n    plugin(function({ addUtilities }) {\n      addUtilities({ '.scrollbar-hide': { '-ms-overflow-style': 'none', 'scrollbar-width': 'none' } });\n    })\n  ]\n};"
+    ],
+    "Directives": [
+      "Tailwind's CSS directives (@tailwind, @apply, @layer, @config) control how styles are generated and applied. @apply inlines utility classes into custom CSS, while @layer organizes styles.",
+      ".btn-primary {\n  @apply px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700;\n}"
+    ],
+    "ฟังก์ชัน": [
+      "Tailwind provides theme(), screen(), and other CSS functions. theme() accesses design tokens from the config, while screen() generates media query strings for custom CSS.",
+      ".custom-section {\n  background: theme('colors.brand.DEFAULT');\n  @media screen(lg) { padding: theme('spacing.8'); }\n}"
+    ]
+  },
+  "Optimization": {
+    "PurgeCSS": [
+      "Tailwind automatically removes unused CSS in production by scanning content files. The content array in config specifies the paths to scan, resulting in dramatically smaller CSS bundles.",
+      "module.exports = {\n  content: ['./src/**/*.{html,js,ts,jsx,tsx}'],\n};"
+    ],
+    "JIT Mode": [
+      "Just-in-Time mode (now default in v3) generates styles on-demand as you author HTML. This eliminates unused CSS entirely, enables arbitrary values like top-[117px], and speeds up builds.",
+      "<div class='top-[117px] text-[#123456] w-[calc(100%-2rem)]'>Arbitrary values in JIT mode</div>"
+    ],
+    "Bundle Size": [
+      "Tailwind's production builds typically result in CSS files under 10KB after purging. The built-in minification and tree-shaking ensure only the utilities you actually use end up in the final bundle.",
+      "# Check bundle size\nnpx tailwindcss -i ./src/input.css -o ./dist/output.css --minify\n# Typical result: 3-10KB"
+    ]
+  },
+  "Tailwind CSS Advanced": {
+    "Custom Design Systems & Plugins": [
+      "Tailwind CSS is highly customizable via <code>tailwind.config.js</code>. Extend the default theme with custom colors, fonts, spacing, breakpoints, and animations. <code>@apply</code> directive extracts repeated utility patterns into custom CSS. Plugins add new utilities, components, or base styles. <code>plugin()</code> function in config creates reusable plugin packages. Dark mode with <code>dark:</code> variant. Arbitrary values (<code>top-[117px]</code>) for one-off measurements. <code>theme()</code> function references design tokens in CSS. Presets share config across projects. <code>safelist</code> prevents purging of dynamically-constructed classes.",
+      "// tailwind.config.js\nconst colors = require('tailwindcss/colors');\n\nmodule.exports = {\n  content: ['./src/**/*.{html,js,svelte,ts,jsx,tsx}'],\n  darkMode: 'class',\n  theme: {\n    extend: {\n      colors: {\n        brand: {\n          50: '#eff6ff',\n          100: '#dbeafe',\n          200: '#bfdbfe',\n          500: '#3b82f6',\n          600: '#2563eb',\n          700: '#1d4ed8',\n          900: '#1e3a5f',\n        },\n        surface: {\n          DEFAULT: '#ffffff',\n          dark: '#0f172a',\n        }\n      },\n      fontFamily: {\n        display: ['Inter', 'system-ui', 'sans-serif'],\n        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],\n      },\n      spacing: {\n        '18': '4.5rem',\n        '88': '22rem',\n      },\n      animation: {\n        'fade-in': 'fadeIn 0.5s ease-in-out',\n        'slide-up': 'slideUp 0.3s ease-out',\n      },\n      keyframes: {\n        fadeIn: {\n          '0%': { opacity: '0' },\n          '100%': { opacity: '1' },\n        },\n        slideUp: {\n          '0%': { transform: 'translateY(10px)', opacity: '0' },\n          '100%': { transform: 'translateY(0)', opacity: '1' },\n        },\n      },\n    },\n  },\n  plugins: [\n    // Custom plugin for scrollbar styling\n    plugin(function({ addUtilities, addComponents, theme }) {\n      addUtilities({\n        '.scrollbar-thin': {\n          scrollbarWidth: 'thin',\n          '&::-webkit-scrollbar': { width: '6px' },\n          '&::-webkit-scrollbar-track': { background: 'transparent' },\n          '&::-webkit-scrollbar-thumb': {\n            background: theme('colors.gray.400'),\n            borderRadius: '3px',\n          },\n        },\n        '.text-gradient': {\n          backgroundClip: 'text',\n          '-webkit-background-clip': 'text',\n          '-webkit-text-fill-color': 'transparent',\n          backgroundImage: 'linear-gradient(to right, var(--tw-gradient-stops))',\n        },\n      });\n    }),\n  ],\n};\n\n// Usage in components\n{/* <div class=\"dark:bg-surface-dark bg-surface p-8 rounded-2xl shadow-lg animate-fade-in\">\n  <h1 class=\"font-display text-3xl text-gradient from-brand-500 to-brand-700\">\n    Custom Design System\n  </h1>\n  <div class=\"scrollbar-thin overflow-auto h-88 mt-4\">\n    <p class=\"text-gray-600 dark:text-gray-300\">Content with custom scrollbar...\n\n  </div>\n</div> */}"
+    ],
+    "Responsive & Adaptive Layouts": [
+      "Tailwind's responsive prefixes: <code>sm:</code> (640px), <code>md:</code> (768px), <code>lg:</code> (1024px), <code>xl:</code> (1280px), <code>2xl:</code> (1536px). Mobile-first: start with base styles for small screens, add breakpoint overrides. Container queries with <code>@container</code> and <code>@lg</code>/<code>@md</code>. Grid layouts: <code>grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4</code>. Flexbox wrapping. <code>min-h-screen</code> for full-height layouts. Group selectors (<code>group</code>, <code>group-hover:</code>) for parent-state styling. <code>peer</code> for sibling-state. Modern CSS features: <code>aspect-ratio</code>, <code>container-type</code>, <code>overscroll-behavior</code>.",
+      "<div class=\"container mx-auto px-4 lg:px-8\">\n  <!-- Header: responsive typography -->\n  <header class=\"py-8 lg:py-12\">\n    <h1 class=\"text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold\">\n      Responsive Title\n    </h1>\n  </header>\n\n  <!-- Grid: 1 col on mobile, 2 on tablet, 3 on desktop, 4 on wide -->\n  <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6\">\n    {#each items as item}\n      <article class=\"group relative overflow-hidden rounded-xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300\">\n        <img src={item.image} alt={item.title}\n          class=\"aspect-video object-cover transition-transform duration-300 group-hover:scale-105\"\n        />\n        <div class=\"p-4\">\n          <h3 class=\"font-semibold group-hover:text-brand-600 transition-colors\">{item.title}</h3>\n          <p class=\"mt-2 text-sm text-gray-600 line-clamp-2\">{item.description}\n\n        </div>\n      </article>\n    {/each}\n  </div>\n\n  <!-- Container queries (modern CSS) -->\n  <div class=\"@container mt-12\">\n    <div class=\"@lg:grid-cols-3 @md:grid-cols-2 grid grid-cols-1 gap-4\">\n      <!-- Container query responsive grid -->\n    </div>\n  </div>\n</div>"
+    ]
+  }
+}
