@@ -3,7 +3,7 @@
   import { LANG_NAMES } from '$lib/lib/constants.js';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import { getCurrentLang } from '$lib/lib/translate.js';
+  import { getCurrentLang, toggleLanguage } from '$lib/lib/translate.js';
   import { onMount } from 'svelte';
 
   let { onmodechange = () => {} } = $props();
@@ -58,10 +58,8 @@
 
   // Quick toggle: click the lang-btn to switch between EN/TH directly
   function quickToggleLang() {
-    import('$lib/lib/translate.js').then(mod => {
-      const next = mod.toggleLanguage();
-      uiLang = next.toUpperCase();
-    });
+    const next = toggleLanguage();
+    uiLang = next.toUpperCase();
   }
 
   function updateUILang() {

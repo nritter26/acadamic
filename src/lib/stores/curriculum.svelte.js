@@ -1,7 +1,7 @@
 import { getCurrentLang } from '$lib/lib/translate.js';
 
 let _lang = $state('js');
-let _uiLang = $state('en'); // 'en' or 'th' — controls curriculum language
+let _uiLang = $state(getCurrentLang() || 'en'); // 'en' or 'th' — controls curriculum language
 let _phase = $state('');
 let _topic = $state('');
 let _level = $state('all');
