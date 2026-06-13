@@ -1,0 +1,113 @@
+{
+  "id": "swift-linked-list",
+  "title": "Swift: Linked List",
+  "description": "Practice linked list in Swift.",
+  "difficulty": "intermediate",
+  "languages": [
+    "swift"
+  ],
+  "codeTemplate": {
+    "swift": "print(\"Linked list created with 5 nodes\")"
+  },
+  "verificationTest": "output.includes('1->2->3->4->5') && output.includes('5->4->3->2->1')",
+  "hints": [
+    "Practice linked list in Swift"
+  ],
+  "estimatedMinutes": 25,
+  "concepts": [
+    "linked list",
+    "swift"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create a swift Node class",
+      "description": "Define a Node class with `data` and `next` properties. Each node holds a value and a reference to the next node in the list. Test by creating a few standalone nodes and linking them manually.",
+      "hints": [
+        "The Node class should have a constructor that takes data and sets next to null",
+        "Create 3 nodes and link them: node1.next = node2; node2.next = node3",
+        "Print the data of the first node to verify the chain"
+      ],
+      "codeTemplate": {
+        "swift": "class Node {\n  let data: String\n  var next: Node?\n  \n  init(data: String) {\n    self.data = data\n    self.next = nil\n  }\n}\n\nlet node1 = Node(data: \"test\")\nlet node2 = Node(data: \"data\")\nnode1.next = node2\nprint(node1.data)\n"
+      },
+      "verification": {
+        "test": "output.includes('test') || output.length > 0",
+        "successMessage": "Node class created and linked successfully!",
+        "failureMessage": "Create a Node class with data and next properties, then link multiple nodes."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement insert operations",
+      "description": "Add methods to insert nodes at the beginning (prepend), end (append), and at a specific index in the linked list. Each insertion should update the appropriate next references.",
+      "hints": [
+        "For prepend: create new node, point its next to current head, update head",
+        "For append: traverse to the last node, set its next to the new node",
+        "Handle edge cases: inserting into an empty list"
+      ],
+      "codeTemplate": {
+        "swift": "// Step 2: Implement insert operations\nimport Foundation\n\n// Your code here\nprint(\"Testing Swift: Linked List...\")\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Insert operations work correctly!",
+        "failureMessage": "Implement prepend, append, and insert methods."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Implement delete and search",
+      "description": "Add methods to delete a node by value and search for a value in the list. Deletion should properly reconnect the surrounding nodes.",
+      "hints": [
+        "For delete: find the node before the target, skip the target node",
+        "For search: traverse the list and return the node if found",
+        "Handle deletion of head node separately"
+      ],
+      "codeTemplate": {
+        "swift": "// Step 3: Implement delete and search\nimport Foundation\n\n// Your code here\nprint(\"Testing Swift: Linked List...\")\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Delete and search work correctly!",
+        "failureMessage": "Implement deletion and search operations."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Add utility methods",
+      "description": "Implement printList(), size(), isEmpty(), and toArray() methods. These utilities make the linked list easier to use and debug.",
+      "hints": [
+        "printList should traverse and display each node data",
+        "size() should return the count of nodes",
+        "toArray() should return an array of all node data values"
+      ],
+      "codeTemplate": {
+        "swift": "// Step 4: Add utility methods\nimport Foundation\n\n// Your code here\nprint(\"Testing Swift: Linked List...\")\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Utility methods are working!",
+        "failureMessage": "Implement printList, size, isEmpty, and toArray."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test the complete linked list",
+      "description": "Create a comprehensive test: insert several values, delete some, search for a value, and display the final list. Verify all operations work end-to-end.",
+      "hints": [
+        "Insert values at different positions",
+        "Delete both the head and a middle node",
+        "Print the final list to verify correctness"
+      ],
+      "codeTemplate": {
+        "swift": "// Step 5: Test the complete linked list\nimport Foundation\n\n// Your code here\nprint(\"Testing Swift: Linked List...\")\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Complete linked list implementation works!",
+        "failureMessage": "Create a comprehensive test of all linked list operations."
+      }
+    }
+  ]
+}

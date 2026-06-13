@@ -1,0 +1,71 @@
+{
+  "id": "rs-fizzbuzz",
+  "title": "Rust: FizzBuzz",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "fizzbuzz", "modulo", "conditionals"],
+  "description": "Implement the classic FizzBuzz interview problem in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print 1 to 15",
+      "description": "Print the numbers from 1 to 15 in a loop.",
+      "hints": ["Use `for i in 1..=15 { println!(\"{}\", i); }`", "The `..=` syntax includes the end value.", "Just print each number for now."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('15')",
+        "successMessage": "Numbers 1 to 15 printed!",
+        "failureMessage": "Print numbers from 1 to 15."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fizz for Multiples of 3",
+      "description": "Modify your loop: if the number is divisible by 3, print `\"Fizz\"` instead of the number.",
+      "hints": ["`if i % 3 == 0 { println!(\"Fizz\"); } else { println!(\"{}\", i); }`", "3, 6, 9, 12, 15 should print 'Fizz'.", "The first numbers should be: 1, 2, Fizz, 4, 5, Fizz, ..."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Fizz') && output.includes('1') && output.includes('2')",
+        "successMessage": "Fizz for multiples of 3 works!",
+        "failureMessage": "Print 'Fizz' for numbers divisible by 3."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Buzz for Multiples of 5",
+      "description": "Add `\"Buzz\"` for numbers divisible by 5.",
+      "hints": ["Add an `else if i % 5 == 0 { println!(\"Buzz\"); }`", "5, 10, 15 should print 'Buzz'.", "15 is divisible by both 3 and 5 — it should print 'FizzBuzz'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Buzz')",
+        "successMessage": "Buzz for multiples of 5 works!",
+        "failureMessage": "Print 'Buzz' for numbers divisible by 5."
+      }
+    },
+    {
+      "id": 4,
+      "title": "FizzBuzz for Both",
+      "description": "Now handle the case where a number is divisible by both 3 and 5 — print `\"FizzBuzz\"`. The order matters: check both first!",
+      "hints": ["Check `i % 15 == 0` (or `i % 3 == 0 && i % 5 == 0`) FIRST.", "If both, print 'FizzBuzz'.", "Otherwise check 3, then 5, then print the number."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('FizzBuzz')",
+        "successMessage": "FizzBuzz complete!",
+        "failureMessage": "Print 'FizzBuzz' for numbers divisible by both 3 and 5."
+      }
+    },
+    {
+      "id": 5,
+      "title": "FizzBuzz Up to 30",
+      "description": "Run the full FizzBuzz logic from 1 to 30. Print each result on its own line.",
+      "hints": ["Change the range to `1..=30`.", "Keep the same logic from step 4.", "Verify: 15 and 30 should print 'FizzBuzz'."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('FizzBuzz') && output.includes('30')",
+        "successMessage": "FizzBuzz up to 30 works!",
+        "failureMessage": "Run FizzBuzz from 1 to 30."
+      }
+    }
+  ]
+}

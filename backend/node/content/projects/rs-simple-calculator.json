@@ -1,0 +1,71 @@
+{
+  "id": "rs-simple-calculator",
+  "title": "Rust: Simple Calculator",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "arithmetic", "match", "calculator"],
+  "description": "Build a simple calculator that performs basic operations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Add Two Numbers",
+      "description": "Write a function `add(a: f64, b: f64) -> f64` that returns the sum. Call with 10.5 and 20.3, print result.",
+      "hints": ["`fn add(a: f64, b: f64) -> f64 { a + b }`", "10.5 + 20.3 = 30.8", "Use `{:.1}` to format 1 decimal place."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30.8')",
+        "successMessage": "Addition works!",
+        "failureMessage": "Add 10.5 and 20.3 and print 30.8."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Subtract, Multiply, Divide",
+      "description": "Write functions for subtract, multiply, and divide. Call each with (20, 4) and print results.",
+      "hints": ["Subtract: 20 - 4 = 16", "Multiply: 20 * 4 = 80", "Divide: 20.0 / 4.0 = 5.0"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('16') && output.includes('80') && output.includes('5')",
+        "successMessage": "All operations work!",
+        "failureMessage": "Print subtract(20,4)=16, multiply(20,4)=80, divide(20,4)=5."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Calculator with Match",
+      "description": "Write a function `calculate(a: f64, b: f64, op: char) -> f64` that uses match to select the operation. Test with (10, 3, '+') and (10, 3, '-').",
+      "hints": ["`match op { '+' => a + b, '-' => a - b, '*' => a * b, '/' => a / b, _ => 0.0 }`", "Make match arms for +, -, *, /", "10 + 3 = 13, 10 - 3 = 7"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('13') && output.includes('7')",
+        "successMessage": "Calculator with match works!",
+        "failureMessage": "Calculate 10+3=13 and 10-3=7."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Division by Zero",
+      "description": "Handle division by zero gracefully. Modify `calculate` to return `Option<f64>` — `Some(result)` on success, `None` on division by zero.",
+      "hints": ["Change return type to `Option<f64>`.", "If op is '/' and b == 0.0, return `None`.", "Print using match: `Some(v) => println!(\"{}\", v), None => println!(\"Error: division by zero\")`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('Error')",
+        "successMessage": "Division by zero handled!",
+        "failureMessage": "Print 10/2=5 and error for division by zero."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Interactive Calculator",
+      "description": "Evaluate `(15 + 3) * 2 - 8 / 4` by chaining multiple calculate calls. Calculate step by step and print the result.",
+      "hints": ["Parentheses first: 15 + 3 = 18", "Then multiplication: 18 * 2 = 36", "Then division: 8 / 4 = 2", "Finally subtraction: 36 - 2 = 34"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('34')",
+        "successMessage": "Chained calculation works!",
+        "failureMessage": "Calculate (15+3)*2-8/4 and print 34."
+      }
+    }
+  ]
+}

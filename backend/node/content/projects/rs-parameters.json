@@ -1,0 +1,71 @@
+{
+  "id": "rs-parameters",
+  "title": "Rust: Function Parameters",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 12,
+  "concepts": ["rust", "parameters", "pass by reference", "mutable references"],
+  "description": "Explore different parameter passing modes in Rust functions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Pass by Value",
+      "description": "Write a function `print_value(x: i32)` that prints the value. Call it with `42`. The original variable is moved/copied.",
+      "hints": ["Primitive types like `i32` implement `Copy` so they're copied automatically.", "`fn print_value(x: i32) { println!(\"{}\", x); }`", "The function takes ownership (or a copy for Copy types)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Pass by value works!",
+        "failureMessage": "Call print_value(42) and print the result."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pass by Reference",
+      "description": "Write a function `print_length(s: &String)` that prints the length of a String. Call it with a String reference.",
+      "hints": ["`fn print_length(s: &String) { println!(\"{}\", s.len()); }`", "Use `&` to create a reference: `print_length(&my_string);`", "References don't transfer ownership."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('5') || output.includes('length')",
+        "successMessage": "Pass by reference works!",
+        "failureMessage": "Print the length of a String using a reference parameter."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Mutable Reference",
+      "description": "Write a function `add_exclamation(s: &mut String)` that appends `\"!\"` to the string. Call it and print the modified string.",
+      "hints": ["`fn add_exclamation(s: &mut String) { s.push_str(\"!\"); }`", "The caller must pass `&mut my_string`.", "The original `my_string` must be declared `mut`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('!')",
+        "successMessage": "Mutable reference works!",
+        "failureMessage": "Append '!' using a mutable reference and print the result."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Multiple References",
+      "description": "Write a function `first_two(a: &i32, b: &i32) -> i32` that returns a + b. Call with references to two variables and print.",
+      "hints": ["You can have multiple immutable references at once.", "`fn first_two(a: &i32, b: &i32) -> i32 { *a + *b }`", "Dereference with `*` to get the value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('30') || output.includes('sum')",
+        "successMessage": "Multiple references work!",
+        "failureMessage": "Add two numbers via references and print the sum."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Slice Parameter",
+      "description": "Write a function `sum_slice(slice: &[i32]) -> i32` that sums all elements. Call with `&[1, 2, 3, 4, 5]` and print.",
+      "hints": ["`fn sum_slice(slice: &[i32]) -> i32 { slice.iter().sum() }`", "A `&[i32]` parameter accepts array slices or Vec references.", "sum_slice(&[1, 2, 3, 4, 5]) = 15."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('15')",
+        "successMessage": "Slice parameter works!",
+        "failureMessage": "Print the sum of 1 to 5 using sum_slice."
+      }
+    }
+  ]
+}

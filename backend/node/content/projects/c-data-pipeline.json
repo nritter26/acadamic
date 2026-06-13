@@ -1,0 +1,23 @@
+{
+  "id": "c-data-pipeline",
+  "title": "C: Data Pipeline",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "pipeline", "data processing", "function pointers", "transforms"],
+  "description": "Build a data processing pipeline that passes integers through a chain of transformations.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Pipeline Transforms",
+      "description": "Define a `Transform` function pointer type `int (*transform)(int)`. Write a `pipeline_run` function that applies an array of transforms sequentially to input data. Create transforms: double, increment, absolute value. Test with input -3.",
+      "hints": ["Transform array is NULL-terminated.", "`pipeline_run(int input, transform t[])` applies all.", "double: `x*2`, increment: `x+1`, absolute: `x<0?-x:x`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef int (*transform)(int);\n\nint double_it(int x) { return x * 2; }\nint increment(int x) { return x + 1; }\nint absolute(int x) { return x < 0 ? -x : x; }\n\nint pipeline_run(int input, transform t[]) {\n    for (int i = 0; t[i]; i++) input = t[i](input);\n    return input;\n}\n\nint main() {\n    transform pipeline[] = {absolute, double_it, increment, NULL};\n    printf(\"Result: %d\\n\", pipeline_run(-3, pipeline));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('7')",
+        "successMessage": "Data pipeline works!",
+        "failureMessage": "Transform -3: |-3|=3, 3*2=6, 6+1=7"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "c-dynamic-array",
+  "title": "C: Dynamic Array",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "malloc", "realloc", "free", "dynamic memory", "printf"],
+  "description": "Implement a dynamic integer array using malloc/realloc that grows automatically as elements are added.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "DynArray Init and Append",
+      "description": "Define a `DynArray` struct with `int *data`, `int size`, `int capacity`. Write `void da_init(DynArray *da)` that allocates initial capacity of 4. Write `void da_append(DynArray *da, int val)` that reallocs when full. Test by appending 6 numbers and printing them.",
+      "hints": ["Initial capacity = 4, use `malloc(capacity * sizeof(int))`.", "When size == capacity, double capacity with `realloc`.", "Access elements with `da->data[i]`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int *data;\n    int size;\n    int capacity;\n} DynArray;\n\nvoid da_init(DynArray *da) {\n    \n}\n\nvoid da_append(DynArray *da, int val) {\n    \n}\n\nint main() {\n    DynArray da;\n    da_init(&da);\n    for (int i = 1; i <= 6; i++) da_append(&da, i * 10);\n    for (int i = 0; i < da.size; i++) printf(\"%d \", da.data[i]);\n    printf(\"\\n\");\n    free(da.data);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('10 20 30 40 50 60')",
+        "successMessage": "Dynamic array works!",
+        "failureMessage": "Append 10-60 and print all elements"
+      }
+    }
+  ]
+}

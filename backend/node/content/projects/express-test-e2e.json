@@ -1,0 +1,147 @@
+{
+  "id": "express-test-e2e",
+  "title": "End-to-End CRUD Testing",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 45,
+  "concepts": ["e2e-testing", "CRUD", "REST", "workflow", "verification"],
+  "serverMode": true,
+  "description": "Build a complete end-to-end CRUD test suite that creates, reads, updates, and deletes resources, verifying each step.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Health check endpoint",
+      "description": "Create a GET /health endpoint that returns 200, establishing the API is running.",
+      "hints": [
+        "Use app.get('/health', handler)",
+        "Return JSON: { status: 'ok' }",
+        "Listen on process.env.PORT or 3000"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/health', (req: Request, res: Response) => {\n  res.json({ status: 'ok' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "status"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Create resource via POST",
+      "description": "Create a POST /resources endpoint that creates a resource and returns 201.",
+      "hints": [
+        "Accept JSON body with resource data",
+        "Assign a unique id",
+        "Return 201 with the created resource"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet resources = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req, res) => {\n  const { title, content } = req.body;\n  const resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Resource {\n  id: number;\n  title: string;\n  content: string;\n  createdAt: string;\n}\n\nlet resources: Resource[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const resource: Resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ResourceIn(BaseModel):\n    title: str\n    content: str\n\nresources = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/resources', status_code=201)\ndef create_resource(res: ResourceIn):\n    global next_id\n    new_res = {'id': next_id, 'title': res.title, 'content': res.content, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    resources.append(new_res)\n    return new_res\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"time\"\n)\n\ntype Resource struct {\n\tID        int    `json:\"id\"`\n\tTitle     string `json:\"title\"`\n\tContent   string `json:\"content\"`\n\tCreatedAt string `json:\"createdAt\"`\n}\n\nvar (\n\tresources []Resource\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/resources\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct {\n\t\t\tTitle   string `json:\"title\"`\n\t\t\tContent string `json:\"content\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tres := Resource{ID: nextID, Title: body.Title, Content: body.Content, CreatedAt: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tresources = append(resources, res)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(res)\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/resources",
+            "expectedStatus": 201,
+            "expectedBodySubstring": "id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Read resource via GET",
+      "description": "Add GET /resources/:id to read a resource and verify the data matches what was created.",
+      "hints": [
+        "Use app.get('/resources/:id', handler)",
+        "Return 200 with the resource data",
+        "Verify the returned data matches the created resource"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet resources = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req, res) => {\n  const { title, content } = req.body;\n  const resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Resource {\n  id: number;\n  title: string;\n  content: string;\n  createdAt: string;\n}\n\nlet resources: Resource[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const resource: Resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ResourceIn(BaseModel):\n    title: str\n    content: str\n\nresources = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/resources', status_code=201)\ndef create_resource(res: ResourceIn):\n    global next_id\n    new_res = {'id': next_id, 'title': res.title, 'content': res.content, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    resources.append(new_res)\n    return new_res\n\n@app.get('/resources/{res_id}')\ndef get_resource(res_id: int):\n    for r in resources:\n        if r['id'] == res_id:\n            return r\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Resource struct {\n\tID        int    `json:\"id\"`\n\tTitle     string `json:\"title\"`\n\tContent   string `json:\"content\"`\n\tCreatedAt string `json:\"createdAt\"`\n}\n\nvar (\n\tresources []Resource\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/resources\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct { Title string `json:\"title\"`; Content string `json:\"content\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tres := Resource{ID: nextID, Title: body.Title, Content: body.Content, CreatedAt: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tresources = append(resources, res)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(res)\n\t})\n\n\thttp.HandleFunc(\"/resources/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/resources/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor _, res := range resources {\n\t\t\tif res.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tjson.NewEncoder(w).Encode(res)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/resources/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "title"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Update resource via PUT",
+      "description": "Add PUT /resources/:id to update a resource and verify via GET that changes persist.",
+      "hints": [
+        "Accept updated title and content in the request body",
+        "Update the resource fields",
+        "Verify by calling GET /resources/:id"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet resources = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req, res) => {\n  const { title, content } = req.body;\n  const resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.put('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  resource.title = req.body.title || resource.title;\n  resource.content = req.body.content || resource.content;\n  res.json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Resource {\n  id: number;\n  title: string;\n  content: string;\n  createdAt: string;\n}\n\nlet resources: Resource[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const resource: Resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.put('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  resource.title = req.body.title || resource.title;\n  resource.content = req.body.content || resource.content;\n  res.json(resource);\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ResourceIn(BaseModel):\n    title: str\n    content: str\n\nclass ResourceUpdate(BaseModel):\n    title: str = None\n    content: str = None\n\nresources = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/resources', status_code=201)\ndef create_resource(res: ResourceIn):\n    global next_id\n    new_res = {'id': next_id, 'title': res.title, 'content': res.content, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    resources.append(new_res)\n    return new_res\n\n@app.get('/resources/{res_id}')\ndef get_resource(res_id: int):\n    for r in resources:\n        if r['id'] == res_id:\n            return r\n    return {'error': 'Not found'}\n\n@app.put('/resources/{res_id}')\ndef update_resource(res_id: int, update: ResourceUpdate):\n    for r in resources:\n        if r['id'] == res_id:\n            if update.title: r['title'] = update.title\n            if update.content: r['content'] = update.content\n            return r\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Resource struct {\n\tID        int    `json:\"id\"`\n\tTitle     string `json:\"title\"`\n\tContent   string `json:\"content\"`\n\tCreatedAt string `json:\"createdAt\"`\n}\n\nvar (\n\tresources []Resource\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/resources\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct { Title string `json:\"title\"`; Content string `json:\"content\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tres := Resource{ID: nextID, Title: body.Title, Content: body.Content, CreatedAt: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tresources = append(resources, res)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(res)\n\t})\n\n\thttp.HandleFunc(\"/resources/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/resources/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor i, res := range resources {\n\t\t\tif res.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tswitch r.Method {\n\t\t\t\tcase \"GET\":\n\t\t\t\t\tjson.NewEncoder(w).Encode(res)\n\t\t\t\tcase \"PUT\":\n\t\t\t\t\tvar body struct { Title string `json:\"title\"`; Content string `json:\"content\"` }\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\tif body.Title != \"\" { resources[i].Title = body.Title }\n\t\t\t\t\tif body.Content != \"\" { resources[i].Content = body.Content }\n\t\t\t\t\tjson.NewEncoder(w).Encode(resources[i])\n\t\t\t\t}\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "PUT",
+            "path": "/resources/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "title"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Delete resource and verify 404",
+      "description": "Add DELETE /resources/:id that returns 200, then verify via GET that it returns 404.",
+      "hints": [
+        "Remove resource from the array by id",
+        "Return 200 with success message",
+        "Call GET /resources/:id and expect 404"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nlet resources = [];\nlet nextId = 1;\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req, res) => {\n  const { title, content } = req.body;\n  const resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.put('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  resource.title = req.body.title || resource.title;\n  resource.content = req.body.content || resource.content;\n  res.json(resource);\n});\n\napp.delete('/resources/:id', (req, res) => {\n  const id = parseInt(req.params.id, 10);\n  const idx = resources.findIndex(r => r.id === id);\n  if (idx === -1) return res.status(404).json({ error: 'Not found' });\n  resources.splice(idx, 1);\n  res.json({ deleted: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\ninterface Resource {\n  id: number;\n  title: string;\n  content: string;\n  createdAt: string;\n}\n\nlet resources: Resource[] = [];\nlet nextId = 1;\n\napp.get('/health', (req: Request, res: Response) => res.json({ status: 'ok' }));\n\napp.post('/resources', (req: Request, res: Response) => {\n  const { title, content } = req.body;\n  const resource: Resource = { id: nextId++, title, content, createdAt: new Date().toISOString() };\n  resources.push(resource);\n  res.status(201).json(resource);\n});\n\napp.get('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  res.json(resource);\n});\n\napp.put('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const resource = resources.find(r => r.id === id);\n  if (!resource) return res.status(404).json({ error: 'Not found' });\n  resource.title = req.body.title || resource.title;\n  resource.content = req.body.content || resource.content;\n  res.json(resource);\n});\n\napp.delete('/resources/:id', (req: Request, res: Response) => {\n  const id = parseInt(req.params.id, 10);\n  const idx = resources.findIndex(r => r.id === id);\n  if (idx === -1) return res.status(404).json({ error: 'Not found' });\n  resources.splice(idx, 1);\n  res.json({ deleted: true });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nclass ResourceIn(BaseModel):\n    title: str\n    content: str\nclass ResourceUpdate(BaseModel):\n    title: str = None\n    content: str = None\n\nresources = []\nnext_id = 1\n\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}\n\n@app.post('/resources', status_code=201)\ndef create_resource(res: ResourceIn):\n    global next_id\n    new_res = {'id': next_id, 'title': res.title, 'content': res.content, 'createdAt': datetime.now().isoformat()}\n    next_id += 1\n    resources.append(new_res)\n    return new_res\n\n@app.get('/resources/{res_id}')\ndef get_resource(res_id: int):\n    for r in resources:\n        if r['id'] == res_id:\n            return r\n    return {'error': 'Not found'}\n\n@app.put('/resources/{res_id}')\ndef update_resource(res_id: int, update: ResourceUpdate):\n    for r in resources:\n        if r['id'] == res_id:\n            if update.title: r['title'] = update.title\n            if update.content: r['content'] = update.content\n            return r\n    return {'error': 'Not found'}\n\n@app.delete('/resources/{res_id}')\ndef delete_resource(res_id: int):\n    for i, r in enumerate(resources):\n        if r['id'] == res_id:\n            resources.pop(i)\n            return {'deleted': True}\n    return {'error': 'Not found'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\ntype Resource struct {\n\tID        int    `json:\"id\"`\n\tTitle     string `json:\"title\"`\n\tContent   string `json:\"content\"`\n\tCreatedAt string `json:\"createdAt\"`\n}\n\nvar (\n\tresources []Resource\n\tnextID    = 1\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" { port = \"3000\" }\n\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n\t})\n\n\thttp.HandleFunc(\"/resources\", func(w http.ResponseWriter, r *http.Request) {\n\t\tvar body struct { Title string `json:\"title\"`; Content string `json:\"content\"` }\n\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\tres := Resource{ID: nextID, Title: body.Title, Content: body.Content, CreatedAt: time.Now().Format(time.RFC3339)}\n\t\tnextID++\n\t\tresources = append(resources, res)\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\tjson.NewEncoder(w).Encode(res)\n\t})\n\n\thttp.HandleFunc(\"/resources/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/resources/\")\n\t\tid, _ := strconv.Atoi(idStr)\n\t\tfor i, res := range resources {\n\t\t\tif res.ID == id {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tswitch r.Method {\n\t\t\t\tcase \"GET\":\n\t\t\t\t\tjson.NewEncoder(w).Encode(res)\n\t\t\t\tcase \"PUT\":\n\t\t\t\t\tvar body struct { Title string `json:\"title\"`; Content string `json:\"content\"` }\n\t\t\t\t\tjson.NewDecoder(r.Body).Decode(&body)\n\t\t\t\t\tif body.Title != \"\" { resources[i].Title = body.Title }\n\t\t\t\t\tif body.Content != \"\" { resources[i].Content = body.Content }\n\t\t\t\t\tjson.NewEncoder(w).Encode(resources[i])\n\t\t\t\tcase \"DELETE\":\n\t\t\t\t\tresources = append(resources[:i], resources[i+1:]...)\n\t\t\t\t\tjson.NewEncoder(w).Encode(map[string]bool{\"deleted\": true})\n\t\t\t\t}\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Not found\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "DELETE",
+            "path": "/resources/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "deleted"
+          }
+        ]
+      }
+    }
+  ]
+}

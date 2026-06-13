@@ -1,0 +1,23 @@
+{
+  "id": "c-task-queue",
+  "title": "C: Task Queue",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "task queue", "worker", "function pointers", "queue"],
+  "description": "Build a task queue system with a pool of workers that process tasks from a shared queue.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Task Queue with Workers",
+      "description": "Define a `Task` struct with a function pointer `void (*run)(void*)` and void* arg. Create a `TaskQueue` that holds up to 100 tasks. Write `void tq_enqueue(TaskQueue *q, Task t)` and `Task tq_dequeue(TaskQueue *q)`. Test by enqueueing 3 tasks and dequeueing/executing them.",
+      "hints": ["TaskQueue: Task array + front/rear indices (circular).", "enqueue adds at rear, dequeue removes from front.", "Execute: `task.run(task.arg)`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\n#define MAX_TASKS 100\n\ntypedef struct { void (*run)(void*); void *arg; } Task;\n\ntypedef struct { Task tasks[MAX_TASKS]; int front, rear, count; } TaskQueue;\n\nvoid tq_init(TaskQueue *q) { q->front = q->rear = q->count = 0; }\nvoid tq_enqueue(TaskQueue *q, Task t) {\n    if (q->count < MAX_TASKS) {\n        q->tasks[q->rear] = t;\n        q->rear = (q->rear + 1) % MAX_TASKS;\n        q->count++;\n    }\n}\nTask tq_dequeue(TaskQueue *q) {\n    Task t = q->tasks[q->front];\n    q->front = (q->front + 1) % MAX_TASKS;\n    q->count--;\n    return t;\n}\n\nvoid print_task(void *arg) { printf(\"Task: %s\\n\", (char*)arg); }\nvoid add_task(void *arg) { int *vals = (int*)arg; printf(\"Sum: %d\\n\", vals[0] + vals[1]); }\n\nint main() {\n    TaskQueue q;\n    tq_init(&q);\n    tq_enqueue(&q, (Task){print_task, \"Hello\"});\n    int vals[2] = {10, 20};\n    tq_enqueue(&q, (Task){add_task, vals});\n    tq_enqueue(&q, (Task){print_task, \"World\"});\n    while (q.count > 0) {\n        Task t = tq_dequeue(&q);\n        t.run(t.arg);\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Hello') && output.includes('30') && output.includes('World')",
+        "successMessage": "Task queue works!",
+        "failureMessage": "Execute all 3 tasks from the queue in order"
+      }
+    }
+  ]
+}

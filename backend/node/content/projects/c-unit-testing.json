@@ -1,0 +1,23 @@
+{
+  "id": "c-unit-testing",
+  "title": "C: Unit Testing with assert",
+  "difficulty": "beginner",
+  "languages": ["c"],
+  "estimatedMinutes": 10,
+  "concepts": ["c", "unit testing", "assert.h", "testing"],
+  "description": "Use assert.h to write simple unit tests for basic arithmetic functions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Test with assert",
+      "description": "Write functions `int add(int a, int b)` and `int multiply(int a, int b)`. Use `assert()` to test that add(2,3) == 5 and multiply(4,5) == 20. Print 'All tests passed!' after assertions.",
+      "hints": ["Include <assert.h>.", "`assert(add(2,3) == 5);` stops the program if false.", "Use `printf(\"All tests passed!\\n\");` at the end."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <assert.h>\n\nint add(int a, int b) { return a + b; }\nint multiply(int a, int b) { return a * b; }\n\nint main() {\n    assert(add(2, 3) == 5);\n    assert(multiply(4, 5) == 20);\n    printf(\"All tests passed!\\n\");\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('All tests passed')",
+        "successMessage": "Unit testing works!",
+        "failureMessage": "Run assertions and print success message"
+      }
+    }
+  ]
+}

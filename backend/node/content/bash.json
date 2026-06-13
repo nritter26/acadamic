@@ -1,0 +1,596 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "Introduction to Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "Variables and data types in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "Operators in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "Control flow statements in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "Functions in Bash.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "Working with collections in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "String manipulation in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "Key-value data structures in Bash.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "OOP concepts in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "Inheritance patterns in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "Interfaces and contracts in Bash.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "Exception handling in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "Debugging Bash code.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "File I/O in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "Input and output operations in Bash.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "Concurrency in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "Modular programming in Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "Best practices for Bash.",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "Optimizing Bash code.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Getting Started": {
+    "What is Bash": [
+      "Bash (Bourne Again SHell) is a Unix shell and command language written by Brian Fox for the GNU Project. It's the default shell on most Linux distributions and macOS. Bash interprets commands, runs programs, and supports scripting with variables, control flow, and functions.",
+      "#!/bin/bash\n# This is a Bash script\n\necho \"Hello from Bash!\"\n\n# Check your shell\necho \"Current shell: $SHELL\"\n\n# Bash version\nbash --version"
+    ],
+    "Terminal vs Shell": [
+      "A terminal (or terminal emulator) is the graphical window where you type commands. A shell (like Bash) is the program inside that terminal that interprets your commands. The terminal sends your keystrokes to the shell, and the shell sends output back to the terminal.",
+      "# Common terminal emulators: GNOME Terminal, Konsole, iTerm2, Windows Terminal\n# Common shells: bash, zsh, fish, sh\n\n# See what shell you're running\necho $0\n\n# See available shells\ncat /etc/shells"
+    ],
+    "Navigating the Filesystem": [
+      "pwd prints your current directory. ls lists directory contents. cd changes directory. Use absolute paths (starting with /) or relative paths. ~ is your home directory, . is current directory, .. is parent directory.",
+      "# Where am I?\npwd\n\n# List files\nls\nls -la          # detailed view with hidden files\nls -lh          # human-readable sizes\n\n# Navigate\ncd /tmp         # absolute path\ncd ~            # home directory\ncd ..           # parent directory\ncd -            # previous directory"
+    ],
+    "man & Help": [
+      "man displays the system manual for any command. Use q to quit, / to search, n/N for next/prev match. Most commands also support --help or -h for a quick usage summary. info provides more detailed documentation.",
+      "# Get manual pages\nman ls\nman bash\n\n# Quick help\ngrep --help\nls --help\n\n# Search manual pages by keyword\nman -k search\nman -k \"list files\""
+    ],
+    "Basic Commands Overview": [
+      "Essential commands: echo (print text), date (show date/time), whoami (current user), id (user info), uname (system info), uptime (system uptime), cal (calendar), clear (clear terminal), history (command history), hostname (system hostname).",
+      "echo \"Hello World\"\ndate\nwhoami\nid\nuname -a\nuphone\ncal 2025\nhistory | tail -10\nhostname"
+    ],
+    "Terminal Multiplexers: tmux & screen": [
+      "tmux: terminal multiplexer for persistent sessions, splits, windows. Sessions survive disconnection. Key: `tmux new -s work`, `Ctrl-b %` (vsplit), `Ctrl-b \"` (hsplit), `Ctrl-b c` (new window), `Ctrl-b d` (detach). `tmux attach -t work` reattach. Mouse mode: `set -g mouse on`. Copy mode: `Ctrl-b [` then vi keys. session groups, synchronize panes. Screen: older alternative `screen -S name`, `Ctrl-a c` (new window).",
+      "# tmux quick reference\n\n# Create session\ntmux new -s mysession\n\n# Detach: Ctrl-b d\n# Reattach: tmux attach -t mysession\n# List: tmux ls\n\n# Key bindings (prefix: Ctrl-b)\n# %  — vertical split\n# \"  — horizontal split\n# o  — next pane\n# c  — new window\n# n/p  — next/prev window\n# ,  — rename window\n# &  — kill window\n# x  — kill pane\n# z  — zoom pane\n# [  — enter copy mode (vi: space to start, enter to copy)\n# :  — command prompt\n\n# ~/.tmux.conf\nset -g mouse on\nset -g default-terminal \"screen-256color\"\nset -g history-limit 10000\nbind r source-file ~/.tmux.conf\n\n# Synchronize panes (type same input to all)\n# Ctrl-b : setw synchronize-panes on\n\n# tmuxinator (session presets)\n# ~/.tmuxinator/project.yml\n# name: project\n# windows:\n#   - editor: vim .\n#   - server: npm run dev\n\n# screen alternative\n# screen -S work\n# Ctrl-a c new window, Ctrl-a n next\n# screen -r work (reattach)"
+    ]
+  },
+  "File Operations": {
+    "Creating & Deleting Files": [
+      "touch creates empty files or updates timestamps. rm removes files. Use -i for confirmation, -f to force, -r for directories. Be careful — rm -rf is powerful and dangerous. mkdir creates directories, rmdir removes empty directories.",
+      "# File operations\ntouch file.txt\nrm file.txt\nrm -i file.txt    # prompt before remove\n\n# Directory operations\nmkdir mydir\nmkdir -p parent/child/grandchild   # create intermediate dirs\nrmdir mydir                         # only empty dirs\nrm -rf mydir                        # remove recursively (dangerous!)"
+    ],
+    "Copying & Moving": [
+      "cp copies files and directories. mv moves or renames files. Both accept -i (interactive), -v (verbose), -u (update newer). For directories, cp needs -r (recursive). mv always works on directories without extra flags.",
+      "# Copy\ncp source.txt dest.txt\ncp -i source.txt dest.txt    # prompt before overwrite\ncp -r mydir /backup/mydir    # copy directory recursively\n\n# Move/Rename\nmv oldname.txt newname.txt\nmv file.txt /tmp/            # move to another directory\nmv -i file.txt dest.txt      # prompt before overwrite"
+    ],
+    "Linking Files": [
+      "ln creates links. Hard links are multiple directory entries pointing to the same inode — deleting one doesn't affect others. Soft links (symlinks) are pointers to another path — they break if the target is moved or deleted. Symbolic links can cross filesystems.",
+      "# Hard link\nln target.txt hardlink.txt\nls -li          # same inode number\n\n# Symbolic link\nln -s target.txt symlink.txt\nls -la          # shows -> target\n\n# Symlinks can point to directories\nln -s /usr/bin binlink\n\n# Broken symlink (target deleted)\nrm target.txt\ncat symlink.txt  # No such file or directory"
+    ],
+    "Finding Files": [
+      "find searches the filesystem by name, type, size, date, and more. locate uses a prebuilt database for faster searches but may be stale. which shows the path of an executable. whereis finds binary, source, and man pages.",
+      "# find: powerful but slower\nfind /home -name \"*.txt\"\nfind . -type f -size +1M\nfind . -mtime -7              # modified in last 7 days\n\n# Advanced: -exec (safe with +)\nfind . -name \"*.log\" -exec rm {} \\;       # run per file\nfind . -name \"*.log\" -exec rm {} +        # batch (faster)\n\n# -ok: interactive confirmation\nfind . -name \"*.tmp\" -ok rm {} \\;\n\n# Complex boolean expressions\nfind . \\( -name \"*.html\" -o -name \"*.htm\" \\) -type f\nfind . ! -name \"*.txt\" -type f\nfind . -name \"*.py\" -not -path \"*/venv/*\"\n\n# find + xargs with null delimiter (handles spaces)\nfind . -name \"*.jpg\" -print0 | xargs -0 rm\n\n# Performance: early pruning\nfind /var -name \"*.log\" -not -path \"*/old/*\"\n\n# locate: fast but uses database\nsudo updatedb                  # update database first\nlocate bashrc\n\n# which & whereis\nwhich python3\nwhereis bash"
+    ],
+    "File Attributes & stat": [
+      "stat displays detailed file metadata: size, blocks, permissions, timestamps (access, modify, change), and inode number. file detects the file type by examining magic bytes. du estimates file/directory size usage.",
+      "# File metadata\nstat file.txt\nstat -c \"%s bytes, permissions %A\" file.txt\n\n# Detect file type\nfile mystery.bin\nfile *\n\n# Disk usage\ndu -sh mydir          # total size\ndu -ah mydir          # per-file sizes\ndu --max-depth=1 /home"
+    ]
+  },
+  "Viewing & Editing Files": {
+    "cat & less": [
+      "cat concatenates and displays files. Use it for small files or joining files. less is a pager for viewing large files with scroll, search, and navigation. less is better than cat for files longer than one screen. Use q to quit less.",
+      "# cat for small files or joining\ncat file.txt\ncat file1.txt file2.txt > combined.txt\ncat -n file.txt              # with line numbers\n\n# less for paging\nless largefile.log\n# Inside less: /search, n/N, g/G, q"
+    ],
+    "head & tail": [
+      "head shows the first N lines (default 10) of a file. tail shows the last N lines. tail -f follows a file as it grows — essential for monitoring logs. Both support -n for line count and -c for byte count.",
+      "# First/last lines\nhead file.txt\nhead -n 20 file.txt\nhead -c 100 file.txt         # first 100 bytes\n\ntail file.txt\ntail -n 50 file.txt\ntail -f /var/log/syslog      # follow mode (Ctrl+C to stop)\n\n# View lines 50-60\nhead -n 60 file.txt | tail -n 11"
+    ],
+    "nano & vim Basics": [
+      "nano is a beginner-friendly terminal text editor with on-screen shortcuts. vim is a powerful modal editor with multiple modes: Normal (navigation), Insert (editing), Visual (selection), and Command (ex commands). Learn vim for speed; use nano for simplicity.",
+      "# nano — simple, intuitive\nnano file.txt\n# ^O save, ^X exit, ^W search, ^K cut, ^U paste\n\n# vim — powerful, modal\nvim file.txt\n# i = insert mode, Esc = normal mode\n# :w save, :q quit, :wq save & quit\n# /search, n/N next/prev, dd delete line"
+    ],
+    "Viewing Binary & Special Files": [
+      "hexdump (hd), xxd, and od display binary file contents in hexadecimal, octal, or ASCII. strings extracts printable strings from binary files. Use these for debugging binary formats or examining executables.",
+      "# Hex dump\nhexdump file.bin\nxxd file.bin\nod -c file.bin               # octal dump\n\n# Extract strings from binary\nstrings /bin/ls | head -20\nstrings program.bin | grep -i error"
+    ]
+  },
+  "Text Processing": {
+    "grep — Search Text": [
+      "grep searches files for patterns using regular expressions. Common options: -i (ignore case), -r (recursive), -v (invert match), -n (line numbers), -l (filename only), -c (count matches), -E (extended regex), -o (only matching).",
+      "# Basic usage\ngrep \"error\" log.txt\ngrep -ri \"TODO\" src/          # recursive, case-insensitive\ngrep -rn \"function\" .\n\n# Advanced\ngrep -E \"foo|bar\" file.txt   # extended regex (alternation)\ngrep -P \"\\\\d{3}-\\\\d{4}\" file.txt  # PCRE (Perl-compatible)\ngrep -v \"^#\" config.conf     # remove comments\ngrep -c \"ERROR\" log.txt      # count matches\ngrep -l \"main\" *.py          # filenames only\n\n# Context lines\ngrep -A 2 \"ERROR\" log.txt    # 2 lines after\ngrep -B 2 \"ERROR\" log.txt    # 2 lines before\ngrep -C 3 \"ERROR\" log.txt    # 3 lines around\n\n# Binary files\ngrep -a \"text\" binary.dat    # treat binary as text\n\n# Pipe with other commands\nps aux | grep python\ndmesg | grep -i error | tail"
+    ],
+    "sed — Stream Editor": [
+      "sed processes and transforms text non-interactively. Most common: s/old/new/g (substitute), /pattern/d (delete), -n 'p' (print). sed supports in-place editing with -i. It works line-by-line by default.",
+      "# Substitution\nsed 's/foo/bar/' file.txt          # first occurrence per line\nsed 's/foo/bar/g' file.txt         # all occurrences\nsed -i 's/foo/bar/g' file.txt      # in-place\n\n# Line operations\nsed '5d' file.txt                  # delete line 5\nsed '/^#/d' file.txt               # delete comments\nsed -n '10,20p' file.txt           # print lines 10-20\n\n# Multiple commands\nsed -e 's/foo/bar/' -e 's/baz/qux/' file.txt\n\n# Multiline (N = append next line)\nsed '/start/,/end/{/start/d;/end/d;}' file.txt  # remove range\n\n# Hold space (advanced)\nsed -n '/pattern/h; ${x;p}' file.txt  # print last match only\n\n# Address ranges\nsed '10,/pattern/s/foo/bar/' file.txt\n\n# In-place with backup\nsed -i.bak 's/old/new/g' file.txt"
+    ],
+    "awk — Text Processing": [
+      "awk is a powerful text-processing language for field-based data. Default field separator is whitespace. $0 is the whole line, $1, $2, etc. are fields. Supports patterns, actions, and built-in variables (NF, NR, FS, OFS).",
+      "# Field extraction\nawk '{print $1}' file.txt          # first column\nawk '{print $1, $3}' file.txt\n\n# With patterns\nawk '/error/ {print $0}' log.txt   # lines matching error\nawk '$3 > 50 {print $1}' data.txt  # conditional\n\n# Built-in variables\nawk '{print NR, $0}' file.txt      # line numbers\nawk -F: '{print $1}' /etc/passwd   # colon separator\n\n# Calculations\nawk '{sum += $1} END {print sum}' numbers.txt\n\n# Multi-rule script\nawk '\nBEGIN { print \"Report\", strftime() }\n/ERROR/ { errors++ }\n/WARN/  { warnings++ }\nEND     { print \"Errors:\", errors, \"Warnings:\", warnings }\n' log.txt\n\n# Arrays in awk\nawk '{count[$1]++} END {for (k in count) print k, count[k]}' data.txt\n\n# User-defined functions (gawk)\nawk 'function max(a,b) {return a>b?a:b} {print max($1,$2)}'"
+    ],
+    "cut, sort, uniq": [
+      "cut extracts columns by delimiter (-d, -f). sort sorts lines alphabetically or numerically (-n), reverse (-r), unique (-u). uniq removes adjacent duplicates (use sort first). wc counts lines/words/characters.",
+      "# cut — extract columns\ncut -d: -f1,3 /etc/passwd\ncut -c1-10 file.txt              # characters 1-10\n\n# sort\nsort file.txt\nsort -n numbers.txt               # numeric sort\nsort -k2 -t: data.txt             # sort by 2nd field\n\n# uniq\nsort file.txt | uniq\nsort file.txt | uniq -c           # count occurrences\nsort file.txt | uniq -d           # only duplicates\n\n# wc — word count\nwc file.txt                       # lines, words, chars\nwc -l file.txt                    # line count only"
+    ],
+    "tr & diff": [
+      "tr translates or deletes characters (from stdin only). Usage: tr 'set1' 'set2'. diff compares files line by line. comm compares sorted files for common/unique lines.",
+      "# tr — translate/delete\necho \"hello\" | tr 'a-z' 'A-Z'    # uppercase\necho \"hello\" | tr -d 'l'          # delete all 'l'\necho \"a b c\" | tr -s ' '         # squeeze spaces\n\n# diff — compare files\ndiff file1.txt file2.txt\ndiff -u file1.txt file2.txt       # unified format\n\n# comm — compare sorted files\ncomm file1.txt file2.txt\ncomm -12 file1.txt file2.txt      # common lines only"
+    ],
+    "xargs & Parallel Execution": [
+      "xargs: build and execute command lines from stdin. `-I{}` (replace), `-n1` (max args), `-P4` (parallel procs). Separator: `-d\\n` (null separator for filenames with spaces). `find ... -print0 | xargs -0 ...`. Parallel: `xargs -P $(nproc) -I{} cmd {}`. gnu parallel: `parallel --bar` for progress. Nested xargs: `xargs -L1 sh -c` for complex commands. Differences: BSD xargs vs GNU xargs (`-r` needed on BSD for empty input).",
+      "# Basic xargs\n# Find and delete\necho \"file1.txt file2.txt\" | xargs rm\n\n# Per-line execution\nfind . -name \"*.log\" | xargs -I{} mv {} /backup/\n\n# Parallel processing\n# Resize images with 4 parallel processes\nfind . -name \"*.jpg\" | xargs -P4 -I{} convert {} -resize 50% {}.small\n\n# Null-separated (filenames with spaces)\nfind . -name \"*.pdf\" -print0 | xargs -0 -I{} cp {} /pdfs/\n\n# Max args per invocation\nseq 1 100 | xargs -n10 echo  # 10 numbers per line\n\n# With inline script\n# find . -name \"*.txt\" | xargs -I{} sh -c 'echo \"Processing: $1\"; wc -l \"$1\"' _ {}\n\n# GNU parallel (more powerful)\n# seq 1 10 | parallel -j4 echo \"Job {}\"\n# parallel --bar wc -l ::: *.txt\n\n# xargs with dry run\n# find . -name \"*.tmp\" | xargs -I{} echo rm {}\n\n# Exit codes\n# find . -name \"*.cfg\" | xargs -r -I{} process.sh {} || echo \"Some failed\"\n\n# Max-procs based on CPU count\nCORES=$(nproc)\nfind . -name \"*.gz\" | xargs -P \"$CORES\" gunzip"
+    ]
+  },
+  "Permissions & Ownership": {
+    "Understanding Permissions": [
+      "Linux file permissions: r (read=4), w (write=2), x (execute=1). Three tiers: owner (u), group (g), others (o). ls -l shows permissions as -rwxr-xr--. The first character indicates file type (-=file, d=dir, l=symlink).",
+      "# View permissions\nls -l\n# -rwxr-xr--\n# |||||||||\n# ||||||||+-- others: read\n# |||||||+--- others: no execute\n# ||||||+---- group: read\n# |||||+----- group: execute\n# ||||+------ group: no write\n# |||+------- owner: read\n# ||+-------- owner: write\n# |+--------- owner: execute\n# +---------- file type (-)"
+    ],
+    "chmod — Change Permissions": [
+      "chmod changes file permissions using symbolic (u+x, g-w, o=r) or octal (755, 644) modes. Common settings: 755 (rwxr-xr-x) for directories/executables, 644 (rw-r--r--) for files. Use -R for recursive.",
+      "# Symbolic mode\nchmod +x script.sh          # add execute to all\nchmod u+x script.sh         # add execute to owner only\nchmod go-w file.txt         # remove write from group & others\n\n# Octal mode\nchmod 755 script.sh         # rwxr-xr-x\nchmod 644 file.txt          # rw-r--r--\nchmod 600 secret.txt       # rw-------\n\n# Recursive\nchmod -R 755 mydir/"
+    ],
+    "chown & chgrp": [
+      "chown changes file owner and group. chgrp changes group only. Syntax: chown user:group file. Use -R for recursive. Only root can change ownership; a user can chgrp to groups they belong to.",
+      "# Change owner\nsudo chown alice file.txt\nsudo chown alice:admin file.txt\nsudo chown :admin file.txt         # change group only\n\n# Recursive\nsudo chown -R alice:users /home/alice\n\n# chgrp\nchgrp developers project/\nchgrp -R developers shared/",
+      "chown"
+    ],
+    "umask & Default Permissions": [
+      "umask sets default permissions for new files and directories. It subtracts from the base permissions (666 for files, 777 for dirs). Common: umask 022 = 644/755, umask 077 = 600/700. Set it in .bashrc.",
+      "# Check current umask\numask\n# 0022\n\n# Common umask values\numask 022    # files: 644, dirs: 755 (default)\numask 077    # files: 600, dirs: 700 (private)\numask 002    # files: 664, dirs: 775 (group writable)\n\n# Test\numask 077\ntouch test.txt\nls -l test.txt   # -rw-------"
+    ],
+    "sudo & Root Access": [
+      "sudo executes a command as another user (default root). sudo -i opens a root shell. visudo edits /etc/sudoers safely. /etc/sudoers.d/ contains drop-in configs. The sudoers file controls who can run what commands.",
+      "# Basic usage\nsudo apt update\nsudo -u alice whoami       # run as alice\nsudo -i                    # root shell\n\n# Run previous command with sudo\nsudo !!                    # !! = last command\n\n# sudoers config (edit with visudo)\n# user ALL=(ALL) ALL\n# %admin ALL=(ALL) ALL\n# alice ALL=(ALL) NOPASSWD: /usr/bin/apt"
+    ],
+    "Special Permissions": [
+      "SUID (setuid, 4xxx) runs a program with the file owner's privileges. SGID (setgid, 2xxx) runs with group privileges — on directories, new files inherit the group. Sticky bit (1xxx, chmod +t) prevents non-owners from deleting files in shared directories (/tmp).",
+      "# Set SUID — runs as owner\nchmod u+s /usr/bin/program\nchmod 4755 script          # rwsr-xr-x\n\n# Set SGID on directory — new files inherit group\nchmod g+s shared_dir/\nchmod 2775 shared_dir      # rwxrwsr-x\n\n# Sticky bit — only owner can delete\nchmod +t /shared\nchmod 1777 /tmp            # rwxrwxrwt\n\n# Check special permissions\nls -la /usr/bin/passwd     # rwsr-xr-x (SUID)\nls -ld /tmp                # drwxrwxrwt (sticky)"
+    ]
+  },
+  "Process Management": {
+    "Viewing Processes": [
+      "ps lists running processes. Common: ps aux (all users, detailed), ps ef (full-format), ps -eo (custom format). top shows real-time process info. htop is an interactive alternative (install separately). Uptime shows system load averages.",
+      "# Process listing\nps aux\nps aux --sort=-%mem          # sorted by memory\nps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu\n\n# Real-time monitoring\ntop\nhtop                         # prettier (install first)\n\n# System load\nuphone\n# load average: 1min, 5min, 15min"
+    ],
+    "Managing Processes": [
+      "kill sends signals to processes. Common signals: SIGTERM (15, graceful), SIGKILL (9, force), SIGHUP (1, reload). killall kills by name. pkill kills by pattern. pgrep finds PIDs by name.",
+      "# Kill by PID\nkill 1234                    # SIGTERM (default)\nkill -9 1234                 # SIGKILL (force)\nkill -15 1234                # SIGTERM (explicit)\n\n# Kill by name\nkillall nginx\npkill -f \"python server.py\"\n\n# Find PIDs\npgrep -u alice\npidof nginx\n\n# Reload config\nkill -HUP $(pgrep nginx)"
+    ],
+    "Background & Foreground Jobs": [
+      "Appending & runs a command in the background. Ctrl+Z suspends the foreground job. bg resumes a suspended job in the background. fg brings a job to the foreground. jobs lists background jobs. disown detaches a job from the shell.",
+      "# Background a command\nsleep 100 &\n\n# Suspend foreground (Ctrl+Z), then background\nsleep 100\n# Press Ctrl+Z\nbg\n\n# Manage jobs\njobs\nfg %1                       # bring job 1 to foreground\n\n# Detach from shell (survive logout)\nsleep 100 &\ndisown\n\n# nohup — immune to hangup\nnohup longscript.sh &"
+    ],
+    "Systemd & Services": [
+      "systemctl manages systemd services. Common: start, stop, restart, enable, disable, status. service is the legacy command. systemd units are defined in .service files in /etc/systemd/system/ and /lib/systemd/system/.",
+      "# Managing services\nsudo systemctl start nginx\nsudo systemctl stop nginx\nsudo systemctl restart nginx\nsudo systemctl status nginx\n\n# Enable at boot\nsudo systemctl enable nginx\nsudo systemctl disable nginx\n\n# View all services\nsystemctl list-units --type=service\nsystemctl list-unit-files | grep enabled\n\n# Journalctl — view logs\njournalctl -u nginx\njournalctl -u nginx -f          # follow mode"
+    ]
+  },
+  "I/O Redirection & Pipes": {
+    "Standard Streams": [
+      "Three standard streams: stdin (0, input), stdout (1, output), stderr (2, errors). By default, stdin comes from keyboard, stdout/stderr go to terminal. Redirection changes where these streams point. < redirects stdin, > redirects stdout.",
+      "# Output redirection\nls > files.txt               # stdout to file (overwrite)\necho \"hello\" >> log.txt     # stdout to file (append)\n\n# Input redirection\nsort < unsorted.txt\n\n# Error redirection\nls /nonexistent 2> error.log\ncommand 2>> error.log        # append stderr\n\n# Redirect both stdout and stderr\ncommand &> output.txt\ncommand > output.txt 2>&1    # traditional syntax"
+    ],
+    "Pipes": [
+      "Pipes (|) connect stdout of one command to stdin of another. This creates powerful command chains called pipelines. Each command runs in parallel. The exit status of a pipeline is that of the last command (pipefail option changes this).",
+      "# Basic pipe\nls -la | grep \".txt\"\n\n# Multi-stage pipeline\nps aux | grep python | grep -v grep | awk '{print $2}'\n\n# Count files\nls | wc -l\n\n# Readable disk usage\ndf -h | grep -v tmpfs | sort -k5 -rn\n\n# Complex pipeline\ncat log.txt | grep ERROR | cut -d' ' -f1-3 | sort | uniq -c | sort -rn"
+    ],
+    "Here Documents & Strings": [
+      "Here documents (<< EOF) pass multi-line input to a command until a delimiter. Here strings (<<<) pass a single string as stdin. These are especially useful in scripts for providing inline input to commands.",
+      "# Here document\ncat << EOF\nThis is a\nmulti-line\nmessage\nEOF\n\n# Here document with variables\nname=\"Alice\"\ncat << EOF\nHello, $name\nEOF\n\n# Quoted delimiter prevents variable expansion\ncat << 'EOF'\n$variable will NOT expand\nEOF\n\n# Here string\ngrep \"error\" <<< \"no errors here\"\ntr 'a-z' 'A-Z' <<< \"hello\""
+    ],
+    "Process Substitution": [
+      "Process substitution <(command) or >(command) treats command output as a file. Useful for diffing command outputs or passing multiple inputs. Available in bash but not POSIX sh.",
+      "# Compare outputs of two commands\ndiff <(ls dir1) <(ls dir2)\n\n# Pass multiple inputs to a command\ncomm <(sort file1) <(sort file2)\n\n# Read from a command as if it's a file\nwhile read line; do\n    echo \"$line\"\ndone < <(grep \"TODO\" src/**/*.js)\n\n# Redirect output to a process\nls > >(gzip > output.gz)"
+    ],
+    "tee & xargs": [
+      "tee reads stdin and writes to both stdout and files (like a T-pipe). Useful for logging while still seeing output. xargs reads items from stdin and executes a command with them. Essential for batch operations.",
+      "# tee — split output\nls -la | tee listing.txt           # print and save\ncommand | tee log.txt | grep error\ncommand | tee -a log.txt           # append mode\n\n# xargs — build and execute commands\nfind . -name \"*.tmp\" | xargs rm -f\necho \"a b c\" | xargs mkdir        # create multiple dirs\n\n# xargs with placeholder\nfind . -name \"*.jpg\" | xargs -I{} cp {} /backup/{}\n\n# Parallel execution\nxargs -P 4 -n 1 command < tasks.txt"
+    ],
+    "Named Pipes & File Descriptors": [
+      "Named pipes (FIFOs) created with mkfifo allow unrelated processes to communicate through the filesystem. /dev/tcp/host/port opens TCP connections from bash (compile-time option). /dev/null discards data, /dev/zero provides null bytes, /dev/urandom provides random bytes. Custom file descriptors using exec allow fine-grained I/O control beyond stdin/stdout/stderr.",
+      "#!/bin/bash\n\n# Named pipe (FIFO)\nmkfifo mypipe\n# Terminal 1: echo \"hello\" > mypipe\n# Terminal 2: cat < mypipe\n\n# One-shot FIFO\nmkfifo pipe\n(echo \"sent from a pipe\") &  # background writer\nread line < pipe              # reader\nrm pipe\n\n# /dev/null: discard output\ngrep error log.txt 2>/dev/null\n\n# /dev/urandom: random bytes\nhead -c 16 /dev/urandom | od -An -tx1\n\n# Custom file descriptors\nexec 3>output.txt       # open fd 3 for writing\nexec 4<input.txt        # open fd 4 for reading\necho \"Hello\" >&3        # write to fd 3\nread line <&4            # read from fd 4\nexec 3>&-               # close fd 3\nexec 4<&-               # close fd 4\n\n# Duplicate file descriptors\ncommand 2>&1            # stderr to stdout\nexec 3>&1               # save stdout as fd 3\nexec 1>log.txt          # redirect stdout to file\n# ... commands with stdout going to log.txt ...\nexec 1>&3               # restore original stdout\nexec 3>&-               # close fd 3"
+    ]
+  },
+  "Shell Scripting Basics": {
+    "Shebang & Execution": [
+      "The shebang (#!) on the first line tells the kernel which interpreter to use. Make scripts executable with chmod +x. Run with ./script.sh or bash script.sh. Arguments are $1, $2, ..., $0 is the script name.",
+      "#!/bin/bash\n# Save as hello.sh\n\necho \"Script name: $0\"\necho \"First arg: $1\"\necho \"All args: $@\"\necho \"Arg count: $#\"\n\n# Make executable:\n# chmod +x hello.sh\n# ./hello.sh World"
+    ],
+    "Variables": [
+      "Variables are assigned with name=value (no spaces). Read with $name or ${name}. Always quote variables (\"$var\") to prevent word splitting and globbing. Use readonly to make variables immutable, unset to remove them.",
+      "#!/bin/bash\nname=\"Alice\"\nage=30\n\necho \"$name is $age years old\"\necho \"${name}_file.txt\"           # brace for clarity\n\n# Always quote!\npath=\"/path/with spaces\"\nls \"$path\"                         # works\nls $path                            # breaks\n\n# readonly & unset\nreadonly PI=3.14159\nunset age                           # delete variable"
+    ],
+    "Expansions & Substitutions": [
+      "Bash supports several expansions: brace ({a,b,c}), tilde (~), parameter ($var, ${var:-default}), command ($(cmd)), and arithmetic ($((expr))). Expansion happens in a specific order before the command executes.",
+      "# Brace expansion\necho {a,b,c}.txt              # a.txt b.txt c.txt\ntouch file-{1..5}.txt\n\n# Command substitution\nnow=$(date)\necho \"Today is $now\"\nfiles=$(ls | wc -l)\n\n# Arithmetic\necho $((2 + 2))\necho $((x * 10))\n\n# Parameter expansion\nname=${name:-\"default\"}       # use default if unset\nname=${name:?\"error message\"} # error if unset"
+    ],
+    "Advanced Parameter Expansion": [
+      "Beyond basic $var, bash offers powerful parameter expansion operators. ${var:-default} uses a default if var is unset. ${var#pattern} removes the shortest prefix match; ${var##pattern} removes the longest. ${var%pattern} and ${var%%pattern} do the same from the suffix. ${var/old/new} replaces the first match; ${var//old/new} replaces all. ${var:offset:length} extracts substrings. ${#var} gives string length. ${!var} provides indirect expansion (variable indirection). ${var,,} and ${var^^} transform case.",
+      "#!/bin/bash\n\n# Default values\nname=${name:-\"Guest\"}\necho \"Hello, $name\"  # Guest if unset\n\n# String length\nmsg=\"Hello\"\necho \"${#msg}\"  # 5\n\n# Substring\necho \"${msg:1:3}\"  # ell\n\n# Remove prefix/suffix\nfilename=\"archive.tar.gz\"\necho \"${filename%.*}\"    # archive.tar\necho \"${filename%%.*}\"   # archive\necho \"${filename#*.}\"    # tar.gz\necho \"${filename##*.}\"   # gz\n\n# Search & replace\ntext=\"foo foo bar\"\necho \"${text/foo/baz}\"    # baz foo bar\necho \"${text//foo/baz}\"   # baz baz bar\n\n# Case modification\nmsg=\"hello WORLD\"\necho \"${msg,,}\"  # hello world\necho \"${msg^^}\"  # HELLO WORLD\n\n# Indirect expansion\nvar_name=\"HOME\"\necho \"${!var_name}\"  # /home/user"
+    ],
+    "Quoting": [
+      "Single quotes preserve every character literally. Double quotes preserve most but allow $, ``, \\, and ! expansion. Backslash escapes the next character. ANSI-C quoting ($'...') interprets escape sequences like \\n, \\t.",
+      "# Single quotes — literal\necho 'Hello $USER'            # $USER not expanded\n\n# Double quotes — partial expansion\necho \"Hello $USER\"            # $USER expanded\n\n# Escape characters\necho \"Price: \\$5\"             # escaped dollar sign\necho He said \\\"hello\\\"\n\n# ANSI-C quoting\necho $'Line1\\nLine2'\necho $'Tab\\tseparated'\n\n# $'' for escape sequences\nprintf '%s\\n' $'color\\tvalue'"
+    ],
+    "Exit Codes": [
+      "Every command returns an exit code (0 = success, 1-255 = failure). $? contains the exit code of the last command. Use && (run if success) and || (run if failure) for chaining. exit terminates a script with a code.",
+      "# Check exit code\nls /tmp\necho $?                        # 0 = success\n\nls /nonexistent\necho $?                        # non-zero = failure\n\n# Chaining commands\nmake && ./run_tests             # run tests only if build succeeds\nmake || echo \"Build failed!\"\n\n# In scripts\nif [ $? -ne 0 ]; then\n    echo \"Error occurred\"\n    exit 1\nfi"
+    ]
+  },
+  "Control Flow": {
+    "if/elif/else": [
+      "if executes commands based on the exit status of a test command. test or [ ] evaluates conditions: numeric (-eq, -ne, -lt, -gt), string (=, !=, -z, -n), file (-f, -d, -e, -r, -w, -x). Use [[ ]] for extended bash tests with &&, ||, =~.",
+      "#!/bin/bash\nscore=85\n\nif [ \"$score\" -ge 90 ]; then\n    echo \"Grade: A\"\nelif [ \"$score\" -ge 80 ]; then\n    echo \"Grade: B\"\nelse\n    echo \"Needs improvement\"\nfi\n\n# File tests\nif [ -f \"config.json\" ]; then\n    echo \"Config exists\"\nfi\n\n# Extended test [[ ]]\nif [[ \"$name\" =~ ^A.* ]]; then\n    echo \"Name starts with A\"\nfi"
+    ],
+    "for Loops": [
+      "for iterates over a list of words, array elements, or command output. Use for ((expr; cond; incr)) for C-style loops. Use continue to skip iteration, break to exit early.",
+      "#!/bin/bash\n# Iterate over list\nfor fruit in apple banana cherry; do\n    echo \"I like $fruit\"\ndone\n\n# Range\nfor i in {1..5}; do\n    echo \"Count: $i\"\ndone\n\n# C-style\nfor ((i=0; i<5; i++)); do\n    echo \"Number $i\"\ndone\n\n# Command output\nfor file in *.txt; do\n    echo \"Processing $file\"\ndone"
+    ],
+    "while & until Loops": [
+      "while runs as long as the test command succeeds. until runs as long as the test command fails. Use read for line-by-line processing. Use break to exit, continue to skip iteration. watch out for infinite loops!",
+      "#!/bin/bash\n# While loop\ncount=0\nwhile [ \"$count\" -lt 5 ]; do\n    echo \"Count: $count\"\n    ((count++))\ndone\n\n# Read file line by line\nwhile IFS= read -r line; do\n    echo \"Line: $line\"\ndone < file.txt\n\n# Until loop\nuntil ping -c1 google.com &>/dev/null; do\n    echo \"Waiting for network...\"\n    sleep 2\ndone\n\necho \"Network is up!\""
+    ],
+    "case Statement": [
+      "case matches a value against patterns (like switch). Patterns can use *, ?, [...], and | for alternation. Each case ends with ;;. Use *) for default. esac ends the statement.",
+      "#!/bin/bash\nread -p \"Enter a color: \" color\n\ncase \"$color\" in\n    red|Red|RED)\n        echo \"Primary color\"\n        ;;\n    blue|Blue|BLUE)\n        echo \"Primary color\"\n        ;;\n    green|Green|GREEN)\n        echo \"Secondary color\"\n        ;;\n    *)\n        echo \"Unknown color\"\n        ;;\nesac"
+    ],
+    "select Menu": [
+      "select creates an interactive menu from a list of items. The user picks a number, and the selected item is stored in the variable. Combined with case for menu-driven scripts. Break out with Ctrl+D or an empty input.",
+      "#!/bin/bash\necho \"Choose your favorite:\"\n\nselect option in \"JavaScript\" \"Python\" \"Go\" \"Rust\" \"Quit\"; do\n    case $option in\n        \"JavaScript\")\n            echo \"Good choice!\"\n            ;;\n        \"Python\")\n            echo \"Snake charmer!\"\n            ;;\n        \"Go\"|\"Rust\")\n            echo \"Systems fan!\"\n            ;;\n        \"Quit\")\n            break\n            ;;\n        *)\n            echo \"Invalid option\"\n            ;;\n    esac\ndone"
+    ]
+  },
+  "Functions & Advanced Scripting": {
+    "Defining Functions": [
+      "Functions group commands for reuse. Define with function name { } or name() { }. Use local for function-scoped variables. Functions return with return (0-255) or set an exit code. Declare -f lists defined functions.",
+      "#!/bin/bash\ngreet() {\n    local name=\"$1\"\n    echo \"Hello, $name!\"\n}\n\n# Call the function\ngreet \"Alice\"\ngreet \"Bob\"\n\n# Function with return\nis_even() {\n    local num=$1\n    return $((num % 2))\n}\n\nif is_even 4; then\n    echo \"Even\"\nfi"
+    ],
+    "Arrays": [
+      "Bash supports indexed arrays (declare -a) and associative arrays (declare -A). Accessed with ${array[index]}. ${array[@]} expands all elements. ${#array[@]} gives length. Useful for lists and lookups.",
+      "#!/bin/bash\n# Indexed array\nfruits=(\"apple\" \"banana\" \"cherry\")\necho \"${fruits[0]}\"              # apple\necho \"${fruits[@]}\"              # all elements\necho \"${#fruits[@]}\"             # length\n\n# Add elements\nfruits+=(\"date\")\n\n# Iterate\nfor fruit in \"${fruits[@]}\"; do\n    echo \"$fruit\"\ndone\n\n# Associative array (declare -A)\ndeclare -A capitals\ncapitals[USA]=\"Washington\"\ncapitals[UK]=\"London\"\necho \"${capitals[USA]}\""
+    ],
+    "Subshells & Command Groups": [
+      "Parentheses ( ) run commands in a subshell — an isolated environment where variable changes, directory changes, and file descriptor manipulation don't affect the parent shell. Curly braces { } group commands in the current shell — they share state and are slightly faster. Subshells have a cost (fork/exec) so avoid them in tight loops. Coprocesses (coproc) run a command in the background with bidirectional communication.",
+      "#!/bin/bash\n\n# Subshell: isolated environment\nx=1\n(\n  x=2\n  cd /tmp\n  echo \"Inside: x=$x, dir=$(pwd)\"\n)\necho \"Outside: x=$x, dir=$(pwd)\"\n# Inside: x=2, dir=/tmp\n# Outside: x=1, dir=/home/user\n\n# Command group: same shell\nx=1\n{\n  x=2\n  echo \"Inside: x=$x\"\n}\necho \"Outside: x=$x\"\n# Inside: x=2\n# Outside: x=2\n\n# Coprocess\ncoproc myproc { bc -l; }\necho \"scale=2; 5/3\" >&\"${myproc[1]}\"\nread -u \"${myproc[0]}\" result\necho \"Result: $result\"\nkill \"$myproc_PID\"\n\n# When subshells cause bugs (pipeline)\ncount=0\necho -e \"a\\nb\\nc\" | while read line; do\n  ((count++))\ndone\necho \"$count\"  # 0 — while in subshell!\n\n# Fix with process substitution\ncount=0\nwhile read line; do\n  ((count++))\ndone < <(echo -e \"a\\nb\\nc\")\necho \"$count\"  # 3"
+    ],
+    "Argument Parsing with getopts": [
+      "getopts parses command-line flags and options in scripts. Each option character can have a colon suffix to require an argument. OPTIND tracks the next argument index. Use a while loop with case for processing.",
+      "#!/bin/bash\nusage() {\n    echo \"Usage: $0 [-n name] [-a age] [-v]\"\n    exit 1\n}\n\nverbose=false\nwhile getopts \"n:a:v\" opt; do\n    case $opt in\n        n) name=\"$OPTARG\" ;;\n        a) age=\"$OPTARG\" ;;\n        v) verbose=true ;;\n        *) usage ;;\n    esac\ndone\n\necho \"Name: ${name:-unknown}\"\necho \"Age: ${age:-unknown}\"\n$verbose && echo \"Verbose mode on\""
+    ],
+    "Error Handling & Trap": [
+      "trap catches signals and executes commands. Common: trap 'cleanup' EXIT, trap 'handler' INT (Ctrl+C). set -e exits on error, set -u errors on undefined variables, set -o pipefail catches pipeline errors. Combined: set -euo pipefail.",
+      "#!/bin/bash\nset -euo pipefail            # strict mode\n\ncleanup() {\n    echo \"Cleaning up...\"\n    rm -f /tmp/tempfile\n}\ntrap cleanup EXIT            # always runs on exit\n\ntrap 'echo \"Interrupted!\"; exit 1' INT\n\necho \"Working...\"\nsleep 10\necho \"Done\""
+    ],
+    "Debugging Scripts": [
+      "bash -x script.sh prints each command before execution (xtrace). set -x enables within a script. PS4 customizes the trace prompt. bash -n script.sh checks syntax without running. bash -v prints input lines.",
+      "#!/bin/bash\n# Enable debugging\nset -x                        # trace commands\necho \"Debugging this\"\nname=\"Alice\"\necho \"Hello $name\"\nset +x                        # disable tracing\n\n# Run from CLI:\n# bash -x script.sh\n# bash -n script.sh    # syntax check only\n\n# Custom PS4 for better traces\nPS4='+ $LINENO: '\nset -x"
+    ],
+    "Strict Mode & Error Handling": [
+      "Bash strict mode: `set -euo pipefail`. `-e`: exit on error, `-u`: undefined variable error, `-o pipefail`: pipeline fails if any command fails. `IFS=$'\\n\\t'` for safe word splitting. Trap EXIT/ERR for cleanup: `trap 'rm -f $tmpfile' EXIT`. `errexit` function-level handling. `shellcheck` for linting. Defensive globbing with `shopt -s failglob`. NOEXEC mode with `return` for sourceable scripts.",
+      "#!/usr/bin/env bash\n\n# Strict mode\nset -euo pipefail\nIFS=$'\\n\\t'\n\n# Safer globbing\nshopt -s failglob\n\n# Temp file with auto-cleanup\ncleanup() {\n    local exit_code=$?\n    echo \"Cleaning up...\" >&2\n    rm -fr \"$TMPDIR\"\n    exit \"$exit_code\"\n}\ntrap cleanup EXIT\n\nTMPDIR=$(mktemp -d)\n\n# Error handling function\ndie() {\n    echo \"ERROR: $*\" >&2\n    exit 1\n}\n\n# Prefer printf over echo for portability\nprint_error() {\n    printf \"Error: %s\\n\" \"$@\" >&2\n}\n\n# Catch specific errors\ndo_something() {\n    local file=$1\n    [[ -f $file ]] || die \"File not found: $file\"\n    \n    # Command may fail — handle gracefully\n    if ! grep -q \"pattern\" \"$file\"; then\n        echo \"Pattern not found (expected)\" >&2\n        return 0  # Don't fail\n    fi\n}\n\n# Validate required tools\ncheck_deps() {\n    local deps=(curl jq git)\n    for cmd in \"${deps[@]}\"; do\n        command -v \"$cmd\" >/dev/null 2>&1 || die \"Missing: $cmd\"\n    done\n}\n\n# Main\ncheck_deps\ndo_something \"/etc/passwd\"\necho \"Done\"\n\n# Use shellcheck for linting\n# shellcheck myscript.sh\n# Use: shellcheck -x for sourced files"
+    ]
+  },
+  "Networking & Transfer": {
+    "curl — HTTP Requests": [
+      "curl transfers data using various protocols (HTTP, FTP, etc.). Common: curl URL (fetch), curl -o file (save), curl -O (save with filename), curl -I (headers only), curl -d (POST data), curl -H (custom header).",
+      "# GET request\ncurl https://api.example.com/users\ncurl -o output.json https://api.example.com/users\n\n# Headers only\ncurl -I https://google.com\n\n# POST with data\ncurl -X POST -d '{\"name\":\"Alice\"}' -H \"Content-Type: application/json\" https://api.example.com/users\n\n# Download file\ncurl -O https://example.com/file.zip\ncurl -L -o myfile.zip https://bit.ly/short-url    # follow redirects"
+    ],
+    "wget — Download Tool": [
+      "wget is a non-interactive downloader supporting recursive downloads, resuming, and mirroring. Unlike curl, wget is designed for downloads and works well with -r (recursive), -c (resume), -m (mirror).",
+      "# Basic download\nwget https://example.com/file.zip\n\n# Resume interrupted download\nwget -c https://example.com/largefile.zip\n\n# Recursive download (limit depth)\nwget -r -l2 https://example.com/docs/\n\n# Mirror a website\nwget -m -p -k https://example.com/\n\n# Download with custom name\nwget -O archive.zip https://example.com/download"
+    ],
+    "ssh — Remote Access": [
+      "SSH (Secure Shell) provides encrypted remote access. ssh user@host connects to a remote machine. Key-based auth with ssh-keygen + ssh-copy-id is more secure than passwords. ~/.ssh/config simplifies connections.",
+      "# Basic connection\nssh alice@server.example.com\nssh -p 2222 user@host         # custom port\n\n# Key-based auth\nssh-keygen -t ed25519         # generate key pair\nssh-copy-id user@host         # copy public key\n\n# SSH config (~/.ssh/config)\n# Host myserver\n#     HostName 192.168.1.100\n#     User alice\n#     Port 2222\n#     IdentityFile ~/.ssh/mykey\n\n# Run command remotely\nssh user@host \"ls -la /var/log\""
+    ],
+    "scp & rsync": [
+      "scp securely copies files over SSH. rsync is a powerful sync tool that transfers only differences, supports compression (-z), archive mode (-a), and deletion (-delete). rsync is better for large or repeated transfers.",
+      "# scp — simple copy\nscp file.txt user@host:/remote/path/\nscp -r mydir/ user@host:/remote/path/\nscp user@host:/remote/file.txt ./\n\n# rsync — synchronized copy (preferred)\nrsync -avz source/ user@host:/dest/          # archive, verbose, compress\nrsync -avz --delete source/ user@host:/dest/ # remove extraneous files\nrsync -n -avz source/ user@host:/dest/       # dry run\n\n# Local sync\nrsync -av /src/ /backup/"
+    ],
+    "Network Diagnostics": [
+      "ping tests host reachability. netstat (or ss) shows network connections, ports, and routing tables. ss is the modern replacement for netstat. dig/nslookup queries DNS. traceroute traces network path.",
+      "# Ping\nping -c 4 google.com\n\n# Port/Socket info\nss -tuln                    # listening TCP/UDP ports\nss -tup                     # active connections\nnetstat -tuln               # traditional (install net-tools)\n\n# DNS lookup\ndig google.com\nnslookup google.com\nhost google.com\n\n# Trace route\ntraceroute google.com\n\n# Bandwidth\niperf3 -c server.example.com"
+    ]
+  },
+  "Shell Configuration": {
+    "Bash Startup Files": [
+      ".bashrc runs for interactive non-login shells. .bash_profile (or .profile) runs for login shells. .bash_logout runs on logout. On macOS, Terminal opens login shells (use .bash_profile). On Linux, terminals typically use .bashrc.",
+      "# ~/.bashrc — aliases, functions, prompt (interactive non-login)\n# ~/.bash_profile — env vars, PATH (login shell)\n# ~/.profile — fallback for sh-compatible shells\n\n# Common pattern: source .bashrc from .bash_profile\nif [ -f ~/.bashrc ]; then\n    . ~/.bashrc\nfi\n\n# /etc/bash.bashrc — system-wide defaults\n# /etc/profile — system-wide env vars"
+    ],
+    "Aliases": [
+      "Aliases create shorthand commands. List all aliases with alias (bare). Remove with unalias. Aliases don't accept arguments (use functions instead). Put aliases in .bashrc for persistence.",
+      "# Create aliases\nalias ll='ls -la'\nalias ..='cd ..'\nalias gs='git status'\nalias gc='git commit'\nalias ..2='cd ../..'\n\n# List aliases\nalias\n\n# Remove alias\nunalias ll\n\n# Bypass alias (use original command)\n\\ls\n'ls'\ncommand ls"
+    ],
+    "Environment Variables": [
+      "Environment variables are inherited by child processes. Set with export VAR=value. PATH controls where the shell looks for executables. Common: HOME, USER, SHELL, EDITOR, LANG, PATH, PS1. Add to .bashrc for persistence.",
+      "# Set & export\nexport PATH=\"$HOME/bin:$PATH\"\nexport EDITOR=nano\nexport LANG=en_US.UTF-8\n\n# List all env vars\nprintenv\necho \"$HOME $USER $SHELL\"\n\n# PATH management\nexport PATH=\"$PATH:$HOME/.local/bin\"\nexport PATH=\"./node_modules/.bin:$PATH\"\n\n# Make variables available to children\nexport MY_VAR=\"value\"\nmy_local=\"not exported\"\n\n# Unset\nunset MY_VAR"
+    ],
+    "PS1 Prompt Customization": [
+      "PS1 defines the primary prompt. Use escape sequences: \\u (user), \\h (host), \\w (working dir), \\W (basename), \\d (date), \\t (time), \\n (newline), \\$ (# for root, $ otherwise). Set in .bashrc.",
+      "# Simple prompt\nexport PS1=\"\\u@\\h:\\w\\$ \"\n\n# With colors and git branch\nexport PS1='\\[\\e[32m\\]\\u@\\h\\[\\e[00m\\]:\\[\\e[34m\\]\\w\\[\\e[00m\\]$(__git_ps1 \" (%s)\")\\$ '\n\n# Multi-line prompt\nexport PS1=\"\\u@\\h\\n\\w\\$ \"\n\n# Test without changing file\nPS1='\\[\\e[31m\\]➜\\[\\e[00m\\] '\n\n# Add to .bashrc for permanence\necho 'export PS1=\"\\u@\\h:\\w\\$ \"' >> ~/.bashrc"
+    ],
+    "Command Completion": [
+      "Bash programmable completion completes commands, filenames, and arguments. Complete with Tab (double Tab to show all). bash-completion package adds completion for git, ssh, apt, and hundreds of commands.",
+      "# Enable programmable completion (often in /etc/bash.bashrc)\nif [ -f /usr/share/bash-completion/bash_completion ]; then\n    . /usr/share/bash-completion/bash_completion\nfi\n\n# List loaded completions\ncomplete -p\n\n# Add custom completion for a function\n_myfunc_complete() {\n    local cur=${COMP_WORDS[COMP_CWORD]}\n    COMPREPLY=($(compgen -W \"start stop restart status\" -- \"$cur\"))\n}\ncomplete -F _myfunc_complete mycommand"
+    ]
+  },
+  "Job Scheduling & Automation": {
+    "cron — Scheduled Jobs": [
+      "cron runs commands at scheduled times. crontab -e edits your user's crontab. Format: minute hour day month weekday command. Use */n for every n, commas for lists, hyphens for ranges. Cron output is emailed by default.",
+      "# Crontab format:\n# ┌──────── minute (0-59)\n# │ ┌──────── hour (0-23)\n# │ │ ┌──────── day of month (1-31)\n# │ │ │ ┌──────── month (1-12)\n# │ │ │ │ ┌──────── day of week (0-7, 0/7=Sun)\n# * * * * * command\n\n# Edit crontab\ncrontab -e\ncrontab -l                    # list\n\n# Examples:\n# Every day at 6 AM\n0 6 * * * /home/alice/backup.sh\n\n# Every 30 minutes\n*/30 * * * * /home/alice/check.sh\n\n# Every weekday at 9 AM\n0 9 * * 1-5 /home/alice/work.sh"
+    ],
+    "at — One-Time Jobs": [
+      "at schedules a command for a specific time (one-time). Use at now + 5 minutes, at 2 PM tomorrow, etc. atq lists pending jobs, atrm removes a job. Commands are read from stdin or piped.",
+      "# Schedule a job\necho \"sh backup.sh\" | at 2:00 PM\necho \"rm /tmp/oldfiles/*\" | at now + 1 hour\n\n# Interactive mode\nat 9:00 AM tomorrow\nat> echo \"Time to wake up\" | mail alice\nat> # Press Ctrl+D to submit\n\n# Manage jobs\natq                           # list pending jobs\natrm 5                        # remove job id 5\n\n# Batch — runs when system load is low\nbatch < job.sh"
+    ],
+    "Writing Robust Scripts": [
+      "Robust scripts handle errors, use strict mode, validate arguments, and log output. Always quote variables, check command success, provide usage messages, and clean up temp files. set -euo pipefail is essential.",
+      "#!/bin/bash\nset -euo pipefail\n\n# Usage check\nif [ $# -lt 1 ]; then\n    echo \"Usage: $0 <input-file> [output-dir]\"\n    exit 1\nfi\n\nINPUT=\"$1\"\nOUTPUT=\"${2:-./output}\"\n\n# Validate input\nif [ ! -f \"$INPUT\" ]; then\n    echo \"Error: $INPUT not found\"\n    exit 1\nfi\n\n# Create output dir\nmkdir -p \"$OUTPUT\"\n\n# Log progress\necho \"[$(date)] Processing $INPUT...\" >> script.log\n\n# Main work\necho \"Processing...\"\n\n# Cleanup on exit\ntrap 'echo \"Done with $INPUT\" >> script.log' EXIT"
+    ],
+    "systemd Timers & anacron": [
+      "systemd timers replace cron with persistent, calendar-based, or monotonic schedules: `OnCalendar=daily`, `OnBootSec=5min`. Log to journalctl. `systemctl list-timers --all`. anacron runs missed jobs on next boot — no strict time guarantees. `systemd-analyze calendar` validates. Timer units pair with service units. `Persistent=true` runs missed jobs at boot. Monotonic: `OnUnitActiveSec=1h`.",
+      "# systemd timer (replaces cron)\n# /etc/systemd/system/backup.timer\n[Unit]\nDescription=Daily backup timer\n\n[Timer]\nOnCalendar=daily\nPersistent=true\nRandomizedDelaySec=1h\n\n[Install]\nWantedBy=timers.target\n\n# /etc/systemd/system/backup.service\n[Unit]\nDescription=Backup script\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/backup.sh\n\n# Enable timer\n# sudo systemctl enable backup.timer --now\n# sudo systemctl list-timers --all\n\n# Calendar expressions\n# OnCalendar=Mon..Fri 09:00:00   # Weekdays 9am\n# OnCalendar=*-*-01 00:00:00     # Monthly\n# OnCalendar=*-*-* 00/6:00:00   # Every 6 hours\n\n# Validate\n# systemd-analyze calendar \"Mon..Fri 09:00\"\n\n# Anacron for systems that aren't always on\n# /etc/anacrontab\n# START_HOURS_RANGE=9-17\n# PERIOD DELAY JOB-IDENTIFIER COMMAND\n# 1 5 daily.backup /usr/local/bin/backup.sh\n# 7 10 weekly.cleanup /usr/local/bin/cleanup.sh\n# 30 15 monthly.report /usr/local/bin/report.sh\n\n# Crontab with systemd hybrid\n# @reboot sleep 30 && systemctl start my-job.timer"
+    ]
+  },
+  "Bash Security & Hardening": {
+    "Shell Injection & Prevention": [
+      "Shell injection occurs when user-controlled input is interpreted as code. Always quote variables (\"$var\"), use printf instead of echo for untrusted data, avoid eval entirely, and use $() instead of backticks for command substitution. Validate inputs against whitelists, not blacklists.",
+      "#!/bin/bash\n\n# DANGEROUS: never do this with user input\neval \"ls $user_input\"   # catastrophic if input is \"; rm -rf /\"\n\n# Safe: quote everything\nls \"$user_input\"\n\n# printf over echo for untrusted data\nprintf '%s\\n' \"$untrusted\"\n\n# Avoid backticks (use $())\n# Bad: files=`ls -la`\n# Good: files=$(ls -la)\n\n# Sanitize filenames\nif [[ \"$filename\" =~ ^[a-zA-Z0-9._-]+$ ]]; then\n    cat \"$filename\"\nelse\n    echo \"Invalid filename\"\nfi\n\n# Never source user files\n# DANGEROUS: source \"$user_file\"\n# Safe: parse instead\nwhile IFS== read -r key value; do\n    printf -v \"$key\" \"$value\"\ndone < \"$user_file\""
+    ],
+    "Safe Temp Files": [
+      "Always use mktemp for temporary files — it creates files in a safe location with a random name, preventing race conditions and symlink attacks. Clean up with trap. Never use hardcoded paths in /tmp or patterns based on $$ (predictable).",
+      "#!/bin/bash\nset -euo pipefail\n\n# Safe: mktemp with cleanup\ntmpfile=$(mktemp)\ntrap 'rm -f \"$tmpfile\"' EXIT\n\n# Safe temp directory\ntmpdir=$(mktemp -d)\ntrap 'rm -rf \"$tmpdir\"' EXIT\n\necho \"Working with $tmpfile...\"\n\n# DANGEROUS: never do this\necho \"data\" > /tmp/myapp.tmp      # predictable path!\necho \"data\" > /tmp/myapp.$$       # $$ is guessable\n\n# Check file creation succeeded\nif [[ ! -f \"$tmpfile\" ]]; then\n    echo \"Failed to create temp file\" >&2\n    exit 1\nfi"
+    ],
+    "Input Validation": [
+      "Validate all external input before using it. Use [[ =~ ]] for regex matching, check exit codes, validate types and ranges. Prefer whitelist (allow known-good) over blacklist (block known-bad).",
+      "#!/bin/bash\n\n# Validate email\nemail=\"user@example.com\"\nif [[ \"$email\" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$ ]]; then\n    echo \"Valid email\"\nfi\n\n# Validate IP address\nip=\"192.168.1.1\"\nif [[ \"$ip\" =~ ^[0-9]{1,3}(\\.[0-9]{1,3}){3}$ ]]; then\n    echo \"Valid IP format\"\nfi\n\n# Validate number\nnum=\"42\"\nif [[ \"$num\" =~ ^[0-9]+$ ]]; then\n    echo \"Positive integer: $num\"\nfi\n\n# Whitelist approach\ncase \"$action\" in\n    start|stop|restart) perform_action \"$action\" ;;\n    *) echo \"Invalid action: $action\" >&2; exit 1 ;;\nesac\n\n# Check file type before processing\nfile \"$input\" | grep -q \"text\" || { echo \"Not a text file\" >&2; exit 1; }"
+    ],
+    "Secrets Management": [
+      "Never hardcode passwords, API keys, or tokens in scripts. Use environment variables, read -s for interactive input, restrict file permissions on sensitive files, and consider dedicated secret management tools like pass or vault.",
+      "#!/bin/bash\n\n# Good: environment variable\ndeploy() {\n    local token=\"${API_TOKEN:?API_TOKEN not set}\"\n    echo \"Deploying with token...\"\n}\n\n# Good: read password securely\nread -s -p \"Enter password: \" password\necho\n\n# Good: restricted permissions on config\n# chmod 600 ~/.myapp/config\n# chmod 700 ~/.myapp/\n\n# DANGEROUS: hardcoded secrets\n# api_key=\"sk-1234567890abcdef\"\n# db_password=\"supersecret\"\n\n# Read from file with safe permissions\nif [[ -f \"$HOME/.myapp/token\" ]]; then\n    if [[ $(stat -c \"%a\" \"$HOME/.myapp/token\") != \"600\" ]]; then\n        echo \"Warning: token file has loose permissions\" >&2\n    fi\n    token=$(<\"$HOME/.myapp/token\")\nfi"
+    ],
+    "Defensive Patterns": [
+      "Production scripts need strict error handling. Always use set -euo pipefail to fail on errors, unset variables, and pipeline failures. Set IFS safely to prevent word splitting on spaces. Use fail-fast design and provide context in error messages.",
+      "#!/bin/bash\nset -euo pipefail\nIFS=$'\\n\\t'\n\n# Context in error messages\nerror() {\n    echo \"[$(date +%Y-%m-%dT%H:%M:%S)] ERROR: $*\" >&2\n    exit 1\n}\n\n# Idempotent patterns (safe to run multiple times)\nmkdir -p /var/lock  # no error if exists\n\n# Only remove if exists\n[[ -f \"$lockfile\" ]] && rm -f \"$lockfile\"\n\n# Guard against missing commands\ncommand -v jq &>/dev/null || error \"jq is required\"\n\n# Fail fast with ||\ncd /var/app || error \"Cannot cd to /var/app\"\n\n# Check command success explicitly\nif ! curl -f \"$url\" > \"$output\"; then\n    error \"Download failed from $url\"\nfi"
+    ],
+    "Filesystem Security": [
+      "Be aware of filesystem security risks: world-writable files can be modified by anyone, symlink attacks can trick privileged scripts into writing to unexpected locations, and rm -rf patterns need careful handling.",
+      "#!/bin/bash\n\n# Check for world-writable files\nfind /etc -perm -002 -type f 2>/dev/null\n\n# Safe deletion patterns\n# Danger: rm -rf \"$dir/\" \"$user_input\"  # user_input could be ../..\n# Safe: stay within expected path\ncleanup_old() {\n    local dir=\"/var/app/tmp/\"\n    local file=\"$1\"\n    if [[ \"$file\" != *..* && \"$file\" != /* ]]; then\n        rm -f \"${dir}${file}\"\n    fi\n}\n\n# Symlink attack prevention\nif [[ -L \"$temp_file\" ]]; then\n    echo \"Refusing to follow symlink\" >&2\n    exit 1\nfi\n\n# Verify real path\nreal_path=$(readlink -f \"$path\")\nexpected_prefix=\"/safe/directory\"\nif [[ \"$real_path\" != \"$expected_prefix\"* ]]; then\n    echo \"Path escape detected\" >&2\n    exit 1\nfi"
+    ],
+    "Auditing & Compliance": [
+      "Track script execution for forensics and compliance. Use logger for syslog integration, log command traces with bash -x, maintain audit trails of who ran what and when.",
+      "#!/bin/bash\n\n# Log to syslog\nlogger -t myscript \"Backup started by $USER\"\n\n# Audit log with timestamp\naudit_log() {\n    echo \"[$(date -Iseconds)] $USER: $*\" >> /var/log/script-audit.log\n}\naudit_log \"Started cleanup of old files\"\n\n# Bash execution tracing (for debugging/audit)\n# bash -x script.sh   # prints every command\n# bash -x -v script.sh # prints input lines too\n\n# In-script trace logging\nif [[ \"${DEBUG:-}\" == \"1\" ]]; then\n    set -x\nfi\n\n# Command logging wrapper\nlog_and_run() {\n    audit_log \"Running: $*\"\n    \"$@\"\n}\nlog_and_run rm -f /tmp/oldfiles/*"
+    ]
+  },
+  "Advanced Scripting Techniques": {
+    "Testing Scripts": [
+      "Treat bash scripts like production code: use static analysis with ShellCheck, write unit tests with bats or shunit2, and verify syntax with bash -n. ShellCheck catches bugs like missing quotes, unused variables, and common antipatterns.",
+      "#!/bin/bash\n\n# ShellCheck (install: apt install shellcheck)\n# shellcheck script.sh\n\n# bats test example (install bats-core)\n# test_file.bats:\n#   #!/usr/bin/env bats\n#   @test \"greet returns greeting\" {\n#     source script.sh\n#     run greet \"World\"\n#     [ \"$output\" == \"Hello, World!\" ]\n#   }\n\n# Syntax check without running\n# bash -n script.sh\n\n# Lint multiple files\n# find . -name '*.sh' -exec shellcheck {} +\n\n# Common ShellCheck warnings:\n# SC2086: Double quote to prevent globbing\n# SC2002: Useless cat (use < file instead)\n# SC2046: Quote this to prevent word splitting"
+    ],
+    "Profiling & Performance": [
+      "Bash scripts can be slow due to subprocess spawning. Use built-in operations instead of external commands, measure with time and PS4 traces, and avoid expensive patterns like $(cat file) (use < file or $(<file)).",
+      "#!/bin/bash\n\n# Time a script\n# time myscript.sh\n\n# Profile with PS4 trace\nPS4='+ $(date +%s.%N) $LINENO: '\nexec 3>&2 2>/tmp/trace.log\nset -x\n# ... code to profile ...\nset +x\nexec 2>&3 3>&-\n\n# Built-in alternatives (faster, no subprocess)\n# Instead of: len=$(echo -n \"$str\" | wc -c)\n# Use: len=${#str}\n\n# Instead of: upper=$(echo \"$str\" | tr 'a-z' 'A-Z')\n# Use: upper=${str^^}\n\n# Instead of: grep -c pattern file\n# Use: count=0; while read line; do [[ $line =~ pattern ]] && ((count++)); done < file\n\n# Instead of: cat file\n# Use: $(<file)\n\n# Avoid $(...) in loops — assign before loop\ndates=()\nfor i in {1..100}; do\n    dates+=(\"$(date)\")  # slow: runs date 100 times\ndone\n\n# Better\nnow=$(date)\nfor i in {1..100}; do\n    dates+=(\"$now\")\ndone"
+    ],
+    "Parallel Execution": [
+      "Run tasks in parallel to speed up batch jobs. Use xargs -P for parallel command execution, GNU parallel for more control, and background + wait for ad-hoc parallelism. Use flock to prevent concurrent access to shared resources.",
+      "#!/bin/bash\n\n# xargs -P: parallel execution\n# Resize images in parallel (4 at a time)\nfind images/ -name '*.jpg' -print0 | xargs -0 -P 4 -I{} convert {} -resize 800x600 thumbnails/{}\n\n# GNU parallel (more features)\n# seq 10 | parallel -j 4 echo \"Processing {}\"\n\n# Background jobs with wait\nfor url in \"${urls[@]}\"; do\n    (curl -f -o \"$(basename \"$url\")\" \"$url\" && echo \"Done: $url\") &\ndone\nwait\necho \"All downloads complete\"\n\n# Job count limit\nmax_jobs=4\nfor task in \"${tasks[@]}\"; do\n    process \"$task\" &\n    while [[ $(jobs -r | wc -l) -ge $max_jobs ]]; do\n        sleep 1\n    done\ndone\nwait\n\n# flock: file-based mutual exclusion\n(\n  flock -n 9 || exit 1\n  # critical section\n  echo \"Exclusive access\" > shared.log\n) 9>/var/lock/myapp.lock"
+    ],
+    "Structured Logging": [
+      "Good logging is essential for debugging and monitoring. Use timestamped log entries with severity levels, write to dedicated log files, integrate with syslog, and implement log rotation.",
+      "#!/bin/bash\n\nLOG_FILE=\"/var/log/myapp.log\"\n\nlog() {\n    local level=\"${1:?}\"\n    local message=\"${2:?}\"\n    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')\n    echo \"[$timestamp] [$level] $message\" >> \"$LOG_FILE\"\n}\n\nlog \"INFO\"  \"Script started\"\nlog \"WARN\"  \"Disk usage at 85%\"\nlog \"ERROR\" \"Backup failed: $?\"\n\n# JSON logging (machine-parseable)\nlog_json() {\n    local level=\"$1\"; shift\n    printf '{\"timestamp\":\"%s\",\"level\":\"%s\",\"message\":\"%s\"}\\n' \\\n        \"$(date -Iseconds)\" \"$level\" \"$*\" >> \"$LOG_FILE\"\n}\n\n# syslog integration\nlogger -t myapp -p user.info \"Backup completed\"\n\n# Log rotation (logrotate config)\n# /var/log/myapp.log {\n#   daily\n#   rotate 7\n#   compress\n#   missingok\n# }"
+    ],
+    "Interactive & TUI Scripts": [
+      "Bash can create interactive terminal interfaces using built-in read/select and tools like whiptail and dialog. Build menus, progress bars, input forms, and file pickers for user-friendly scripts.",
+      "#!/bin/bash\n\n# Advanced read with timeout and hidden input\nread -t 5 -p \"Quick input (5s): \" response\nread -s -p \"Password: \" password\necho\n\n# select with dynamic options\noptions=(\"Option A\" \"Option B\" \"Option C\" \"Quit\")\nPS3=\"Choose: \"\nselect opt in \"${options[@]}\"; do\n    [[ -z \"$opt\" ]] && echo \"Invalid\" && continue\n    [[ \"$opt\" == \"Quit\" ]] && break\n    echo \"You chose: $opt\"\ndone\n\n# whiptail: message box\nwhiptail --msgbox \"Installation complete!\" 8 40\n\n# whiptail: yes/no\nif whiptail --yesno \"Continue?\" 8 40; then\n    echo \"Continuing...\"\nfi\n\n# whiptail: menu\nwhiptail --menu \"Select option\" 15 50 4 \\\n    \"1\" \"Backup\" \\\n    \"2\" \"Restore\" \\\n    \"3\" \"Exit\" 2>choice.txt\n\n# whiptail: progress bar\n{\n    for i in $(seq 1 100); do\n        echo $i\n        sleep 0.05\n    done\n} | whiptail --gauge \"Processing...\" 8 40 0"
+    ],
+    "Bash Portability": [
+      "Not all systems use bash — some use dash (Debian/Ubuntu /bin/sh), busybox ash, or zsh. Write portable scripts by avoiding bashisms, using POSIX sh syntax, and testing with dash. Use command -v for feature detection instead of assuming paths.",
+      "#!/bin/sh\n# Portable sh script (no bashisms)\n\n# POSIX vs Bash:\n# Use [ ] not [[ ]]\nif [ \"$var\" = \"value\" ]; then\n    echo \"Match\"\nfi\n\n# Use case instead of regex\ncase \"$var\" in\n    *.txt) echo \"Text file\" ;;\n    *) echo \"Other\" ;;\nesac\n\n# Use = not == for string comparison\n# Good: [ \"$a\" = \"$b\" ]\n# Bad: [[ \"$a\" == \"$b\" ]]\n\n# Use $? explicitly\ncommand\nif [ $? -eq 0 ]; then :; fi\n\n# Feature detection with command -v\nif command -v python3 >/dev/null 2>&1; then\n    python3 script.py\nelif command -v python >/dev/null 2>&1; then\n    python script.py\nfi\n\n# Test with dash\n# dash script.sh\n# Check for bashisms: checkbashisms script.sh"
+    ],
+    "Config File Parsing": [
+      "Parse configuration files without sourcing them (sourcing is dangerous with untrusted files). Parse .env files, INI-style configs, and use jq/yq for JSON and YAML.",
+      "#!/bin/bash\n\n# Parse .env file safely\nwhile IFS='=' read -r key value; do\n    [[ \"$key\" =~ ^#.*$ || -z \"$key\" ]] && continue\n    value=\"${value%\\\"}\"\n    value=\"${value#\\\"}\"\n    printf -v \"$key\" \"$value\"\ndone < .env\n\n# Parse INI-style\nparse_ini() {\n    local section=\"\"\n    while IFS= read -r line; do\n        [[ \"$line\" =~ ^\\[.*\\]$ ]] && section=\"${line:1:-1}\"\n        [[ \"$line\" =~ ^#.*$ || -z \"$line\" ]] && continue\n        if [[ \"$line\" =~ ^([^=]+)=(.*)$ ]]; then\n            echo \"[$section] ${BASH_REMATCH[1]}=${BASH_REMATCH[2]}\"\n        fi\n    done < \"$1\"\n}\n\n# Parse JSON with jq (install: apt install jq)\nname=$(jq -r '.name' config.json)\nport=$(jq -r '.server.port // 8080' config.json)\n\n# Parse YAML with yq (install: pip install yq)\n# name=$(yq -r '.name' config.yaml)"
+    ],
+    "Math & Data Processing": [
+      "Bash built-in arithmetic ($(( ))) handles integers. For floating point, use bc or awk. For structured data, use jq. For statistics on arrays, use built-in operations.",
+      "#!/bin/bash\n\n# Integer arithmetic\nresult=$(( (10 + 5) * 2 / 3 ))\necho \"$result\"  # 10\n\n# Floating point with bc\nresult=$(echo \"scale=2; 10 / 3\" | bc)\necho \"$result\"  # 3.33\n\n# bc with variables\npi=$(echo \"scale=10; 4*a(1)\" | bc -l)\necho \"$pi\"\n\n# Formatting with printf\nprintf \"%.2f\\n\" \"$result\"\nprintf \"%010d\\n\" 42  # 0000000042\n\n# Array statistics\nnumbers=(42 17 8 99 33)\nsum=0\nfor n in \"${numbers[@]}\"; do ((sum += n)); done\necho \"Sum: $sum\"\ncount=${#numbers[@]}\necho \"Count: $count\"\n# Average (integer)\necho \"Avg: $((sum / count))\"\n\n# jq for JSON data\n# echo '{\"values\":[1,2,3,4,5]}' | jq '.values | add / length'"
+    ]
+  },
+  "DevOps & Tooling with Bash": {
+    "Git Automation": [
+      "Bash scripts can automate git workflows: batch operations, branch management, hook scripts, and CI pipeline glue. Git hooks (.git/hooks/) are bash scripts triggered by git events.",
+      "#!/bin/bash\n\n# Batch operations on all branches\nfor branch in $(git branch --format='%(refname:short)'); do\n    if [[ \"$branch\" != \"main\" && \"$branch\" != \"develop\" ]]; then\n        echo \"Stale branch: $branch\"\n    fi\ndone\n\n# Pre-commit hook (.git/hooks/pre-commit)\n#!/bin/bash\necho \"Running linter...\"\nif ! shellcheck -- *.sh; then\n    echo \"Lint failed!\"\n    exit 1\nfi\n\n# Automated release script\nversion=$(git describe --tags --abbrev=0)\nnew_version=$(echo \"$version\" | awk -F. '{$NF++; print}' OFS='.')\necho \"Releasing $new_version...\"\ngit tag -a \"v$new_version\" -m \"Release v$new_version\"\ngit push origin \"v$new_version\"\n\n# CI pipeline check\nif git diff --name-only HEAD~1 | grep -q \"^src/\"; then\n    echo \"Source files changed — running tests\"\nfi\n\n# Automate git bisect\ngit bisect start HEAD v1.0\ngit bisect run bash -c 'make test 2>/dev/null'"
+    ],
+    "Docker & Containers": [
+      "Script Docker workflows: build images, manage containers, run health checks, and orchestrate multi-container operations. Useful for dev environments, CI/CD, and deployment automation.",
+      "#!/bin/bash\n\n# Build and tag\nimage_name=\"myapp:$(git rev-parse --short HEAD)\"\ndocker build -t \"$image_name\" .\ndocker tag \"$image_name\" \"myapp:latest\"\n\n# Health check loop\ncontainer_id=$(docker run -d -p 8080:80 \"$image_name\")\nfor i in $(seq 1 10); do\n    if curl -sf http://localhost:8080/health > /dev/null 2>&1; then\n        echo \"Container healthy!\"\n        break\n    fi\n    echo \"Waiting... ($i)\"\n    sleep 2\ndone\n\n# Cleanup old images\ndocker image prune -af --filter \"until=24h\"\n\n# Multi-stage build and push\ndocker buildx build --platform linux/amd64,linux/arm64 \\\n    -t \"registry.example.com/myapp:latest\" \\\n    --push .\n\n# Docker Compose wrapper\nif ! docker compose ps | grep -q \"Up\"; then\n    docker compose up -d\nfi"
+    ],
+    "API Interaction": [
+      "Interact with REST APIs using curl. Parse JSON responses with jq, handle errors, implement pagination, and respect rate limits. Essential for cloud tooling and web service automation.",
+      "#!/bin/bash\nset -euo pipefail\n\n# GET with error handling\nresponse=$(curl -sf \"https://api.github.com/repos/user/repo\" || true)\nif [[ -z \"$response\" ]]; then\n    echo \"API request failed\" >&2\n    exit 1\nfi\n\n# Parse JSON with jq\nname=$(echo \"$response\" | jq -r '.full_name')\nstars=$(echo \"$response\" | jq '.stargazers_count')\necho \"$name has $stars stars\"\n\n# POST with payload\ncurl -s -X POST \\\n    -H \"Content-Type: application/json\" \\\n    -H \"Authorization: Bearer $TOKEN\" \\\n    -d '{\"title\": \"Bug fix\", \"body\": \"Fixed the issue\"}' \\\n    https://api.github.com/repos/user/repo/issues\n\n# Pagination\npage=1\nwhile :; do\n    data=$(curl -s \"https://api.example.com/items?page=$page\")\n    count=$(echo \"$data\" | jq '.items | length')\n    [[ \"$count\" -eq 0 ]] && break\n    echo \"Processing page $page with $count items\"\n    ((page++))\ndone\n\n# Rate limit handling\nwhile ! curl -sf \"$url\" > /dev/null 2>&1; do\n    echo \"Rate limited, waiting...\" >&2\n    sleep 60\ndone"
+    ],
+    "Database Interaction": [
+      "Run database queries from bash scripts for automation: backups, migrations, reporting, and data import. Use non-interactive mode with environment variables for credentials.",
+      "#!/bin/bash\n\n# MySQL non-interactive query\nresult=$(mysql -u \"$DB_USER\" -p\"$DB_PASS\" -h \"$DB_HOST\" -N -e \"\n    SELECT COUNT(*) FROM users WHERE status = 'active';\n\" 2>/dev/null)\necho \"Active users: $result\"\n\n# Export query to CSV\nmysql -u \"$DB_USER\" -p\"$DB_PASS\" \"$DB_NAME\" <<SQL\n    SELECT id, name, email\n    INTO OUTFILE '/tmp/users.csv'\n    FIELDS TERMINATED BY ','\n    ENCLOSED BY '\"'\n    LINES TERMINATED BY '\\n'\n    FROM users;\nSQL\n\n# PostgreSQL\npsql -U \"$PG_USER\" -d \"$PG_DB\" -c \"SELECT count(*) FROM logs;\" -t -A\n\n# Backup script\nbackup_file=\"backup_$(date +%Y%m%d_%H%M%S).sql\"\nmysqldump -u \"$DB_USER\" -p\"$DB_PASS\" \"$DB_NAME\" > \"$backup_file\"\ngzip \"$backup_file\"\necho \"Backup saved: ${backup_file}.gz\"\n\n# Migration runner\nfor migration in migrations/*.sql; do\n    name=$(basename \"$migration\")\n    if ! grep -q \"$name\" migrations_applied.txt 2>/dev/null; then\n        echo \"Applying: $name\"\n        mysql -u \"$DB_USER\" -p\"$DB_PASS\" \"$DB_NAME\" < \"$migration\"\n        echo \"$name\" >> migrations_applied.txt\n    fi\ndone"
+    ],
+    "Cloud CLI Automation": [
+      "Cloud provider CLIs (aws, gcloud, az) are built for scripting. Automate resource provisioning, configuration, and monitoring with bash wrappers and jq output parsing.",
+      "#!/bin/bash\n\n# AWS: list EC2 instances\naws ec2 describe-instances --query \\\n    'Reservations[].Instances[].[InstanceId,State.Name,InstanceType]' \\\n    --output table\n\n# AWS: get secret from Secrets Manager\nsecret=$(aws secretsmanager get-secret-value \\\n    --secret-id \"myapp/prod/db\" \\\n    --query SecretString --output text)\nuser=$(echo \"$secret\" | jq -r '.username')\npassword=$(echo \"$secret\" | jq -r '.password')\n\n# GCP: list compute instances\ngcloud compute instances list --format=\"table(name,zone,status)\"\n\n# Azure: deploy VM\naz vm create \\\n    --resource-group my-rg \\\n    --name my-vm \\\n    --image UbuntuLTS \\\n    --admin-username azureuser \\\n    --generate-ssh-keys\n\n# Idempotent resource creation\nif ! aws s3 ls \"s3://myapp-backups\" 2>/dev/null; then\n    aws s3 mb \"s3://myapp-backups\"\n    aws s3api put-bucket-versioning \\\n        --bucket myapp-backups \\\n        --versioning-configuration Status=Enabled\nfi"
+    ],
+    "System Monitoring": [
+      "Build custom monitoring scripts for system health checks, disk usage alerts, service availability monitoring, and notification integration.",
+      "#!/bin/bash\n\n# Disk usage alert\nthreshold=80\ndf_output=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')\nif [[ \"$df_output\" -gt \"$threshold\" ]]; then\n    echo \"WARNING: Disk usage at ${df_output}%\"\n    mail -s \"Disk Alert\" admin@example.com <<EOF\nDisk usage is at ${df_output}% on $(hostname)\nEOF\nfi\n\n# Service health check\ncheck_service() {\n    local service=\"$1\"\n    if systemctl is-active --quiet \"$service\"; then\n        echo \"$service: OK\"\n    else\n        echo \"$service: DOWN — restarting...\"\n        sudo systemctl restart \"$service\"\n        notify-send \"Service $service restarted\"\n    fi\n}\nfor svc in nginx postgresql redis; do\n    check_service \"$svc\"\ndone\n\n# Port monitoring\nport=8080\nif ss -tlnp | grep -q \":$port \"; then\n    echo \"Port $port is listening\"\nelse\n    echo \"Port $port is NOT listening\"\nfi\n\n# Resource trend logging\n{\n    echo \"$(date +%s),$(free -m | awk '/Mem:/{print $3}'),$(uptime | awk -F'load average:' '{print $2}')\"\n} >> /var/log/resource-trend.csv"
+    ]
+  },
+  "Regular Expressions": {
+    "grep & egrep": [
+      "grep searches file content using regex patterns. Options: -i (case insensitive), -r (recursive), -v (invert match), -c (count), -l (filenames only), -n (line numbers), -o (only matched), -E (extended regex). egrep is equivalent to grep -E. grep returns 0 if match found, 1 if not, 2 on error. Use -q for quiet mode (suppress output).",
+      "# Basic search\ngrep \"error\" /var/log/syslog\ngrep -i \"warning\" *.log\ngrep -rn \"TODO\" src/\n\n# Extended regex\ngrep -E \"error|fatal|critical\" log.txt\n\n# Count matches\ngrep -c \"pattern\" file.txt\n\n# Only filenames\ngrep -rl \"function\" *.py\n\n# Inverted match\ngrep -v \"^#\" config.conf  # exclude comments\n\n# Context lines\ngrep -B 2 -A 3 \"error\" log.txt  # 2 before, 3 after\n\n# Using regex\nfor file in *.log; do\n    if grep -q \"ERROR\" \"$file\"; then\n        echo \"$file has errors\"\n    fi\ndone"
+    ],
+    "sed Stream Editor Basics": [
+      "sed processes text line by line. Syntax: sed 'addresscommand' file. Common commands: s (substitute), d (delete), p (print), a/i (append/insert), c (change). Use -i for in-place editing (backup with -i.bak). Use -n with p to suppress default printing. Addresses: line number, range, regex /pattern/.",
+      "# Substitute (first occurrence per line)\nsed 's/old/new/' file.txt\n\n# Global substitute (all occurrences)\nsed 's/old/new/g' file.txt\n\n# In-place with backup\nsed -i.bak 's/foo/bar/g' config.conf\n\n# Delete lines matching pattern\nsed '/^#/d' file.txt  # remove comments\nsed '/^$/d' file.txt   # remove empty lines\n\n# Print specific lines\nsed -n '10,20p' file.txt  # lines 10-20 only\n\n# Multiple commands\nsed -e 's/foo/bar/g' -e '/^$/d' file.txt\n\n# Address range\nsed '/start/,/end/s/old/new/g' file.txt\n\n# Using variables\nold=\"foo\"; new=\"bar\"\nsed \"s/$old/$new/g\" file.txt"
+    ],
+    "awk Text Processing": [
+      "awk processes structured text (columns/fields). Pattern-action: awk '/pattern/ {action}' file. Built-in variables: $0 (whole line), $1-$NF (fields), NR (line number), NF (fields per line), FS (field separator, default whitespace). Common uses: field extraction, column arithmetic, report generation.",
+      "# Field extraction\nawk '{print $1, $3}' data.txt\nawk -F: '{print $1, $6}' /etc/passwd  # custom separator\n\n# Pattern matching\nawk '/error/ {print NR, $0}' log.txt\nawk '$3 > 100 {print $1, $3}' data.txt\n\n# BEGIN/END blocks\nawk 'BEGIN {sum=0} {sum+=$3} END {print \"Total:\", sum}' sales.txt\n\n# Formatted output\nawk '{printf \"%-10s %5d\\n\", $1, $2}' file.txt\n\n# Multi-condition\nawk '{\n    if ($1 ~ /^[A-Z]/) {\n        print \"Starts with uppercase:\", $0\n    } else {\n        print \"Other:\", $0\n    }\n}' file.txt\n\n# Process substitution\nawk '!seen[$0]++' file.txt  # remove duplicate lines without sort"
+    ]
+  },
+  "Shell Scripting Best Practices": {
+    "Error Handling (set -e, trap)": [
+      "Robust error handling: set -e (exit on error), set -u (treat unset vars as error), set -o pipefail (fail on pipeline error). trap catches signals (EXIT, ERR, SIGINT, SIGTERM). Use || for fallback commands. ERR traps fire on command failure. EXIT traps run on script exit regardless of success/failure.",
+      "#!/usr/bin/env bash\nset -euo pipefail\n\n# Error handler\nerror_handler() {\n    local line=$1\n    local command=$2\n    echo \"Error on line $line: $command\" >&2\n}\ntrap 'error_handler $LINENO \"$BASH_COMMAND\"' ERR\n\n# EXIT trap (cleanup)\ncleanup() {\n    rm -f /tmp/temp_*\n    echo \"Cleaned up\"\n}\ntrap cleanup EXIT\n\n# Graceful signal handling\nhandle_sigint() {\n    echo \"Interrupted, cleaning up...\"\n    exit 1\n}\ntrap handle_sigint SIGINT SIGTERM\n\n# Fallback pattern\nmkdir -p /some/dir || {\n    echo \"Failed to create directory\" >&2\n    exit 1\n}\n\n# Command substitution with error checking\nresult=$(risky_command 2>&1) || {\n    echo \"Command failed: $result\" >&2\n    exit 1\n}"
+    ],
+    "Debugging Scripts (set -x, bash -n)": [
+      "Debug with set -x (print commands before execution), bash -n (syntax check without running), bash -v (verbose, print input lines). PS4 controls debug prompt (default +). Use DEBUG trap for step-by-step. shellcheck for static analysis. Set -x locally with set -x inside subshell or function.",
+      "# Syntax check (no execution)\nbash -n script.sh\n\n# Trace execution\nset -x  # enable tracing\nfor i in {1..3}; do\n    echo \"Iteration $i\"\ndone\nset +x  # disable tracing\n\n# Custom PS4 for nested debugging\nPS4='+ $BASH_SOURCE:$LINENO:$FUNCNAME> '\n\n# DEBUG trap (step through)\ntrap 'echo \"About to run: $BASH_COMMAND\"' DEBUG\n\n# Check for unbound variables\nset -u  # error on undefined variables\n\n# Partial debugging\ndebug() {\n    [[ -n \"${DEBUG:-}\" ]] && \"$@\"\n}\ndebug echo \"This only prints when DEBUG is set\"\n\n# ShellCheck static analysis\n# shellcheck script.sh  # catches common bugs"
+    ],
+    "Idiomatic Bash Patterns": [
+      "Idiomatic Bash: use [[ ]] instead of [ ], (( )) for arithmetic, $() instead of backticks, local variables in functions, arrays for lists, parameter expansion for string ops, here-docs for multi-line blocks, and printf instead of echo for portable output.",
+      "#!/usr/bin/env bash\n\n# Pattern: parameter expansion\nfilename=\"photo.jpg\"\nname=\"${filename%.*}\"       # photo (remove shortest suffix)\next=\"${filename##*.}\"      # jpg (remove longest prefix)\necho \"${name}.${ext}\"\n\n# Pattern: arrays\nfiles=(*.txt)\necho \"${#files[@]} text files\"\nfor f in \"${files[@]}\"; do\n    echo \"Processing: $f\"\ndone\n\n# Pattern: default values\ndefault_port=${PORT:-8080}  # use 8080 if unset\n\n# Pattern: read with IFS\nwhile IFS=: read -r user pass uid gid name home shell; do\n    printf \"User: %-10s Home: %s\\n\" \"$user\" \"$home\"\ndone < /etc/passwd\n\n# Pattern: here-doc for config generation\ncat <<EOF > /tmp/config.yml\nserver:\n  port: ${PORT:-8080}\n  host: \"${HOST:-localhost}\"\nEOF\n\n# Pattern: check command existence\ncommand -v python3 &>/dev/null || {\n    echo \"python3 not found\" >&2\n    exit 1\n}"
+    ]
+  },
+  "Version Control with Git": {
+    "git add, commit, log": [
+      "Git records snapshots. git add stages changes; git commit creates a snapshot with a message. git log shows history. Options: --oneline (compact), --graph (branch viz), --decorate (refs), -p/show (diff), --stat (file summary), --author (filter), --since/--until (date range). .gitignore prevents tracking.",
+      "# Staging and committing\ngit add file.py          # stage single file\ngit add .                # stage all changes\ngit add -p               # interactive staging (hunks)\ngit commit -m \"feat: add login\"\ngit commit -am \"fix: typo\"  # add + commit tracked files\n\n# Viewing history\ngit log --oneline --graph --decorate --all\ngit log --since=\"2 weeks ago\"\ngit log --author=\"Alice\" --oneline\ngit log -p -2  # show last 2 commits with diff\n\n# Amending\ngit commit --amend -m \"better message\"\n\n# Interactive rebase\ngit rebase -i HEAD~5\n\n# Blame\n# git blame file.py  # who changed each line"
+    ],
+    "Branching & Merging": [
+      "Branch = independent development line. Commands: git branch (list/create), git checkout -b (create+switch), git merge branch (integrate). Fast-forward vs 3-way merge. Resolve conflicts in marked files, then git add + commit. git merge --no-ff (keep branch history). git branch -d (delete merged).",
+      "# Branch management\ngit branch feature-x     # create branch\ngit checkout feature-x  # switch\ngit checkout -b feature-y  # create + switch\n\n# Merging\ngit checkout main\ngit merge feature-x      # merge into main\ngit merge --no-ff feature-x  # force merge commit\n\n# Conflict resolution\n# 1. git merge feature causes conflicts\n# 2. Edit files with conflict markers (<<<<<<<, =======, >>>>>>>)\n# 3. git add resolved-file.py\n# 4. git commit\n\n# Delete branch\ngit branch -d feature-x  # delete merged branch\ngit branch -D feature-x  # force delete (unmerged)\n\n# List branches\ngit branch -a  # all branches (local + remote)"
+    ],
+    "Remote Repositories (push/pull)": [
+      "Remotes track remote repositories. git remote add origin <url>, git push origin main, git pull (fetch + merge), git fetch (fetch without merge). Upstream branch: git push -u origin main sets tracking. Pull requests / merge requests integrate feature branches via code review.",
+      "# Adding remote\ngit remote add origin https://github.com/user/repo.git\ngit remote -v  # list remotes\n\n# Push\ngit push origin main\ngit push -u origin feature  # set upstream for future pulls\n\n# Pull (fetch + merge)\ngit pull origin main\n\n# Fetch (review before merge)\ngit fetch origin\ngit log origin/main..main  # see local commits ahead\n\n# Force push (use with care!)\n# git push --force-with-lease origin main  # safer than --force\n\n# Tags\ngit tag v1.0.0\ngit push origin --tags\n\n# Submodules for dependencies\ngit submodule add https://github.com/example/lib.git lib/"
+    ]
+  },
+  "System Administration": {
+    "Process Management (ps, top, kill)": [
+      "ps lists processes: ps aux (all users, detailed), ps -ef (full format). top (htop better) shows live process view. kill sends signals: SIGTERM (15, graceful), SIGKILL (9, force), SIGHUP (1, reload). pkill/fkill by name. jobs/bg/fg for foreground/background. /proc filesystem exposes process info.",
+      "# Listing processes\nps aux                    # all processes\ntop                       # interactive process viewer\nhtop                      # improved top\n\n# Finding processes\npgrep nginx               # find PIDs by name\nps aux | grep nginx\npidof nginx\n\n# Sending signals\nkill 1234                 # SIGTERM (graceful)\nkill -9 1234              # SIGKILL (force)\nkill -HUP $(pgrep nginx)  # reload config\npkill -f \"node server.js\"  # kill by pattern\n\n# Jobs\nsleep 100 &\nbg\nfg\nkill %1  # kill job 1\n\n# CPU/memory per process\nps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head\n\ntop -b -n 1 | head -20  # batch mode"
+    ],
+    "Permissions & Ownership (chmod, chown)": [
+      "Linux permissions: rwx (read/write/execute) for owner/group/others. chmod changes modes: octal (755, 644), symbolic (u+x, g-w). chown changes owner/group. umask sets default permissions. SUID/SGID (4xxx, 2xxx) for elevated privileges. chmod -R for recursive. ls -l shows permissions.",
+      "# chmod in octal\nchmod 755 script.sh  # rwxr-xr-x\ntouch file.txt && chmod 644 file.txt  # rw-r--r--\n\n# chmod symbolic\nchmod u+x script.sh   # add execute for user\nchmod go-w file.txt   # remove write for group/others\nchmod a+r file.txt    # add read for all\n\n# chown\nchown alice:dev file.txt  # change user:group\nchown -R alice:dev /home/alice\n\n# umask\numask 0022  # default files 644, dirs 755\n\n# SUID/SGID\nchmod u+s executable    # SUID (runs as owner)\nchmod g+s directory     # SGID (inherits group)\nchmod +t /tmp           # sticky bit\n\n# ACL (extended permissions)\nsetfacl -m u:bob:rw file.txt\ngetfacl file.txt"
+    ],
+    "Systemd & Service Management": [
+      "systemd manages services, sockets, timers. systemctl controls units. Common commands: start, stop, restart, enable, disable, status, is-active, list-units. Unit files in /etc/systemd/system/. Journalctl reads logs (journald). Timers replace cron. Analyzing boot with systemd-analyze.",
+      "# Service management\nsudo systemctl start nginx\nsudo systemctl stop nginx\nsudo systemctl restart nginx\nsudo systemctl status nginx\nsudo systemctl enable nginx   # start on boot\nsudo systemctl disable nginx\n\n# Check state\nsystemctl is-active nginx\nsystemctl is-enabled nginx\nsystemctl list-units --type=service --state=running\n\n# Creating a unit file\n# /etc/systemd/system/myapp.service:\n# [Unit]\n# Description=My Application\n# \n# [Service]\n# ExecStart=/usr/local/bin/myapp\n# Restart=always\n# User=myapp\n# \n# [Install]\n# WantedBy=multi-user.target\n\n# Logs\njournalctl -u nginx -f  # follow logs\njournalctl -u nginx --since \"1 hour ago\"\n\n# Timers (cron replacement)\nsystemctl list-timers\n\n# Boot analysis\nsystemd-analyze blame"
+    ]
+  },
+  "Network Tools": {
+    "curl (HTTP Client)": [
+      "curl transfers data with URL syntax. Common options: -o (output file), -O (remote filename), -L (follow redirects), -I (headers only), -H (custom headers), -d (POST data), -X (method), -k (insecure SSL), -u (basic auth), -v (verbose). jq parses JSON responses.",
+      "# GET requests\ncurl https://api.example.com/users\ncurl -o users.json https://api.example.com/users\ncurl -s https://api.example.com/users | jq '.'\n\n# POST with JSON data\ncurl -X POST https://api.example.com/users \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Alice\",\"email\":\"alice@example.com\"}'\n\n# Headers only\ncurl -I https://google.com\n\n# Authentication\ncurl -u user:password https://api.example.com/secure\ncurl -H \"Authorization: Bearer $TOKEN\" https://api.example.com/data\n\n# File upload\ncurl -F \"file=@photo.jpg\" https://api.example.com/upload\n\n# Download with resume\ncurl -C - -O https://example.com/bigfile.zip\n\n# Follow redirects\ncurl -L http://bit.ly/shortlink\n\n# Timeout and retry\ncurl --connect-timeout 5 --retry 3 https://example.com"
+    ],
+    "ping, traceroute, dig": [
+      "Network diagnostics: ping tests reachability (ICMP echo). traceroute traces the route to a host. dig (DNS lookup) queries DNS records: A, AAAA, MX, NS, TXT, CNAME. nslookup is simpler but deprecated. mtr combines ping + traceroute. netstat/ss show network connections.",
+      "# Ping\ntest -t 1 google.com  # ping with interval\nping -c 4 google.com     # stop after 4 packets\n\n# Traceroute\ntraceroute google.com\ntraceroute -n google.com  # numeric (no DNS)\nmtr google.com  # continuous ping + trace\n\n# DNS lookup (dig)\ndig google.com\ndig google.com AAAA          # IPv6 record\ndig google.com MX            # mail servers\ndig -x 8.8.8.8              # reverse lookup\ndig +short google.com        # short output\n\n# nslookup (fallback)\nnslookup google.com\n\n# Active connections\nss -tuln   # listening TCP/UDP numeric\nss -tup    # established connections with process\nnetstat -tulpn\n\n# Check port\nnc -zv google.com 80  # TCP port check"
+    ],
+    "rsync & SCP (File Transfer)": [
+      "scp copies files over SSH: scp source destination. rsync is smarter: delta transfer, compression, preserves permissions/times, only transfers differences. Both use SSH by default. rsync -a (archive), -z (compress), -v (verbose), --progress, --delete (remove dest extras), --exclude.",
+      "# SCP\nscp file.txt user@host:/remote/path/\nscp -r dir/ user@host:/remote/path/\nscp user@host:/remote/file.txt ./\n\n# RSync\nrsync -avz source/ user@host:/dest/\n\n# Sync local dirs\nrsync -av --delete /src/ /backup/  # mirror src to backup\n\n# Exclude patterns\nrsync -av --exclude='*.log' --exclude='node_modules/' src/ dest/\n\n# Dry run\nrsync -av --dry-run source/ dest/\n\n# Over SSH with non-standard port\nrsync -avz -e \"ssh -p 2222\" source/ user@host:/dest/\n\n# Incremental backup with hardlinks\nrsync -av --link-dest=/backup/yesterday /src/ /backup/today/\n\n# Bandwidth limit\nrsync -av --bwlimit=1000 source/ dest/  # 1000 KB/s"
+    ]
+  },
+  "Advanced Scripting": {
+    "getopts (Argument Parsing)": [
+      "getopts parses command-line options in Bash scripts. Syntax: getopts \"optstring\" variable. optstring letters with : for required value. OPTARG gets argument value, OPTIND tracks position. Built-in (no external dep). Supports short flags only. Use shift $((OPTIND-1)) to access positional args after flags.",
+      "#!/usr/bin/env bash\n\nusage() {\n    echo \"Usage: $0 [-v] [-o output] [-n count] file\"\n    exit 1\n}\n\nverbose=false\noutput=\"\"\ncount=1\n\nwhile getopts \"vo:n:\" opt; do\n    case $opt in\n        v) verbose=true ;;\n        o) output=$OPTARG ;;\n        n) count=$OPTARG ;;\n        *) usage ;;\n    esac\ndone\nshift $((OPTIND - 1))\n\nif [[ $# -eq 0 ]]; then\n    usage\nfi\n\n$verbose && echo \"Verbose mode\"\necho \"Output: ${output:-stdout}\"\necho \"Count: $count\"\necho \"File: $1\""
+    ],
+    "Associative Arrays & Advanced Data": [
+      "Associative arrays (declare -A map) map strings to strings. Available in Bash 4+. Operations: map[keys]=value, ${map[key]}, ${!map[@]} (keys), ${#map[@]} (size). Composed with loops for complex data structures. Can't nest directly, but can use naming conventions (prefix_map).",
+      "#!/usr/bin/env bash\n\n# Declare associative array\ndeclare -A config\nconfig=(\n    [host]=\"localhost\"\n    [port]=\"8080\"\n    [user]=\"admin\"\n)\n\n# Access\nprintf \"Host: %s\\n\" \"${config[host]}\"\n\n# Iterate keys\nfor key in \"${!config[@]}\"; do\n    printf \"%s = %s\\n\" \"$key\" \"${config[$key]}\"\ndone\n\n# Nested structures (simulated)\ndeclare -A user1\nuser1=([name]=\"Alice\" [role]=\"admin\")\ndeclare -A user2\nuser2=([name]=\"Bob\" [role]=\"user\")\n\n# Composite\nfor user_var in \"user1\" \"user2\"; do\n    declare -n ref=\"$user_var\"\n    echo \"${ref[name]} is ${ref[role]}\"\ndone\n\n# Use with functions\nfunction get_config() {\n    local key=$1\n    echo \"${config[$key]:-default}\"\n}"
+    ],
+    "Process Substitution & Here-Strings": [
+      "Process substitution <(cmd) treats output as a file. Useful for diff, comm, and paste. Here-string <<< word feeds string as stdin. Combined with read, tr, or awk for inline processing. Named file descriptors with exec for custom redirection.",
+      "#!/usr/bin/env bash\n\n# Compare outputs of two commands\ndiff <(ls dir1) <(ls dir2)\n\n# Count words in pipeline output\nwc -l <(find . -name '*.py' | head)\n\n# Here-string with read\nIFS=: read -r user pass uid <<< \"alice:x:1000:1000::/home/alice:/bin/bash\"\necho \"User: $user, UID: $uid\"\n\n# Process substitution with while\nwhile IFS= read -r line; do\n    echo \"Line: $line\"\ndone < <(grep -r \"error\" /var/log/)\n\n# Named file descriptors\nexec {fd}>output.txt\necho \"Hello\" >&$fd\nexec {fd}>&-\n\n# Tee with process substitution\ncommand | tee >(grep 'error' > errors.log) >(grep 'warn' > warnings.log)\n\n# String processing\ncombined=$(paste <(echo -e \"a\\nb\\nc\") <(echo -e \"1\\n2\\n3\"))"
+    ]
+  },
+  "DevOps & CI/CD": {
+    "Docker in Bash Scripts": [
+      "Docker CLI commands in scripts: docker build, docker run, docker compose. Manage containers programmatically. Check Docker availability with docker info. Use --rm for temporary containers. docker exec to run commands. docker cp to copy files. docker logs to fetch output. Health checks with docker inspect.",
+      "# Check Docker is running\nif ! docker info &>/dev/null; then\n    echo \"Docker not available\" >&2\n    exit 1\nfi\n\n# Build\ndocker build -t myapp:latest .\n\n# Run with cleanup\ndocker run --rm -d --name myapp -p 8080:80 myapp:latest\n\n# Execute command in container\nresult=$(docker exec myapp cat /etc/hostname)\necho \"Hostname: $result\"\n\n# Wait for healthy\nuntil docker inspect --format='{{.State.Health.Status}}' myapp 2>/dev/null | grep -q healthy; do\n    echo \"Waiting...\"\n    sleep 2\ndone\n\n# Docker Compose\nif [[ -f docker-compose.yml ]]; then\n    docker compose up -d\nfi\n\n# Cleanup function\ncleanup() {\n    echo \"Stopping containers...\"\n    docker stop myapp 2>/dev/null\n    docker system prune -f 2>/dev/null\n}\ntrap cleanup EXIT\n\n# Logs\ndocker logs myapp --tail 100 > app.log"
+    ],
+    "GitHub Actions Workflows": [
+      "GitHub Actions automate CI/CD. Workflow files in .github/workflows/*.yml. Triggers: push, pull_request, schedule. Jobs run on runners (ubuntu-latest, windows-latest, macos-latest). Steps: actions/checkout, setup, build, test, deploy. Secrets via GitHub Secrets. Artifacts and caching.",
+      "# .github/workflows/ci.yml\n# name: CI\n# on:\n#   push:\n#     branches: [main]\n#   pull_request:\n#     branches: [main]\n#\n# jobs:\n#   test:\n#     runs-on: ubuntu-latest\n#     steps:\n#       - uses: actions/checkout@v4\n#       - uses: actions/setup-node@v4\n#         with:\n#           node-version: 20\n#       - run: npm ci\n#       - run: npm test\n#\n#   deploy:\n#     needs: test\n#     if: github.ref == 'refs/heads/main'\n#     runs-on: ubuntu-latest\n#     steps:\n#       - uses: actions/checkout@v4\n#       - run: ./deploy.sh\n#         env:\n#           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}\n#\n# Matrix builds:\n# strategy:\n#   matrix:\n#     os: [ubuntu-latest, macos-latest]\n#     node: [18, 20]"
+    ]
+  }
+}

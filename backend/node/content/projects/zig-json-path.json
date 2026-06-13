@@ -1,0 +1,115 @@
+{
+  "id": "zig-json-path",
+  "title": "JSON Path Parser",
+  "description": "Write a Zig program that parses a simple JSON path expression and extracts the corresponding value from a nested JSON-like structure.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst Value = union(enum) {\n    num: f64,\n    str: []const u8,\n    obj: struct { keys: [][]const u8, vals: []Value },\n};\n\npub fn main() !void {\n    const path = \"person.name\";\n    \n    var parts: [2][]const u8 = undefined;\n    var start: usize = 0;\n    var idx: usize = 0;\n    for (path, 0..) |ch, i| {\n        if (ch == '.') {\n            parts[idx] = path[start..i];\n            idx += 1;\n            start = i + 1;\n        }\n    }\n    parts[idx] = path[start..];\n    \n    std.debug.print(\"Path segments: \", .{});\n    for (0..idx + 1) |i| {\n        std.debug.print(\"{s} \", .{parts[i]});\n    }\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('Path segments: person name')",
+  "hints": [
+    "Split the path string on '.' to get individual segments",
+    "Use `for (path, 0..) |ch, i|` for iteration with index",
+    "Slice the string with `path[start..i]` to extract substrings without allocation"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "general",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the JSON Path Parser project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for JSON Path Parser",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the JSON Path Parser project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing JSON Path Parser...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for JSON Path Parser",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for JSON Path Parser\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing JSON Path Parser...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing JSON Path Parser...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing JSON Path Parser...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing JSON Path Parser...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

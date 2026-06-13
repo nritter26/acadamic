@@ -1,0 +1,71 @@
+{
+  "id": "rs-scope",
+  "title": "Rust: Scope and Ownership",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 15,
+  "concepts": ["rust", "scope", "ownership", "borrowing", "lifetimes"],
+  "description": "Understand variable scope, ownership, and borrowing in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Block Scope",
+      "description": "Declare `x = 10` outside a block. Inside a block `{}`, declare `y = 20`. Print both x and y inside and outside.",
+      "hints": ["Variables declared inside `{}` are scoped to that block.", "`x` is accessible both inside and outside.", "`y` is only accessible inside the block."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('10') && output.includes('20')",
+        "successMessage": "Block scope understood!",
+        "failureMessage": "Print x outside and y inside the block."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Ownership Transfer (Move)",
+      "description": "Declare `let s1 = String::from(\"hello\");`, then `let s2 = s1;`. Try to print `s1` (it will fail — comment it out). Print `s2`.",
+      "hints": ["`String` does not implement `Copy`, so assignment moves ownership.", "After `let s2 = s1;`, `s1` is no longer valid.", "This prevents double-free errors."],
+      "codeTemplate": { "rust": "fn main() {\n    let s1 = String::from(\"hello\");\n    let s2 = s1;\n    // println!(\"{}\", s1); // This would fail to compile!\n    println!(\"{}\", s2);\n}" },
+      "verification": {
+        "test": "output.includes('hello')",
+        "successMessage": "Ownership transfer works!",
+        "failureMessage": "Print s2 after moving from s1."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Clone (Deep Copy)",
+      "description": "Declare `let s1 = String::from(\"hello\");`, then `let s2 = s1.clone();`. Now both are valid — print both.",
+      "hints": [".clone() creates a deep copy of the heap data.", "After cloning, both variables are valid.", "This is more expensive than a move but allows independent values."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "(output.match(/hello/g) || []).length >= 2",
+        "successMessage": "Clone works! Both strings are independent.",
+        "failureMessage": "Print both s1 and s2 after cloning."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Borrowing with References",
+      "description": "Create a String `s = String::from(\"borrow\")`. Write a function `print_str(s: &String)` that prints it. Call with `&s`. After the call, s is still usable in main.",
+      "hints": ["References (`&`) borrow without taking ownership.", "The function signature `fn print_str(s: &String)` borrows s.", "After calling `print_str(&s)`, you can still use `s` in main."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('borrow')",
+        "successMessage": "Borrowing works!",
+        "failureMessage": "Print the string via a borrowed reference."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Copy Types",
+      "description": "Show that primitive types like `i32` implement `Copy`. Declare `let a = 5; let b = a;` then print both `a` and `b`.",
+      "hints": ["Integers implement the `Copy` trait.", "After `let b = a;`, both `a` and `b` are still valid.", "This is because `i32` is stored on the stack (cheap to copy)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "(output.match(/5/g) || []).length >= 2",
+        "successMessage": "Copy types work! Both variables are valid.",
+        "failureMessage": "Print both a and b to show Copy behavior."
+      }
+    }
+  ]
+}

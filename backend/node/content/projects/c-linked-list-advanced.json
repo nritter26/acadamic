@@ -1,0 +1,23 @@
+{
+  "id": "c-linked-list-advanced",
+  "title": "C: Doubly Linked List",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "doubly linked list", "pointers", "insert", "delete"],
+  "description": "Implement a doubly linked list with insert at end, delete, and reverse traversal.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Doubly Linked List Operations",
+      "description": "Define a `DNode` struct with int data, prev, next pointers. Write `void insert_end(DNode **head, int val)`, `void delete(DNode **head, int val)`, and `void print_reverse(DNode *head)`. Test by inserting 10, 20, 30, then print reverse.",
+      "hints": ["Each node has prev and next pointers.", "insert_end: find tail, link new node.", "print_reverse: traverse to tail, then walk backwards."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct DNode { int data; struct DNode *prev, *next; } DNode;\n\nvoid insert_end(DNode **head, int val) {\n    DNode *n = malloc(sizeof(DNode));\n    n->data = val; n->next = NULL;\n    if (!*head) { n->prev = NULL; *head = n; return; }\n    DNode *cur = *head;\n    while (cur->next) cur = cur->next;\n    cur->next = n; n->prev = cur;\n}\n\nvoid print_reverse(DNode *head) {\n    if (!head) return;\n    while (head->next) head = head->next;\n    while (head) { printf(\"%d \", head->data); head = head->prev; }\n    printf(\"\\n\");\n}\n\nint main() {\n    DNode *head = NULL;\n    insert_end(&head, 10); insert_end(&head, 20); insert_end(&head, 30);\n    print_reverse(head);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('30 20 10')",
+        "successMessage": "Doubly linked list works!",
+        "failureMessage": "Print the list in reverse: 30 20 10"
+      }
+    }
+  ]
+}

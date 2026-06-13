@@ -1,0 +1,71 @@
+{
+  "id": "go-pointers",
+  "title": "Go: Pointers",
+  "difficulty": "beginner",
+  "languages": ["go"],
+  "estimatedMinutes": 15,
+  "concepts": ["go", "pointers", "dereference", "nil", "value-vs-pointer"],
+  "description": "Use pointers to reference and modify values, work with pointer to struct, and understand nil pointers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "& and *",
+      "description": "Declare `x := 42`. Create a pointer `p` to `x` using `&`, print the pointer and dereference it with `*`.",
+      "hints": ["`p := &x` gets the address of x.", "`*p` gets the value at that address.", "Print both: `fmt.Println(p, *p)`"],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('42')",
+        "successMessage": "Pointers basics work!",
+        "failureMessage": "Create a pointer to x=42, dereference it, and print 42."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pointer to Struct",
+      "description": "Define a `Person` struct with `Name string`. Create a pointer to a Person instance and access fields via the pointer.",
+      "hints": ["`p := &Person{\"Alice\"}`", "Go automatically dereferences: `p.Name` works.", "Print `p.Name`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Alice')",
+        "successMessage": "Pointer to struct works!",
+        "failureMessage": "Create a pointer to Person{Name:'Alice'} and print the name."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Modify via Pointer",
+      "description": "Write a function `zero(i *int)` that sets the value pointed to by `i` to 0. Pass an int's address and print the result.",
+      "hints": ["`func zero(i *int) { *i = 0 }`", "Call: `x := 42; zero(&x)`", "Print x after the call — it should be 0."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('0')",
+        "successMessage": "Modify via pointer works!",
+        "failureMessage": "Write zero(*int) that sets value to 0, call with x=42, print x."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nil Pointer Check",
+      "description": "Declare a pointer `var p *int` without initializing it. Check if it's nil and print a message.",
+      "hints": ["A nil pointer has no address assigned.", "`if p != nil { ... } else { ... }`", "Since it's nil, print something like `\"p is nil\"`."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('nil')",
+        "successMessage": "Nil check works!",
+        "failureMessage": "Check if p is nil and print a message."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Pointer vs Value",
+      "description": "Define a `Counter` struct with `Value int`. Write methods `IncrementValue()` (value receiver) and `IncrementPointer()` (pointer receiver), call both, and print differences.",
+      "hints": ["Value receiver doesn't change original.", "`func (c Counter) IncrementValue() { c.Value++ }` vs `func (c *Counter) IncrementPointer() { c.Value++ }`", "Create counter, call both, print Value."],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('1')",
+        "successMessage": "Value vs pointer receiver understood!",
+        "failureMessage": "Show that only pointer receiver actually increments the counter."
+      }
+    }
+  ]
+}

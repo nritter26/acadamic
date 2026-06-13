@@ -1,0 +1,71 @@
+{
+  "id": "rs-traits",
+  "title": "Rust: Traits and Generics",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "traits", "generics", "polymorphism", "trait bounds"],
+  "description": "Define and implement traits, and use generics with trait bounds in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define a Trait",
+      "description": "Define a trait `Area` with a method `area(&self) -> f64`. Implement it for `Circle` (from a radius) and `Rectangle` (width, height). Print their areas.",
+      "hints": ["`trait Area { fn area(&self) -> f64; }`", "`impl Area for Circle { fn area(&self) -> f64 { 3.14159 * self.r * self.r } }`", "Create structs first, then implement the trait."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('78.5') || output.includes('78.54')",
+        "successMessage": "Trait implementation works!",
+        "failureMessage": "Print areas of Circle(5) and Rectangle(4, 5)."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Default Trait Methods",
+      "description": "Define a trait `Greeter` with a default method `greet(&self) -> String` that returns `\"Hello!\"`. Implement for a `Person` struct (override) and a `Robot` struct (use default).",
+      "hints": ["Default method: `fn greet(&self) -> String { \"Hello!\".to_string() }`", "Override: `impl Greeter for Person { fn greet(&self) -> String { format!(\"Hi, I'm {}\", self.name) } }`", "Robot uses the default greet()."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello!') && output.includes('Hi')",
+        "successMessage": "Default trait methods work!",
+        "failureMessage": "Print greet() from both Person and Robot."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Generic Function with Trait Bound",
+      "description": "Write a generic function `print_area<T: Area>(shape: T)` that prints the area of any type implementing Area. Call with a Circle and a Rectangle.",
+      "hints": ["`fn print_area<T: Area>(shape: T) { println!(\"Area: {}\", shape.area()); }`", "The `<T: Area>` syntax constrains T to types that implement Area.", "This is polymorphism at compile time (monomorphization)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Area')",
+        "successMessage": "Generic function with trait bound works!",
+        "failureMessage": "Call print_area with a Circle and Rectangle."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Derive Traits",
+      "description": "Create a struct `Point { x: i32, y: i32 }` and derive `Debug`, `Clone`, `Copy`, `PartialEq`. Demonstrate each: print with {:?}, clone, compare.",
+      "hints": ["`#[derive(Debug, Clone, Copy, PartialEq)]`", "Debug: `println!(\"{:?}\", p)`", "Clone: `let p2 = p.clone();`", "Compare: `p == p2`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Point') && output.includes('true') || output.includes('equal')",
+        "successMessage": "Derive traits work!",
+        "failureMessage": "Demonstrate Debug, Clone, and PartialEq on Point."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Trait as Return Type (impl Trait)",
+      "description": "Write a function `make_circle(r: f64) -> impl Area` that returns something implementing Area (a Circle). Call and print its area.",
+      "hints": ["`fn make_circle(r: f64) -> impl Area { Circle { r } }`", "`impl Trait` in return position lets you return a concrete type.", "The caller can only use methods from the `Area` trait."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('78.5') || output.includes('area')",
+        "successMessage": "impl Trait return works!",
+        "failureMessage": "Return a Circle as impl Area and print its area."
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "github-profile",
+  "title": "GitHub Profile Viewer",
+  "difficulty": "intermediate",
+  "languages": ["javascript", "typescript", "python"],
+  "estimatedMinutes": 25,
+  "concepts": ["data fetching", "mock data", "formatting", "DOM rendering"],
+  "description": "Build a GitHub profile viewer that displays user profiles and repository lists from mock data.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Profile data structure",
+      "description": "Create a profile object with `username`, `name`, `avatarUrl`, `bio`, `publicRepos`, `followers`, and `following` properties.",
+      "hints": ["avatarUrl can be a placeholder like 'https://avatars.githubusercontent.com/u/1'", "publicRepos, followers, following should be numbers", "bio is a short string description"],
+      "codeTemplate": {
+        "javascript": "<div id=\"github-profile\"></div>\n<script>\n  const profile = {\n    // Your code here\n  };\n  console.log(JSON.stringify(profile));\n</script>\n",
+        "typescript": "<div id=\"github-profile\"></div>\n<script>\n  interface Profile {\n    username: string;\n    name: string;\n    avatarUrl: string;\n    bio: string;\n    publicRepos: number;\n    followers: number;\n    following: number;\n  }\n  const profile: Profile = {\n    // Your code here\n  };\n  console.log(JSON.stringify(profile));\n</script>\n",
+        "python": "profile = {\n    # Your code here\n}\nimport json\nprint(json.dumps(profile))\n"
+      },
+      "verification": {
+        "test": "output.includes('username') && output.includes('followers') && output.includes('publicRepos')",
+        "successMessage": "Profile data structure created!",
+        "failureMessage": "Include username, name, avatarUrl, bio, publicRepos, followers, and following."
+      }
+    },
+    {
+      "id": 2,
+      "title": "getProfile function",
+      "description": "Write `getProfile(username)` that returns a mock profile object for a given username. Use a predefined object, or return `null` if not found.",
+      "hints": ["Create a mockProfiles object keyed by username", "Return profile for matching username", "Return null for unknown users"],
+      "codeTemplate": {
+        "javascript": "<div id=\"github-profile\"></div>\n<script>\n  const mockProfiles = {\n    'octocat': { username: 'octocat', name: 'Octocat', avatarUrl: 'https://avatars.githubusercontent.com/u/1', bio: 'GitHub mascot', publicRepos: 8, followers: 5000, following: 10 }\n  };\n  function getProfile(username) {\n    // Your code here\n  }\n  console.log(JSON.stringify(getProfile('octocat')));\n  console.log(JSON.stringify(getProfile('unknown')));\n</script>\n",
+        "typescript": "<div id=\"github-profile\"></div>\n<script>\n  const mockProfiles: Record<string, Profile> = {\n    'octocat': { username: 'octocat', name: 'Octocat', avatarUrl: 'https://avatars.githubusercontent.com/u/1', bio: 'GitHub mascot', publicRepos: 8, followers: 5000, following: 10 }\n  };\n  function getProfile(username: string): Profile | null {\n    // Your code here\n  }\n  console.log(JSON.stringify(getProfile('octocat')));\n  console.log(JSON.stringify(getProfile('unknown')));\n</script>\n",
+        "python": "mock_profiles = {\n    'octocat': {'username': 'octocat', 'name': 'Octocat', 'avatarUrl': 'https://avatars.githubusercontent.com/u/1', 'bio': 'GitHub mascot', 'publicRepos': 8, 'followers': 5000, 'following': 10}\n}\n\ndef get_profile(username):\n    # Your code here\n\nimport json\nprint(json.dumps(get_profile('octocat')))\nprint(json.dumps(get_profile('unknown')))\n"
+      },
+      "verification": {
+        "test": "output.includes('octocat') && output.includes('null') || output.includes('None')",
+        "successMessage": "Profile lookup works!",
+        "failureMessage": "Return the profile for existing users and null for unknown."
+      }
+    },
+    {
+      "id": 3,
+      "title": "renderProfile function",
+      "description": "Write `renderProfile(profile)` that returns a formatted HTML string showing the profile's name, bio, and stats (repos, followers, following).",
+      "hints": ["Return empty string if profile is null", "Use template literals to build HTML", "Show stats as a list or divs"],
+      "codeTemplate": {
+        "javascript": "<div id=\"github-profile\"></div>\n<script>\n  const profile = { username: 'octocat', name: 'Octocat', avatarUrl: 'https://avatars.githubusercontent.com/u/1', bio: 'GitHub mascot', publicRepos: 8, followers: 5000, following: 10 };\n  function renderProfile(profile) {\n    // Your code here\n  }\n  console.log(renderProfile(profile));\n</script>\n",
+        "typescript": "<div id=\"github-profile\"></div>\n<script>\n  function renderProfile(profile: Profile | null): string {\n    // Your code here\n  }\n  const profile: Profile = { username: 'octocat', name: 'Octocat', avatarUrl: 'https://avatars.githubusercontent.com/u/1', bio: 'GitHub mascot', publicRepos: 8, followers: 5000, following: 10 };\n  console.log(renderProfile(profile));\n</script>\n",
+        "python": "profile = {'username': 'octocat', 'name': 'Octocat', 'avatarUrl': 'https://avatars.githubusercontent.com/u/1', 'bio': 'GitHub mascot', 'publicRepos': 8, 'followers': 5000, 'following': 10}\n\ndef render_profile(profile):\n    # Your code here\n\nprint(render_profile(profile))\n"
+      },
+      "verification": {
+        "test": "output.includes('Octocat') && output.includes('5000') && output.includes('8')",
+        "successMessage": "Profile rendered correctly!",
+        "failureMessage": "Return HTML with name, bio, and stats."
+      }
+    },
+    {
+      "id": 4,
+      "title": "getRepos function",
+      "description": "Write `getRepos(username)` that returns a mock array of repository objects with `name`, `description`, `stars`, `forks`, and `language`.",
+      "hints": ["Use a mockRepos object keyed by username", ["Each repo has name, description, stars, forks, language"]],
+      "codeTemplate": {
+        "javascript": "<div id=\"github-profile\"></div>\n<script>\n  const mockRepos = {\n    'octocat': [\n      { name: 'Hello-World', description: 'First repo', stars: 100, forks: 50, language: 'JavaScript' },\n      { name: 'My-Project', description: 'Second repo', stars: 75, forks: 25, language: 'Python' }\n    ]\n  };\n  function getRepos(username) {\n    // Your code here\n  }\n  console.log(JSON.stringify(getRepos('octocat')));\n</script>\n",
+        "typescript": "<div id=\"github-profile\"></div>\n<script>\n  interface Repo {\n    name: string;\n    description: string;\n    stars: number;\n    forks: number;\n    language: string;\n  }\n  const mockRepos: Record<string, Repo[]> = {\n    'octocat': [\n      { name: 'Hello-World', description: 'First repo', stars: 100, forks: 50, language: 'JavaScript' },\n      { name: 'My-Project', description: 'Second repo', stars: 75, forks: 25, language: 'Python' }\n    ]\n  };\n  function getRepos(username: string): Repo[] {\n    // Your code here\n  }\n  console.log(JSON.stringify(getRepos('octocat')));\n</script>\n",
+        "python": "mock_repos = {\n    'octocat': [\n        {'name': 'Hello-World', 'description': 'First repo', 'stars': 100, 'forks': 50, 'language': 'JavaScript'},\n        {'name': 'My-Project', 'description': 'Second repo', 'stars': 75, 'forks': 25, 'language': 'Python'}\n    ]\n}\n\ndef get_repos(username):\n    # Your code here\n\nimport json\nprint(json.dumps(get_repos('octocat')))\n"
+      },
+      "verification": {
+        "test": "output.includes('Hello-World') && output.includes('stars')",
+        "successMessage": "Repos fetched correctly!",
+        "failureMessage": "Return an array of repo objects with name, stars, forks, language."
+      }
+    },
+    {
+      "id": 5,
+      "title": "renderRepos function",
+      "description": "Write `renderRepos(repos)` that returns a formatted HTML string listing all repos with their name, description, stars, forks, and language.",
+      "hints": ["Return empty string if no repos", "Map each repo to a list item HTML", "Show stars and forks with icons or labels"],
+      "codeTemplate": {
+        "javascript": "<div id=\"github-profile\"></div>\n<script>\n  const repos = [\n    { name: 'Hello-World', description: 'First repo', stars: 100, forks: 50, language: 'JavaScript' },\n    { name: 'My-Project', description: 'Second repo', stars: 75, forks: 25, language: 'Python' }\n  ];\n  function renderRepos(repos) {\n    // Your code here\n  }\n  console.log(renderRepos(repos));\n</script>\n",
+        "typescript": "<div id=\"github-profile\"></div>\n<script>\n  function renderRepos(repos: Repo[]): string {\n    // Your code here\n  }\n  const repos: Repo[] = [\n    { name: 'Hello-World', description: 'First repo', stars: 100, forks: 50, language: 'JavaScript' },\n    { name: 'My-Project', description: 'Second repo', stars: 75, forks: 25, language: 'Python' }\n  ];\n  console.log(renderRepos(repos));\n</script>\n",
+        "python": "repos = [\n    {'name': 'Hello-World', 'description': 'First repo', 'stars': 100, 'forks': 50, 'language': 'JavaScript'},\n    {'name': 'My-Project', 'description': 'Second repo', 'stars': 75, 'forks': 25, 'language': 'Python'}\n]\n\ndef render_repos(repos):\n    # Your code here\n\nprint(render_repos(repos))\n"
+      },
+      "verification": {
+        "test": "output.includes('Hello-World') && output.includes('100') && output.includes('JavaScript')",
+        "successMessage": "Repos rendered correctly!",
+        "failureMessage": "Return HTML listing all repos with their details."
+      }
+    }
+  ]
+}

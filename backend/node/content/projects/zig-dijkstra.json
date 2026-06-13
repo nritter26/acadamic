@@ -1,0 +1,116 @@
+{
+  "id": "zig-dijkstra",
+  "title": "Dijkstra's Algorithm",
+  "description": "Write a Zig program that implements Dijkstra's shortest path algorithm on a weighted graph.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const INF: u32 = 9999;\n    const graph = [_][5]u32{\n        [_]u32{ 0, 2, 0, 6, 0 },\n        [_]u32{ 2, 0, 3, 8, 5 },\n        [_]u32{ 0, 3, 0, 0, 7 },\n        [_]u32{ 6, 8, 0, 0, 9 },\n        [_]u32{ 0, 5, 7, 9, 0 },\n    };\n    var dist = [_]u32{ INF, INF, INF, INF, INF };\n    var visited = [_]bool{false} ** 5;\n    dist[0] = 0;\n    \n    for (0..4) |_| {\n        var min_dist: u32 = INF;\n        var min_idx: u8 = 0;\n        for (0..5) |i| {\n            if (!visited[i] and dist[i] < min_dist) {\n                min_dist = dist[i];\n                min_idx = @intCast(i);\n            }\n        }\n        visited[min_idx] = true;\n        for (0..5) |i| {\n            if (!visited[i] and graph[min_idx][i] != 0 and \n                dist[min_idx] + graph[min_idx][i] < dist[i]) {\n                dist[i] = dist[min_idx] + graph[min_idx][i];\n            }\n        }\n    }\n    \n    for (0..5) |i| std.debug.print(\"0->{}: {} \", .{i, dist[i]});\n    std.debug.print(\"\\n\", .{});\n}"
+  },
+  "verificationTest": "output.includes('0->0: 0') && output.includes('0->4: 7') && output.includes('0->2: 3')",
+  "hints": [
+    "Dijkstra's finds the shortest path from a source to all vertices",
+    "Maintain a distance array initialized to INF and a visited set",
+    "At each step, pick the unvisited vertex with the smallest distance",
+    "Relax edges from the picked vertex to improve distances"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "graph",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Dijkstra's Algorithm project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Dijkstra's Algorithm",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Dijkstra's Algorithm project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Dijkstra's Algorithm...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Dijkstra's Algorithm",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Dijkstra's Algorithm\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Dijkstra's Algorithm...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Dijkstra's Algorithm...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Dijkstra's Algorithm...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Dijkstra's Algorithm...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

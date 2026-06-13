@@ -1,0 +1,23 @@
+{
+  "id": "zig-even-odd",
+  "title": "Zig: Even or Odd",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "modulo", "conditionals"],
+  "description": "Check if a number is even or odd using @mod.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Even or Odd Check",
+      "description": "Declare const num: i32 = 7. Use @mod to check if num % 2 == 0 and print 'Even' or 'Odd'.",
+      "hints": ["Use `@mod(num, 2) == 0` to check even.", "Zig uses `@mod` instead of % for modulo.", "Use if-else to branch."],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\npub fn main() !void {\n    const num: i32 = 7;\n    \n}" },
+      "verification": {
+        "test": "output.includes('Odd') || output.includes('odd')",
+        "successMessage": "Even/odd check works!",
+        "failureMessage": "Check if 7 is even or odd"
+      }
+    }
+  ]
+}

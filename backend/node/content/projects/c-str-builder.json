@@ -1,0 +1,23 @@
+{
+  "id": "c-str-builder",
+  "title": "C: String Builder",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "string builder", "dynamic memory", "realloc", "printf"],
+  "description": "Build an efficient string builder that dynamically grows as strings are appended.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "String Builder",
+      "description": "Define a `StrBuilder` struct with a char* buffer, length, and capacity. Implement `void sb_init(StrBuilder *sb)`, `void sb_append(StrBuilder *sb, char *s)`, and `void sb_free(StrBuilder *sb)`. Append 'Hello', ' ', 'World' and print the result.",
+      "hints": ["Start with capacity 16, double when full.", "Use `strcpy` or `memcpy` to append.", "Track length separately from capacity."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct { char *buf; int len; int cap; } StrBuilder;\n\nvoid sb_init(StrBuilder *sb) {\n    sb->cap = 16; sb->len = 0;\n    sb->buf = malloc(sb->cap); sb->buf[0] = '\\0';\n}\n\nvoid sb_append(StrBuilder *sb, char *s) {\n    int slen = strlen(s);\n    while (sb->len + slen + 1 > sb->cap) {\n        sb->cap *= 2;\n        sb->buf = realloc(sb->buf, sb->cap);\n    }\n    memcpy(sb->buf + sb->len, s, slen);\n    sb->len += slen;\n    sb->buf[sb->len] = '\\0';\n}\n\nvoid sb_free(StrBuilder *sb) { free(sb->buf); sb->buf = NULL; sb->len = sb->cap = 0; }\n\nint main() {\n    StrBuilder sb;\n    sb_init(&sb);\n    sb_append(&sb, \"Hello\");\n    sb_append(&sb, \" \");\n    sb_append(&sb, \"World\");\n    printf(\"%s\\n\", sb.buf);\n    sb_free(&sb);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Hello World')",
+        "successMessage": "String builder works!",
+        "failureMessage": "Append 'Hello', ' ', 'World' and print"
+      }
+    }
+  ]
+}

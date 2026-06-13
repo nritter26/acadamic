@@ -1,0 +1,71 @@
+{
+  "id": "rs-generics",
+  "title": "Rust: Generics",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "generics", "type parameters", "monomorphization"],
+  "description": "Use generic type parameters to write reusable, type-safe code in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Generic Function",
+      "description": "Write a generic function `identity<T>(value: T) -> T` that returns the value unchanged. Test with i32 42 and &str \"hello\".",
+      "hints": ["`fn identity<T>(value: T) -> T { value }`", "The `<T>` declares a type parameter.", "Call with `identity(42)` and `identity(\"hello\")`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('42') && output.includes('hello')",
+        "successMessage": "Generic identity works!",
+        "failureMessage": "Call identity with i32 and &str."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Generic Struct",
+      "description": "Define a generic struct `Pair<T, U>` with fields `first: T` and `second: U`. Implement a method `first(&self) -> &T`. Create a Pair<i32, &str> and print both fields.",
+      "hints": ["`struct Pair<T, U> { first: T, second: U }`", "Method: `impl<T, U> Pair<T, U> { fn first(&self) -> &T { &self.first } }`", "Create: `let p = Pair { first: 1, second: \"two\" };`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('two')",
+        "successMessage": "Generic struct works!",
+        "failureMessage": "Create and print Pair<i32, &str>."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Generic with Trait Bound",
+      "description": "Write a generic function `largest<T: PartialOrd>(list: &[T]) -> &T` that returns the largest element in a slice. Test with i32 and &str slices.",
+      "hints": ["`fn largest<T: PartialOrd>(list: &[T]) -> &T { ... }`", "Iterate and compare: `if item > largest { largest = item }`", "Test with `[1, 5, 3, 9, 2]` and `[\"a\", \"z\", \"m\"]`."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('9') && output.includes('z')",
+        "successMessage": "Generic largest works!",
+        "failureMessage": "Find largest of [1,5,3,9,2] and [\"a\",\"z\",\"m\"]."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Generic Enum (Option-like)",
+      "description": "Define a generic enum `MyOption<T>` with variants `MySome(T)` and `MyNone`. Implement a method `is_some(&self) -> bool`. Create and test both variants.",
+      "hints": ["`enum MyOption<T> { MySome(T), MyNone }`", "`impl<T> MyOption<T> { fn is_some(&self) -> bool { matches!(self, MyOption::MySome(_)) } }`", "This is how Rust's built-in `Option<T>` works!"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('true') && output.includes('false')",
+        "successMessage": "Generic enum works!",
+        "failureMessage": "Create MySome(42) and MyNone and call is_some() on each."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Generic Associated Function",
+      "description": "Add an associated function `new(first: T, second: U) -> Self` to the Pair struct that creates a new Pair. Also add a `swap` method that returns Pair<U, T>.",
+      "hints": ["`fn new(first: T, second: U) -> Self { Self { first, second } }`", "`fn swap(self) -> Pair<U, T> { Pair { first: self.second, second: self.first } }`", "Generic methods can have additional type parameters."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('hello') && output.includes('42')",
+        "successMessage": "Generic associated function works!",
+        "failureMessage": "Create Pair::new(42, \"hello\"), swap it, and print both fields."
+      }
+    }
+  ]
+}

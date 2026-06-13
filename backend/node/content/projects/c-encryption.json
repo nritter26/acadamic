@@ -1,0 +1,23 @@
+{
+  "id": "c-encryption",
+  "title": "C: Caesar Cipher",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "encryption", "caesar cipher", "strings", "modulo"],
+  "description": "Implement the Caesar cipher encryption and decryption algorithms.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Encrypt and Decrypt",
+      "description": "Write functions `void encrypt(char *text, int shift)` and `void decrypt(char *text, int shift)` that shift each letter by the given amount (wrapping around the alphabet). Test with 'Hello, World!' shifted by 3.",
+      "hints": ["Only shift letters a-z and A-Z.", "Use modulo to wrap: `(c - 'a' + shift) % 26 + 'a'`.", "Pass through non-letter characters unchanged."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <ctype.h>\n\nvoid encrypt(char *text, int shift) {\n    for (int i = 0; text[i]; i++) {\n        if (islower(text[i])) text[i] = (text[i] - 'a' + shift) % 26 + 'a';\n        else if (isupper(text[i])) text[i] = (text[i] - 'A' + shift) % 26 + 'A';\n    }\n}\n\nvoid decrypt(char *text, int shift) {\n    encrypt(text, 26 - shift);\n}\n\nint main() {\n    char msg[] = \"Hello, World!\";\n    encrypt(msg, 3);\n    printf(\"Encrypted: %s\\n\", msg);\n    decrypt(msg, 3);\n    printf(\"Decrypted: %s\\n\", msg);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Khoor') && output.includes('Hello')",
+        "successMessage": "Caesar cipher works!",
+        "failureMessage": "Encrypt and then decrypt the message"
+      }
+    }
+  ]
+}

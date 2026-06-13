@@ -1,0 +1,19 @@
+warning: use of deprecated struct `bollard::container::StartContainerOptions`: use the OpenAPI generated bollard::query_parameters::StartContainerOptions and associated StartContainerOptionsBuilder
+  --> crates\kodex-executor\src\docker_executor.rs:99:48
+   |
+99 |         .start_container(&container.id, None::<StartContainerOptions<String>>)
+   |                                                ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated struct `bollard::image::ListImagesOptions`: use the OpenAPI generated bollard::query_parameters::ListImageOptions and associated ListImageOptionsBuilder
+   --> crates\kodex-executor\src\docker_executor.rs:165:45
+    |
+165 |         .list_images(None::<bollard::image::ListImagesOptions<String>>)
+    |                                             ^^^^^^^^^^^^^^^^^
+
+warning: `kodex-executor` (lib) generated 2 warnings
+   Compiling kodex-server v0.1.0 (C:\Users\ASUS\Documents\GitHub\Kodex\crates\kodex-server)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 24.95s
+     Running `target\debug\kodex-server.exe`
+error: process didn't exit successfully: `target\debug\kodex-server.exe` (exit code: 0xffffffff)

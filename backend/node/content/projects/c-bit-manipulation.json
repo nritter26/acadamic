@@ -1,0 +1,23 @@
+{
+  "id": "c-bit-manipulation",
+  "title": "C: Bit Manipulation",
+  "difficulty": "intermediate",
+  "languages": ["c"],
+  "estimatedMinutes": 15,
+  "concepts": ["c", "bitwise operations", "bits", "printf"],
+  "description": "Use bitwise operators (&, |, ^, <<, >>) to manipulate individual bits of integers.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set, Clear, Toggle Bits",
+      "description": "Write functions `int set_bit(int n, int pos)`, `int clear_bit(int n, int pos)`, `int toggle_bit(int n, int pos)`, and `int get_bit(int n, int pos)` to manipulate the bit at position `pos`. Test with n=0b1010 (10), pos=0 and pos=3.",
+      "hints": ["Set: `n | (1 << pos)`.", "Clear: `n & ~(1 << pos)`.", "Toggle: `n ^ (1 << pos)`.", "Get: `(n >> pos) & 1`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\nint set_bit(int n, int pos) { return n | (1 << pos); }\nint clear_bit(int n, int pos) { return n & ~(1 << pos); }\nint toggle_bit(int n, int pos) { return n ^ (1 << pos); }\nint get_bit(int n, int pos) { return (n >> pos) & 1; }\n\nint main() {\n    int n = 10; // 1010\n    printf(\"get bit 0: %d\\n\", get_bit(n, 0));\n    printf(\"set bit 0: %d\\n\", set_bit(n, 0));\n    printf(\"clear bit 3: %d\\n\", clear_bit(n, 3));\n    printf(\"toggle bit 1: %d\\n\", toggle_bit(n, 1));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('0') && output.includes('11') && output.includes('2') && output.includes('8')",
+        "successMessage": "Bit manipulation works!",
+        "failureMessage": "Test set, clear, toggle, and get bit operations"
+      }
+    }
+  ]
+}

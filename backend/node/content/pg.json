@@ -1,0 +1,513 @@
+{
+  "Getting Started": {
+    "PostgreSQL Introduction": {
+      "exp": "Introduction to PostgreSQL.",
+      "code": "",
+      "exercises": []
+    },
+    "PostgreSQL History & Overview": [
+      "PostgreSQL began as POSTGRES at UC Berkeley in 1986, led by Michael Stonebraker. It evolved into PostgreSQL (Post-GreSQL) in 1996, emphasizing SQL compliance and extensibility. Today it is the world's most advanced open-source relational database, known for ACID compliance, MVCC, extensibility, and a vibrant community.",
+      "SELECT version();\n-- PostgreSQL 16.2 on x86_64-linux-gnu..."
+    ],
+    "Installation & Configuration": [
+      "PostgreSQL can be installed via package managers (apt, yum, brew), Docker, or compiled from source. The main configuration file is postgresql.conf, controlling memory, logging, connections, and replication settings. After install, the postgres service must be started.",
+      "# Ubuntu / Debian\nsudo apt install postgresql-16\nsudo systemctl start postgresql\n\n# Verify\npg_isready"
+    ],
+    "psql Basics": [
+      "psql is the official interactive terminal for PostgreSQL. Connect to a database, run SQL queries, and use backslash meta-commands. Essential commands: \\c to connect, \\dt list tables, \\d describe, \\l list databases, \\du list roles.",
+      "psql -h localhost -p 5432 -U myuser -d mydb\n\nmydb=> \\dt\nmydb=> \\d users\nmydb=> \\l\nmydb=> \\du"
+    ],
+    "pgAdmin GUI": [
+      "pgAdmin is a popular web-based GUI for PostgreSQL. It provides visual query building, schema browsing, dashboard monitoring, and server management. The server runs as a Python/Flask app and can be accessed via browser.",
+      "# Start pgAdmin 4 (via desktop or server mode)\npgadmin4\n\n# Docker\n# docker pull dpage/pgadmin4\n# docker run -p 80:80 -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=admin dpage/pgadmin4"
+    ],
+    "Connection Strings & Service File": [
+      "PostgreSQL supports libpq connection strings (postgresql://user:pass@host:port/db) and a pg_service.conf file that stores named connection parameters for reuse. Environment variables (PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD) also configure connections.",
+      "# Connection string\npostgresql://myuser:mypass@localhost:5432/mydb?sslmode=require\n\n# ~/.pg_service.conf\n[mydb]\nhost=localhost\nport=5432\ndbname=mydb\nuser=myuser"
+    ],
+    ".pgpass & Authentication": [
+      "The .pgpass file stores passwords for non-interactive connections. Format: hostname:port:database:username:password. File must have 0600 permissions. psql and other libpq clients read it automatically when no password is provided.",
+      "# ~/.pgpass\nlocalhost:5432:mydb:myuser:mypassword\n*:*:*:postgres:supersecret\n\n# Permissions\nchmod 0600 ~/.pgpass"
+    ],
+    "psql Meta-Commands Deep Dive": [
+      "psql offers 100+ backslash meta-commands. \\g executes the query buffer, \\i includes a file, \\o redirects output, \\x toggles expanded display, \\e opens an external editor, \\timing shows query duration, \\watch repeats a query, and \\copy performs server-side data transfer.",
+      "\\x on            -- Expanded display\n\\timing on       -- Show query duration\n\\i queries.sql   -- Run SQL from file\n\\copy users TO '/tmp/users.csv' CSV HEADER\nSELECT COUNT(*) FROM users \\watch 5"
+    ]
+  },
+  "Core Concepts": {
+    "PostgreSQL Fundamentals": {
+      "exp": "Core PostgreSQL concepts.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Modeling": {
+    "PostgreSQL Schema Design": {
+      "exp": "Designing schemas in PostgreSQL.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Querying": {
+    "PostgreSQL Queries": {
+      "exp": "Querying data in PostgreSQL.",
+      "code": "",
+      "exercises": []
+    },
+    "SELECT Deep Dive": [
+      "SELECT defines the projection, FROM specifies the source, WHERE filters rows, GROUP BY groups for aggregation, HAVING filters groups, ORDER BY sorts results, and LIMIT/OFFSET paginates. Execution order: FROM -> WHERE -> GROUP BY -> HAVING -> WINDOW -> SELECT -> DISTINCT -> ORDER BY -> LIMIT.",
+      "SELECT\n  u.id,\n  COUNT(o.id) AS order_count,\n  SUM(o.total) AS total_spent\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id\nWHERE u.created_at > '2024-01-01'\nGROUP BY u.id\nHAVING SUM(o.total) > 100\nORDER BY total_spent DESC\nLIMIT 10;"
+    ],
+    "JOIN Types": [
+      "INNER JOIN returns matching rows from both tables. LEFT JOIN returns all rows from the left table plus matches. RIGHT JOIN is the symmetric opposite. FULL OUTER JOIN returns all rows from both tables, matching where possible. CROSS JOIN produces a Cartesian product of all row combinations.",
+      "SELECT e.name, d.dept_name\nFROM employees e\nINNER JOIN departments d ON e.dept_id = d.id;\n\nSELECT * FROM students s\nLEFT JOIN enrollments e ON s.id = e.student_id;\n\nSELECT * FROM a FULL OUTER JOIN b ON a.id = b.id;\n\nSELECT a.*, b.* FROM products a CROSS JOIN colors b;"
+    ],
+    "LATERAL & Self Joins": [
+      "LATERAL allows a subquery in FROM to reference columns from preceding FROM items. Essential for top-N-per-group queries and calling set-returning functions per row. Self JOIN joins a table to itself (using aliases) to query hierarchical data like org charts or threaded comments.",
+      "-- Top 3 orders per user (LATERAL)\nSELECT u.name, top.*\nFROM users u\nCROSS JOIN LATERAL (\n  SELECT amount, created_at FROM orders\n  WHERE user_id = u.id\n  ORDER BY amount DESC\n  LIMIT 3\n) top;\n\n-- Self JOIN (org chart)\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON e.manager_id = m.id;"
+    ],
+    "Set Operations": [
+      "UNION combines results of two queries, deduplicating rows. UNION ALL keeps duplicates. INTERSECT returns rows present in both queries. EXCEPT returns rows from the first query not present in the second. All set operations require matching column counts and compatible data types.",
+      "-- Active and former employees combined\nSELECT name, email FROM active_employees\nUNION\nSELECT name, email FROM former_employees;\n\n-- Products in both categories\nSELECT product_id FROM electronics\nINTERSECT\nSELECT product_id FROM clearance;\n\n-- Customers with no orders\nSELECT id FROM customers\nEXCEPT\nSELECT customer_id FROM orders;"
+    ],
+    "Recursive CTE": [
+      "WITH RECURSIVE lets a CTE reference itself. The anchor member runs first (non-recursive), then the recursive member repeatedly joins the CTE's output until no new rows are produced. Essential for tree traversal (org charts, category hierarchies), graph queries, and generating series.",
+      "WITH RECURSIVE org_tree AS (\n  -- Anchor: top-level manager\n  SELECT id, name, manager_id, 1 AS level\n  FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  -- Recursive: direct reports\n  SELECT e.id, e.name, e.manager_id, t.level + 1\n  FROM employees e\n  JOIN org_tree t ON e.manager_id = t.id\n)\nSELECT * FROM org_tree ORDER BY level, name;\n\n-- Fibonacci sequence\nWITH RECURSIVE fib(a, b) AS (\n  SELECT 0, 1\n  UNION ALL\n  SELECT b, a + b FROM fib WHERE b < 1000\n)\nSELECT a FROM fib;"
+    ],
+    "Correlated Subqueries": [
+      "A correlated subquery references columns from the outer query and is re-evaluated for every row. Used in WHERE (with EXISTS, IN, comparisons), SELECT (as a scalar subquery), and HAVING clauses. Can be slower than JOINs on large datasets, but is expressive for row-by-row comparisons.",
+      "-- Employees earning above dept average\nSELECT e.name, e.salary, e.dept_id\nFROM employees e\nWHERE e.salary > (\n  SELECT AVG(salary) FROM employees\n  WHERE dept_id = e.dept_id\n);\n\n-- Customers with recent orders\nSELECT c.*\nFROM customers c\nWHERE EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id AND o.created_at > NOW() - INTERVAL '30 days'\n);"
+    ],
+    "ANY, ALL, EXISTS": [
+      "ANY compares a value to any element in a subquery result (equivalent to IN but more flexible with operators like > ANY). ALL requires the comparison to hold for every element. EXISTS returns TRUE if the subquery has any rows. These are powerful for semi-join and anti-join patterns.",
+      "-- Find products priced above any product in category 5\nSELECT * FROM products\nWHERE price > ANY (SELECT price FROM products WHERE category_id = 5);\n\n-- Products more expensive than ALL clearance items\nSELECT * FROM products\nWHERE price > ALL (SELECT price FROM clearance_items);\n\n-- Customers with at least one order\nSELECT * FROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);"
+    ],
+    "FILTER Clause for Aggregates": [
+      "The FILTER clause lets aggregate functions conditionally include rows without a subquery or CASE. Multiple aggregates can use different filters on the same column set. More readable and often faster than CASE-based conditional aggregation. Compatible with GROUP BY.",
+      "SELECT\n  dept_id,\n  COUNT(*) AS total,\n  COUNT(*) FILTER (WHERE salary > 100000) AS high_earners,\n  AVG(salary) FILTER (WHERE status = 'active') AS avg_active_salary,\n  SUM(bonus) FILTER (WHERE YEAR( award_date) = 2024) AS bonus_2024\nFROM employees\nGROUP BY dept_id;"
+    ],
+    "GROUPING SETS, CUBE, ROLLUP": [
+      "GROUPING SETS produces multiple grouping levels in a single query. ROLLUP generates hierarchical subtotals (e.g., by year, then month, then day). CUBE produces all possible grouping combinations. The GROUPING() function identifies which level a row belongs to, preventing ambiguity with actual NULLs.",
+      "SELECT dept_id, role_id, SUM(salary) AS total\nFROM employees\nGROUP BY GROUPING SETS (\n  (dept_id, role_id),\n  (dept_id),\n  (role_id),\n  ()\n);\n\n-- ROLLUP (hierarchy)\nSELECT EXTRACT(YEAR FROM sale_date) AS yr,\n       EXTRACT(MONTH FROM sale_date) AS mon,\n       SUM(amount)\nFROM sales\nGROUP BY ROLLUP (yr, mon);\n\nSELECT GROUPING(yr) AS is_total FROM ..."
+    ],
+    "Window Functions Deep Dive": [
+      "Window functions compute values across sets of rows related to the current row without collapsing them. RANK() and DENSE_RANK() assign rankings with or without gaps. NTILE(n) divides rows into n buckets. LAG()/LEAD() access adjacent rows. FIRST_VALUE()/LAST_VALUE() get window endpoints. Frame clauses (ROWS/RANGE/GROUPS BETWEEN) define the sliding window.",
+      "SELECT\n  name, department, salary,\n  RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rank,\n  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dense_rank,\n  NTILE(4) OVER (PARTITION BY department ORDER BY salary DESC) AS quartile,\n  LAG(salary, 1) OVER (PARTITION BY department ORDER BY salary) AS prev_salary,\n  LEAD(salary, 1) OVER (PARTITION BY department ORDER BY salary) AS next_salary,\n  FIRST_VALUE(salary) OVER (PARTITION BY department ORDER BY salary DESC) AS max_dept_salary,\n  LAST_VALUE(salary) OVER (\n    PARTITION BY department ORDER BY salary DESC\n    RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n  ) AS min_dept_salary,\n  AVG(salary) OVER (\n    PARTITION BY department\n    ORDER BY salary\n    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING\n  ) AS moving_avg\nFROM employees;"
+    ]
+  },
+  "Indexes & Performance": {
+    "PostgreSQL Performance": {
+      "exp": "Optimizing PostgreSQL performance.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Security": {
+    "PostgreSQL Security": {
+      "exp": "Securing your PostgreSQL databases.",
+      "code": "",
+      "exercises": []
+    },
+    "Roles Deep Dive": [
+      "Roles can be LOGIN (for user authentication), SUPERUSER (full access, needed for extension creation and system config), CREATEDB, CREATEROLE, REPLICATION, BYPASSRLS. INHERIT means parent role's privileges are inherited. Roles can be organized in hierarchies (GRANT role TO role). Groups are just roles without LOGIN. ALTER ROLE sets per-role configuration.",
+      "CREATE ROLE admin WITH LOGIN SUPERUSER CREATEDB CREATEROLE;\nCREATE ROLE read_only WITH LOGIN PASSWORD 'secure_pass';\nCREATE ROLE app_group;\n\n-- Assign privileges to group\nGRANT SELECT, INSERT ON ALL TABLES IN SCHEMA public TO app_group;\n\n-- Add users to group\nGRANT app_group TO alice;\nGRANT app_group TO bob;\n\n-- Per-role config\nALTER ROLE alice SET search_path TO app, public;\nALTER ROLE bob SET timezone TO 'America/New_York';\n\n-- List roles\nSELECT rolname, rolsuper, rolcreatedb, rolcanlogin\nFROM pg_roles;"
+    ],
+    "GRANT / REVOKE Privileges": [
+      "GRANT assigns privileges (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, CREATE, CONNECT, TEMPORARY, EXECUTE, USAGE, ALL) on databases, schemas, tables, columns, sequences, functions, and procedural languages. GRANT ... ON ALL TABLES IN SCHEMA grants future tables are NOT included (use default privileges). REVOKE removes privileges. Default privileges for future objects via ALTER DEFAULT PRIVILEGES.",
+      "-- Table-level\nGRANT SELECT, INSERT, UPDATE ON users TO app_user;\nGRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin;\n\n-- Schema\nGRANT USAGE, CREATE ON SCHEMA public TO app_user;\n\n-- Column-level\nGRANT SELECT (id, name) ON users TO read_only_role;\n\n-- Default privileges (for future objects)\nALTER DEFAULT PRIVILEGES FOR ROLE admin IN SCHEMA public\n  GRANT SELECT ON TABLES TO read_only_role;\n\n-- Revoke\nREVOKE DELETE ON users FROM app_user;\n\n-- Function\nGRANT EXECUTE ON FUNCTION calculate_tax(NUMERIC) TO app_user;"
+    ],
+    "Row-Level Security (RLS)": [
+      "Row-Level Security (RLS) restricts which rows a user can see or modify based on a policy expression. Enable RLS on a table (ALTER TABLE ... ENABLE ROW LEVEL SECURITY), then create policies. WITH CHECK controls INSERT/UPDATE new rows. USING controls SELECT/UPDATE/DELETE visibility. BYPASSRLS role attribute exempts superusers and roles with BYPASSRLS.",
+      "CREATE TABLE documents (\n  id SERIAL,\n  owner TEXT DEFAULT current_user,\n  content TEXT\n);\n\nALTER TABLE documents ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY user_policy ON documents\n  USING (owner = current_user)\n  WITH CHECK (owner = current_user);\n\n-- More permissive policy for managers\nCREATE POLICY manager_policy ON documents\n  FOR SELECT\n  USING (current_user IN (SELECT name FROM managers));\n\n-- Combine policies (OR logic)\nSELECT * FROM documents;\n-- Only sees own documents (plus all if manager)"
+    ],
+    "Column-Level Security": [
+      "Column-level security restricts which columns a user can access. Implemented via column-level GRANT (GRANT SELECT(col1, col2) ON table TO role). Unprivileged columns appear as NULL in SELECT * or are rejected entirely depending on context. Often combined with views for fine-grained access control beyond simple column grants.",
+      "-- Grant access only to specific columns\nGRANT SELECT (id, name, email) ON employees TO hr_role;\nGRANT SELECT (id, name, salary, ssn) ON employees TO payroll_role;\n\n-- When hr_role runs:\nSELECT * FROM employees;\n-- ERROR: permission denied for column salary\n\n-- Or using views\nCREATE VIEW employee_public AS\nSELECT id, name, email\nFROM employees;\n\nGRANT SELECT ON employee_public TO all_staff;"
+    ],
+    "TLS / SSL Configuration": [
+      "PostgreSQL supports TLS/SSL for encrypted connections. Configure ssl = on in postgresql.conf, provide server certificate (server.crt) and private key (server.key), and optional CA (root.crt) for client certificate authentication. sslmode=require in client connection strings enforces TLS. For production, prefer verify-full sslmode with proper CA verification.",
+      "-- postgresql.conf\n# ssl = on\n# ssl_cert_file = 'server.crt'\n# ssl_key_file = 'server.key'\n# ssl_ca_file = 'root.crt'\n# ssl_crl_file = 'root.crl'\n\n-- pg_hba.conf (require SSL for specific users)\n# hostssl all all 0.0.0.0/0 scram-sha-256\n# hostnossl all all 0.0.0.0/0 reject\n\n-- Client connection with SSL enforcement\npostgresql://user:pass@host/db?sslmode=verify-full&sslrootcert=ca.pem"
+    ],
+    "pg_hba.conf Deep Dive": [
+      "pg_hba.conf controls client authentication: local (Unix socket), host (TCP/IP with or without SSL), hostssl, hostnossl. Authentication methods: trust (no password, dev only), password (plaintext), md5, scram-sha-256, cert (client certificate), ldap, pam, peer (OS user), and reject. Rules are evaluated top-down, first match wins.",
+      "# TYPE  DATABASE  USER  ADDRESS       METHOD\nlocal   all       all                 peer\nhost    all       all   127.0.0.1/32  scram-sha-256\nhost    all       all   ::1/128       scram-sha-256\nhostssl all       all   0.0.0.0/0    cert\nhost    mydb      app   10.0.0.0/8   scram-sha-256\nhost    all       all   0.0.0.0/0    reject\n\n# Reload config (no restart needed)\nSELECT pg_reload_conf();"
+    ],
+    "Password Profiles & SCRAM-SHA-256": [
+      "PostgreSQL 10+ uses SCRAM-SHA-256 as the default password hashing mechanism (md5 still available for legacy). It's a challenge-response protocol that never sends the password in plaintext. Password expiration (valid until), password_encryption parameter, and account locking (via pg_hba.conf reject rules) provide profile-like management. Extensions like pg_password_history add rotation enforcement.",
+      "-- postgresql.conf\n# password_encryption = 'scram-sha-256'\n\nCREATE ROLE app_user WITH LOGIN PASSWORD 'secure123' VALID UNTIL '2025-12-31';\n\n-- Change password\nALTER ROLE app_user PASSWORD 'new_secure_pass';\n\n-- Password expiry check\nSELECT rolname, rolvaliduntil\nFROM pg_roles\nWHERE rolvaliduntil < NOW() AND rolvaliduntil IS NOT NULL;\n\n-- Force reconnection on password change\nSELECT pg_terminate_backend(pid) FROM pg_stat_activity\nWHERE usename = 'app_user';"
+    ]
+  },
+  "Advanced Features": {
+    "PostgreSQL Advanced": {
+      "exp": "Advanced PostgreSQL features and techniques.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Definition": {
+    "CREATE TABLE Deep Dive": [
+      "CREATE TABLE defines a new relation with named columns, data types, and optional constraints. Supports storage parameters (FILLFACTOR, autovacuum), WITH OIDs (deprecated), ON COMMIT behavior for temp tables, and tablespace assignment. Columns can have defaults, nullability, and compression.",
+      "CREATE TABLE orders (\n  id BIGSERIAL,\n  customer_id INT NOT NULL,\n  total NUMERIC(12,2) DEFAULT 0.00,\n  created_at TIMESTAMPTZ DEFAULT NOW(),\n  notes TEXT\n) WITH (FILLFACTOR = 90)\nTABLESPACE fast_space;"
+    ],
+    "Column Constraints": [
+      "Constraints enforce data integrity at the column level: NOT NULL prevents nulls, UNIQUE ensures no duplicates, DEFAULT supplies a fallback value, CHECK validates a boolean expression, and REFERENCES (foreign key) links to another table's column. Multiple constraints can stack.",
+      "CREATE TABLE employees (\n  id SERIAL PRIMARY KEY,\n  email TEXT NOT NULL UNIQUE,\n  salary NUMERIC(10,2) CHECK (salary > 0),\n  dept_id INT REFERENCES departments(id),\n  status TEXT DEFAULT 'active'\n);"
+    ],
+    "Table Constraints & EXCLUDE": [
+      "Table-level constraints span multiple columns: PRIMARY KEY (composite), UNIQUE (composite), FOREIGN KEY, CHECK, and EXCLUDE. EXCLUDE ensures no two rows satisfy a condition using GiST operators, useful for calendar bookings, IP allocation, and overlapping ranges.",
+      "CREATE TABLE bookings (\n  room_id INT,\n  during TSRANGE,\n  booked_by TEXT,\n  EXCLUDE USING gist (room_id WITH =, during WITH &&)\n);\n-- Prevents overlapping time ranges for same room"
+    ],
+    "Sequences & SERIAL": [
+      "Sequences generate unique numeric values. SERIAL is shorthand for creating an INTEGER column with an auto-incrementing sequence. Sequences support CACHE, CYCLE, MINVALUE, MAXVALUE, and can be manipulated via nextval(), currval(), setval(), and ALTER SEQUENCE.",
+      "CREATE SEQUENCE order_seq START 1000 INCREMENT BY 1 CACHE 10;\nCREATE TABLE orders (id INT DEFAULT nextval('order_seq'), amount NUMERIC);\n\nSELECT nextval('order_seq'), currval('order_seq');\nSELECT setval('order_seq', 5000, false);"
+    ],
+    "IDENTITY Columns": [
+      "GENERATED AS IDENTITY (SQL standard) replaces SERIAL. Supports BY DEFAULT (allows manual override) or ALWAYS (prevents manual override). Offers better schema introspection, no orphan sequences, and proper dependency tracking. Preferred over SERIAL in modern PostgreSQL.",
+      "CREATE TABLE users (\n  id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  name TEXT\n);\n\nINSERT INTO users (name) VALUES ('Alice');\n-- id is auto-assigned\n\nCREATE TABLE logs (\n  id INT GENERATED BY DEFAULT AS IDENTITY (START 1000)\n);"
+    ],
+    "GENERATED Columns": [
+      "Generated columns compute values from other columns. STORED means the value is computed on write and stored physically. VIRTUAL is not yet supported in PostgreSQL. Useful for derived data like full_name from first and last name, or price with tax.",
+      "CREATE TABLE products (\n  price NUMERIC(10,2),\n  tax_rate NUMERIC(4,2) DEFAULT 0.08,\n  price_with_tax NUMERIC(10,2) GENERATED ALWAYS AS (price * (1 + tax_rate)) STORED\n);\n\n-- Cannot INSERT or UPDATE generated columns directly"
+    ],
+    "Table Inheritance": [
+      "PostgreSQL supports table inheritance where a child table inherits all columns from a parent. Queries on the parent include child rows by default (use ONLY to exclude children). Useful for partitioning and code reuse, though modern partitioning is preferred over traditional inheritance.",
+      "CREATE TABLE person (id SERIAL, name TEXT, age INT);\nCREATE TABLE employee (salary NUMERIC) INHERITS (person);\n\nINSERT INTO employee (name, age, salary) VALUES ('Bob', 30, 75000);\nSELECT * FROM ONLY person;  -- excludes employees\nSELECT * FROM person;        -- includes employees"
+    ],
+    "Table Partitioning": [
+      "Partitioning splits large tables into smaller physical pieces while preserving a single logical view. Methods: RANGE (by date/id range), LIST (by discrete values), HASH (by hash of key). Partitions can be sub-partitioned, and partition pruning dramatically improves query performance.",
+      "CREATE TABLE sales (id BIGSERIAL, amount NUMERIC, sale_date DATE)\nPARTITION BY RANGE (sale_date);\n\nCREATE TABLE sales_2024 Q1 PARTITION OF sales\n  FOR VALUES FROM ('2024-01-01') TO ('2024-04-01');\nCREATE TABLE sales_2024 Q2 PARTITION OF sales\n  FOR VALUES FROM ('2024-04-01') TO ('2024-07-01');\n\n-- List partition\nCREATE TABLE region_data (id INT, region TEXT)\nPARTITION BY LIST (region);\n\n-- Hash partition\nCREATE TABLE logs (id INT, data TEXT)\nPARTITION BY HASH (id);"
+    ],
+    "Temporary Tables": [
+      "Temporary tables (prefixed with TEMP or TEMPORARY) exist only for the duration of a session or transaction. They are visible only to the creating session, stored in a temporary schema, and can have ON COMMIT DROP or ON COMMIT DELETE ROWS behavior. Useful for intermediate results.",
+      "CREATE TEMP TABLE temp_results (\n  id INT,\n  calculation NUMERIC\n) ON COMMIT DROP;\n\nINSERT INTO temp_results SELECT id, revenue - cost FROM ledger;\nSELECT * FROM temp_results;"
+    ],
+    "UNLOGGED Tables": [
+      "UNLOGGED tables skip WAL (Write-Ahead Log) generation, making writes ~10x faster. They are NOT crash-safe — truncated or lost after an unclean shutdown. Ideal for ephemeral or cache data that can be rebuilt. Cannot be replicated via streaming replication.",
+      "CREATE UNLOGGED TABLE cache_data (\n  key TEXT PRIMARY KEY,\n  value JSONB,\n  expires_at TIMESTAMPTZ\n);\n\nINSERT INTO cache_data VALUES ('config', '{\"theme\": \"dark\"}', NOW() + INTERVAL '1 hour');"
+    ]
+  },
+  "Data Types": {
+    "Numeric Types": [
+      "PostgreSQL offers SMALLINT (2 bytes), INTEGER (4 bytes), BIGINT (8 bytes), NUMERIC(p,s) for exact precision, REAL (4-byte float), DOUBLE PRECISION (8-byte float), and MONEY for currency. NUMERIC is preferred for financial calculations requiring exact decimal storage without rounding errors.",
+      "CREATE TABLE finances (\n  qty SMALLINT DEFAULT 0,\n  total BIGINT,\n  price NUMERIC(12,4),       -- 12 digits, 4 after decimal\n  tax_rate REAL,\n  exchange DOUBLE PRECISION,\n  amount MONEY\n);\n\nSELECT price * qty AS subtotal FROM finances;"
+    ],
+    "Character Types": [
+      "CHAR(n) is a fixed-length string (blank-padded), VARCHAR(n) is variable-length with a limit, and TEXT is unlimited. PostgreSQL treats all three similarly internally — there is no performance penalty for TEXT over VARCHAR. Use CHECK if you need length constraints beyond the type itself.",
+      "CREATE TABLE messages (\n  code CHAR(3),          -- Always 3 chars\n  title VARCHAR(255),    -- Max 255\n  body TEXT              -- Unlimited\n);\n\nINSERT INTO messages VALUES ('OK', 'Hello', 'Long content here...');"
+    ],
+    "Binary Data (BYTEA)": [
+      "BYTEA stores binary strings (byte arrays). Supports hex format (\\x...) and escape format. Use encode()/decode() for conversion to/from hex, base64. BYTEA is limited to 1 GB per value. For large objects >1 GB, use the large object API (lo_creat, lo_import, lo_export).",
+      "CREATE TABLE files (id SERIAL, data BYTEA);\nINSERT INTO files (data) VALUES (decode('48656C6C6F', 'hex'));\nSELECT encode(data, 'base64') FROM files;\n\n\\lo_import '/path/to/file.jpg'\nSELECT lo_export(oid, '/path/to/output.jpg') FROM pg_largeobject_meta;"
+    ],
+    "Date/Time Types": [
+      "PostgreSQL has DATE (no time), TIME (no date, with/without timezone), TIMESTAMP (date+time, with/without timezone), TIMESTAMPTZ (with timezone), and INTERVAL (duration). TIMESTAMPTZ stores internally as UTC and converts to session timezone on display. Use AT TIME ZONE for conversions.",
+      "CREATE TABLE events (\n  event_date DATE,\n  start_time TIME,\n  created_at TIMESTAMPTZ DEFAULT NOW(),\n  duration INTERVAL\n);\n\nSELECT created_at AT TIME ZONE 'America/New_York' AS ny_time\nFROM events;\n\nSELECT DATE_TRUNC('month', NOW());\nSELECT EXTRACT(YEAR FROM NOW());\nSELECT NOW() - INTERVAL '30 days';"
+    ],
+    "Boolean & UUID": [
+      "BOOLEAN stores TRUE, FALSE, or NULL. Accepts 'yes'/'no', '1'/'0', 't'/'f' as input. UUID stores Universally Unique Identifiers (128-bit). The uuid-ossp or pgcrypto extension provides generation functions (gen_random_uuid()). UUIDs are ideal for distributed system primary keys.",
+      "CREATE TABLE config (\n  is_active BOOLEAN DEFAULT TRUE,\n  session_id UUID DEFAULT gen_random_uuid()\n);\n\nSELECT * FROM config WHERE is_active IS TRUE;\n\n-- Enable extension\nCREATE EXTENSION IF NOT EXISTS pgcrypto;"
+    ],
+    "Arrays & Composite Types": [
+      "Arrays store multiple values of the same type in a single column. Use array constructors or ARRAY[...] syntax. Supports multi-dimensional arrays and rich operators (@>, <@, &&). Composite types bundle multiple fields into one column, created via CREATE TYPE or inferred from table row types.",
+      "CREATE TABLE articles (\n  tags TEXT[],\n  ratings INTEGER[3]\n);\n\nINSERT INTO articles VALUES (ARRAY['sql', 'postgres'], '{5,4,3}');\nSELECT * FROM articles WHERE tags @> ARRAY['sql'];\n\n-- Composite type\nCREATE TYPE full_name AS (first TEXT, last TEXT);\nCREATE TABLE persons (name full_name);\nINSERT INTO persons VALUES (ROW('John', 'Doe'));"
+    ],
+    "Range Types": [
+      "Range types represent intervals: int4range, int8range, numrange, tsrange, tstzrange, daterange. Operators include && (overlap), @> (contains), <@ (contained by), -|- (adjacent). GiST indexes on ranges enable fast exclusion constraints and overlap queries for scheduling, geofencing, and log analysis.",
+      "CREATE TABLE room_bookings (\n  room_id INT,\n  booking_times TSRANGE,\n  EXCLUDE USING gist (room_id WITH =, booking_times WITH &&)\n);\n\n-- Find overlapping\nSELECT * FROM room_bookings\nWHERE booking_times && '[2024-06-01 10:00, 2024-06-01 12:00)'::tsrange;\n\nSELECT upper(booking_times), lower(booking_times) FROM room_bookings;"
+    ],
+    "JSON & JSONB Deep Dive": [
+      "JSON stores text as-is (preserving whitespace, order, duplicates). JSONB stores a decomposed binary format (efficient indexing, no duplicates, no key order). JSONB supports GIN indexes for containment (@>), existence (?), and key/value queries. Operators: -> (json), ->> (text), #> (path), #>> (path text).",
+      "CREATE TABLE events (\n  payload JSONB\n);\n\nCREATE INDEX idx_events_gin ON events USING gin(payload);\n\nINSERT INTO events VALUES ('{\"user\": {\"id\": 42, \"tags\": [\"admin\", \"vip\"]}}');\n\n-- Path query\nSELECT payload #>> '{user, tags, 0}' FROM events;\n-- Containment\nSELECT * FROM events WHERE payload @> '{\"user\": {\"id\": 42}}';\n-- Existence\nSELECT * FROM events WHERE payload ? 'user';\n-- Update key\nUPDATE events SET payload = jsonb_set(payload, '{user,role}', '\"manager\"');"
+    ],
+    "hstore Key-Value Store": [
+      "hstore stores sets of key-value pairs within a single column (both keys and values are strings). Requires the hstore extension. Useful for semi-structured attributes when the schema is not fixed. Operators: -> (value by key), ? (key exists), @> (contains pair), || (concatenate).",
+      "CREATE EXTENSION hstore;\n\nCREATE TABLE products (\n  id SERIAL,\n  attributes hstore\n);\n\nINSERT INTO products VALUES (1, 'color => red, size => M, material => cotton');\n\nSELECT attributes -> 'color' FROM products;\nSELECT * FROM products WHERE attributes ? 'size';\nSELECT * FROM products WHERE attributes @> 'color => red';"
+    ],
+    "Network Address Types": [
+      "PostgreSQL provides inet (IPv4/IPv6 addresses), cidr (network blocks), and macaddr (MAC addresses). Built-in operators test containment (<<=, <<), sort, and compare. The ip4r extension (not built-in) adds indexed range operations for advanced network queries.",
+      "CREATE TABLE hosts (\n  ip INET,\n  network CIDR,\n  mac MACADDR\n);\n\nINSERT INTO hosts VALUES ('192.168.1.42', '192.168.1.0/24', '08:00:2b:01:02:03');\n\nSELECT * FROM hosts WHERE ip <<= '192.168.1.0/24'::cidr;\nSELECT host(ip), netmask(ip) FROM hosts;"
+    ],
+    "Geometric Types": [
+      "PostgreSQL supports geometric data types: point (x,y), line, lseg (line segment), box, path (open/closed), polygon, and circle. Operators test containment (@>), intersection (?-\\||), distance (<->). GiST indexes accelerate geometric queries. Useful for GIS-like applications without PostGIS overhead.",
+      "CREATE TABLE landmarks (\n  name TEXT,\n  location POINT,\n  area CIRCLE\n);\n\nINSERT INTO landmarks VALUES ('Central Park', POINT(40.78, -73.97), CIRCLE(POINT(40.78, -73.97), 0.05));\n\n-- Distance query (approximate)\nSELECT name FROM landmarks\nORDER BY location <-> POINT(40.71, -74.01)\nLIMIT 5;"
+    ],
+    "Domain & Custom Types": [
+      "CREATE DOMAIN creates a reusable type based on an existing type with constraints (CHECK, NOT NULL, DEFAULT). CREATE TYPE creates a custom composite or enum type (or base type via C extension). Domains are great for business-level validation like us_zip_code, email, or positive_numeric.",
+      "CREATE DOMAIN us_zip AS TEXT\n  CHECK (VALUE ~ '^\\d{5}(-\\d{4})?$');\n\nCREATE DOMAIN email AS TEXT\n  CHECK (VALUE ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$');\n\nCREATE TYPE mood AS ENUM ('happy', 'sad', 'neutral');\n\nCREATE TABLE contacts (\n  zip us_zip,\n  contact_email email,\n  current_mood mood\n);"
+    ]
+  },
+  "Modifying Data": {
+    "INSERT ON CONFLICT (UPSERT)": [
+      "INSERT ... ON CONFLICT handles unique/primary key violations gracefully. DO NOTHING skips the insert silently. DO UPDATE SET ... acts as an UPDATE when a conflict occurs (the UPSERT pattern). The EXCLUDED pseudo-table references the values that would have been inserted. Conflict targets can be constraint names or columns.",
+      "INSERT INTO users (id, email, name)\nVALUES (1, 'alice@example.com', 'Alice')\nON CONFLICT (id) DO UPDATE\n  SET email = EXCLUDED.email,\n      name = EXCLUDED.name,\n      updated_at = NOW();\n\n-- On conflict on any unique constraint\nINSERT INTO inventory (sku, qty)\nVALUES ('ABC-123', 10)\nON CONFLICT DO NOTHING;"
+    ],
+    "RETURNING Clause": [
+      "The RETURNING clause returns values from inserted, updated, or deleted rows — similar to OUTPUT in SQL Server. Supports * or specific expressions. Works with INSERT, UPDATE, DELETE, and MERGE. Essential for getting auto-generated keys (SERIAL, IDENTITY) without a separate SELECT.",
+      "INSERT INTO orders (customer_id, total)\nVALUES (42, 99.99)\nRETURNING id, created_at;\n\nUPDATE employees SET salary = salary * 1.1\nWHERE dept_id = 5\nRETURNING id, name, salary AS new_salary;\n\nDELETE FROM logs WHERE created_at < '2023-01-01'\nRETURNING id, created_at, 'deleted' AS action;"
+    ],
+    "MERGE (PostgreSQL 15+)": [
+      "MERGE (also called upsert) conditionally inserts, updates, or deletes rows in a target table based on a source of rows. WHEN MATCHED/WHEN NOT MATCHED branches control the action. More expressive than INSERT ON CONFLICT for complex synchronization scenarios like data warehouse merges.",
+      "MERGE INTO employees t\nUSING staging_employees s ON t.employee_id = s.employee_id\nWHEN MATCHED AND t.salary <> s.salary THEN\n  UPDATE SET salary = s.salary, updated_at = NOW()\nWHEN NOT MATCHED THEN\n  INSERT (employee_id, name, salary, dept_id)\n  VALUES (s.employee_id, s.name, s.salary, s.dept_id);"
+    ],
+    "UPDATE with FROM": [
+      "UPDATE ... FROM extends standard SQL to allow joining additional tables in the UPDATE statement. Useful for updating values based on matches in another table or aggregated values. The joined table(s) appear after FROM, with conditions in WHERE to control which rows update.",
+      "UPDATE products p\nSET price = p.price * 1.1,\n    updated_at = NOW()\nFROM categories c\nWHERE p.category_id = c.id\n  AND c.name = 'Electronics';\n\n-- Update from an aggregate\nUPDATE accounts a\nSET balance = a.balance + d.total\nFROM (\n  SELECT account_id, SUM(amount) AS total\n  FROM deposits WHERE status = 'pending'\n  GROUP BY account_id\n) d\nWHERE a.id = d.account_id;"
+    ],
+    "DELETE with USING": [
+      "DELETE ... USING (PostgreSQL-specific) allows joining additional tables to determine which rows to delete. Similar to UPDATE FROM syntax. Useful for bulk deletes based on conditions in related tables, like purging orphaned records or cleaning up by business rules from a reference table.",
+      "DELETE FROM orders o\nUSING customers c\nWHERE o.customer_id = c.id\n  AND c.status = 'inactive'\n  AND o.created_at < NOW() - INTERVAL '1 year';\n\n-- Delete duplicates\nDELETE FROM products p\nUSING products p2\nWHERE p.id > p2.id\n  AND p.sku = p2.sku;"
+    ],
+    "COPY for Bulk Loading": [
+      "COPY is the fastest way to import/export data. COPY (server-side) requires file system access on the server. \\copy (psql meta-command) works client-side. Supports CSV, TEXT, and BINARY formats. HEADER skips the first line. DELIMITER specifies column separator. NULL specifies the null string.",
+      "-- Server-side (superuser or pg_read_server_files)\nCOPY users FROM '/tmp/users.csv' DELIMITER ',' CSV HEADER;\nCOPY (SELECT id, name FROM active_users) TO '/tmp/active.csv' CSV HEADER;\n\n-- psql meta-command (client-side)\n\\copy users FROM '/tmp/users.csv' WITH (FORMAT CSV, HEADER true, DELIMITER ',')\n\\copy (SELECT * FROM users) TO '/tmp/users_export.csv' CSV HEADER"
+    ],
+    "Foreign Data Wrappers": [
+      "Foreign Data Wrappers (FDW) let PostgreSQL query external data sources as if they were local tables. postgres_fdw connects to remote PostgreSQL databases. mysql_fdw, mongo_fdw handle other databases. file_fdw reads flat files. CREATE FOREIGN TABLE defines the structure. IMPORT FOREIGN SCHEMA bulk-imports remote tables.",
+      "CREATE EXTENSION postgres_fdw;\n\nCREATE SERVER remote_server\n  FOREIGN DATA WRAPPER postgres_fdw\n  OPTIONS (host 'remote.host', port '5432', dbname 'remote_db');\n\nCREATE USER MAPPING FOR local_user\n  SERVER remote_server\n  OPTIONS (user 'remote_user', password 'secret');\n\nCREATE FOREIGN TABLE remote_orders (\n  id INT, total NUMERIC, created_at TIMESTAMPTZ\n)\nSERVER remote_server\nOPTIONS (schema_name 'public', table_name 'orders');\n\n-- Now query remote_orders like a local table\nSELECT * FROM remote_orders WHERE created_at > NOW() - INTERVAL '1 day';"
+    ]
+  },
+  "Indexing": {
+    "B-Tree Index Deep Dive": [
+      "B-Tree (balanced tree) is the default and most common index type. Supports =, <, <=, >, >=, BETWEEN, IN, IS NULL, and pattern matching (if left-anchored). Also handles ORDER BY and MIN/MAX efficiently. Multiple NULLs are stored together (at the front or back depending on sort order).",
+      "CREATE INDEX idx_btree_email ON users(email);\nCREATE INDEX idx_btree_date_desc ON orders(created_at DESC);\n\n-- Multi-column B-Tree (leftmost prefix rule)\nCREATE INDEX idx_name_age ON employees(name, age);\n-- Queries that use it: WHERE name = 'x' | WHERE name = 'x' AND age > 30\n-- Queries that DON'T: WHERE age > 30 (name needed first)\n\n-- NULLS FIRST / LAST\nCREATE INDEX idx_nullable ON tasks(completed_at NULLS FIRST);"
+    ],
+    "Hash Index": [
+      "Hash indexes store 32-bit hash codes of indexed values. Only support equality comparisons (=). In PostgreSQL 10+, hash indexes are WAL-logged and crash-safe. Use them when you only need equality lookups on large, random values where B-Tree would be deeper. Generally smaller than B-Tree for simple equality.",
+      "CREATE INDEX idx_hash_session ON sessions USING hash(session_id);\n\n-- Only supports =\nSELECT * FROM sessions WHERE session_id = 'abc-123-def';\n\n-- Hash index vs B-Tree: B-Tree is usually preferred for equality\n-- Hash excels when the key is large and only = is needed"
+    ],
+    "GiST Index": [
+      "GiST (Generalized Search Tree) is a balanced tree structure supporting custom operator classes. Used for geometric data (@@, ~=, &&), full-text search (tsvector), range type overlap (&&), and trigram similarity (pg_trgm). Supports nearest-neighbor search (ORDER BY <-> LIMIT n).",
+      "CREATE INDEX idx_gist_geo ON locations USING gist(coordinates);\nCREATE INDEX idx_gist_range ON bookings USING gist(booking_times);\n\n-- Nearest-neighbor\nSELECT name FROM landmarks\nORDER BY location <-> POINT(40.71, -74.01)\nLIMIT 10;\n\n-- Range overlap\nSELECT * FROM bookings WHERE booking_times && '[2024-06-15, 2024-06-20)'::tsrange;"
+    ],
+    "GIN Index": [
+      "GIN (Generalized Inverted Index) indexes composite values like elements within arrays, JSONB documents, tsvectors, and hstore. Excellent for containment (@>), existence (?), and full-text search queries. GIN builds fast but is slower to update. GIN can be FASTUPDATE-enabled for better write performance.",
+      "CREATE INDEX idx_gin_tags ON articles USING gin(tags);\nCREATE INDEX idx_gin_jsonb ON events USING gin(payload);\nCREATE INDEX idx_gin_fts ON documents USING gin(to_tsvector('english', body));\n\n-- Queries accelerated by GIN\nSELECT * FROM articles WHERE tags @> ARRAY['postgres'];\nSELECT * FROM events WHERE payload @> '{\"status\": \"active\"}';\nSELECT * FROM documents WHERE to_tsvector('english', body) @@ to_tsquery('performance & tuning');"
+    ],
+    "SP-GiST & BRIN Indexes": [
+      "SP-GiST (Space-Partitioned GiST) supports partitioned search trees (quadtrees, kd-trees) for point data, network addresses, and text. BRIN (Block Range Index) summarizes min/max values per block range. BRIN is orders of magnitude smaller than B-Tree and ideal for append-only, naturally-ordered data like time-series logs.",
+      "-- SP-GiST (good for point clustering)\nCREATE INDEX idx_spgist ON locations USING spgist(coordinates);\n\n-- BRIN (excellent for time-series)\nCREATE INDEX idx_brin_created ON orders USING brin(created_at)\n  WITH (pages_per_range = 32);\n\n-- BRIN query\nSELECT * FROM orders WHERE created_at BETWEEN '2024-06-01' AND '2024-06-30';"
+    ],
+    "Bloom Filter Index": [
+      "The bloom extension provides Bloom filter indexes — a probabilistic data structure that tests set membership with a tunable false-positive rate. Ideal for multi-column equality queries on many columns where creating individual indexes is impractical. Supports only = queries and can have false positives.",
+      "CREATE EXTENSION bloom;\n\nCREATE INDEX idx_bloom_multi ON products USING bloom (id, price, category_id, status)\n  WITH (length = 80);\n\n-- Useful for queries with arbitrary combinations of equality filters\nSELECT * FROM products\nWHERE id = 12345 AND status = 'active' AND category_id = 5;"
+    ],
+    "Partial & Expression Indexes": [
+      "Partial indexes index only rows satisfying a WHERE clause — smaller and faster than full indexes. Expression indexes index the result of a function or expression rather than a raw column. Essential for case-insensitive lookups, computed columns, and conditional indexing of only relevant rows.",
+      "-- Partial index (only active users)\nCREATE INDEX idx_active_users ON users(email) WHERE active = TRUE;\n\n-- Expression index (case-insensitive search)\nCREATE INDEX idx_lower_email ON users(LOWER(email));\nSELECT * FROM users WHERE LOWER(email) = 'alice@example.com';\n\n-- Expression + partial\nCREATE INDEX idx_recent_orders ON orders(DATE(created_at))\nWHERE status = 'pending';"
+    ],
+    "Covering Indexes & Index-Only Scans": [
+      "A covering index includes all columns needed by a query, allowing index-only scans that never touch the heap (table). PostgreSQL supports INCLUDE to add non-key columns to a unique or primary key index. This allows a query to be satisfied entirely from the index, dramatically reducing I/O.",
+      "-- Covering index with INCLUDE\nCREATE INDEX idx_cover ON employees(dept_id) INCLUDE (name, salary);\n\n-- This query can be served entirely from the index:\nSELECT name, salary FROM employees WHERE dept_id = 10;\n-- Notice: dept_id is the search key, name and salary are fetched from index\n\n-- Without INCLUDE, PostgreSQL would need to visit the heap for name and salary\n\n-- Also works with UNIQUE constraints\nCREATE UNIQUE INDEX idx_unique_cover ON users(email) INCLUDE (name, created_at);"
+    ],
+    "Concurrent & Conditional Index Operations": [
+      "CREATE INDEX CONCURRENTLY builds an index without locking the table against writes (uses extra CPU and I/O). DROP INDEX CONCURRENTLY removes without blocking. REINDEX rebuilds indexes (CONCURRENTLY mode in v12+). Indexes can be marked UNUSABLE (but not yet supported in vanilla PostgreSQL — use INVALID).",
+      "-- Build without locking writes\nCREATE INDEX CONCURRENTLY idx_new ON big_table(column1);\n\n-- Drop without blocking\nDROP INDEX CONCURRENTLY IF EXISTS idx_old;\n\n-- Rebuild index (v12+)\nREINDEX INDEX CONCURRENTLY idx_bloated;\nREINDEX TABLE CONCURRENTLY big_table;\n\n-- Validate a unique index built with CONCURRENTLY\nALTER INDEX idx_unique VISIBLE;\nALTER TABLE users ADD CONSTRAINT uq_email UNIQUE USING INDEX idx_unique;"
+    ]
+  },
+  "Performance": {
+    "EXPLAIN Deep Dive": [
+      "EXPLAIN shows the query plan (sequential scan, index scan, join type, etc.) with estimated costs. EXPLAIN ANALYZE executes the query and shows actual timing and rows. Additional options: BUFFERS (shared/local hit/read/dirtied), TIMING (enable/disable per-node timing), FORMAT JSON, and SETTINGS (showing planner parameters). Parallel plans show Workers Launched and worker timing.",
+      "EXPLAIN (ANALYZE, BUFFERS, TIMING, FORMAT JSON)\nSELECT o.id, c.name\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE o.created_at > '2024-06-01'\nORDER BY o.total DESC\nLIMIT 100;\n\n-- Key metrics: startup cost, total cost, rows, width, actual time,\n-- shared hit (from cache), shared read (from disk), loops"
+    ],
+    "VACUUM Deep Dive": [
+      "VACUUM reclaims storage occupied by dead tuples and updates visibility maps. VACUUM FULL rewrites the entire table (exclusive lock, shrinks disk). VACUUM (without FULL) marks space for reuse but doesn't return it to the OS. VERBOSE shows detailed per-table activity. FREEZE aggressively marks tuples as frozen for anti-wraparound.",
+      "-- Standard vacuum (safe, concurrent)\nVACUUM VERBOSE ANALYZE orders;\n\n-- Full vacuum (exclusive lock, shrinks table)\nVACUUM FULL VERBOSE orders;\n\n-- Freeze (anti-wraparound)\nVACUUM FREEZE orders;\n\n-- Check bloat\nSELECT schemaname, tablename, n_dead_tup, n_live_tup\nFROM pg_stat_user_tables\nWHERE n_dead_tup > 1000;"
+    ],
+    "ANALYZE & Statistics": [
+      "ANALYZE collects table statistics (column distributions, correlation, null fractions, most-common values) used by the query planner. Run standalone or as VACUUM ANALYZE. pg_stats (system view) exposes histogram buckets, n_distinct, and correlation. Accurate statistics are critical for optimal query plans.",
+      "-- Collect statistics for a table\nANALYZE employees;\nANALYZE VERBOSE employees;\n\n-- Query planner statistics\nSELECT attname, n_distinct, most_common_vals, most_common_freqs,\n       histogram_bounds, correlation\nFROM pg_stats\nWHERE tablename = 'employees';\n\n-- Adjust statistics target (higher = more detailed but slower analyze)\nALTER TABLE employees ALTER COLUMN salary SET STATISTICS 1000;"
+    ],
+    "Autovacuum Tuning": [
+      "Autovacuum automatically runs VACUUM and ANALYZE based on dead tuple thresholds. Key parameters: autovacuum_vacuum_threshold, autovacuum_vacuum_scale_factor (triggers when dead tuples > threshold + scale * total), autovacuum_vacuum_cost_limit (I/O throttling), and autovacuum_naptime. Per-table overrides via storage parameters.",
+      "-- Global settings in postgresql.conf\n# autovacuum_vacuum_threshold = 50\n# autovacuum_vacuum_scale_factor = 0.2\n# autovacuum_vacuum_cost_limit = 200\n# autovacuum_naptime = 60s\n\n-- Per-table override\nALTER TABLE busy_orders SET (\n  autovacuum_vacuum_threshold = 1000,\n  autovacuum_vacuum_scale_factor = 0.05\n);\n\n-- Monitor autovacuum activity\nSELECT schemaname, tablename, last_autovacuum, last_autoanalyze\nFROM pg_stat_user_tables;"
+    ],
+    "pg_stat_statements": [
+      "pg_stat_statements tracks execution statistics for all SQL queries: calls, total_time, min/max/mean time, rows, shared hit/read/dirtied, and temp file I/O. Essential for identifying slow queries, high-frequency queries, and I/O patterns. Requires shared_preload_libraries and creating the extension.",
+      "-- postgresql.conf\n# shared_preload_libraries = 'pg_stat_statements'\n# pg_stat_statements.max = 10000\n# pg_stat_statements.track = all\n\nCREATE EXTENSION pg_stat_statements;\n\n-- Top 10 worst queries by total time\nSELECT queryid, LEFT(query, 80) AS query,\n       calls, mean_exec_time, total_exec_time,\n       shared_blks_hit, shared_blks_read, rows\nFROM pg_stat_statements\nORDER BY total_exec_time DESC\nLIMIT 10;\n\n-- Reset statistics\nSELECT pg_stat_statements_reset();"
+    ],
+    "Query Tuning & Join Strategies": [
+      "PostgreSQL uses three join strategies: Nested Loop (good for small inner sets), Hash Join (good for large, unindexed joins), and Merge Join (good for sorted inputs). The planner chooses based on row estimates and cost parameters. Enable/disable via SET enable_hashjoin = off for debugging. Key practice: ensure proper indexes align with join and filter columns.",
+      "-- Check join strategy\nEXPLAIN (ANALYZE, BUFFERS)\nSELECT * FROM orders o\nJOIN customers c ON o.customer_id = c.id\nWHERE o.total > 1000;\n\n-- Force a specific join (for testing)\nSET enable_hashjoin = off;\nSET enable_mergejoin = off;\n\n-- Tune planner\nSET random_page_cost = 1.1;   -- For SSD storage (default 4.0 is for HDD)\nSET effective_cache_size = '8GB';  -- Tell planner about OS cache\n\n-- Gather feedback\nSELECT relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch\nFROM pg_stat_user_tables;"
+    ],
+    "Memory Settings": [
+      "shared_buffers (typically 25% of RAM) is PostgreSQL's cache within its own memory. effective_cache_size estimates OS-level file system cache (helps planner decide index vs sequential scan). work_mem per-operation sort/hash memory (too high risks OOM, too low causes temp file spills). maintenance_work_mem for VACUUM, CREATE INDEX. wal_buffers for WAL throughput.",
+      "-- postgresql.conf (16 GB RAM server example)\n# shared_buffers = 4GB          # 25% of RAM\n# effective_cache_size = 12GB   # OS cache estimate\n# work_mem = 64MB               # per sort/hash operation\n# maintenance_work_mem = 1GB    # for VACUUM, CREATE INDEX\n# wal_buffers = 64MB            # WAL write buffer\n\n-- Check where sorts spill to disk\nSELECT * FROM pg_stat_activity WHERE query LIKE '%ORDER BY%';\n-- Increase work_mem if many temp files created"
+    ],
+    "Parallel Query Execution": [
+      "PostgreSQL can parallelize sequential scans, joins, aggregates, and some window functions across worker processes. Controlled by max_parallel_workers_per_gather, parallel_tuple_cost, and parallel_setup_cost. Tables can set parallel_workers storage parameter. Parallelism benefits large scans but has overhead for small queries.",
+      "-- postgresql.conf\n# max_parallel_workers_per_gather = 4\n# max_parallel_workers = 8\n# max_worker_processes = 8\n\n-- Enable/disable for a table\nALTER TABLE big_table SET (parallel_workers = 4);\n\n-- Check parallel plan\nEXPLAIN (ANALYZE, BUFFERS)\nSELECT COUNT(*), AVG(total)\nFROM orders\nWHERE created_at > '2024-01-01';\n-- Look for: \"Workers Planned: 4\", \"Workers Launched: 4\""
+    ]
+  },
+  "Functions & Triggers": {
+    "PL/pgSQL Variables & Cursors": [
+      "PL/pgSQL is PostgreSQL's native procedural language. DECLARE defines variables (with DEFAULT or NOT NULL). %TYPE and %ROWTYPE anchor types to columns or table rows. Cursors iterate through query result sets row by row — declare, open, fetch, close. FOR loops implicitly handle cursors.",
+      "CREATE OR REPLACE FUNCTION process_orders()\nRETURNS VOID AS $$\nDECLARE\n  v_count INT := 0;\n  v_order orders%ROWTYPE;\n  cur CURSOR FOR SELECT * FROM orders WHERE status = 'pending';\nBEGIN\n  OPEN cur;\n  LOOP\n    FETCH cur INTO v_order;\n    EXIT WHEN NOT FOUND;\n    v_count := v_count + 1;\n    -- process v_order\n  END LOOP;\n  CLOSE cur;\n  RAISE NOTICE 'Processed % orders', v_count;\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Simpler: FOR loop\nFOR rec IN SELECT * FROM orders WHERE status = 'pending' LOOP\n  -- process\nEND LOOP;"
+    ],
+    "PL/pgSQL Exception Handling": [
+      "PL/pgSQL provides structured exception handling with BEGIN ... EXCEPTION ... END blocks. Caught exceptions can specify SQLSTATE or condition names (e.g., division_by_zero, unique_violation, foreign_key_violation). GET STACKED DIAGNOSTICS retrieves error details. Note: exception blocks force a subtransaction, which has overhead.",
+      "CREATE OR REPLACE FUNCTION safe_insert(p_id INT, p_name TEXT)\nRETURNS TEXT AS $$\nBEGIN\n  INSERT INTO users (id, name) VALUES (p_id, p_name);\n  RETURN 'OK';\nEXCEPTION\n  WHEN unique_violation THEN\n    RETURN 'Duplicate ID';\n  WHEN not_null_violation THEN\n    RETURN 'Name is required';\n  WHEN OTHERS THEN\n    GET STACKED DIAGNOSTICS\n      v_msg = MESSAGE_TEXT,\n      v_detail = PG_EXCEPTION_DETAIL;\n    RAISE WARNING 'Unexpected error: %', v_msg;\n    RETURN 'Error';\nEND;\n$$ LANGUAGE plpgsql;"
+    ],
+    "SQL Functions": [
+      "SQL functions (LANGUAGE sql) are simple, fast, and can be inlined by the planner. Support RETURNS scalar, SETOF record/table, or single row. Can be used in FROM clauses when marked RETURNS TABLE. SQL functions have no variables, no procedural logic — just a single query (or multiple with the last one returned).",
+      "-- Scalar SQL function\nCREATE FUNCTION active_user_count() RETURNS BIGINT AS $$\n  SELECT COUNT(*) FROM users WHERE active = TRUE;\n$$ LANGUAGE sql;\n\n-- Table-returning SQL function\nCREATE FUNCTION get_orders_for_user(p_id INT)\nRETURNS TABLE(order_id INT, total NUMERIC, created_at TIMESTAMPTZ) AS $$\n  SELECT id, total, created_at\n  FROM orders\n  WHERE customer_id = p_id\n  ORDER BY created_at DESC;\n$$ LANGUAGE sql;\n\nSELECT * FROM get_orders_for_user(42);"
+    ],
+    "Triggers (BEFORE/AFTER/INSTEAD OF)": [
+      "Triggers fire functions automatically on INSERT, UPDATE, DELETE, or TRUNCATE. BEFORE triggers run before the operation (can modify the NEW row or prevent action). AFTER triggers run after the operation (see final values). INSTEAD OF triggers on views intercept operations entirely. FOR EACH ROW fires per row; FOR EACH STATEMENT fires once.",
+      "CREATE OR REPLACE FUNCTION validate_salary()\nRETURNS TRIGGER AS $$\nBEGIN\n  IF NEW.salary < 0 THEN\n    RAISE EXCEPTION 'Salary cannot be negative';\n  END IF;\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER before_salary_insert\nBEFORE INSERT ON employees\nFOR EACH ROW EXECUTE FUNCTION validate_salary();\n\n-- INSTEAD OF trigger (on view)\nCREATE VIEW active_users AS SELECT * FROM users WHERE active = TRUE;\n\nCREATE OR REPLACE FUNCTION instead_of_delete()\nRETURNS TRIGGER AS $$\nBEGIN\n  UPDATE users SET active = FALSE WHERE id = OLD.id;\n  RETURN OLD;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER soft_delete_trigger\nINSTEAD OF DELETE ON active_users\nFOR EACH ROW EXECUTE FUNCTION instead_of_delete();"
+    ],
+    "Column-Specific & Event Triggers": [
+      "Column-specific triggers fire only when specified columns are mentioned in UPDATE. Use UPDATE OF col1, col2 in the trigger definition. Event triggers (CREATE EVENT TRIGGER) fire on DDL events (CREATE, ALTER, DROP) at the database level, allowing logging or prevention of schema changes.",
+      "-- Column-specific trigger\nCREATE TRIGGER audit_salary_change\nBEFORE UPDATE OF salary ON employees\nFOR EACH ROW\nWHEN (OLD.salary IS DISTINCT FROM NEW.salary)\nEXECUTE FUNCTION log_salary_change();\n\n-- Event trigger (DDL)\nCREATE OR REPLACE FUNCTION prevent_drop()\nRETURNS EVENT_TRIGGER AS $$\nBEGIN\n  RAISE EXCEPTION 'Dropping tables is not allowed in this database';\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE EVENT TRIGGER block_table_drops\nON ddl_command_start\nWHEN TAG IN ('DROP TABLE', 'DROP VIEW')\nEXECUTE FUNCTION prevent_drop();"
+    ],
+    "Trigger Functions (TG_OP, TG_TABLE_NAME)": [
+      "Trigger functions receive automatic special variables: TG_OP (INSERT/UPDATE/DELETE/TRUNCATE), TG_TABLE_NAME, TG_TABLE_SCHEMA, TG_WHEN (BEFORE/AFTER), TG_LEVEL (ROW/STATEMENT), TG_RELID, TG_NAME. OLD and NEW represent row states. A generic audit trigger uses these to log all table changes dynamically.",
+      "CREATE OR REPLACE FUNCTION universal_audit()\nRETURNS TRIGGER AS $$\nBEGIN\n  INSERT INTO audit_log (\n    table_name, operation, old_data, new_data, changed_by, changed_at\n  ) VALUES (\n    TG_TABLE_NAME,\n    TG_OP,\n    CASE WHEN TG_OP IN ('UPDATE', 'DELETE') THEN row_to_json(OLD) ELSE NULL END,\n    CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN row_to_json(NEW) ELSE NULL END,\n    current_user,\n    NOW()\n  );\n  RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Apply to multiple tables\nCREATE TRIGGER audit_users AFTER INSERT OR UPDATE OR DELETE ON users\nFOR EACH ROW EXECUTE FUNCTION universal_audit();"
+    ],
+    "DO Blocks": [
+      "DO blocks execute anonymous PL/pgSQL (or other procedural language) code without creating a persistent function. Useful for one-off scripts, migrations, data cleanups, and administrative tasks. Can declare variables, use cursors, handle exceptions — same as a full function but nameless and immediate.",
+      "DO $$\nDECLARE\n  rec RECORD;\n  count INT := 0;\nBEGIN\n  FOR rec IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP\n    EXECUTE format('ANALYZE %I', rec.tablename);\n    count := count + 1;\n  END LOOP;\n  RAISE NOTICE 'Analyzed % tables', count;\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Execute with output\nDO $$ BEGIN\n  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'temp_data') THEN\n    DROP TABLE temp_data;\n    RAISE NOTICE 'Dropped temp table';\n  END IF;\nEND $$;"
+    ]
+  },
+  "Procedures & Extensions": {
+    "Stored Procedures (CALL)": [
+      "Stored procedures (CREATE PROCEDURE) differ from functions: they support transaction control (COMMIT/ROLLBACK inside the procedure), have no return value, and are invoked with CALL. Introduced in PostgreSQL 11. Useful for ETL pipelines, multi-step operations requiring intermediate commits, and administrative tasks.",
+      "CREATE OR REPLACE PROCEDURE transfer_funds(\n  from_id INT, to_id INT, amount NUMERIC\n)\nLANGUAGE plpgsql AS $$\nBEGIN\n  UPDATE accounts SET balance = balance - amount WHERE id = from_id;\n  UPDATE accounts SET balance = balance + amount WHERE id = to_id;\n  COMMIT;  -- Only allowed in procedures, not functions\nEND;\n$$;\n\nCALL transfer_funds(1, 2, 500.00);\n\n-- Procedure with multiple commits\nCREATE PROCEDURE batch_process()\nLANGUAGE plpgsql AS $$\nDECLARE\n  batch_size INT := 1000;\nBEGIN\n  LOOP\n    UPDATE jobs SET status = 'processed'\n    WHERE id IN (SELECT id FROM jobs WHERE status = 'pending' LIMIT batch_size);\n    EXIT WHEN NOT FOUND;\n    COMMIT;\n  END LOOP;\nEND;\n$$;"
+    ],
+    "PostGIS Extension": [
+      "PostGIS is the gold standard for spatial databases. It adds geometry, geography, and raster types, spatial indexes (GiST on geometry), and hundreds of functions (ST_Distance, ST_Intersects, ST_Within). Enables GIS queries, map rendering, and geospatial analytics. Requires CREATE EXTENSION postgis; then add a geometry column.",
+      "CREATE EXTENSION postgis;\n\nCREATE TABLE places (\n  id SERIAL,\n  name TEXT,\n  geom GEOMETRY(Point, 4326)  -- WGS84 lon/lat\n);\n\nCREATE INDEX idx_places_geom ON places USING gist(geom);\n\nINSERT INTO places VALUES (1, 'Office', ST_SetSRID(ST_MakePoint(-73.97, 40.78), 4326));\n\n-- Find nearby places (within 1000 meters)\nSELECT name, ST_Distance(geom::geography, ST_SetSRID(ST_MakePoint(-73.98, 40.77), 4326)::geography) AS dist\nFROM places\nWHERE ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(-73.98, 40.77), 4326)::geography, 1000);"
+    ],
+    "pg_stat_statements & uuid-ossp": [
+      "pg_stat_statements provides query execution statistics (see Performance section). uuid-ossp generates UUIDs via OSSP library (uuid_generate_v1mc, uuid_generate_v4) or use pgcrypto's gen_random_uuid() instead, which doesn't need uuid-ossp. Both extensions are simple to enable and essential for distributed IDs.",
+      "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;\nCREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n\n-- uuid-ossp functions\nSELECT uuid_generate_v1();      -- Time-based UUID\nSELECT uuid_generate_v1mc();    -- Time-based with random MAC\nSELECT uuid_generate_v4();      -- Random UUID\n\nCREATE TABLE sessions (\n  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,\n  user_id INT,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);"
+    ],
+    "pgcrypto & citext": [
+      "pgcrypto provides cryptographic functions: digest(), hmac(), crypt() for password hashing, pgp_sym_encrypt()/pgp_pub_encrypt() for encryption, and gen_random_uuid()/gen_random_bytes(). citext provides a case-insensitive character string type that behaves like TEXT but comparisons are case-insensitive — ideal for email fields or usernames.",
+      "CREATE EXTENSION pgcrypto;\nCREATE EXTENSION citext;\n\n-- Password hashing\nINSERT INTO users (email, password_hash)\nVALUES ('alice@example.com', crypt('my_password', gen_salt('bf')));\n\n-- Authentication\nSELECT * FROM users\nWHERE email = 'alice@example.com'\n  AND password_hash = crypt('my_password', password_hash);\n\n-- Symmetric encryption\nSELECT pgp_sym_encrypt('secret data', 'encryption_key');\nSELECT pgp_sym_decrypt(pgp_sym_encrypt('data', 'key'), 'key');\n\n-- citext (case-insensitive text)\nCREATE TABLE accounts (username CITEXT UNIQUE);\nINSERT INTO accounts VALUES ('Alice');\nSELECT * FROM accounts WHERE username = 'alice';  -- matches!"
+    ],
+    "Fuzzy String Matching": [
+      "pg_trgm (trigram) and fuzzystrmatch (Levenshtein, Metaphone, Soundex, Double Metaphone) provide fuzzy text matching. pg_trgm creates a GIN or GiST index of 3-character substrings for fast similarity searches using %, <-> (distance), and word_similarity. Essential for search-as-you-type, deduplication, and spell correction.",
+      "CREATE EXTENSION pg_trgm;\nCREATE EXTENSION fuzzystrmatch;\n\n-- pg_trgm similarity search\nCREATE INDEX idx_trgm_name ON users USING gin(name gin_trgm_ops);\n\nSELECT *, similarity(name, 'Jon') AS sim\nFROM users\nWHERE name % 'Jon'\nORDER BY similarity(name, 'Jon') DESC;\n\n-- fuzzystrmatch\nSELECT levenshtein('sunday', 'saturday');  -- 3\nSELECT metaphone('programming', 10);       -- PRKRMNK\nSELECT dmetaphone('programming');          -- PRKRMNK\nSELECT soundex('Smith'), soundex('Smythe');  -- S530, S530"
+    ],
+    "unaccent & Full-Text Extensions": [
+      "unaccent removes diacritical marks (accents) from text, enabling accent-insensitive search. Typically combined with full-text search and an immutable function wrapping to_tsvector for GIN indexes. Also useful with citext and pg_trgm. Essential for internationalized applications (French, Spanish, German, etc.).",
+      "CREATE EXTENSION unaccent;\n\n-- Remove accents\nSELECT unaccent('café crème déjà vu');  -- cafe creme deja vu\n\n-- Combined with full-text search\nCREATE OR REPLACE FUNCTION unaccent_immutable(text)\nRETURNS text AS $$\n  SELECT unaccent($1);\n$$ LANGUAGE sql IMMUTABLE;\n\nCREATE INDEX idx_fts_unaccent ON articles\n  USING gin(to_tsvector('french', unaccent_immutable(body)));\n\nSELECT title FROM articles\nWHERE to_tsvector('french', unaccent_immutable(body))\n  @@ to_tsquery('french', unaccent_immutable('déjà vu'));"
+    ],
+    "TimescaleDB & pg_plan_advsr": [
+      "TimescaleDB is a time-series extension adding hypertables (automatic partitioning by time), continuous aggregates, compression, and retention policies. pg_plan_advsr (plan advisor) analyzes slow queries and suggests index or rewriting improvements. Other notable extensions: pg_partman (partition management), pgaudit (audit logging), and hypopg (hypothetical indexes).",
+      "-- TimescaleDB\nCREATE EXTENSION timescaledb;\n\nCREATE TABLE sensor_data (\n  time TIMESTAMPTZ NOT NULL,\n  sensor_id INT,\n  temperature FLOAT,\n  humidity FLOAT\n);\n\nSELECT create_hypertable('sensor_data', 'time');\n\n-- Continuous aggregate\nCREATE MATERIALIZED VIEW sensor_hourly\nWITH (timescaledb.continuous) AS\nSELECT time_bucket('1 hour', time) AS bucket,\n       sensor_id,\n       AVG(temperature) AS avg_temp,\n       MAX(temperature) AS max_temp\nFROM sensor_data\nGROUP BY bucket, sensor_id;\n\n-- pg_plan_advsr (load via shared_preload_libraries)\nCREATE EXTENSION pg_plan_advsr;\nSELECT plan_advsr('SELECT * FROM orders WHERE id = 42;');"
+    ]
+  },
+  "Transactions & Concurrency": {
+    "MVCC Internals": [
+      "Multi-Version Concurrency Control (MVCC) allows readers never to block writers and vice versa. Each row has xmin (creating transaction ID) and xmax (deleting/expiring transaction ID). A snapshot captures active transactions at a point in time. Visibility rules determine which row versions are visible. Old versions (dead tuples) are cleaned by VACUUM.",
+      "-- Check tuple visibility\nSELECT ctid, xmin, xmax, * FROM users;\n\n-- System catalogs for MVCC state\nSELECT datname, age(datfrozenxid) AS xid_age\nFROM pg_database;\n\n-- Transaction ID wraparound (critical monitoring)\nSELECT max(age(relfrozenxid)) FROM pg_class;\n-- If approaching 2 billion, emergency VACUUM FREEZE is needed"
+    ],
+    "Isolation Levels": [
+      "PostgreSQL supports four ANSI isolation levels, but only three distinct behaviors: Read Committed (default — sees committed data at each statement start), Repeatable Read (sees snapshot from first statement in transaction, retry on serialization failure), Serializable (detects true serialization conflicts with SSI). Higher levels reduce concurrency but increase consistency.",
+      "-- Read Committed (default)\nBEGIN;\nSELECT * FROM accounts WHERE id = 1;\n-- Another session might update and commit between this and next statement\nSELECT * FROM accounts WHERE id = 1;  -- may see different value!\nCOMMIT;\n\n-- Repeatable Read\nBEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;\nSELECT * FROM accounts WHERE id = 1;\n-- Repeat: guaranteed same snapshot\nSELECT * FROM accounts WHERE id = 1;  -- same result\nCOMMIT;\n\n-- Serializable\nBEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nCOMMIT;\n-- May get: ERROR: could not serialize access due to read/write dependencies"
+    ],
+    "Serializable Snapshot Isolation (SSI)": [
+      "SSI is PostgreSQL's Serializable implementation. Unlike Repeatable Read, SSI detects read-write conflicts that could cause serialization anomalies (e.g., write skew). Uses predicate locks (not row locks) to track read dependencies. SSI provides true serializability at the cost of more serialization failures requiring retry logic.",
+      "-- Write skew example (SSI catches this)\n-- Two doctors must be on call. Don't let both go off duty.\nBEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n\nSELECT COUNT(*) INTO v_count FROM on_call WHERE status = 'active';\n\nIF v_count <= 1 THEN\n  RAISE EXCEPTION 'Need at least one doctor on call';\nEND IF;\n\nUPDATE on_call SET status = 'off' WHERE doctor_id = 42;\n\nCOMMIT;\n-- Under Repeatable Read, two sessions could both see count=2 and both update\n-- Under Serializable, one will fail with serialization error"
+    ],
+    "Deadlock Detection": [
+      "PostgreSQL automatically detects deadlocks (cycles in lock wait graph). When detected, one session is aborted with ERROR: deadlock detected. The deadlock_timeout setting (default 1s) controls how often the deadlock check runs. Shorter timeouts detect deadlocks faster but use more CPU. Application code should retry on deadlock errors.",
+      "-- Session 1\nBEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\n-- then Session 2 updates id=2\n\n-- Session 2\nBEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 2;\n-- then Session 1 tries to update id=2 -> deadlock!\n\n-- Deadlock will be detected after deadlock_timeout\n-- One session gets:\n-- ERROR: deadlock detected\n-- DETAIL: Process 12345 waits for ShareLock on transaction 678; blocked by process 678.\n-- HINT: See server log for query details.\n\n-- Retry pattern\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance - 100 WHERE id = 2;  -- Always lock in same order!"
+    ],
+    "Advisory Locks": [
+      "Advisory locks are application-level locks managed by PostgreSQL. Session-level (pg_advisory_lock) blocks until released. Transaction-level (pg_advisory_xact_lock) auto-releases on commit/rollback. Try variants (pg_try_advisory_lock) return false immediately instead of blocking. Keyed by a single bigint or two integers. Useful for distributed job queues and rate limiting.",
+      "-- Session-level advisory lock (manual release)\nSELECT pg_advisory_lock(12345);\n-- Critical section\nSELECT pg_advisory_unlock(12345);\n\n-- Transaction-level (auto-release)\nBEGIN;\nSELECT pg_advisory_xact_lock(42);\nUPDATE job_queue SET status = 'running' WHERE id = 1;\nCOMMIT;  -- lock released\n\n-- Try lock (non-blocking)\nSELECT pg_try_advisory_lock(999);  -- returns true or false\n\n-- Two-key variant\nSELECT pg_advisory_lock(1, 2);\nSELECT pg_advisory_unlock(1, 2);\n\n-- Use case: job queue worker locking\nSELECT pg_try_advisory_lock(job_id) FROM jobs LIMIT 1;"
+    ],
+    "SKIP LOCKED & NOWAIT": [
+      "SKIP LOCKED (PostgreSQL 9.5+) skips rows locked by other transactions — ideal for work queues where multiple workers select jobs. NOWAIT fails immediately if a row is locked, instead of waiting. Both used with FOR UPDATE/FOR SHARE. SKIP LOCKED eliminates busy-waiting and lock contention in high-concurrency job processing.",
+      "-- Job queue worker: pick next available job, skipping locked ones\nBEGIN;\n\nSELECT id, payload\nFROM job_queue\nWHERE status = 'pending'\nORDER BY priority DESC, created_at ASC\nLIMIT 1\nFOR UPDATE SKIP LOCKED;\n\n-- Process the job...\nUPDATE job_queue SET status = 'completed' WHERE id = ?;\n\nCOMMIT;\n\n-- NOWAIT: fail fast if row is locked\nSELECT * FROM accounts WHERE id = 1 FOR UPDATE NOWAIT;\n-- ERROR: could not obtain lock on row in relation \"accounts\"\n\n-- Combined\nSELECT * FROM orders\nWHERE id = 42\nFOR NO KEY UPDATE SKIP LOCKED;"
+    ],
+    "Row Locking": [
+      "PostgreSQL provides row-level locking clauses on SELECT: FOR UPDATE (write lock, blocks other FOR UPDATE/FOR NO KEY UPDATE/FOR SHARE/FOR KEY SHARE), FOR NO KEY UPDATE (weaker write lock), FOR SHARE (read lock, blocks FOR UPDATE/FOR NO KEY UPDATE but not FOR SHARE), FOR KEY SHARE (weakest, blocks only FOR UPDATE). These are the foundation of pessimistic locking.",
+      "BEGIN;\n\n-- Exclusive write lock\nSELECT * FROM inventory WHERE product_id = 10 FOR UPDATE;\n\n-- Weak write (does NOT block FOR KEY SHARE)\nSELECT * FROM orders WHERE id = 5 FOR NO KEY UPDATE;\n\n-- Shared read lock\nSELECT * FROM products WHERE category_id = 3 FOR SHARE;\n\n-- Weakest read lock (only blocks FOR UPDATE on PK/FK)\nSELECT * FROM users WHERE id = 42 FOR KEY SHARE;\n\nUPDATE inventory SET qty = qty - 1 WHERE product_id = 10;\n\nCOMMIT;\n\n-- Check locks held\nSELECT pid, locktype, mode, granted FROM pg_locks\nWHERE relation = 'inventory'::regclass;"
+    ],
+    "Predicate Locking": [
+      "Predicate locks prevent phantom reads in SERIALIZABLE isolation. Instead of row locks, PostgreSQL acquires predicate locks on index pages or whole tables that represent a query's read range. If two transactions read overlapping ranges and one writes, SSI detects the conflict. SiLockEntry view shows predicate lock state.",
+      "-- Only relevant under SERIALIZABLE isolation\nBEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n\n-- Predicate lock acquired on range\nSELECT COUNT(*) FROM orders WHERE created_at BETWEEN '2024-01-01' AND '2024-01-31';\n\n-- Another session inserts into this range\nINSERT INTO orders (id, created_at) VALUES (999, '2024-01-15');\n\n-- First session re-reads (may see the same count depending on SSI)\nSELECT COUNT(*) FROM orders WHERE created_at BETWEEN '2024-01-01' AND '2024-01-31';\n\nCOMMIT;\n-- If the range is read and a concurrent write touches it,\n-- one transaction will abort with serialization failure"
+    ]
+  },
+  "Backup & Replication": {
+    "pg_dump / pg_restore": [
+      "pg_dump creates logical backups of a single database (plain SQL, custom, directory, or tar format). pg_dumpall backs up all databases plus global objects (roles, tablespaces). pg_restore restores from custom/directory/tar formats with parallel jobs (-j) and selective restore (-t, -n). Plain format can be restored via psql. Essential for schema migrations and data export.",
+      "# Custom format (compressed, parallel restore)\npg_dump -Fc mydb > mydb.dump\npg_restore -d mydb -j 4 mydb.dump\n\n# Plain SQL\npg_dump mydb > mydb.sql\npsql mydb < mydb.sql\n\n# Directory format (parallel dump + restore)\npg_dump -Fd -j 4 mydb -f /backup/mydb_dir/\npg_restore -d mydb -j 4 /backup/mydb_dir/\n\n# Dump specific tables\npg_dump -t users -t orders mydb > partial.sql\n\n# All databases\npg_dumpall > full_backup.sql\n\n# Exclude data (schema only)\npg_dump -s mydb > schema.sql"
+    ],
+    "pg_basebackup": [
+      "pg_basebackup creates a binary (physical) backup of the entire PostgreSQL cluster. Required for setting up streaming replication and Point-in-Time Recovery. Produces a consistent copy using WAL archiving. Supports compression (gzip, lz4, zstd), progress output, and parallel transfer with --wal-method=stream. The -X stream option includes WAL in the backup.",
+      "# Full base backup with WAL streaming\npg_basebackup -D /backup/base -X stream -P -v\n\n# With compression\npg_basebackup -D /backup/base -X stream -z -P\n\n# For replica setup\npg_basebackup -h primary_host -D /var/lib/postgresql/data -X stream -P\n\n# Checkpoint and label\nSELECT * FROM pg_backup_label;\n\n# Restore: copy files, create standby.signal, configure recovery settings"
+    ],
+    "Continuous Archiving & WAL": [
+      "WAL (Write-Ahead Log) records every change to the database. Continuous archiving copies WAL segments to a safe location for PITR. Configure archive_mode, archive_command (e.g., cp to NFS or S3), and restore_command. WAL segments are 16 MB each. WAL compression (wal_compression) reduces storage. Monitor via pg_stat_archiver.",
+      "-- postgresql.conf\n# wal_level = replica\n# archive_mode = on\n# archive_command = 'cp %p /archive/%f'\n# archive_timeout = 60\n# restore_command = 'cp /archive/%f %p'\n\n-- Monitor archiving\nSELECT * FROM pg_stat_archiver;\n\n-- Check WAL status\nSELECT pg_walfile_name_offset(pg_current_wal_lsn());\nSELECT * FROM pg_stat_wal;\n\n-- Create a restore point for PITR\nSELECT pg_create_restore_point('before_migration_v2');"
+    ],
+    "Streaming Replication": [
+      "Streaming replication sends WAL data from primary to standby in real time. Standby runs in recovery mode, applying WAL continuously. Hot standby allows read-only queries on standby. Configuration: wal_level >= replica, max_wal_senders >= number of replicas, primary_conninfo on standby. pg_stat_replication shows replication lag.",
+      "-- Primary postgresql.conf\n# wal_level = replica\n# max_wal_senders = 5\n# wal_keep_size = 512\n\n-- Standby postgresql.conf\n# hot_standby = on\n\n-- Standby: standby.signal (touch file)\n-- Standby: postgresql.auto.conf\n# primary_conninfo = 'host=primary_host port=5432 user=replicator'\n\n-- Create replication user\nCREATE ROLE replicator WITH LOGIN REPLICATION PASSWORD 'secret';\n\n-- Monitor replication\nSELECT application_name, state, sync_state, write_lag, flush_lag, replay_lag\nFROM pg_stat_replication;\n\n-- Check if standby\nSELECT pg_is_in_recovery();"
+    ],
+    "Synchronous Replication": [
+      "Synchronous replication guarantees that commits on primary are confirmed by at least one standby before reporting success. Set synchronous_standby_names to specify which standbys are synchronous (FIRST, ANY). sync_state = sync in pg_stat_replication. Provides zero-data-loss but increases commit latency. Use for critical financial or compliance workloads.",
+      "-- Primary postgresql.conf\n# synchronous_commit = on\n# synchronous_standby_names = 'FIRST 1 (standby1, standby2)'\n\n-- Or quorum-based (any 2 of 3)\n# synchronous_standby_names = 'ANY 2 (standby1, standby2, standby3)'\n\n-- Check sync state\nSELECT application_name, sync_state, sync_priority\nFROM pg_stat_replication;\n\n-- Per-session control\nSET synchronous_commit = remote_write;  -- faster than 'on'"
+    ],
+    "Logical Replication": [
+      "Logical replication publishes individual table changes (INSERT/UPDATE/DELETE) via a publication on the publisher, subscribed to on the subscriber. Unlike streaming replication, it allows selective replication (specific tables), major version upgrades, and bidirectional replication. Uses pgoutput plugin. Built on top of WAL decoding.",
+      "-- Publisher\nCREATE PUBLICATION my_pub FOR TABLE users, orders;\nCREATE PUBLICATION all_tables FOR ALL TABLES;\n\n-- Subscriber\nCREATE SUBSCRIPTION my_sub\nCONNECTION 'host=publisher_host dbname=mydb user=replicator'\nPUBLICATION my_pub;\n\n-- Monitor\nSELECT * FROM pg_stat_subscription;\nSELECT * FROM pg_publication;\nSELECT * FROM pg_subscription;\n\n-- Add table to existing publication\nALTER PUBLICATION my_pub ADD TABLE products;\n\n-- Logical replication slot\nSELECT * FROM pg_replication_slots;\n\n-- Useful for major version upgrades (pg_upgrade alternative)"
+    ],
+    "Point-in-Time Recovery (PITR) & pg_rewind": [
+      "PITR restores a database to any point in time after a base backup, by replaying WAL up to the target time (recovery_target_time), transaction ID (recovery_target_xid), or named restore point. Configure recovery.conf (PG12+) or postgresql.conf recovery parameters (PG12+). pg_rewind syncs a stale replica with the new primary after a failover, enabling fast rejoin.",
+      "-- PITR: postgresql.conf (or postgresql.auto.conf)\n# restore_command = 'cp /archive/%f %p'\n# recovery_target_time = '2024-06-15 14:30:00 UTC'\n# recovery_target_action = 'promote'\n\n-- Create a named restore point on the running system\nSELECT pg_create_restore_point('pre_deploy_v3');\n-- Then restore with:\n# recovery_target_name = 'pre_deploy_v3'\n\n-- pg_rewind (after failover, to rejoin old primary)\npg_rewind --target-pgdata /var/lib/postgresql/16/main \\\n         --source-server='host=new_primary user=postgres'\n-- This is much faster than rebuilding from pg_basebackup"
+    ]
+  },
+  "Advanced Topics": {
+    "LISTEN / NOTIFY Pub-Sub": [
+      "LISTEN subscribes to a notification channel. NOTIFY sends an asynchronous message (up to 8000 bytes payload) to all sessions listening on that channel. pg_notify(text, text) function sends from SQL. Used for cache invalidation, triggering application workers, and real-time UI updates without polling.",
+      "-- Session 1 (listener)\nLISTEN new_order;\n\n-- Session 2 (notifier)\nNOTIFY new_order, 'Order #42 placed';\n\n-- Or via function (works inside triggers)\nSELECT pg_notify('new_order', row_to_json(NEW)::text);\n\n-- In psql, listen for notifications\nLISTEN channel_name;\n-- Notifications appear automatically\n\n-- Application pattern (Python/Node.js async driver)\n-- conn.add_notify_handler(lambda msg: print(msg.payload))\n-- await conn.execute(\"LISTEN channel_name\")"
+    ],
+    "COPY Protocol Deep Dive": [
+      "The COPY protocol (\\copy in psql, PQputCopyData in libpq) streams data between client and server. PostgreSQL 14+ supports COPY ... FROM PROGRAM (superuser only, dangerous), COPY ... WHERE for row filtering on import, and COPY ... ON_ERROR for error handling (ignore, stop). The \\copy meta-command routes through the client, not the server.",
+      "-- Filtered import (v14+)\nCOPY big_table FROM '/tmp/data.csv'\nWITH (FORMAT CSV, HEADER true, FREEZE true)\nWHERE (column1 IS NOT NULL);\n\n-- On error handling (v14+)\nCOPY data FROM '/tmp/risky.csv'\nWITH (FORMAT CSV, ON_ERROR 'ignore');\n\n-- Binary COPY (fastest)\nCOPY users TO '/tmp/users.bin' WITH (FORMAT binary);\nCOPY users FROM '/tmp/users.bin' WITH (FORMAT binary);\n\n-- Program source (superuser only, careful!)\nCOPY sensors FROM PROGRAM 'tail -100 /var/log/sensors.csv' CSV;\n\n-- Using libpq for custom application copy"
+    ],
+    "Custom Aggregate Functions": [
+      "PostgreSQL allows creating custom aggregate functions with CREATE AGGREGATE. Define an sfunc (state transition function), stype (state type), and optionally a finalfunc (final calculation), initcond (initial condition), and combinefunc (for parallel/partial aggregation). Useful for rolling averages, statistical aggregations, or custom JSON accumulation.",
+      "-- Aggregate that concatenates strings with a separator\nCREATE OR REPLACE FUNCTION concat_accum(state TEXT, next TEXT, delim TEXT)\nRETURNS TEXT AS $$\nBEGIN\n  IF state IS NULL THEN\n    RETURN next;\n  ELSE\n    RETURN state || delim || next;\n  END IF;\nEND;\n$$ LANGUAGE plpgsql IMMUTABLE;\n\nCREATE AGGREGATE concat_with(text, text) (\n  SFUNC = concat_accum,\n  STYPE = text,\n  INITCOND = ''\n);\n\nSELECT dept_id, concat_with(name, ', ') AS employees\nFROM employees\nGROUP BY dept_id;\n\n-- Built-in: string_agg() does this, but custom aggregates unlock any logic"
+    ],
+    "Procedural Languages (PL/Python, PL/V8)": [
+      "PostgreSQL supports multiple procedural languages via extensions. PL/Python (plpython3u) allows writing functions in Python with access to numpy, pandas, etc. PL/V8 (plv8) runs JavaScript inside PostgreSQL. PL/Tcl and PL/Perl are also available. These are powerful for data science, complex string processing, and integrating external libraries directly in SQL.",
+      "-- PL/Python\nCREATE EXTENSION plpython3u;\n\nCREATE OR REPLACE FUNCTION analyze_sentiment(text TEXT)\nRETURNS TEXT AS $$\n  # Simple sentiment analysis example\n  positive_words = ['good', 'great', 'excellent', 'happy']\n  negative_words = ['bad', 'awful', 'terrible', 'sad']\n  words = text.lower().split()\n  pos_count = sum(1 for w in words if w in positive_words)\n  neg_count = sum(1 for w in words if w in negative_words)\n  if pos_count > neg_count: return 'positive'\n  if neg_count > pos_count: return 'negative'\n  return 'neutral'\n$$ LANGUAGE plpython3u;\n\nSELECT analyze_sentiment('This product is great and excellent!');\n\n-- PL/V8 (requires compilation)\n-- CREATE EXTENSION plv8;\n-- Can use full JavaScript, including npm modules"
+    ],
+    "FDW Deep Dive (file_fdw, postgres_fdw)": [
+      "file_fdw queries CSV, text, or program output as foreign tables. Great for ad-hoc data analysis without loading data into the database. postgres_fdw connects to remote PostgreSQL, supports INSERT/UPDATE/DELETE (pushdown). IMPORT FOREIGN SCHEMA bulk-creates foreign tables. Options include fetch_size, use_remote_estimate, and async_capable for parallel remote scans.",
+      "-- file_fdw: query CSV files directly\nCREATE EXTENSION file_fdw;\n\nCREATE SERVER file_server FOREIGN DATA WRAPPER file_fdw;\n\nCREATE FOREIGN TABLE sales_csv (\n  id INT,\n  product TEXT,\n  amount NUMERIC,\n  sale_date DATE\n)\nSERVER file_server\nOPTIONS (filename '/home/data/sales_2024.csv', format 'csv', header 'true');\n\nSELECT product, SUM(amount) FROM sales_csv\nWHERE sale_date >= '2024-06-01'\nGROUP BY product;\n\n-- postgres_fdw with pushdown\nCREATE EXTENSION postgres_fdw;\nCREATE SERVER remote_srv FOREIGN DATA WRAPPER postgres_fdw\n  OPTIONS (host 'remote', dbname 'analytics', fetch_size '10000');\n\nCREATE USER MAPPING FOR local_user SERVER remote_srv\n  OPTIONS (user 'remote_user', password 'secret');\n\nIMPORT FOREIGN SCHEMA public LIMIT TO (orders, customers)\nFROM SERVER remote_srv INTO public;"
+    ],
+    "Table Sampling & Parallel Query Details": [
+      "TABLESAMPLE (BERNOULLI, SYSTEM) returns a random sample of rows. SYSTEM is faster (uses physical pages), BERNOULLI is more accurate (row-level). Percent specifies approximate sample size. REPEATABLE(seed) gives reproducible samples. For parallel queries, max_parallel_workers_per_gather controls workers per query, parallel_tuple_cost offsets overhead, and gather nodes merge worker results.",
+      "-- Table sampling\nSELECT * FROM large_table TABLESAMPLE SYSTEM (1);        -- ~1% sample\nSELECT * FROM large_table TABLESAMPLE BERNOULLI (0.5);   -- ~0.5% sample\n\n-- Reproducible sample\nSELECT * FROM orders TABLESAMPLE SYSTEM (1) REPEATABLE (42);\n\n-- Parallel query details\nEXPLAIN (ANALYZE, VERBOSE)\nSELECT /*+ Parallel(orders 4) */ COUNT(*), AVG(total)\nFROM orders\nWHERE created_at >= '2024-01-01';\n-- Look for: Gather, Workers Planned, Workers Launched\n\n-- Force parallel settings\nSET max_parallel_workers_per_gather = 4;\nSET parallel_setup_cost = 0;\nSET parallel_tuple_cost = 0.01;\n\n-- Partial aggregation: each worker aggregates, Gather merges"
+    ]
+  },
+  "Mastering PostgreSQL 15": {
+    "date_bin Time Bucketing": [
+      "`date_bin` (PostgreSQL 14+) buckets timestamps into fixed intervals. Essential for time-series aggregation: bin timestamps into 5-minute, hourly, or daily buckets. The function aligns to a specified origin. Much cleaner than manual arithmetic with EXTRACT and FLOOR. Used with GROUP BY for time-series rollups.",
+      "SELECT\n  date_bin('1 hour', created_at, '2024-01-01') AS bucket,\n  COUNT(*) AS order_count,\n  SUM(total) AS revenue\nFROM orders\nWHERE created_at >= '2024-06-01'\nGROUP BY bucket\nORDER BY bucket;\n\n-- 5-minute buckets with origin at midnight\nSELECT date_bin('5 minutes', ts, TIMESTAMP '2024-01-01') AS bucket,\n       COUNT(*)\nFROM sensor_readings\nGROUP BY bucket;\n\n-- Equivalent to:\n-- SELECT date_trunc('hour', created_at) ... for hourly\n-- But date_bin supports arbitrary intervals like 7 minutes, 3 hours\n\n-- Custom origin\nSELECT date_bin('1 week', created_at, TIMESTAMP '2024-01-01') AS week_start"
+    ],
+    "WAL & Checkpoint Tuning": [
+      "Mastering PostgreSQL 15 dedicates significant coverage to WAL tuning: wal_level (minimal, replica, logical), wal_buffers (WAL in memory), wal_writer_delay, checkpoint_timeout, checkpoint_completion_target, and max_wal_size/min_wal_size. The goal: enough WAL for crash recovery and replication, but not so much that checkpoints thrash I/O.",
+      "-- postgresql.conf\n# wal_level = replica              # minimal, replica (default), logical\n# wal_buffers = 64MB               # WAL write buffer in memory\n# wal_writer_delay = 200ms         # WAL writer frequency\n# wal_compression = zstd           # compress WAL (zstd, lz4, gzip)\n\n# Checkpoint tuning\n# checkpoint_timeout = 15min        # max between checkpoints\n# checkpoint_completion_target = 0.9  # spread writes over 90% of interval\n# max_wal_size = 8GB                # triggers checkpoint (soft limit)\n# min_wal_size = 2GB                # target WAL cleanup\n\n-- Monitor checkpoints\nSELECT * FROM pg_stat_bgwriter;\n-- checkpoints_timed vs checkpoints_req (req = too frequent)\n\n-- WAL generation rate\nSELECT wal_bytes / 1024 / 1024 AS wal_mb,\n       (EXTRACT(EPOCH FROM now() - stats_reset) / 3600) AS hours\nFROM pg_stat_wal;\n\n-- Checkpoint frequency\nSELECT checkpoints_timed, checkpoints_req,\n       checkpoints_req::float / NULLIF(checkpoints_timed + checkpoints_req, 0) * 100 AS req_pct\nFROM pg_stat_bgwriter;"
+    ],
+    "Custom GUC Parameters": [
+      "PostgreSQL allows custom GUC (Grand Unified Configuration) parameters with the `custom_variable_classes` pattern. Set custom parameters in postgresql.conf or via SET. Access in PL/pgSQL via current_setting(). Useful for application-level configuration that should live in the database session, like tenant_id, application_name, or feature flags.",
+      "-- postgresql.conf\n# custom_variable_classes = 'myapp'\n# myapp.tenant_id = 'default'\n# myapp.feature_flag = 'true'\n\n-- Set at session level\nSET myapp.tenant_id = 'acme_corp';\nSET myapp.audit_level = 'strict';\n\n-- Read in PL/pgSQL\nCREATE OR REPLACE FUNCTION get_tenant_id()\nRETURNS TEXT AS $$\nBEGIN\n  RETURN current_setting('myapp.tenant_id', true);\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Use in RLS policies\nCREATE POLICY tenant_isolation ON documents\n  USING (tenant_id = current_setting('myapp.tenant_id'));\n\n-- Query current settings\nSELECT name, setting FROM pg_settings WHERE name LIKE 'myapp.%';"
+    ],
+    "PL/pgSQL Profiling & Optimization": [
+      "Mastering PostgreSQL 15 covers PL/pgSQL performance. Key advice: minimize EXCEPTION blocks (they force subtransactions), use FOREACH over arrays, prefer SQL functions over PL/pgSQL for simple logic, avoid row-by-row processing (use set-based operations), and move expensive computations into pure SQL. Use auto_explain for logging slow PL/pgSQL executions.",
+      "-- auto_explain (postgresql.conf)\n# shared_preload_libraries = 'auto_explain'\n# auto_explain.log_min_duration = '1s'\n# auto_explain.log_analyze = on\n# auto_explain.log_nested_statements = on  -- includes PL/pgSQL internals\n\n-- Bad: row-by-row processing (slow)\nCREATE OR REPLACE FUNCTION slow_update() RETURNS VOID AS $$\nDECLARE\n  r RECORD;\nBEGIN\n  FOR r IN SELECT * FROM orders WHERE status = 'pending' LOOP\n    UPDATE orders SET status = 'processed' WHERE id = r.id;\n  END LOOP;\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Good: set-based (fast)\nCREATE OR REPLACE FUNCTION fast_update() RETURNS VOID AS $$\nBEGIN\n  UPDATE orders SET status = 'processed' WHERE status = 'pending';\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Use SQL functions for simple lookups\nCREATE FUNCTION get_user_email(uid INT) RETURNS TEXT LANGUAGE sql AS\n  'SELECT email FROM users WHERE id = $1';"
+    ],
+    "pg_stat_progress Monitoring": [
+      "PostgreSQL provides progress reporting views for long-running operations. pg_stat_progress_vacuum (VACUUM phase, heap_blks_total/ scanned/vacuumed), pg_stat_progress_create_index (phase: building, index name, tuples), pg_stat_progress_analyze (phase, sample tuples), pg_stat_progress_basebackup, pg_stat_progress_copy. Essential for knowing how long operations will take.",
+      "-- VACUUM progress\nSELECT pid, phase, heap_blks_total, heap_blks_scanned,\n       heap_blks_vacuumed, max_dead_tuples, num_dead_tuples\nFROM pg_stat_progress_vacuum;\n\n-- CREATE INDEX progress\nSELECT pid, command_tag, phase, lockers_total, lockers_done,\n       blocks_total, blocks_done, tuples_total, tuples_done\nFROM pg_stat_progress_create_index;\n\n-- COPY progress (v14+)\nSELECT pid, command_tag, phase, tuples_processed, bytes_processed\nFROM pg_stat_progress_copy;\n\n-- Combined with current query\nSELECT p.pid, p.phase, a.query\nFROM pg_stat_progress_vacuum p\nJOIN pg_stat_activity a ON p.pid = a.pid;"
+    ]
+  }
+}

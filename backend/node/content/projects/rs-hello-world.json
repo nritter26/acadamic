@@ -1,0 +1,71 @@
+{
+  "id": "rs-hello-world",
+  "title": "Rust: Hello, World!",
+  "difficulty": "beginner",
+  "languages": ["rust"],
+  "estimatedMinutes": 10,
+  "concepts": ["rust", "hello-world", "println", "main function"],
+  "description": "Print output to the console using println! macro in Rust.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Print Hello, Rust!",
+      "description": "Write a Rust program that prints `Hello, Rust!` to the console using the `println!` macro.",
+      "hints": ["Use `println!` macro with double quotes.", "The syntax is `println!(\"Hello, Rust!\");`", "Don't forget the main function: `fn main() { }`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello, Rust!')",
+        "successMessage": "You printed to the console!",
+        "failureMessage": "Make sure you print exactly 'Hello, Rust!'."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Print with Variables",
+      "description": "Declare a variable `message` with value `\"Rust is fun!\"` using `let` and print it with `println!`.",
+      "hints": ["Use `let message = \"Rust is fun!\";`", "Pass the variable to `println!` with `{}` placeholder.", "`println!(\"{}\", message)` prints the variable's value."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Rust is fun!')",
+        "successMessage": "Variables work!",
+        "failureMessage": "Print the variable so 'Rust is fun!' appears."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Multiple Arguments",
+      "description": "Use `println!` with multiple placeholders to print `\"My name is Rust and I am 10 years old\"`.",
+      "hints": ["`println!(\"My name is {} and I am {} years old\", name, age)`", "Use `{}` for each value you want to insert.", "Declare `name` and `age` as variables first."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('My name is') && output.includes('years old')",
+        "successMessage": "Multiple placeholders work!",
+        "failureMessage": "Print 'My name is ... and I am ... years old' using println! with placeholders."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Print with Debug Format",
+      "description": "Print a tuple `(1, \"hello\", 3.14)` using the debug formatter `{:?}` with `println!`.",
+      "hints": ["`let data = (1, \"hello\", 3.14);`", "Use `println!(\"{:?}\", data);` for debug output.", "The `{:?}` formatter works for any type that implements the Debug trait."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('1') && output.includes('hello') && output.includes('3.14')",
+        "successMessage": "Debug formatting works!",
+        "failureMessage": "Print the tuple using {:?} format specifier."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Print Multiple Values",
+      "description": "Print `\"apple\"`, `\"banana\"`, and `\"cherry\"` each on a separate line using three separate `println!` calls.",
+      "hints": ["Call `println!` once for each fruit.", "`println!` automatically adds a newline at the end.", "Write `println!(\"apple\");` then repeat for banana and cherry."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('apple') && output.includes('banana') && output.includes('cherry')",
+        "successMessage": "Multiple lines printed!",
+        "failureMessage": "Print each fruit on its own line."
+      }
+    }
+  ]
+}

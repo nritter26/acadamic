@@ -1,0 +1,374 @@
+{
+  "Getting Started": {
+    "What is C": [
+      "C เป็นภาษา low-level, statically typed ที่พัฒนาโดย Dennis Ritchie ในปี 1972 มันให้การเข้าถึงหน่วยความจำโดยตรง, runtime ที่น้อยที่สุด และเป็นรากฐานสำหรับระบบปฏิบัติการส่วนใหญ่, ระบบ embedded, และภาษา modern เกือบทุกภาษา",
+      "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, C!\\n\");\n    return 0;\n}"
+    ],
+    "Hello World": [
+      "ทุกโปรแกรม C เริ่มต้นที่ `main()` `#include <stdio.h>` นำ standard I/O library เข้ามา `printf()` พิมพ์ข้อความที่จัดรูปแบบ `return 0` ส่งสัญญาณความสำเร็จให้ OS",
+      "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}"
+    ],
+    "C Syntax & Structure": [
+      "โปรแกรม C ประกอบด้วยฟังก์ชัน `main()` คือจุดเริ่มต้น คำสั่งลงท้ายด้วย semicolons บล็อกอยู่ใน braces `#include` directives รวม header files C เป็น case-sensitive และ whitespace-insensitive",
+      "#include <stdio.h>\n\nint main() {\n    int x = 10;\n    printf(\"Value: %d\\n\", x);\n    return 0;\n}"
+    ],
+    "Compilation Process": [
+      "Source code C ผ่าน preprocessing, compilation, assembly, และ linking `gcc` (GNU C Compiler) เป็น compiler มาตรฐาน ใช้ `-o` เพื่อตั้งชื่อ output, `-Wall` สำหรับ warnings, `-g` สำหรับ debug symbols",
+      "gcc -Wall -g -o program program.c\n./program\n# Or with multiple files\ngcc -Wall -o program main.c helper.c -lm"
+    ],
+    "Data Types": [
+      "ประเภทพื้นฐาน: `int`, `char`, `float`, `double`, `void` Modifiers: `short`, `long`, `signed`, `unsigned` `sizeof()` คืนค่า bytes ขนาด type แตกต่างกันตาม platform (int มักจะ 4 bytes, char เป็น 1 เสมอ)",
+      "int a = 42;\nchar c = 'A';\nfloat f = 3.14f;\ndouble d = 3.14159;\nunsigned int u = 100;\nlong big = 100000L;\nprintf(\"%zu\\n\", sizeof(int));"
+    ],
+    "Comments": [
+      "C รองรับ `//` single-line comments (C99+) และ `/* */` multi-line comments Comments ถูกลบโดย preprocessor ใช้ comments เพื่ออธิบาย why ไม่ใช่ what",
+      "// This is a single-line comment\nint x = 5; /* This also works\n   across multiple lines */"
+    ],
+    "C Standards": [
+      "มาตรฐาน C: C89/C90 (ANSI/ISO), C99 (designated initializers, // comments, inline, stdint.h), C11 (threads, _Generic, anonymous structs, _Static_assert), C17 (bugfix), C23 (embed, #elifdef, typeof, constexpr) GCC default: gnu17 ใช้ -std=c11 -pedantic สำหรับ strict compliance",
+      "#include <stdio.h>\n#include <stdint.h>\n\nint main() {\n    // C99: designated initializers\n    int arr[5] = {[0]=1, [3]=42};\n    \n    // C11: static assert\n    _Static_assert(sizeof(int) >= 4, \"int too small\");\n    \n    // C99: stdint types\n    int32_t x = INT32_MAX;\n    uint64_t y = UINT64_MAX;\n    \n    printf(\"C17 features active\\n\");\n    return 0;\n}"
+    ]
+  },
+  "Variables & Storage": {
+    "Variables & Assignment": [
+      "ตัวแปรต้องประกาศด้วย type ก่อนใช้งาน กฎการตั้งชื่อ: ตัวอักษร, ตัวเลข, underscore; ขึ้นต้นด้วยตัวเลขไม่ได้ Convention ใช้ snake_case ตัวแปร local ที่ไม่ได้กำหนดค่าเริ่มต้นมีค่า garbage",
+      "int age = 25;\nfloat price = 19.99;\nchar initial = 'A';\nint count;  // uninitialized (garbage)\ncount = 10; // assignment"
+    ],
+    "Constants & Literals": [
+      "Constants คือค่าคงที่ที่ไม่สามารถเปลี่ยนได้ ใช้คีย์เวิร์ด `const` หรือ `#define` preprocessor Integer, floating-point, character, และ string literals Suffixes: L (long), U (unsigned), F (float)",
+      "const int MAX_USERS = 100;\n#define PI 3.14159\n\nint x = 42;        // decimal\nint y = 0x2A;      // hexadecimal\nint z = 052;       // octal\nfloat f = 3.14f;\nlong big = 1000L;"
+    ],
+    "Scope & Lifetime": [
+      "Scope กำหนดว่าตัวแปรเข้าถึงได้ที่ไหน Block scope `{}`, file scope (global), function scope Lifetime: automatic (stack) vs static (ตลอดโปรแกรม) ตัวแปร shadow scopes ภายนอก",
+      "#include <stdio.h>\nint global = 100;  // file scope\n\nvoid func() {\n    int local = 10;  // block scope\n    static int stat = 0;  // static lifetime\n    stat++;\n    printf(\"%d %d\\n\", local, stat);\n}"
+    ],
+    "Storage Classes": [
+      "`auto` (ค่าเริ่มต้นสำหรับ locals), `register` (แนะนำ CPU register), `static` (ทำให้ lifetime คงอยู่, จำกัด scope), `extern` (ประกาศตัวแปรที่กำหนดไว้ที่อื่น) `static` บน globals จำกัดเฉพาะไฟล์",
+      "static int file_counter = 0;  // internal linkage\n\nvoid count() {\n    static int calls = 0;  // persists across calls\n    calls++;\n    printf(\"Called %d times\\n\", calls);\n}\n\nextern int external_var;  // defined in another file"
+    ],
+    "Type Qualifiers": [
+      "Type qualifiers: const (immutable), volatile (อาจเปลี่ยนแปลงจากภายนอก — สำหรับ memory-mapped I/O, signal handlers), restrict (pointer เป็น path การเข้าถึงเดียว — optimization hint) volatile ป้องกัน compiler จากการ optimize อ่าน/เขียนทิ้ง restrict มีเฉพาะใน C99+ `_Atomic` (C11) สำหรับ atomic operations",
+      "#include <stdio.h>\n#include <stdint.h>\n\nconst int MAX = 100;             // cannot modify\n\nvoid delay(volatile int *count) { // volatile: don't optimize\n    while ((*count)--) { /* busy wait */ }\n}\n\nvoid copy(int *restrict dst,       // no overlap\n          const int *restrict src,  // guarantees no alias\n          size_t n) {\n    for (size_t i = 0; i < n; i++)\n        dst[i] = src[i];\n}\n\nint main() {\n    volatile uint32_t *reg = (volatile uint32_t *)0x40001000;\n    printf(\"MAX = %d\\n\", MAX);\n    return 0;\n}"
+    ],
+    "Type Conversion": [
+      "Implicit conversion (type coercion) เกิดขึ้นอัตโนมัติ: `int` -> `float` -> `double` Explicit conversion (casting) ใช้ไวยากรณ์ `(type)` กฎ promotion: ค่าถูกเลื่อนไปยัง type ที่ใหญ่กว่า",
+      "int a = 5;\nfloat b = a;  // implicit: 5.0\nfloat c = 3.14;\nint d = (int)c;  // explicit cast: 3\n\nchar ch = 'A';\nint ascii = (int)ch;  // 65"
+    ],
+    "typedef": [
+      "`typedef` สร้าง type aliases เพื่อ code ที่สะอาดขึ้น มักใช้กับ structs, function pointers, และ complex types ไม่ได้สร้าง type ใหม่ — แค่ alias",
+      "typedef unsigned long ulong;\ntypedef struct { int x; int y; } Point;\ntypedef int (*MathOp)(int, int);\n\nulong big = 100000;\nPoint p = {10, 20};\nMathOp op = add;"
+    ]
+  },
+  "Operators": {
+    "Arithmetic Operators": [
+      "คณิตศาสตร์มาตรฐาน: `+` บวก, `-` ลบ, `*` คูณ, `/` หาร, `%` modulo (เศษเหลือ) การหาร integer ตัดเศษทิ้ง การผสม types ทำให้เกิด implicit conversion",
+      "int a = 10 + 5;\nint b = 20 - 3;\nint c = 4 * 5;\nint d = 20 / 3;  // 6 (integer truncation)\nint e = 17 % 5;  // 2\nfloat f = 20.0 / 3.0;  // 6.666..."
+    ],
+    "Relational & Logical Operators": [
+      "Relational: `==`, `!=`, `<`, `>`, `<=`, `>=` Logical: `&&` (AND), `||` (OR), `!` (NOT) C ถือว่า 0 เป็น false, ค่าที่ไม่ใช่ 0 เป็น true Short-circuit evaluation สำหรับ && และ ||",
+      "int x = 5, y = 10;\nif (x > 0 && y < 20) {\n    printf(\"Both true\\n\");\n}\nif (!(x == y)) {\n    printf(\"Not equal\\n\");\n}"
+    ],
+    "Bitwise Operators": [
+      "จัดการแต่ละ bits: `&` AND, `|` OR, `^` XOR, `~` NOT, `<<` left shift, `>>` right shift ใช้สำหรับ flags, hardware control, และ performance optimization",
+      "unsigned int a = 5;   // 0101\nunsigned int b = 3;   // 0011\nunsigned int c = a & b;  // 0001 = 1\nunsigned int d = a | b;  // 0111 = 7\nunsigned int e = a ^ b;  // 0110 = 6\nunsigned int f = a << 1; // 1010 = 10"
+    ],
+    "Assignment Operators": [
+      "Compound assignments: `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `<<=`, `>>=` กระชับกว่าและมีประสิทธิภาพมากกว่าการแยก operation และ assignment",
+      "int x = 10;\nx += 5;   // x = 15\nx *= 2;   // x = 30\nx %= 7;   // x = 2\n\nunsigned int flags = 0;\nflags |= 0x01;  // set bit 0\nflags &= ~0x01; // clear bit 0"
+    ],
+    "sizeof, Ternary & Comma": [
+      "`sizeof` คืนขนาดเป็น bytes (ของ type หรือ expression) Ternary `?:` คือ if-else แบบกระชับ Comma `,` ประเมินทั้งสอง operands, คืนตัวที่สอง มีประโยชน์ใน `for` loops",
+      "printf(\"%zu\\n\", sizeof(int));  // 4\nint max = (a > b) ? a : b;\n\nfor (int i = 0, j = 10; i < j; i++, j--) {\n    printf(\"%d %d\\n\", i, j);\n}"
+    ],
+    "Operator Precedence": [
+      "Precedence กำหนดลำดับการประเมิน Postfix > Unary > Multiplicative > Additive > Shift > Relational > Equality > Bitwise AND > XOR > OR > Logical AND > OR > Ternary > Assignment > Comma ใช้วงเล็บเพื่อความชัดเจน",
+      "int x = 5 + 3 * 4;     // 17 (not 32)\nint y = (5 + 3) * 4;   // 32\nint z = 1 << 2 + 3;     // 1 << 5 = 32\nprintf(\"%d %d %d\\n\", x, y, z);"
+    ]
+  },
+  "Control Flow": {
+    "if / else if / else": [
+      "การแยกสาขาแบบมีเงื่อนไขด้วย `if`, `else if`, `else` เงื่อนไขต้องอยู่ในวงเล็บ C ถือว่า 0 เป็น false, ค่าที่ไม่ใช่ 0 เป็น true ไม่มี boolean type ใน C ยุคแรก — ใช้ `<stdbool.h>` สำหรับ `bool`",
+      "int score = 85;\nif (score >= 90) {\n    printf(\"A\\n\");\n} else if (score >= 80) {\n    printf(\"B\\n\");\n} else {\n    printf(\"C\\n\");\n}"
+    ],
+    "Switch Statement": [
+      "`switch` แยกสาขาตามค่า integer/enum แต่ละ `case` ต้องลงท้ายด้วย `break` เพื่อป้องกัน fallthrough `default` จัดการค่าที่ไม่ตรง C23 อนุญาต `switch` บน expression ที่มีหลาย cases ต่อ label",
+      "int day = 3;\nswitch (day) {\n    case 1: printf(\"Mon\\n\"); break;\n    case 2: printf(\"Tue\\n\"); break;\n    case 3: printf(\"Wed\\n\"); break;\n    default: printf(\"Unknown\\n\");\n}"
+    ],
+    "Loops: for, while, do-while": [
+      "`for` เมื่อรู้จำนวนครั้ง (init; condition; increment) `while` เมื่ออิงตามเงื่อนไข `do-while` ทำงาน body อย่างน้อยหนึ่งครั้ง ทุก loops ซ้อนกันได้ ระวัง infinite loops และ off-by-one errors",
+      "for (int i = 0; i < 5; i++) {\n    printf(\"%d \", i);\n}\nprintf(\"\\n\");\n\nint j = 0;\nwhile (j < 5) {\n    printf(\"%d \", j);\n    j++;\n}"
+    ],
+    "break & continue": [
+      "`break` ออกจาก loop หรือ switch ที่อยู่ด้านในสุดทันที `continue` ข้ามส่วนที่เหลือของ iteration ปัจจุบันและไปยัง iteration ถัดไป ใน nested loops, break ออกจากเฉพาะ loop ที่อยู่ด้านในสุด",
+      "for (int i = 0; i < 10; i++) {\n    if (i == 2) continue;\n    if (i == 5) break;\n    printf(\"%d \", i);\n}\n// Output: 0 1 3 4"
+    ],
+    "goto & Labels": [
+      "`goto` กระโดดไปยัง labeled statement ในฟังก์ชันเดียวกัน โดยทั่วไปไม่แนะนำสำหรับ structured flow แต่มีประโยชน์สำหรับการออกจาก nested loops ที่ลึก หรือ centralized error cleanup",
+      "for (int i = 0; i < 10; i++) {\n    for (int j = 0; j < 10; j++) {\n        if (i * j > 50) goto found;\n    }\n}\nfound:\n    printf(\"Found at i=%d\\n\", i);"
+    ],
+    "Infinite Loops & Pitfalls": [
+      "ข้อผิดพลาด loop ทั่วไป: off-by-one (`<=` vs `<`), ขาด braces ทำให้ body ไม่ได้ตั้งใจ, ใช้ assignment `=` แทน comparison `==`, ลืม increment, และ semicolon หลัง `for` หรือ `while`",
+      "// Common mistakes:\nint i = 0;\nwhile (i < 5); {  // semicolon: infinite loop\n    i++;\n}\n\nif (x = 5)  // assignment, not comparison!\n    printf(\"always true\");"
+    ]
+  },
+  "Functions": {
+    "Function Declaration & Definition": [
+      "ฟังก์ชันต้องประกาศก่อนใช้ (prototype) หรือกำหนดก่อน Return type, name, parameter list พร้อม types `void` สำหรับไม่มี return value หรือไม่มี parameters รูปแบบ K&R ถือว่าล้าสมัย",
+      "#include <stdio.h>\n\nint add(int a, int b);  // prototype\n\nint main() {\n    printf(\"%d\\n\", add(3, 4));\n    return 0;\n}\n\nint add(int a, int b) {  // definition\n    return a + b;\n}"
+    ],
+    "Pass by Value": [
+      "C ส่ง argument โดย value — ฟังก์ชันได้รับสำเนา เพื่อแก้ไขตัวแปรใน caller ให้ส่ง pointers Arrays decay เป็น pointers เมื่อถูกส่ง Structs ถูกคัดลอกเว้นแต่ส่งโดย pointer",
+      "void swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf(\"%d %d\\n\", x, y);\n}"
+    ],
+    "Return Values": [
+      "ฟังก์ชันคืนค่าที่ตรงกับ return type ที่ประกาศไว้ ไม่ต้องคืนค่าสำหรับ `void` caller สามารถละเลยค่าที่คืนได้ ห้ามคืน pointer ไปยัง local variable — ใช้ `static` หรือ dynamic allocation",
+      "#include <stdio.h>\n\nint square(int n) {\n    return n * n;\n}\n\nint* bad() {\n    int x = 5;\n    return &x;  // BUG: dangling pointer!\n}"
+    ],
+    "Recursion": [
+      "ฟังก์ชัน recursive เรียกตัวเอง ต้องมี base case เพื่อยุติ หน่วยความจำ stack ถูกใช้สำหรับแต่ละ call — recursion ลึกอาจทำให้ stack overflow ตัวอย่าง: factorial, Fibonacci, tree traversal",
+      "int factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n-1) + fibonacci(n-2);\n}\n\nprintf(\"%d\\n\", factorial(5));"
+    ],
+    "Inline Functions": [
+      "`inline` แนะนำให้ compiler เปลี่ยน function call เป็น body code เพื่อหลีกเลี่ยง call overhead (C99) Compiler อาจไม่ทำตาม Static inline ใน headers เป็นเรื่องปกติ Compilers สมัยใหม่ auto-inline ดีกว่าโปรแกรมเมอร์",
+      "static inline int max(int a, int b) {\n    return a > b ? a : b;\n}\n\n// Compiler may inline this call:\nint m = max(x, y);"
+    ],
+    "Variadic Functions": [
+      "ฟังก์ชันที่รับ argument แปรผันใช้ `<stdarg.h>`: `va_list`, `va_start()`, `va_arg()`, `va_end()` ต้องการ named parameter อย่างน้อยหนึ่งตัว ไม่มี type safety — caller ต้องให้ types ที่ถูกต้อง",
+      "#include <stdarg.h>\n\ndouble average(int count, ...) {\n    va_list args;\n    va_start(args, count);\n    double sum = 0;\n    for (int i = 0; i < count; i++) {\n        sum += va_arg(args, double);\n    }\n    va_end(args);\n    return sum / count;\n}\n\nprintf(\"%.2f\\n\", average(3, 1.0, 2.0, 3.0));"
+    ],
+    "main() Arguments": [
+      "`int main(int argc, char *argv[])` รับ command-line arguments `argc` คือจำนวน argument (ชื่อโปรแกรมคือ argv[0]) `argv` คือ array ของ strings ใช้ `getopt()` สำหรับ parsing flags",
+      "int main(int argc, char *argv[]) {\n    for (int i = 0; i < argc; i++) {\n        printf(\"arg[%d]: %s\\n\", i, argv[i]);\n    }\n    return 0;\n}"
+    ]
+  },
+  "Pointers": {
+    "Pointer Basics": [
+      "Pointers เก็บที่อยู่หน่วยความจำ `&` หาที่อยู่ของตัวแปร `*` dereference (เข้าถึงค่าที่ที่อยู่) `NULL` คือค่า pointer ที่ปลอดภัย ควรกำหนดค่าเริ่มต้นให้ pointer เสมอ ขนาดขึ้นอยู่กับ platform (4 หรือ 8 bytes)",
+      "int x = 42;\nint *ptr = &x;\n\nprintf(\"Address: %p\\n\", (void*)ptr);\nprintf(\"Value: %d\\n\", *ptr);\n\n*ptr = 99;\nprintf(\"x is now: %d\\n\", x);"
+    ],
+    "Pointer Arithmetic": [
+      "การเพิ่ม pointer จะเลื่อนไปยัง element ถัดไปของ type ของมัน: `ptr + n` เพิ่ม `n * sizeof(type)` bytes Arrays และ pointers เกี่ยวข้องกันอย่างใกล้ชิด การลบให้จำนวน element ระหว่างสอง pointers",
+      "int arr[] = {10, 20, 30, 40};\nint *p = arr;\n\nprintf(\"%d\\n\", *p);       // 10\nprintf(\"%d\\n\", *(p + 2)); // 30\np++;\nprintf(\"%d\\n\", *p);       // 20\n\nint *start = &arr[0];\nint *end = &arr[3];\nprintf(\"diff: %td\\n\", end - start);  // 3"
+    ],
+    "Pointers & Arrays": [
+      "ชื่อ array decay เป็น pointer ไปยัง element แรก `arr[i]` เทียบเท่ากับ `*(arr + i)` ตัวดำเนินการ `[]` ใช้กับ pointers ได้เช่นกัน แต่ `sizeof(arr)` ต่างจาก `sizeof(ptr)` — arrays จำขนาดตัวเองได้ตอน compile time",
+      "int arr[5] = {1, 2, 3, 4, 5};\nint *p = arr;\n\nfor (int i = 0; i < 5; i++) {\n    printf(\"%d == %d\\n\", p[i], *(arr + i));\n}\n\nprintf(\"Array size: %zu\\n\", sizeof(arr));  // 20\nprintf(\"Pointer size: %zu\\n\", sizeof(p));  // 8"
+    ],
+    "Pointer to Pointer": [
+      "`int **pp` เก็บที่อยู่ของ `int*` ใช้สำหรับ dynamic 2D arrays, การแก้ไข pointer arguments ในฟังก์ชัน, และ arrays ของ strings สามารถ chain ได้ลึกตามต้องการ",
+      "int x = 42;\nint *p = &x;\nint **pp = &p;\n\nprintf(\"%d\\n\", **pp);  // 42\n**pp = 99;\nprintf(\"%d\\n\", x);     // 99\n\n// Array of strings\nchar *fruits[] = {\"apple\", \"banana\", \"cherry\"};"
+    ],
+    "Void Pointers": [
+      "`void*` คือ generic pointer ที่เก็บ address ใดๆ ต้อง cast เป็น type เฉพาะก่อน dereference ใช้ในฟังก์ชัน generic เช่น `malloc()`, `qsort()`, `memcpy()` ไม่มี pointer arithmetic บน void*",
+      "int x = 42;\nfloat f = 3.14;\nvoid *ptr;\n\nptr = &x;\nprintf(\"%d\\n\", *(int*)ptr);\n\nptr = &f;\nprintf(\"%.2f\\n\", *(float*)ptr);"
+    ],
+    "Function Pointers": [
+      "Function pointers เก็บที่อยู่ของฟังก์ชัน ใช้สำหรับ callbacks, strategy patterns, และ dynamic dispatch ไวยากรณ์: `returnType (*name)(params)` `qsort()` รับ comparator function pointer",
+      "#include <stdlib.h>\n\nint compare(const void *a, const void *b) {\n    return (*(int*)a - *(int*)b);\n}\n\nint main() {\n    int arr[] = {3, 1, 4, 1, 5};\n    qsort(arr, 5, sizeof(int), compare);\n}\n\n// typedef for clarity\ntypedef int (*Comparator)(const void*, const void*);"
+    ],
+    "Dynamic Memory Allocation": [
+      "`malloc()` จัดสรรบน heap, `free()` ปล่อย `calloc()` จัดสรรและ zero-initialize `realloc()` ปรับขนาด ตรวจสอบค่า NULL เสมอ เรียก free เพื่อป้องกัน leaks รวม `<stdlib.h>`",
+      "#include <stdlib.h>\n\nint *arr = (int*)malloc(5 * sizeof(int));\nif (arr == NULL) { printf(\"OOM\\n\"); return 1; }\n\nfor (int i = 0; i < 5; i++) arr[i] = i * 10;\n\nint *bigger = (int*)realloc(arr, 10 * sizeof(int));\nif (bigger == NULL) { free(arr); return 1; }\n\nfree(bigger);"
+    ],
+    "Memory Leaks & Debugging": [
+      "Memory leak เกิดขึ้นเมื่อหน่วยความจำที่จัดสรรไว้ไม่ถูกปล่อย Tools: Valgrind, AddressSanitizer (`-fsanitize=address`), leak sanitizer ปัญหาทั่วไป: ลืม free, ทำ pointer หาย, double free, use-after-free",
+      "// Compile with AddressSanitizer:\n// gcc -fsanitize=address -g program.c -o program\n\nvoid leak() {\n    int *p = (int*)malloc(100 * sizeof(int));\n    // forgot to free(p);\n}\n\nvoid use_after_free() {\n    int *p = (int*)malloc(sizeof(int));\n    free(p);\n    *p = 42;  // BUG: use after free\n}"
+    ],
+    "Function Pointers & Callbacks": [
+      "Function pointers เก็บที่อยู่ของฟังก์ชันที่เรียกได้ ไวยากรณ์: `return_type (*ptr)(params)` ใช้สำหรับ callbacks, plugin systems, dispatch tables qsort รับ comparator function pointer Callbacks เป็นศูนย์กลางของ event-driven และ GUI programming Typedef เพิ่ม readability",
+      "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef int (*Comparator)(const void *, const void *);\n\nint ascending(const void *a, const void *b) {\n    return *(int*)a - *(int*)b;\n}\n\nint descending(const void *a, const void *b) {\n    return *(int*)b - *(int*)a;\n}\n\n// Callback array\nvoid apply(int *arr, size_t n, int (*op)(int)) {\n    for (size_t i = 0; i < n; i++)\n        arr[i] = op(arr[i]);\n}\n\nint square(int x) { return x * x; }\nint negate(int x) { return -x; }"
+    ]
+  },
+  "Arrays & Strings": {
+    "One-Dimensional Arrays": [
+      "บล็อกหน่วยความจำต่อเนื่องของ type เดียวกัน ขนาดคงที่กำหนดตอน compile time ดัชนีเริ่มที่ 0 ไม่มี bounds checking — buffer overflows เป็นอันตรายและเป็นช่องโหว่ด้านความปลอดภัยทั่วไป",
+      "int arr[5] = {10, 20, 30, 40, 50};\n\nfor (int i = 0; i < 5; i++) {\n    printf(\"arr[%d] = %d\\n\", i, arr[i]);\n}\n\n// Partial initialization (rest zeroed)\nint partial[5] = {1, 2};  // {1, 2, 0, 0, 0}"
+    ],
+    "Multidimensional Arrays": [
+      "Arrays ของ arrays เก็บใน row-major order `int matrix[rows][cols]` เข้าถึงด้วย `matrix[r][c]` สามารถส่งต่อไปยังฟังก์ชันโดยระบุทุก dimension ยกเว้นอันแรก",
+      "int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};\n\nfor (int r = 0; r < 2; r++) {\n    for (int c = 0; c < 3; c++) {\n        printf(\"%d \", matrix[r][c]);\n    }\n    printf(\"\\n\");\n}\n\n// 3D array\nint cube[2][3][4];"
+    ],
+    "Array Initialization & Bounds": [
+      "Arrays กำหนดค่าเริ่มต้นด้วย `= {values}` Designated initializers (C99): `int arr[5] = {[0]=1, [4]=5}` C ไม่มี runtime bounds checking — การเข้าถึงนอกขอบเขตทำให้เกิด undefined behavior: crash หรือช่องโหว่ความปลอดภัย",
+      "#include <stdio.h>\n\nint arr[3] = {1, 2, 3};\narr[5] = 100;  // BUG: buffer overflow!\n\n// Designated initializers (C99)\nint days[] = {[0]=31, [1]=28, [2]=31};"
+    ],
+    "Strings as char Arrays": [
+      "C strings คือ null-terminated char arrays (`\\0` หมายถึงจบ) String literals คือ `char*` ที่ชี้ไปยังหน่วยความจำแบบอ่านอย่างเดียว ตรวจสอบให้แน่ใจว่า buffer มีขนาดใหญ่พอสำหรับ null terminator",
+      "#include <stdio.h>\n\nchar s1[] = \"Doge\";\nchar *s2 = \"Doge\";\nchar s3[10] = {68,111,103,101,0};  // explicit\n\nprintf(\"First char: %c\\n\", s1[0]);\nprintf(\"String: %s\\n\", s1);"
+    ],
+    "String Library": [
+      "`<string.h>` ให้: `strlen()` (ความยาว), `strcpy()` (คัดลอก), `strncpy()` (คัดลอกแบบจำกัด), `strcat()` (ต่อ), `strncat()` (ต่อแบบจำกัด), `strcmp()` (เปรียบเทียบ), `strchr()` (หา char), `strstr()` (หาสตริงย่อย) ควรใช้เวอร์ชันแบบจำกัดเสมอ",
+      "#include <string.h>\n\nchar dest[50] = \"Hello \";\nchar src[] = \"World\";\n\nstrcat(dest, src);\nprintf(\"%s\\n\", dest);\n\nprintf(\"Length: %zu\\n\", strlen(dest));\nprintf(\"Compare: %d\\n\", strcmp(\"abc\", \"abd\"));\n\nchar *found = strstr(dest, \"World\");"
+    ],
+    "Array of Strings": [
+      "Array ของ strings คือ 2D char array หรือ array ของ char pointers `char names[5][20]` — ขนาดคงที่ `char *names[5]` — ยืดหยุ่น แต่ละ string มีความยาวต่างกันได้ ทั้งสองมี layout หน่วยความจำต่างกัน",
+      "#include <stdio.h>\n\n// Option 1: 2D array (fixed, contiguous)\nchar grid[3][10] = {\"cat\", \"elephant\", \"dog\"};\n\n// Option 2: array of pointers (flexible lengths)\nchar *words[3] = {\"apple\", \"banana\", \"cherry\"};\n\nfor (int i = 0; i < 3; i++) {\n    printf(\"%s\\n\", words[i]);\n}"
+    ]
+  },
+  "Structures, Unions & Enums": {
+    "Structs": [
+      "Structures จัดกลุ่มข้อมูลชนิดต่างกัน Define ด้วย `struct` เข้าถึงสมาชิกด้วย `.` (dot) ใช้ `->` กับ pointers ไปยัง structs Structs สามารถถูกคัดลอกด้วย assignment",
+      "struct Person {\n    char name[50];\n    int age;\n    float score;\n};\n\nstruct Person p1 = {\"Alice\", 20, 95.5};\nprintf(\"%s: %d\\n\", p1.name, p1.age);\n\nstruct Person *ptr = &p1;\nprintf(\"%s\\n\", ptr->name);"
+    ],
+    "Unions": [
+      "Unions เก็บ types ต่างกันในตำแหน่งหน่วยความจำเดียวกัน (size = สมาชิกที่ใหญ่ที่สุด) แต่ละครั้งมีสมาชิกเดียวที่มีค่าได้ มีประโยชน์สำหรับ variant types, การเข้าถึง register, และการออกแบบที่ประหยัดหน่วยความจำ Type punning เป็นเรื่องปกติแต่อาจเป็น undefined behavior",
+      "union Data {\n    int i;\n    float f;\n    char str[20];\n};\n\nunion Data data;\ndata.i = 42;\nprintf(\"%d\\n\", data.i);\ndata.f = 3.14;\nprintf(\"%f\\n\", data.f);  // i value is now invalid"
+    ],
+    "Bit Fields": [
+      "Bit fields จัดหลายค่าลงใน integer เดียว ระบุ bits ที่แน่นอน ใช้ใน device drivers, network protocols, และ embedded systems ไม่สามารถหา address ของ bit field ได้ ลำดับและการจัดเรียงขึ้นอยู่กับ implementation",
+      "struct Flags {\n    unsigned int active : 1;\n    unsigned int visible : 1;\n    unsigned int mode : 2;\n    unsigned int id : 4;\n};\n\nstruct Flags f = {1, 0, 2, 5};\nprintf(\"Size: %zu bytes\\n\", sizeof(f));"
+    ],
+    "enum": [
+      "Enums กำหนด named integer constants (ค่าเริ่มต้น: 0, 1, 2...) สามารถกำหนดค่าที่ชัดเจนได้ Enums เพิ่ม readability และ type safety (compiler บางตัวเตือนเมื่อ switch ไม่ครอบคลุมทุก case) C23 อนุญาต `enum` พร้อม type specifier",
+      "enum Color { RED, GREEN, BLUE };\nenum Color c = GREEN;\nprintf(\"%d\\n\", c);  // 1\n\nenum Status { OK = 200, NOT_FOUND = 404, ERROR = 500 };\nprintf(\"%d\\n\", NOT_FOUND);"
+    ],
+    "Struct Padding & Alignment": [
+      "Compilers อาจเพิ่ม padding bytes ระหว่าง struct members เพื่อ alignment จัดเรียงสมาชิกจากใหญ่ไปเล็กเพื่อลด padding `offsetof()` จาก `<stddef.h>` หา offset ของสมาชิก Packed structs ด้วย `__attribute__((packed))`",
+      "#include <stddef.h>\n\nstruct Padded {\n    char c;     // 1 byte + 3 padding\n    int i;      // 4 bytes\n    short s;    // 2 bytes + 2 padding\n};  // total: 12 bytes\n\nstruct Packed {\n    int i;      // 4 bytes\n    short s;    // 2 bytes\n    char c;     // 1 byte + 1 padding\n};  // total: 8 bytes\n\nprintf(\"%zu\\n\", sizeof(struct Padded));\nprintf(\"%zu\\n\", offsetof(struct Padded, i));"
+    ],
+    "Flexible Array Members": [
+      "Struct สามารถมี incomplete array เป็นสมาชิกสุดท้าย (C99) ให้ข้อมูลขนาดแปรผันได้โดยไม่ต้องใช้ pointers Struct ถูกจัดสรรด้วยพื้นที่พิเศษสำหรับ array มักใช้ใน network protocols และ variable-length records",
+      "struct Buffer {\n    int length;\n    char data[];  // flexible array member (must be last)\n};\n\nstruct Buffer *buf = malloc(sizeof(struct Buffer) + 100);\nbuf->length = 100;\nfor (int i = 0; i < 100; i++) buf->data[i] = i;\nfree(buf);"
+    ],
+    "Nested & Self-Referential Structs": [
+      "Structs สามารถมี structs อื่นเป็นสมาชิก Self-referential structs (มี pointer ไปยัง type เดียวกัน) ใช้สำหรับ linked data structures: linked lists, trees, graphs Forward declaration ด้วย `struct Name;`",
+      "struct Point {\n    int x, y;\n};\n\nstruct Rectangle {\n    struct Point top_left;\n    struct Point bottom_right;\n};\n\n// Self-referential for linked list\nstruct Node {\n    int data;\n    struct Node *next;\n};"
+    ]
+  },
+  "File I/O": {
+    "Opening & Closing Files": [
+      "`fopen()` เปิดไฟล์: `r` อ่าน, `w` เขียน (ลบของเก่า), `a` ต่อท้าย, `r+` อ่าน/เขียน, `w+` อ่าน/เขียน (ลบของเก่า), `a+` อ่าน/ต่อท้าย `fclose()` ปิด ตรวจสอบ return value เป็น NULL เสมอ โหมด binary: เติม `b` (เช่น `rb`, `wb`)",
+      "#include <stdio.h>\n\nFILE *fp = fopen(\"test.txt\", \"w\");\nif (fp == NULL) {\n    perror(\"Failed to open\");\n    return 1;\n}\nfprintf(fp, \"Hello, file!\\n\");\nfclose(fp);"
+    ],
+    "Reading & Writing Text": [
+      "Character: `fgetc()`, `fputc()` Line: `fgets()` (ปลอดภัย, รวม newline), `fputs()` Block: `fread()`, `fwrite()` `fgets()` อ่านอย่างมาก n-1 chars และเพิ่ม null terminator `getline()` เป็น POSIX, ไม่ใช่ C มาตรฐาน",
+      "#include <stdio.h>\n\nFILE *fp = fopen(\"test.txt\", \"r\");\nif (!fp) return 1;\n\nchar line[256];\nwhile (fgets(line, sizeof(line), fp)) {\n    printf(\"%s\", line);\n}\nfclose(fp);"
+    ],
+    "Formatted I/O": [
+      "`fprintf()` เขียน output ที่จัดรูปแบบไปยังไฟล์ `fscanf()` อ่าน input ที่จัดรูปแบบจากไฟล์ Format specifiers: `%d` int, `%f` float, `%s` string, `%c` char, `%x` hex `sscanf()` / `sprintf()` ทำงานกับ strings",
+      "#include <stdio.h>\n\nstruct Person { char name[50]; int age; };\nstruct Person p = {\"Alice\", 30};\n\n// Write\nFILE *fp = fopen(\"data.txt\", \"w\");\nfprintf(fp, \"%s,%d\\n\", p.name, p.age);\nfclose(fp);\n\n// Read\nfp = fopen(\"data.txt\", \"r\");\nfscanf(fp, \"%49[^,],%d\", p.name, &p.age);\nfclose(fp);"
+    ],
+    "Binary I/O": [
+      "`fread()` และ `fwrite()` อ่าน/เขียน raw binary data พารามิเตอร์: pointer ไปยังข้อมูล, size ของแต่ละ element, count, file pointer ไฟล์ binary กะทัดรัดกว่าและแม่นยำกว่าแต่ไม่ portable ข้าม endianness ใช้ `\"rb\"` / `\"wb\"` modes",
+      "#include <stdio.h>\n\nint data[] = {1, 2, 3, 4, 5};\nFILE *fp = fopen(\"data.bin\", \"wb\");\nfwrite(data, sizeof(int), 5, fp);\nfclose(fp);\n\nint readback[5];\nfp = fopen(\"data.bin\", \"rb\");\nfread(readback, sizeof(int), 5, fp);\nfor (int i = 0; i < 5; i++) printf(\"%d \", readback[i]);\nfclose(fp);"
+    ],
+    "File Positioning": [
+      "`fseek(fp, offset, whence)` เลื่อนตำแหน่งไฟล์: `SEEK_SET` (เริ่มต้น), `SEEK_CUR` (ปัจจุบัน), `SEEK_END` (ท้าย) `ftell()` คืนตำแหน่งปัจจุบัน `rewind()` กลับไปเริ่มต้น `feof()` ตรวจสอบ end-of-file",
+      "#include <stdio.h>\n\nFILE *fp = fopen(\"data.bin\", \"rb\");\n\nfseek(fp, 0, SEEK_END);\nlong size = ftell(fp);\nprintf(\"File size: %ld bytes\\n\", size);\n\nrewind(fp);  // back to start\n\nfseek(fp, 100, SEEK_SET);  // skip to byte 100\n\nfclose(fp);"
+    ],
+    "Error Handling": [
+      "การดำเนินการไฟล์ตั้งค่า `errno` เมื่อล้มเหลว `perror()` พิมพ์ข้อความ error ที่อธิบายไปยัง stderr `strerror()` คืน string error `ferror()` ตรวจสอบว่า file stream มี error หรือไม่ ตรวจสอบ return values ของฟังก์ชัน I/O เสมอ",
+      "#include <errno.h>\n#include <string.h>\n\nFILE *fp = fopen(\"nonexistent.txt\", \"r\");\nif (fp == NULL) {\n    perror(\"Error\");\n    printf(\"errno: %d - %s\\n\", errno, strerror(errno));\n    return 1;\n}"
+    ]
+  },
+  "Preprocessor": {
+    "Macros (#define)": [
+      "Preprocessor ทำงานก่อน compilation `#define` สร้าง macros (constants หรือ function-like) ใช้วงเล็บเพื่อหลีกเลี่ยง precedence bugs ไม่มี type checking Convention: ชื่อ UPPER_CASE",
+      "#define PI 3.14159\n#define SQUARE(x) ((x) * (x))\n#define MAX(a,b) ((a) > (b) ? (a) : (b))\n\nprintf(\"%f\\n\", SQUARE(5 + 1));  // (6*6) = 36\nprintf(\"%d\\n\", MAX(3, 7));"
+    ],
+    "Conditional Compilation": [
+      "`#if`, `#ifdef`, `#ifndef`, `#else`, `#elif`, `#endif` ควบคุมว่าโค้ดส่วนไหนถูกคอมไพล์ ใช้สำหรับ platform-specific code, debug builds, feature toggles `defined()` operator ทำงานใน `#if`",
+      "#define DEBUG 1\n\n#ifdef DEBUG\n    printf(\"Debug: x = %d\\n\", x);\n#endif\n\n#ifndef NDEBUG\n    assert(ptr != NULL);\n#endif\n\n#if defined(__linux__)\n    printf(\"Linux\\n\");\nelif defined(_WIN32)\n    printf(\"Windows\\n\");\n#endif"
+    ],
+    "Header Files & Guards": [
+      "Header files (`.h`) ประกาศฟังก์ชัน, macros, และ types ใช้ include guards (`#ifndef`) เพื่อป้องกัน double inclusion `#pragma once` เป็นทางเลือกสมัยใหม่ (ไม่เป็นมาตรฐานแต่รองรับอย่างกว้างขวาง)",
+      "// mylib.h\n#ifndef MYLIB_H\n#define MYLIB_H\n\nint add(int a, int b);\nvoid greet(const char *name);\n\n#endif\n\n// mylib.c\n#include \"mylib.h\"\nint add(int a, int b) { return a + b; }"
+    ],
+    "#pragma & #error": [
+      "`#error` ส่ง compiler error พร้อมข้อความกำหนดเอง — หยุด compilation `#pragma` ให้ compiler-specific instructions: `#pragma once` (header guard), `#pragma pack(push, 1)` (packing), `#pragma GCC optimize` ไม่เป็นมาตรฐาน",
+      "#ifndef REQUIRED_FEATURE\n    #error \"REQUIRED_FEATURE must be defined\"\n#endif\n\n#pragma once  // modern header guard\n#pragma pack(push, 1)  // pack structs tightly"
+    ],
+    "Predefined Macros": [
+      "Predefined macros มาตรฐาน: `__FILE__` (ไฟล์ปัจจุบัน), `__LINE__` (บรรทัดปัจจุบัน), `__DATE__` (วันที่คอมไพล์), `__TIME__` (เวลาคอมไพล์), `__STDC__` (1 ถ้าเป็น C มาตรฐาน), `__STDC_VERSION__` (C version: 199901L, 201112L, 202311L)",
+      "#include <stdio.h>\n\nprintf(\"File: %s\\n\", __FILE__);\nprintf(\"Line: %d\\n\", __LINE__);\nprintf(\"Date: %s\\n\", __DATE__);\nprintf(\"Time: %s\\n\", __TIME__);\nprintf(\"C std: %ld\\n\", __STDC_VERSION__);"
+    ],
+    "Stringification & Token Pasting": [
+      "`#` แปลง macro parameter เป็น string literal `##` เชื่อมสอง tokens เป็น token เดียว มีประโยชน์สำหรับสร้าง repetitive code patterns และ type-generic macros",
+      "#define STRINGIFY(x) #x\n#define CONCAT(a, b) a ## b\n#define MAKE_TYPE(name) \\\n    typedef struct { int data; } name ## _t\n\nprintf(\"%s\\n\", STRINGIFY(hello));  // \"hello\"\n\nint xy = 42;\nprintf(\"%d\\n\", CONCAT(x, y));  // 42\n\nMAKE_TYPE(User);\nUser_t u = {42};"
+    ],
+    "Variadic Macros": [
+      "Macros ที่มี argument แปรผันใช้ `__VA_ARGS__` (C99) Named variadic argument ใน C23 (`__VA_OPT__` สำหรับจัดการ trailing comma) มีประโยชน์สำหรับ debug logging และ generic printing",
+      "#include <stdio.h>\n\n#define DEBUG_PRINT(fmt, ...) \\\n    fprintf(stderr, \"%s:%d: \" fmt \"\\n\", \\\n            __FILE__, __LINE__, __VA_ARGS__)\n\n#define LOG(...) printf(__VA_ARGS__)\n\nDEBUG_PRINT(\"x = %d\", 42);\nLOG(\"Hello %s\\n\", \"World\");"
+    ]
+  },
+  "Standard Library": {
+    "stdlib.h Utilities": [
+      "`atoi()` / `atol()` / `atof()` แปลง strings เป็นตัวเลข `itoa()` ไม่เป็นมาตรฐาน — ใช้ `sprintf()` `rand()` / `srand()` สำหรับตัวเลขสุ่มเทียม `qsort()` สำหรับ sort `abs()` / `labs()` สำหรับค่าสัมบูรณ์ `div()` / `ldiv()` สำหรับ quotient และ remainder",
+      "#include <stdlib.h>\n\nint n = atoi(\"42\");\ndouble d = atof(\"3.14\");\n\nsrand(time(NULL));\nint r = rand() % 100;  // 0-99\n\nint arr[] = {3, 1, 4, 1, 5};\nint cmp(const void *a, const void *b) {\n    return *(int*)a - *(int*)b;\n}\nqsort(arr, 5, sizeof(int), cmp);"
+    ],
+    "math.h Functions": [
+      "ฟังก์ชันคณิตศาสตร์: `sqrt()`, `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan2()`, `pow()`, `exp()`, `log()`, `log10()`, `floor()`, `ceil()`, `fabs()`, `fmod()` เชื่อมโยงด้วย `-lm` มุมเป็นเรเดียน",
+      "#include <math.h>\n\ndouble x = 3.14159 / 4;\nprintf(\"sqrt(16) = %.2f\\n\", sqrt(16));\nprintf(\"sin(pi/4) = %.2f\\n\", sin(x));\nprintf(\"pow(2, 10) = %.2f\\n\", pow(2, 10));\nprintf(\"ceil(3.14) = %.2f\\n\", ceil(3.14));\n\n// Compile: gcc program.c -lm"
+    ],
+    "time.h Functions": [
+      "`time()` เวลาปัจจุบัน `clock()` เวลา CPU `difftime()` คำนวณความแตกต่าง `strftime()` จัดรูปแบบเวลา `localtime()` / `gmtime()` แปลงเป็น struct `mktime()` แปลงกลับ `clock_gettime()` สำหรับ precision ระดับนาโนวินาที (POSIX)",
+      "#include <time.h>\n\ntime_t now = time(NULL);\nprintf(\"Unix time: %ld\\n\", now);\n\nstruct tm *local = localtime(&now);\nchar buf[64];\nstrftime(buf, sizeof(buf), \"%Y-%m-%d %H:%M:%S\", local);\nprintf(\"%s\\n\", buf);\n\nclock_t start = clock();\n// ... do work ...\nclock_t end = clock();\ndouble sec = (double)(end - start) / CLOCKS_PER_SEC;"
+    ],
+    "assert.h & setjmp.h": [
+      "`assert(expr)` หยุดการทำงานถ้า expr เป็น false (debug builds) ปิดด้วย `#define NDEBUG` `setjmp()` / `longjmp()` ให้ non-local jumps (เหมือน try/catch) บันทึกสถานะด้วย `jmp_buf` ใช้เท่าที่จำเป็น — ทำให้ resource cleanup ซับซ้อน",
+      "#include <assert.h>\n#include <setjmp.h>\n\nassert(x > 0);  // abort if x <= 0\n\njmp_buf env;\nif (setjmp(env) == 0) {\n    // normal code\n    longjmp(env, 1);  // jump back\n} else {\n    printf(\"Recovered from error\\n\");\n}"
+    ],
+    "signal.h Handling": [
+      "`signal()` ตั้งค่า handler สำหรับ OS signals: SIGINT (Ctrl+C), SIGTERM (termination), SIGSEGV (segfault), SIGFPE (หารด้วยศูนย์) Handler ต้องเป็น `void handler(int sig)` บาง signals (SIGKILL, SIGSTOP) ไม่สามารถจับได้",
+      "#include <signal.h>\n\nvolatile sig_atomic_t interrupted = 0;\n\nvoid handler(int sig) {\n    interrupted = 1;\n}\n\nint main() {\n    signal(SIGINT, handler);\n    \n    while (!interrupted) {\n        // main loop\n    }\n    printf(\"\\nGraceful shutdown\\n\");\n}"
+    ],
+    "stddef.h & Limits": [
+      "`<stddef.h>`: `size_t`, `ptrdiff_t`, `NULL`, `offsetof()` `<limits.h>`: integer limits (INT_MIN, INT_MAX, LONG_MAX, CHAR_BIT) `<float.h>`: floating limits (FLT_MAX, DBL_EPSILON) `<stdint.h>`: fixed-width types (int32_t, uint64_t)",
+      "#include <stddef.h>\n#include <limits.h>\n#include <stdint.h>\n\nprintf(\"Max int: %d\\n\", INT_MAX);\nprintf(\"Bits per byte: %d\\n\", CHAR_BIT);\n\nint32_t exact = 100;  // exactly 32 bits\nuint64_t big = 1000000;\n\nstruct S { char c; int i; };\nprintf(\"Offset of i: %zu\\n\", offsetof(struct S, i));"
+    ]
+  },
+  "Advanced Topics": {
+    "Linked Lists": [
+      "Linked list คือลำดับของ nodes ที่แต่ละ node ชี้ไปยัง node ถัดไป Singly linked: `next` pointer Doubly linked: `prev` และ `next` การดำเนินการ: insert, delete, traverse, search O(1) insert/delete เมื่อมี pointer, O(n) access โดย index",
+      "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int data;\n    struct Node *next;\n};\n\nvoid append(struct Node **head, int data) {\n    struct Node *new = malloc(sizeof(struct Node));\n    new->data = data;\n    new->next = NULL;\n    if (!*head) { *head = new; return; }\n    struct Node *cur = *head;\n    while (cur->next) cur = cur->next;\n    cur->next = new;\n}"
+    ],
+    "Debugging with GDB": [
+      "GDB คือ GNU debugger คอมไพล์ด้วย `-g` สำหรับ debug symbols คำสั่ง: `run`, `break`, `next`, `step`, `print`, `backtrace`, `watch`, `continue` ตั้ง breakpoints ที่ฟังก์ชันหรือบรรทัด ตรวจสอบตัวแปรและหน่วยความจำ",
+      "# Compile with debug symbols\ngcc -g -o program program.c\n\n# GDB commands:\n# gdb ./program\n# (gdb) break main\n# (gdb) run\n# (gdb) print x\n# (gdb) next\n# (gdb) continue\n# (gdb) backtrace\n# (gdb) quit"
+    ],
+    "Memory Debugging (Valgrind)": [
+      "Valgrind ตรวจหา memory leaks, invalid accesses, และ use-after-free รันด้วย `valgrind ./program` Tools: `memcheck` (ค่าเริ่มต้น), `callgrind` (profiling), `helgrind` (race conditions) สนใจ errors = definitely lost bytes",
+      "# Compile with -g for better output\ngcc -g -o program program.c\n\n# Check for memory errors\nvalgrind --leak-check=full ./program\n\n# Typical output:\n# HEAP SUMMARY:\n#     definitely lost: 40 bytes in 2 blocks\n# ERROR SUMMARY: 3 errors"
+    ],
+    "Build Systems (Make)": [
+      "Make ทำให้การคอมไพล์อัตโนมัติ กฎ: `target: dependencies` ตามด้วยคำสั่งที่ย่อหน้า tab ตัวแปร: `CC=gcc`, `CFLAGS=-Wall` ตัวแปรอัตโนมัติ: `$@` (target), `$<` (dep แรก), `$^` (ทุก deps)",
+      "CC = gcc\nCFLAGS = -Wall -Wextra -std=c17 -g\nLDFLAGS = -lm\n\nprogram: main.o helper.o\n\t$(CC) -o $@ $^ $(LDFLAGS)\n\nmain.o: main.c helper.h\n\t$(CC) $(CFLAGS) -c $<\n\nhelper.o: helper.c helper.h\n\t$(CC) $(CFLAGS) -c $<\n\n.PHONY: clean\nclean:\n\trm -f *.o program"
+    ],
+    "Multithreading (pthreads)": [
+      "POSIX threads (`<pthreads.h>`) สร้าง concurrent execution `pthread_create()`, `pthread_join()`, `pthread_mutex_lock/unlock()`, `pthread_cond_wait/signal()` Data races ทำให้เกิด undefined behavior ต้อง synchronize ข้อมูลที่แชร์เสมอ",
+      "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t lock;\nlong counter = 0;\n\nvoid* worker(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&lock);\n        counter++;\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&lock, NULL);\n    pthread_create(&t1, NULL, worker, NULL);\n    pthread_create(&t2, NULL, worker, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Counter: %ld\\n\", counter);\n    pthread_mutex_destroy(&lock);\n}"
+    ],
+    "Network Programming (Sockets)": [
+      "Berkeley sockets (`<sys/socket.h>`) สำหรับ networking ขั้นตอน: `socket()`, `bind()`, `listen()`, `accept()` (server) หรือ `connect()` (client) `send()` / `recv()` สำหรับข้อมูล ใช้ `inet_pton()` สำหรับ IP addresses คอมไพล์ด้วย `-lsocket` บางระบบ",
+      "#include <sys/socket.h>\n#include <netinet/in.h>\n\nint server = socket(AF_INET, SOCK_STREAM, 0);\nstruct sockaddr_in addr = {\n    .sin_family = AF_INET,\n    .sin_port = htons(8080),\n    .sin_addr.s_addr = INADDR_ANY\n};\nbind(server, (struct sockaddr*)&addr, sizeof(addr));\nlisten(server, 10);\n\nint client = accept(server, NULL, NULL);\nchar buf[1024];\nrecv(client, buf, sizeof(buf), 0);\nsend(client, \"OK\", 2, 0);"
+    ]
+  },
+  "Memory Management": {
+    "malloc/free Basics": [
+      "การจัดสรรหน่วยความจำแบบ dynamic ในภาษา C ใช้ malloc (จัดสรร), calloc (จัดสรร + zero-init), realloc (ปรับขนาด), และ free (คืน) malloc คืน void* ไปยังหน่วยความจำที่จัดสรร หรือ NULL เมื่อล้มเหลว ตรวจสอบ return value เสมอ free คืนหน่วยความจำกลับไปยัง heap รวม `<stdlib.h>` หน่วยความจำจาก malloc ไม่ได้กำหนดค่าเริ่มต้น",
+      "#include <stdlib.h>\n#include <stdio.h>\n\nint main() {\n    int *arr = malloc(10 * sizeof(int));\n    if (arr == NULL) {\n        fprintf(stderr, \"malloc failed\\n\");\n        return 1;\n    }\n\n    for (int i = 0; i < 10; i++)\n        arr[i] = i * i;\n\n    int *bigger = realloc(arr, 20 * sizeof(int));\n    if (bigger == NULL) {\n        free(arr);\n        return 1;\n    }\n    arr = bigger;\n\n    free(arr);\n    return 0;\n}"
+    ],
+    "Memory Layout (Stack vs Heap)": [
+      "หน่วยความจำกระบวนการแบ่งเป็น segments: text (code), data (initialized globals), bss (uninitialized globals), heap (dynamic allocation), stack (local variables, function calls) Stack โตลง, heap โตขึ้น แต่ละ thread มี stack ของตัวเอง Stack allocation เร็วแต่จำกัด Heap ยืดหยุ่นแต่ช้ากว่าและต้องการการจัดการด้วยตนเอง",
+      "#include <stdio.h>\n#include <stdlib.h>\n\nint global_init = 42;     // data segment\nint global_uninit;         // bss segment\n\nvoid func() {\n    int local = 10;                 // stack\n    static int static_var = 5;      // data segment\n    int *heap = malloc(sizeof(int)); // heap\n    *heap = 20;\n    printf(\"stack: %p, heap: %p, static: %p, code: %p\\n\",\n           (void*)&local, (void*)heap, (void*)&static_var, (void*)&func);\n    free(heap);\n}\n\nint main() {\n    func();\n    return 0;\n}"
+    ],
+    "Memory Leaks & Valgrind": [
+      "Memory leak เกิดขึ้นเมื่อหน่วยความจำที่จัดสรรไว้ไม่ถูกคืน สาเหตุ: lost pointer, ลืม free, circular reference Valgrind ตรวจหา leaks: valgrind --leak-check=full ./program ASAN (AddressSanitizer) เป็นทางเลือกตอน compile: -fsanitize=address แนวปฏิบัติที่ดี: free ใน scope เดียวกับ malloc, ใช้ guard patterns, หลีกเลี่ยงการ reassign pointer ก่อน free",
+      "#include <stdlib.h>\n\nvoid leak_example() {\n    int *p = malloc(100);\n    // forgot to free(p) -> leak\n}\n\nvoid dangling_pointer() {\n    int *p = malloc(100);\n    free(p);\n    *p = 42;  // undefined behavior!\n}\n\n// Correct pattern:\nvoid safe_example() {\n    int *p = malloc(100);\n    if (p) {\n        // use p\n        free(p);\n    }\n}\n\n// Run: valgrind --leak-check=full ./program\n// Or compile with: gcc -fsanitize=address -g program.c"
+    ]
+  },
+  "Concurrency": {
+    "POSIX Threads (pthreads)": [
+      "POSIX threads (pthreads) เป็น threading API มาตรฐานบน Unix systems pthread_create สร้าง thread, pthread_join รอจนเสร็จ ฟังก์ชัน thread คืน void* คอมไพล์ด้วย -pthread แต่ละ thread มี stack ของตัวเองแต่แชร์ heap Thread IDs เป็น opaque (pthread_t) Detach threads ด้วย pthread_detach",
+      "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid *worker(void *arg) {\n    int id = *(int*)arg;\n    printf(\"Thread %d running\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[4];\n    int ids[4];\n\n    for (int i = 0; i < 4; i++) {\n        ids[i] = i;\n        pthread_create(&threads[i], NULL, worker, &ids[i]);\n    }\n\n    for (int i = 0; i < 4; i++)\n        pthread_join(threads[i], NULL);\n\n    return 0;\n}"
+    ],
+    "Mutexes & Condition Variables": [
+      "Mutexes ป้องกัน race conditions ด้วยการทำให้การเข้าถึงข้อมูลที่แช้งเป็น serial pthread_mutex_t พร้อม lock/unlock Condition variables (pthread_cond_t) ให้ thread signaling: wait (block จนกว่าจะถูก signal), signal (ปลุกหนึ่ง), broadcast (ปลุกทั้งหมด) ตรวจสอบ predicate ใน while loop หลัง wait เสมอ (spurious wakeups) กำหนดค่าเริ่มต้นด้วย PTHREAD_MUTEX_INITIALIZER",
+      "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\nint ready = 0;\n\nvoid *producer(void *arg) {\n    pthread_mutex_lock(&mutex);\n    ready = 1;\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    pthread_mutex_lock(&mutex);\n    while (!ready)\n        pthread_cond_wait(&cond, &mutex);\n    printf(\"Ready!\\n\");\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, producer, NULL);\n    pthread_create(&t2, NULL, consumer, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}"
+    ],
+    "Atomic Operations": [
+      "Atomic operations ทำให้สมบูรณ์โดยไม่มีการแทรกแซงจาก threads อื่น C11 มี `<stdatomic.h>` พร้อม atomic_int, atomic_store, atomic_load, atomic_fetch_add, ฯลฯ Atomic compare-and-swap (CAS) ทำให้ lock-free data structures เป็นไปได้ Memory ordering: memory_order_relaxed, acquire, release, seq_cst หลีกเลี่ยง data races โดยไม่ต้องใช้ mutex overhead",
+      "#include <stdatomic.h>\n#include <stdio.h>\n#include <pthread.h>\n\natomic_int counter = 0;\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 1000000; i++)\n        atomic_fetch_add(&counter, 1);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, increment, NULL);\n    pthread_create(&t2, NULL, increment, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Counter: %d\\n\", atomic_load(&counter));\n\n    // Compare-and-swap\n    atomic_int expected = 0;\n    int desired = 42;\n    if (atomic_compare_exchange_strong(&counter, &expected, desired))\n        printf(\"CAS succeeded: %d\\n\", (int)counter);\n\n    return 0;\n}"
+    ]
+  }
+}

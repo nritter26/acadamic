@@ -1,0 +1,137 @@
+{
+  "id": "express-gql-federation",
+  "title": "GraphQL Federation",
+  "difficulty": "expert",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 40,
+  "concepts": ["graphql", "federation", "microservices", "entity-resolution", "key-directive", "express", "fastapi"],
+  "description": "Implement Apollo Federation with multiple services, federated queries, entity resolution via @key, and service status.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Service A _service SDL",
+      "description": "Create Service A (users) that exposes a _service query returning its SDL string for the federation gateway.",
+      "hints": [
+        "Service A exposes { _service { sdl } }", "The SDL should include the User type with @key directive", "Use Apollo Federation libraries or build a custom implementation"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nconst sdl = `\n  type User @key(fields: \"id\") {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    user(id: Int!): User\n    users: [User]\n  }\n`;\n\nconst schema = buildSchema(`\n  type _Service {\n    sdl: String\n  }\n\n  type User {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    _service: _Service\n    user(id: Int!): User\n    users: [User]\n  }\n`);\n\nconst users = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\nconst root = {\n  _service: () => ({ sdl }),\n  user: ({ id }) => users.find(u => u.id === id),\n  users: () => users\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3001, () => console.log('Users service on 3001'));\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nconst sdl = `\n  type User @key(fields: \"id\") {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    user(id: Int!): User\n    users: [User]\n  }\n`;\n\nconst schema = buildSchema(`\n  type _Service {\n    sdl: String\n  }\n\n  type User {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    _service: _Service\n    user(id: Int!): User\n    users: [User]\n  }\n`);\n\ninterface User {\n  id: number;\n  name: string;\n}\n\nconst users: User[] = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\nconst root = {\n  _service: () => ({ sdl }),\n  user: ({ id }: { id: number }) => users.find(u => u.id === id),\n  users: () => users\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3001, () => console.log('Users service on 3001'));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field\nfrom fastapi_gql import GQL\n\nSDL = '''\n  type User @key(fields: \"id\") {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    user(id: Int!): User\n    users: [User]\n  }\n'''\n\nusers_data = [\n    {'id': 1, 'name': 'Alice'},\n    {'id': 2, 'name': 'Bob'}\n]\n\nclass Service(ObjectType):\n    sdl = String()\n\nclass User(ObjectType):\n    id = Int(required=True)\n    name = String()\n\nclass Query(ObjectType):\n    _service = Field(Service)\n    user = Field(User, id=Int(required=True))\n    users = List(User)\n\n    def resolve__service(self, info):\n        return Service(sdl=SDL)\n\n    def resolve_user(self, info, id):\n        u = next((u for u in users_data if u['id'] == id), None)\n        return User(**u) if u else None\n\n    def resolve_users(self, info):\n        return [User(**u) for u in users_data]\n\nschema = Schema(query=Query)\napp = FastAPI()\nGQL(app, schema=schema)\n\nif __name__ == '__main__':\n    import uvicorn\n    uvicorn.run(app, port=3001)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n)\n\nconst sdl = `\n  type User @key(fields: \"id\") {\n    id: Int!\n    name: String\n  }\n\n  type Query {\n    user(id: Int!): User\n    users: [User]\n  }\n`\n\ntype User struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\nvar users = []User{{ID: 1, Name: \"Alice\"}, {ID: 2, Name: \"Bob\"}}\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tvar params struct {\n\t\t\tQuery string `json:\"query\"`\n\t\t}\n\t\tjson.NewDecoder(r.Body).Decode(&params)\n\n\t\tresult := map[string]interface{}{\n\t\t\t\"data\": map[string]interface{}{\n\t\t\t\t\"_service\": map[string]string{\"sdl\": sdl},\n\t\t\t},\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\tfmt.Println(\"Users service on :3001\")\n\thttp.ListenAndServe(\":3001\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "_service"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Service B _service SDL",
+      "description": "Create Service B (reviews) that exposes its own _service query with Review type and references to User via @key.",
+      "hints": [
+        "Service B's SDL includes Review type with extends User", "Use the extend keyword to reference User from Service A", "Expose reviews query and _service"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\n\nconst sdl = `\n  type Review {\n    id: Int!\n    text: String\n    author: User\n  }\n\n  extend type User @key(fields: \"id\") {\n    id: Int! @external\n    reviews: [Review]\n  }\n\n  type Query {\n    reviews: [Review]\n  }\n`;\n\nconst schema = buildSchema(`\n  type _Service {\n    sdl: String\n  }\n\n  type Review {\n    id: Int!\n    text: String\n  }\n\n  type Query {\n    _service: _Service\n    reviews: [Review]\n  }\n`);\n\nconst reviews = [\n  { id: 1, text: 'Great!', authorId: 1 },\n  { id: 2, text: 'Nice!', authorId: 2 }\n];\n\nconst root = {\n  _service: () => ({ sdl }),\n  reviews: () => reviews\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3002, () => console.log('Reviews service on 3002'));\n",
+        "typescript": "import express from 'express';\nimport { graphqlHTTP } from 'express-graphql';\nimport { buildSchema } from 'graphql';\n\nconst sdl = `\n  type Review {\n    id: Int!\n    text: String\n    author: User\n  }\n\n  extend type User @key(fields: \"id\") {\n    id: Int! @external\n    reviews: [Review]\n  }\n\n  type Query {\n    reviews: [Review]\n  }\n`;\n\nconst schema = buildSchema(`\n  type _Service {\n    sdl: String\n  }\n\n  type Review {\n    id: Int!\n    text: String\n  }\n\n  type Query {\n    _service: _Service\n    reviews: [Review]\n  }\n`);\n\ninterface Review {\n  id: number;\n  text: string;\n  authorId: number;\n}\n\nconst reviews: Review[] = [\n  { id: 1, text: 'Great!', authorId: 1 },\n  { id: 2, text: 'Nice!', authorId: 2 }\n];\n\nconst root = {\n  _service: () => ({ sdl }),\n  reviews: () => reviews\n};\n\nconst app = express();\napp.use('/graphql', graphqlHTTP({ schema, rootValue: root, graphiql: false }));\napp.listen(3002, () => console.log('Reviews service on 3002'));\n",
+        "python": "from fastapi import FastAPI\nfrom graphene import ObjectType, Int, String, List, Schema, Field\nfrom fastapi_gql import GQL\n\nSDL = '''\n  type Review {\n    id: Int!\n    text: String\n    author: User\n  }\n\n  extend type User @key(fields: \"id\") {\n    id: Int! @external\n    reviews: [Review]\n  }\n\n  type Query {\n    reviews: [Review]\n  }\n'''\n\nreviews_data = [\n    {'id': 1, 'text': 'Great!', 'authorId': 1},\n    {'id': 2, 'text': 'Nice!', 'authorId': 2}\n]\n\nclass Service(ObjectType):\n    sdl = String()\n\nclass Review(ObjectType):\n    id = Int(required=True)\n    text = String()\n\nclass Query(ObjectType):\n    _service = Field(Service)\n    reviews = List(Review)\n\n    def resolve__service(self, info):\n        return Service(sdl=SDL)\n\n    def resolve_reviews(self, info):\n        return [Review(**r) for r in reviews_data]\n\nschema = Schema(query=Query)\napp = FastAPI()\nGQL(app, schema=schema)\n\nif __name__ == '__main__':\n    import uvicorn\n    uvicorn.run(app, port=3002)\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"net/http\"\n)\n\nconst sdl = `\n  type Review {\n    id: Int!\n    text: String\n    author: User\n  }\n\n  extend type User @key(fields: \"id\") {\n    id: Int! @external\n    reviews: [Review]\n  }\n\n  type Query {\n    reviews: [Review]\n  }\n`\n\ntype Review struct {\n\tID       int    `json:\"id\"`\n\tText     string `json:\"text\"`\n\tAuthorID int    `json:\"authorId\"`\n}\n\nvar reviews = []Review{\n\t{ID: 1, Text: \"Great!\", AuthorID: 1},\n\t{ID: 2, Text: \"Nice!\", AuthorID: 2},\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/graphql\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tresult := map[string]interface{}{\n\t\t\t\"data\": map[string]interface{}{\n\t\t\t\t\"_service\": map[string]string{\"sdl\": sdl},\n\t\t\t},\n\t\t}\n\t\tjson.NewEncoder(w).Encode(result)\n\t})\n\n\tfmt.Println(\"Reviews service on :3002\")\n\thttp.ListenAndServe(\":3002\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "POST",
+            "path": "/graphql",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "_service"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Federated query across services",
+      "description": "Create a gateway that queries both services and combines results. Query users with their reviews across services.",
+      "hints": [
+        "The gateway makes requests to both Service A (port 3001) and Service B (port 3002)", "Combine the results from both services", "Return a federated response with data from both"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst http = require('http');\nconst app = express();\nconst port = 3000;\n\nfunction graphqlRequest(url, query) {\n  return new Promise((resolve, reject) => {\n    const body = JSON.stringify({ query });\n    const req = http.request(url, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'Content-Length': body.length }\n    }, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    });\n    req.on('error', reject);\n    req.write(body);\n    req.end();\n  });\n}\n\napp.get('/federated/users', async (req, res) => {\n  try {\n    const [usersRes, reviewsRes] = await Promise.all([\n      graphqlRequest('http://localhost:3001/graphql', '{ users { id name } }'),\n      graphqlRequest('http://localhost:3002/graphql', '{ reviews { id text } }')\n    ]);\n    res.json({\n      users: usersRes.data.users,\n      reviews: reviewsRes.data.reviews\n    });\n  } catch (err) {\n    res.status(500).json({ error: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Gateway on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = 3000;\n\nfunction graphqlRequest(url: string, query: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const body = JSON.stringify({ query });\n    const req = http.request(url, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }\n    }, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    });\n    req.on('error', reject);\n    req.write(body);\n    req.end();\n  });\n}\n\napp.get('/federated/users', async (req: Request, res: Response) => {\n  try {\n    const [usersRes, reviewsRes] = await Promise.all([\n      graphqlRequest('http://localhost:3001/graphql', '{ users { id name } }'),\n      graphqlRequest('http://localhost:3002/graphql', '{ reviews { id text } }')\n    ]);\n    res.json({\n      users: usersRes.data.users,\n      reviews: reviewsRes.data.reviews\n    });\n  } catch (err: any) {\n    res.status(500).json({ error: err.message });\n  }\n});\n\napp.listen(port, () => console.log(`Gateway on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport httpx\nimport uvicorn\n\napp = FastAPI()\nport = 3000\n\n@app.get('/federated/users')\ndef federated_users():\n    with httpx.Client() as client:\n        users_res = client.post('http://localhost:3001/graphql', json={'query': '{ users { id name } }'})\n        reviews_res = client.post('http://localhost:3002/graphql', json={'query': '{ reviews { id text } }'})\n    return {\n        'users': users_res.json()['data']['users'],\n        'reviews': reviews_res.json()['data']['reviews']\n    }\n\nif __name__ == '__main__':\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"io\"\n\t\"net/http\"\n)\n\nfunc graphqlRequest(url, query string) (map[string]interface{}, error) {\n\tbody := map[string]string{\"query\": query}\n\tjsonBody, _ := json.Marshal(body)\n\tresp, err := http.Post(url, \"application/json\", bytes.NewBuffer(jsonBody))\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer resp.Body.Close()\n\tdata, _ := io.ReadAll(resp.Body)\n\tvar result map[string]interface{}\n\tjson.Unmarshal(data, &result)\n\treturn result, nil\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/federated/users\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tusersRes, _ := graphqlRequest(\"http://localhost:3001/graphql\", \"{ users { id name } }\")\n\t\treviewsRes, _ := graphqlRequest(\"http://localhost:3002/graphql\", \"{ reviews { id text } }\")\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\"users\":   usersRes[\"data\"].(map[string]interface{})[\"users\"],\n\t\t\t\"reviews\": reviewsRes[\"data\"].(map[string]interface{})[\"reviews\"],\n\t\t})\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/federated/users",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "users"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Entity resolution via @key",
+      "description": "Implement entity resolution: the gateway can request a User entity by ID and get data from both services.",
+      "hints": [
+        "Service A resolves User entities with _entities query", "The gateway sends a representations array with __typename and id", "Service A returns the user data, Service B enriches with reviews"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst { graphqlHTTP } = require('express-graphql');\nconst { buildSchema } = require('graphql');\nconst http = require('http');\n\nconst app = express();\nconst port = 3000;\n\nconst users = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\nconst reviews = [\n  { id: 1, text: 'Great!', authorId: 1 },\n  { id: 2, text: 'Nice!', authorId: 2 }\n];\n\nfunction graphqlRequest(url, query) {\n  return new Promise((resolve, reject) => {\n    const body = JSON.stringify({ query });\n    const req = http.request(url, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'Content-Length': body.length }\n    }, (res) => {\n      let data = '';\n      res.on('data', chunk => data += chunk);\n      res.on('end', () => resolve(JSON.parse(data)));\n    });\n    req.on('error', reject);\n    req.write(body);\n    req.end();\n  });\n}\n\napp.get('/federated/user/:id', async (req, res) => {\n  const userId = parseInt(req.params.id);\n  const user = users.find(u => u.id === userId);\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  const userReviews = reviews.filter(r => r.authorId === userId);\n  res.json({ ...user, reviews: userReviews });\n});\n\napp.listen(port, () => console.log(`Federation gateway on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = 3000;\n\ninterface User {\n  id: number;\n  name: string;\n}\n\ninterface Review {\n  id: number;\n  text: string;\n  authorId: number;\n}\n\nconst users: User[] = [\n  { id: 1, name: 'Alice' },\n  { id: 2, name: 'Bob' }\n];\n\nconst reviews: Review[] = [\n  { id: 1, text: 'Great!', authorId: 1 },\n  { id: 2, text: 'Nice!', authorId: 2 }\n];\n\napp.get('/federated/user/:id', (req: Request, res: Response) => {\n  const userId = parseInt(req.params.id);\n  const user = users.find(u => u.id === userId);\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  const userReviews = reviews.filter(r => r.authorId === userId);\n  res.json({ ...user, reviews: userReviews });\n});\n\napp.listen(port, () => console.log(`Federation gateway on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\nport = 3000\n\nusers = [\n    {'id': 1, 'name': 'Alice'},\n    {'id': 2, 'name': 'Bob'}\n]\n\nreviews = [\n    {'id': 1, 'text': 'Great!', 'authorId': 1},\n    {'id': 2, 'text': 'Nice!', 'authorId': 2}\n]\n\n@app.get('/federated/user/{user_id}')\ndef get_federated_user(user_id: int):\n    user = next((u for u in users if u['id'] == user_id), None)\n    if not user:\n        from fastapi.responses import JSONResponse\n        return JSONResponse(status_code=404, content={'error': 'User not found'})\n    user_reviews = [r for r in reviews if r['authorId'] == user_id]\n    return {**user, 'reviews': user_reviews}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"strings\"\n)\n\ntype User struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n\ntype Review struct {\n\tID       int    `json:\"id\"`\n\tText     string `json:\"text\"`\n\tAuthorID int    `json:\"authorId\"`\n}\n\nvar users = []User{{ID: 1, Name: \"Alice\"}, {ID: 2, Name: \"Bob\"}}\nvar reviews = []Review{{ID: 1, Text: \"Great!\", AuthorID: 1}, {ID: 2, Text: \"Nice!\", AuthorID: 2}}\n\nfunc main() {\n\thttp.HandleFunc(\"/federated/user/\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tidStr := strings.TrimPrefix(r.URL.Path, \"/federated/user/\")\n\t\tid, err := strconv.Atoi(idStr)\n\t\tif err != nil {\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\treturn\n\t\t}\n\t\tfor _, u := range users {\n\t\t\tif u.ID == id {\n\t\t\t\tvar userReviews []Review\n\t\t\t\tfor _, rev := range reviews {\n\t\t\t\t\tif rev.AuthorID == id {\n\t\t\t\t\t\tuserReviews = append(userReviews, rev)\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n\t\t\t\t\t\"id\":      u.ID,\n\t\t\t\t\t\"name\":    u.Name,\n\t\t\t\t\t\"reviews\": userReviews,\n\t\t\t\t})\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"User not found\"})\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/federated/user/1",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "reviews"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Federation status",
+      "description": "Create GET /federation/status that returns the list of registered services and their health status.",
+      "hints": [
+        "Track which services are registered in the federation", "Check each service's health by calling its _service endpoint", "Return the list with service name, URL, and status"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst http = require('http');\nconst app = express();\nconst port = 3000;\n\nconst services = [\n  { name: 'users', url: 'http://localhost:3001/graphql' },\n  { name: 'reviews', url: 'http://localhost:3002/graphql' }\n];\n\nfunction checkService(url) {\n  return new Promise((resolve) => {\n    const body = JSON.stringify({ query: '{ __typename }' });\n    const req = http.request(url, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'Content-Length': body.length },\n      timeout: 2000\n    }, (res) => {\n      resolve({ status: 'healthy' });\n    });\n    req.on('error', () => resolve({ status: 'unhealthy' }));\n    req.on('timeout', () => {\n      req.destroy();\n      resolve({ status: 'unhealthy' });\n    });\n    req.write(body);\n    req.end();\n  });\n}\n\napp.get('/federation/status', async (req, res) => {\n  const statuses = await Promise.all(services.map(async svc => ({\n    name: svc.name,\n    url: svc.url,\n    ...await checkService(svc.url)\n  })));\n  res.json({ services: statuses });\n});\n\napp.listen(port, () => console.log(`Federation status on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nimport http from 'http';\nconst app = express();\nconst port = 3000;\n\ninterface Service {\n  name: string;\n  url: string;\n}\n\nconst services: Service[] = [\n  { name: 'users', url: 'http://localhost:3001/graphql' },\n  { name: 'reviews', url: 'http://localhost:3002/graphql' }\n];\n\nfunction checkService(url: string): Promise<{ status: string }> {\n  return new Promise((resolve) => {\n    const body = JSON.stringify({ query: '{ __typename }' });\n    const req = http.request(url, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },\n      timeout: 2000\n    }, (res) => {\n      resolve({ status: 'healthy' });\n    });\n    req.on('error', () => resolve({ status: 'unhealthy' }));\n    req.on('timeout', () => {\n      req.destroy();\n      resolve({ status: 'unhealthy' });\n    });\n    req.write(body);\n    req.end();\n  });\n}\n\napp.get('/federation/status', async (req: Request, res: Response) => {\n  const statuses = await Promise.all(services.map(async svc => ({\n    name: svc.name,\n    url: svc.url,\n    ...await checkService(svc.url)\n  })));\n  res.json({ services: statuses });\n});\n\napp.listen(port, () => console.log(`Federation status on port ${port}`));\n",
+        "python": "from fastapi import FastAPI\nimport httpx\nimport asyncio\n\napp = FastAPI()\nport = 3000\n\nservices = [\n    {'name': 'users', 'url': 'http://localhost:3001/graphql'},\n    {'name': 'reviews', 'url': 'http://localhost:3002/graphql'}\n]\n\nasync def check_service(url):\n    try:\n        async with httpx.AsyncClient(timeout=2.0) as client:\n            await client.post(url, json={'query': '{ __typename }'})\n            return {'status': 'healthy'}\n    except:\n        return {'status': 'unhealthy'}\n\n@app.get('/federation/status')\nasync def federation_status():\n    statuses = []\n    for svc in services:\n        result = await check_service(svc['url'])\n        statuses.append({'name': svc['name'], 'url': svc['url'], **result})\n    return {'services': statuses}\n\nif __name__ == '__main__':\n    import uvicorn\n    uvicorn.run(app, port=port)\n",
+        "go": "package main\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"time\"\n)\n\ntype Service struct {\n\tName string `json:\"name\"`\n\tURL  string `json:\"url\"`\n}\n\nvar services = []Service{\n\t{Name: \"users\", URL: \"http://localhost:3001/graphql\"},\n\t{Name: \"reviews\", URL: \"http://localhost:3002/graphql\"},\n}\n\nfunc checkService(url string) map[string]string {\n\tclient := &http.Client{Timeout: 2 * time.Second}\n\tbody := map[string]string{\"query\": \"{ __typename }\"}\n\tjsonBody, _ := json.Marshal(body)\n\tresp, err := client.Post(url, \"application/json\", bytes.NewBuffer(jsonBody))\n\tif err != nil {\n\t\treturn map[string]string{\"status\": \"unhealthy\"}\n\t}\n\tdefer resp.Body.Close()\n\treturn map[string]string{\"status\": \"healthy\"}\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/federation/status\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\ttype ServiceStatus struct {\n\t\t\tName   string `json:\"name\"`\n\t\t\tURL    string `json:\"url\"`\n\t\t\tStatus string `json:\"status\"`\n\t\t}\n\t\tvar results []ServiceStatus\n\t\tfor _, svc := range services {\n\t\t\tresult := checkService(svc.URL)\n\t\t\tresults = append(results, ServiceStatus{\n\t\t\t\tName:   svc.Name,\n\t\t\t\tURL:    svc.URL,\n\t\t\t\tStatus: result[\"status\"],\n\t\t\t})\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]interface{}{\"services\": results})\n\t})\n\n\thttp.ListenAndServe(\":3000\", nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/federation/status",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "services"
+          }
+        ]
+      }
+    }
+  ]
+}

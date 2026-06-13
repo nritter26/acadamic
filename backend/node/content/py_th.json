@@ -713,5 +713,203 @@
       "แทนที่ส่วนของระบบด้วย mock objects: Mock, patch, MagicMock, PropertyMock, side_effect ข้อผิดพลาดทั่วไป: การ patching พาธผิด — patch ที่ที่ชื่อถูกค้นหา (โมดูลที่ถูกทดสอบ) ไม่ใช่ที่ที่มันถูกนิยาม",
       "from unittest.mock import Mock, patch\n\nm = Mock(return_value=42)\nprint(m())\n\nm.side_effect = [1, 2, ValueError('Boom')]\nprint(m(), m())\n\nwith patch('os.path.exists', return_value=True):\n    import os\n    print(os.path.exists('/fake/path'))"
     ]
+  },
+  "การแพ็กเกจและการแจกจ่าย": {
+    "setuptools & setup.py": [
+      "เครื่องมือแพ็กเกจแบบดั้งเดิม กำหนด metadata ใน setup.py: name, version, packages, install_requires, entry_points ข้อผิดพลาดทั่วไป: การลืมรวม package data files (ไฟล์ที่ไม่ใช่ Python) แนวปฏิบัติที่ดี: ใช้ pyproject.toml สำหรับโปรเจกต์สมัยใหม่; setup.py จำเป็นเฉพาะสำหรับ editable installs หรือ dynamic metadata",
+      "from setuptools import setup, find_packages\n\nsetup(\n    name='my_package',\n    version='0.1.0',\n    packages=find_packages(where='src'),\n    package_dir={'': 'src'},\n    install_requires=[\n        'requests>=2.25.0',\n        'click>=8.0',\n    ],\n    entry_points={\n        'console_scripts': [\n            'mycli = my_package.cli:main',\n        ],\n    },\n    python_requires='>=3.9',\n)"
+    ],
+    "pyproject.toml": [
+      "PEP 517/518 การกำหนดค่าระบบ build รูปแบบ declarative แทนที่ setup.py ใช้โดย setuptools, flit, pdm, poetry ข้อผิดพลาดทั่วไป: การผสม sections [build-system] และ [project] ไม่ถูกต้อง แนวปฏิบัติที่ดี: ใช้ pyproject.toml เพียงอย่างเดียว; เลือก build backend หนึ่งตัว",
+      "[build-system]\nrequires = [\"setuptools>=68.0\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"my_package\"\nversion = \"0.1.0\"\ndescription = \"A useful package\"\nrequires-python = \">=3.9\"\ndependencies = [\n    \"requests>=2.25.0\",\n]\n\n[project.optional-dependencies]\ndev = [\n    \"pytest>=7.0\",\n    \"black>=24.0\",\n]\n\n[project.scripts]\nmycli = \"my_package.cli:main\""
+    ],
+    "Wheels และ sdist": [
+      "sdist (.tar.gz) คือ source distribution; wheel (.whl) คือ built distribution (ติดตั้งเร็วกว่า) Build ด้วย: python -m build ข้อผิดพลาดทั่วไป: การแจกจ่าย platform-specific wheels โดยไม่ implement build variants สำหรับ OS ต่างๆ แนวปฏิบัติที่ดี: เผยแพร่ทั้ง sdist และ wheel ไปยัง PyPI",
+      "# Build both sdist and wheel\n# pip install build\n# python -m build\n\n# Output:\n# dist/\n#   my_package-0.1.0.tar.gz     (sdist)\n#   my_package-0.1.0-py3-none-any.whl  (wheel)\n\n# Install wheel directly:\n# pip install dist/my_package-0.1.0-py3-none-any.whl\n\n# Upload to PyPI:\n# pip install twine\n# twine upload dist/*"
+    ],
+    "pip install -e (Editable Installs)": [
+      "ติดตั้งแพ็กเกจในโหมดพัฒนาด้วย pip install -e . การเปลี่ยนแปลงซอร์สสะท้อนทันทีโดยไม่ต้องติดตั้งใหม่ ข้อผิดพลาดทั่วไป: การลืม . (current directory) ต่อท้าย แนวปฏิบัติที่ดี: ใช้ editable installs เสมอระหว่างการพัฒนา",
+      "# In the package root directory:\n# pip install -e .\n\n# This creates a link to the source, so imports use your live code.\n# Useful with:\n# pip install -e '.[dev]'  # includes dev dependencies"
+    ],
+    "Namespace Packages": [
+      "แพ็กเกจที่แบ่งกระจายหลายไดเรกทอรี Python 3.3+ รองรับ implicit namespace packages (ไม่ต้องมี __init__.py) ข้อผิดพลาดทั่วไป: การผสม regular packages กับ namespace packages ใน distribution เดียวกัน",
+      "# Directory structure:\n# project/\n#   acme/\n#     admin/\n#       __init__.py    # regular package\n#       views.py\n#     billing/\n#       # No __init__.py — namespace package\n#       invoices.py\n\n# Each sub-package can be distributed separately"
+    ]
+  },
+  "การทำงานกับข้อมูล": {
+    "CSV": [
+      "อ่าน/เขียน comma-separated values ด้วย csv module ใช้ DictReader และ DictWriter สำหรับคอลัมน์ที่มีชื่อ ข้อผิดพลาดทั่วไป: การไม่จัดการ quoted fields ที่มี commas หรือ newlines — csv module จัดการนี้อย่างถูกต้อง แนวปฏิบัติที่ดี: ระบุ delimiter และ quoting เสมอ",
+      "import csv\n\nwith open('data.csv', 'w', newline='', encoding='utf-8') as f:\n    writer = csv.DictWriter(f, fieldnames=['name', 'age', 'city'])\n    writer.writeheader()\n    writer.writerow({'name': 'Alice', 'age': 30, 'city': 'NYC'})\n\nwith open('data.csv', 'r', newline='', encoding='utf-8') as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        print(row['name'], row['age'])"
+    ],
+    "JSON": [
+      "รูปแบบแลกเปลี่ยนข้อมูลน้ำหนักเบา json.dumps(obj), json.loads(str), json.dump(obj, file), json.load(file) ข้อผิดพลาดทั่วไป: JSON รองรับเฉพาะ strings, numbers, booleans, null, arrays, objects — ชนิดเฉพาะของ Python (datetime, Decimal) ต้องใช้ custom encoders",
+      "import json\nfrom pathlib import Path\n\ndata = {\n    'users': [\n        {'name': 'Alice', 'age': 30, 'active': True},\n        {'name': 'Bob', 'age': 25, 'active': False},\n    ]\n}\nPath('data.json').write_text(json.dumps(data, indent=2))\n\nloaded = json.loads(Path('data.json').read_text())\nprint(loaded['users'][0]['name'])"
+    ],
+    "YAML": [
+      "การ serialization ข้อมูลที่มนุษย์อ่านได้ พบทั่วไปใน config files ต้องใช้ PyYAML package ข้อผิดพลาดทั่วไป: ค่า truthy ของ YAML (yes, on, true) — ใช้ true/false สำหรับ booleans เสมอ แนวปฏิบัติที่ดี: ใช้ safe_load() แทน load() เพื่อหลีกเลี่ยง code execution",
+      "import yaml\n\ndata = {\n    'server': {\n        'host': 'localhost',\n        'port': 8080,\n        'debug': True\n    },\n    'database': {\n        'url': 'postgres://localhost/mydb',\n        'pool_size': 5\n    }\n}\n\nyaml_str = yaml.dump(data, default_flow_style=False)\nprint(yaml_str)\n\nwith open('config.yaml') as f:\n    config = yaml.safe_load(f)\n    print(config['server']['host'])"
+    ],
+    "SQLite": [
+      "ฐานข้อมูล SQL แบบฝังตัวน้ำหนักเบาผ่าน sqlite3 module (built-in) ไม่ต้องใช้ server แยก ข้อผิดพลาดทั่วไป: การใช้ string formatting สำหรับ SQL queries — ใช้ parameterized queries (?) เพื่อป้องกัน SQL injection",
+      "import sqlite3\n\nconn = sqlite3.connect('example.db')\nconn.row_factory = sqlite3.Row\n\nconn.execute('''\n    CREATE TABLE IF NOT EXISTS users (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        name TEXT NOT NULL,\n        age INTEGER\n    )\n''')\n\nconn.execute('INSERT INTO users (name, age) VALUES (?, ?)', ('Alice', 30))\nconn.commit()\n\ncursor = conn.execute('SELECT * FROM users WHERE age > ?', (25,))\nfor row in cursor:\n    print(row['name'], row['age'])\n\nconn.close()"
+    ],
+    "pickle": [
+      "การ serialization ออบเจกต์ Python (pickling) Serialize ออบเจกต์ Python ใดๆ เป็น bytes ข้อผิดพลาดทั่วไป: การ unpickle ข้อมูลที่ไม่น่าเชื่อถือ — pickle สามารถ execute โค้ดอันตรายระหว่าง deserialization แนวปฏิบัติที่ดี: อย่า unpickle ข้อมูลจากแหล่งที่ไม่น่าเชื่อถือ",
+      "import pickle\n\ndata = {\n    'name': 'Alice',\n    'scores': [85, 92, 78],\n    'metadata': {'version': 1, 'tags': {'a', 'b'}}\n}\n\npickled = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)\nprint(f'Pickled size: {len(pickled)} bytes')\n\nloaded = pickle.loads(pickled)\nprint(loaded['name'], loaded['scores'])"
+    ],
+    "XML & ElementTree": [
+      "แยกวิเคราะห์และสร้าง XML ด้วย xml.etree.ElementTree รองรับ find(), findall(), iter() และ XPath-like expressions ข้อผิดพลาดทั่วไป: การจัดการ namespace เป็นเรื่องยุ่งยาก — ใช้ {uri}tag หรือ register_namespace()",
+      "import xml.etree.ElementTree as ET\n\nxml_str = '''\n<library>\n    <book id=\"1\">\n        <title>Python 101</title>\n        <author>Alice</author>\n    </book>\n</library>\n'''\n\nroot = ET.fromstring(xml_str)\nfor book in root.findall('book'):\n    title = book.find('title').text\n    author = book.find('author').text\n    print(f'{title} by {author}')"
+    ]
+  },
+  "Concurrency เจาะลึก": {
+    "threading": [
+      "รันฟังก์ชันในเธรดแยกสำหรับงาน I/O-bound GIL (Global Interpreter Lock) จำกัด parallelism สำหรับ CPU-bound ใช้ threading.Thread, Lock, Semaphore, Event ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า threads ปลอดภัยสำหรับข้อมูลที่แชร์ — ใช้ Lock หรือ Queue เพื่อป้องกัน race conditions",
+      "import threading\nimport time\n\nresults = []\nlock = threading.Lock()\n\ndef worker(n):\n    time.sleep(0.5)\n    with lock:\n        results.append(n * 2)\n\nthreads = [threading.Thread(target=worker, args=(i,)) for i in range(5)]\nfor t in threads: t.start()\nfor t in threads: t.join()\n\nprint(results)"
+    ],
+    "multiprocessing": [
+      "รันกระบวนการแบบ parallel, bypassing GIL สำหรับงาน CPU-bound ใช้ Pool, Process, Queue, shared memory ข้อผิดพลาดทั่วไป: การพยายามแชร์ออบเจกต์ที่ซับซ้อนระหว่าง processes — ใช้ Queue หรือ Manager เพื่อการแชร์ที่ปลอดภัย",
+      "from multiprocessing import Pool, cpu_count\nimport time\n\ndef cpu_heavy(n):\n    total = sum(i * i for i in range(n))\n    return total\n\nif __name__ == '__main__':\n    with Pool(processes=cpu_count()) as pool:\n        results = pool.map(cpu_heavy, [10**6, 2*10**6, 3*10**6])\n        print(results)"
+    ],
+    "ThreadPoolExecutor & ProcessPoolExecutor": [
+      "อินเทอร์เฟซ concurrent.futures ระดับสูง submit() คืน Future; map() สำหรับ parallel iteration ข้อผิดพลาดทั่วไป: การใช้ ThreadPoolExecutor สำหรับงาน CPU-bound — GIL ป้องกัน true parallelism แนวปฏิบัติที่ดี: ใช้ ThreadPoolExecutor สำหรับ I/O; ProcessPoolExecutor สำหรับ CPU",
+      "from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed\nimport time\n\ndef io_task(n):\n    time.sleep(0.5)\n    return n ** 2\n\nwith ThreadPoolExecutor(max_workers=4) as executor:\n    futures = {executor.submit(io_task, i): i for i in range(8)}\n    for future in as_completed(futures):\n        print(f'Result: {future.result()}')"
+    ],
+    "Queues (threading/multiprocessing)": [
+      "FIFO queues ที่ปลอดภัยต่อเธรดสำหรับรูปแบบ producer-consumer queue.Queue สำหรับ threads; multiprocessing.Queue สำหรับ processes ข้อผิดพลาดทั่วไป: การใช้ queue.task_done() โดยไม่มีการเรียก queue.get() หรือ queue.join()",
+      "import threading\nimport queue\nimport time\n\nq = queue.Queue(maxsize=10)\n\ndef producer():\n    for i in range(5):\n        q.put(f'item-{i}')\n        time.sleep(0.1)\n    q.put(None)\n\ndef consumer():\n    while True:\n        item = q.get()\n        if item is None:\n            q.task_done()\n            break\n        print(f'Consumed {item}')\n        q.task_done()\n\nthreads = [\n    threading.Thread(target=producer),\n    threading.Thread(target=consumer),\n]\nfor t in threads: t.start()\nfor t in threads: t.join()\nq.join()"
+    ],
+    "asyncio.Queue": [
+      "คิวที่เข้ากันได้กับ asyncio สำหรับแอปพลิเคชัน async ใช้ในรูปแบบ producer-consumer แบบ async ข้อผิดพลาดทั่วไป: การดำเนินการ blocking ภายในโค้ด async — ใช้ asyncio.to_thread() สำหรับ blocking I/O",
+      "import asyncio\n\nasync def producer(q):\n    for i in range(5):\n        await q.put(f'task-{i}')\n        await asyncio.sleep(0.1)\n    await q.put(None)\n\nasync def consumer(q):\n    while True:\n        item = await q.get()\n        if item is None:\n            q.task_done()\n            break\n        print(f'Processing {item}')\n        await asyncio.sleep(0.3)\n        q.task_done()\n\nasync def main():\n    q = asyncio.Queue(maxsize=3)\n    async with asyncio.TaskGroup() as tg:\n        tg.create_task(producer(q))\n        tg.create_task(consumer(q))\n    await q.join()\n\nasyncio.run(main())"
+    ]
+  },
+  "เว็บและ API": {
+    "requests": [
+      "ไลบรารี HTTP ที่มี API เป็นมิตรกับมนุษย์ เมธอด: get, post, put, delete, patch จัดการ sessions, auth, timeouts, redirects ข้อผิดพลาดทั่วไป: การไม่ตั้ง timeouts — requests สามารถค้างไม่มีกำหนด แนวปฏิบัติที่ดี: ตั้ง timeout เสมอ; ใช้ Session() สำหรับ connection reuse",
+      "import requests\n\nresp = requests.get('https://api.example.com/data', timeout=10)\nresp.raise_for_status()\nprint(resp.json())\n\nwith requests.Session() as s:\n    s.headers.update({'Authorization': 'Bearer token123'})\n    r1 = s.get('https://api.example.com/profile', timeout=10)"
+    ],
+    "httpx": [
+      "HTTP client สมัยใหม่ที่รองรับ async/await, HTTP/2, และทั้ง sync/async APIs ข้อผิดพลาดทั่วไป: การผสม sync และ async — ใช้ httpx.Client() สำหรับ sync; httpx.AsyncClient() สำหรับ async แนวปฏิบัติที่ดี: เลือก httpx มากกว่า requests สำหรับโปรเจกต์ใหม่",
+      "import httpx\n\nwith httpx.Client() as client:\n    resp = client.get('https://httpbin.org/json', timeout=10)\n    print(resp.json())\n\nasync def fetch():\n    async with httpx.AsyncClient() as client:\n        resp = await client.get('https://httpbin.org/json', timeout=10)\n        return resp.json()"
+    ],
+    "FastAPI Basics": [
+      "เฟรมเวิร์กเว็บ async สมัยใหม่ที่มี OpenAPI docs อัตโนมัติ, type validation ผ่าน Pydantic, และประสิทธิภาพสูง ข้อผิดพลาดทั่วไป: การไม่ใช้ Pydantic models สำหรับ request/response validation",
+      "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass Item(BaseModel):\n    name: str\n    price: float\n\n@app.get('/')\nasync def root():\n    return {'message': 'Hello World'}\n\n@app.get('/items/{item_id}')\nasync def get_item(item_id: int):\n    return items_db.get(item_id)\n\n@app.post('/items', status_code=201)\nasync def create_item(item: Item):\n    items_db[len(items_db)+1] = item.model_dump()\n    return items_db[len(items_db)]"
+    ],
+    "Flask Basics": [
+      "เฟรมเวิร์กเว็บ WSGI น้ำหนักเบาสำหรับแอปพลิเคชันขนาดเล็กถึงกลาง การ routing, request handling, และ template rendering ข้อผิดพลาดทั่วไป: การใช้ development server ใน production — ใช้ gunicorn หรือ uwsgi แทน",
+      "from flask import Flask, jsonify, request\n\napp = Flask(__name__)\n\n@app.route('/')\ndef home():\n    return jsonify({'message': 'Hello World'})\n\n@app.route('/items/<int:item_id>', methods=['GET'])\ndef get_item(item_id):\n    return jsonify({'id': item_id, 'name': f'Item {item_id}'})\n\n@app.route('/items', methods=['POST'])\ndef create_item():\n    data = request.get_json()\n    return jsonify({'created': data}), 201"
+    ],
+    "aiohttp": [
+      "ไลบรารี HTTP client/server แบบ async สำหรับการ scraping และ microservices ที่มีการ concurrent สูง ข้อผิดพลาดทั่วไป: การสร้าง ClientSession ใหม่ต่อ request — ใช้ sessions ซ้ำเพื่อ connection pooling",
+      "import aiohttp\nimport asyncio\n\nasync def fetch_url(session, url):\n    async with session.get(url) as response:\n        return await response.json()\n\nasync def main():\n    async with aiohttp.ClientSession() as session:\n        tasks = [fetch_url(session, url) for url in urls]\n        results = await asyncio.gather(*tasks)\n        print(results)\n\nasyncio.run(main())"
+    ]
+  },
+  "Type Hints": {
+    "Basic Types & Annotations": [
+      "PEP 484 type hints สำหรับตัวแปร, พารามิเตอร์, และชนิดที่คืนค่า ตรวจสอบโดย mypy/pyright ไม่ใช่ตอน runtime ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า type hints มีผลต่อประสิทธิภาพ — พวกมันถูกลบออกตอน runtime อย่างสมบูรณ์",
+      "name: str = 'Alice'\nage: int = 30\nheight: float = 1.75\nis_active: bool = True\n\ndef greet(name: str) -> str:\n    return f'Hello, {name}'\n\nresult: str = greet('Bob')\nprint(result)"
+    ],
+    "Optional & Union": [
+      "Optional[X] หมายถึง X | None (Python 3.10+) หรือ Union[X, None] Union[X, Y] หมายถึง X หรือ Y ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า Optional[str] หมายถึง 'พารามิเตอร์สตริงที่ไม่จำเป็น' — มันหมายถึง 'str หรือ None'",
+      "from typing import Optional, Union\n\ndef find_user(user_id: int) -> Optional[dict]:\n    users = {1: {'name': 'Alice'}}\n    return users.get(user_id)\n\ndef process(value: Union[int, str]) -> str:\n    if isinstance(value, int):\n        return str(value * 2)\n    return value.upper()\n\nprint(find_user(1))\nprint(find_user(99))"
+    ],
+    "Generics & TypeVar": [
+      "สร้างฟังก์ชันและคลาสที่ใช้ซ้ำได้และปลอดภัยต่อชนิดด้วย TypeVar และ Generic ข้อผิดพลาดทั่วไป: การจำกัด type variables มากเกินไป — ใช้ bound= หรือ constraints ที่เหมาะสม",
+      "from typing import TypeVar, Generic, Sequence, List\n\nT = TypeVar('T')\n\ndef first(items: Sequence[T]) -> T:\n    return items[0]\n\nprint(first([1, 2, 3]))\nprint(first(['a', 'b']))\n\nclass Stack(Generic[T]):\n    def __init__(self) -> None:\n        self._items: List[T] = []\n    def push(self, item: T) -> None:\n        self._items.append(item)\n    def pop(self) -> T:\n        return self._items.pop()\n\nstack = Stack[int]()\nstack.push(1)\nval: int = stack.pop()"
+    ],
+    "Protocol (Structural Subtyping)": [
+      "PEP 544 — static duck typing นิยามอินเทอร์เฟซผ่าน Protocol ที่คลาสใดก็ได้ที่มี methods ตรงกันก็สามารถใช้ได้ ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า Protocol ต้องการ explicit inheritance — ไม่ต้องการ; structural subtyping เป็นแบบ implicit",
+      "from typing import Protocol\n\nclass Drawable(Protocol):\n    def draw(self) -> str: ...\n\nclass Circle:\n    def draw(self) -> str:\n        return 'Drawing circle'\n\ndef render(obj: Drawable) -> None:\n    print(obj.draw())\n\nrender(Circle())"
+    ]
+  },
+  "ประสิทธิภาพ": {
+    "การวัดประสิทธิภาพ": [
+      "วัดเวลาทำงานของโค้ดด้วย timeit module หรือการ profiling ด้วย cProfile ข้อผิดพลาดทั่วไป: การ optimize โดยไม่วัดก่อน — วัดประสิทธิภาพก่อนเสมอเพื่อหา bottlenecks ที่แท้จริง",
+      "import timeit\n\ntime = timeit.timeit('sum(range(1000))', number=10000)\nprint(f'Execution time: {time:.4f}s')"
+    ],
+    "หน่วยความจำและการเพิ่มประสิทธิภาพ": [
+      "Python จัดการหน่วยความจำผ่าน reference counting และ garbage collection ใช้ __slots__ เพื่อลดการใช้หน่วยความจำของคลาส ใช้ generators สำหรับลำดับข้อมูลขนาดใหญ่",
+      "class Point:\n    __slots__ = ('x', 'y')\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y"
+    ],
+    "PyPy และ JIT": [
+      "PyPy เป็น alternative Python implementation ที่มี JIT compiler ซึ่งสามารถเร่งงาน CPU-bound ได้อย่างมาก ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า PyPy เร่งทุกอย่าง — C extensions อาจทำงานช้าลงหรือไม่เข้ากัน",
+      "# PyPy is a drop-in replacement for CPython\n# python --version  # CPython\n# pypy --version    # PyPy with JIT\n# pypy my_script.py  # Run with PyPy"
+    ],
+    "NumPy Optimization": [
+      "ใช้ NumPy สำหรับการคำนวณเชิงตัวเลขที่มีประสิทธิภาพ หลีกเลี่ยง loops ใน Python — ใช้ vectorized operations แทน",
+      "import numpy as np\n\narr = np.array([1, 2, 3, 4, 5])\nprint(arr * 2)  # Vectorized, no loop"
+    ]
+  },
+  "ระบบอัตโนมัติและการเรียกดูเว็บ": [
+    "Selenium Basics": [
+      "Selenium เป็นเครื่องมือสำหรับการทดสอบและเรียกดูเว็บอัตโนมัติ รองรับหลาย browser drivers ใช้สำหรับ web scraping, การทดสอบ UI, และ task automation",
+      "from selenium import webdriver\n\ndriver = webdriver.Chrome()\ndriver.get('https://example.com')\nprint(driver.title)\ndriver.quit()"
+    ],
+    "Playwright Basics": [
+      "Playwright เป็นเครื่องมือเรียกดูเว็บสมัยใหม่ที่รองรับหลาย browser และ cross-browser testing รองรับ async และ auto-wait",
+      "from playwright.sync_api import sync_playwright\n\nwith sync_playwright() as p:\n    browser = p.chromium.launch()\n    page = browser.new_page()\n    page.goto('https://example.com')\n    print(page.title())\n    browser.close()"
+    ]
+  },
+  "Fluent Python เจาะลึก": {
+    "Data Model และ Protocols": [
+      "Python data model (dunder methods) กำหนดพฤติกรรมของออบเจกต์ Protocols เช่น Iterable, Sequence, Mapping, Context Manager กำหนดอินเทอร์เฟซมาตรฐาน",
+      "class FluentVector:\n    def __init__(self, *args):\n        self._data = list(args)\n    def __add__(self, other):\n        return FluentVector(*(a+b for a,b in zip(self._data, other._data)))\n    def __repr__(self):\n        return f'Vector({self._data})'"
+    ],
+    "Context Managers (บริบท)": [
+      "Python context manager protocol (__enter__/__exit__) ใช้กับคำสั่ง 'with' สำหรับการจัดการทรัพยากร",
+      "class ManagedFile:\n    def __init__(self, name):\n        self.name = name\n    def __enter__(self):\n        self.file = open(self.name, 'w')\n        return self.file\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        if self.file:\n            self.file.close()"
+    ]
+  },
+  "วิทยาการข้อมูลและ AI": {
+    "NumPy": [
+      "ไลบรารีหลักสำหรับการคำนวณเชิงตัวเลขใน Python ให้อาร์เรย์หลายมิติที่มีประสิทธิภาพและฟังก์ชันทางคณิตศาสตร์",
+      "import numpy as np\na = np.array([[1, 2], [3, 4]])\nb = np.array([[5, 6], [7, 8]])\nprint(a @ b)  # Matrix multiplication"
+    ],
+    "Pandas": [
+      "ไลบรารีสำหรับการจัดการและวิเคราะห์ข้อมูล ให้ DataFrame สำหรับข้อมูลแบบตาราง",
+      "import pandas as pd\ndf = pd.DataFrame({'name': ['Alice', 'Bob'], 'age': [30, 25]})\nprint(df[df['age'] > 25])"
+    ],
+    "Matplotlib": [
+      "ไลบรารีสำหรับการสร้างกราฟและ visualization ใน Python",
+      "import matplotlib.pyplot as plt\nplt.plot([1, 2, 3], [1, 4, 9])\nplt.savefig('plot.png')"
+    ],
+    "Scikit-learn": [
+      "ไลบรารี machine learning ที่ครอบคลุม สำหรับ classification, regression, clustering และอื่นๆ",
+      "from sklearn.ensemble import RandomForestClassifier\nmodel = RandomForestClassifier()\nmodel.fit(X_train, y_train)"
+    ]
+  },
+  "AI และวิศวกรรม LLM": {
+    "OpenAI API": [
+      "API สำหรับเข้าถึงโมเดล GPT (Generative Pre-trained Transformer) ใช้สร้างข้อความ, ตอบคำถาม, และทำงาน NLP ต่างๆ",
+      "from openai import OpenAI\n\nclient = OpenAI()\nresp = client.chat.completions.create(\n    model='gpt-4',\n    messages=[{\"role\": \"user\", \"content\": \"Hello\"}]\n)\nprint(resp.choices[0].message.content)"
+    ],
+    "LangChain": [
+      "เฟรมเวิร์กสำหรับสร้างแอปพลิเคชันด้วย LLMs จัดการ chains, prompts, memory, และการเรียก tools",
+      "from langchain.llms import OpenAI\nfrom langchain.prompts import PromptTemplate\n\nllm = OpenAI()\nprompt = PromptTemplate.from_template(\"Translate: {text}\")\nchain = prompt | llm"
+    ],
+    "Prompt Engineering": [
+      "การออกแบบ prompts ที่มีประสิทธิภาพสำหรับ LLMs รวมถึง system prompts, few-shot learning, และ chain-of-thought",
+      "system_prompt = \"You are a helpful coding tutor.\"\nuser_prompt = \"Explain Python decorators.\""
+    ],
+    "Embeddings และ Vector Search": [
+      "Embeddings แสดงความหมายของข้อความเป็นเวกเตอร์ ใช้สำหรับ semantic search, clustering, และ recommendation",
+      "from openai import OpenAI\n\nclient = OpenAI()\nresp = client.embeddings.create(\n    model='text-embedding-ada-002',\n    input=['Hello world']\n)\nembedding = resp.data[0].embedding"
+    ]
+  },
+  "วิศวกรรม AI ขั้นสูง": {
+    "Fine-tuning": [
+      "การปรับแต่งโมเดลที่ผ่านการฝึกมาแล้วบนชุดข้อมูลเฉพาะเพื่อปรับปรุงประสิทธิภาพในงานเฉพาะทาง",
+      "# Fine-tuning with Hugging Face\nfrom transformers import AutoModelForCausalLM, Trainer\n\nmodel = AutoModelForCausalLM.from_pretrained('gpt2')\n# trainer = Trainer(model=model, train_dataset=dataset)\n# trainer.train()"
+    ],
+    "RAG (Retrieval-Augmented Generation)": [
+      "RAG รวมการค้นหาด้วยการสร้างข้อความ ดึงข้อมูลที่เกี่ยวข้องจากฐานความรู้ก่อนสร้างคำตอบ",
+      "# RAG pipeline concept\n# 1. Embed query → 2. Search vector DB → 3. Retrieve chunks → 4. Generate with context"
+    ],
+    "Agent Systems": [
+      "ระบบ Agent ที่ใช้ LLMs เพื่อตัดสินใจ, เรียก tools, และแก้ปัญหาหลายขั้นตอน",
+      "# Agent concept\nagent = create_agent(tools=[search, calculator, code])\nresult = agent.run(\"Find the latest research on AI\")"
+    ]
   }
 }

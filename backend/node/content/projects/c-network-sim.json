@@ -1,0 +1,23 @@
+{
+  "id": "c-network-sim",
+  "title": "C: Network (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "networking", "simulation", "structs", "buffers"],
+  "description": "Simulate a simple network protocol with packet creation, sending, and receiving over a virtual channel.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Packet Creation and Send",
+      "description": "Define a `Packet` struct with src, dst, type, payload (char[64]), and length. Write `void send_packet(Packet *p)` that prints the packet details. Create a packet from 1 to 2 with payload 'Hello' and send it.",
+      "hints": ["Packet fields: src, dst, type (DATA/ACK), payload, len.", "Use `typedef enum { DATA, ACK } PacketType;`.", "Print: 'Packet: 1 -> 2 [DATA] Hello'."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <string.h>\n\ntypedef enum { DATA, ACK } PacketType;\n\ntypedef struct { int src, dst; PacketType type; char payload[64]; int len; } Packet;\n\nvoid send_packet(Packet *p) {\n    printf(\"Packet: %d -> %d [%s] %s\\n\", p->src, p->dst, p->type==DATA?\"DATA\":\"ACK\", p->payload);\n}\n\nint main() {\n    Packet p;\n    p.src = 1; p.dst = 2; p.type = DATA;\n    strcpy(p.payload, \"Hello\"); p.len = strlen(p.payload);\n    send_packet(&p);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1 -> 2') && output.includes('Hello')",
+        "successMessage": "Network simulation works!",
+        "failureMessage": "Create and send a packet from node 1 to node 2"
+      }
+    }
+  ]
+}

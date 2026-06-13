@@ -1,0 +1,71 @@
+{
+  "id": "rs-immutable-collections",
+  "title": "Rust: Immutable Collections",
+  "difficulty": "expert",
+  "languages": ["rust"],
+  "estimatedMinutes": 35,
+  "concepts": ["rust", "immutable", "persistent", "functional", "structural sharing"],
+  "description": "Implement immutable/persistent data structures with structural sharing.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Immutable List (Cons)",
+      "description": "Create an immutable linked list using `Rc` (reference counting). Define `enum ImList<T> { Cons(T, Rc<ImList<T>>), Nil }`. Create [1, 2, 3] and print.",
+      "hints": ["`enum ImList<T> { Cons(T, Rc<ImList<T>>), Nil }`", "`use std::rc::Rc;`", "Create: `Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Nil))))))`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('1') && output.contains('2') && output.contains('3')",
+        "successMessage": "Immutable list created!",
+        "failureMessage": "Create and print an immutable list [1,2,3]."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Structural Sharing",
+      "description": "Demonstrate structural sharing: create an immutable list `list1 = [1, 2, 3, 4]`. Create `list2` by prepending 0 to `list1`. Print both and show they share the tail.",
+      "hints": ["`let list1 = ImList::from_vec(vec![1, 2, 3, 4]);`", "`let list2 = list1.prepend(0);`", "Both lists share the [1,2,3,4] tail (Rc handles reference counting)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('0') && output.contains('1') && output.contains('4')",
+        "successMessage": "Structural sharing works!",
+        "failureMessage": "Create list1, create list2 by prepending, print both."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Immutable Map (HAMT)",
+      "description": "Implement a simple persistent hash array mapped trie (HAMT) or a simpler persistent map using a sorted `Vec<(K, V)>` with structural sharing. Support `insert`, `get`, and `remove`.",
+      "hints": ["Simpler approach: persistent map using sorted Vec with structural sharing.", "`insert` returns a new map with the entry added (doesn't modify old).", "`get` does binary search on the sorted Vec."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('value')",
+        "successMessage": "Immutable map works!",
+        "failureMessage": "Create map, insert a key, and retrieve it."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Immutability with Cloning",
+      "description": "Create a `Person` struct and demonstrate that after \"modification\" (using functional update), the original remains unchanged. Show both old and new versions.",
+      "hints": ["`let alice = Person { name: \"Alice\".into(), age: 30 };`", "`let bob = Person { name: \"Bob\".into(), ..alice };` (struct update syntax)", "Bob has a different name but same age as Alice."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Alice') && output.contains('Bob') && output.contains('30')",
+        "successMessage": "Immutability demonstrated!",
+        "failureMessage": "Show original unchanged and new version with updates."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Functional Operations",
+      "description": "Implement `map`, `filter`, and `fold` on `ImList<T>` that return new lists (not modifying the original). Chain: filter even numbers, map to squares, fold to sum. Test with [1, 2, 3, 4, 5].",
+      "hints": ["`fn map<U, F>(&self, f: F) -> ImList<U> where F: Fn(&T) -> U`", "Build the result by prepending in reverse order.", "Chain: `list.filter(|x| x % 2 == 0).map(|x| x * x).fold(0, |a, x| a + x)` → 4+16=20"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('20')",
+        "successMessage": "Functional operations chain works!",
+        "failureMessage": "Filter even, map to square, fold sum of [1..5] = 20."
+      }
+    }
+  ]
+}

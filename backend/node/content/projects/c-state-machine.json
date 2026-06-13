@@ -1,0 +1,23 @@
+{
+  "id": "c-state-machine",
+  "title": "C: State Machine",
+  "difficulty": "advanced",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "state machine", "FSM", "design patterns", "function pointers"],
+  "description": "Implement a finite state machine using function pointers for a simple traffic light controller.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Traffic Light FSM",
+      "description": "Define states: GREEN, YELLOW, RED. Implement a state machine where GREEN -> YELLOW (after 5s), YELLOW -> RED (after 2s), RED -> GREEN (after 5s). Simulate 6 transitions and print the state each time.",
+      "hints": ["Each state is a function pointer that returns the next state.", "`void (*state)(void)` -> `State transition(State s)`.", "Use `typedef enum { GREEN, YELLOW, RED } State;`."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { GREEN, YELLOW, RED } State;\n\nconst char* state_name(State s) {\n    switch(s) { case GREEN: return \"GREEN\"; case YELLOW: return \"YELLOW\"; case RED: return \"RED\"; }\n    return \"\";\n}\n\nState next_state(State s) {\n    switch(s) {\n        case GREEN: return YELLOW;\n        case YELLOW: return RED;\n        case RED: return GREEN;\n    }\n}\n\nint main() {\n    State s = GREEN;\n    for (int i = 0; i < 6; i++) {\n        printf(\"State: %s\\n\", state_name(s));\n        s = next_state(s);\n    }\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('GREEN') && output.includes('YELLOW') && output.includes('RED')",
+        "successMessage": "State machine works!",
+        "failureMessage": "Run the traffic light FSM through 6 transitions"
+      }
+    }
+  ]
+}

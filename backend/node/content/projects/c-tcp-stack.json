@@ -1,0 +1,23 @@
+{
+  "id": "c-tcp-stack",
+  "title": "C: TCP Stack (Simulated)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 30,
+  "concepts": ["c", "TCP", "state machine", "networking", "protocol", "simulation"],
+  "description": "Simulate a simplified TCP state machine with states like CLOSED, SYN_SENT, ESTABLISHED, FIN_WAIT.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "TCP State Machine",
+      "description": "Define TCP states as an enum: CLOSED, LISTEN, SYN_SENT, SYN_RCVD, ESTABLISHED, FIN_WAIT_1, FIN_WAIT_2, TIME_WAIT, CLOSED. Implement a `tcp_handshake` function that transitions through: CLOSED -> SYN_SENT -> ESTABLISHED (client side). Print each state transition.",
+      "hints": ["Enum for TCP states.", "Function `const char* state_name(State s)` for printing.", "Simulate: send SYN -> receive SYN+ACK -> send ACK."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef enum { CLOSED, LISTEN, SYN_SENT, SYN_RCVD, ESTABLISHED, FIN_WAIT_1, FIN_WAIT_2, TIME_WAIT } State;\n\nconst char* state_name(State s) {\n    switch(s) {\n        case CLOSED: return \"CLOSED\";\n        case SYN_SENT: return \"SYN_SENT\";\n        case SYN_RCVD: return \"SYN_RCVD\";\n        case ESTABLISHED: return \"ESTABLISHED\";\n        default: return \"OTHER\";\n    }\n}\n\nint main() {\n    State s = CLOSED;\n    printf(\"State: %s\\n\", state_name(s));\n    // Client sends SYN\n    s = SYN_SENT;\n    printf(\"Send SYN -> %s\\n\", state_name(s));\n    // Server receives SYN, sends SYN+ACK\n    // Client receives SYN+ACK, sends ACK\n    s = ESTABLISHED;\n    printf(\"Receive SYN+ACK, send ACK -> %s\\n\", state_name(s));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('CLOSED') && output.includes('SYN_SENT') && output.includes('ESTABLISHED')",
+        "successMessage": "TCP state simulation works!",
+        "failureMessage": "Simulate TCP handshake through all states"
+      }
+    }
+  ]
+}

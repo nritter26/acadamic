@@ -1,0 +1,117 @@
+{
+  "id": "express-auth-apikey",
+  "title": "API Key Authentication",
+  "difficulty": "beginner",
+  "languages": ["javascript", "typescript", "python", "go"],
+  "estimatedMinutes": 20,
+  "concepts": ["api-key", "middleware", "express", "header-validation", "security"],
+  "description": "Build an Express API that protects routes using API key authentication via a custom middleware.",
+  "serverMode": true,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Public endpoint",
+      "description": "Create a GET /public endpoint that returns a welcome message. This route should be accessible without any authentication.",
+      "hints": [
+        "Use app.get('/public', handler) to define the route",
+        "Return JSON with a message like { message: 'Welcome to the public endpoint!' }",
+        "No auth checks needed for this route"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/public",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "message"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Protected endpoint",
+      "description": "Add a GET /protected endpoint that returns 401 if the x-api-key header is missing or invalid, and returns 200 with data if the API key is valid.",
+      "hints": [
+        "Define a hardcoded valid API key: const API_KEY = 'my-secret-key'",
+        "Check req.headers['x-api-key'] against the valid key",
+        "Return 401 with { error: 'Unauthorized' } if missing or invalid"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst API_KEY = 'my-secret-key';\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/protected', (req, res) => {\n  const apiKey = req.headers['x-api-key'];\n  if (!apiKey || apiKey !== API_KEY) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  res.json({ message: 'Welcome to the protected endpoint!', data: 'sensitive data' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst API_KEY = 'my-secret-key';\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/protected', (req: Request, res: Response) => {\n  const apiKey = req.headers['x-api-key'];\n  if (!apiKey || apiKey !== API_KEY) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  res.json({ message: 'Welcome to the protected endpoint!', data: 'sensitive data' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nAPI_KEY = 'my-secret-key'\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n\n@app.get('/protected')\ndef protected(request: Request):\n    api_key = request.headers.get('x-api-key')\n    if not api_key or api_key != API_KEY:\n        return {'error': 'Unauthorized'}\n    return {'message': 'Welcome to the protected endpoint!', 'data': 'sensitive data'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nconst API_KEY = \"my-secret-key\"\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.HandleFunc(\"/protected\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tapiKey := r.Header.Get(\"x-api-key\")\n\t\tif apiKey != API_KEY {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Unauthorized\"})\n\t\t\treturn\n\t\t}\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the protected endpoint!\", \"data\": \"sensitive data\"})\n\t})\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/protected",
+            "expectedStatus": 401,
+            "expectedBodySubstring": "Unauthorized"
+          },
+          {
+            "method": "GET",
+            "path": "/protected",
+            "headers": {
+              "x-api-key": "my-secret-key"
+            },
+            "expectedStatus": 200,
+            "expectedBodySubstring": "sensitive"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "API key middleware",
+      "description": "Refactor the API key check into a reusable middleware function that can be applied to any protected route.",
+      "hints": [
+        "Create an apiKeyMiddleware function: (req, res, next) => { ... }",
+        "Use app.get('/protected', apiKeyMiddleware, handler) to apply it",
+        "Export or reuse the middleware across multiple routes"
+      ],
+      "codeTemplate": {
+        "javascript": "const express = require('express');\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst API_KEY = 'my-secret-key';\n\nfunction apiKeyMiddleware(req, res, next) {\n  const apiKey = req.headers['x-api-key'];\n  if (!apiKey || apiKey !== API_KEY) {\n    return res.status(401).json({ error: 'Unauthorized' });\n  }\n  next();\n}\n\napp.get('/public', (req, res) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/protected', apiKeyMiddleware, (req, res) => {\n  res.json({ message: 'Welcome to the protected endpoint!', data: 'sensitive data' });\n});\n\napp.get('/admin', apiKeyMiddleware, (req, res) => {\n  res.json({ message: 'Admin panel', data: 'admin data' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "typescript": "import express, { Request, Response, NextFunction } from 'express';\nconst app = express();\nconst port = process.env.PORT || 3000;\n\napp.use(express.json());\n\nconst API_KEY = 'my-secret-key';\n\nfunction apiKeyMiddleware(req: Request, res: Response, next: NextFunction): void {\n  const apiKey = req.headers['x-api-key'];\n  if (!apiKey || apiKey !== API_KEY) {\n    res.status(401).json({ error: 'Unauthorized' });\n    return;\n  }\n  next();\n}\n\napp.get('/public', (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the public endpoint!' });\n});\n\napp.get('/protected', apiKeyMiddleware, (req: Request, res: Response) => {\n  res.json({ message: 'Welcome to the protected endpoint!', data: 'sensitive data' });\n});\n\napp.get('/admin', apiKeyMiddleware, (req: Request, res: Response) => {\n  res.json({ message: 'Admin panel', data: 'admin data' });\n});\n\napp.listen(port, () => console.log(`Server on port ${port}`));\n",
+        "python": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nimport os\n\napp = FastAPI()\nport = int(os.getenv('PORT', 3000))\n\nAPI_KEY = 'my-secret-key'\n\ndef api_key_middleware(request: Request):\n    api_key = request.headers.get('x-api-key')\n    if not api_key or api_key != API_KEY:\n        return JSONResponse(status_code=401, content={'error': 'Unauthorized'})\n    return None\n\n@app.get('/public')\ndef public():\n    return {'message': 'Welcome to the public endpoint!'}\n\n@app.get('/protected')\ndef protected(request: Request):\n    err = api_key_middleware(request)\n    if err:\n        return err\n    return {'message': 'Welcome to the protected endpoint!', 'data': 'sensitive data'}\n\n@app.get('/admin')\ndef admin(request: Request):\n    err = api_key_middleware(request)\n    if err:\n        return err\n    return {'message': 'Admin panel', 'data': 'admin data'}\n",
+        "go": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"os\"\n)\n\nconst API_KEY = \"my-secret-key\"\n\nfunc apiKeyMiddleware(next http.HandlerFunc) http.HandlerFunc {\n\treturn func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tapiKey := r.Header.Get(\"x-api-key\")\n\t\tif apiKey != API_KEY {\n\t\t\tw.WriteHeader(http.StatusUnauthorized)\n\t\t\tjson.NewEncoder(w).Encode(map[string]string{\"error\": \"Unauthorized\"})\n\t\t\treturn\n\t\t}\n\t\tnext(w, r)\n\t}\n}\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"3000\"\n\t}\n\n\thttp.HandleFunc(\"/public\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the public endpoint!\"})\n\t})\n\n\thttp.HandleFunc(\"/protected\", apiKeyMiddleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Welcome to the protected endpoint!\", \"data\": \"sensitive data\"})\n\t}))\n\n\thttp.HandleFunc(\"/admin\", apiKeyMiddleware(func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tjson.NewEncoder(w).Encode(map[string]string{\"message\": \"Admin panel\", \"data\": \"admin data\"})\n\t}))\n\n\thttp.ListenAndServe(\":\"+port, nil)\n}\n"
+      },
+      "verification": {
+        "mode": "http",
+        "tests": [
+          {
+            "method": "GET",
+            "path": "/admin",
+            "headers": {
+              "x-api-key": "my-secret-key"
+            },
+            "expectedStatus": 200,
+            "expectedBodySubstring": "admin"
+          },
+          {
+            "method": "GET",
+            "path": "/admin",
+            "expectedStatus": 401,
+            "expectedBodySubstring": "Unauthorized"
+          },
+          {
+            "method": "GET",
+            "path": "/public",
+            "expectedStatus": 200,
+            "expectedBodySubstring": "public"
+          }
+        ]
+      }
+    }
+  ]
+}

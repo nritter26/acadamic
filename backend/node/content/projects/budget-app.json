@@ -1,0 +1,121 @@
+{
+  "id": "budget-app",
+  "title": "Budget App",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "objects",
+    "arrays",
+    "budget math",
+    "data aggregation",
+    "reporting"
+  ],
+  "description": "Build a budget application that tracks expenses by category, monitors spending limits, and generates monthly reports.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define budget categories with limits",
+      "description": "Create a `budgetCategories` array with objects containing `id`, `name`, and `limit` (max spending per month). Also create an empty `expenses` array. Log the categories.",
+      "hints": [
+        "Category: { id: 'food', name: 'Food & Dining', limit: 500 }",
+        "Create 4 categories: food, transportation, entertainment, utilities",
+        "Log both the categories and empty expenses array"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"budget\"></div>\n<script>\nconst budgetCategories = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 },\n  { id: \"transport\", name: \"Transportation\", limit: 200 },\n  { id: \"entertainment\", name: \"Entertainment\", limit: 150 },\n  { id: \"utilities\", name: \"Utilities\", limit: 300 }\n];\n\nconst expenses = [];\n\nconsole.log(JSON.stringify(budgetCategories));\nconsole.log(\"Expenses count:\", expenses.length);\ndocument.getElementById('budget').textContent = \"Categories: \" + budgetCategories.length;\n</script>\n",
+        "typescript": "<div id=\"budget\"></div>\n<script>\ninterface BudgetCategory {\n  id: string;\n  name: string;\n  limit: number;\n}\n\ninterface Expense {\n  id: number;\n  categoryId: string;\n  amount: number;\n  date: string;\n  description: string;\n}\n\nconst budgetCategories: BudgetCategory[] = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 },\n  { id: \"transport\", name: \"Transportation\", limit: 200 },\n  { id: \"entertainment\", name: \"Entertainment\", limit: 150 },\n  { id: \"utilities\", name: \"Utilities\", limit: 300 }\n];\n\nconst expenses: Expense[] = [];\n\nconsole.log(JSON.stringify(budgetCategories));\nconsole.log(\"Expenses count:\", expenses.length);\ndocument.getElementById('budget').textContent = \"Categories: \" + budgetCategories.length;\n</script>\n",
+        "python": "import json\n\nbudgetCategories = [\n  {\"id\": \"food\", \"name\": \"Food & Dining\", \"limit\": 500},\n  {\"id\": \"transport\", \"name\": \"Transportation\", \"limit\": 200},\n  {\"id\": \"entertainment\", \"name\": \"Entertainment\", \"limit\": 150},\n  {\"id\": \"utilities\", \"name\": \"Utilities\", \"limit\": 300}\n]\n\nexpenses = []\n\nprint(json.dumps(budgetCategories))\nprint(\"Expenses count:\", len(expenses))\n"
+      },
+      "verification": {
+        "test": "output.includes('food') && output.includes('500') && output.includes('Expenses count: 0')",
+        "successMessage": "Budget categories with limits and expenses array are initialized!",
+        "failureMessage": "Create at least 4 budget categories with id, name, and limit fields, plus an empty expenses array."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement addExpense function",
+      "description": "Write an `addExpense` function that takes `categoryId`, `amount`, `date`, and `description`. Creates an expense object with a unique id and appends it to the expenses array. Log the new expense.",
+      "hints": [
+        "Generate id: expenses.length + 1 or Date.now()",
+        "Create expense: { id: nextId, categoryId, amount, date, description }",
+        "Use expenses.push(newExpense) to add, then log the new expense"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"budget\"></div>\n<script>\nconst budgetCategories = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 }\n];\n\nconst expenses = [];\n\nfunction addExpense(categoryId, amount, date, description) {\n  \n}\n\naddExpense(\"food\", 45.50, \"2025-01-15\", \"Groceries\");\naddExpense(\"food\", 12.00, \"2025-01-16\", \"Coffee\");\nconsole.log(JSON.stringify(expenses));\ndocument.getElementById('budget').textContent = \"Expenses: \" + expenses.length;\n</script>\n",
+        "typescript": "<div id=\"budget\"></div>\n<script>\ninterface Expense {\n  id: number;\n  categoryId: string;\n  amount: number;\n  date: string;\n  description: string;\n}\n\nconst budgetCategories: { id: string; name: string; limit: number }[] = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 }\n];\n\nconst expenses: Expense[] = [];\n\nfunction addExpense(categoryId: string, amount: number, date: string, description: string): void {\n  \n}\n\naddExpense(\"food\", 45.50, \"2025-01-15\", \"Groceries\");\naddExpense(\"food\", 12.00, \"2025-01-16\", \"Coffee\");\nconsole.log(JSON.stringify(expenses));\ndocument.getElementById('budget').textContent = \"Expenses: \" + expenses.length;\n</script>\n",
+        "python": "budgetCategories = [\n  {\"id\": \"food\", \"name\": \"Food & Dining\", \"limit\": 500}\n]\n\nexpenses = []\n\ndef addExpense(categoryId, amount, date, description):\n  \n\naddExpense(\"food\", 45.50, \"2025-01-15\", \"Groceries\")\naddExpense(\"food\", 12.00, \"2025-01-16\", \"Coffee\")\nimport json\nprint(json.dumps(expenses))\n"
+      },
+      "verification": {
+        "test": "output.includes('Groceries') && output.includes('45.5') && output.includes('food')",
+        "successMessage": "Expenses can be added with all required fields!",
+        "failureMessage": "addExpense should create an expense object with id, categoryId, amount, date, and description, then add it to the expenses array."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Calculate spending by category",
+      "description": "Write a `getCategorySpending` function that takes a `categoryId` and returns the total amount spent in that category. Log the total for food.",
+      "hints": [
+        "Filter expenses by categoryId: expenses.filter(e => e.categoryId === categoryId)",
+        "Sum the amounts: .reduce((sum, e) => sum + e.amount, 0) or loop",
+        "Return the total (rounded to 2 decimal places)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"budget\"></div>\n<script>\nconst expenses = [\n  { id: 1, categoryId: \"food\", amount: 45.50, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"food\", amount: 12.00, date: \"2025-01-16\", description: \"Coffee\" },\n  { id: 3, categoryId: \"transport\", amount: 30.00, date: \"2025-01-15\", description: \"Gas\" }\n];\n\nfunction getCategorySpending(categoryId) {\n  \n}\n\nconsole.log(\"Food spending:\", getCategorySpending(\"food\"));\nconsole.log(\"Transport spending:\", getCategorySpending(\"transport\"));\ndocument.getElementById('budget').textContent = \"Food: $\" + getCategorySpending(\"food\");\n</script>\n",
+        "typescript": "<div id=\"budget\"></div>\n<script>\ninterface Expense {\n  id: number;\n  categoryId: string;\n  amount: number;\n  date: string;\n  description: string;\n}\n\nconst expenses: Expense[] = [\n  { id: 1, categoryId: \"food\", amount: 45.50, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"food\", amount: 12.00, date: \"2025-01-16\", description: \"Coffee\" },\n  { id: 3, categoryId: \"transport\", amount: 30.00, date: \"2025-01-15\", description: \"Gas\" }\n];\n\nfunction getCategorySpending(categoryId: string): number {\n  \n}\n\nconsole.log(\"Food spending:\", getCategorySpending(\"food\"));\nconsole.log(\"Transport spending:\", getCategorySpending(\"transport\"));\ndocument.getElementById('budget').textContent = \"Food: $\" + getCategorySpending(\"food\");\n</script>\n",
+        "python": "expenses = [\n  {\"id\": 1, \"categoryId\": \"food\", \"amount\": 45.50, \"date\": \"2025-01-15\", \"description\": \"Groceries\"},\n  {\"id\": 2, \"categoryId\": \"food\", \"amount\": 12.00, \"date\": \"2025-01-16\", \"description\": \"Coffee\"},\n  {\"id\": 3, \"categoryId\": \"transport\", \"amount\": 30.00, \"date\": \"2025-01-15\", \"description\": \"Gas\"}\n]\n\ndef getCategorySpending(categoryId):\n  \n\nprint(\"Food spending:\", getCategorySpending(\"food\"))\nprint(\"Transport spending:\", getCategorySpending(\"transport\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('57.5') && output.includes('30')",
+        "successMessage": "Category spending calculates the correct totals!",
+        "failureMessage": "getCategorySpending('food') should return 57.5 (45.50 + 12.00). getCategorySpending('transport') should return 30."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Check budget alerts",
+      "description": "Write a `checkBudgetAlerts` function that returns an array of categories where spending has exceeded the limit. Log the alerts.",
+      "hints": [
+        "Loop through budgetCategories",
+        "For each category, get its spending and compare to its limit",
+        "If spending > limit, include: { id, name, spent, limit, overBy }"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"budget\"></div>\n<script>\nconst budgetCategories = [\n  { id: \"food\", name: \"Food & Dining\", limit: 50 },\n  { id: \"transport\", name: \"Transportation\", limit: 200 }\n];\n\nconst expenses = [\n  { id: 1, categoryId: \"food\", amount: 60, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"transport\", amount: 30, date: \"2025-01-15\", description: \"Gas\" }\n];\n\nfunction checkBudgetAlerts() {\n  \n}\n\nconsole.log(JSON.stringify(checkBudgetAlerts()));\ndocument.getElementById('budget').textContent = JSON.stringify(checkBudgetAlerts());\n</script>\n",
+        "typescript": "<div id=\"budget\"></div>\n<script>\ninterface BudgetAlert {\n  id: string;\n  name: string;\n  spent: number;\n  limit: number;\n  overBy: number;\n}\n\nconst budgetCategories = [\n  { id: \"food\", name: \"Food & Dining\", limit: 50 },\n  { id: \"transport\", name: \"Transportation\", limit: 200 }\n];\n\nconst expenses = [\n  { id: 1, categoryId: \"food\", amount: 60, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"transport\", amount: 30, date: \"2025-01-15\", description: \"Gas\" }\n];\n\nfunction checkBudgetAlerts(): BudgetAlert[] {\n  \n}\n\nconsole.log(JSON.stringify(checkBudgetAlerts()));\ndocument.getElementById('budget').textContent = JSON.stringify(checkBudgetAlerts());\n</script>\n",
+        "python": "budgetCategories = [\n  {\"id\": \"food\", \"name\": \"Food & Dining\", \"limit\": 50},\n  {\"id\": \"transport\", \"name\": \"Transportation\", \"limit\": 200}\n]\n\nexpenses = [\n  {\"id\": 1, \"categoryId\": \"food\", \"amount\": 60, \"date\": \"2025-01-15\", \"description\": \"Groceries\"},\n  {\"id\": 2, \"categoryId\": \"transport\", \"amount\": 30, \"date\": \"2025-01-15\", \"description\": \"Gas\"}\n]\n\ndef checkBudgetAlerts():\n  \n\nimport json\nprint(json.dumps(checkBudgetAlerts()))\n"
+      },
+      "verification": {
+        "test": "output.includes('food') && output.includes('over') && output.includes('10')",
+        "successMessage": "Budget alerts detect categories that exceed their limits!",
+        "failureMessage": "checkBudgetAlerts should return an array with 'food' overspent by $10 (spent $60, limit $50)."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Generate monthly budget report",
+      "description": "Write a `monthlyReport` function that takes a `month` and `year`, and returns a formatted string with each category's spending, limit, remaining, and alert status.",
+      "hints": [
+        "Filter expenses by date: e.date.startsWith(year + '-' + month)",
+        "For each category, show: 'name: $spent / $limit ($remaining remaining)'",
+        "Add '[OVER]' or '[OK]' tag based on whether limit is exceeded"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"budget\"></div>\n<script>\nconst budgetCategories = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 },\n  { id: \"entertainment\", name: \"Entertainment\", limit: 150 }\n];\n\nconst expenses = [\n  { id: 1, categoryId: \"food\", amount: 200, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"food\", amount: 100, date: \"2025-01-20\", description: \"Restaurant\" },\n  { id: 3, categoryId: \"entertainment\", amount: 200, date: \"2025-01-18\", description: \"Concert\" }\n];\n\nfunction monthlyReport(month, year) {\n  \n}\n\nconsole.log(monthlyReport(\"01\", \"2025\"));\ndocument.getElementById('budget').innerHTML = \"<pre>\" + monthlyReport(\"01\", \"2025\") + \"</pre>\";\n</script>\n",
+        "typescript": "<div id=\"budget\"></div>\n<script>\ninterface BudgetCategory {\n  id: string;\n  name: string;\n  limit: number;\n}\n\ninterface Expense {\n  id: number;\n  categoryId: string;\n  amount: number;\n  date: string;\n  description: string;\n}\n\nconst budgetCategories: BudgetCategory[] = [\n  { id: \"food\", name: \"Food & Dining\", limit: 500 },\n  { id: \"entertainment\", name: \"Entertainment\", limit: 150 }\n];\n\nconst expenses: Expense[] = [\n  { id: 1, categoryId: \"food\", amount: 200, date: \"2025-01-15\", description: \"Groceries\" },\n  { id: 2, categoryId: \"food\", amount: 100, date: \"2025-01-20\", description: \"Restaurant\" },\n  { id: 3, categoryId: \"entertainment\", amount: 200, date: \"2025-01-18\", description: \"Concert\" }\n];\n\nfunction monthlyReport(month: string, year: string): string {\n  \n}\n\nconsole.log(monthlyReport(\"01\", \"2025\"));\ndocument.getElementById('budget').innerHTML = \"<pre>\" + monthlyReport(\"01\", \"2025\") + \"</pre>\";\n</script>\n",
+        "python": "budgetCategories = [\n  {\"id\": \"food\", \"name\": \"Food & Dining\", \"limit\": 500},\n  {\"id\": \"entertainment\", \"name\": \"Entertainment\", \"limit\": 150}\n]\n\nexpenses = [\n  {\"id\": 1, \"categoryId\": \"food\", \"amount\": 200, \"date\": \"2025-01-15\", \"description\": \"Groceries\"},\n  {\"id\": 2, \"categoryId\": \"food\", \"amount\": 100, \"date\": \"2025-01-20\", \"description\": \"Restaurant\"},\n  {\"id\": 3, \"categoryId\": \"entertainment\", \"amount\": 200, \"date\": \"2025-01-18\", \"description\": \"Concert\"}\n]\n\ndef monthlyReport(month, year):\n  \n\nprint(monthlyReport(\"01\", \"2025\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('Food') && output.includes('Entertainment') && output.includes('OVER')",
+        "successMessage": "Monthly report shows category breakdown with over-budget alerts!",
+        "failureMessage": "monthlyReport should show 'Food & Dining: $300 / $500 ($200 remaining) [OK]' and 'Entertainment: $200 / $150 ($-50 remaining) [OVER]'."
+      }
+    }
+  ]
+}

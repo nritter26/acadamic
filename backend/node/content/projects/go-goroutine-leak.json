@@ -1,0 +1,116 @@
+{
+  "id": "go-goroutine-leak",
+  "title": "Go: Goroutine Leak Prevention",
+  "description": "Write a Go program that demonstrates proper goroutine cleanup using context cancellation.",
+  "difficulty": "advanced",
+  "languages": [
+    "go"
+  ],
+  "codeTemplate": {
+    "go": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc worker(ctx context.Context, id int) {\n\tfor {\n\t\tselect {\n\t\tcase <-ctx.Done():\n\t\t\tfmt.Printf(\"Worker %d stopping\\n\", id)\n\t\t\treturn\n\t\tdefault:\n\t\t\tfmt.Printf(\"Worker %d working\\n\", id)\n\t\t\ttime.Sleep(10 * time.Millisecond)\n\t\t}\n\t}\n}\n\nfunc main() {\n\tctx, cancel := context.WithCancel(context.Background())\n\n\tgo worker(ctx, 1)\n\tgo worker(ctx, 2)\n\n\ttime.Sleep(30 * time.Millisecond)\n\tcancel()\n\ttime.Sleep(10 * time.Millisecond)\n\tfmt.Println(\"Done\")\n}"
+  },
+  "verificationTest": "output.includes('Worker 1 working') || output.includes('Worker 2 working') && output.includes('Done')",
+  "hints": [
+    "Use `context.WithCancel` to create a cancellable context",
+    "Goroutines should check `ctx.Done()` via select to know when to stop",
+    "Call `cancel()` when the goroutine's work is no longer needed",
+    "Always clean up goroutines to prevent memory leaks"
+  ],
+  "estimatedMinutes": 40,
+  "concepts": [
+    "general",
+    "go"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Go: Goroutine Leak Prevention project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Go: Goroutine Leak Prevention",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "go": "// Step 1: Set up the Go: Goroutine Leak Prevention project\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Goroutine Leak Prevention...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Go: Goroutine Leak Prevention",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "go": "// Step 2: Implement the core logic for Go: Goroutine Leak Prevention\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Goroutine Leak Prevention...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "go": "// Step 3: Handle edge cases and errors\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Goroutine Leak Prevention...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "go": "// Step 4: Format and display the output\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Goroutine Leak Prevention...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "go": "// Step 5: Test with sample inputs\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n  // Your code here\n  fmt.Println(\"Testing Go: Goroutine Leak Prevention...\")\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

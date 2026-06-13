@@ -1,0 +1,507 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "Introduction to Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "Variables and data types in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "Operators in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "Control flow statements in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "Functions in Ruby.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "Working with collections in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "String manipulation in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "Key-value data structures in Ruby.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "OOP concepts in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "Inheritance patterns in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "Interfaces and contracts in Ruby.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "Exception handling in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "Debugging Ruby code.",
+      "code": "",
+      "exercises": []
+    },
+    "Exception Hierarchy": [
+      "Ruby's exception hierarchy: Exception (top) > StandardError (what you should rescue) > RuntimeError (default for raise), NoMethodError, TypeError, ArgumentError, ZeroDivisionError, IOError, and more. Never rescue Exception directly — you'll catch SignalException, SystemExit, and NoMemoryError. Rescue specific types for precise handling. Use the exception's backtrace for debugging.",
+      "# Hierarchy\n# Exception\n#   StandardError (rescue this, not Exception)\n#     RuntimeError (default raise)\n#     ArgumentError\n#     TypeError\n#     NoMethodError\n#     ZeroDivisionError\n#     IOError\n#   NoMemoryError\n#   SystemExit\n#   SignalException\n\n# Rescue multiple types\nbegin\n  risky_operation\nrescue ArgumentError => e\n  puts \"Bad argument: #{e.message}\"\nrescue NoMethodError => e\n  puts \"Missing method: #{e.message}\"\nend\n\n# Rescue with condition\nbegin\n  result = process(input)\nrescue => e\n  raise if e.is_a?(FatalError)  # re-raise fatal\n  puts \"Handled: #{e.message}\"\nend\n\n# Backtrace\nbegin; raise \"test\"; rescue => e; puts e.backtrace.first(3); end"
+    ],
+    "begin/rescue/ensure": [
+      "Ruby uses begin/rescue/ensure/else for exception handling. rescue catches exceptions by class. Multiple rescue blocks for different exceptions. ensure always runs (like finally). else runs if no exception. raise/throw to trigger errors. $! contains last exception, $@ contains backtrace. StandardError is the common superclass (most code should rescue StandardError, not Exception).",
+      "def divide(a, b)\n  begin\n    result = a / b\n  rescue ZeroDivisionError => e\n    puts \"Error: #{e.message}\"\n    nil\n  rescue TypeError => e\n    puts \"Type error: #{e.message}\"\n    nil\n  else\n    puts \"No error occurred\"\n    result\n  ensure\n    puts \"This always runs\"\n  end\nend\n\nputs divide(10, 2)  # No error occurred / This always runs / 5\nputs divide(10, 0)  # Error: divided by 0 / This always runs / nil\n\n# Inline rescue (risky, catches all StandardError)\nvalue = risky_call() rescue \"default\"\n\n# Custom exceptions\nclass MyError < StandardError; end\nraise MyError, \"Something went wrong\""
+    ],
+    "Custom Exceptions": [
+      "Creating custom exception classes by inheriting from StandardError. Custom exceptions can carry additional data (attributes). Use meaningful class names that describe the error. Rescue specific exceptions rather than generic StandardError. Exception hierarchies allow fine-grained error handling.",
+      "# Custom exception with data\nclass ValidationError < StandardError\n  attr_reader :field, :value\n\n  def initialize(message, field:, value:)\n    @field = field\n    @value = value\n    super(message)\n  end\nend\n\n# Usage\nclass User\n  def validate_age!(age)\n    raise ValidationError.new(\n      \"Invalid age: #{age}\",\n      field: :age,\n      value: age\n    ) unless age.between?(0, 150)\n  end\nend\n\nbegin\n  User.new.validate_age!(200)\nrescue ValidationError => e\n  puts \"#{e.field}: #{e.value} — #{e.message}\"\nend"
+    ],
+    "ensure & retry": [
+      "ensure runs regardless of exception — use for cleanup (closing files, releasing locks). retry restarts the begin block, useful for transient failures. retry without limit can create infinite loops — always use a counter. catch/throw is for non-local control flow, not error handling (like a labeled break).",
+      "attempts = 0\nbegin\n  attempts += 1\n  puts \"Attempt #{attempts}\"\n  result = fetch_data  # might fail\n  puts result\nrescue NetworkError\n  retry if attempts < 3\n  puts \"Failed after #{attempts} attempts\"\nensure\n  puts \"Cleanup: closing connection\"\nend\n\n# catch/throw (non-local exit)\ndef search(array, target)\n  catch(:found) do\n    array.each_with_index do |item, i|\n      throw(:found, i) if item == target\n    end\n    nil\n  end\nend\n\nputs search([1, 2, 3, 4, 5], 3)  # 2"
+    ],
+    "raise vs throw": [
+      "raise is for exceptions (error conditions). throw/catch is for control flow (early exit from nested loops). Only rescue StandardError subtypes. Never rescue Exception (catches everything including SignalException). Always specify an exception class with raise. Use throw with a symbol label for non-local control flow.",
+      "# Raise with class\nraise ArgumentError, \"Invalid argument\"\nraise ArgumentError.new(\"Invalid argument\")\nraise \"default to RuntimeError\"\n\n# Throw/catch (not exceptions)\ndef find_first_even(numbers)\n  catch(:found) do\n    numbers.each do |n|\n      throw(:found, n) if n.even?\n    end\n    nil\n  end\nend\n\nputs find_first_even([1, 3, 5, 6, 7])  # 6\n\n# Best practice: rescue StandardError, never Exception\nbegin\n  # some code\nrescue => e  # rescues StandardError (default)\n  puts e.message\nend"
+    ]
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "File I/O in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "Input and output operations in Ruby.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "Concurrency in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "Modular programming in Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "Best practices for Ruby.",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "Optimizing Ruby code.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Getting Started": {
+    "Time, Date & DateTime": [
+      "Ruby's standard library includes Time (built-in), Date, and DateTime (require 'date'). Time handles seconds since epoch, timezones, and formatting. Date handles calendar dates without time. DateTime combines date and time. ActiveSupport (Rails) provides extensive additions like 1.day.ago, 2.hours.from_now. Use strftime for custom formatting.",
+      "require 'date'\n\n# Time (built-in, no require)\nnow = Time.now\nputs now.to_s            # \"2026-06-05 10:30:00 +0000\"\nputs now.to_i            # epoch seconds\nputs now + 3600          # 1 hour later\n\nutc = Time.now.utc\nlocal = Time.now.localtime\n\n# strftime formatting\nputs Time.now.strftime(\"%Y-%m-%d %H:%M:%S\")  # \"2026-06-05 10:30:00\"\nputs Time.now.strftime(\"%B %d, %Y\")          # \"June 05, 2026\"\n\n# Date\nd = Date.today\nputs d.to_s              # \"2026-06-05\"\nputs d + 7               # 1 week later\nputs d.leap?             # false\n\n# DateTime\ndt = DateTime.now\nputs dt.iso8601          # \"2026-06-05T10:30:00+00:00\"\n\n# Parsing\nputs Date.parse('2026-06-05')\nputs Time.parse('2026-06-05 10:30') rescue \"need 'time' gem\""
+    ],
+    "IRB & Interactive Ruby": [
+      "IRB (Interactive Ruby) is Ruby's built-in REPL. Launch with `irb` in terminal. Features: history, tab completion, auto-indent, and inspection. Pry is a more powerful alternative with syntax highlighting, runtime invocation, and ls/show-source commands. Use `_` to access last result, `Ctrl+R` for history search, `Ctrl+D` to exit.",
+      "# Launch\n# $ irb\n\n# In IRB/Pry\nputs 2 + 2           # 4\n\"hello\".upcase      # \"HELLO\" (auto-prints)\n_\n\n# Pry features\n# $ pry\n# cd into objects\n# ls Array          # show methods\n# show-source Array#map\n\n# IRB config in ~/.irbrc\n# require 'irb/completion'\n# IRB.conf[:AUTO_INDENT] = true"
+    ],
+    "Ruby Version Managers": [
+      "Ruby Version Managers like rbenv and RVM let you install and switch between multiple Ruby versions. rbenv is lightweight (recommended), RVM is more feature-rich. Key commands: rbenv install 3.2.2, rbenv global 3.2.2, rbenv local 3.1.0 (per-project), ruby -v. Use .ruby-version files for project-specific versions. Bundler integrates with both.",
+      "# rbenv (recommended, lightweight)\n# rbenv install 3.2.2\n# rbenv global 3.2.2\n# rbenv local 3.1.0   # project-specific\n\n# RVM\n# rvm install 3.2.2\n# rvm use 3.2.2 --default\n\n# .ruby-version file\n# echo \"3.2.2\" > .ruby-version\n\n# Check version\nputs RUBY_VERSION\nputs RUBY_ENGINE  # 'ruby' or 'jruby', etc."
+    ],
+    "What is Ruby": [
+      "Ruby is a dynamic, interpreted, reflective, object-oriented programming language created by Yukihiro Matsumoto (Matz) in 1995. It combines syntax inspired by Perl and Smalltalk with object-oriented features. Everything in Ruby is an object — even integers and booleans. Ruby follows the Principle of Least Surprise (POLS), meaning the language behaves as you'd expect. It's known for its elegant syntax, powerful metaprogramming, and the Ruby on Rails web framework.",
+      "# Install: ruby --version\n# Run: ruby file.rb\n\nputs \"Hello from Ruby!\"\n\n# Everything is an object\nputs 42.class       # Integer\nputs true.class     # TrueClass\nputs \"hi\".class     # String\nputs nil.class      # NilClass\n\n# Interactive: irb"
+    ],
+    "Ruby Syntax & Conventions": [
+      "Ruby uses English-like, minimalist syntax. Parentheses are optional for method calls. Blocks defined with do/end or {}. Class and method names follow conventions: SNAKE_CASE for files/variables, CamelCase for classes, snake_case for methods. Files end with .rb. Comments use # for single line and =begin/=end for multi-line. Indentation is 2 spaces (convention, not enforced).",
+      "# Naming conventions\nfile_name = \"example.rb\"\nclass UserProfile\nend\n\ndef calculate_total\n  # 2-space indentation\n  puts \"calculating...\"\nend\n\n# Optional parentheses\nputs \"Hello\"\nputs(\"Hello\")  # same\n\n# Multiline comment\n=begin\nThis is a\nmultiline comment\n=end"
+    ],
+    "Variables & Types": [
+      "Ruby is dynamically typed. Local variables (name), instance variables (@name), class variables (@@name), global variables ($name), and constants (NAME). Basic types: Integer, Float, String, Symbol, Array, Hash, Boolean, Nil. Type checking occurs at runtime — no static type declarations needed. Symbols (:name) are immutable, lightweight identifiers used for keys and method names.",
+      "name = \"Alice\"       # local variable (string)\n@name = \"Bob\"         # instance variable\n@@count = 0           # class variable\n$debug = true         # global variable\nMAX_SIZE = 100         # constant (warning if reassigned)\n\n# Types\nage = 30              # Integer\npi = 3.14             # Float\nflag = true           # TrueClass / FalseClass\nnothing = nil         # NilClass\nsym = :ruby           # Symbol\n\nputs name.class       # String\nputs sym.class        # Symbol"
+    ],
+    "Strings & Interpolation": [
+      "Ruby strings can be single-quoted (no interpolation) or double-quoted (supports interpolation and escape sequences). #{expression} interpolates any Ruby expression. Strings are mutable. Common methods: length, upcase, downcase, capitalize, reverse, split, join, gsub, strip, include?, empty?. << or + for concatenation.",
+      "name = \"Ruby\"\nage = 30\n\n# String interpolation (double quotes only)\nputs \"Hello, #{name}!\"       # Hello, Ruby!\nputs \"Age: #{age}\"           # Age: 30\nputs \"Pi: #{Math::PI.round(2)}\"  # Pi: 3.14\n\n# Single quotes = literal\nputs 'Hello, #{name}!'       # Hello, #{name}!\n\n# Common methods\nputs \"hello\".upcase         # HELLO\nputs \"hello\".capitalize     # Hello\nputs \"a,b,c\".split(\",\")    # [\"a\", \"b\", \"c\"]\nputs \"hello\".include?(\"ll\")  # true"
+    ],
+    "Arrays": [
+      "Arrays are ordered, integer-indexed collections. Can hold mixed types. Index starts at 0. Negative indices count from end (-1 = last). Common methods: push, pop, shift, unshift, first, last, length/ size, include?, empty?, sort, reverse, join, map/collect, select/filter, reject, each, each_with_index. Arrays created with [] or Array.new.",
+      "arr = [1, 2, 3, 4, 5]\nputs arr[0]        # 1\nputs arr[-1]       # 5\nputs arr[1..3].join(\", \")  # \"2, 3, 4\"\n\n# Mixed types\nmixed = [1, \"two\", :three, 4.0]\n\n# Common operations\narr << 6           # append\narr.push(7)        # also append\nlast = arr.pop     # remove last\nfirst = arr.shift  # remove first\n\n# Iteration\narr.each { |n| puts n }\narr.each_with_index { |n, i| puts \"#{i}: #{n}\" }\n\n# Transform\nsquares = arr.map { |n| n ** 2 }"
+    ],
+    "Hashes": [
+      "Hashes are key-value dictionaries. Keys can be any object type, but symbols are most common (memory efficient, immutable). Two syntaxes: hash-rocket (=>) for any key type, and JSON-style for symbol keys (Ruby 1.9+). Default values can be set. Common methods: keys, values, key?, has_key?, has_value?, fetch, merge, select, each, except, slice.",
+      "# Hash with symbol keys (modern syntax)\nperson = { name: \"Alice\", age: 30, city: \"NYC\" }\nputs person[:name]     # Alice\n\n# Hash-rocket syntax (any key type)\nold = { \"name\" => \"Bob\", :key => \"value\", 1 => \"one\" }\n\n# Default value\ncounts = Hash.new(0)   # default 0\ncounts[:a] += 1        # counts[:a] = 1\nputs counts[:b]        # 0 (default)\n\n# Iteration\nperson.each { |key, val| puts \"#{key}: #{val}\" }\n\n# Merging\nmerged = person.merge({ age: 31, country: \"US\" })\n\n# Selection\nadults = { alice: 30, bob: 15, charlie: 25 }.select { |_, age| age >= 18 }"
+    ],
+    "Symbols": [
+      "Symbols are immutable, reusable identifiers represented as :name. Unlike strings, every instance of a symbol with the same name refers to the same object in memory (same object_id). This makes them ideal for hash keys and method references. Symbols are not garbage collected, so be careful about creating them dynamically from user input. Convert: to_sym / intern, to_s.",
+      ":name          # symbol literal\n:\"with spaces\"  # quoted symbol\n:\"my_var\"       # symbol with special chars\n\n# Symbols are singletons\nputs \"name\".object_id == \"name\".object_id  # false (different strings)\nputs :name.object_id == :name.object_id      # true (same symbol)\n\n# Common usage\nperson = { name: \"Alice\", age: 30 }\n\n# Conversion\nsym = \"hello\".to_sym   # :hello\nstr = :hello.to_s      # \"hello\"\n\n# Method as symbol\nobjects = [1, \"a\", 2, \"b\"]\nobjects.select(&:to_s)  # shorthand for { |o| o.to_s }"
+    ]
+  },
+  "Variables & Types": {
+    "Local & Global Variables": [
+      "Ruby variables are dynamically typed. Local variables start with a lowercase letter or _, instance variables with @, class variables with @@, and global variables with $. Understanding scope rules prevents subtle bugs. Local vars are scoped to the current block/method; instance vars belong to an object instance; class vars are shared across the hierarchy; globals are visible everywhere (avoid when possible).",
+      "name = 'Alice'          # local variable\n@count = 0               # instance variable\n@@total = 0              # class variable\n$debug = true            # global variable\n\nputs defined?(name)      # 'local-variable'"
+    ],
+    "Constants": [
+      "Constants in Ruby start with a capital letter. They are not truly immutable — Ruby warns but doesn't prevent reassignment. Use them for values that logically shouldn't change.",
+      "PI = 3.14159\nMAX_USERS = 100\n\n# Ruby warns on reassignment\nPI = 3.14  # warning: already initialized constant PI"
+    ],
+    "Data Types": [
+      "Ruby's core types: Integer, Float, String, Symbol, Array, Hash, true/false (TrueClass/FalseClass), nil (NilClass). Everything is an object — even nil has methods.",
+      "puts 42.class          # Integer\nputs 3.14.class        # Float\nputs 'hello'.class     # String\nputs :symbol.class     # Symbol\nputs true.class        # TrueClass\nputs nil.class         # NilClass\n\nputs 42.to_s           # '42' — Integer#to_s"
+    ],
+    "Type Conversion": [
+      "Ruby provides explicit conversion methods: to_s, to_i, to_f, to_a, to_sym. Implicit conversion is rare — Ruby prefers raising errors to silent coercion.",
+      "age = '25'\nputs age.to_i + 5      # 30\nputs '3.14'.to_f       # 3.14\nputs 42.to_s           # '42'\nputs :hello.to_s       # 'hello'\n\n# No implicit conversion\n# '5' + 3  # TypeError (String + Integer)"
+    ]
+  },
+  "Operators": {
+    "Arithmetic": [
+      "Standard + - * / % **. Integer division truncates. ** is exponentiation.",
+      "puts 10 / 3   # 3 (integer division)\nputs 10 / 3.0 # 3.333...\nputs 2 ** 10  # 1024\nputs 10 % 3   # 1"
+    ],
+    "Comparison": [
+      "== != < > <= >=. Ruby also has .eql? (type-sensitive) and .equal? (identity). <=> (spaceship) returns -1/0/1.",
+      "puts 5 == 5.0   # true (value equality)\nputs 5.eql?(5.0) # false (type-sensitive)\nputs 5 <=> 10   # -1\nputs 10 <=> 10  # 0\nputs 10 <=> 5   # 1"
+    ],
+    "Logical": [
+      "&& || ! (or and not). and/or/not have lower precedence than &&/||/!. Short-circuit evaluation applies.",
+      "puts true && false  # false\nputs false || 42    # 42\nputs !true          # false\n\n# Low-precedence versions\nputs true and false  # true (prints then evaluates)\nputs (true and false) # false"
+    ],
+    "Range": [
+      "Ruby ranges: inclusive (..) and exclusive (...). Used in iteration, slicing, and case conditions.",
+      "range = 1..5\nputs range.to_a    # [1, 2, 3, 4, 5]\n\nexcl = 1...5\nputs excl.to_a    # [1, 2, 3, 4]\n\ncase score\nwhen 90..100 then 'A'\nwhen 80...90 then 'B'\nend"
+    ]
+  },
+  "Control Flow": {
+    "Ternary & Statement Modifiers": [
+      "Ruby's ternary operator (?:) is a compact if/else expression. Statement modifiers (postfix if/unless/while/until) add conditionals at the end of a single statement. Use ternary for simple binary choices. Use statement modifiers for guard clauses and concise loops. Avoid nesting — readability matters more than brevity.",
+      "# Ternary (expression, not statement)\nage = 20\nstatus = age >= 18 ? \"Adult\" : \"Minor\"\n\n# Nested ternary (avoid when possible)\ntier = score > 90 ? \"Gold\" : score > 70 ? \"Silver\" : \"Bronze\"\n\n# Statement modifiers (postfix)\nputs \"x is zero\" if x.zero?\nraise \"Invalid\" unless valid?\n\n# Postfix while/until\nx = 0\nputs x += 1 while x < 5  # prints 1, 2, 3, 4, 5\n\n# Postfix begin/rescue/end\nvalue = risky_call rescue \"default\"\n\n# Idiomatic Ruby: use modifiers for simple guards\n# Instead of:\n# if user\n#   user.name\n# end\n# Use:\nuser&.name  # safe navigation"
+    ],
+    "if/unless/elsif": [
+      "Ruby uses if, elsif, else, unless, and ternary (?:). unless is the opposite of if and reads naturally for negative conditions. if/unless can be used as statement modifiers (postfix). All conditionals return a value. Only nil and false are falsy — everything else (including 0, empty strings, empty arrays) is truthy.",
+      "age = 20\n\nif age >= 18\n  puts \"Adult\"\nelsif age >= 13\n  puts \"Teen\"\nelse\n  puts \"Child\"\nend\n\n# unless (opposite of if)\nunless age < 18\n  puts \"Can vote\"\nend\n\n# Statement modifiers (postfix)\nputs \"Adult\" if age >= 18\nputs \"Minor\" unless age >= 18\n\n# Ternary\ntype = age >= 18 ? \"Adult\" : \"Minor\"\n\n# Truthiness\nif 0       # truthy! (unlike some languages)\n  puts \"zero is truthy\"\nend\n\nif \"\"     # also truthy\n  puts \"empty string is truthy\"\nend"
+    ],
+    "case/when": [
+      "Ruby's case/when is more flexible than switch/case in other languages. It uses === (case equality operator) for comparison, which can match classes, regexp, ranges, and procs. when can have multiple values separated by commas. else is the default. Returns the value of the last evaluated expression.",
+      "grade = 85\n\nresult = case grade\nwhen 90..100 then \"A\"\nwhen 80...90 then \"B\"\nwhen 70...80 then \"C\"\nwhen 60...70 then \"D\"\nelse \"F\"\nend\n\nputs result  # B\n\n# === operator matching\ncase \"Hello\"\nwhen String then puts \"It's a string\"\nwhen /^H/ then puts \"Starts with H\"\nend\n\n# Multiple values\ncase 3\nwhen 1, 3, 5 then puts \"Odd single digit\"\nwhen 2, 4, 6 then puts \"Even single digit\"\nend"
+    ],
+    "while/until Loops": [
+      "while executes while condition is truthy. until executes while condition is falsy (opposite of while). Both can be used as statement modifiers. begin/end versions guarantee at least one execution. Loop control: break (exit loop), next (skip iteration), redo (rerun current iteration), retry (restart from beginning).",
+      "# while\nx = 0\nwhile x < 5\n  puts x\n  x += 1\nend\n\n# until\ny = 0\nuntil y == 5\n  puts y\n  y += 1\nend\n\n# Statement modifiers\ni = 0\nputs i += 1 while i < 5\n\n# begin/end (do at least once)\nz = 10\nbegin\n  puts z\n  z += 1\nend while z < 5  # runs once\n\n# Loop control\n[1, 2, 3, 4, 5].each do |n|\n  next if n.even?  # skip evens\n  break if n > 4    # stop at 5\n  puts n\nend"
+    ],
+    "for/in & each": [
+      "Ruby has for/in loops but they're rarely used — each and friends are preferred. for/in iterates over enumerables but doesn't create a new scope for the variable (leaks it). each and the Enumerable module provide a rich set of iteration methods with proper scoping. Range literals (1..10) are commonly used for iteration.",
+      "# for loop (rarely idiomatic)\nfor i in 1..5\n  puts i\nend\nputs i  # i leaks! (5)\n\n# each (idiomatic)\n(1..5).each { |i| puts i }\n\n# each with index\n%w[a b c].each_with_index { |v, i| puts \"#{i}: #{v}\" }\n\n# Times, upto, downto, step\n3.times { puts \"hi\" }\n1.upto(5) { |n| puts n }\n5.downto(1) { |n| puts n }\n0.step(10, 2) { |n| puts n }  # 0, 2, 4, ..., 10\n\n# Ranges\n(1..5).to_a    # [1,2,3,4,5] (inclusive)\n(1...5).to_a   # [1,2,3,4] (exclusive)"
+    ]
+  },
+  "Methods": {
+    "Keyword Arguments": [
+      "Keyword arguments (Ruby 2.0+) let you pass arguments by name, making method calls self-documenting and order-independent. Required keyword args have no default, optional ones do. Double splot (**) captures extra keyword args. Use keyword args for methods with 3+ parameters, especially when multiple boolean options are needed.",
+      "def configure(host:, port: 3000, debug: false, **options)\n  puts \"Host: #{host}, Port: #{port}\"\n  puts \"Debug: #{debug}\" if debug\n  puts \"Extra: #{options}\" unless options.empty?\nend\n\nconfigure(host: \"localhost\")\nconfigure(host: \"app.com\", port: 443, debug: true, ssl: true)\n\n# Required vs optional\nclass User\n  def initialize(name:, age: nil, **attrs)\n    @name = name\n    @age = age\n    @attrs = attrs\n  end\nend\n\nUser.new(name: \"Alice\")  # OK\nUser.new(name: \"Bob\", age: 30, role: \"admin\")"
+    ],
+    "Default Values": [
+      "Method arguments can have default values evaluated at call time. Use expressions, method calls, or even previous arguments. Defaults are evaluated left-to-right. Avoid side effects in defaults — they run every call. Use ||= inside the method body for more control over default initialization.",
+      "# Simple defaults\ndef repeat(text, times = 1)\n  text * times\nend\n\nputs repeat(\"hi\")      # \"hi\"\nputs repeat(\"hi\", 3)   # \"hihihi\"\n\n# Default from method call\ndef log(message, level = default_level)\n  puts \"[#{level}] #{message}\"\nend\n\ndef default_level\n  ENV.fetch(\"LOG_LEVEL\", \"INFO\")\nend\n\n# Default referencing prior args\ndef multiply(a, b = a)\n  a * b\nend\n\nputs multiply(5)    # 25 (5 * 5)\nputs multiply(5, 3) # 15\n\n# nil vs default\n# If nil is meaningful, use explicit check:\ndef connect(host:, port: nil)\n  port ||= 5432\n  \"#{host}:#{port}\"\nend"
+    ],
+    "Defining Methods": [
+      "Methods defined with def/end. Parentheses optional. Return last evaluated expression implicitly or use explicit return. Method names can end with ? (predicates, return boolean), ! (dangerous/mutating version), = (setter). Arguments can have default values. Keyword arguments (Ruby 2.0+) for named parameters. Splat (*) captures multiple args. Double splat (**) captures keyword args.",
+      "# Implicit return (last expression)\ndef add(a, b)\n  a + b\nend\n\n# Explicit return\ndef max(a, b)\n  return a if a > b\n  b\nend\n\n# Default arguments\ndef greet(name = \"World\")\n  \"Hello, #{name}!\"\nend\n\n# Keyword arguments\ndef configure(host:, port: 3000, debug: false)\n  puts \"#{host}:#{port} (debug=#{debug})\"\nend\n\nconfigure(host: \"localhost\")  # localhost:3000\nconfigure(host: \"app\", port: 8080, debug: true)\n\n# Splat\n\ndef sum(*numbers)\n  numbers.sum\nend\n\nputs sum(1, 2, 3, 4)  # 10\n\n# Predicate methods (end with ?)\nputs [].empty?        # true\nputs 5.odd?           # true\n\n# Bang methods (end with !)\nname = \"ruby\"\nname.upcase!          # modifies in place\nputs name             # RUBY"
+    ],
+    "Splat Arguments": [
+      "The splat operator (*) captures a variable number of positional arguments into an array. It can also expand an array into individual arguments when calling a method. The double splat (**) captures keyword arguments into a hash. Place the splat parameter last in the parameter list to avoid ambiguity.",
+      "def greet(greeting, *names)\n  names.each { |name| puts \"#{greeting}, #{name}!\" }\nend\n\ngreet(\"Hello\", \"Alice\", \"Bob\", \"Charlie\")\n# Hello, Alice!\n# Hello, Bob!\n# Hello, Charlie!\n\n# Splat in method call (array expansion)\nargs = [1, 2, 3]\nputs [0, *args]  # [0, 1, 2, 3]\n\n# Double splat for keyword args\ndef log(message, **options)\n  timestamp = options[:timestamp] || Time.now\n  level = options[:level] || \"INFO\"\n  puts \"[#{level}] #{timestamp}: #{message}\"\nend\n\nlog(\"Server started\", level: \"DEBUG\", timestamp: Time.now)"
+    ],
+    "Method Visibility": [
+      "Ruby controls method visibility with public, private, and protected. public is the default. private methods can only be called without an explicit receiver (self is implied). protected methods can be called by any instance of the same class. Use private for internal helpers, protected for shared implementation in inheritance chains.",
+      "class Person\n  def initialize(name, age)\n    @name = name\n    @age = age\n  end\n\n  # Public (default)\n  def introduce\n    \"#{@name}, #{@age} years old\"\n  end\n\n  # Private — internal helper\n  private\n\n  def formatted_age\n    \"#{@age} years\"\n  end\n\n  # Protected — shared with subclasses\n  protected\n\n  def name\n    @name\n  end\nend\n\nclass Employee < Person\n  def colleague_info(other)\n    \"Works with #{other.name}\"  # can call protected method\n  end\nend\n\nalice = Person.new(\"Alice\", 30)\nputs alice.introduce\n# alice.formatted_age  # NoMethodError (private)"
+    ],
+    "Refinements": [
+      "Refinements are a way to scope monkey-patches to specific files or modules. Defined with refine inside a module, activated with using. Refinements only affect code after the using statement and within the current scope. They don't pollute the global namespace, making them safer than outright monkey-patching.",
+      "module StringExtensions\n  refine String do\n    def shout\n      \"#{upcase}!\"\n    end\n  end\nend\n\n# Not active yet\n# \"hello\".shout  # NoMethodError\n\nusing StringExtensions\n\nputs \"hello\".shout  # \"HELLO!\"\n\n# Only active in this scope"
+    ]
+  },
+  "Procs & Lambdas": {
+    "Blocks & yield": [
+      "Blocks are chunks of code passed to methods. They are not objects by themselves — they become Procs when captured. Use yield to invoke a block from within a method. Blocks can be defined with do/end (multi-line) or {} (single-line). The block_given? method checks if a block was passed.",
+      "def greet\n  puts \"Before block\"\n  yield if block_given?\n  puts \"After block\"\nend\n\ngreet { puts \"Hello from block!\" }\n# Before block\n# Hello from block!\n# After block\n\n# Block with parameters\ndef repeat(n)\n  n.times { |i| yield i }\nend\n\nrepeat(3) { |i| puts \"Iteration #{i}\" }\n\n# do/end vs {}\n[1, 2, 3].each { |n| puts n }  # single-line\n\n[1, 2, 3].each do |n|           # multi-line\n  puts n * 2\nend"
+    ],
+    "Proc Objects": [
+      "Proc objects encapsulate blocks into first-class objects. Create with Proc.new or proc. Call with .call, .[], or .(). Procs don't check argument count (missing args become nil, extra args are ignored). They return from the enclosing method (not just the proc itself). Use procs when you need to pass a block to another method or store it for later.",
+      "double = Proc.new { |x| x * 2 }\ntriple = proc { |x| x * 3 }\n\nputs double.call(5)   # 10\nputs triple[10]        # 30\nputs triple.(20)        # 60 (syntax sugar)\n\n# Conversion\n[1, 2, 3].map(&double)  # [2, 4, 6]\n\n# Argument leniency\nloose = Proc.new { |a, b| [a, b] }\nputs loose.call(1).inspect      # [1, nil]\nputs loose.call(1, 2, 3).inspect  # [1, 2]"
+    ],
+    "Lambda Semantics": [
+      "Lambdas are defined with -> or lambda. Unlike Procs, lambdas check argument count strictly and return from the lambda itself (not the enclosing method). Lambdas are closer to method semantics. Use lambdas when you want strict argument checking and predictable return behavior.",
+      "strict = ->(x, y) { x + y }\nalso_strict = lambda { |x, y| x + y }\n\nputs strict.call(1, 2)  # 3\n# strict.call(1)  # ArgumentError\n\n# Return behavior\ndef test_proc\n  p = Proc.new { return \"from proc\" }\n  p.call\n  \"from method\"\nend\n\ndef test_lambda\n  l = -> { return \"from lambda\" }\n  l.call\n  \"from method\"\nend\n\nputs test_proc   # \"from proc\"\nputs test_lambda # \"from method\""
+    ],
+    "Closures & Binding": [
+      "Both Procs and lambdas are closures — they capture the local variables from the scope where they were defined. The binding retains access to those variables even after the enclosing scope has exited. This enables powerful patterns like generators, callbacks, and lazy evaluation.",
+      "def make_counter(start = 0)\n  count = start\n  -> { count += 1 }\nend\n\ncounter = make_counter(10)\nputs counter.call  # 11\nputs counter.call  # 12\nputs counter.call  # 13\n\n# Shared variable\ncounter2 = make_counter\nputs counter2.call  # 1\n\n# Binding inspection\ndef capture_binding\n  x = 42\n  y = \"hello\"\n  binding\nend\n\nb = capture_binding\nputs b.local_variables  # [:x, :y]\nputs b.eval(\"x\")        # 42"
+    ]
+  },
+  "Enumerables & Collections": {
+    "Enumerable Module": [
+      "Enumerable is Ruby's most powerful mixin. Include it + define each and you get map, select, reject, reduce, any?, all?, none?, one?, count, group_by, partition, sort_by, first, take, drop, min, max, min_by, max_by, each_slice, each_cons, cycle, detect/find, grep, flat_map, zip, chunk, and many more. Lazy enumerators (lazy) for infinite sequences.",
+      "numbers = [1, 2, 3, 4, 5]\n\n# Map / Collect\nsquares = numbers.map { |n| n ** 2 }\n\n# Select / Find all\nevens = numbers.select(&:even?)  # [2, 4]\n\n# Reject\nodds = numbers.reject(&:even?)   # [1, 3, 5]\n\n# Reduce / Inject\nsum = numbers.reduce(0) { |acc, n| acc + n }  # 15\n# Or shorter:\nsum = numbers.reduce(:+)  # 15\n\n# Any? / All? / None?\nputs numbers.any?(&:even?)   # true\nputs numbers.all? { |n| n > 0 }  # true\n\n# Group by\nby_parity = numbers.group_by(&:even?)\n# { false => [1,3,5], true => [2,4] }\n\n# Each slice\nnumbers.each_slice(2) { |slice| puts slice.inspect }\n# [1, 2]\n# [3, 4]\n# [5]\n\n# Lazy enumeration\ninfinite = (1..Float::INFINITY).lazy\n  .select(&:even?)\n  .first(5)\n# [2, 4, 6, 8, 10]"
+    ],
+    "map/select/reduce Deep Dive": [
+      "map, select, and reduce form the core of Ruby's functional programming toolkit. map transforms each element. select filters. reduce accumulates. They can be combined with symbol-to-proc (&:method) shorthand. Chain them for powerful data processing pipelines.",
+      "data = [1, 2, 3, 4, 5, 6]\n\n# Chaining\nresult = data\n  .select(&:even?)\n  .map { |n| n ** 2 }\n  .reduce(:+)\n\nputs result  # 56 (4 + 16 + 36)\n\n# Symbol shorthand\nstrings = %w[a b c]\nputs strings.map(&:upcase).join(', ')  # A, B, C\n\n# With index\n[10, 20, 30].map.with_index { |n, i| n * (i + 1) }\n# [10, 40, 90]\n\n# reduce with different initializers\nputs [1, 2, 3].reduce(Hash.new(0)) { |h, n| h[n] += 1; h }\n# {1=>1, 2=>1, 3=>1}"
+    ],
+    "Arrays Deep": [
+      "Ruby arrays go beyond basic operations. Advanced techniques include: array intersections (&), unions (|), differences (-), Cartesian products (product), flattening (flatten), compacting (compact), transposing (transpose), sampling (sample), filling (fill), repeating (cycle), and combinations/permutations.",
+      "a = [1, 2, 3, 4, 5]\nb = [3, 4, 5, 6, 7]\n\nputs (a & b).inspect   # [3, 4, 5] (intersection)\nputs (a | b).inspect   # [1, 2, 3, 4, 5, 6, 7] (union)\nputs (a - b).inspect   # [1, 2] (difference)\n\n# Nested arrays\nnested = [[1, 2], [3, [4, 5]]]\nputs nested.flatten.inspect  # [1, 2, 3, 4, 5]\nputs nested.flatten(1).inspect  # [1, 2, 3, [4, 5]]\n\n# Sampling\nputs [1, 2, 3, 4, 5].sample(2).inspect  # random 2\n\n# Combinations\nputs [1, 2, 3].combination(2).to_a.inspect\n# [[1, 2], [1, 3], [2, 3]]\n\n# Array.new with block\nArray.new(5) { |i| i * 2 }\n# [0, 2, 4, 6, 8]"
+    ],
+    "Hashes Deep": [
+      "Advanced Hash techniques: fetch with default block, transforming keys/values, hash slicing, nested hash access with dig, custom defaults with Hash.new { |h, k| h[k] = {} }, merging with block for conflict resolution, and converting to/from arrays.",
+      "data = { a: 1, b: 2, c: 3 }\n\n# fetch with block\nvalue = data.fetch(:missing) { |key| \"#{key} not found\" }\n\n# Transform values\ndata.transform_values! { |v| v * 10 }\n# { a: 10, b: 20, c: 30 }\n\n# Transform keys\ndata.transform_keys! { |k| k.to_s.upcase }\n# { \"A\" => 10, \"B\" => 20, \"C\" => 30 }\n\n# Hash slicing (Ruby 2.5+)\nslice = data.slice(\"A\", \"B\")\n# { \"A\" => 10, \"B\" => 20 }\n\n# dig for nested access\nnested = { user: { profile: { name: \"Alice\" } } }\nputs nested.dig(:user, :profile, :name)  # Alice\nputs nested.dig(:user, :missing, :name)  # nil (no error)\n\n# Merging with block\nh1 = { a: 1, b: 2 }\nh2 = { b: 3, c: 4 }\nmerged = h1.merge(h2) { |_key, old, new| old + new }\n# { a: 1, b: 5, c: 4 }"
+    ],
+    "Sets & SortedSet": [
+      "Set is a collection of unique elements (require 'set'). It provides fast membership testing, mathematical set operations (union, intersection, difference), and automatic deduplication. SortedSet maintains elements in sorted order. Sets are useful for membership queries, deduplication, and set algebra.",
+      "require 'set'\n\nset = Set.new([1, 2, 3, 3, 2])  # automatically deduped\nputs set.inspect  # #<Set: {1, 2, 3}>\n\n# Set operations\na = Set.new([1, 2, 3, 4])\nb = Set.new([3, 4, 5, 6])\n\nputs (a & b).inspect  # #<Set: {3, 4}> (intersection)\nputs (a | b).inspect  # #<Set: {1, 2, 3, 4, 5, 6}> (union)\nputs (a - b).inspect  # #<Set: {1, 2}> (difference)\n\n# Membership\na.include?(2)  # true\n\n# Add/delete\nset << 4\nset.delete(1)\n\n# from array with duplicates\n[1, 1, 2, 3].to_set  # #<Set: {1, 2, 3}>"
+    ],
+    "Enumerable Chaining": [
+      "Enumerable methods can be chained to build expressive data pipelines. Lazy evaluation with lazy avoids intermediate arrays. Method chains read left-to-right as transformation pipelines. Be mindful of performance — each chain method creates a new array (unless using lazy).",
+      "data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n\n# Chained pipeline\nresult = data\n  .select(&:odd?)\n  .map { |n| n * 3 }\n  .reject { |n| n > 20 }\n  .sort.reverse\n\nputs result.inspect  # [15, 9, 3]\n\n# Lazy (no intermediate arrays)\nlazy_result = data.lazy\n  .select(&:odd?)\n  .map { |n| n * 3 }\n  .first(3)\n\nputs lazy_result.inspect  # [3, 9, 15]\n\n# each_with_object (accumulator pattern)\n{ a: 1, b: 2, c: 3 }.each_with_object([]) do |(key, val), arr|\n  arr << \"#{key.upcase}: #{val * 10}\"\nend\n# [\"A: 10\", \"B: 20\", \"C: 30\"]"
+    ]
+  },
+  "Strings & Regex": {
+    "String Methods Deep": [
+      "Ruby has an extensive set of string methods. Core methods: chomp/chop (remove trailing chars), gsub/sub (global/substitute), scan (extract matches), partition/rpartition (split around match), tr (character replacement), ljust/rjust/center (padding), delete (remove chars), squeeze (remove consecutive duplicates), count (character counting).",
+      "text = \"  Hello, Ruby World!  \"\n\n# Trimming\nputs text.strip       # \"Hello, Ruby World!\"\nputs text.lstrip      # \"Hello, Ruby World!  \"\nputs text.rstrip      # \"  Hello, Ruby World!\"\n\n# Replacement\ntext.gsub!('Ruby', 'RUBY')\nputs text             # \"Hello, RUBY World!\"\n\n# Delete\nputs \"hello\".delete('l')       # \"heo\"\nputs \"hello\".squeeze('l')      # \"helo\"\n\n# Count\nputs \"hello\".count('l')        # 2\n\n# Scan (extract matches)\nputs \"a1b2c3\".scan(/\\d/).inspect  # [\"1\", \"2\", \"3\"]\n\n# Partition\ntext = \"name: Alice\"\nbefore, match, after = text.partition(': ')\nputs before  # \"name\"\nputs after   # \"Alice\""
+    ],
+    "Regular Expressions": [
+      "Ruby regex uses /pattern/ syntax with powerful features. Match operator =~ returns index or nil. Regexp.last_match ($~) for match data. Named captures (?<name>pattern). Modifiers: i (case-insensitive), m (multiline), x (extended). Common methods: match, scan, gsub with block, split with regex.",
+      "text = \"Hello, my email is alice@example.com\"\n\n# Match operator\nif text =~ /(\\w+)@(\\w+\\.\\w+)/\n  puts \"Found: #{$&}\"          # alice@example.com\n  puts \"User: #{$1}\"           # alice\n  puts \"Domain: #{$2}\"         # example.com\nend\n\n# Named captures\nif m = text.match(/(?<user>\\w+)@(?<domain>\\w+\\.\\w+)/)\n  puts m[:user]                # alice\n  puts m[:domain]              # example.com\nend\n\n# gsub with block\nputs text.gsub(/\\b[a-z]+\\b/) { |w| w.capitalize }\n# Hello, My Email Is Alice@example.com\n\n# Split with regex\nputs \"a, b, c\".split(/\\s*,\\s*/).inspect\n# [\"a\", \"b\", \"c\"]"
+    ],
+    "String Interpolation & Formatting": [
+      "Ruby offers multiple ways to format strings: #{expr} for expression interpolation, sprintf/format/% for formatted output, and String#% for template formatting. Format specifiers: %s (string), %d (integer), %f (float), %x (hex). Precision and width control for alignment and padding.",
+      "name = \"Ruby\"\nversion = 3.2\n\n# Interpolation\nputs \"Hello, #{name}! Version #{version}\"\n# Hello, Ruby! Version 3.2\n\n# Format with %\nputs \"%s version %.1f\" % [name, version]\n# Ruby version 3.2\n\n# sprintf\nputs sprintf(\"%-10s %03d\", \"test\", 42)\n# test       042\n\n# Decimal formatting\npi = Math::PI\nputs \"Pi is %.2f\" % pi      # Pi is 3.14\nputs \"Pi is %.4f\" % pi      # Pi is 3.1416\n\n# Number formatting\nputs \"%010d\" % 42          # 0000000042\nputs \"%,d\" % 1234567       # 1,234,567\n\n# String center/truncate\nputs \"hello\".center(11)    # \"   hello   \"\nputs \"hello\".ljust(10, '.')  # \"hello.....\"\nputs \"very long string\".truncate(10)  # \"very lon...\""
+    ],
+    "String Building & Performance": [
+      "String concatenation with + creates new strings (O(n²) in loops). Use << or concat for mutable appending. String interpolation (#{}) is optimized and preferred. For heavy building, use Array#join (fastest) or StringIO. Frozen string literals (# frozen_string_literal: true) reduce allocations. Use dup for mutable strings from frozen sources.",
+      "# Slow: creates new string each time\nresult = \"\"\n10_000.times { |i| result += i.to_s }  # O(n²)\n\n# Fast: mutates in place\nresult = \"\"\n10_000.times { |i| result << i.to_s }  # O(n)\n\n# Fastest: join\nparts = 10_000.times.map(&:to_s)\nresult = parts.join\n\n# StringIO for large building\nrequire 'stringio'\nio = StringIO.new\n10_000.times { |i| io << i.to_s }\nresult = io.string\n\n# Frozen string literal (Ruby 3+ default)\n# frozen_string_literal: true\n# All string literals frozen, saves allocations\n\n# Interpolation is optimized\nname = \"Ruby\"\nputs \"Hello, #{name}!\"  # preferred over concat\n\n# Squiggly heredoc (remove leading whitespace)\nsql = <<~SQL\n  SELECT * FROM users\n  WHERE active = true\nSQL"
+    ],
+    "Encoding & Unicode": [
+      "Ruby supports multiple string encodings via Encoding class. Strings have an encoding attribute (UTF-8 by default). Use force_encoding to change encoding, encode to convert. Common encodings: UTF-8, ASCII-8BIT, ISO-8859-1. String#valid_encoding? checks validity. Handle encoding errors with :invalid => :replace or :replace => ''.",
+      "str = \"Hello\"\nputs str.encoding  # UTF-8\n\n# Check validity\nputs \"\\x80\".force_encoding(\"UTF-8\").valid_encoding?  # false\n\n# Convert encoding\neuros = \"\\u20AC\"\nputs euros.encode(\"ISO-8859-15\")  # €\n\n# Encoding with replacement\ndirty = \"\\x48\\x65\\x6C\\x6C\\x6F\"\nclean = dirty.encode(\"UTF-8\", invalid: :replace, replace: \"?\")\n\n# Get byte representation\nputs \"hello\".bytes.inspect  # [104, 101, 108, 108, 111]\n\n# External encoding (for file I/O)\n# File.open(\"file.txt\", \"r:UTF-8\")"
+    ]
+  },
+  "Classes & OOP": {
+    "Singleton Class & Eigenclass": [
+      "Every Ruby object has a hidden singleton class (eigenclass) that holds methods unique to that object. Use class << obj to open it. This enables per-object behavior, class methods (methods on Class objects), and DSLs. The singleton class sits between the object and its real class in the method lookup chain.",
+      "obj = \"hello\"\n\n# Open singleton class\nclass << obj\n  def shout\n    \"#{upcase}!\"\n  end\nend\n\nputs obj.shout       # \"HELLO!\"\n# \"other\".shout     # NoMethodError\n\n# Class methods are just singleton methods on the class object\nclass MyClass\n  class << self\n    def class_method\n      \"class method\"\n    end\n  end\nend\n\n# Alternatively\ndef MyClass.another_method\n  \"another\"\nend\n\n# Singleton class in inheritance\nsingleton_class = obj.singleton_class\nputs singleton_class.ancestors.first(3).inspect\n# [#<Class:#<String:...>>, String, Comparable]"
+    ],
+    "Classes & Objects": [
+      "Ruby is pure object-oriented. Classes defined with class/end. Constructor is initialize. Instance variables (@name) are private by default. attr_reader, attr_writer, attr_accessor create getters/setters automatically. self refers to the current object. Class methods defined with self.method_name. Every class inherits from Object (which inherits from BasicObject).",
+      "class Person\n  # Attribute shortcuts\n  attr_reader :name     # getter only\n  attr_accessor :age    # getter + setter\n\n  # Constructor\n  def initialize(name, age = 0)\n    @name = name\n    @age = age\n  end\n\n  # Instance method\n  def introduce\n    \"Hi, I'm #{@name}, age #{@age}\"\n  end\n\n  # Class method\n  def self.species\n    \"Homo sapiens\"\n  end\n\n  # Custom setter\n  def name=(value)\n    raise \"Invalid name\" if value.nil? || value.empty?\n    @name = value\n  end\nend\n\n# Usage\nalice = Person.new(\"Alice\", 30)\nputs alice.introduce       # Hi, I'm Alice, age 30\nputs alice.name            # Alice (via attr_reader)\nalice.age = 31             # (via attr_accessor)\nputs Person.species        # Homo sapiens"
+    ],
+    "Inheritance": [
+      "Ruby supports single inheritance with the < operator. Modules provide multiple inheritance-like behavior via mixins. super calls the parent method with the same arguments. Method resolution order (MRO) follows the lookup path: object -> class -> modules (reverse order of include) -> superclass. ancestor chain shows inheritance.",
+      "class Animal\n  def speak\n    \"#{@name} makes a sound\"\n  end\n\n  def initialize(name)\n    @name = name\n  end\nend\n\nclass Dog < Animal\n  def speak\n    \"#{@name} barks!\"\n  end\n\n  def wag_tail\n    \"#{@name} wags tail\"\n  end\nend\n\nclass Cat < Animal\n  def speak\n    \"#{@name} meows\"\n  end\nend\n\ndog = Dog.new(\"Rex\")\ncat = Cat.new(\"Whiskers\")\nputs dog.speak   # Rex barks!\nputs cat.speak   # Whiskers meows\nputs dog.wag_tail  # Rex wags tail\n\n# Ancestor chain\nputs Dog.ancestors.inspect\n# Dog, Animal, Object, Kernel, BasicObject"
+    ],
+    "Modules & Mixins": [
+      "Modules collect methods and constants. They cannot be instantiated. Use include for instance methods (mixins), extend for class methods, and prepend to override methods (prepended module methods are called first). Namespacing: MyModule::MyClass. The include lookup checks modules in reverse order of inclusion. Enumerable and Comparable are built-in mixin examples.",
+      "module Greetable\n  def greet\n    \"Hello, I'm #{@name}\"\n  end\nend\n\nmodule Walkable\n  def walk\n    \"#{@name} is walking\"\n  end\nend\n\nclass Robot\n  include Greetable\n  include Walkable\n\n  def initialize(name)\n    @name = name\n  end\nend\n\nrobot = Robot.new(\"R2D2\")\nputs robot.greet  # Hello, I'm R2D2\nputs robot.walk   # R2D2 is walking\n\n# extend (class methods)\nmodule ClassMethods\n  def version\n    \"1.0\"\n  end\nend\n\nclass App\n  extend ClassMethods\nend\n\nputs App.version  # 1.0\n\n# Namespacing\nmodule Admin\n  class User\n    def role = \"admin\"\n  end\nend\n\nuser = Admin::User.new\nputs user.role"
+    ],
+    "attr_accessor/reader/writer": [
+      "Ruby provides metaprogramming shortcuts for attribute accessors. attr_reader creates a getter (@name -> name). attr_writer creates a setter (@name = value -> name = value). attr_accessor creates both. These can be customized by accepting multiple symbols. Use attr_reader for read-only attributes, attr_writer for write-only, attr_accessor for read-write.",
+      "class Product\n  # Single attribute\n  attr_accessor :name\n\n  # Multiple attributes\n  attr_reader :id, :created_at\n  attr_writer :price\n\n  def initialize(id, name, price)\n    @id = id\n    @name = name\n    @price = price\n    @created_at = Time.now\n  end\n\n  # Custom setter with validation\n  def price=(value)\n    raise \"Price must be positive\" if value < 0\n    @price = value\n  end\nend\n\nproduct = Product.new(1, \"Widget\", 9.99)\nputs product.name        # Widget (attr_reader)\nproduct.name = \"Gadget\"  # attr_writer (from attr_accessor)\nputs product.id          # 1 (attr_reader only)\n# product.id = 2  # NoMethodError (no writer)"
+    ],
+    "super & Method Dispatch": [
+      "super calls the parent method with the same arguments. super() calls with no arguments (empty). super(a, b) calls with specific arguments. It's used in initialize to chain constructors, in overridden methods to extend behavior, and around_alias for method wrapping. Know the difference between super (forwards args) and super() (no args).",
+      "class Base\n  def initialize(name)\n    @name = name\n  end\n\n  def greet\n    \"Hello from Base, #{@name}\"\n  end\nend\n\nclass Extended < Base\n  def initialize(name, version)\n    super(name)  # passes name to Base\n    @version = version\n  end\n\n  def greet\n    base_greeting = super  # forwards args implicitly\n    \"#{base_greeting} (version #{@version})\"\n  end\nend\n\next = Extended.new(\"App\", \"2.0\")\nputs ext.greet\n# Hello from Base, App (version 2.0)"
+    ],
+    "Struct & OpenStruct": [
+      "Struct is a built-in class for creating plain old Ruby objects with attributes. Define with Struct.new(:name, :age). Creates a class with accessors, ==, to_a, and initialize. OpenStruct (require 'ostruct') creates objects on the fly with dynamic attributes (slower, flexible). Use Struct for data objects with known shape. Use Data.define (Ruby 3.2+) for immutable data objects.",
+      "# Struct\nPerson = Struct.new(:name, :age, keyword_init: true)\nalice = Person.new(name: 'Alice', age: 30)\nputs alice.name      # 'Alice'\nputs alice.age       # 30\nputs alice.to_h      # { name: 'Alice', age: 30 }\nputs alice == Person.new(name: 'Alice', age: 30)  # true\n\n# Struct with methods\nclass Animal < Struct.new(:species, :sound, keyword_init: true)\n  def speak\n    \"#{species} says #{sound}!\"\n  end\nend\n\ndog = Animal.new(species: 'Dog', sound: 'Woof')\nputs dog.speak  # 'Dog says Woof!'\n\n# OpenStruct (dynamic attributes)\nrequire 'ostruct'\nconfig = OpenStruct.new\nconfig.host = 'localhost'\nconfig.port = 3000\nputs config.port  # 3000\n\n# Data.define (Ruby 3.2+, immutable)\n# Point = Data.define(:x, :y)\n# p = Point.new(1, 2)\n# puts p.x  # 1\n# # p.x = 3  # NoMethodError (immutable)"
+    ],
+    "Duck Typing & Polymorphism": [
+      "Ruby uses duck typing: if it walks like a duck and quacks like a duck, it's a duck. Objects are defined by what methods they respond to, not their class. This enables polymorphic behavior without explicit interfaces. Use respond_to? to check method availability. Duck typing leads to flexible, loosely coupled code.",
+      "class Duck\n  def quack\n    \"Quack!\"\n  end\nend\n\nclass Dog\n  def quack\n    \"Woof... I mean Quack!\"\n  end\nend\n\nclass Cat\n  def meow\n    \"Meow!\"\n  end\nend\n\ndef make_it_quack(animal)\n  if animal.respond_to?(:quack)\n    puts animal.quack\n  else\n    puts \"Can't quack!\"\n  end\nend\n\nmake_it_quack(Duck.new)   # Quack!\nmake_it_quack(Dog.new)    # Woof... I mean Quack!\nmake_it_quack(Cat.new)    # Can't quack!"
+    ]
+  },
+  "Modules & Packages": {
+    "require/load/autoload": [
+      "Ruby provides three ways to load code. require loads a file once (preferred for gems/libraries). require_relative loads relative to the current file. load reloads a file every time (rare, only for development). autoload (deprecated in Ruby 2.0+) loads on first use. The $LOAD_PATH ($:) lists directories searched by require.",
+      "# require — loads once, searches $LOAD_PATH\nrequire 'json'\nrequire 'net/http'\n\n# require_relative — relative path, no $LOAD_PATH\nrequire_relative 'lib/helper'\n\n# load — reloads every time (development only)\nload 'config.rb'\n\n# Check if already loaded\nputs $LOADED_FEATURES.grep(/json/).first\n\n# $LOAD_PATH\n$LOAD_PATH << File.expand_path('lib')\nrequire 'my_library'\n\n# Ruby 3+ Kernel#load improvements\n# load 'file.rb', wrap: true  # wraps in anonymous module"
+    ],
+    "Gems & Gemfile": [
+      "RubyGems is Ruby's package manager. Gems are packaged libraries installed via gem install. Bundler manages dependencies through Gemfile. Gemfile.lock locks exact versions. Key commands: gem install, gem list, gem search, bundle install, bundle exec, bundle update. Gemfile groups (development, test, production) control environment-specific dependencies.",
+      "# Gemfile example\n# source \"https://rubygems.org\"\n#\n# gem \"rails\"\n# gem \"pg\"\n# gem \"puma\"\n#\n# group :development, :test do\n#   gem \"rspec-rails\"\n#   gem \"pry\"\n# end\n#\n# group :development do\n#   gem \"rubocop\"\n# end\n\n# CLI commands\n# gem install sinatra\n# bundle init\n# bundle install\n# bundle exec ruby app.rb\n\n# In code\nrequire 'bundler/setup'\nrequire 'sinatra'\n\n# gemspec for creating gems\n# Gem::Specification.new do |s|\n#   s.name = \"my_gem\"\n#   s.version = \"0.1.0\"\n#   s.authors = [\"You\"]\n# end"
+    ],
+    "Bundler Workflow": [
+      "Bundler provides a reliable dependency management workflow. Key concepts: Gemfile (declarative dependencies), Gemfile.lock (snapshot of exact versions), bundle exec (run in locked context), binstubs (bundle binstubs for wrappers). Use bundle outdated to check for updates. bundle viz generates dependency graphs. bundle doctor checks for issues.",
+      "# Typical workflow\n# 1. Create Gemfile\n# 2. bundle install\n# 3. bundle exec ruby app.rb\n\n# Without bundle exec, load Bundler\nrequire 'bundler/setup'\nBundler.require(:default, :development)\n\n# Groups\n# group :test do\n#   gem 'rspec'\n#   gem 'factory_bot'\n# end\n\n# Conditional install\n# gem 'sqlite3', platform: :ruby\n# gem 'jdbc-sqlite3', platform: :jruby\n\n# Path gems (local development)\n# gem 'my_lib', path: '../my_lib'\n\n# Git gems\n# gem 'my_gem', git: 'https://github.com/user/my_gem.git'"
+    ]
+  },
+  "File I/O": {
+    "Tempfile & StringIO": [
+      "Tempfile creates temporary files that auto-delete on garbage collection. StringIO provides an in-memory IO-like object (treat strings as files). Both implement the IO interface (read, write, gets, each_line, rewind, close). Useful for tests (capture stdout), file upload processing, and scratch data. Use Tempfile for actual file system operations, StringIO for in-memory.",
+      "require 'tempfile'\nrequire 'stringio'\n\n# Tempfile (auto-deleted when garbage collected)\nTempfile.create(['prefix', '.csv']) do |f|\n  f.puts 'name,age'\n  f.puts 'Alice,30'\n  f.rewind\n  puts f.read  # 'name,age\\nAlice,30\\n'\nend  # file deleted after block\n\n# Or manual\nfile = Tempfile.new(%w[data .tmp])\nfile.write('temporary data')\nfile.close\nputs File.read(file.path)\nfile.unlink  # delete manually\n\n# StringIO (in-memory IO)\ninput = StringIO.new(\"line 1\\nline 2\\n\")\nputs input.gets       # 'line 1'\nputs input.read       # 'line 2'\n\noutput = StringIO.new\noutput.puts 'Hello'\noutput.write 'World'\noutput.string  # \"Hello\\nWorld\"\n\n# Capturing stdout\nbuffer = StringIO.new\n$stdout = buffer\nputs 'captured!'\n$stdout = STDOUT\nputs buffer.string  # 'captured!\\n'"
+    ],
+    "Reading & Writing Files": [
+      "File operations with File class. Block form auto-closes. Modes: r (read), w (write, truncate), a (append), r+ (read/write), w+ (read/write, truncate), a+ (read/append). Binary mode: rb, wb. Common methods: File.read, File.write, File.readlines, File.foreach (memory efficient for large files). Dir for directory operations. Pathname for path manipulation.",
+      "# Block form (auto-closes)\nFile.open(\"example.txt\", \"w\") do |f|\n  f.puts \"Line 1\"\n  f.puts \"Line 2\"\nend\n\n# Simple read/write\ncontent = File.read(\"example.txt\")\nputs content\n\n# Read lines into array\nlines = File.readlines(\"example.txt\")\nputs lines.length\n\n# Memory-efficient line-by-line\nFile.foreach(\"example.txt\") do |line|\n  puts line.chomp  # chomp removes trailing newline\nend\n\n# Append\nFile.write(\"log.txt\", \"New entry\\n\", mode: \"a\")\n\n# Check existence\nputs File.exist?(\"example.txt\")  # true\n\n# Directory operations\nDir.mkdir(\"mydir\") unless Dir.exist?(\"mydir\")\nDir.entries(\".\").each { |entry| puts entry }"
+    ],
+    "CSV & YAML Parsing": [
+      "Ruby's standard library includes CSV and YAML for data file parsing. CSV provides read/write with headers support. YAML is used for configuration files. Both handle encoding and type conversion. Use CSV.foreach for memory-efficient processing of large files. YAML.load_file for loading config safely (with permitted_classes).",
+      "require 'csv'\nrequire 'yaml'\n\n# CSV reading\nCSV.foreach(\"data.csv\", headers: true) do |row|\n  puts \"#{row['name']}: #{row['age']}\"\nend\n\n# CSV writing\nCSV.open(\"output.csv\", \"w\") do |csv|\n  csv << [\"name\", \"age\", \"city\"]\n  csv << [\"Alice\", 30, \"NYC\"]\n  csv << [\"Bob\", 25, \"SF\"]\nend\n\n# YAML loading\nconfig = YAML.load_file(\"config.yml\", permitted_classes: [Symbol])\nputs config[:database][:host]\n\n# YAML dumping\ndata = { name: \"Ruby\", version: 3.2 }\nFile.write(\"data.yml\", YAML.dump(data))"
+    ],
+    "Dir Operations": [
+      "The Dir class provides directory operations. Dir.glob for file pattern matching (uses shell-style patterns). Dir entries for listing. Dir.mkdir/rmdir for creation/deletion. Dir.chdir for changing working directory. Dir.tmpdir for temporary files. Pathname (require 'pathname') provides an OO interface combining File and Dir operations.",
+      "# Directory operations\nDir.mkdir(\"backup\") unless Dir.exist?(\"backup\")\n\n# List entries (excluding . and ..)\nentries = Dir.entries(\".\") - %w[. ..]\n\n# Glob patterns\ndir = Dir.glob(\"*.rb\")\nputs dir.inspect  # all Ruby files\n\nDir.glob(\"**/*.json\")  # recursive search\nDir.glob(\"src/{lib,test}/**/*.rb\")  # multiple dirs\n\n# Change directory\nDir.chdir(\"/tmp\") { puts Dir.pwd }  # temporary\n\n# Temporary file\nrequire 'tmpdir'\nDir.mktmpdir do |tmpdir|\n  path = File.join(tmpdir, \"temp.txt\")\n  File.write(path, \"temporary\")\n  puts File.read(path)\nend  # auto-deleted\n\n# Pathname (OOP interface)\nrequire 'pathname'\npath = Pathname.new(\"./lib/helper.rb\")\nputs path.basename     # helper.rb\nputs path.dirname      # ./lib\nputs path.extname      # .rb"
+    ]
+  },
+  "Metaprogramming": {
+    "send & define_method": [
+      "Ruby's metaprogramming power comes from dynamic method dispatch. send invokes methods by name (string or symbol). define_method creates methods at runtime. public_send respects visibility (vs send which bypasses private). These enable DSL construction, dynamic proxies, and automatic delegation. Use them carefully — they bypass normal type checking.",
+      "class Calculator\n  def add(a, b)\n    a + b\n  end\n\n  def multiply(a, b)\n    a * b\n  end\nend\n\ncalc = Calculator.new\n\n# Dynamic dispatch\nmethod_name = \"add\"\nresult = calc.send(method_name, 5, 3)\nputs result  # 8\n\n# define_method\nclass DynamicGreeter\n  languages = { english: \"Hello\", french: \"Bonjour\", spanish: \"Hola\" }\n\n  languages.each do |lang, greeting|\n    define_method(:\"greet_in_#{lang}\") do |name|\n      \"#{greeting}, #{name}!\"\n    end\n  end\nend\n\ng = DynamicGreeter.new\nputs g.greet_in_english(\"Alice\")  # Hello, Alice!\nputs g.greet_in_french(\"Bob\")     # Bonjour, Bob!"
+    ],
+    "method_missing": [
+      "method_missing is called when a method is not found. It enables ghost methods, dynamic proxies, and delegation patterns. Always call super (not defined?) for the default NoMethodError behavior. respond_to_missing? must be overridden alongside method_missing for respond_to? to work correctly. Use carefully — it makes debugging harder.",
+      "class DynamicProxy\n  def initialize(target)\n    @target = target\n  end\n\n  def method_missing(name, *args, &block)\n    if @target.respond_to?(name)\n      @target.send(name, *args, &block)\n    else\n      super\n    end\n  end\n\n  def respond_to_missing?(name, include_private = false)\n    @target.respond_to?(name) || super\n  end\nend\n\nproxy = DynamicProxy.new([1, 2, 3])\nputs proxy.length    # 3 (delegated to Array)\nputs proxy.join(',') # \"1,2,3\"\nputs proxy.respond_to?(:length)  # true"
+    ],
+    "DSL Patterns": [
+      "Domain Specific Languages (DSLs) are a Ruby specialty. Using blocks, method_missing, define_method, and instance_eval, you can create expressive DSLs. Examples: RSpec's describe/it, Rails routes, Rake tasks. The pattern: a class collects DSL calls, instance_eval evaluates blocks in the DSL context, method_missing handles undefined methods.",
+      "class RouterDSL\n  attr_reader :routes\n\n  def initialize\n    @routes = []\n  end\n\n  def get(path, to:)\n    @routes << { method: 'GET', path: path, controller: to }\n  end\n\n  def post(path, to:)\n    @routes << { method: 'POST', path: path, controller: to }\n  end\n\n  def self.draw(&block)\n    dsl = new\n    dsl.instance_eval(&block)\n    dsl.routes\n  end\nend\n\nroutes = RouterDSL.draw do\n  get \"/users\", to: \"users#index\"\n  get \"/users/new\", to: \"users#new\"\n  post \"/users\", to: \"users#create\"\nend\n\nputs routes.inspect\n# [{:method=>\"GET\", :path=>\"/users\", ...}, ...]"
+    ]
+  },
+  "Gems & Bundler": {
+    "RubyGems & Bundler": [
+      "RubyGems is the package manager for Ruby libraries (gems). Bundler manages gem dependencies via Gemfile. Key commands: gem install, gem list, bundle init, bundle install, bundle exec. Gemfile specifies sources and gems. Gemfile.lock locks versions. gemspec for gem development. Popular gems: rails, sinatra, rspec, devise, sidekiq, nokogiri, httparty.",
+      "# Install gems\ngem install sinatra\ngem install rspec\n\n# Gemfile\n# source \"https://rubygems.org\"\n# gem \"sinatra\"\n# gem \"rspec\", group: :test\n# gem \"puma\"\n\n# Bundle commands\n# bundle init       # Create Gemfile\n# bundle install    # Install gems\n# bundle exec ruby app.rb  # Run with locked gems\n\n# Using gems in code\nrequire \"sinatra\"\n\nget \"/\" do\n  \"Hello from Sinatra!\"\nend"
+    ]
+  },
+  "Testing": {
+    "Minitest & RSpec": [
+      "Ruby's standard testing library is Minitest (built-in, no install needed). RSpec is the most popular third-party testing framework (BDD-style). Minitest uses assert methods. RSpec uses describe/it/expect syntax. Both support before/after hooks, let helpers, and matchers. Test-driven development is common in the Ruby community.",
+      "# Minitest (built-in)\nrequire \"minitest/autorun\"\n\nclass TestCalculator < Minitest::Test\n  def setup\n    @calc = Calculator.new\n  end\n\n  def test_add\n    assert_equal 5, @calc.add(2, 3)\n  end\n\n  def test_subtract\n    assert_equal 1, @calc.subtract(3, 2)\n  end\nend\n\n# RSpec (gem)\n# describe Calculator do\n#   subject { Calculator.new }\n#\n#   describe \"#add\" do\n#     it \"adds two numbers\" do\n#       expect(subject.add(2, 3)).to eq(5)\n#     end\n#   end\n# end"
+    ],
+    "RSpec describe/it/expect": [
+      "RSpec uses a nested DSL. describe groups tests, it defines examples, expect sets expectations. Matchers: eq, be_true, be_falsey, include, match, change, raise_error. before/after/around hooks run at example or context level. let/lazy evaluation defines memoized helpers. subject defines the object under test.",
+      "# RSpec matchers\ndescribe Array do\n  subject { [1, 2, 3] }\n\n  describe \"#length\" do\n    it \"returns the count of elements\" do\n      expect(subject.length).to eq(3)\n    end\n  end\n\n  describe \"#include?\" do\n    it \"checks element presence\" do\n      expect(subject).to include(2)\n      expect(subject).not_to include(5)\n    end\n  end\n\n  describe \"#map\" do\n    it \"transforms elements\" do\n      result = subject.map { |n| n * 2 }\n      expect(result).to match_array([2, 4, 6])\n    end\n  end\n\n  describe \"expecting errors\" do\n    it \"raises on invalid operation\" do\n      expect { [1].pop(0) }.not_to raise_error\n    end\n  end\nend"
+    ],
+    "CI Integration for Ruby": [
+      "Ruby projects commonly use GitHub Actions, CircleCI, or Travis CI. Standard CI pipeline: lint (rubocop), test (rspec/minitest), and sometimes type check (sorbet/rbs). Parallel test execution with knapsack or CI matrix for multiple Ruby versions. Use .github/workflows/ci.yml for GitHub Actions. Cache gems with actions/cache for faster runs.",
+      "# .github/workflows/ci.yml (excerpt)\n# name: CI\n# on: [push, pull_request]\n# jobs:\n#   test:\n#     runs-on: ubuntu-latest\n#     strategy:\n#       matrix:\n#         ruby-version: ['3.0', '3.1', '3.2']\n#     steps:\n#       - uses: actions/checkout@v4\n#       - uses: ruby/setup-ruby@v1\n#         with:\n#           ruby-version: ${{ matrix.ruby-version }}\n#           bundler-cache: true\n#       - run: bundle exec rubocop\n#       - run: bundle exec rspec\n\n# Local CI simulation\ndefault: &default\n  image: ruby:3.2\n  before_script:\n    - bundle install\n  script:\n    - bundle exec rspec"
+    ],
+    "Mocking with RSpec": [
+      "RSpec mocking enables isolated testing. double creates test doubles. allow(...).to receive(...) sets up stubs. expect(...).to receive(...) sets expectations on method calls. instance_double verifies method signatures against real classes. spy records calls without setting expectations upfront. Use mocks sparingly — prefer real objects when practical.",
+      "# Test double\ndb = double(\"Database\", save: true, query: [])\n\n# Stub methods\nallow(db).to receive(:find).with(1).and_return({ id: 1, name: \"Alice\" })\nallow(db).to receive(:find).with(anything).and_return(nil)\n\n# Message expectation\nexpect(db).to receive(:save).once.with(hash_including(name: \"Bob\"))\n\n# Instance double (verifies real class API)\nclass User\n  def save = true\n  def name = \"test\"\nend\n\nuser = instance_double(User, save: false)\n# user.invalid_method  # raises MockExpectationError\n\n# Spy\nlogger = spy(\"Logger\")\nlogger.info(\"test\")\nexpect(logger).to have_received(:info).with(\"test\")"
+    ]
+  },
+  "Concurrency & Parallelism": {
+    "Thread Safety & Mutex": [
+      "Thread safety in Ruby requires careful synchronization. The GVL (Global VM Lock) protects Ruby internals but doesn't guarantee your code is thread-safe. Use Mutex (mutual exclusion) with synchronize to protect critical sections. ConditionVariable for signaling between threads. Avoid sharing mutable state across threads — prefer message passing.",
+      "require 'thread'\n\ncounter = 0\nmutex = Mutex.new\n\nthreads = 10.times.map do\n  Thread.new do\n    1000.times do\n      mutex.synchronize { counter += 1 }\n    end\n  end\nend\n\nthreads.each(&:join)\nputs counter  # 10000 (correct)\n\n# Without mutex, you'd get < 10000\n\n# ConditionVariable\nqueue = []\nmutex = Mutex.new\ncond = ConditionVariable.new\n\nconsumer = Thread.new do\n  mutex.synchronize do\n    cond.wait(mutex) while queue.empty?\n    puts \"Got: #{queue.shift}\"\n  end\nend\n\nsleep 0.1\nmutex.synchronize do\n  queue << \"data\"\n  cond.signal\nend\n\nconsumer.join"
+    ],
+    "Ractors (Ruby 3+)": [
+      "Ractors are Ruby 3+'s answer to parallel execution without GVL limitations. Each Ractor has its own execution context and doesn't share mutable objects. Communication via send/receive (message passing). Objects passed to ractors are deeply copied or must be shareable (frozen, no references to unshareable objects). Ractors enable true CPU-bound parallelism.",
+      "# Ractor (Ruby 3+)\nractor = Ractor.new do\n  result = 0\n  100.times { |i| result += i }\n  result\nend\n\nputs ractor.take  # 4950\n\n# Multiple ractors in parallel\nractors = 4.times.map do |i|\n  Ractor.new(i) do |n|\n    # Heavy CPU work\n    (n * 1000000..(n+1) * 1000000).sum\n  end\nend\n\nresults = ractors.map(&:take)\nputs results.sum\n\n# Message passing\npipe = Ractor.new do\n  loop do\n    msg = Ractor.receive\n    Ractor.yield \"Processed: #{msg}\"\n  end\nend\n\npipe.send(\"hello\")\nputs pipe.take  # \"Processed: hello\"\n\n# Shareable values (frozen)\nconfig = { timeout: 5 }.freeze\nractor = Ractor.new(config) do |cfg|\n  puts cfg[:timeout]\nend\nractor.take"
+    ],
+    "Fibers for Async": [
+      "Fibers are lightweight concurrency primitives for cooperative multitasking. Unlike threads, fibers yield control explicitly via Fiber.yield. The async/await pattern in Ruby uses fibers under the hood (Async gem by Samuel Williams). Fibers are ideal for streaming, generators, and non-blocking I/O with explicit scheduling.",
+      "# Generator pattern with fiber\ndef fibonacci(limit)\n  Fiber.new do\n    a, b = 0, 1\n    while a <= limit\n      Fiber.yield a\n      a, b = b, a + b\n    end\n  end\nend\n\nfib = fibonacci(100)\nputs fib.resume  # 0\nputs fib.resume  # 1\nputs fib.resume  # 1\nputs fib.resume  # 2\n\n# Async gem (requires async)\n# require 'async'\n# Async do\n#   task1 = Async { http.get(\"https://api1.com\") }\n#   task2 = Async { http.get(\"https://api2.com\") }\n#   results = await(task1, task2)\n# end\n\n# Fiber scheduler (Ruby 3.0+)\nrequire 'io/wait'\n# Custom scheduler for non-blocking I/O"
+    ],
+    "Concurrent Ruby Patterns": [
+      "Common concurrent patterns in Ruby: thread pools (ConnectionPool gem), promises (concurrent-ruby gem), actors (concurrent-ruby), and queues (Queue class is thread-safe). The concurrent-ruby gem provides high-level abstractions: Concurrent::Future, Concurrent::Promise, Concurrent::Actor, Concurrent::Map, and Concurrent::TimerTask.",
+      "require 'concurrent'\n\n# Future (async computation)\nfuture = Concurrent::Future.execute do\n  sleep 1\n  42\nend\n\nputs future.value  # 42 (blocks until ready)\n\n# Promise (chained async)\npromise = Concurrent::Promise\n  .new { 10 }\n  .then { |v| v * 2 }\n  .then { |v| v + 5 }\n  .execute\n\nputs promise.value  # 25\n\n# Thread pool\npool = Concurrent::FixedThreadPool.new(5)\n\n5.times do |i|\n  pool.post { puts \"Task #{i} on #{Thread.current.object_id}\" }\nend\n\npool.shutdown\npool.wait_for_termination\n\n# Thread-safe Map\nmap = Concurrent::Map.new\nmap[:count] = 0\nmap.compute(:count) { |v| v + 1 }  # atomic"
+    ]
+  },
+  "Web Development": {
+    "Rack & Middleware": [
+      "Rack is the foundation of Ruby web servers. It defines a simple interface: call(env) returns [status, headers, body]. Middleware are Rack components that wrap requests/responses. Popular Rack-based frameworks: Sinatra, Rails, Roda. Use config.ru for Rack configuration. Rack middleware enables cross-cutting concerns like logging, auth, and caching.",
+      "# config.ru\n# app = proc do |env|\n#   [200, { 'Content-Type' => 'text/plain' }, ['Hello']]\n# end\n# run app\n\n# Middleware\nclass LoggerMiddleware\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    puts \"#{env['REQUEST_METHOD']} #{env['PATH_INFO']}\"\n    status, headers, body = @app.call(env)\n    [status, headers, body]\n  end\nend\n\n# use LoggerMiddleware\n# run app\n\n# Built-in middleware\n# Rack::CommonLogger\n# Rack::ShowExceptions\n# Rack::Static (serves static files)\n# Rack::Session::Cookie\n\n# Run with:\n# $ rackup config.ru"
+    ],
+    "Sinatra Deep Dive": [
+      "Sinatra is a DSL for quick web applications. Core concepts: routes (get/post/put/delete/ patch), params hash, before/after filters, sessions, helpers, templates (ERB/Haml/Slim), and error handling. Sinatra::Base for modular apps (easier testing). Sinatra::Namespace for route grouping. Sinatra is ideal for APIs, microservices, and prototypes.",
+      "require 'sinatra'\nrequire 'sinatra/json'\n\n# Routes\nset :port, 4567\nget '/api/items' do\n  content_type :json\n  items = [{ id: 1, name: 'Widget' }]\n  json items\nend\n\nget '/api/items/:id' do\n  item = { id: params[:id].to_i, name: \"Item #{params[:id]}\" }\n  json item\nend\n\npost '/api/items' do\n  request_body = JSON.parse(request.body.read)\n  status 201\n  json(request_body.merge(id: 2))\nend\n\nbefore do\n  content_type :json\nend\n\n# Error handling\nerror 404 do\n  json(error: 'Not found')\nend\n\n# Helpers\nhelpers do\n  def authorized?\n    env['HTTP_AUTHORIZATION'] == 'Bearer secret'\n  end\nend"
+    ],
+    "Rails MVC Overview": [
+      "Ruby on Rails is a full-stack MVC framework. Model (ActiveRecord) handles data/database, View (ActionView/ERB) handles presentation, Controller (ActionController) handles request logic. Convention over configuration, DRY, and RESTful design are core principles. Key generators: rails generate model/user scaffold/product. Rails includes ActionMailer, ActiveJob, ActionCable (WebSockets), and ActiveStorage.",
+      "# Rails MVC flow\n# Request -> Routes -> Controller -> Model -> View -> Response\n\n# Route (config/routes.rb)\n# resources :articles\n\n# Controller (app/controllers/articles_controller.rb)\n# class ArticlesController < ApplicationController\n#   def index\n#     @articles = Article.all\n#   end\n#\n#   def show\n#     @article = Article.find(params[:id])\n#   end\n# end\n\n# Model (app/models/article.rb)\n# class Article < ApplicationRecord\n#   validates :title, presence: true\n#   has_many :comments\n# end\n\n# View (app/views/articles/index.html.erb)\n# <% @articles.each do |article| %>\n#   <h2><%= article.title %></h2>\n# <% end %>\n\n# Key commands\n# rails new myapp\n# rails generate model Article title:string body:text\n# rails generate controller Articles\n# rails db:migrate"
+    ],
+    "API Building with Grape": [
+      "Grape is a REST-like API framework for Ruby. It's designed for building APIs separate from web views. Features: DSL for routes, parameter validation, content negotiation, versioning, and mounting on Rack or within Rails. Ideal for API-only services or microservices. Combine with Entity for JSON serialization.",
+      "require 'grape'\n\nclass API < Grape::API\n  version 'v1', using: :header, vendor: 'myapp'\n  format :json\n  prefix :api\n\n  helpers do\n    def current_user\n      @current_user ||= User.find_by(token: headers['Authorization'])\n    end\n  end\n\n  resource :articles do\n    desc 'Return list of articles'\n    get do\n      Article.all\n    end\n\n    desc 'Return specific article'\n    params do\n      requires :id, type: Integer, desc: 'Article ID'\n    end\n    route_param :id do\n      get do\n        Article.find(params[:id])\n      end\n    end\n\n    desc 'Create article'\n    params do\n      requires :title, type: String\n      optional :body, type: String\n    end\n    post do\n      Article.create!(declared(params))\n    end\n  end\nend"
+    ]
+  },
+  "Database & Persistence": {
+    "ActiveRecord ORM": [
+      "ActiveRecord is Rails' ORM (Object-Relational Mapping). Maps database tables to Ruby classes. Key features: migrations (schema evolution), validations, associations (belongs_to/has_many/has_one), callbacks, scopes, query interface (where/order/joins/includes), and eager loading (includes/preload/eager_load). Chain query methods lazily — queries execute when results are needed.",
+      "# Migration\n# class CreateUsers < ActiveRecord::Migration[7.0]\n#   def change\n#     create_table :users do |t|\n#       t.string :name, null: false\n#       t.integer :age\n#       t.timestamps\n#     end\n#   end\n# end\n\n# Model\n# class User < ApplicationRecord\n#   validates :name, presence: true\n#   validates :age, numericality: { greater_than: 0 }\n#   has_many :posts\n#\n#   scope :adults, -> { where('age >= 18') }\n#\n#   def formatted_name\n#     \"#{name.upcase} (#{age})\"\n#   end\n# end\n\n# Query examples\n# users = User.where('age >= ?', 18).order(name: :asc)\n# user = User.includes(:posts).find(1)\n# User.create(name: 'Alice', age: 30)"
+    ],
+    "Sequel Gem": [
+      "Sequel is a lightweight, thread-safe ORM alternative to ActiveRecord. Key features: DSL for queries, model support, migrations, dataset chaining, eager loading, and excellent performance. Sequel's dataset API is more SQL-like and transparent. Works with SQLite, PostgreSQL, MySQL, and others. Popular for non-Rails Ruby apps.",
+      "require 'sequel'\n\n# Connect\nDB = Sequel.connect('sqlite://blog.db')\n\n# Create table migration\nDB.create_table?(:articles) do\n  primary_key :id\n  String :title, null: false\n  Text :body\n  DateTime :created_at, default: Sequel::CURRENT_TIMESTAMP\nend\n\n# Model\nclass Article < Sequel::Model\n  plugin :validation_helpers\n\n  def validate\n    super\n    validates_presence [:title]\n    validates_min_length 3, :title\n  end\n\n  one_to_many :comments\nend\n\n# Queries\narticles = Article.where(Sequel.lit('created_at > ?', Date.today - 7))\n                   .order(:created_at)\n                   .limit(10)\n\narticles.each { |a| puts \"#{a.id}: #{a.title}\" }\n\n# Raw SQL\ndata = DB['SELECT COUNT(*) AS cnt FROM articles'].first\nputs data[:cnt]"
+    ],
+    "SQLite & PG Integration": [
+      "Ruby connects to databases via gems: sqlite3 gem for SQLite, pg gem for PostgreSQL, mysql2 for MySQL. Establish connection, execute queries, handle results. Use connection pooling for production. Sequel and ActiveRecord handle connection management automatically. Environment-specific configs for development/test/production databases.",
+      "# SQLite (file-based, no server)\nrequire 'sqlite3'\ndb = SQLite3::Database.new('dev.db')\ndb.execute('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT)')\ndb.execute('INSERT INTO items (name) VALUES (?)', ['test'])\nrows = db.execute('SELECT * FROM items')\n\n# PostgreSQL\ngem 'pg'\nrequire 'pg'\nconn = PG.connect(host: 'localhost', dbname: 'myapp', user: 'app', password: ENV['DB_PASS'])\nresult = conn.exec_params('SELECT * FROM users WHERE age > $1', [18])\nresult.each { |row| puts row['name'] }\n\n# Connection pooling with connection_pool gem\ngem 'connection_pool'\npool = ConnectionPool.new(size: 5, timeout: 5) do\n  PG.connect(dbname: 'myapp')\nend\n\npool.with do |conn|\n  conn.exec('SELECT 1')\nend"
+    ]
+  },
+  "Tools & Best Practices": {
+    "RuboCop & Linting": [
+      "RuboCop is the standard Ruby linter and formatter. Enforces community style guides (Ruby Style Guide, Rails Style Guide). Integrates with editors via LSP. Run rubocop (check), rubocop -a (auto-fix safe offenses), rubocop -A (auto-fix all). Configuration in .rubocop.yml. Custom cops for project-specific rules. Use with pre-commit hooks and CI.",
+      "# .rubocop.yml\n# AllCops:\n#   NewCops: enable\n#   TargetRubyVersion: 3.2\n#\n# Style/Documentation:\n#   Enabled: false\n#\n# Metrics/MethodLength:\n#   Max: 15\n#\n# Layout/LineLength:\n#   Max: 100\n\n# CLI commands\n# $ rubocop                    # check all files\n# $ rubocop app/models/user.rb  # specific file\n# $ rubocop -a                 # auto-fix safe\n# $ rubocop -A                 # auto-fix all (unsafe too)\n# $ rubocop --auto-gen-config  # generate todo config\n\n# Inline disable\n# rubocop:disable Metrics/AbcSize\ndef complex_method; end\n# rubocop:enable Metrics/AbcSize"
+    ],
+    "Debugging with Pry": [
+      "Pry is the de facto Ruby debugger. Features: binding.pry to pause execution, ls to list methods, cd to navigate objects, show-source to view implementation, wtf? for exception trace, edit to open in editor, and play to replay code. Byebug is an alternative with step/next/continue commands. Use binding.irb (built-in) for simple debugging.",
+      "require 'pry'\n\ndef buggy_method(x)\n  y = x * 2\n  binding.pry  # execution pauses here\n  z = y + 10\n  z\nend\n\n# In Pry session:\n# > ls x          # show methods on x\n# > show-source Array#map  # view implementation\n# > cd y          # navigate into object\n# > whereami      # show current location\n# > help          # list all commands\n# > exit          # continue execution\n\n# Byebug commands\n# require 'byebug'\n# byebug\n# step (into), next (over), continue (out), display var\n\n# Calling from CLI\n# $ ruby -r pry my_script.rb"
+    ],
+    "Profiling & Benchmarking": [
+      "Ruby provides built-in profiling tools. Benchmark module for timing code blocks. The stackprof gem for sampling CPU profiler. rack-mini-profiler for web request profiling. memory_profiler for memory allocation tracking. Derailed benchmarks for Rails apps. Profile before optimizing — measure, identify bottlenecks, then optimize.",
+      "require 'benchmark'\n\nn = 1_000_000\n\nBenchmark.bm do |x|\n  x.report('concat:') { n.times { 'a' + 'b' } }\n  x.report('interp:') { n.times { \"#{'a'}#{'b'}\" } }\n  x.report('join:')   { n.times { ['a', 'b'].join } }\nend\n\n# Stackprof\n# $ gem install stackprof\n# $ stackprof --mode=cpu --out=tmp/stackprof.dump\n# then profile block:\n# StackProf.run(mode: :cpu, out: 'tmp/profile.dump') do\n#   MyWorker.new.perform\n# end\n# $ stackprof tmp/profile.dump --text\n\n# Memory profiling\n# require 'memory_profiler'\n# report = MemoryProfiler.report do\n#   MyWorker.new.perform\n# end\n# report.pretty_print"
+    ],
+    "YARD Documentation": [
+      "YARD is Ruby's documentation tool (replaces RDoc). Uses @tag annotations for structured docs. Key tags: @param, @return, @raise, @yield, @example, @see, @deprecated, @since. Inline docs use # Comments above definitions. Generate HTML docs with yard doc. YARD types: String, Array<String>, Hash{Symbol=>Integer}, #method, DuckType#method.",
+      "# YARD documentation example\n# @param name [String] the user's full name\n# @param options [Hash] optional configuration\n# @option options [Boolean] :verbose enable verbose output\n# @option options [Integer] :retries (3) number of retries\n# @return [User] the newly created user\n# @raise [ArgumentError] if name is empty\n# @example Creating a user\n#   User.create('Alice', verbose: true)\n# @see User#activate\n# @since 2.0.0\ndef create(name, options = {})\n  raise ArgumentError if name.empty?\n  User.new(name).tap(&:save)\nend\n\n# Generate docs\n# $ yard doc          # generate HTML docs in doc/\n# $ yard server       # serve docs on localhost:8808\n# $ yard stats        # documentation coverage stats\n# $ yard graph        # dependency graph"
+    ]
+  },
+  "Advanced Ruby": {
+    "Threads & Fibers": [
+      "Ruby supports threading (Thread class) and fibers (Fibers for cooperative concurrency). Threads run concurrently (with GIL limitation in CRuby). Fibers are lightweight control structures for cooperative multitasking. Ractors (Ruby 3+) provide parallel execution without GIL. Use threads for I/O-bound work, ractors for CPU-bound, fibers for generators/streaming.",
+      "# Thread (I/O-bound)\nthreads = 3.times.map do |i|\n  Thread.new do\n    sleep rand(0.1)\n    puts \"Thread #{i} done\"\n  end\nend\nthreads.each(&:join)\n\n# Fiber (cooperative)\nfiber = Fiber.new do\n  puts \"Fiber start\"\n  Fiber.yield \"paused\"\n  puts \"Fiber resumed\"\n  \"done\"\nend\n\nputs fiber.resume  # Fiber start / \"paused\"\nputs fiber.resume  # Fiber resumed / \"done\"\n\n# Fiber as generator\ndef fibonacci\n  Fiber.new do\n    a, b = 0, 1\n    loop do\n      Fiber.yield a\n      a, b = b, a + b\n    end\n  end\nend\n\nfib = fibonacci\n10.times { puts fib.resume }"
+    ],
+    "Rake Tasks": [
+      "Rake is Ruby's build tool (like Make). Tasks defined with desc + task. Namespaces group related tasks. Task dependencies via =>. Default task runs with plain `rake`. Rakefile in project root. File tasks for file generation. Rake is commonly used for database migrations, test running, asset compilation, and deployment automation.",
+      "# Rakefile\n# desc \"Default task\"\n# task default: :test\n#\n# desc \"Run tests\"\n# task :test do\n#   ruby \"test/test_helper.rb\"\n# end\n#\n# namespace :db do\n#   desc \"Create database\"\n#   task :create do\n#     puts \"Creating database...\"\n#   end\n#\n#   desc \"Migrate database\"\n#   task migrate: :create do\n#     puts \"Running migrations...\"\n#   end\n# end\n#\n# # Run: rake db:migrate\n\n# Common commands\n# rake -T        # list tasks\n# rake -W db:migrate  # show where task is defined"
+    ],
+    "Sinatra Overview": [
+      "Sinatra is a lightweight web framework. Routes are methods decorated with HTTP verbs. Params hash for input. ERB/Haml templates. before/after filters. Sessions with enable :sessions. Helpers for shared logic. Extensions for modular organization. Sinatra is ideal for APIs, microservices, and simple web apps.",
+      "require 'sinatra'\n\nget '/' do\n  \"Hello from Sinatra!\"\nend\n\nget '/hello/:name' do\n  \"Hello, #{params[:name]}!\"\nend\n\npost '/data' do\n  content_type :json\n  { received: params }.to_json\nend\n\nbefore do\n  content_type :html\nend\n\nhelpers do\n  def formatted_time\n    Time.now.strftime(\"%Y-%m-%d %H:%M:%S\")\n  end\nend\n\n# Configuration\nset :port, 4567\nset :bind, '0.0.0.0'\nenable :sessions\n\n# Run: ruby app.rb"
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "id": "go-dependency-injection",
+  "title": "Go: Dependency Injection Container",
+  "difficulty": "expert",
+  "languages": ["go"],
+  "estimatedMinutes": 75,
+  "concepts": ["go", "dependency injection", "reflection", "lifetimes", "singleton"],
+  "description": "Build a dependency injection container in Go using reflection for provider registration, automatic resolution, and lifetime management.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Container with type registration",
+      "description": "Create a `Container` struct that stores providers as `map[reflect.Type]ProviderFunc`. Implement `Register(provider interface{})` that uses reflection to extract the return type of the provider function. Register a provider for `*Logger` and a provider for `*Database`. Print the registered types.",
+      "hints": [
+        "Use `reflect.TypeOf(provider)` to get the function type, then `.Out(0)` for the return type",
+        "ProviderFunc can be `func(...interface{}) (interface{}, error)`",
+        "Print registered types: `fmt.Printf(\"Registered: %s\\n\", t.String())`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Registered') && (output.includes('Logger') || output.includes('Database'))",
+        "successMessage": "Container correctly registers providers by their return type!",
+        "failureMessage": "Print the registered types using fmt.Printf after each registration."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Resolve with reflection",
+      "description": "Implement `Resolve(target interface{}) error` that takes a pointer to a struct and automatically populates its fields using reflection. For each field with a `@inject` tag, look up the provider and call it. Handle nested injection where a provider depends on another service. Print the resolved struct fields.",
+      "hints": [
+        "Iterate struct fields, find tagged fields with `field.Tag.Get(\"inject\")`",
+        "Look up the provider for the field type from the container registry",
+        "For nested dependencies, call `Resolve` recursively on the provider's own fields"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('Resolved') && output.includes('Logger') && output.includes('Database')",
+        "successMessage": "Container resolves and injects dependencies recursively using field tags!",
+        "failureMessage": "Print the resolved struct showing all injected field values."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Singleton lifetime",
+      "description": "Implement singleton scope where the provider is called once and the same instance is reused for all resolutions. Add a `RegisterSingleton` method that stores the instance after first creation. Register a `*Config` as singleton, resolve it twice, and print the pointer addresses to confirm they are the same object.",
+      "hints": [
+        "Store singleton instances in a `map[reflect.Type]interface{}` on the container",
+        "On first Resolve, call the provider and cache the result in the singleton map",
+        "Print addresses: `fmt.Printf(\"%p\\n\", config)` to show same pointer on second call"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('same') || output.includes('0x')",
+        "successMessage": "Singleton lifetime returns the exact same instance across multiple resolutions!",
+        "failureMessage": "Print the pointer addresses to prove both resolutions return the same instance."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Transient lifetime and scoped container",
+      "description": "Add transient lifetime (new instance every time) and scoped lifetime (one instance per scope). Implement `CreateScope()` that returns a new `Container` sharing singleton providers from the parent but with its own scope cache. Print memory addresses to demonstrate each lifetime behavior.",
+      "hints": [
+        "Transient is the default — just call the provider every time without caching",
+        "Scoped container holds a reference to parent and its own instance cache",
+        "Resolve a service in two different scopes and print addresses to show different instances between scopes"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('transient') && output.includes('scope') && output.includes('0x')",
+        "successMessage": "Transient and scoped lifetimes correctly manage instance creation!",
+        "failureMessage": "Print pointer addresses showing transient gives new instances, scoped shares within scope."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Circular dependency detection",
+      "description": "Implement circular dependency detection using a resolution stack. Before resolving a type, check if it is already in the resolution stack. If found, return a descriptive error. Test by creating two services that depend on each other and print the circular dependency error.",
+      "hints": [
+        "Maintain a `map[reflect.Type]bool` or a slice as the resolution stack on the container",
+        "Push the type before resolving dependencies, pop after done — use defer for safety",
+        "On detecting a cycle, return an error: `fmt.Errorf(\"circular dependency: %s\", t)`"
+      ],
+      "codeTemplate": { "go": "" },
+      "verification": {
+        "test": "output.includes('circular dependency') || output.includes('cycle')",
+        "successMessage": "Circular dependency detection catches and reports dependency cycles with clear errors!",
+        "failureMessage": "Print the circular dependency error message when a cycle is detected."
+      }
+    }
+  ]
+}

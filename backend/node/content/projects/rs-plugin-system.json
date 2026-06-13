@@ -1,0 +1,71 @@
+{
+  "id": "rs-plugin-system",
+  "title": "Rust: Plugin System",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 30,
+  "concepts": ["rust", "plugin system", "dynamic dispatch", "plugin registry"],
+  "description": "Build a plugin system where plugins can be registered and executed at runtime.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Plugin Trait",
+      "description": "Define a `Plugin` trait with methods `fn name(&self) -> &str` and `fn execute(&self, input: &str) -> String`. Implement `UpperCasePlugin` and `ReversePlugin`. Test both.",
+      "hints": ["`UpperCasePlugin` returns input.to_uppercase().", "`ReversePlugin` returns input.chars().rev().collect().", "Each plugin has a unique name."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('HELLO') && output.includes('olleh')",
+        "successMessage": "Plugin trait works!",
+        "failureMessage": "Execute UpperCasePlugin('hello') and ReversePlugin('hello')."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Plugin Registry",
+      "description": "Create a `PluginRegistry` that stores plugins in a `HashMap<String, Box<dyn Plugin>>`. Add methods `register(&mut self, plugin: Box<dyn Plugin>)` and `execute(&self, name: &str, input: &str) -> Option<String>`.",
+      "hints": ["`HashMap<String, Box<dyn Plugin>>`", "`register` inserts the plugin by name.", "`execute` looks up the plugin and calls its execute method."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('HELLO') && output.includes('olleh')",
+        "successMessage": "Plugin registry works!",
+        "failureMessage": "Register both plugins and execute them by name."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Pipeline Execution",
+      "description": "Add a `run_pipeline(&self, plugin_names: &[&str], input: &str) -> String` method that runs multiple plugins sequentially, using each plugin's output as the next plugin's input.",
+      "hints": ["Start with `input`, iterate over plugin names.", "`result = registry.execute(name, result).unwrap_or(result)`", "Pipeline: UpperCase then Reverse on \"hello\" → \"OLLEH\" (reversed uppercase)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('OLLEH')",
+        "successMessage": "Plugin pipeline works!",
+        "failureMessage": "Run UpperCase then Reverse on 'hello' to get 'OLLEH'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Plugin with Config",
+      "description": "Add a `PrefixPlugin` that takes a prefix string. Register multiple instances with different prefixes. Demonstrate the same plugin type with different configurations.",
+      "hints": ["`struct PrefixPlugin { prefix: String }`", "`impl Plugin for PrefixPlugin { fn execute(&self, input: &str) -> String { format!(\"{}{}\", self.prefix, input) } }`", "Register both `add_hello` and `add_bye` plugins."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Hello, world') && output.includes('Bye, world')",
+        "successMessage": "Configurable plugins work!",
+        "failureMessage": "Create PrefixPlugin with 'Hello, ' and 'Bye, ' and execute both."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Plugin with Dependencies",
+      "description": "Simulate plugin dependencies: a `StatsPlugin` that can be registered to collect statistics (execution count, average time). Track metrics from pipeline runs and print a report.",
+      "hints": ["Use `RefCell` or `Mutex` for interior mutability in plugin stats.", "Track `run_count` and `total_time` in the plugin.", "Print a stats report after executing the pipeline several times."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('stats') || output.includes('runs') || output.includes('count')",
+        "successMessage": "Plugin with dependencies works!",
+        "failureMessage": "Run the pipeline and print execution statistics."
+      }
+    }
+  ]
+}

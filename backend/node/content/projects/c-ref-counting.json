@@ -1,0 +1,23 @@
+{
+  "id": "c-ref-counting",
+  "title": "C: Reference Counting",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "reference counting", "memory management", "smart pointer", "RC"],
+  "description": "Implement a simple reference-counted pointer to automatically manage memory.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "RefCounted Pointer",
+      "description": "Define a `RefCounted` struct containing a pointer and a reference count pointer. Write `void* rc_new(int size)` that allocates memory with a refcount of 1. Write `void* rc_ref(void *ptr)` that increments the refcount. Write `void rc_unref(void *ptr)` that decrements and frees when 0.",
+      "hints": ["Store refcount just before the data pointer.", "Allocate: refcount + data in one malloc.", "rc_ref: `(*(int*)ptr - 1)++`.", "rc_unref: decrement, if 0 then free."],
+      "codeTemplate": { "c": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid* rc_new(int size) {\n    int *mem = malloc(sizeof(int) + size);\n    *mem = 1;\n    return mem + 1;\n}\n\nvoid* rc_ref(void *ptr) {\n    int *rc = (int*)ptr - 1;\n    (*rc)++;\n    return ptr;\n}\n\nvoid rc_unref(void *ptr) {\n    int *rc = (int*)ptr - 1;\n    (*rc)--;\n    printf(\"Refcount: %d\\n\", *rc);\n    if (*rc == 0) {\n        free(rc);\n        printf(\"Memory freed\\n\");\n    }\n}\n\nint main() {\n    int *data = (int*)rc_new(10 * sizeof(int));\n    data[0] = 42;\n    int *data2 = (int*)rc_ref(data);\n    rc_unref(data);\n    rc_unref(data2);\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('Refcount: 2') && output.includes('Refcount: 1') && output.includes('freed')",
+        "successMessage": "Reference counting works!",
+        "failureMessage": "Create, reference, and unreference to see refcounts"
+      }
+    }
+  ]
+}

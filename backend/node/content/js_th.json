@@ -568,6 +568,118 @@
       "เปรียบเทียบค่าและคืนค่า boolean เชิงสัมพันธ์: >, <, >=, <= ความเท่ากัน: === (strict, ไม่มีการแปลงชนิด) และ == (loose, แปลงชนิด) ข้อผิดพลาดทั่วไป: การใช้ == อนุญาตให้มีการแปลงชนิด (เช่น 5 == '5' เป็น true) ซึ่งทำให้เกิดข้อผิดพลาดที่ซับซ้อน แนวปฏิบัติที่ดี: ใช้ === และ !== เสมอ; ใช้ Object.is() สำหรับการเปรียบเทียบ NaN (Object.is(NaN, NaN) เป็น true, ต่างจาก NaN === NaN ที่เป็น false)",
       "console.log(5 > 3);     // true\nconsole.log(5 <= 3);    // false\n\n// Strict vs loose equality\nconsole.log(5 === '5'); // false (ชนิดต่างกัน — ถูกต้อง)\nconsole.log(5 == '5');  // true (coercion — หลีกเลี่ยง)\n\n// NaN เป็นค่าเดียวที่ไม่เท่ากับตัวมันเอง\nconsole.log(NaN === NaN); // false (แปลก)\nconsole.log(Object.is(NaN, NaN)); // true\n\n// Object.is สำหรับ strict equality กับกรณีพิเศษ\nconsole.log(Object.is(0, -0)); // false (แยกแยะเครื่องหมายศูนย์)"
     ]
+  },
+  "การควบคุมการทำงาน": {
+    "If Else": [
+      "การแยกสาขาตามเงื่อนไขบูลีน ใช้ === เสมอ ใช้ guard clauses ลดการซ้อน",
+      "const score = 85;\nif (score >= 90) { console.log('A'); }\nelse if (score >= 80) { console.log('B'); }\nelse { console.log('C'); }"
+    ],
+    "Switch Statement": [
+      "เปรียบเทียบนิพจน์กับหลายค่าด้วย === ใช้ break ป้องกันการตก case",
+      "switch (status) {\n  case 'ok': console.log('OK'); break;\n  case 'error': console.log('Error'); break;\n  default: console.log('Unknown');\n}"
+    ],
+    "For Loops": [
+      "for (init; condition; increment) — ลูปนับ for...of — วนค่าของ iterables",
+      "for (let i = 0; i < 5; i++) { console.log(i); }\nfor (const fruit of fruits) { console.log(fruit); }"
+    ],
+    "While และ Do While": [
+      "while ตรวจสอบก่อน do...while ทำงานอย่างน้อยหนึ่งครั้งเสมอ",
+      "let i = 0;\nwhile (i < 3) { console.log(i); i++; }"
+    ],
+    "Break และ Continue": [
+      "break ออกจากลูป continue ข้ามส่วนที่เหลือของรอบปัจจุบัน",
+      "for (const n of [1, 2, 3, 4, 5]) {\n  if (n === 2) continue;\n  if (n === 4) break;\n  console.log(n);\n}"
+    ],
+    "การจัดการข้อผิดพลาด": [
+      "try/catch/finally จัดการ runtime exceptions finally ทำงานเสมอ",
+      "try { JSON.parse('invalid') } catch (e) { console.error(e) } finally { cleanup() }"
+    ]
+  },
+  "ฟังก์ชัน": {
+    "การประกาศฟังก์ชัน": [
+      "ฟังก์ชันถูก hoisted สามารถเรียกก่อนประกาศ สร้าง scope และเป็นค่าที่ส่งต่อได้",
+      "function greet(name) { return 'Hello ' + name; }\nsetTimeout(function() { console.log('Hi'); }, 100);"
+    ],
+    "Arrow Functions": [
+      "ไวยากรณ์สั้น: (params) => expression this เป็น lexical ไม่มี arguments",
+      "const add = (a, b) => a + b;\nconst greet = name => { return `Hello ${name}`; };"
+    ],
+    "Default Parameters": [
+      "ค่าเริ่มต้นเมื่ออาร์กิวเมนต์เป็น undefined",
+      "function log(msg = 'Hi') { console.log(msg); }"
+    ],
+    "Rest Parameters": [
+      "รวบรวมอาร์กิวเมนต์ที่เหลือเป็นอาร์เรย์",
+      "function sum(...nums) { return nums.reduce((a,b) => a+b, 0); }"
+    ],
+    "Closures": [
+      "ฟังก์ชันที่จำตัวแปรจากขอบเขตภายนอกแม้ฟังก์ชันนั้นคืนค่าไปแล้ว",
+      "function counter() { let count = 0; return () => ++count; }"
+    ]
+  },
+  "ออบเจกต์และคลาส": {
+    "ออบเจกต์": [
+      "Objects เก็บ properties เป็นคู่ key-value ส่งผ่านแบบ reference",
+      "const obj = { name: 'Doge', age: 5 };"
+    ],
+    "คีย์เวิร์ด this": [
+      "this อ้างถึงบริบทการทำงาน ขึ้นอยู่กับ HOW ที่เรียกใช้ฟังก์ชัน",
+      "const obj = { name: 'test', log() { console.log(this.name); } };"
+    ],
+    "โปรโตไทป์": [
+      "การสืบทอดแบบ prototype — objects สืบทอดจาก objects โดยตรง",
+      "const animal = { speak() { console.log('sound'); } };\nconst dog = Object.create(animal);"
+    ],
+    "คลาส": [
+      "คลาส ES6 คือ syntactic sugar เหนือ prototypes",
+      "class Animal { constructor(name) { this.name = name; } speak() {} }"
+    ]
+  },
+  "JavaScript แบบอะซิงก์": {
+    "Promises": [
+      "Promise แทนค่าที่จะพร้อมในอนาคต สถานะ: pending, fulfilled, rejected",
+      "const p = new Promise((resolve) => setTimeout(() => resolve('done'), 1000));\np.then(console.log).catch(console.error);"
+    ],
+    "Async/Await": [
+      "async คืน Promise เสมอ await หยุดรอจน promise settle",
+      "async function get() {\n  const r = await fetch('/api');\n  return r.json();\n}"
+    ],
+    "Event Loop": [
+      "single-threaded ไม่ blocking call stack → microtasks → macrotasks",
+      "console.log(1); setTimeout(() => console.log(2), 0); console.log(3); // 1, 3, 2"
+    ]
+  },
+  "เฟรมเวิร์กและเครื่องมือ": {
+    "React": [
+      "ไลบรารี UI แบบ component-based ใช้ JSX, props, state, hooks",
+      "function Counter() { const [c, setC] = useState(0); return <button onClick={() => setC(c+1)}>{c}</button>; }"
+    ],
+    "Vue": [
+      "เฟรมเวิร์กแบบ progressive มี Options API และ Composition API",
+      "const app = Vue.createApp({ data() { return { count: 0 }; } });"
+    ],
+    "Express": [
+      "เฟรมเวิร์ก Node.js แบบ minimalist สำหรับสร้าง APIs",
+      "const express = require('express')();\nexpress.get('/', (req, res) => res.json({msg: 'hi'}));"
+    ]
+  },
+  "ออบเจกต์ในตัว": {
+    "JSON": [
+      "JSON.parse แปลง JSON string → object; JSON.stringify แปลง object → JSON string",
+      "JSON.parse('{\"a\":1}'); JSON.stringify({a: 1});"
+    ],
+    "Math": [
+      "Math.random(), Math.floor(), Math.round(), Math.PI, Math.max/min",
+      "Math.random(); Math.floor(4.7); Math.max(1, 5, 3);"
+    ],
+    "Date": [
+      "Date จัดการวันที่/เวลา เดือนเริ่มที่ 0 (มกราคม = 0)",
+      "const now = new Date(); console.log(now.toISOString());"
+    ],
+    "String Methods": [
+      "slice, split, replaceAll, trim, includes, toUpperCase, startsWith",
+      "'Hello'.toUpperCase(); 'abc'.includes('b'); ' hi '.trim();"
+    ]
   }
 }
 

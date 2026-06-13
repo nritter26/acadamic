@@ -1,0 +1,71 @@
+{
+  "id": "rs-http-server",
+  "title": "Rust: HTTP Server (Simulated)",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "HTTP", "TCP", "server", "request handling"],
+  "description": "Simulate an HTTP server with route matching and response handling.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "HTTP Request Parser",
+      "description": "Write a function `parse_http_request(raw: &str) -> (String, String, HashMap<String, String>)` that extracts method, path, and headers from a raw HTTP request string like `\"GET /api/users HTTP/1.1\\r\\nHost: localhost\\r\\n\"`.",
+      "hints": ["Split by `\\r\\n` lines.", "First line: method, path, version.", "Rest lines: \"Header: Value\" pairs."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('GET') && output.contains('/api')",
+        "successMessage": "HTTP request parser works!",
+        "failureMessage": "Parse and print method and path from a raw request."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Route Matcher",
+      "description": "Create a `Router` struct with a `HashMap<String, HashMap<String, Box<dyn Fn(&Request) -> Response>>>` (method → path → handler). Add a `GET /hello` route that returns a greeting. Test route matching.",
+      "hints": ["`routes: HashMap<String, HashMap<String, Box<dyn Fn(&Request) -> Response>>>`", "`add_route(\"GET\", \"/hello\", Box::new(|req| Response { status: 200, body: \"Hello!\".into() }))`", "`handle(req)` looks up method → path."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('Hello!') || output.contains('200')",
+        "successMessage": "Route matching works!",
+        "failureMessage": "Match GET /hello and print the response."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Route Parameters",
+      "description": "Add support for path parameters like `/users/:id`. Parse the parameter and pass it to the handler. Test with `GET /users/42` printing `\"User 42\"`.",
+      "hints": ["Store routes as patterns like `/users/:id`.", "Split both pattern and request path by `/`.", "Match segment by segment, collect `:param` values."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('42') || output.contains('User')",
+        "successMessage": "Route parameters work!",
+        "failureMessage": "Match GET /users/42 and print 'User 42'."
+      }
+    },
+    {
+      "id": 4,
+      "title": "JSON Response",
+      "description": "Create a helper `json_response(body: &str, status: u16) -> String` that returns a properly formatted HTTP response with Content-Type: application/json. Test with a JSON body.",
+      "hints": ["Format: `HTTP/1.1 {status} OK\\r\\nContent-Type: application/json\\r\\nContent-Length: {len}\\r\\n\\r\\n{body}`", "Set Content-Length to body.len().", "Wrap body in the HTTP response format."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('HTTP/1.1') && output.contains('application/json')",
+        "successMessage": "JSON response formatting works!",
+        "failureMessage": "Create and print a JSON HTTP response."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Router Demo",
+      "description": "Wire everything together: create a router with routes for GET / (home), GET /hello (greeting), GET /users/:id (user detail). Parse a request, match the route, and print the response.",
+      "hints": ["Register 3 routes.", "Create a sample request: `\"GET /users/42 HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\"`", "Parse, route, handle, and print the response."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('User 42') || output.contains('200')",
+        "successMessage": "Full router demo works!",
+        "failureMessage": "Route and handle a GET /users/42 request."
+      }
+    }
+  ]
+}

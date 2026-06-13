@@ -1,0 +1,23 @@
+{
+  "id": "c-crdt-counter",
+  "title": "C: CRDT Counter (G-Counter)",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 25,
+  "concepts": ["c", "CRDT", "distributed", "merge", "state"],
+  "description": "Implement a Grow-Only Counter (G-Counter) CRDT that can be merged across multiple nodes.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "G-Counter Implementation",
+      "description": "Define a `GCounter` struct with an int array for each node's contribution. Write `void increment(GCounter *c, int node)` and `int value(GCounter *c)` which sums all node counts. Write `void merge(GCounter *a, GCounter *b)` that takes the max for each node. Test with 2 nodes.",
+      "hints": ["Each node has its own counter that only goes up.", "Value = sum of all node counters.", "Merge = max of each element."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\n#define NODES 3\n\ntypedef struct { int counts[NODES]; } GCounter;\n\nvoid g_init(GCounter *c) { for (int i = 0; i < NODES; i++) c->counts[i] = 0; }\nvoid g_inc(GCounter *c, int node) { c->counts[node]++; }\nint g_val(GCounter *c) { int sum=0; for(int i=0;i<NODES;i++) sum+=c->counts[i]; return sum; }\nvoid g_merge(GCounter *a, GCounter *b) {\n    for (int i = 0; i < NODES; i++)\n        if (b->counts[i] > a->counts[i]) a->counts[i] = b->counts[i];\n}\n\nint main() {\n    GCounter a, b;\n    g_init(&a); g_init(&b);\n    g_inc(&a, 0); g_inc(&a, 0);\n    g_inc(&b, 1); g_inc(&b, 1); g_inc(&b, 1);\n    printf(\"A: %d, B: %d\\n\", g_val(&a), g_val(&b));\n    g_merge(&a, &b);\n    printf(\"Merged: %d\\n\", g_val(&a));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('A: 2') && output.includes('B: 3') && output.includes('Merged: 5')",
+        "successMessage": "CRDT G-Counter works!",
+        "failureMessage": "Increment, merge, and compute the correct merged value"
+      }
+    }
+  ]
+}

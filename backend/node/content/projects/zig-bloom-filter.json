@@ -1,0 +1,116 @@
+{
+  "id": "zig-bloom-filter",
+  "title": "Bloom Filter",
+  "description": "Write a Zig program that implements a simple Bloom filter for set membership testing.",
+  "difficulty": "expert",
+  "languages": [
+    "zig"
+  ],
+  "codeTemplate": {
+    "zig": "const std = @import(\"std\");\n\nconst BloomFilter = struct {\n    bits: u64 = 0,\n    \n    fn hash1(self: BloomFilter, s: []const u8) u6 {\n        var h: u64 = 5381;\n        for (s) |ch| h = h *% 33 +% ch;\n        return @truncate(h);\n    }\n    fn hash2(self: BloomFilter, s: []const u8) u6 {\n        var h: u64 = 0;\n        for (s) |ch| h = h *% 65599 +% ch;\n        return @truncate(h);\n    }\n    fn insert(self: *BloomFilter, s: []const u8) void {\n        self.bits |= (@as(u64, 1) << self.hash1(s));\n        self.bits |= (@as(u64, 1) << self.hash2(s));\n    }\n    fn mightContain(self: BloomFilter, s: []const u8) bool {\n        const b1 = self.bits & (@as(u64, 1) << self.hash1(s));\n        const b2 = self.bits & (@as(u64, 1) << self.hash2(s));\n        return b1 != 0 and b2 != 0;\n    }\n};\n\npub fn main() !void {\n    var bf = BloomFilter{};\n    bf.insert(\"apple\");\n    bf.insert(\"banana\");\n    \n    std.debug.print(\"apple: {}\\n\", .{bf.mightContain(\"apple\")});\n    std.debug.print(\"grape: {}\\n\", .{bf.mightContain(\"grape\")});\n}"
+  },
+  "verificationTest": "output.includes('apple: true') && output.includes('grape: false')",
+  "hints": [
+    "A Bloom filter uses multiple hash functions to set bits in a bit array",
+    "`@truncate(u6)` converts a u64 hash to a 6-bit value (0-63)",
+    "`*%` is Zig's wrapping multiplication operator",
+    "`mightContain` returns false when definitely absent, true when possibly present"
+  ],
+  "estimatedMinutes": 60,
+  "concepts": [
+    "unit test",
+    "zig"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Set up the Bloom Filter project",
+      "description": "Initialize the project structure and create the main entry point. Set up any necessary configuration files and import required libraries.",
+      "hints": [
+        "Create the main source file for Bloom Filter",
+        "Import necessary standard libraries",
+        "Set up the basic program structure"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 1: Set up the Bloom Filter project\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Bloom Filter...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Project structure set up correctly!",
+        "failureMessage": "Initialize the project with proper structure."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Implement the core logic for Bloom Filter",
+      "description": "Write the main algorithm or core functionality that drives this project. Break down the problem into smaller functions for clarity.",
+      "hints": [
+        "Start with the simplest part of the algorithm",
+        "Test each function as you write it",
+        "Use descriptive variable and function names"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 2: Implement the core logic for Bloom Filter\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Bloom Filter...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Core logic implemented successfully!",
+        "failureMessage": "Implement the main functionality."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Handle edge cases and errors",
+      "description": "Add checks for edge cases such as empty inputs, invalid data, boundary conditions, and error states. Provide clear feedback for invalid inputs.",
+      "hints": [
+        "Test with empty strings or zero values",
+        "Handle negative numbers if applicable",
+        "Provide user-friendly error messages"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 3: Handle edge cases and errors\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Bloom Filter...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Edge cases handled properly!",
+        "failureMessage": "Add error handling for edge cases."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Format and display the output",
+      "description": "Format the output in a clear, readable way. If applicable, display results in a structured format with labels and proper formatting.",
+      "hints": [
+        "Add labels to output values for clarity",
+        "Use consistent formatting throughout",
+        "Consider adding a summary section"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 4: Format and display the output\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Bloom Filter...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "Output is clean and well-formatted!",
+        "failureMessage": "Format the output for readability."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test with sample inputs",
+      "description": "Run the complete program with several sample inputs to verify everything works correctly. Test edge cases and compare results with expected outputs.",
+      "hints": [
+        "Test with typical inputs first",
+        "Test with boundary values",
+        "Verify output matches expected results"
+      ],
+      "codeTemplate": {
+        "zig": "// Step 5: Test with sample inputs\nconst std = @import(\"std\");\n\npub fn main() void {\n  // Your code here\n  std.debug.print(\"Testing Bloom Filter...\\n\", .{});\n}\n"
+      },
+      "verification": {
+        "test": "output.length > 0",
+        "successMessage": "All tests passed! Project complete.",
+        "failureMessage": "Test the program with multiple sample inputs."
+      }
+    }
+  ]
+}

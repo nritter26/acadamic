@@ -1,0 +1,23 @@
+{
+  "id": "c-semver",
+  "title": "C: Semver Parser",
+  "difficulty": "expert",
+  "languages": ["c"],
+  "estimatedMinutes": 20,
+  "concepts": ["c", "semver", "parsing", "structs", "comparison"],
+  "description": "Parse semantic version strings (MAJOR.MINOR.PATCH) and compare them.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Parse and Compare Versions",
+      "description": "Define a `Semver` struct with major, minor, patch ints. Write `int semver_parse(Semver *v, char *s)` that parses a version string. Write `int semver_cmp(Semver *a, Semver *b)` that returns -1, 0, or 1. Test with '1.2.3' vs '1.10.0'.",
+      "hints": ["Use `sscanf(s, \"%d.%d.%d\", &v->major, &v->minor, &v->patch)`.", "Compare major first, then minor, then patch.", "Print comparison result."],
+      "codeTemplate": { "c": "#include <stdio.h>\n\ntypedef struct { int major, minor, patch; } Semver;\n\nint semver_parse(Semver *v, char *s) {\n    return sscanf(s, \"%d.%d.%d\", &v->major, &v->minor, &v->patch) == 3;\n}\n\nint semver_cmp(Semver *a, Semver *b) {\n    if (a->major != b->major) return a->major < b->major ? -1 : 1;\n    if (a->minor != b->minor) return a->minor < b->minor ? -1 : 1;\n    if (a->patch != b->patch) return a->patch < b->patch ? -1 : 1;\n    return 0;\n}\n\nint main() {\n    Semver a, b;\n    semver_parse(&a, \"1.2.3\");\n    semver_parse(&b, \"1.10.0\");\n    printf(\"A: %d.%d.%d\\n\", a.major, a.minor, a.patch);\n    printf(\"B: %d.%d.%d\\n\", b.major, b.minor, b.patch);\n    printf(\"Compare: %d\\n\", semver_cmp(&a, &b));\n    return 0;\n}" },
+      "verification": {
+        "test": "output.includes('1.2.3') && output.includes('1.10.0') && output.includes('-1')",
+        "successMessage": "Semver parser works!",
+        "failureMessage": "Parse and compare versions (1.2.3 < 1.10.0)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "zig-structs",
+  "title": "Zig: Structs",
+  "difficulty": "beginner",
+  "languages": ["zig"],
+  "estimatedMinutes": 10,
+  "concepts": ["zig", "structs", "fields", "methods"],
+  "description": "Define a struct representing a Point with x and y coordinates.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define and Use a Struct",
+      "description": "Define a `Point` struct with x: i32 and y: i32. Create an instance `const p = Point{ .x = 3, .y = 7 }` and print its fields.",
+      "hints": ["`const Point = struct { x: i32, y: i32 };`", "Zig uses named field initialization: `Point{ .x = 3, .y = 7 }`", "Access fields with `p.x` and `p.y`"],
+      "codeTemplate": { "zig": "const std = @import(\"std\");\n\nconst Point = struct {\n    x: i32,\n    y: i32,\n};\n\npub fn main() !void {\n    \n}" },
+      "verification": {
+        "test": "output.includes('3') && output.includes('7')",
+        "successMessage": "Struct works!",
+        "failureMessage": "Print the point coordinates"
+      }
+    }
+  ]
+}

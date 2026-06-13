@@ -1,0 +1,567 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "Introduction to Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "Variables and data types in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "Operators in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "Control flow statements in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "Functions in Scala.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "Working with collections in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "String manipulation in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "Key-value data structures in Scala.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "OOP concepts in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "Inheritance patterns in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "Interfaces and contracts in Scala.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "Exception handling in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "Debugging Scala code.",
+      "code": "",
+      "exercises": []
+    },
+    "Try & Recovery": [
+      "`Try[T]` represents computations that may throw. Pattern: `Try(...) match { case Success(v) => ... case Failure(e) => ... }`. Chaining: `.map`, `.flatMap`, `.filter`. Recovery: `.recover`, `.recoverWith`.",
+      "import scala.util.{Try, Success, Failure}\nimport scala.io.Source\n\ndef readFile(path: String): Try[String] = Try {\n  Source.fromFile(path).mkString\n}\n\nreadFile(\"build.sbt\") match {\n  case Success(content) => println(content.take(100))\n  case Failure(e) => println(s\"Failed: ${e.getMessage}\")\n}\n\n// Chaining\nval parsed: Try[Int] = readFile(\"config.txt\")\n  .map(_.trim)\n  .filter(_.nonEmpty)\n  .flatMap(s => Try(s.toInt))\n  .recover {\n    case _: NumberFormatException => 0\n    case _: java.io.FileNotFoundException => -1\n  }\n\nprintln(parsed.getOrElse(-1))\n\n// for-comprehension\nval combined = for {\n  content <- readFile(\"a.txt\")\n  more    <- readFile(\"b.txt\")\n} yield content + more"
+    ],
+    "Either & Validated": [
+      "`Either[L, R]` with convention: `Left` is error, `Right` is success. `.map`, `.flatMap`, `.fold`. `.toTry`, `.toOption`. Cats' `Validated` accumulates multiple errors (unlike Either which fails fast).",
+      "// Either convention: Right = success\ndef divide(a: Int, b: Int): Either[String, Int] =\n  if (b == 0) Left(\"Cannot divide by zero\")\n  else Right(a / b)\n\nval result = for {\n  x <- divide(10, 2)\n  y <- divide(20, 4)\n} yield x + y\n\nprintln(result)  // Right(7)\n\n// fold — handle both cases\nval msg = result.fold(\n  err => s\"Error: $err\",\n  val => s\"Result: $val\"\n)\n\n// Either projections\nresult.left.map(_.toUpperCase)\nresult.map(_ * 2)\n\n// Cats Validated — accumulate errors\n// import cats.data.Validated\n// Validated.catchOnly[NumberFormatException](\"42\".toInt)\n// Validated.invalidNel(\"error1\").combine(Validated.invalidNel(\"error2\"))"
+    ],
+    "Custom Exceptions & Error ADTs": [
+      "Model errors as sealed ADTs (algebraic data types) for exhaustive handling. Use case classes extending a sealed trait. Combine with Either or Try for type-safe error propagation.",
+      "// Error ADT\nsealed trait AppError\ncase class NotFound(id: Int) extends AppError\ncase class ValidationError(field: String, msg: String) extends AppError\ncase class DbError(cause: Throwable) extends AppError\n\ntype Result[A] = Either[AppError, A]\n\ndef findUser(id: Int): Result[String] =\n  if (id <= 0) Left(ValidationError(\"id\", \"must be positive\"))\n  else if (id == 42) Left(NotFound(id))\n  else Right(s\"User $id\")\n\nfindUser(42) match {\n  case Right(user) => println(user)\n  case Left(NotFound(id)) => println(s\"User $id not found\")\n  case Left(ValidationError(f, m)) => println(s\"$f: $m\")\n  case Left(DbError(cause)) => throw cause\n}"
+    ],
+    "Resource Management": [
+      "Manage resources (files, sockets, connections) with `using` pattern or Scala 3's `using` rework. The loan pattern ensures proper cleanup even with exceptions.",
+      "// Loan pattern\nimport scala.io.Source\n\ndef withFile[A](path: String)(f: Source => A): A = {\n  val source = Source.fromFile(path)\n  try f(source)\n  finally source.close()\n}\n\nval firstLine = withFile(\"build.sbt\") { source =>\n  source.getLines().next()\n}\nprintln(firstLine)\n\n// Scala 2.13+ Using\nimport scala.util.Using\nval lines = Using.resource(Source.fromFile(\"build.sbt\")) { source =>\n  source.getLines().toList\n}\nprintln(lines)\n\n// Using with Try\nval content = Using(Source.fromFile(\"build.sbt\"))(_.mkString)\nprintln(content.getOrElse(\"Failed\"))"
+    ]
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "File I/O in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "Input and output operations in Scala.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "Concurrency in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "Modular programming in Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "Best practices for Scala.",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "Optimizing Scala code.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Getting Started": {
+    "What is Scala": [
+      "Scala is a statically-typed language that blends OOP and functional programming on the JVM. It interoperates fully with Java and powers systems like Apache Spark and Apache Kafka.",
+      "object Hello extends App {\n  println(\"Hello, Scala!\")\n}"
+    ],
+    "Scala Syntax": [
+      "Scala uses `def` for methods, `val` for immutable references, and `var` for mutable ones. Types are inferred but can be declared after colons. No semicolons required.",
+      "val name: String = \"Scala\"\nvar count = 0\ndef greet() = s\"Hello $name\"\nprintln(greet())"
+    ],
+    "Variables & Types": [
+      "`val` creates an immutable binding (like final), `var` creates a mutable one. Basic types: Int, Long, Double, Float, Boolean, Char, Byte, Short, String.",
+      "val pi = 3.14159\nvar counter = 0\nval visible: Boolean = true\nval items = List(1, 2, 3)\nprintln(s\"pi=$pi, count=$counter\")"
+    ],
+    "Type Inference": [
+      "Scala infers types from expressions. You can omit type annotations when the compiler can deduce them. Explicit types help with readability and API contracts.",
+      "val msg = \"Hello\"           // inferred: String\nval nums = List(1, 2, 3)    // inferred: List[Int]\nval fn: Int => Int = _ * 2  // explicit: function type\nprintln(nums.map(fn))"
+    ],
+    "REPL & Worksheet": [
+      "The Scala REPL provides interactive evaluation. Scala Worksheets in IDEs auto-evaluate on save. Both are great for experimenting with code snippets.",
+      "// In REPL:\n// scala> val x = 42\n// scala> println(x * 2)\n\n// Worksheet (auto-evaluated):\nval greeting = \"Hello, REPL!\"\nprintln(greeting)"
+    ],
+    "Project Structure": [
+      "Scala projects typically use sbt with `src/main/scala` and `src/test/scala`. Scala CLI supports single-file scripts. Maven and Gradle also support Scala via plugins.",
+      "project/\n ├── build.sbt\n ├── src/\n │   ├── main/scala/\n │   │   └── example/\n │   │       └── Main.scala\n │   └── test/scala/\n │       └── example/\n │           └── MainSpec.scala\n └── project/\n     └── plugins.sbt"
+    ],
+    "Installation & Setup": [
+      "Install Scala via Coursier (`cs setup`), SDKMAN, or download from scalalang.org. Verify with `scala -version`. Coursier is the recommended tool for managing Scala versions and tools.",
+      "curl -fL https://github.com/coursier/coursier/releases/latest/download/cs-x86_64-pc-linux.gz | gzip -d > cs && chmod +x cs && ./cs setup\n\n# Verify installation\nscala -version\nscalac -version\n\n# Start REPL\nscala\n\n# Compile and run\nscalac Hello.scala\nscala Hello"
+    ]
+  },
+  "Control Flow": {
+    "If Expressions": [
+      "`if` is an expression in Scala that returns a value. Ternary-style: `val x = if (cond) a else b`. The else branch is optional but Unit is returned without it.",
+      "val score = 85\nval grade = if (score >= 90) \"A\"\n            else if (score >= 80) \"B\"\n            else \"F\"\nprintln(s\"Grade: $grade\")"
+    ],
+    "Match Expressions": [
+      "`match` is Scala's powerful pattern matching — like switch on steroids. It returns a value and supports type matching, destructuring, and guards.",
+      "val x = 3\nval desc = x match {\n  case 1 => \"one\"\n  case 2 => \"two\"\n  case n if n > 2 => s\"$n is greater than 2\"\n  case _ => \"something else\"\n}\nprintln(desc)"
+    ],
+    "For Loops & Comprehensions": [
+      "`for` loops iterate over collections. For-comprehensions (`for` with `yield`) produce new collections. Multiple generators and guards are supported.",
+      "val nums = List(1, 2, 3, 4, 5)\n\n// Loop\nfor (n <- nums) println(n)\n\n// Comprehension\nval doubled = for (n <- nums) yield n * 2\nprintln(doubled)\n\n// Multiple generators + guard\nval pairs = for {\n  x <- 1 to 3\n  y <- 1 to 3 if x != y\n} yield (x, y)\nprintln(pairs)"
+    ],
+    "While Loops": [
+      "`while` and `do-while` loops work as expected for imperative code. Prefer recursion or functional approaches in idiomatic Scala.",
+      "var i = 0\nwhile (i < 5) {\n  println(i)\n  i += 1\n}\n\nvar j = 0\ndo {\n  println(j)\n  j += 1\n} while (j < 3)"
+    ],
+    "Exception Handling": [
+      "Exceptions use `try-catch-finally`. `try` is an expression returning a value. `catch` clauses use pattern matching for different exception types.",
+      "import scala.util.control.NonFatal\n\nval result = try {\n  \"42\".toInt\n} catch {\n  case e: NumberFormatException => 0\n  case NonFatal(e) => throw e\n} finally {\n  println(\"Attempted parse\")\n}\nprintln(result)"
+    ],
+    "Custom Control Structures": [
+      "By-name parameters and higher-order functions enable custom control structures. Common patterns: `measure`, `timed`, `using` (resource management), `repeat`, custom loops.",
+      "def repeat(n: Int)(block: => Unit): Unit =\n  (1 to n).foreach(_ => block)\n\nrepeat(3) {\n  println(\"Hello!\")\n}\n\n// Resource management pattern\ndef using[A <: AutoCloseable, B](resource: A)(block: A => B): B =\n  try block(resource)\n  finally resource.close()\n\nimport scala.io.Source\nval content = using(Source.fromFile(\"build.sbt\")) { source =>\n  source.mkString\n}\nprintln(content.take(100))"
+    ]
+  },
+  "Functions": {
+    "Method Declaration": [
+      "Methods use `def` with explicit parameter types and optional return type. Expression-bodied methods omit braces. Parentheses can be omitted for nullary methods.",
+      "def sum(a: Int, b: Int): Int = a + b\ndef greet(name: String) = s\"Hello, $name\"\ndef currentTime() = java.time.Instant.now()\ndef pi = 3.14159  // parameterless\nprintln(sum(3, 4))"
+    ],
+    "Default & Named Args": [
+      "Parameters can have default values. Named arguments allow reordering or skipping parameters. Combine both for flexible APIs.",
+      "def createUser(name: String, age: Int = 18, active: Boolean = true) =\n  s\"$name ($age, active=$active)\"\n\nprintln(createUser(\"Alice\"))\nprintln(createUser(\"Bob\", active = false))\nprintln(createUser(age = 25, name = \"Charlie\"))"
+    ],
+    "Anonymous Functions": [
+      "Lambda syntax: `(params) => expr`. Short form `_` for single-use params. Lambdas are first-class values with function types.",
+      "val nums = List(1, 2, 3, 4, 5)\nval doubled = nums.map(_ * 2)\nval filtered = nums.filter(x => x % 2 == 0)\nval sum = nums.reduce((a, b) => a + b)\nprintln(s\"$doubled, $filtered, $sum\")"
+    ],
+    "Higher-Order Functions": [
+      "Functions that take or return other functions. `map`, `filter`, `flatMap`, `fold` are core HOFs. Methods can be lifted to functions with `_`.",
+      "def applyTwice(f: Int => Int, x: Int): Int = f(f(x))\nval double = (x: Int) => x * 2\nprintln(applyTwice(double, 3))  // 12\n\nval addOne: Int => Int = _ + 1\nprintln(List(1, 2, 3).map(addOne))"
+    ],
+    "Currying & Partially Applied": [
+      "Methods can have multiple parameter lists. Partial application binds some args leaving others free. Currying transforms multi-arg functions into chains of single-arg functions.",
+      "def add(x: Int)(y: Int) = x + y\nval addFive = add(5) _  // partially applied\nprintln(addFive(3))  // 8\n\ndef wrap(prefix: String)(suffix: String)(str: String) =\n  s\"$prefix$str$suffix\"\nval withParens = wrap(\"(\")(\")\") _\nprintln(withParens(\"Scala\"))  // (Scala)"
+    ],
+    "By-Name Parameters": [
+      "By-name parameters (`=> T`) are evaluated only when used, not at call site. Useful for custom control structures and short-circuit logic.",
+      "def until(cond: => Boolean)(body: => Unit): Unit = {\n  if (!cond) { body; until(cond)(body) }\n}\n\nvar i = 0\nuntil(i >= 5) {\n  println(i)\n  i += 1\n}"
+    ],
+    "Tail Recursion": [
+      "`@tailrec` annotation ensures a recursive method is compiled into a loop. The recursive call must be in tail position (last operation).",
+      "import scala.annotation.tailrec\n\n@tailrec\ndef factorial(n: Int, acc: Int = 1): Int = {\n  if (n <= 1) acc\n  else factorial(n - 1, n * acc)\n}\n\nprintln(factorial(5))  // 120\nprintln(factorial(10000))  // no stack overflow"
+    ]
+  },
+  "Collections": {
+    "Lists": [
+      "`List` is an immutable linked list (head + tail). `::` prepends, `:::` concatenates. Rich API: map, filter, flatMap, fold, reduce, and more.",
+      "val list = List(1, 2, 3, 4, 5)\nval prepended = 0 :: list\nval appended = list :+ 6\nval doubled = list.map(_ * 2)\nval sum = list.sum\nprintln(s\"$prepended, $appended, $doubled, $sum\")"
+    ],
+    "Maps & Sets": [
+      "`Map` for key-value pairs (immutable by default). `Set` for unique elements. `+` adds entries, `++` merges, `-` removes keys.",
+      "val map = Map(\"Alice\" -> 25, \"Bob\" -> 30)\nval updated = map + (\"Charlie\" -> 35)\nprintln(updated.get(\"Alice\"))\n\nval set = Set(1, 2, 3, 2, 1)\nval larger = set + 4 ++ Set(5, 6)\nprintln(larger)\n\n// Mutable variants\nval mutMap = scala.collection.mutable.Map(\"x\" -> 1)\nmutMap(\"y\") = 2\nprintln(mutMap)"
+    ],
+    "Seq, Vector & IndexedSeq": [
+      "`Seq` is the base trait for ordered collections. `Vector` offers O(log32) indexed access. `IndexedSeq` is the preferred type for random access sequences.",
+      "val vec = Vector(1, 2, 3, 4, 5)\nprintln(vec(0))  // fast indexed access\n\nval seq: Seq[Int] = Seq(1, 2, 3)\nval indexed: IndexedSeq[Int] = IndexedSeq(4, 5, 6)\n\nval range = 1 to 10 by 2\nprintln(range.toList)"
+    ],
+    "Functional Operations": [
+      "Core collection operations: map, filter, flatMap, foldLeft, foldRight, reduce, scan, partition, span, groupBy, sortBy, distinct, zip, unzip.",
+      "val nums = List(1, 2, 3, 4, 5)\nprintln(nums.filter(_ % 2 == 0))\nprintln(nums.partition(_ > 3))\nprintln(nums.foldLeft(0)(_ + _))\nprintln(nums.scanLeft(0)(_ + _))\nprintln(nums.groupBy(_ % 2))\nprintln(nums.zip(List(\"a\",\"b\",\"c\",\"d\",\"e\")))"
+    ],
+    "LazyList": [
+      "`LazyList` (formerly Stream) provides lazy, potentially infinite sequences. Elements are computed on demand and memoized. Use `#::` for construction.",
+      "val fib: LazyList[Int] = {\n  def loop(a: Int, b: Int): LazyList[Int] = a #:: loop(b, a + b)\n  loop(0, 1)\n}\n\nprintln(fib.take(10).toList)  // first 10 Fibonacci\nval evens = LazyList.from(1).filter(_ % 2 == 0)\nprintln(evens.take(5).toList)"
+    ],
+    "Options & Either": [
+      "`Option[T]` represents optional values: `Some(value)` or `None`. `Either[L, R]` represents a value that can be one of two types (typically success or error).",
+      "def divide(a: Int, b: Int): Option[Int] =\n  if (b == 0) None else Some(a / b)\n\nprintln(divide(10, 2))  // Some(5)\nprintln(divide(10, 0))  // None\nprintln(divide(10, 2).getOrElse(0))\n\n// Either for error handling\ndef parse(input: String): Either[String, Int] =\n  try Right(input.toInt)\n  catch { case e: NumberFormatException => Left(s\"Invalid: $input\") }\n\nprintln(parse(\"42\"))\nprintln(parse(\"abc\"))"
+    ],
+    "Arrays & ArrayBuffer": [
+      "Array is a mutable, fixed-size sequence backed by JVM array. ArrayBuffer is a mutable, resizable sequence. Use `Array` for performance, `ArrayBuffer` for flexible sizing.",
+      "val arr = Array(1, 2, 3, 4, 5)\narr(0) = 10  // mutable\nprintln(arr.mkString(\", \"))\n\nimport scala.collection.mutable.ArrayBuffer\nval buf = ArrayBuffer(1, 2, 3)\nbuf += 4\nbuf ++= Seq(5, 6)\nbuf -= 1\nprintln(buf)\n\n// Conversions\nval list = arr.toList\nval arr2 = list.toArray\nval vec = arr.toVector"
+    ],
+    "View & Lazy Evaluation": [
+      "`View` provides lazy evaluation for collection operations. Transformations are deferred until forced. Avoids intermediate collections. Use `.view` to create, `.force` or `.toList` to materialize.",
+      "val nums = (1 to 1000000).view\n  .filter(_ % 2 == 0)\n  .map(_ * 2)\n  .take(5)\n\nprintln(nums)  // not evaluated yet\nprintln(nums.toList)  // materialized\n\n// Cached (memoized) views\nval cached = (1 to 10).view\n  .map { x => println(s\"Computing $x\"); x * x }\n  .force  // evaluates eagerly and caches\n\nprintln(cached.take(3))  // uses cached values"
+    ]
+  },
+  "Object-Oriented Scala": {
+    "Classes & Constructors": [
+      "Classes have primary constructors in the class signature. Auxiliary constructors use `def this()`. Fields become public by default.",
+      "class Person(val name: String, var age: Int) {\n  def this(name: String) = this(name, 0)\n  override def toString = s\"$name ($age)\"\n}\n\nval p = Person(\"Alice\", 30)\nprintln(p.name)\np.age = 31\nprintln(p)"
+    ],
+    "Objects & Companions": [
+      "`object` declares a singleton. A companion object (same name as a class, same file) holds static-like members and factory methods. `apply` methods allow `new`-less construction.",
+      "class Circle(val radius: Double)\n\nobject Circle {\n  def apply(radius: Double) = new Circle(radius)\n  val Unit = new Circle(1.0)\n}\n\nval c = Circle(5.0)  // calls apply\nprintln(c.radius)"
+    ],
+    "Traits": [
+      "Traits are like interfaces with concrete methods and fields. A class can mix in multiple traits. Traits support linearization (stackable modifications).",
+      "trait Greeter {\n  def greet(name: String): String\n}\n\ntrait FormalGreeter extends Greeter {\n  abstract override def greet(name: String) = s\"Dear $name\"\n}\n\ntrait InformalGreeter extends Greeter {\n  abstract override def greet(name: String) = s\"Hey $name\"\n}\n\nclass Person extends Greeter {\n  override def greet(name: String) = name\n}\n\nval p = new Person with InformalGreeter\nprintln(p.greet(\"Alice\"))"
+    ],
+    "Case Classes": [
+      "Case classes are immutable with auto-generated `equals`, `hashCode`, `toString`, `copy`, and pattern-matching extractors. Perfect for data modelling.",
+      "case class User(id: Int, name: String, email: String)\n\nval u1 = User(1, \"Alice\", \"alice@example.com\")\nval u2 = u1.copy(name = \"Bob\")\nprintln(u1 == User(1, \"Alice\", \"alice@example.com\"))  // true\nprintln(u2)\n\n// Destructuring\nval User(id, name, _) = u1\nprintln(s\"id=$id name=$name\")"
+    ],
+    "Inheritance & Sealed Types": [
+      "Sealed classes restrict subtyping to the same file. The compiler knows all subtypes, enabling exhaustive pattern matching. `abstract class` provides base with constructor params.",
+      "sealed trait Shape\ncase class Circle(radius: Double) extends Shape\ncase class Rectangle(w: Double, h: Double) extends Shape\ncase object Point extends Shape\n\ndef area(s: Shape): Double = s match {\n  case Circle(r) => math.Pi * r * r\n  case Rectangle(w, h) => w * h\n  case Point => 0\n}\n\nprintln(area(Circle(3)))"
+    ],
+    "Enums (Scala 3)": [
+      "Scala 3 enums provide algebraic data types with parameterized cases and methods. More concise than sealed trait + case class patterns.",
+      "// Scala 3 only\nenum Color(val rgb: Int):\n  case Red   extends Color(0xFF0000)\n  case Green extends Color(0x00FF00)\n  case Blue  extends Color(0x0000FF)\n\ndef describe(c: Color) = c match\n  case Color.Red   => \"Stop\"\n  case Color.Green => \"Go\"\n  case Color.Blue  => \"Sky\"\n\nprintln(describe(Color.Red))"
+    ],
+    "Visibility Modifiers": [
+      "Scala visibility: `public` (default), `protected` (subclass + companion), `private` (class + companion only). Scoped access: `private[this]`, `private[package]`. Companion objects access private members.",
+      "class VisibilityDemo {\n  private[this] val instanceOnly = \"only this instance\"\n  private val classPrivate = \"class + companion\"\n  protected val subClassOnly = \"subclasses\"\n  val publicField = \"anyone\"\n\n  def canAccess = classPrivate\n}\n\nobject VisibilityDemo {\n  def access(d: VisibilityDemo) = d.classPrivate  // OK\n  // d.instanceOnly — not accessible\n}\n\n// Package-scoped\npackage org.example {\n  class MyClass {\n    private[example] val pkgVisible = \"visible in example package\"\n  }\n}"
+    ],
+    "Self Types & Cake Pattern": [
+      "Self-type annotations (`_: Trait =>`) declare that a trait must be mixed into a class extending another type. Enables dependency injection via cake pattern. Use `this: Dependency =>` to require a dependency.",
+      "trait Persistence {\n  def save(entity: Any): Unit\n  def load(id: Int): Any\n}\n\ntrait Logging { this: Persistence =>\n  def saveWithLog(entity: Any): Unit = {\n    println(s\"Saving $entity\")\n    save(entity)  // requires Persistence\n  }\n}\n\nclass DatabasePersistence extends Persistence with Logging {\n  def save(entity: Any): Unit = println(s\"DB save $entity\")\n  def load(id: Int): Any = s\"Record $id\"\n}\n\nval db = DatabasePersistence()\ndb.saveWithLog(\"test\")"
+    ]
+  },
+  "Pattern Matching": {
+    "Case Matching": [
+      "Pattern matching destructures and matches values. Supports constants, type tests, guards, and deep matching on case classes and collections.",
+      "def describe(x: Any): String = x match {\n  case 0 => \"zero\"\n  case n: Int if n > 0 => \"positive int\"\n  case s: String => s\"string: $s\"\n  case List(a, b, _*) => s\"list starts with $a, $b\"\n  case _ => \"something else\"\n}\n\nprintln(describe(42))\nprintln(describe(List(1, 2, 3)))"
+    ],
+    "Pattern Guards": [
+      "Guards with `if` add conditional logic to patterns. Combine destructuring with boolean checks for precise matching.",
+      "def classify(pair: (Int, Int)): String = pair match {\n  case (a, b) if a > b => s\"$a > $b\"\n  case (a, b) if a < b => s\"$a < $b\"\n  case (a, b) => s\"$a == $b\"\n}\n\nprintln(classify((3, 5)))\nprintln(classify((7, 2)))"
+    ],
+    "Extractors & unapply": [
+      "Custom extractors use `unapply` methods on objects. They enable custom destructuring in pattern matching. `unapplySeq` for variable-length extractions.",
+      "object Email {\n  def unapply(s: String): Option[(String, String)] = {\n    val parts = s.split(\"@\")\n    if (parts.length == 2) Some(parts(0), parts(1)) else None\n  }\n}\n\n\"alice@example.com\" match {\n  case Email(user, domain) => println(s\"User: $user, Domain: $domain\")\n  case _ => println(\"Not an email\")\n}"
+    ],
+    "For-Comprehension Desugaring": [
+      "For-comprehensions with `yield` desugar to `flatMap`, `map`, and `withFilter`. This works with any type providing these operations — enabling monadic composition.",
+      "val result = for {\n  x <- List(1, 2, 3)\n  y <- List(4, 5)\n  if (x + y) % 2 == 0\n} yield (x, y)\n\n// Desugars to:\nval result2 = List(1, 2, 3).flatMap(x =>\n  List(4, 5).withFilter(y => (x + y) % 2 == 0).map(y => (x, y))\n)\n\nprintln(result)"
+    ],
+    "Sealed Hierarchies & Exhaustiveness": [
+      "The compiler checks exhaustiveness for sealed types — warns if a match is non-exhaustive. Use `sealed trait` or `enum` for ADTs. The `@unused` or wildcard `_` satisfies remaining cases.",
+      "sealed trait Color\ncase object Red extends Color\ncase object Green extends Color\ncase object Blue extends Color\ncase class Custom(hex: String) extends Color\n\ndef describe(c: Color): String = c match\n  case Red    => \"Stop\"\n  case Green  => \"Go\"\n  case Blue   => \"Sky\"\n  case Custom(h) => s\"Custom: #$h\"\n\n// Compiler warns if not exhaustive!\n// Try removing the Custom case — you'll get a warning\n\n// @switch annotation for performance (tableswitch/lookupswitch)\nimport scala.annotation.switch\n(1: @switch) match {\n  case 1 => \"one\"\n  case 2 => \"two\"\n  case _ => \"many\"\n}"
+    ]
+  },
+  "Functional Programming": {
+    "Immutability": [
+      "Scala encourages immutable data and pure functions. `val` over `var`, immutable collections by default. Immutability simplifies reasoning and concurrency.",
+      "val nums = Vector(1, 2, 3, 4, 5)\nval processed = nums\n  .map(_ * 2)\n  .filter(_ > 5)\n  .reduce(_ + _)\n// nums is unchanged\nprintln(processed)  // 6 + 8 + 10 = 24"
+    ],
+    "Pure Functions": [
+      "Pure functions have no side effects and depend only on their inputs. They're deterministic, testable, and composable. Referential transparency is the key principle.",
+      "// Pure\ndef add(a: Int, b: Int): Int = a + b\n\n// Impure (side effect)\ndef addAndPrint(a: Int, b: Int): Int = {\n  val sum = a + b\n  println(sum)  // side effect!\n  sum\n}\n\n// Referentially transparent\nval x = add(3, 4) + add(3, 4)  // same as val x = 7 + 7"
+    ],
+    "Monadic Operations": [
+      "`Option`, `Try`, `Either`, `Future` are monads — they support `map`, `flatMap`, `filter`, and for-comprehensions. Chaining operations safely without null checks.",
+      "import scala.util.Try\n\nval result: Option[Int] = Some(42)\n  .map(_ * 2)\n  .filter(_ > 50)\n  .flatMap(n => Some(n / 2))\n\nprintln(result)  // Some(42)\n\n// Try for exception-safe chaining\nval parsed = Try(\"42\".toInt)\n  .map(_ + 1)\n  .filter(_ > 0)\n  .getOrElse(0)\n\nprintln(parsed)"
+    ],
+    "Functors & Applicatives": [
+      "`Functor` provides `map`. `Applicative` provides `pure` and `ap` (`<*>`). Cats library provides typeclass hierarchy. Scala's standard library gives basic functor support via `map`.",
+      "// Functor: provides map\nList(1, 2, 3).map(_ * 2)\nOption(42).map(_ + 1)\n\n// With Cats (external library):\n// import cats.implicits._\n// val add: Int => Int => Int = a => b => a + b\n// val applicative = Option(3) ap Option(5) map add  // Some(8)"
+    ],
+    "Type Classes (Scala 2)": [
+      "Type classes use implicit parameters and implicit classes. Pattern: trait + implicit instances + interface methods. Enables ad-hoc polymorphism.",
+      "trait Show[A] {\n  def show(a: A): String\n}\n\nobject Show {\n  def apply[A](implicit ev: Show[A]): Show[A] = ev\n}\n\nimplicit val intShow: Show[Int] = (a: Int) => s\"Int($a)\"\nimplicit val stringShow: Show[String] = (a: String) => s\"Str($a)\"\n\ndef printWith[A: Show](a: A) = println(implicitly[Show[A]].show(a))\n\nprintWith(42)\nprintWith(\"Scala\")"
+    ],
+    "Given & Using (Scala 3)": [
+      "Scala 3 replaces `implicit` with `given`/`using`. `given` defines instances, `using` declares requirements. More explicit and safer than Scala 2 implicits.",
+      "// Scala 3 syntax\ntrait Ord[T]:\n  def compare(a: T, b: T): Int\n\ngiven intOrd: Ord[Int] with\n  def compare(a: Int, b: Int) = a - b\n\ndef max[T](a: T, b: T)(using ord: Ord[T]): T =\n  if ord.compare(a, b) >= 0 then a else b\n\nprintln(max(3, 7))"
+    ],
+    "For-Comprehension Deep": [
+      "For-comprehensions desugar to `foreach`, `map`, `flatMap`, `withFilter`. Any type providing these methods works in for-comprehensions. Custom monads can use for-comprehensions.",
+      "case class Logged[A](value: A, logs: List[String]) {\n  def map[B](f: A => B): Logged[B] =\n    Logged(f(value), logs)\n  def flatMap[B](f: A => Logged[B]): Logged[B] = {\n    val result = f(value)\n    Logged(result.value, logs ++ result.logs)\n  }\n}\n\nobject Logged {\n  def apply[A](value: A): Logged[A] = Logged(value, Nil)\n}\n\nval result = for {\n  x <- Logged(10)\n  y <- Logged(x * 2)\n  z <- Logged(y + 1)\n} yield s\"Result: $z\"\n\nprintln(result)  // Logged(Result: 21, List())"
+    ],
+    "Recursion Schemes": [
+      "Recursion schemes generalize recursion patterns. `fold` (catamorphism) collapses data. `unfold` (anamorphism) generates data. Scala supports via `cats.Recursive`. Manual implementation with F-algebras.",
+      "// Manual recursion\nsealed trait Expr\ncase class Num(n: Int) extends Expr\ncase class Add(a: Expr, b: Expr) extends Expr\n\n// Catamorphism (fold)\ndef evaluate(expr: Expr): Int = expr match {\n  case Num(n) => n\n  case Add(a, b) => evaluate(a) + evaluate(b)\n}\n\nval expr = Add(Num(1), Add(Num(2), Num(3)))\nprintln(evaluate(expr))  // 6\n\n// Using cats:\n// import cats.free.Fold\n// type ExprF[A] = ...  // pattern functor\n// Fix point encoding for general recursion"
+    ]
+  },
+  "Generics & Variance": {
+    "Generic Classes & Methods": [
+      "Type parameters in square brackets. Variance annotations: `+T` (covariant), `-T` (contravariant). Bounds: `T <: Upper`, `T >: Lower`. Multiple bounds with `with`.",
+      "class Box[+T](val value: T)\n\ndef identity[T](x: T): T = x\n\ndef combine[T <: Comparable[T]](a: T, b: T): Boolean = a.compareTo(b) > 0\n\nval box: Box[Any] = Box(42)  // covariance works\nprintln(box.value)"
+    ],
+    "Variance Annotations": [
+      "`+T`: covariant — `Box[Child] <: Box[Parent]`. `-T`: contravariant — `Printer[Parent] <: Printer[Child]`. Invariant (no annotation) is the default.",
+      "// Covariant\nclass List[+T]\nval list: List[Int] = ???  // also a List[Any]\n\n// Contravariant\ntrait Printer[-T] {\n  def print(value: T): String\n}\nval anyPrinter: Printer[Any] = (a: Any) => a.toString\nval strPrinter: Printer[String] = anyPrinter  // OK! contravariance\n\n// Function[-T, +R]\n// Function1[Any, String] <: Function1[String, String]"
+    ],
+    "Type Bounds": [
+      "Upper bound: `T <: UpperType`. Lower bound: `T >: LowerType`. View bounds (deprecated): `T <% U`. Context bounds: `[T: TypeClass]`.",
+      "// Upper bound\nclass Pet(val name: String)\nclass Dog(name: String) extends Pet(name)\ndef adopt[T <: Pet](p: T) = s\"Adopted ${p.name}\"\n\n// Lower bound\ndef prepend[T >: Int](list: List[T], elem: T) = elem :: list\nprintln(prepend(List(1, 2, 3), 0))\nprintln(prepend(List(1, 2, 3), \"start\"))  // T = Any"
+    ],
+    "Ad-Hoc Polymorphism": [
+      "Ad-hoc polymorphism via type classes lets you define behavior for types without inheritance. Pattern: trait with type parameter + implicit instances + summon method. Scala 3 uses `given`/`using`.",
+      "trait JsonWriter[A]:\n  def write(a: A): String\n\ngiven JsonWriter[Int] with\n  def write(a: Int) = a.toString\n\ngiven JsonWriter[String] with\n  def write(a: String) = s\"\\\"$a\\\"\"\n\ngiven listWriter[A](using jw: JsonWriter[A]): JsonWriter[List[A]] with\n  def write(as: List[A]) = as.map(jw.write).mkString(\"[\", \", \", \"]\")\n\ndef toJson[A](a: A)(using jw: JsonWriter[A]): String = jw.write(a)\n\nprintln(toJson(42))\nprintln(toJson(\"hello\"))\nprintln(toJson(List(1, 2, 3)))"
+    ]
+  },
+  "Concurrency & Futures": {
+    "Future Basics": [
+      "`Future` represents an asynchronous computation. Use `Future.apply` to start, `map`/`flatMap` to transform, `onComplete` for callbacks. Requires an implicit `ExecutionContext`.",
+      "import scala.concurrent.{Future, Await}\nimport scala.concurrent.ExecutionContext.Implicits.global\nimport scala.concurrent.duration._\n\nval future = Future {\n  Thread.sleep(100)\n  42\n}\n\nval doubled = future.map(_ * 2)\nval result = Await.result(doubled, 1.second)\nprintln(result)"
+    ],
+    "Promise & Async": [
+      "`Promise` completes a Future manually. `Future.sequence` runs multiple futures. `Future.traverse` maps and sequences. `Future.firstCompletedOf` races futures.",
+      "import scala.concurrent.{Future, Promise}\nimport scala.concurrent.ExecutionContext.Implicits.global\n\nval p = Promise[Int]()\nval f = p.future\n\nFuture {\n  Thread.sleep(100)\n  p.success(42)\n}\n\nval results = Future.sequence(List(\n  Future(1), Future(2), Future(3)\n))  // Future(List(1, 2, 3))\n\nimport scala.concurrent.{Await, duration}\nimport duration.DurationInt\nprintln(Await.result(f, 1.second))"
+    ],
+    "Try & Error Handling": [
+      "`Try[T]` represents a computation that may fail: `Success(t)` or `Failure(e)`. Use `.recover`, `.recoverWith`, `.getOrElse` for fallback logic.",
+      "import scala.util.{Try, Success, Failure}\n\nval result: Try[Int] = Try(\"42\".toInt)\n\nresult match {\n  case Success(n) => println(s\"Parsed: $n\")\n  case Failure(e) => println(s\"Failed: ${e.getMessage}\")\n}\n\nval safe = Try(\"abc\".toInt).getOrElse(0)\nprintln(safe)  // 0\n\nval chained = Try(\"42\".toInt)\n  .map(_ * 2)\n  .recover { case _: NumberFormatException => -1 }\n  .get"
+    ],
+    "Akka Actors (Overview)": [
+      "Akka implements the Actor model for distributed concurrency. Actors encapsulate state and communicate via messages. `ActorSystem`, `Props`, and `tell/ask` patterns.",
+      "import akka.actor.{Actor, ActorSystem, Props}\n\nclass Counter extends Actor {\n  var count = 0\n  def receive = {\n    case \"inc\" => count += 1\n    case \"get\" => sender() ! count\n  }\n}\n\nval system = ActorSystem(\"MySystem\")\nval counter = system.actorOf(Props[Counter](), \"counter\")\ncounter ! \"inc\"\ncounter ! \"inc\"\n// counter ! \"get\"  // would reply to sender"
+    ],
+    "Future Combinators": [
+      "Future combinators: `zip` (pair of results), `foldLeft`/`sequence` (list of futures), `traverse` (map + sequence), `firstCompletedOf` (race), `fallbackTo` (fallback). Use `andThen` for side effects.",
+      "import scala.concurrent.{Future, ExecutionContext}\nimport ExecutionContext.Implicits.global\n\nval f1 = Future { Thread.sleep(100); 1 }\nval f2 = Future { Thread.sleep(200); 2 }\nval f3 = Future { Thread.sleep(150); 3 }\n\n// Zip — pair\nval zipped: Future[(Int, Int)] = f1 zip f2\n\n// Sequence — all results\nval all: Future[List[Int]] = Future.sequence(List(f1, f2, f3))\n\n// Traverse\ndef asyncId(n: Int) = Future(n)\nval traversed: Future[List[Int]] = Future.traverse(1 to 10)(asyncId)\n\n// Race\nval first: Future[Int] = Future.firstCompletedOf(List(f1, f2, f3))\n\n// Fallback\nval failing = Future.failed(new Exception(\"boom\"))\nval safe = failing.fallbackTo(f1)\n\n// andThen for side effects\nf1.andThen {\n  case scala.util.Success(v) => println(s\"Got $v\")\n  case scala.util.Failure(e) => println(s\"Failed: $e\")\n}"
+    ],
+    "Ref & Atomic Primitives": [
+      "`java.util.concurrent.atomic` provides lock-free thread-safe primitives: AtomicInteger, AtomicReference, etc. Scala's `scala.concurrent.util.Unsafe` or Java's Atomic classes for shared mutable state.",
+      "import java.util.concurrent.atomic.AtomicInteger\n\nclass Counter {\n  private val count = AtomicInteger(0)\n\n  def increment(): Int = count.incrementAndGet()\n  def get: Int = count.get()\n}\n\nval counter = Counter()\nval futures = (1 to 1000).map(_ => Future { counter.increment() })\nimport scala.concurrent.Await\nimport scala.concurrent.duration._\n\nAwait.result(Future.sequence(futures), 5.seconds)\nprintln(counter.get)  // 1000 — safe without locks\n\n// AtomicReference for complex types\nimport java.util.concurrent.atomic.AtomicReference\nval ref = AtomicReference(0)\nref.updateAndGet(_ + 1)\nprintln(ref.get())"
+    ]
+  },
+  "Build & Tooling": {
+    "sbt Basics": [
+      "sbt (Scala Build Tool) uses `build.sbt` for project config. Key tasks: `compile`, `run`, `test`, `console` (REPL). Dependencies are declared in `libraryDependencies`.",
+      "name := \"my-project\"\nversion := \"1.0\"\nscalaVersion := \"3.3.1\"\n\nlibraryDependencies ++= Seq(\n  \"org.scalatest\" %% \"scalatest\" % \"3.2.17\" % Test,\n  \"org.typelevel\" %% \"cats-core\" % \"2.10.0\"\n)\n\n// sbt shell commands:\n// > compile\n// > run\n// > test\n// > console"
+    ],
+    "Scala CLI": [
+      "Scala CLI is a modern tool for running Scala scripts and projects without sbt. Supports single-file scripts, multiple files, dependencies with `//> using` directives.",
+      "//> using scala 3.3.1\n//> using dep org.typelevel::cats-core:2.10.0\n\n@main def hello() = {\n  println(\"Hello from Scala CLI!\")\n  println(s\"Sum: ${1 + 2 + 3}\")\n}"
+    ],
+    "Testing with ScalaTest": [
+      "ScalaTest supports multiple styles: `FlatSpec`, `WordSpec`, `FunSuite`. Matchers provide readable assertions. `should`/`must` methods with descriptive failure messages.",
+      "import org.scalatest.flatspec.AnyFlatSpec\nimport org.scalatest.matchers.should.Matchers\n\nclass CalculatorSpec extends AnyFlatSpec with Matchers {\n  \"A calculator\" should \"add numbers\" in {\n    val result = 2 + 2\n    result shouldEqual 4\n    result should be > 0\n  }\n\n  it should \"throw on overflow\" in {\n    an [ArithmeticException] should be thrownBy {\n      1 / 0\n    }\n  }\n}"
+    ],
+    "Scala Ecosystem Overview": [
+      "The Scala ecosystem includes: Apache Spark (data processing), Akka (actors/streams), http4s/Play (web), Cats/Zio (functional effects), Circe/UPickle (JSON), Doobie/Slick (database).",
+      "// Common libraries:\n// - http4s: functional HTTP\n// - Play Framework: full-stack web\n// - Akka: actor model, streams\n// - Cats: functional abstractions\n// - ZIO: effect system\n// - Circe: JSON encoding/decoding\n// - Doobie: functional JDBC\n// - Slick: functional relational mapping"
+    ],
+    "Build Performance & Multi-Module": [
+      "sbt supports multi-module builds and incremental compilation. Use `subproject` definitions, `dependsOn`, and `aggregate`. sbt's incremental compiler tracks dependencies for minimal recompilation.",
+      "lazy val common = (project in file(\"common\"))\n  .settings(\n    name := \"common\",\n    scalaVersion := \"3.3.1\"\n  )\n\nlazy val api = (project in file(\"api\"))\n  .dependsOn(common)\n  .settings(\n    name := \"api\",\n    libraryDependencies += \"org.http4s\" %% \"http4s-core\" % \"0.23.24\"\n  )\n\nlazy val app = (project in file(\"app\"))\n  .aggregate(common, api)  // commands run on aggregate\n  .dependsOn(api)\n  .settings(\n    name := \"my-app\"\n  )\n\n// sbt performance flags\n// in .sbtopts:\n// -J-Xmx2G\n// --no-colors\n// sbt.glarity=true"
+    ]
+  },
+  "Scala 3 Features": {
+    "Indentation Syntax": [
+      "Scala 3 uses significant indentation (like Python) as an alternative to braces. `if`, `for`, `match`, class bodies use indentation to define blocks.",
+      "// Scala 3 braced-less syntax\ndef greet(name: String): String =\n  s\"Hello, $name\"\n\nval result =\n  if 42 > 0 then \"positive\"\n  else \"non-positive\"\n\nfor\n  x <- List(1, 2, 3)\n  y <- List(4, 5)\ndo println(x * y)\n\nprintln(result)"
+    ],
+    "Union & Intersection Types": [
+      "Union types (`A | B`) accept either type. Intersection types (`A & B`) require both. Useful for flexible APIs and type-safe composition.",
+      "// Union types\ndef handle(input: Int | String): String =\n  input match\n    case i: Int    => s\"Integer: $i\"\n    case s: String => s\"String: $s\"\n\nprintln(handle(42))\nprintln(handle(\"hello\"))\n\n// Intersection types\ntrait Showable { def show: String }\ntrait Printable { def print: Unit }\ndef process[T: Showable & Printable](x: T) = x.show"
+    ],
+    "Multiversal Equality": [
+      "Scala 3's `CanEqual` type class prevents unsafe comparisons. Use `given` to opt-in to equality between types. Catches bugs at compile time.",
+      "class Account(val id: Int)\n\n// This won't compile without CanEqual\n// println(Account(1) == \"hello\")  // compiler error\n\n// Opt-in:\ngiven CanEqual[Account, Account] = CanEqual.derived\nval a1 = Account(1)\nval a2 = Account(1)\nprintln(a1 == a2)  // OK\n\n// Safe comparison is automatic for case classes\ncase class Name(first: String, last: String)\ncase class Age(years: Int)\n// println(Name(\"A\",\"B\") == Age(25))  // compiler error"
+    ],
+    "Extension Methods": [
+      "Extension methods add functionality to existing types without implicit conversions. Defined with `extension` keyword and type parameter.",
+      "extension (n: Int)\n  def isEven: Boolean = n % 2 == 0\n  def squared: Int = n * n\n  def times(action: => Unit): Unit = (1 to n).foreach(_ => action)\n\nprintln(4.isEven)\nprintln(5.squared)\n5.times(println(\"Hi\"))"
+    ],
+    "Top-Level Definitions": [
+      "Scala 3 allows top-level definitions (methods, given, extensions) without wrapping in an object or class. Simplifies scripting and module structure.",
+      "// top-level.scala — no package or object needed\n@main def run(): Unit =\n  println(s\"Sum = ${add(3, 4)}\")\n\ndef add(a: Int, b: Int) = a + b\n\n// Top-level given\ngiven defaultName: String = \"World\"\n\n// Top-level extension\nextension (s: String) def greet = s\"Hello, $s!\""
+    ],
+    "Opaque Types": [
+      "Opaque type aliases (Scala 3) create new types at compile time without runtime overhead. `opaque type UserId = Long`. Only the companion object can access the underlying type. Enforces domain constraints.",
+      "object UserIds:\n  opaque type UserId = Long\n\n  object UserId:\n    def apply(id: Long): UserId = id\n    extension (id: UserId)\n      def value: Long = id\n\nimport UserIds.UserId\n\nval uid: UserId = UserId(42)\nprintln(uid.value)  // 42\n// val raw: Long = uid  // won't compile!\n\n// Runtime: no wrapper objects\n// Equivalent to: val uid: Long = 42L\n\n// With validation\nopaque type Email = String\nobject Email:\n  def apply(s: String): Email =\n    require(s.contains(\"@\"), \"Invalid email\")\n    s\n  extension (e: Email) def value: String = e"
+    ],
+    "Export Clauses": [
+      "Export clauses (Scala 3) forward selected members from a given value. Richer than inheritance — you choose exactly what to expose, rename, or exclude.",
+      "class Service:\n  def query(id: Int): String = s\"Result $id\"\n  def delete(id: Int): Unit = println(s\"Deleted $id\")\n\nclass Facade:\n  private val service = Service()\n  export service.query  // only expose query, hide delete\n\nval facade = Facade()\nprintln(facade.query(1))\n// facade.delete(1)  // won't compile\n\n// Renaming on export\nclass Util:\n  def compute(n: Int): Int = n * 2\n\nclass App:\n  private val util = Util()\n  export util.{compute as double}\n\nval app = App()\nprintln(app.double(5))  // 10"
+    ]
+  },
+  "Variables & Data Types": {
+    "Literals & String Interpolation": [
+      "Scala supports string interpolation with `s` (expressions), `f` (formatting), `raw` (no escaping). Triple quotes \"\"\" for multi-line strings with no escaping needed.",
+      "val name = \"Scala\"\nval year = 2024\nprintln(s\"Hello $name! Version 3 was released in ${year - 3}\")\n\n// f-interpolation (format)\nprintln(f\"Pi = ${math.Pi}%.3f\")  // Pi = 3.142\n\n// raw interpolation\nprintln(raw\"No \\n escaping\\nhere\")  // \\n are literal\n\n// Triple quotes\nval json = \"\"\"\n  {\n    \"name\": \"Scala\",\n    \"version\": 3\n  }\n  \"\"\"\nprintln(json)"
+    ],
+    "Numeric Types & Conversions": [
+      "Scala numeric types: Byte, Short, Int, Long, Float, Double. Implicit widening works. Conversion methods: `.toInt`, `.toDouble`, `.toLong`. Rich operations via implicit conversions.",
+      "val b: Byte = 127\nval s: Short = b  // implicit widening\nval i: Int = s\nval l: Long = i\nval f: Float = i\nval d: Double = f\n\n// Explicit conversions\nval str = \"42\"\nval parsed = str.toInt\nval hex = Integer.parseInt(\"FF\", 16)\n\n// Operations\ndouble.PositiveInfinity.isInfinite\nInt.MinValue\nmath.pow(2, 10)\n\n// BigInt for arbitrary precision\nval big = BigInt(Long.MaxValue) * BigInt(\"999999999999\")\nprintln(big)"
+    ],
+    "Tuples & Unit": [
+      "Tuple groups values of possibly different types. `(a, b, c)` syntax up to Tuple22. Access with `._1`, `._2`. Destructuring in pattern matching. `Unit` (from `()`) is like `void`.",
+      "val pair = (1, \"hello\", 3.14)\nprintln(pair._1)  // 1\nprintln(pair._2)  // \"hello\"\n\n// Destructuring\nval (x, y, z) = pair\nprintln(s\"$x, $y, $z\")\n\n// In patterns\n(1, \"a\") match {\n  case (1, s) => println(s\"Matched: $s\")\n  case _ =>\n}\n\n// Unit — the () value\nval u: Unit = ()\ndef print(msg: String): Unit = println(msg)\n\n// 2-tuple special syntax\nval keyValue = \"key\" -> \"value\"  // sugar for (\"key\", \"value\")\nprintln(keyValue)"
+    ],
+    "Type Hierarchy & Any": [
+      "Scala type hierarchy: `Any` (top), `AnyVal` (primitives), `AnyRef` (objects). `Nothing` (bottom) is subtype of all types. `Null` is subtype of all AnyRef. `null` is dangerous — prefer Option.",
+      "// Type hierarchy:\n//        Any\n//      /     \\\n//   AnyVal   AnyRef (java.lang.Object)\n//   /    \\      /       \\\n//  Int  Double  String   List\n//   \\    /       \\       /\n//       Nothing (bottom)\n\nval v1: Any = 42\nval v2: Any = \"hello\"\nval v3: AnyRef = \"string\"\nval v4: AnyVal = 3.14\n\n// Nothing example\ndef error(msg: String): Nothing = throw new Exception(msg)\n// val x: Int = error(\"fail\")  // Nothing is subtype of Int\n\n// Null — avoid in Scala 3\nval nullable: String | Null = null"
+    ]
+  },
+  "Strings & Text Processing": {
+    "String Operations": [
+      "Rich String API: `split`, `replaceAll`, `matches`, `stripMargin`, `toInt/toDouble`, `format`, `take/drop`, `slice`, `contains`, `startsWith`, `endsWith`, `interpolate`. Strings are `java.lang.String` — full Java API available.",
+      "val text = \"  Hello, Scala World!  \"\nprintln(text.trim)\nprintln(text.strip)  // Scala 2.13+\nprintln(text.replaceAll(\"Scala\", \"Java\"))\nprintln(text.split(\", \").toList)\nprintln(text.substring(7, 12))\n\n// stripMargin for multi-line\nval sql = s\"\"\"SELECT *\n              |FROM users\n              |WHERE id = ${42}\n           \"\"\".stripMargin\nprintln(sql)\n\n// Regex matching\nval dateRegex = raw\"\"\"(\\d{4})-(\\d{2})-(\\d{2})\"\"\".r\n\"2024-01-15\" match {\n  case dateRegex(y, m, d) => println(s\"Year: $y, Month: $m, Day: $d\")\n}\n\n// StringOps implicit conversions\nprintln(\"hello\".capitalize)  // \"Hello\""
+    ],
+    "Regular Expressions": [
+      "`scala.util.matching.Regex` provides pattern matching, find/replace, and extraction. Create with `.r` on strings. Use `findFirstIn`, `findAllIn`, `replaceFirstIn`, `replaceSomeIn`.",
+      "import scala.util.matching.Regex\n\nval emailRegex: Regex = \"\"\"([\\w.]+)@([\\w.]+)\"\"\".r\n\n\"alice@example.com\" match {\n  case emailRegex(user, domain) => println(s\"User $user at $domain\")\n  case _ => println(\"Not an email\")\n}\n\n// Find all matches\nval text = \"Contact: bob@a.com or carol@b.net\"\nval emails = emailRegex.findAllIn(text).toList\nprintln(emails)\n\n// Find with groups\nemailRegex.findAllMatchIn(text).foreach { m =>\n  println(s\"Full: ${m.matched}, User: ${m.group(1)}, Domain: ${m.group(2)}\")\n}\n\n// Replace\nval masked = emailRegex.replaceAllIn(text, \"***@***\")\nprintln(masked)\n\n// Option-based (no match = None)\nemailRegex.findFirstIn(\"no email here\")  // None"
+    ],
+    "StringBuilder & Performance": [
+      "StringBuilder for efficient string building in loops. Pre-allocate capacity for performance. String concatenation with `+` creates intermediate strings — avoid in hot paths. Use `mkString` on collections.",
+      "val sb = StringBuilder()\nsb.append(\"Items: \")\nfor i <- 1 to 1000 do\n  sb.append(i).append(\", \")\nsb.delete(sb.length - 2, sb.length)  // remove trailing \", \"\nval result = sb.result()\nprintln(result.take(50))\n\n// Collection mkString\nval items = List(\"a\", \"b\", \"c\")\nprintln(items.mkString)          // \"abc\"\nprintln(items.mkString(\", \"))    // \"a, b, c\"\nprintln(items.mkString(\"[\", \", \", \"]\"))  // \"[a, b, c]\"\n\n// Performance comparison\n// val slow = (1 to 10000).map(_.toString).reduce(_ + _)  // many intermediates!\nval fast = (1 to 10000).map(_.toString).mkString  // one StringBuilder\n\n// String multiplication\nprintln(\"-\" * 40)\nprintln(\"Scala\".intersperse(\", \")\"\""
+    ]
+  },
+  "I/O & File Handling": {
+    "File I/O Basics": [
+      "Read/write files with `scala.io.Source`, `java.nio.file.Files`, `PrintWriter`. Source reads from files, URLs, and stdin. Java NIO Files provides concise read/write methods.",
+      "import scala.io.Source\nimport java.io.PrintWriter\nimport java.nio.file.{Files, Paths}\nimport scala.jdk.StreamConverters.*\n\n// Read entire file\nval content = Source.fromFile(\"build.sbt\").mkString\n\n// Read lines lazily\nSource.fromFile(\"build.sbt\").getLines().zipWithIndex.foreach {\n  case (line, i) => println(s\"$i: $line\")\n}\n\n// Write\nnew PrintWriter(\"output.txt\") {\n  write(\"Hello, file!\\n\")\n  write(\"Second line\\n\")\n  close()\n}\n\n// Java NIO (no dependencies)\nimport java.nio.file.{Files, Paths}\nval path = Paths.get(\"output.txt\")\nFiles.writeString(path, \"Written via NIO\")\nval read = Files.readString(path)\nprintln(read)"
+    ],
+    "Java NIO & Channels": [
+      "Java NIO provides non-blocking I/O, channels, buffers, and selectors. `FileChannel` for file transfer, `ByteBuffer` for data, `Selector` for multiplexing. Useful for high-performance I/O.",
+      "import java.nio.{ByteBuffer, CharBuffer}\nimport java.nio.channels.FileChannel\nimport java.nio.file.{StandardOpenOption, Paths}\nimport java.nio.charset.StandardCharsets\n\n// Fast file copy with transferTo\nval sourcePath = Paths.get(\"source.dat\")\nval destPath = Paths.get(\"dest.dat\")\n\nval inChannel = FileChannel.open(sourcePath, StandardOpenOption.READ)\nval outChannel = FileChannel.open(destPath,\n  StandardOpenOption.WRITE, StandardOpenOption.CREATE)\n\ninChannel.transferTo(0, inChannel.size(), outChannel)\ninChannel.close()\noutChannel.close()\n\n// Reading with ByteBuffer\nval channel = FileChannel.open(sourcePath, StandardOpenOption.READ)\nval buffer = ByteBuffer.allocate(1024)\nvar bytesRead = channel.read(buffer)\nwhile bytesRead != -1 do\n  buffer.flip()  // prepare for read\n  val decoded = StandardCharsets.UTF_8.decode(buffer)\n  print(decoded)\n  buffer.clear()\n  bytesRead = channel.read(buffer)\nchannel.close()"
+    ],
+    "Serialization & JSON": [
+      "Serialize data with Java Serialization (binary, fragile), Circe/UPickle (JSON), or Scala Pickling. Circe is the most popular Scala JSON library. UPickle is simpler and faster.",
+      "// UPickle — simple JSON\nimport upickle.default.*\n\ncase class User(id: Int, name: String, tags: List[String])\nobject User {\n  implicit val rw: ReadWriter[User] = macroRW\n}\n\nval user = User(1, \"Alice\", List(\"admin\", \"premium\"))\nval json = write(user)\nprintln(json)\nval parsed = read[User](json)\nprintln(parsed)\n\n// Circe — functional JSON\n// import io.circe.*, io.circe.generic.auto.*, io.circe.parser.*, io.circe.syntax.*\n// case class Item(name: String, price: Double)\n// val item = Item(\"Widget\", 9.99)\n// val json = item.asJson.noSpaces\n// val decoded = decode[Item](json)\n\n// Java serialization (discouraged)\n// import java.io.*\n// val baos = ByteArrayOutputStream()\n// val oos = ObjectOutputStream(baos)\n// oos.writeObject(user)\n// oos.close()"
+    ]
+  },
+  "Testing": {
+    "Property-Based Testing": [
+      "ScalaCheck generates random test inputs. Define properties with `forAll` and generators. Test many edge cases automatically. Combined with ScalaTest for seamless integration.",
+      "import org.scalacheck.*\nimport Prop.*\n\nobject MathProps extends Properties(\"Math\") {\n  property(\"addition is commutative\") = forAll { (a: Int, b: Int) =>\n    a + b == b + a\n  }\n\n  property(\"abs is non-negative\") = forAll { (n: Int) =>\n    n.abs >= 0\n  }\n\n  property(\"reverse twice is identity\") = forAll { (list: List[Int]) =>\n    list.reverse.reverse == list\n  }\n}\n\n// Custom generator\nval evenGen: Gen[Int] = Gen.choose(-1000, 1000).map(_ * 2)\nval property = Prop.forAll(evenGen) { n =>\n  n % 2 == 0\n}\n\n// With ScalaTest\n// class MathSpec extends AnyFlatSpec with ScalaCheckPropertyChecks {\n//   \"abs\" should \"be non-negative\" in {\n//     forAll { (n: Int) => n.abs should be >= 0 }\n//   }\n// }"
+    ],
+    "Mocking & Stubbing": [
+      "ScalaMock and Mockito provide mocking for Scala tests. Mock traits/classes to isolate units. ScalaMock generates mocks from traits. Mockito works with Scala with fewer limitations.",
+      "// ScalaMock example\nimport org.scalamock.scalatest.MockFactory\nimport org.scalatest.flatspec.AnyFlatSpec\n\ntrait UserRepo {\n  def find(id: Int): Option[String]\n  def save(name: String): Int\n}\n\nclass UserService(repo: UserRepo) {\n  def greet(id: Int): String =\n    repo.find(id) match {\n      case Some(name) => s\"Hello $name\"\n      case None => \"Unknown\"\n    }\n}\n\nclass UserServiceSpec extends AnyFlatSpec with MockFactory {\n  \"greet\" should \"return greeting if user found\" in {\n    val mockRepo = mock[UserRepo]\n    (mockRepo.find _).expects(1).returning(Some(\"Alice\"))\n\n    val service = UserService(mockRepo)\n    assert(service.greet(1) == \"Hello Alice\")\n  }\n}\n\n// Mockito-style:\n// val mockRepo = MockitoSugar.mock[UserRepo]\n// when(mockRepo.find(1)).thenReturn(Some(\"Alice\"))"
+    ]
+  },
+  "Standard Library": {
+    "Collections Hierarchy": [
+      "Scala collections hierarchy: `Iterable` → `Seq`/`Set`/`Map`. Mutable and immutable versions. `Traversable` deprecated in 2.13. Prefer immutable by default. The 2.13 collections are simplified and more consistent.",
+      "// Immutable (default) hierarchy:\n// Iterable\n//   Seq\n//     IndexedSeq — Vector, ArraySeq\n//     LinearSeq  — List, LazyList\n//   Set — HashSet, TreeSet\n//   Map — HashMap, TreeMap\n\n// Mutable — explicit import required\nimport scala.collection.mutable\n\nval mutList = mutable.ListBuffer(1, 2, 3)\nval mutSet = mutable.Set(1, 2, 3)\nval mutMap = mutable.Map(\"a\" -> 1, \"b\" -> 2)\n\n// Converting\nimport scala.collection.immutable.{List, Map, Set}\nval immList = mutList.toList\nval immMap = mutMap.toMap\n\n// Java interop\nimport scala.jdk.CollectionConverters.*\nval javaList: java.util.List[Int] = List(1,2,3).asJava\nval scalaList: Seq[Int] = javaList.asScala.toSeq"
+    ],
+    "Date & Time API": [
+      "Scala uses `java.time` (Java 8+) for date/time. Key classes: `LocalDate`, `LocalTime`, `LocalDateTime`, `ZonedDateTime`, `Instant`, `Duration`, `Period`. Scala no longer has its own date API.",
+      "import java.time.*\nimport java.time.format.DateTimeFormatter\n\nval today = LocalDate.now()\nval christmas = LocalDate.of(2024, 12, 25)\nval daysUntil = ChronoUnit.DAYS.between(today, christmas)\nprintln(s\"$daysUntil days until Christmas\")\n\nval now = LocalTime.now()\nval meeting = LocalTime.of(14, 30)\nval duration = Duration.between(now, meeting)\nprintln(s\"${duration.toMinutes} min until meeting\")\n\n// Formatting\nval formatter = DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm\")\nval formatted = LocalDateTime.now().format(formatter)\nprintln(formatted)\n\n// Instant (epoch millis)\nval epoch = Instant.now().toEpochMilli\n\n// Parsing\nval parsed = LocalDate.parse(\"2024-06-15\")\nprintln(parsed)"
+    ],
+    "System Properties & Environment": [
+      "Access JVM system properties (`sys.props`), environment variables (`sys.env`), and process control (`sys.exit`, `sys.addShutdownHook`). `scala.sys.process` for external process execution.",
+      "// System properties\nval javaVersion = sys.props(\"java.version\")\nval userHome = sys.props(\"user.home\")\nprintln(s\"Java $javaVersion, Home: $userHome\")\n\n// Environment variables\nval path = sys.env.get(\"PATH\")\npath.foreach(p => println(s\"PATH=$p\"))\n\n// With default\nval mode = sys.env.getOrElse(\"APP_MODE\", \"development\")\n\n// Shutdown hook\nsys.addShutdownHook {\n  println(\"Cleaning up...\")\n}\n\n// Execute external commands\nimport scala.sys.process.*\nval lsOutput = \"ls -la\".!!  // captures stdout\nprintln(lsOutput.take(200))\n\n// Line by line\n\"ls -la\".lazyLines.foreach(println)\n\n// With exit code\nval exitCode = \"mkdir /tmp/testdir\".!\nprintln(s\"Exit code: $exitCode\")\n\n// Run and ignore output\n\"echo done\".!"
+    ]
+  },
+  "Implicits & Type Classes": {
+    "Implicit Conversions": [
+      "Implicit conversions (Scala 2) auto-convert between types. Used for extending libraries. Scala 3 replaces with `given` conversions. Use sparingly — can cause confusing behavior. Prefer extension methods.",
+      "// Implicit conversion (Scala 2 style)\nimport scala.language.implicitConversions\n\ncase class Euro(amount: Double)\nimplicit def doubleToEuro(d: Double): Euro = Euro(d)\n\nval price: Euro = 29.99  // auto-converted!\nprintln(price)  // Euro(29.99)\n\n// Implicit class (extension method, Scala 2)\nimplicit class RichInt(val n: Int) extends AnyVal {\n  def squared: Int = n * n\n  def isEven: Boolean = n % 2 == 0\n}\n\nprintln(4.squared)  // 16\nprintln(7.isEven)   // false\n\n// Scala 3 style:\n// extension (n: Int)\n//   def squared: Int = n * n\n\n// Caution: implicit conversions can cause unexpected behavior\n// Prefer extension methods or explicit conversions"
+    ],
+    "Implicit Resolution & Scope": [
+      "Implicits are resolved using the type at compile time. Search order: local scope, imported scope, companion objects of type and type parameters. The `implicitly[T]` method summons an implicit value of type T.",
+      "trait Default[T]:\n  def value: T\n\n// Companion object — implicits found here\ndefault object IntDefault extends Default[Int]:\n  def value = 0\n\ndefault object StringDefault extends Default[String]:\n  def value = \"default\"\n\ndef getDefault[T](using d: Default[T]): T = d.value\n\ndef main(args: Array[String]): Unit =\n  println(getDefault[Int])     // 0 — found in companion\n  println(getDefault[String])  // \"default\"\n\n  // Local implicit overrides companion\n  given myInt: Default[Int] with\n    def value = 42\n  println(getDefault[Int])  // 42 — local wins\n\n  // Summon\n  val d = summon[Default[String]]\n  println(d.value)  // \"default\""
+    ],
+    "Context Bounds & Type Classes": [
+      "Context bounds `[T: TypeClass]` desugar to `(using TypeClass[T])`. The type class pattern provides ad-hoc polymorphism. `implicitly[TC[T]]` or `summon[TC[T]]` retrieves the instance.",
+      "// Type class definition\ntrait Serializer[T]:\n  def serialize(t: T): String\n\n// Context bound syntax\n// [T: Serializer] means T has a Serializer instance\n\ndef toJSON[T: Serializer](value: T): String =\n  summon[Serializer[T]].serialize(value)\n\n// Instances\ngiven Serializer[Int] with\n  def serialize(n: Int): String = s\"{\\\"value\\\": $n}\"\n\ngiven Serializer[String] with\n  def serialize(s: String): String = s\"\\\"$s\\\"\"\n\ngiven listSerializer[T](using s: Serializer[T]): Serializer[List[T]] with\n  def serialize(xs: List[T]): String =\n    xs.map(s.serialize).mkString(\"[\", \", \", \"]\")\n\nprintln(toJSON(42))\nprintln(toJSON(\"hello\"))\nprintln(toJSON(List(1, 2, 3)))\n\n// Derivation in Scala 3\n// enum Shape derives Serializer:\n//   case Circle(r: Double)\n//   case Rect(w: Double, h: Double)"
+    ]
+  },
+  "Performance & Optimization": {
+    "Profiling & Benchmarking": [
+      "Use `scala.concurrent.blocking` for blocking operations in ForkJoinPool. Java Flight Recorder (JFR) for profiling. sbt-jmh for microbenchmarks. Measure, don't guess.",
+      "import scala.concurrent.blocking\nimport scala.concurrent.{Future, ExecutionContext}\nimport ExecutionContext.Implicits.global\n\n// Mark blocking operations\nFuture {\n  blocking {\n    Thread.sleep(1000)  // won't starve the pool\n  }\n}\n\n// jmh benchmark example (requires sbt-jmh plugin):\n// import org.openjdk.jmh.annotations._\n// @BenchmarkMode(Array(Mode.AverageTime))\n// class StringBench {\n//   @Benchmark\n//   def concat(): String = (1 to 100).map(_.toString).mkString\n// }\n\n// JFR command:\n// java -XX:StartFlightRecording=filename=recording.jfr,duration=60s MyApp\n\n// Timing helper\ndef timed[A](label: String)(f: => A): A =\n  val start = System.nanoTime()\n  val result = f\n  val elapsed = (System.nanoTime() - start) / 1e6\n  println(s\"$label: ${elapsed}ms\")\n  result\n\nval sum = timed(\"sum\") {\n  (1 to 1000000).sum\n}"
+    ],
+    "Memory & GC Tuning": [
+      "JVM memory tuning: -Xms/-Xmx for heap, -XX:NewRatio for young/old gen. G1GC is default. Avoid allocations in hot paths. Use `-XX:+PrintGCDetails` for diagnostics. Scala-specific: avoid boxing with specialized methods.",
+      "// JVM options\n// -Xms512m -Xmx4g -XX:+UseG1GC -XX:MaxGCPauseMillis=100\n// -XX:+PrintGCDetails -XX:+PrintGCTimeStamps\n// -XX:+HeapDumpOnOutOfMemoryError\n\n// Specialized for primitives\nclass @specialized(Int, Double) Box[@specialized(Int, Double) A](val value: A)\n\n// Avoid allocations\n// BAD: creates many intermediate strings\nval bad = (1 to 1000).map(n => s\"Item $n\").mkString\n\n// GOOD: single StringBuilder\nval good = StringBuilder()\nfor n <- 1 to 1000 do good.append(s\"Item $n\")\ngood.result()\n\n// Prefer immutable for safety, but mutable for hot paths\nimport scala.collection.mutable.ArrayBuffer\nval buf = ArrayBuffer[Int]()  // allocate once\nfor i <- 1 to 10000 do buf += i\n\n// Heap analysis\n// jmap -histo:live <pid>\n// jhat heap.hprof\n\n// G1GC tuning for low latency\n// -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:InitiatingHeapOccupancyPercent=35"
+    ]
+  },
+  "Java Interoperability": {
+    "Calling Java from Scala": [
+      "Java libraries work seamlessly. Use Java collections (convert with `asScala`), Java streams (`asScala`), Optional (`toOption`). Annotations, beans, and functional interfaces are fully compatible.",
+      "import scala.jdk.CollectionConverters.*\nimport scala.jdk.OptionConverters.*\nimport java.util.{List => JList, Map => JMap}\n\n// Java to Scala collections\nval javaList: JList[Int] = java.util.Arrays.asList(1, 2, 3)\nval scalaList: Seq[Int] = javaList.asScala.toSeq\nprintln(scalaList.map(_ * 2))\n\n// Java Map to Scala\nval javaMap: JMap[String, Int] = java.util.Map.of(\"a\", 1, \"b\", 2)\nval scalaMap: Map[String, Int] = javaMap.asScala.toMap\nprintln(scalaMap)\n\n// Java Optional to Scala Option\nval javaOptional = java.util.Optional.of(42)\nval scalaOption: Option[Int] = javaOptional.toScala\nprintln(scalaOption.getOrElse(0))\n\n// Java streams\nval stream = java.util.stream.Stream.of(1, 2, 3)\nstream.collect(java.util.stream.Collectors.toList[Int])\n\n// Scala streams to Java\nval scalaStream = List(1, 2, 3).toStream\nimport scala.jdk.StreamConverters.*\nval javaStr = scalaStream.asJavaStream  // requires Scala 2.13+"
+    ],
+    "Scala from Java": [
+      "Call Scala code from Java. Scala objects appear as `ClassName$.MODULE$`. Methods with special chars are mangled. Scala collections need conversion. Case classes get `apply`, `copy`, `toString` methods.",
+      "// Scala class: class Person(val name: String, val age: Int)\n// From Java:\n// Person p = new Person(\"Alice\", 30);\n// System.out.println(p.name);  // \"Alice\"\n\n// Scala object: object Config { val port = 8080 }\n// From Java:\n// int port = Config$.MODULE$.port();\n\n// Scala trait with default methods\n// trait Greeter { default def greet() = \"Hi\" }\n// From Java: implement normally\n\n// Scala collections from Java\n// import scala.jdk.javaapi.CollectionConverters;\n// List<String> scalaList = scala.collection.immutable.List.empty();\n// java.util.List<String> javaList = CollectionConverters.asJava(scalaList);\n\n// Throwing Scala exceptions from Java:\n// throw new scala.Exception(\"error\");\n\n// Traits with abstract methods work as Java interfaces\n// Scala: trait Runner { def run(): Unit }\n// Java: class MyRunner implements Runner { public void run() { ... } }"
+    ]
+  },
+  "Functional Programming Deep Dive": {
+    "Immutability & Pure Functions": [
+      "Scala is a functional-first language. Immutability means variables declared with <code>val</code> cannot be reassigned. Pure functions have no side effects — they depend only on inputs and return only outputs. Benefits: easier reasoning, thread safety, testability. Scala encourages immutable data structures in <code>scala.collection.immutable</code> package. Use <code>var</code> sparingly, only when mutation is required for performance. <code>final</code> in Java translates to <code>val</code> in Scala. Pure functions enable referential transparency — any expression can be replaced with its value without changing program behavior.",
+      "// Immutability\nval x = 42  // cannot reassign\n// x = 10  // compilation error\n\n// Pure function - no side effects\ndef add(a: Int, b: Int): Int = a + b\n\n// Impure function - has side effects\nvar total = 0\ndef addToTotal(x: Int): Unit = {\n  total += x  // mutates state!\n}\n\n// Immutable collections\nval list = List(1, 2, 3)\nval newList = list.map(_ * 2)  // original unchanged\n\n// Case classes are immutable by default\ncase class Person(name: String, age: Int)\nval alice = Person(\"Alice\", 30)\nval olderAlice = alice.copy(age = 31)  // creates new instance"
+    ],
+    "Higher-Order Functions": [
+      "Higher-order functions take functions as parameters or return functions. This is central to functional programming. Common higher-order functions on collections: <code>map</code> (transform each element), <code>filter</code> (keep matching elements), <code>flatMap</code> (map then flatten), <code>foldLeft</code>/<code>foldRight</code> (accumulate), <code>reduce</code> (combine without initial value). Anonymous functions (lambdas) use concise syntax: <code>(x: Int) => x * 2</code>. Placeholder syntax <code>_</code> shortens common patterns: <code>list.map(_ * 2)</code>. Method eta-expansion converts methods to functions: <code>val f = add _</code>.",
+      "def twice(f: Int => Int, x: Int): Int = f(f(x))\nprintln(twice(x => x + 1, 5))  // 7\n\n// Map, filter, reduce\nval numbers = List(1, 2, 3, 4, 5)\nval evens = numbers.filter(_ % 2 == 0)       // List(2, 4)\nval doubled = evens.map(_ * 2)               // List(4, 8)\nval sum = numbers.reduce(_ + _)               // 15\n\n// FlatMap for nested structures\nval nested = List(List(1, 2), List(3, 4))\nval flattened = nested.flatten               // List(1, 2, 3, 4)\nval flatMapped = nested.flatMap(_.map(_ * 2)) // List(2, 4, 6, 8)\n\n// Function composition\nval add1 = (x: Int) => x + 1\nval double = (x: Int) => x * 2\nval add1ThenDouble = add1 andThen double  // f(g(x))\nval doubleThenAdd1 = add1 compose double  // g(f(x))\nprintln(add1ThenDouble(5))  // 12"
+    ],
+    "Pattern Matching & Case Classes": [
+      "Pattern matching is Scala's powerful replacement for switch statements. Match against values, types, case class extractors, sequences, tuples, and custom extractors. Patterns can be: literal, variable, constructor, sequence, tuple, type test, and regex. Guards with <code>if</code> add conditions. Patterns are checked for exhaustiveness at compile time. Case classes automatically provide <code>unapply</code> methods for pattern matching, <code>copy</code>, <code>equals</code>, <code>hashCode</code>, and <code>toString</code>. Sealed hierarchies enable exhaustive matching.",
+      "sealed trait Shape\ncase class Circle(radius: Double) extends Shape\ncase class Rectangle(width: Double, height: Double) extends Shape\ncase class Triangle(base: Double, height: Double) extends Shape\n\ndef area(shape: Shape): Double = shape match {\n  case Circle(r) => Math.PI * r * r\n  case Rectangle(w, h) => w * h\n  case Triangle(b, h) => b * h / 2\n}\n\n// Pattern matching with guards\ndef describe(x: Any): String = x match {\n  case i: Int if i > 0 => s\"Positive integer: $i\"\n  case 0 => \"Zero\"\n  case s: String => s\"String: $s\"\n  case list: List[Int] if list.nonEmpty => \"Non-empty Int list\"\n  case _ => \"Something else\"\n}\n\n// Extracting from collections\nval list = List(1, 2, 3, 4, 5)\nlist match {\n  case head :: tail => s\"Head: $head, Tail: $tail\"\n  case Nil => \"Empty list\"\n}\n\n// Tuples\nval pair = (\"Alice\", 30)\npair match {\n  case (name, age) => s\"$name is $age years old\"\n}"
+    ],
+    "Monads & For-Comprehensions": [
+      "A monad is a design pattern that provides a way to sequence computations. In Scala, common monads include <code>Option</code>, <code>Either</code>, <code>Try</code>, <code>Future</code>, and <code>List</code>. For-comprehensions provide syntactic sugar for chaining monadic operations: <code>for (x <- expr1; y <- expr2) yield (x, y)</code> desugars to <code>expr1.flatMap(x => expr2.map(y => (x, y)))</code>. Monads must satisfy three laws: left identity, right identity, and associativity. In practice, monads enable safe error handling (Option/Either), asynchronous programming (Future), and collection operations.",
+      "// Option monad\nval maybeNum: Option[Int] = Some(42)\nval maybeNull: Option[Int] = None\n\nval result = for {\n  a <- maybeNum\n  b <- Some(10)\n} yield a + b  // Some(52)\n\n// Either monad (error handling)\ndef divide(a: Int, b: Int): Either[String, Int] =\n  if (b == 0) Left(\"Division by zero\")\n  else Right(a / b)\n\nval result2 = for {\n  x <- divide(10, 2)\n  y <- divide(x, 2)\n} yield y  // Right(2)\n\n// Try for exception handling\nimport scala.util.{Try, Success, Failure}\ndef parseNumber(s: String): Try[Int] = Try(s.toInt)\n\nval sum = for {\n  a <- parseNumber(\"10\")\n  b <- parseNumber(\"20\")\n} yield a + b  // Success(30)"
+    ]
+  },
+  "Scala Type System": {
+    "Type Classes & Implicits": [
+      "Type classes in Scala provide ad-hoc polymorphism — the ability to add behavior to existing types without modifying them. A type class is defined as a trait with type parameters. Implicit parameters and implicit conversions provide the mechanism for type class dispatch. The <code>implicit</code> keyword marks parameters that are automatically filled by the compiler. Scala 3 (Dotty) uses <code>given</code>/<code>using</code> instead of implicits. Common type classes: <code>Ordering</code>, <code>Numeric</code>, <code>JsonWriter</code>, <code>Show</code>, <code>Eq</code>. Context bounds <code>[T: Ordering]</code> are syntactic sugar for implicit parameters.",
+      "// Define a type class\ntrait JsonWriter[T] {\n  def write(value: T): String\n}\n\n// Provide instances\nimplicit val stringWriter: JsonWriter[String] = (value: String) => s\"\\\"$value\\\"\"\nimplicit val intWriter: JsonWriter[Int] = (value: Int) => value.toString\n\n// Use the type class\ndef toJson[T](value: T)(implicit writer: JsonWriter[T]): String =\n  writer.write(value)\n\n// Context bound syntax\ndef toJson2[T: JsonWriter](value: T): String =\n  implicitly[JsonWriter[T]].write(value)\n\n// Extension method pattern\nimplicit class JsonOps[T](value: T)(implicit w: JsonWriter[T]) {\n  def toJson: String = w.write(value)\n}\n\nprintln(42.toJson)        // \"42\"\nprintln(\"hello\".toJson)  // \"\\\"hello\\\"\"\n\n// Scala 3 syntax:\n// trait JsonWriter[T]:\n//   def write(value: T): String\n// given JsonWriter[Int] with\n//   def write(value: Int): String = value.toString"
+    ],
+    "Covariance, Contravariance, Invariance": [
+      "Variance describes how generic types relate to subtype relationships. <code>List[+T]</code> is covariant: if Dog extends Animal, then List[Dog] is a subtype of List[Animal]. <code>Contravariant[-T]</code>: if Dog extends Animal, then Printer[Animal] is a subtype of Printer[Dog]. <code>Invariant[T]</code>: no relationship. Use covariance for immutable collections (producers), contravariance for consumers (functions), invariance for mutable data. The Liskov Substitution Principle guides variance: if a type can be used where a parent type is expected, it should be covariant. The compiler checks variance annotations for type safety.",
+      "// Covariant: immutable read-only collections\nsealed trait List[+A]\ncase class Cons[+A](head: A, tail: List[A]) extends List[A]\ncase object Nil extends List[Nothing]\n\n// If Dog <: Animal, then List[Dog] <: List[Animal]\nval dogs: List[Dog] = Cons(Golden(), Nil)\nval animals: List[Animal] = dogs  // OK - covariant\n\n// Contravariant: function parameters\ntrait Comparator[-T] {\n  def compare(a: T, b: T): Int\n}\n\nval animalComp: Comparator[Animal] = ???\nval dogComp: Comparator[Dog] = animalComp  // OK - contravariant\n\n// Invariant: mutable collections\nclass ArrayBuffer[T]  // invariant!\n// val dogs: ArrayBuffer[Dog] = ???\n// val animals: ArrayBuffer[Animal] = dogs  // COMPILE ERROR\n\n// Function types are contravariant in params, covariant in return\n// Function1[-T, +R]: (A => B) <: (C => D) if C <: A and B <: D"
+    ],
+    "Advanced Types (Path, Dependent, Higher-Kinded)": [
+      "Scala's type system supports advanced constructs: <strong>path-dependent types</strong> distinguish types based on instance paths. <strong>Dependent method types</strong> allow return types to depend on value parameters. <strong>Higher-kinded types</strong> abstract over type constructors (<code>trait Functor[F[_]]</code>). <strong>Existential types</strong> (deprecated in Scala 3) abstract over type parameters. <strong>Union types</strong> (Scala 3): <code>Int | String</code>. <strong>Intersection types</strong> (Scala 3): <code>A & B</code>. <strong>Match types</strong> (Scala 3): type-level computation. <strong>Opaque types</strong> (Scala 3): zero-cost type abstractions without runtime overhead.",
+      "// Path-dependent types\ntrait Animal {\n  type Food\n  def eat(food: Food): Unit\n}\n\nclass Cow extends Animal {\n  type Food = Grass\n  def eat(grass: Grass): Unit = println(\"Eating grass\")\n}\n\n// Higher-kinded types\nimport scala.language.higherKinds\ntrait Functor[F[_]] {\n  def map[A, B](fa: F[A])(f: A => B): F[B]\n}\n\nimplicit val listFunctor: Functor[List] = new Functor[List] {\n  def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)\n}\n\n// Scala 3 union types\n// def process(input: Int | String): Unit =\n//   input match\n//     case i: Int => println(s\"Number: $i\")\n//     case s: String => println(s\"String: $s\")\n\n// Scala 3 opaque types\n// object Meters:\n//   opaque type Meters = Double\n//   def apply(value: Double): Meters = value\n//   extension (m: Meters) def value: Double = m"
+    ]
+  }
+}

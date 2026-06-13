@@ -1,0 +1,71 @@
+{
+  "id": "rs-observer-pattern",
+  "title": "Rust: Observer Pattern",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "observer pattern", "publish-subscribe", "callbacks", "traits"],
+  "description": "Implement the observer pattern with event subscription and notifications.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Observer Trait",
+      "description": "Define a trait `Observer` with method `fn update(&self, event: &str)`. Create two structs `EmailNotifier` and `SmsNotifier` that implement Observer and print different messages.",
+      "hints": ["`trait Observer { fn update(&self, event: &str); }`", "`EmailNotifier::update` prints `\"Email: {event}\"`", "`SmsNotifier::update` prints `\"SMS: {event}\"`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Email') && output.includes('SMS')",
+        "successMessage": "Observer trait implemented!",
+        "failureMessage": "Print notifications from both Email and SMS notifiers."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Event Emitter",
+      "description": "Create an `EventEmitter` struct that holds a list of observers (`Vec<Box<dyn Observer>>`). Add methods `subscribe(&mut self, observer: Box<dyn Observer>)` and `emit(&self, event: &str)`.",
+      "hints": ["`struct EventEmitter { observers: Vec<Box<dyn Observer>> }`", "`emit` iterates over observers and calls `.update(event)` on each.", "Subscribe both notifiers and emit an event."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Email:') && output.includes('SMS:')",
+        "successMessage": "Event emitter works!",
+        "failureMessage": "Subscribe both notifiers and emit 'order_shipped'."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Topic-Based Events",
+      "description": "Extend EventEmitter to support multiple topics using a `HashMap<String, Vec<Box<dyn Observer>>>`. Add `subscribe(topic, observer)` and `emit(topic, event)`. Test with \"order\" and \"payment\" topics.",
+      "hints": ["`HashMap<String, Vec<Box<dyn Observer>>>` as the observer storage.", "Observers subscribe to specific topics.", "Only observers of that topic receive the event."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('order') && output.includes('payment')",
+        "successMessage": "Topic-based events work!",
+        "failureMessage": "Emit on 'order' and 'payment' topics."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Unsubscribe",
+      "description": "Add an `unsubscribe` method that removes an observer by ID. Use a counter to assign unique IDs to each observer. Demonstrate subscribing then unsubscribing.",
+      "hints": ["Give each observer a unique `id: usize`.", "`fn unsubscribe(&mut self, id: usize)` removes the observer.", "After unsubscribe, the removed observer stops receiving events."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('received') || output.includes('unsubscribed')",
+        "successMessage": "Unsubscribe works!",
+        "failureMessage": "Subscribe an observer, then unsubscribe and verify it no longer receives events."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Closure-Based Observers",
+      "description": "Add support for closure-based observers: `on<F>(&mut self, topic: &str, callback: F) where F: Fn(&str) + 'static`. Subscribe both a named struct and a closure, emit an event.",
+      "hints": ["`Box<dyn Fn(&str)>` for closure observers.", "Store them alongside trait observers or as a separate list.", "`emitter.on(\"event\", |msg| println!(\"Closure: {}\", msg));`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.includes('Closure') || output.includes('callback')",
+        "successMessage": "Closure-based observers work!",
+        "failureMessage": "Subscribe a closure observer and emit an event."
+      }
+    }
+  ]
+}

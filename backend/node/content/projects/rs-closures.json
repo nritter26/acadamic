@@ -1,0 +1,71 @@
+{
+  "id": "rs-closures",
+  "title": "Rust: Closures",
+  "difficulty": "intermediate",
+  "languages": ["rust"],
+  "estimatedMinutes": 20,
+  "concepts": ["rust", "closures", "Fn", "FnMut", "FnOnce", "anonymous functions"],
+  "description": "Use closures (anonymous functions) that can capture their environment.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Closure",
+      "description": "Create a closure `let square = |x: i32| x * x;` and call it with 5. Print the result.",
+      "hints": ["`let square = |x| x * x;`", "Closures are defined with `||` syntax.", "Call: `println!(\"{}\", square(5));`"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('25')",
+        "successMessage": "Basic closure works!",
+        "failureMessage": "Create and call a closure that squares a number."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Capturing Environment",
+      "description": "Create a variable `factor = 3` outside a closure. The closure `|x| x * factor` captures factor by reference. Call it with 10 and print 30.",
+      "hints": ["`let factor = 3; let multiply = |x| x * factor;`", "Closures can capture variables from their surrounding scope.", "`multiply(10)` = 30 (10 * 3)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('30')",
+        "successMessage": "Environment capture works!",
+        "failureMessage": "Create a closure that captures 'factor' and prints 10*factor."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Closure as Function Parameter",
+      "description": "Write a function `apply<F>(x: i32, f: F) -> i32 where F: Fn(i32) -> i32` that applies the closure. Test with `|x| x + 1` and `|x| x * 2`.",
+      "hints": ["`fn apply<F: Fn(i32) -> i32>(x: i32, f: F) -> i32 { f(x) }`", "Call: `apply(5, |x| x + 1)` = 6.", "Call: `apply(5, |x| x * 2)` = 10."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('6') && output.contains('10')",
+        "successMessage": "Closure as parameter works!",
+        "failureMessage": "Apply different closures to 5 and print results."
+      }
+    },
+    {
+      "id": 4,
+      "title": "FnMut Closure",
+      "description": "Create a mutable counter using a closure that captures `&mut count`. The closure increments count each time it's called. Call it 3 times and print the counter value.",
+      "hints": ["`let mut count = 0; let mut inc = || { count += 1; count };`", "A closure that mutates captured variables implements `FnMut`.", "Call 3 times → count = 3."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('3') || output.contains('count')",
+        "successMessage": "FnMut closure works!",
+        "failureMessage": "Call a mutable closure 3 times and print the final count."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Iterator with Closures",
+      "description": "Use closures with iterator methods: given `[1, 2, 3, 4, 5]`, filter even numbers with a closure, then map to squares with another closure. Collect and print.",
+      "hints": ["`let result: Vec<i32> = numbers.iter().filter(|x| *x % 2 == 0).map(|x| x * x).collect();`", "Filter closures take `&&i32` (need dereference).", "Result: [4, 16] from [1,2,3,4,5]"],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('4') && output.contains('16')",
+        "successMessage": "Iterator closures work!",
+        "failureMessage": "Filter evens and map to squares, print [4, 16]."
+      }
+    }
+  ]
+}

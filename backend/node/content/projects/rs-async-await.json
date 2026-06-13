@@ -1,0 +1,71 @@
+{
+  "id": "rs-async-await",
+  "title": "Rust: Async/Await Fundamentals",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "async", "await", "Future", "futures", "tokio"],
+  "description": "Understand async/await and Futures in Rust using tokio or futures crate.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Basic Async Function",
+      "description": "Write an async function `async fn say_hello() -> String` that returns `\"Hello, async!\"`. Use `futures::executor::block_on` to run it. Print the result.",
+      "hints": ["`async fn say_hello() -> String { \"Hello, async!\".to_string() }`", "`let result = futures::executor::block_on(say_hello());`", "This requires the `futures` crate (simulate without it if needed)."],
+      "codeTemplate": { "rust": "fn main() {\n    // Simulate async by just calling the function\n    // In real async, you'd use block_on\n    let msg = \"Hello, async!\".to_string();\n    println!(\"{}\", msg);\n}" },
+      "verification": {
+        "test": "output.includes('Hello, async!')",
+        "successMessage": "Async function concept demonstrated!",
+        "failureMessage": "Print 'Hello, async!' from an async-style function."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Await Multiple Futures",
+      "description": "Create two async functions: `compute_one() -> u32` returning 10 and `compute_two() -> u32` returning 20. Call both and sum them, printing the result 30.",
+      "hints": ["Await both futures sequentially or with `join!`.", "`let (a, b) = futures::join!(compute_one(), compute_two());`", "In Rust, `join!` polls both futures concurrently."],
+      "codeTemplate": { "rust": "fn main() {\n    let a = 10;\n    let b = 20;\n    println!(\"{}\", a + b);\n}" },
+      "verification": {
+        "test": "output.includes('30')",
+        "successMessage": "Multiple futures joined!",
+        "failureMessage": "Print the sum of two async computations (30)."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Async with Sleep",
+      "description": "Use `tokio::time::sleep` (or simulate) to create a delayed print. Print `\"Start\"`, wait 100ms (simulated), print `\"End\"`.",
+      "hints": ["In real code: `tokio::time::sleep(Duration::from_millis(100)).await;`", "Simulate: print timestamps before and after.", "Demonstrate the non-blocking nature."],
+      "codeTemplate": { "rust": "fn main() {\n    println!(\"Start\");\n    std::thread::sleep(std::time::Duration::from_millis(10));\n    println!(\"End\");\n}" },
+      "verification": {
+        "test": "output.includes('Start') && output.includes('End')",
+        "successMessage": "Async sleep concept demonstrated!",
+        "failureMessage": "Print Start, delay, print End."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Async with .await",
+      "description": "Write a function `fetch_user(id: u32) -> String` that simulates fetching a user (returns `format!(\"User {}\", id)`). Create two fetches and await them sequentially.",
+      "hints": ["`let user1 = fetch_user(1).await;`", "`let user2 = fetch_user(2).await;`", "Print both results."],
+      "codeTemplate": { "rust": "fn main() {\n    let user1 = \"User 1\";\n    let user2 = \"User 2\";\n    println!(\"{}\", user1);\n    println!(\"{}\", user2);\n}" },
+      "verification": {
+        "test": "output.includes('User 1') && output.includes('User 2')",
+        "successMessage": "Sequential async fetches work!",
+        "failureMessage": "Print two simulated async user fetches."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Async Error Handling",
+      "description": "Write an async function `divide(a: f64, b: f64) -> Result<f64, String>`. Create an async function that calls divide with `?` and handles errors. Print success or error messages.",
+      "hints": ["`async fn divide(a: f64, b: f64) -> Result<f64, String> { if b == 0.0 { Err(\"div by zero\".into()) } else { Ok(a / b) } }`", "Use `?` to propagate errors in async functions.", "Call with (10, 2) and (10, 0)."],
+      "codeTemplate": { "rust": "fn main() {\n    fn divide(a: f64, b: f64) -> Result<f64, String> {\n        if b == 0.0 { Err(\"div by zero\".into()) } else { Ok(a / b) }\n    }\n    match divide(10.0, 2.0) {\n        Ok(v) => println!(\"10/2 = {}\", v),\n        Err(e) => println!(\"Error: {}\", e),\n    }\n    match divide(10.0, 0.0) {\n        Ok(v) => println!(\"10/0 = {}\", v),\n        Err(e) => println!(\"Error: {}\", e),\n    }\n}" },
+      "verification": {
+        "test": "output.includes('5') && output.includes('Error')",
+        "successMessage": "Async error handling demonstrated!",
+        "failureMessage": "Handle both success and error cases."
+      }
+    }
+  ]
+}

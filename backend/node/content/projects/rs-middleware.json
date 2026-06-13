@@ -1,0 +1,71 @@
+{
+  "id": "rs-middleware",
+  "title": "Rust: Middleware Pipeline",
+  "difficulty": "advanced",
+  "languages": ["rust"],
+  "estimatedMinutes": 25,
+  "concepts": ["rust", "middleware", "pipeline", "decorator pattern", "chain of responsibility"],
+  "description": "Build a middleware pipeline for processing requests and responses.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Define Request and Response",
+      "description": "Define `Request` struct with `path: String`, `method: String`, `headers: HashMap<String, String>`. Define `Response` struct with `status: u16`, `body: String`. Create sample request.",
+      "hints": ["`struct Request { path: String, method: String, headers: HashMap<String, String> }`", "`struct Response { status: u16, body: String }`", "Create a GET request to \"/api/users\"."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('/api/users') && output.contains('GET')",
+        "successMessage": "Request/Response defined!",
+        "failureMessage": "Create and print a sample request."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Middleware Trait",
+      "description": "Define a trait `Middleware` with `fn handle(&self, req: &mut Request, res: &mut Response)`. Implement `LoggingMiddleware` that prints the request method and path.",
+      "hints": ["`trait Middleware { fn handle(&self, req: &mut Request, res: &mut Response); }`", "LoggingMiddleware prints `\"METHOD /path\"` then calls `next(req, res)` or continues.", "For now, just print and modify the response."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('GET') && output.contains('/api')",
+        "successMessage": "Middleware trait implemented!",
+        "failureMessage": "Run LoggingMiddleware on a request and print the log output."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Middleware Chain",
+      "description": "Create a `MiddlewareChain` that holds a `Vec<Box<dyn Middleware>>`. Add a `handle(mut req: Request, mut res: Response) -> Response` method that runs all middleware in order.",
+      "hints": ["`struct MiddlewareChain { middlewares: Vec<Box<dyn Middleware>> }`", "`fn add(&mut self, m: Box<dyn Middleware>)` adds to the chain.", "`handle` iterates and calls each middleware."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('middleware') || output.contains('chain')",
+        "successMessage": "Middleware chain works!",
+        "failureMessage": "Run a middleware chain on a request."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Auth Middleware",
+      "description": "Implement an `AuthMiddleware` that checks for an Authorization header. If missing, set status to 401 and short-circuit. Add it to the chain before LoggingMiddleware.",
+      "hints": ["Check `req.headers.contains_key(\"Authorization\")`.", "If missing, set `res.status = 401; res.body = \"Unauthorized\".to_string();`.", "Short-circuit by returning early (skip remaining middleware)."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('401') || output.contains('Unauthorized')",
+        "successMessage": "Auth middleware works!",
+        "failureMessage": "Test with missing Authorization header to get 401."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Full Pipeline with Multiple Middleware",
+      "description": "Create a pipeline with 3 middleware: `AuthMiddleware`, `LoggingMiddleware`, and an `AddHeaderMiddleware` that adds a `X-Response-Time` header. Test with a valid request that passes all middleware.",
+      "hints": ["Add all 3 to the chain in order.", "AuthMiddleware passes (has Authorization header).", "LoggingMiddleware prints request info.", "AddHeaderMiddleware adds a custom response header."],
+      "codeTemplate": { "rust": "" },
+      "verification": {
+        "test": "output.contains('200') || output.contains('X-Response')",
+        "successMessage": "Full middleware pipeline works!",
+        "failureMessage": "Run all 3 middleware and print the final response."
+      }
+    }
+  ]
+}

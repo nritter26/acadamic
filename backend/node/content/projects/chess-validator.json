@@ -1,0 +1,122 @@
+{
+  "id": "chess-validator",
+  "title": "Chess Piece Validator",
+  "difficulty": "advanced",
+  "languages": [
+    "javascript",
+    "typescript",
+    "python"
+  ],
+  "estimatedMinutes": 45,
+  "concepts": [
+    "2D arrays",
+    "game rules",
+    "movement validation",
+    "conditionals",
+    "check detection"
+  ],
+  "description": "Build a chess move validator that validates moves for all piece types and detects check conditions.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Create the chess board",
+      "description": "Define the `board` as an 8x8 2D array. Use objects with `type` (pawn, rook, etc.) and `color` (white, black). Set up the standard starting position and log it.",
+      "hints": [
+        "Use null for empty squares, objects for pieces: { type: 'pawn', color: 'white' }",
+        "Back row (rank 1): rook, knight, bishop, queen, king, bishop, knight, rook",
+        "Pawns on rank 2 (white) and rank 7 (black)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"chess\"></div>\n<script>\nfunction createBoard() {\n  \n}\n\nconst board = createBoard();\nconsole.log(\"Board size:\", board.length + \"x\" + board[0].length);\nconsole.log(JSON.stringify(board[0]));\ndocument.getElementById('chess').textContent = \"Chess board ready: 8x8\";\n</script>\n",
+        "typescript": "<div id=\"chess\"></div>\n<script>\ninterface Piece {\n  type: string;\n  color: string;\n}\n\ntype Cell = Piece | null;\ntype Board = Cell[][];\n\nfunction createBoard(): Board {\n  \n}\n\nconst board: Board = createBoard();\nconsole.log(\"Board size:\", board.length + \"x\" + board[0].length);\nconsole.log(JSON.stringify(board[0]));\ndocument.getElementById('chess').textContent = \"Chess board ready: 8x8\";\n</script>\n",
+        "python": "import json\n\ndef createBoard():\n  \n\nboard = createBoard()\nprint(\"Board size:\", str(len(board)) + \"x\" + str(len(board[0])))\nprint(json.dumps(board[0]))\n"
+      },
+      "verification": {
+        "test": "output.includes('Board size: 8x8') && output.includes('pawn') && output.includes('rook')",
+        "successMessage": "Chess board set up with standard starting position!",
+        "failureMessage": "createBoard should return an 8x8 board with pieces in starting positions."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Validate pawn moves",
+      "description": "Write a `isValidPawnMove` function that takes the board, start position, and end position, and returns true if the pawn move is valid. Include forward movement, double move from starting rank, and diagonal captures.",
+      "hints": [
+        "White pawns move up (y decreasing), black pawns move down (y increasing)",
+        "Forward one: same x, y +/- 1, target must be empty",
+        "Double move from start: same x, y +/- 2, both squares must be empty",
+        "Capture: diagonal x +/- 1, y +/- 1, target must have opposite color"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"chess\"></div>\n<script>\nconst board = [\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null]\n];\n\nboard[6][0] = { type: \"pawn\", color: \"white\" };\nboard[4][0] = { type: \"pawn\", color: \"black\" };\n\nfunction isValidPawnMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nconsole.log(\"Pawn forward:\", isValidPawnMove(board, 0, 6, 0, 5));\nconsole.log(\"Pawn double:\", isValidPawnMove(board, 0, 6, 0, 4));\ndocument.getElementById('chess').textContent = \"Pawn tests done\";\n</script>\n",
+        "typescript": "<div id=\"chess\"></div>\n<script>\ninterface Piece {\n  type: string;\n  color: string;\n}\n\ntype Cell = Piece | null;\ntype Board = Cell[][];\n\nconst board: Board = [\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null],\n  [null, null, null, null, null, null, null, null]\n];\n\nboard[6][0] = { type: \"pawn\", color: \"white\" };\nboard[4][0] = { type: \"pawn\", color: \"black\" };\n\nfunction isValidPawnMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nconsole.log(\"Pawn forward:\", isValidPawnMove(board, 0, 6, 0, 5));\nconsole.log(\"Pawn double:\", isValidPawnMove(board, 0, 6, 0, 4));\ndocument.getElementById('chess').textContent = \"Pawn tests done\";\n</script>\n",
+        "python": "board = [[None for _ in range(8)] for _ in range(8)]\n\nboard[6][0] = {\"type\": \"pawn\", \"color\": \"white\"}\nboard[4][0] = {\"type\": \"pawn\", \"color\": \"black\"}\n\ndef isValidPawnMove(board, fromX, fromY, toX, toY):\n  \n\nprint(\"Pawn forward:\", isValidPawnMove(board, 0, 6, 0, 5))\nprint(\"Pawn double:\", isValidPawnMove(board, 0, 6, 0, 4))\n"
+      },
+      "verification": {
+        "test": "output.includes('Pawn forward: true') && output.includes('Pawn double: true')",
+        "successMessage": "Pawn movement validates forward and double moves correctly!",
+        "failureMessage": "isValidPawnMove should return true for forward 1 square and double move from starting rank for a white pawn."
+      }
+    },
+    {
+      "id": 3,
+      "title": "Validate rook and bishop moves",
+      "description": "Write `isValidRookMove` and `isValidBishopMove` functions. Rooks move horizontally/vertically. Bishops move diagonally. Check that the path is clear. Log test results.",
+      "hints": [
+        "Rook: same row (y) or same column (x), no pieces between",
+        "Bishop: |dx| === |dy|, no pieces between",
+        "Loop through intermediate squares to ensure they are empty"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"chess\"></div>\n<script>\nconst board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][0] = { type: \"rook\", color: \"white\" };\nboard[7][3] = { type: \"bishop\", color: \"white\" };\n\nfunction isValidRookMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nfunction isValidBishopMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nconsole.log(\"Rook vertical:\", isValidRookMove(board, 0, 7, 0, 4));\nconsole.log(\"Bishop diagonal:\", isValidBishopMove(board, 3, 7, 5, 5));\ndocument.getElementById('chess').textContent = \"Rook and bishop tests done\";\n</script>\n",
+        "typescript": "<div id=\"chess\"></div>\n<script>\ninterface Piece {\n  type: string;\n  color: string;\n}\n\ntype Cell = Piece | null;\ntype Board = Cell[][];\n\nconst board: Board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][0] = { type: \"rook\", color: \"white\" };\nboard[7][3] = { type: \"bishop\", color: \"white\" };\n\nfunction isValidRookMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nfunction isValidBishopMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nconsole.log(\"Rook vertical:\", isValidRookMove(board, 0, 7, 0, 4));\nconsole.log(\"Bishop diagonal:\", isValidBishopMove(board, 3, 7, 5, 5));\ndocument.getElementById('chess').textContent = \"Rook and bishop tests done\";\n</script>\n",
+        "python": "board = [[None for _ in range(8)] for _ in range(8)]\nboard[7][0] = {\"type\": \"rook\", \"color\": \"white\"}\nboard[7][3] = {\"type\": \"bishop\", \"color\": \"white\"}\n\ndef isValidRookMove(board, fromX, fromY, toX, toY):\n  \n\ndef isValidBishopMove(board, fromX, fromY, toX, toY):\n  \n\nprint(\"Rook vertical:\", isValidRookMove(board, 0, 7, 0, 4))\nprint(\"Bishop diagonal:\", isValidBishopMove(board, 3, 7, 5, 5))\n"
+      },
+      "verification": {
+        "test": "output.includes('Rook vertical: true') && output.includes('Bishop diagonal: true')",
+        "successMessage": "Rook and bishop moves validate correctly!",
+        "failureMessage": "isValidRookMove should return true for moving down an open column. isValidBishopMove should return true for moving along an open diagonal."
+      }
+    },
+    {
+      "id": 4,
+      "title": "Validate queen and knight moves",
+      "description": "Write `isValidQueenMove` (combines rook + bishop) and `isValidKnightMove` (L-shape: 2+1 or 1+2). Log test results.",
+      "hints": [
+        "Queen: reuse rook and bishop logic (or same combined check)",
+        "Knight: |dx| === 2 && |dy| === 1 OR |dx| === 1 && |dy| === 2",
+        "Knight can jump over pieces (no need to check path)"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"chess\"></div>\n<script>\nconst board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][3] = { type: \"queen\", color: \"white\" };\nboard[7][1] = { type: \"knight\", color: \"white\" };\n\nfunction isValidQueenMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nfunction isValidKnightMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nconsole.log(\"Queen diagonal:\", isValidQueenMove(board, 3, 7, 5, 5));\nconsole.log(\"Knight L-shape:\", isValidKnightMove(board, 1, 7, 2, 5));\ndocument.getElementById('chess').textContent = \"Queen and knight tests done\";\n</script>\n",
+        "typescript": "<div id=\"chess\"></div>\n<script>\ninterface Piece {\n  type: string;\n  color: string;\n}\n\ntype Cell = Piece | null;\ntype Board = Cell[][];\n\nconst board: Board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][3] = { type: \"queen\", color: \"white\" };\nboard[7][1] = { type: \"knight\", color: \"white\" };\n\nfunction isValidQueenMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nfunction isValidKnightMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nconsole.log(\"Queen diagonal:\", isValidQueenMove(board, 3, 7, 5, 5));\nconsole.log(\"Knight L-shape:\", isValidKnightMove(board, 1, 7, 2, 5));\ndocument.getElementById('chess').textContent = \"Queen and knight tests done\";\n</script>\n",
+        "python": "board = [[None for _ in range(8)] for _ in range(8)]\nboard[7][3] = {\"type\": \"queen\", \"color\": \"white\"}\nboard[7][1] = {\"type\": \"knight\", \"color\": \"white\"}\n\ndef isValidQueenMove(board, fromX, fromY, toX, toY):\n  \n\ndef isValidKnightMove(board, fromX, fromY, toX, toY):\n  \n\nprint(\"Queen diagonal:\", isValidQueenMove(board, 3, 7, 5, 5))\nprint(\"Knight L-shape:\", isValidKnightMove(board, 1, 7, 2, 5))\n"
+      },
+      "verification": {
+        "test": "output.includes('Queen diagonal: true') && output.includes('Knight L-shape: true')",
+        "successMessage": "Queen and knight moves validate correctly!",
+        "failureMessage": "isValidQueenMove should work like rook+bishop. isValidKnightMove should validate L-shaped movement."
+      }
+    },
+    {
+      "id": 5,
+      "title": "Validate king moves and detect check",
+      "description": "Write `isValidKingMove` (1 square any direction) and `isInCheck` function that checks if a given king is under attack by any opposing piece. Log the check status.",
+      "hints": [
+        "King: |dx| <= 1 && |dy| <= 1, not both 0",
+        "isInCheck: find the king's position, then check if any opponent piece can reach it",
+        "Use all the isValid* functions to check each opponent piece"
+      ],
+      "codeTemplate": {
+        "javascript": "<div id=\"chess\"></div>\n<script>\nconst board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][4] = { type: \"king\", color: \"white\" };\nboard[0][4] = { type: \"rook\", color: \"black\" };\n\nfunction isValidKingMove(board, fromX, fromY, toX, toY) {\n  \n}\n\nfunction isInCheck(board, color) {\n  \n}\n\nconsole.log(\"King move:\", isValidKingMove(board, 4, 7, 4, 6));\nconsole.log(\"White in check:\", isInCheck(board, \"white\"));\ndocument.getElementById('chess').textContent = \"Check: \" + isInCheck(board, \"white\");\n</script>\n",
+        "typescript": "<div id=\"chess\"></div>\n<script>\ninterface Piece {\n  type: string;\n  color: string;\n}\n\ntype Cell = Piece | null;\ntype Board = Cell[][];\n\nconst board: Board = Array(8).fill(null).map(() => Array(8).fill(null));\nboard[7][4] = { type: \"king\", color: \"white\" };\nboard[0][4] = { type: \"rook\", color: \"black\" };\n\nfunction isValidKingMove(board: Board, fromX: number, fromY: number, toX: number, toY: number): boolean {\n  \n}\n\nfunction isInCheck(board: Board, color: string): boolean {\n  \n}\n\nconsole.log(\"King move:\", isValidKingMove(board, 4, 7, 4, 6));\nconsole.log(\"White in check:\", isInCheck(board, \"white\"));\ndocument.getElementById('chess').textContent = \"Check: \" + isInCheck(board, \"white\");\n</script>\n",
+        "python": "board = [[None for _ in range(8)] for _ in range(8)]\nboard[7][4] = {\"type\": \"king\", \"color\": \"white\"}\nboard[0][4] = {\"type\": \"rook\", \"color\": \"black\"}\n\ndef isValidKingMove(board, fromX, fromY, toX, toY):\n  \n\ndef isInCheck(board, color):\n  \n\nprint(\"King move:\", isValidKingMove(board, 4, 7, 4, 6))\nprint(\"White in check:\", isInCheck(board, \"white\"))\n"
+      },
+      "verification": {
+        "test": "output.includes('King move: true') && output.includes('Check: true')",
+        "successMessage": "King movement validates correctly and check detection works!",
+        "failureMessage": "isValidKingMove(4, 7, 4, 6) should be true. isInCheck should detect that the black rook on the same column puts the white king in check."
+      }
+    }
+  ]
+}
