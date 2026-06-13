@@ -235,7 +235,7 @@
       "exercises": []
     },
     "Polymorphism": {
-      "exp": "Polymorphism 允许ออบเจกต์ชนิดต่างๆ ถูกจัดการอย่างเป็นหนึ่งเดียวผ่านอินเทอร์เฟสร่วม",
+      "exp": "Polymorphism ทำให้ออบเจกต์ชนิดต่างๆ ถูกจัดการอย่างเป็นหนึ่งเดียวผ่านอินเทอร์เฟสร่วม",
       "code": "for animal in [Dog(\"Rex\"), Cat(\"Whiskers\")]:\n  print(animal.speak())",
       "exercises": []
     },
@@ -274,5 +274,444 @@
       "code": "from dataclasses import dataclass\n@dataclass\nclass Point:\n  x: float\n  y: float",
       "exercises": []
     }
+  },
+  "โมดูลและแพ็กเกจ": {
+    "ระบบ Import": {
+      "exp": "ระบบ Import (Import System) จัดการว่าโมดูลถูกค้นพบ, โหลด, และแคชในสภาพแวดล้อม runtime อย่างไร",
+      "code": "import math; from datetime import datetime; import numpy as np",
+      "exercises": []
+    },
+    "โครงสร้างแพ็กเกจ": {
+      "exp": "โครงสร้างแพ็กเกจ (Package Structure) คือไดเรกทอรีของโมดูลที่เกี่ยวข้องที่ให้ฟังก์ชันการทำงานที่จัดระเบียบ",
+      "code": "from mypackage import module1, module2",
+      "exercises": []
+    },
+    "ไลบรารีมาตรฐาน": {
+      "exp": "ไลบรารีมาตรฐาน (Standard Library) คือชุดรวมของโมดูลในตัวที่มาพร้อมกับภาษา",
+      "code": "os, sys, json, re, datetime, collections, itertools, math, random",
+      "exercises": []
+    },
+    "Virtual Environments": {
+      "exp": "Virtual Environments คือสภาพแวดล้อม Python แบบแยกส่วนที่มี dependencies และ interpreter ของตัวเอง",
+      "code": "python -m venv venv; source venv/bin/activate",
+      "exercises": []
+    },
+    "pip": {
+      "exp": "pip คือตัวติดตั้งแพ็กเกจสำหรับ Python ที่ดาวน์โหลดและจัดการแพ็กเกจจาก PyPI",
+      "code": "pip install requests flask numpy pandas",
+      "exercises": []
+    },
+    "ไฟล์ Requirements": {
+      "exp": "ไฟล์ Requirements (Requirements Files) ระบุ dependencies ของโปรเจกต์พร้อมข้อจำกัดเวอร์ชัน",
+      "code": "pip freeze > requirements.txt\npip install -r requirements.txt",
+      "exercises": []
+    }
+  },
+  "I/O ไฟล์": {
+    "การอ่านไฟล์": {
+      "exp": "การอ่านไฟล์ (Reading Files) โหลดข้อมูลจากไฟล์เข้าสู่หน่วยความจำเพื่อประมวลผล",
+      "code": "with open(\"file.txt\", \"r\") as f:\n  content = f.read()\n  lines = f.readlines()",
+      "exercises": []
+    },
+    "การเขียนไฟล์": {
+      "exp": "การเขียนไฟล์ (Writing Files) บันทึกข้อมูลจากหน่วยความจำไปยังไฟล์บนดิสก์",
+      "code": "with open(\"file.txt\", \"w\") as f:\n  f.write(\"Hello World\\n\")",
+      "exercises": []
+    },
+    "โหมดไฟล์": {
+      "exp": "โหมดไฟล์ (File Modes) กำหนดว่าไฟล์ถูกเปิดอย่างไร รวมถึงอ่าน, เขียน, ต่อท้าย, และไบนารี",
+      "code": "\"r\" read, \"w\" write (overwrite), \"a\" append, \"r+\" read/write, \"b\" binary",
+      "exercises": []
+    },
+    "ไฟล์ CSV": {
+      "exp": "ไฟล์ CSV จัดเก็บข้อมูลแบบตารางเป็นค่าที่คั่นด้วยจุลภาค",
+      "code": "import csv\nwith open(\"data.csv\") as f:\n  reader = csv.DictReader(f)\n  for row in reader: print(row)",
+      "exercises": []
+    },
+    "ไฟล์ JSON": {
+      "exp": "ไฟล์ JSON จัดเก็บข้อมูลที่มีโครงสร้างโดยใช้ JSON format",
+      "code": "import json\nwith open(\"data.json\") as f:\n  data = json.load(f)",
+      "exercises": []
+    },
+    "ไฟล์ไบนารี": {
+      "exp": "ไฟล์ไบนารี (Binary Files) จัดเก็บข้อมูลเป็น bytes ดิบแทนข้อความที่มนุษย์อ่านได้",
+      "code": "with open(\"image.png\", \"rb\") as f:\n  data = f.read()",
+      "exercises": []
+    },
+    "การดำเนินการ Path": {
+      "exp": "การดำเนินการ Path (Path Operations) จัดการพาธของระบบไฟล์เพื่อความเข้ากันได้ข้ามแพลตฟอร์ม",
+      "code": "from pathlib import Path\np = Path(\"/usr/bin/python3\")\np.name, p.parent, p.suffix",
+      "exercises": []
+    }
+  },
+  "Python ขั้นสูง": {
+    "Itertools": {
+      "exp": "Itertools คือชุดเครื่องมือ combinator สำหรับ iterator: chain, cycle, permutations, combinations, product",
+      "code": "from itertools import chain, cycle, permutations, combinations, product",
+      "exercises": []
+    },
+    "Functools": {
+      "exp": "Functools คือไลบรารีฟังก์ชันระดับสูง: lru_cache, partial, reduce, singledispatch, wraps",
+      "code": "from functools import partial, reduce, lru_cache, wraps",
+      "exercises": []
+    },
+    "Collections": {
+      "exp": "Collections เป็นชนิดข้อมูลโครงสร้างพิเศษ: deque, Counter, defaultdict, OrderedDict, ChainMap",
+      "code": "from collections import defaultdict, Counter, deque, namedtuple, OrderedDict",
+      "exercises": []
+    },
+    "Concurrency": {
+      "exp": "Concurrency ช่วยให้หลายงานทำงานในช่วงเวลาที่ทับซ้อนกัน เพิ่มการใช้ทรัพยากร",
+      "code": "import threading; import multiprocessing; import asyncio",
+      "exercises": []
+    },
+    "Async/Await": {
+      "exp": "Async/Await ให้วิธีการทางไวยากรณ์สำหรับการทำงานกับ asynchronous operations",
+      "code": "async def fetch(url):\n  async with aiohttp.ClientSession() as session:\n    async with session.get(url) as resp:\n      return await resp.json()",
+      "exercises": []
+    },
+    "Type Hints": {
+      "exp": "Type Hints คือ annotations ที่ระบุชนิดที่คาดหวังสำหรับตัวแปร, พารามิเตอร์ฟังก์ชัน, และค่าที่คืน",
+      "code": "def greet(name: str) -> str:\n  return f\"Hello {name}\"",
+      "exercises": []
+    },
+    "Metaclasses": {
+      "exp": "Metaclasses คือคลาสที่ instance ของมันคือคลาสอื่น ควบคุมการสร้างคลาสและการเข้าถึงแอตทริบิวต์",
+      "code": "class Meta(type): pass\nclass MyClass(metaclass=Meta): pass",
+      "exercises": []
+    },
+    "Descriptors": {
+      "exp": "Descriptors คือกลไก Python ที่ทรงพลังสำหรับจัดการการเข้าถึงแอตทริบิวต์",
+      "code": "class Property:\n  def __get__(self, obj, objtype=None): return obj._value\n  def __set__(self, obj, value): obj._value = value",
+      "exercises": []
+    }
+  },
+  "ตัวดำเนินการ": {
+    "เลขคณิต": [
+      "ตัวดำเนินการทางคณิตศาสตร์มาตรฐาน: + - * / // % ** // คือ floor division (ปัดลง), ** คือยกกำลัง ข้อผิดพลาดทั่วไป: การใช้ / เมื่อต้องการ integer division — / คืนค่า float เสมอ แนวปฏิบัติที่ดี: ใช้ // สำหรับ integer division และ % สำหรับ modulo",
+      "print(10 / 3)   # 3.333...\nprint(10 // 3)  # 3\nprint(10 % 3)   # 1\nprint(2 ** 10)  # 1024"
+    ],
+    "Bitwise": [
+      "ตัวดำเนินการที่จัดการระดับบิต: & (AND), | (OR), ^ (XOR), ~ (NOT), << (left shift), >> (right shift) ข้อผิดพลาดทั่วไป: การสับสน & กับ 'and' หรือ | กับ 'or' — ตัวดำเนินการ bitwise มีลำดับความสำคัญสูงกว่าตัวดำเนินการตรรกะ",
+      "print(5 & 1)   # 1 (0101 & 0001)\nprint(5 | 2)   # 7 (0101 | 0010)\nprint(5 ^ 1)   # 4 (0101 ^ 0001)\nprint(~5)      # -6 (two's complement)\nprint(8 << 1)  # 16\nprint(8 >> 1)  # 4"
+    ],
+    "การกำหนดค่า": [
+      "รวมการดำเนินการกับการกำหนดค่า: +=, -=, *=, /=, //=, %=, **=, &=, |=, ^=, <<=, >>= ข้อผิดพลาดทั่วไป: การใช้ = แทน == ในเงื่อนไข — = กำหนดค่าเสมอ",
+      "count = 0\ncount += 5  # count = 5\ncount *= 2  # count = 10\ncount //= 3 # count = 3\nprint(count)"
+    ],
+    "การเปรียบเทียบ": [
+      "Python รองรับ ==, !=, >, <, >=, <= และ chained comparisons (เช่น a < b < c) ข้อผิดพลาดทั่วไป: การใช้ == เพื่อเปรียบเทียบ float — ใช้ math.isclose() แทนเนื่องจากความแม่นยำของทศนิยม แนวปฏิบัติที่ดี: ใช้ 'is' สำหรับ None, True, False",
+      "x = 5\nprint(1 < x < 10)   # True (chained)\nprint(x == 5)       # True\nprint(x is not None) # True\n\nimport math\nprint(math.isclose(0.1 + 0.2, 0.3))  # True"
+    ],
+    "ตรรกะ": [
+      "and, or, not ดำเนินการกับค่าบูลีน Short-circuit evaluation: 'and' หยุดที่ค่า falsy แรก; 'or' หยุดที่ค่า truthy แรก ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่าตัวดำเนินการตรรกะคืนค่า bool — พวกมันคืนค่า operand สุดท้ายที่ถูกประเมิน",
+      "print(True and False)  # False\nprint(False or 42)     # 42 (ไม่ใช่ True!)\nprint(not \"\")          # True\nprint([] or {} or [1]) # [1]"
+    ],
+    "Identity และ Membership": [
+      "'is' ตรวจสอบ object identity (หน่วยความจำเดียวกัน) ไม่ใช่ความเท่ากัน 'in' ตรวจสอบ membership ใน iterables ข้อผิดพลาดทั่วไป: การใช้ 'is' สำหรับการเปรียบเทียบค่าแทน == แนวปฏิบัติที่ดี: ใช้ 'is' เฉพาะกับ singletons (None, True, False)",
+      "a = [1, 2, 3]\nb = [1, 2, 3]\nprint(a == b)  # True (same value)\nprint(a is b)  # False (different objects)\n\nprint(2 in a)  # True\nprint(5 not in a)  # True"
+    ]
+  },
+  "โครงสร้างข้อมูล": {
+    "ลิสต์": [
+      "ลำดับที่เปลี่ยนแปลงได้ (mutable sequences) เก็บชนิดผสม เมธอด: append, extend, insert, remove, pop, sort, reverse ข้อผิดพลาดทั่วไป: การใช้ append() เมื่อต้องการ extend() — append เพิ่มหนึ่งสมาชิก; extend เพิ่มแต่ละสมาชิกของ iterable แนวปฏิบัติที่ดี: ใช้ list comprehensions แทน manual loops",
+      "fruits = ['apple', 'banana', 'cherry']\nfruits.append('date')\nfruits.extend(['elderberry', 'fig'])\nfruits.insert(0, 'apricot')\nlast = fruits.pop()\nprint(fruits)\nprint(last)"
+    ],
+    "ทูเพิล": [
+      "ลำดับที่ไม่เปลี่ยนแปลงได้ (immutable sequences) สามารถใช้เป็น dictionary keys รองรับการแกะ (unpacking) ข้อผิดพลาดทั่วไป: การลืมจุลภาคท้ายสำหรับ single-element tuples — (1) คือ int; (1,) คือ tuple แนวปฏิบัติที่ดี: ใช้ tuples สำหรับข้อมูลคงที่แบบผสม; ใช้ lists สำหรับลำดับที่เป็นเนื้อเดียวกัน",
+      "point = (3, 4)\nx, y = point  # unpacking\nprint(x, y)\n\nsingle = (1,)\nprint(type(single))\n\ncoord_map = {(0, 0): 'origin', (1, 0): 'east'}\nprint(coord_map[(0, 0)])"
+    ],
+    "ดิกชันนารี": [
+      "การจับคู่ key-value ด้วยการค้นหา O(1) โดยเฉลี่ย คีย์ต้อง immutable (strings, numbers, tuples) เมธอด: get, setdefault, keys, values, items, update, pop ข้อผิดพลาดทั่วไป: การใช้ dict[key] เมื่อ key อาจไม่มี — ใช้ .get() เพื่อหลีกเลี่ยง KeyError แนวปฏิบัติที่ดี: ใช้ collections.defaultdict สำหรับการจัดการ missing-key",
+      "ages = {'Alice': 30, 'Bob': 25}\nprint(ages.get('Alice'))        # 30\nprint(ages.get('Charlie', 0))   # 0\nages.setdefault('Charlie', 35)\nprint(ages)\n\nfor name, age in ages.items():\n    print(f\"{name}: {age}\")"
+    ],
+    "เซต": [
+      "คอลเลกชันที่ไม่เรียงลำดับของสมาชิกที่ไม่ซ้ำกัน รองรับการดำเนินการทางคณิตศาสตร์: union (|), intersection (&), difference (-), symmetric difference (^) ข้อผิดพลาดทั่วไป: การใช้ {} สำหรับเซตว่าง — {} สร้าง dict; ใช้ set() แนวปฏิบัติที่ดี: ใช้ sets สำหรับการตรวจสอบสมาชิก O(1) และการตัดค่าซ้ำ",
+      "a = {1, 2, 3}\nb = {3, 4, 5}\nprint(a | b)  # {1, 2, 3, 4, 5}\nprint(a & b)  # {3}\nprint(a - b)  # {1, 2}\nprint(a ^ b)  # {1, 2, 4, 5}\n\nnames = ['a', 'b', 'a', 'c']\nunique = list(set(names))\nprint(unique)"
+    ],
+    "Slicing": [
+      "แยกลำดับย่อยโดยใช้ไวยากรณ์ start:stop:step กับ lists, tuples, strings ดัชนีลบนับจากท้าย ข้อผิดพลาดทั่วไป: การสับสน start:stop — stop เป็น exclusive แนวปฏิบัติที่ดี: ใช้ [::-1] เพื่อกลับลำดับ; ใช้ [::2] สำหรับทุกสมาชิกที่สอง",
+      "nums = [0, 1, 2, 3, 4, 5]\nprint(nums[1:4])     # [1, 2, 3]\nprint(nums[:3])      # [0, 1, 2]\nprint(nums[3:])      # [3, 4, 5]\nprint(nums[::2])     # [0, 2, 4]\nprint(nums[::-1])    # [5, 4, 3, 2, 1, 0]"
+    ],
+    "collections.deque": [
+      "Double-ended queue จาก collections module O(1) append/pop จากทั้งสองด้าน ข้อผิดพลาดทั่วไป: การใช้ list.pop(0) สำหรับคิว — lists มี O(n) pop จากหน้า แนวปฏิบัติที่ดี: ใช้ deque สำหรับ stacks/queues",
+      "from collections import deque\nq = deque(['a', 'b', 'c'])\nq.append('d')\nq.appendleft('z')\nprint(q.popleft())   # 'z'\nprint(q.pop())       # 'd'\nprint(q)"
+    ],
+    "namedtuple": [
+      "คอนเทนเนอร์ข้อมูลแบบ immutable ที่มีฟิลด์มีชื่อ ข้อผิดพลาดทั่วไป: การลืมว่า namedtuples เป็น immutable — ใช้ _replace() เพื่อสร้าง copy ที่แก้ไขแล้ว แนวปฏิบัติที่ดี: ใช้ dataclasses สำหรับข้อมูลที่เปลี่ยนแปลงได้; namedtuple สำหรับ records immutable ง่ายๆ",
+      "from collections import namedtuple\nPoint = namedtuple('Point', ['x', 'y'])\np = Point(3, 4)\nprint(p.x, p.y)\nprint(p[0])\np2 = p._replace(x=5)\nprint(p2)\nx, y = p"
+    ]
+  },
+  "Comprehensions": {
+    "List Comprehensions": [
+      "ไวยากรณ์กระชับสำหรับสร้าง lists: [expr for item in iterable if condition] ข้อผิดพลาดทั่วไป: การทำให้ comprehensions ซับซ้อนเกินไป — เลือกใช้ regular loops เพื่อความอ่านง่าย แนวปฏิบัติที่ดี: เลือก comprehensions มากกว่า map()/filter()",
+      "squares = [x**2 for x in range(10)]\nevens = [x for x in range(20) if x % 2 == 0]\npairs = [(a, b) for a in range(3) for b in range(2)]\nprint(squares)\nprint(evens)\nprint(pairs)"
+    ],
+    "Dict & Set Comprehensions": [
+      "ไวยากรณ์ comprehension ขยายไปยัง dictionaries {k: v for ...} และ sets {expr for ...} ข้อผิดพลาดทั่วไป: การใช้ dict comprehension กับคีย์ซ้ำ — ค่าสุดท้ายชนะอย่างเงียบๆ แนวปฏิบัติที่ดี: ใช้ dict comprehensions สำหรับการแปลง dict หนึ่งไปยังอีก dict",
+      "square_map = {x: x**2 for x in range(5)}\nprint(square_map)\n\nunique_lens = {len(w) for w in ['hi', 'hello', 'hey']}\nprint(unique_lens)\n\nnames = ['Alice', 'Bob', 'Charlie']\nname_len = {n: len(n) for n in names if len(n) > 3}\nprint(name_len)"
+    ],
+    "Generator Expressions": [
+      "เหมือน list comprehensions แต่ใช้ () แทน [] — ผลิตค่าอย่างขี้เกียจ (lazy) ทีละค่า ประหยัดหน่วยความจำ ข้อผิดพลาดทั่วไป: การพยายามใช้ generator ซ้ำ — generator ใช้ได้ครั้งเดียว",
+      "squares = (x**2 for x in range(10))\nprint(sum(squares))  # 285\n\nbig = sum(x**2 for x in range(10**6))\nprint(big)"
+    ],
+    "Nested Comprehensions": [
+      "Comprehensions สามารถซ้อนกันได้ แต่ความอ่านง่ายลดลงอย่างรวดเร็ว ข้อผิดพลาดทั่วไป: การสับสนลำดับการซ้อน — 'for' ด้านซ้ายสุดเป็นลูปนอก แนวปฏิบัติที่ดี: ใช้ itertools.product() หรือแบ่งหลายบรรทัด",
+      "matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nflattened = [num for row in matrix for num in row]\nprint(flattened)  # [1, 2, 3, 4, 5, 6, 7, 8, 9]\n\ntranspose = [[row[i] for row in matrix] for i in range(3)]\nprint(transpose)"
+    ]
+  },
+  "คลาส": {
+    "คลาสและออบเจกต์": [
+      "คลาสคือแม่แบบสำหรับออบเจกต์ __init__ คือ constructor self อ้างถึง instance ข้อผิดพลาดทั่วไป: การลืม 'self' เป็นพารามิเตอร์แรกของ instance methods — ทำให้เกิด TypeError เมื่อเรียกใช้ แนวปฏิบัติที่ดี: ให้ __init__ เน้นเฉพาะการกำหนดค่าเริ่มต้นแอตทริบิวต์เท่านั้น",
+      "class Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n\n    def greet(self):\n        return f\"Hi, I'm {self.name}\"\n\np = Person('Alice', 30)\nprint(p.name)\nprint(p.greet())"
+    ],
+    "Methods & Variables": [
+      "Instance variables เป็น unique ต่อ instance; class variables ถูกแชร์ ใช้ cls สำหรับ classmethod, self สำหรับ instancemethod ข้อผิดพลาดทั่วไป: การแก้ไข mutable class variable ผ่าน instance หนึ่งส่งผลต่อทุก instances",
+      "class Dog:\n    species = 'Canine'\n\n    def __init__(self, name):\n        self.name = name\n        self.tricks = []\n\n    @classmethod\n    def create_puppy(cls, name):\n        return cls(name)\n\n    @staticmethod\n    def bark():\n        return 'Woof!'\n\nd1 = Dog('Buddy')\nd2 = Dog('Max')\nprint(d1.species, d2.species)\nprint(Dog.bark())"
+    ],
+    "Inheritance": [
+      "Single และ multiple inheritance ใช้ super() เพื่อเรียก methods ของแม่ MRO (Method Resolution Order) กำหนดลำดับการค้นหา ข้อผิดพลาดทั่วไป: การลืมเรียก super().__init__() ในคลาสลูก แนวปฏิบัติที่ดี: เลือก composition มากกว่า inheritance; ใช้ abstract base classes สำหรับ interfaces",
+      "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return 'Sound'\n\nclass Cat(Animal):\n    def __init__(self, name, color):\n        super().__init__(name)\n        self.color = color\n    def speak(self):\n        return 'Meow'\n\nprint(Cat('Whiskers', 'black').speak())\nprint(Cat.__mro__)"
+    ],
+    "dataclasses": [
+      "สร้าง __init__, __repr__, __eq__, __hash__, __order__ อัตโนมัติจาก annotations ใช้ @dataclass decorator ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า dataclasses เป็น immutable โดยค่าเริ่มต้น — ใช้ frozen=True แนวปฏิบัติที่ดี: ใช้ dataclasses สำหรับ data containers",
+      "from dataclasses import dataclass, field\n\n@dataclass(order=True, frozen=True)\nclass Person:\n    name: str\n    age: int = 0\n    tags: list = field(default_factory=list)\n\np1 = Person('Alice', 30)\np2 = Person('Bob', 25)\nprint(p1)\nprint(p1 == Person('Alice', 30))\nprint(p1 > p2)"
+    ],
+    "@property Decorator": [
+      "นิยาม methods ที่เข้าถึงเหมือน attributes ช่วยให้ computed properties, validation, และ encapsulation ข้อผิดพลาดทั่วไป: การเขียน trivial properties ที่แค่ return attribute — ใช้ @property เฉพาะเมื่อต้องการ computation หรือ validation แนวปฏิบัติที่ดี: ใช้ setter สำหรับตรรกะ validation",
+      "class Circle:\n    def __init__(self, radius):\n        self._radius = radius\n    @property\n    def area(self):\n        return 3.14159 * self._radius ** 2\n    @property\n    def radius(self):\n        return self._radius\n    @radius.setter\n    def radius(self, value):\n        if value < 0:\n            raise ValueError('No negative radius')\n        self._radius = value\n\nc = Circle(5)\nprint(c.area)\nc.radius = 10\nprint(c.area)"
+    ],
+    "Magic Methods": [
+      "Dunder methods ที่กำหนด operator และพฤติกรรมในตัว: __add__, __str__, __repr__, __len__, __getitem__, __call__ ข้อผิดพลาดทั่วไป: การนิยาม __str__ แต่ไม่นิยาม __repr__ — __repr__ ควรชัดเจน; __str__ ควรอ่านง่าย แนวปฏิบัติที่ดี: implement __repr__ เสมอเพื่อการดีบัก",
+      "class Vector:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n    def __add__(self, other):\n        return Vector(self.x + other.x, self.y + other.y)\n    def __repr__(self):\n        return f'Vector({self.x}, {self.y})'\n    def __abs__(self):\n        return (self.x**2 + self.y**2)**0.5\n    def __bool__(self):\n        return bool(abs(self))\n\nv1 = Vector(1, 2)\nv2 = Vector(3, 4)\nprint(v1 + v2)\nprint(abs(v1))\nprint(bool(Vector(0, 0)))"
+    ],
+    "Abstract Base Classes": [
+      "นิยาม interfaces ด้วย abc module ใช้ @abstractmethod เพื่อบังคับ implement ในคลาสลูก ข้อผิดพลาดทั่วไป: การลืมว่า ABCs ไม่สามารถสร้าง instance ได้โดยตรง แนวปฏิบัติที่ดี: ใช้ ABCs เพื่อนิยาม interfaces; ใช้ collections.abc สำหรับ built-in abstract types",
+      "from abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    @abstractmethod\n    def area(self): pass\n    @abstractmethod\n    def perimeter(self): pass\n\nclass Square(Shape):\n    def __init__(self, side):\n        self.side = side\n    def area(self):\n        return self.side ** 2\n    def perimeter(self):\n        return 4 * self.side\n\ns = Square(5)\nprint(s.area())"
+    ]
+  },
+  "โมดูลและข้อผิดพลาด": {
+    "โมดูลและแพ็กเกจ": [
+      "จัดระเบียบโค้ดเป็น .py files (modules) และไดเรกทอรีที่มี __init__.py (packages) ใช้ 'import module' หรือ 'from module import name' ข้อผิดพลาดทั่วไป: circular imports — จัดโครงสร้างใหม่หรือใช้ lazy imports ภายในฟังก์ชัน แนวปฏิบัติที่ดี: ใช้ explicit imports; ใช้ absolute imports",
+      "import math\nfrom datetime import datetime\nfrom collections import OrderedDict\n\nprint(math.sqrt(16))\nprint(datetime.now())"
+    ],
+    "การจัดการข้อยกเว้น": [
+      "ใช้ try/except/else/finally 'else' ทำงานถ้าไม่มี exception; 'finally' ทำงานเสมอ จับ exceptions ที่เฉพาะเจาะจง ไม่ใช่ bare 'except:' ข้อผิดพลาดทั่วไป: การจับทุก exception ด้วย bare 'except:' ซึ่งจับ KeyboardInterrupt และ SystemExit ด้วย แนวปฏิบัติที่ดี: จับ exception type ที่เฉพาะเจาะจงที่สุด",
+      "try:\n    res = 10 / 0\nexcept ZeroDivisionError as e:\n    print(f'Safe capture: {e}')\nexcept TypeError:\n    print('Wrong type')\nelse:\n    print('No error occurred')\nfinally:\n    print('Always executes')"
+    ],
+    "การโยนข้อยกเว้น": [
+      "ใช้ 'raise' เพื่อโยน exceptions สามารถ re-raise exception ปัจจุบันด้วย 'raise' เปล่าๆ Chain exceptions ด้วย 'raise ... from ...' ข้อผิดพลาดทั่วไป: การโยน generic Exception แทนประเภทที่เฉพาะเจาะจง แนวปฏิบัติที่ดี: สร้าง custom exception classes สำหรับ domain ของคุณ",
+      "def validate_age(age):\n    if age < 0:\n        raise ValueError('Age cannot be negative')\n    if age > 150:\n        raise ValueError('Age too large')\n    return age\n\ntry:\n    validate_age(-5)\nexcept ValueError as e:\n    raise RuntimeError('Validation failed') from e"
+    ],
+    "Custom Exceptions": [
+      "นิยาม exceptions ที่เฉพาะเจาะจงกับ domain โดยสืบทอดจาก Exception ข้อผิดพลาดทั่วไป: การสร้างลำดับชั้น exception ที่ใหญ่เกินไป — ให้มันแบนและปฏิบัติได้จริง แนวปฏิบัติที่ดี: ใช้ base exception สำหรับแอปพลิเคชันของคุณและสืบทอดจากมัน",
+      "class AppError(Exception):\n    \"\"\"Base exception for this app.\"\"\"\n    pass\n\nclass NotFoundError(AppError):\n    def __init__(self, resource, id):\n        self.resource = resource\n        self.id = id\n        super().__init__(f'{resource} with id {id} not found')\n\nraise NotFoundError('User', 42)"
+    ],
+    "pip & Virtual Environments": [
+      "pip ติดตั้ง packages จาก PyPI venv สร้างสภาพแวดล้อมแบบแยก ใช้ pip freeze > requirements.txt เพื่อล็อก dependencies ข้อผิดพลาดทั่วไป: การ commit .venv/ เข้า version control — เพิ่มใน .gitignore แนวปฏิบัติที่ดี: ใช้ pip-tools หรือ Poetry สำหรับ dependency management",
+      "python -m venv .venv\nsource .venv/bin/activate\npip install requests pandas\npip freeze > requirements.txt"
+    ],
+    "if __name__ == '__main__'": [
+      "Guard ที่รันโค้ดเฉพาะเมื่อไฟล์ถูกเรียกใช้โดยตรง ไม่ใช่ตอน import ข้อผิดพลาดทั่วไป: การวางโค้ดที่ควรนำกลับมาใช้ใหม่ได้นอก guard — มันจะทำงานตอน import แนวปฏิบัติที่ดี: วางโค้ดน้อยที่สุดใน guard; มอบหมายให้ main() function",
+      "def main():\n    print('Running as script')\n\nif __name__ == '__main__':\n    main()"
+    ],
+    "with Statement (Context Managers)": [
+      "จัดการทรัพยากรผ่าน __enter__/__exit__ protocol ใช้สำหรับไฟล์, ล็อก, การเชื่อมต่อ, และการตั้งค่าชั่วคราว ข้อผิดพลาดทั่วไป: การซ้อน with statements แทนการใช้ with เดียวที่มีหลาย context managers แนวปฏิบัติที่ดี: ใช้ contextlib.contextmanager เพื่อสร้าง custom context managers",
+      "with open('example.txt', 'w') as f:\n    f.write('Hello, World!')\n\nwith open('a.txt') as f1, open('b.txt') as f2:\n    print(f1.read(), f2.read())"
+    ]
+  },
+  "ไฟล์และอินพุต": {
+    "การอ่านและเขียน": [
+      "เปิดไฟล์ด้วย open() ในหลายโหมด: 'r', 'w', 'a', 'x', 'rb', 'wb' ใช้ 'with' เสมอเพื่อทำความสะอาดอัตโนมัติ ข้อผิดพลาดทั่วไป: การเปิดไฟล์ใน text mode สำหรับข้อมูลไบนารีหรือกลับกัน แนวปฏิบัติที่ดี: ระบุ encoding อย่างชัดเจน (encoding='utf-8') สำหรับไฟล์ข้อความ",
+      "with open('example.txt', 'w', encoding='utf-8') as f:\n    f.write('Hello, World!\\n')\n    f.writelines(['line2\\n', 'line3\\n'])\n\nwith open('example.txt', 'r', encoding='utf-8') as f:\n    content = f.read()"
+    ],
+    "อินพุตจาก Terminal": [
+      "input() อ่านหนึ่งบรรทัดจาก stdin เป็นสตริง ข้อผิดพลาดทั่วไป: การไม่ลบ newline หรือช่องว่างท้ายจาก input() แนวปฏิบัติที่ดี: ให้ prompt ที่ชัดเจนและ validate/แปลง input ทันที",
+      "name = input('Enter username: ')\nprint(f'Hello, {name}')\n\nwhile True:\n    try:\n        age = int(input('Age: '))\n        break\n    except ValueError:\n        print('Enter a valid number')"
+    ],
+    "ไฟล์ไบนารี": [
+      "เปิดด้วย 'rb' หรือ 'wb' สำหรับข้อมูลไบนารี จำเป็นสำหรับรูปภาพ, เสียง, ออบเจกต์ที่ serialized แล้ว ข้อผิดพลาดทั่วไป: การใช้ text mode กับไฟล์ไบนารีทำให้ข้อมูลเสียหาย แนวปฏิบัติที่ดี: ใช้ struct module สำหรับข้อมูลไบนารีที่มีโครงสร้าง",
+      "with open('data.bin', 'wb') as f:\n    f.write(b'\\x00\\x01\\x02\\x03')\n\nwith open('data.bin', 'rb') as f:\n    data = f.read()\n    print(list(data))"
+    ],
+    "โหมดและตำแหน่งไฟล์": [
+      "โหมดไฟล์: 'r' (read), 'w' (write, truncate), 'a' (append), 'x' (exclusive create), '+', 'b' (binary), 't' (text, default) ใช้ tell() สำหรับตำแหน่งปัจจุบันและ seek() เพื่อย้าย ข้อผิดพลาดทั่วไป: การเปิดในโหมด 'w' โดยไม่ตั้งใจ — มันตัดเนื้อหาเดิมทิ้ง",
+      "with open('test.txt', 'w+') as f:\n    f.write('Hello')\n    f.seek(0)\n    print(f.read())\n    print(f.tell())"
+    ]
+  },
+  "เพิ่มเติม": {
+    "pass & Ellipsis": [
+      "'pass' คือ no-op placeholder '...' (Ellipsis) ก็เป็น placeholder ที่ถูกต้องเช่นกัน ข้อผิดพลาดทั่วไป: การใช้ pass เมื่อ docstring สื่อความตั้งใจได้ดีกว่า แนวปฏิบัติที่ดี: ใช้ pass สำหรับ syntactic placeholders; ใช้ ... เป็น stub marker",
+      "def unimplemented():\n    pass\n\nclass Stub:\n    ...\n\nprint('Both compile without error')"
+    ],
+    "Generators": [
+      "ฟังก์ชันที่มี 'yield' ที่ผลิตค่าอย่างขี้เกียจ แต่ละ next() เรียกจะเริ่มการทำงานอีกครั้งจนถึง yield ถัดไป ข้อผิดพลาดทั่วไป: การพยายามใช้ generator ซ้ำ — generators ใช้ครั้งเดียว แนวปฏิบัติที่ดี: ใช้ generator functions สำหรับ infinite sequences หรือข้อมูลขนาดใหญ่",
+      "def count_up(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1\n\nfor val in count_up(3):\n    print(val)\n\ngen = count_up(3)\nprint(list(gen))  # [1, 2, 3]\nprint(list(gen))  # [] (exhausted)"
+    ],
+    "f-strings & Formatting": [
+      "f-strings (Python 3.6+) ฝังนิพจน์ด้วย {} รองรับ format spec: alignment (< > ^), padding, precision, type conversion (!r, !s, !a) ข้อผิดพลาดทั่วไป: การใช้ f-strings กับ user input ที่มีวงเล็บปีกกา — ใช้ {{}} สำหรับ literal braces แนวปฏิบัติที่ดี: เลือก f-strings มากกว่า .format() และ %-formatting",
+      "name = 'Doge'\nage = 5\npi = 3.14159\nprint(f'{name} is {age} years old')\nprint(f'{name:>10}')\nprint(f'{age:04d}')\nprint(f'{pi:.2f}')\nprint(f'{{{name}}}')"
+    ],
+    "Ternary Expression": [
+      "เงื่อนไขแบบอินไลน์: value_if_true if condition else value_if_false ข้อผิดพลาดทั่วไป: การซ้อน ternaries — มันอ่านยากอย่างรวดเร็ว แนวปฏิบัติที่ดี: ใช้ ternaries เฉพาะเงื่อนไขง่ายๆ",
+      "age = 20\nstatus = 'adult' if age >= 18 else 'minor'\nprint(status)\n\nif x > 10:\n    result = 'A'\nelif x > 5:\n    result = 'B'\nelse:\n    result = 'C'"
+    ],
+    "enumerate & zip": [
+      "enumerate() ให้คู่ (index, value) zip() จับคู่สมาชิกจากหลาย iterables ทั้งคู่คืนค่า lazy iterators ข้อผิดพลาดทั่วไป: การใช้ range(len(list)) แทน enumerate() แนวปฏิบัติที่ดี: ใช้ enumerate() เมื่อต้องการ indices; ใช้ zip() เพื่อ iterate หลาย iterables พร้อมกัน",
+      "names = ['Alice', 'Bob', 'Charlie']\nfor i, name in enumerate(names, start=1):\n    print(f'{i}: {name}')\n\nscores = [85, 92, 78]\nfor name, score in zip(names, scores):\n    print(f'{name}: {score}')"
+    ],
+    "any & all": [
+      "any() คืน True ถ้าอย่างน้อยหนึ่งสมาชิกเป็น truthy all() คืน True ถ้าทุกสมาชิกเป็น truthy ทั้งคู่ short-circuit ข้อผิดพลาดทั่วไป: การส่ง generator expression แทน comprehension — ทั้งคู่ใช้ได้ แต่ generator ประหยัดหน่วยความจำมากกว่า",
+      "nums = [1, 2, 3, 0, 5]\nprint(any(n == 0 for n in nums))\nprint(all(n > 0 for n in nums))\n\nusers = [{'name': 'Alice', 'active': True}, {'name': 'Bob', 'active': False}]\nall_active = all(u['active'] for u in users)\nprint(all_active)"
+    ]
+  },
+  "ไลบรารีมาตรฐาน": {
+    "json": [
+      "Serialize/deserialize Python objects ไป/จาก JSON ใช้ json.dumps() และ json.loads() ข้อผิดพลาดทั่วไป: การพยายาม serialize ชนิดที่ serialize ไม่ได้ (datetime, Decimal) — ใช้ custom default handler แนวปฏิบัติที่ดี: ใช้ indent=2 เพื่อ output ที่อ่านง่าย; ใช้ sort_keys=True สำหรับ output ที่แน่นอน",
+      "import json\nfrom datetime import datetime\n\ndata = {'name': 'Alice', 'scores': [85, 92]}\njson_str = json.dumps(data, indent=2, sort_keys=True)\nprint(json_str)\n\nparsed = json.loads(json_str)\nprint(parsed['name'])"
+    ],
+    "re (Regular Expressions)": [
+      "การจับคู่รูปแบบข้อความที่ทรงพลัง ฟังก์ชันหลัก: re.match(), re.search(), re.findall(), re.sub(), re.split() ข้อผิดพลาดทั่วไป: การสับสน re.match() (ยึดที่จุดเริ่มต้น) กับ re.search() (ที่ไหนก็ได้) แนวปฏิบัติที่ดี: ใช้ raw strings r'pattern' เพื่อหลีกเลี่ยง backslashes",
+      "import re\npattern = r'^[a-z]+$'\nprint(bool(re.match(pattern, 'koded')))\nprint(bool(re.search(r'\\d+', 'abc123')))\nprint(re.findall(r'\\w+', 'Hello, World!'))\nprint(re.sub(r'\\s+', '-', 'Hello World'))"
+    ],
+    "math, random & statistics": [
+      "math: ฟังก์ชันคณิตศาสตร์ขั้นสูง, ค่าคงที่ (pi, e) random: การสร้างตัวเลขสุ่มเทียม statistics: mean, median, stdev ข้อผิดพลาดทั่วไป: การใช้ random สำหรับแอปพลิเคชันที่ต้องการความปลอดภัย — ใช้ secrets module แทน แนวปฏิบัติที่ดี: ตั้งค่า random.seed() เพื่อผลลัพธ์ที่ reproducible",
+      "import math\nimport random\nimport statistics\n\nprint(math.sqrt(144))\nprint(math.pi)\nprint(random.randint(1, 10))\nprint(random.choice(['a', 'b', 'c']))\nprint(statistics.mean([1, 2, 3, 4, 5]))\nprint(statistics.stdev([1, 2, 3, 4, 5]))"
+    ],
+    "datetime": [
+      "date, time, datetime, timedelta classes สำหรับการจัดการวันที่/เวลา timezone-aware vs naive datetimes ข้อผิดพลาดทั่วไป: การคำนวณด้วย naive datetimes ข้าม DST boundaries — ใช้ timezone-aware datetimes แนวปฏิบัติที่ดี: เก็บและประมวลผล UTC เสมอ; แปลงเป็น local time สำหรับแสดงผลเท่านั้น",
+      "from datetime import datetime, timedelta, timezone\n\nnow = datetime.now(timezone.utc)\nprint(now)\n\nfuture = now + timedelta(days=7, hours=3)\nprint(future)\n\nprint(now.strftime('%Y-%m-%d %H:%M:%S %Z'))\n\ndt = datetime.fromisoformat('2024-01-15T14:30:00+00:00')\nprint(dt)"
+    ],
+    "collections": [
+      "ชนิดข้อมูลคอนเทนเนอร์พิเศษ: deque, Counter, defaultdict, OrderedDict, ChainMap ข้อผิดพลาดทั่วไป: การเข้าใจผิดว่า OrderedDict ไม่จำเป็นใน Python 3.7+ — dicts รักษาลำดับการเพิ่ม แต่ OrderedDict มี methods ที่ไวต่อลำดับเช่น move_to_end() แนวปฏิบัติที่ดี: ใช้ Counter สำหรับการนับ; ใช้ defaultdict สำหรับการจัดกลุ่ม",
+      "from collections import Counter, defaultdict\n\nwords = ['a', 'b', 'a', 'c', 'b', 'a']\nprint(Counter(words))\n\nby_first = defaultdict(list)\nfor name in ['Alice', 'Bob', 'Charlie']:\n    by_first[name[0]].append(name)\nprint(dict(by_first))\n\nfrom collections import ChainMap\nconfig = ChainMap({'debug': True}, {'debug': False, 'port': 8080})\nprint(config['debug'])"
+    ],
+    "os & sys": [
+      "os: การดำเนินการระดับ OS (environ, path, listdir, getcwd) sys: การโต้ตอบกับ Python interpreter (argv, path, exit, stdout) ข้อผิดพลาดทั่วไป: การใช้ os.path แทน pathlib สำหรับโค้ดสมัยใหม่ แนวปฏิบัติที่ดี: เลือก pathlib มากกว่า os.path; ใช้ os.environ.get() พร้อมค่าเริ่มต้นสำหรับ environment variables",
+      "import os\nimport sys\n\nprint(os.environ.get('HOME', '/tmp'))\nprint(sys.argv)\nprint(sys.path[:2])"
+    ]
+  },
+  "Async Python": {
+    "async/await": [
+      "asyncio ช่วยให้ concurrent I/O 'async def' นิยาม coroutine; 'await' ส่งมอบการควบคุมให้ event loop ข้อผิดพลาดทั่วไป: การเรียก async def โดยตรงคืน coroutine object ไม่ใช่ผลลัพธ์ — ต้องใช้ await แนวปฏิบัติที่ดี: ใช้ asyncio.run() เป็น entry point; ห้ามเรียกจากภายใน running event loop",
+      "import asyncio\n\nasync def fetch_data():\n    await asyncio.sleep(1)\n    return {'data': 42}\n\nasync def main():\n    result = await fetch_data()\n    print(result)\n\nasyncio.run(main())"
+    ],
+    "asyncio.gather": [
+      "รันหลาย coroutines พร้อมกันและรวบรวมผลลัพธ์ทั้งหมด ผลลัพธ์อยู่ในลำดับเดียวกับ input coroutines ข้อผิดพลาดทั่วไป: การไม่จัดการ exceptions — ความล้มเหลวหนึ่งไม่ยกเลิกตัวอื่นเว้นแต่ return_exceptions=True แนวปฏิบัติที่ดี: ใช้ return_exceptions=True เมื่องานสามารถล้มเหลวอิสระ",
+      "import asyncio\n\nasync def task(n):\n    await asyncio.sleep(n)\n    return f'Task {n}'\n\nasync def main():\n    results = await asyncio.gather(\n        task(2), task(1), task(3),\n        return_exceptions=True\n    )\n    print(results)\n\nasyncio.run(main())"
+    ],
+    "Async Context Managers": [
+      "ใช้ 'async with' สำหรับทรัพยากรแบบ async (connections, streams) นิยามด้วย __aenter__ และ __aexit__ ข้อผิดพลาดทั่วไป: การลืมว่า async context managers ต้องการ 'async with' ไม่ใช่ 'with' ธรรมดา",
+      "import asyncio\nfrom contextlib import asynccontextmanager\n\n@asynccontextmanager\nasync def db_connection():\n    print('Connecting...')\n    yield {'conn': 'ok'}\n    print('Disconnecting...')\n\nasync def main():\n    async with db_connection() as conn:\n        print(conn)\n\nasyncio.run(main())"
+    ],
+    "asyncio.TaskGroup": [
+      "Python 3.11+ TaskGroup ให้ structured concurrency ทำงานพร้อมกัน ถ้างานใดล้มเหลว งานทั้งหมดจะถูกยกเลิก ข้อผิดพลาดทั่วไป: การผสม asyncio.gather กับ TaskGroup — ใช้ TaskGroup สำหรับ error handling แบบมีโครงสร้าง",
+      "import asyncio\n\nasync def worker(n):\n    await asyncio.sleep(n)\n    return n * 2\n\nasync def main():\n    async with asyncio.TaskGroup() as tg:\n        t1 = tg.create_task(worker(1))\n        t2 = tg.create_task(worker(2))\n        t3 = tg.create_task(worker(3))\n\n    print(t1.result(), t2.result(), t3.result())\n\nasyncio.run(main())"
+    ],
+    "Async Generators": [
+      "ฟังก์ชันที่ใช้ 'yield' ภายใน 'async def' ผลิตค่าแบบ asynchronous วนซ้ำด้วย 'async for' ข้อผิดพลาดทั่วไป: การใช้ 'for' แทน 'async for' กับ async generators แนวปฏิบัติที่ดี: ใช้ async generators สำหรับ streaming data",
+      "import asyncio\n\nasync def async_range(n):\n    for i in range(n):\n        await asyncio.sleep(0.1)\n        yield i\n\nasync def main():\n    async for val in async_range(5):\n        print(val)\n\nasyncio.run(main())"
+    ]
+  },
+  "ระบบไฟล์และพาธ": {
+    "pathlib": [
+      "การจัดการพาธแบบเชิงวัตถุ Path objects กับ / operator, .read_text(), .write_text(), .iterdir(), .glob(), .resolve() ข้อผิดพลาดทั่วไป: การต่อพาธด้วย + แทน / แนวปฏิบัติที่ดี: ใช้ pathlib สำหรับทุกการดำเนินการกับพาธในโค้ดใหม่",
+      "from pathlib import Path\n\nbase = Path('data')\nbase.mkdir(exist_ok=True)\n\nfile = base / 'note.txt'\nfile.write_text('Hello', encoding='utf-8')\nprint(file.read_text(encoding='utf-8'))\n\nfor p in base.iterdir():\n    print(p.name, p.stat().st_size)"
+    ],
+    "shutil": [
+      "การดำเนินการไฟล์ระดับสูง: copy2, move, copytree, rmtree, make_archive ข้อผิดพลาดทั่วไป: การใช้ shutil.copy() แทน shutil.copy2() — copy2 รักษา timestamps แนวปฏิบัติที่ดี: ใช้ shutil.rmtree() ด้วยความระมัดระวัง (ทำลายล้าง)",
+      "import shutil\n\nshutil.copy2('src.txt', 'dst.txt')\nshutil.move('src.txt', 'archive/')\nshutil.make_archive('backup', 'zip', '.')"
+    ],
+    "glob (รูปแบบไฟล์)": [
+      "การจับคู่ไฟล์ตามรูปแบบ รองรับ wildcards: *, ?, [chars], ** (recursive ด้วย recursive=True) ข้อผิดพลาดทั่วไป: การลืม recursive=True สำหรับ ** patterns แนวปฏิบัติที่ดี: ใช้ pathlib.Path.glob() สำหรับแนวทางเชิงวัตถุ",
+      "import glob\n\nfor f in glob.glob('**/*.py', recursive=True):\n    print(f)\n\nfor f in glob.glob('*.txt'):\n    print(f)"
+    ],
+    "tempfile": [
+      "สร้างไฟล์และไดเรกทอรีชั่วคราวอย่างปลอดภัย ไฟล์ถูกลบอัตโนมัติเมื่อปิด ข้อผิดพลาดทั่วไป: การสร้าง temp files โดยไม่ใช้ context manager — อาจไม่ถูกลบเมื่อเกิดข้อผิดพลาด แนวปฏิบัติที่ดี: ใช้ with statement เพื่อ clean up อัตโนมัติ",
+      "import tempfile\n\nwith tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:\n    f.write('temporary data')\n    temp_path = f.name\n\nwith tempfile.TemporaryDirectory() as tmpdir:\n    print(f'Temp dir: {tmpdir}')"
+    ]
+  },
+  "การบันทึก (Logging)": {
+    "logging module": [
+      "เฟรมเวิร์ก logging ในตัวที่มีระดับ: DEBUG, INFO, WARNING, ERROR, CRITICAL ข้อผิดพลาดทั่วไป: การใช้ print() สำหรับ debug แทน logging — logging ให้ระดับ, timestamp, และการเปลี่ยนทิศทางที่ง่าย แนวปฏิบัติที่ดี: รับ module-level logger ด้วย __name__; กำหนดค่า logging ที่ application entry point",
+      "import logging\n\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'\n)\nlogger = logging.getLogger(__name__)\n\nlogger.debug('not shown')\nlogger.info('started')\nlogger.warning('low disk space')\nlogger.error('failed', exc_info=True)"
+    ],
+    "Logging Configuration": [
+      "กำหนดค่า logging ผ่าน dictConfig สำหรับการตั้งค่าที่ซับซ้อน: หลาย handlers (file, console, syslog), ระดับต่างๆ ต่อ handler, formatters ข้อผิดพลาดทั่วไป: การแก้ไข root logger ทั่วโลกใน libraries — libraries ควรใช้ NullHandler",
+      "import logging.config\n\nLOGGING_CONFIG = {\n    'version': 1,\n    'formatters': {\n        'detailed': {'format': '%(asctime)s %(levelname)-8s %(name)s: %(message)s'}\n    },\n    'handlers': {\n        'console': {'class': 'logging.StreamHandler', 'formatter': 'detailed'},\n    },\n    'root': {'handlers': ['console'], 'level': 'INFO'}\n}\n\nlogging.config.dictConfig(LOGGING_CONFIG)"
+    ],
+    "Handlers & Filters": [
+      "handlers ในตัว: StreamHandler, FileHandler, RotatingFileHandler, TimedRotatingFileHandler Filters อนุญาตให้เลือก log ข้อผิดพลาดทั่วไป: การลืมกำหนดค่า handlers — ไม่มี output เลยถ้าไม่มี handler แนวปฏิบัติที่ดี: ใช้ RotatingFileHandler สำหรับ production apps",
+      "from logging.handlers import RotatingFileHandler\nimport logging\n\nlogger = logging.getLogger(__name__)\nlogger.setLevel(logging.DEBUG)\n\nhandler = RotatingFileHandler('app.log', maxBytes=5*1024*1024, backupCount=3)\nhandler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))\nlogger.addHandler(handler)"
+    ]
+  },
+  "Itertools & Functools": {
+    "itertools": [
+      "ไลบรารี combinator iterator: chain, cycle, repeat, permutations, combinations, product, groupby, islice, count, accumulate ข้อผิดพลาดทั่วไป: การพยายามใช้ groupby กับข้อมูลที่ไม่ได้เรียงลำดับ — groupby จับคู่เฉพาะ keys ที่ติดกันเท่านั้น แนวปฏิบัติที่ดี: ใช้ itertools สำหรับรูปแบบการวนซ้ำที่ประหยัดหน่วยความจำ",
+      "from itertools import chain, permutations, islice, count, groupby\n\nprint(list(chain([1,2], [3,4])))\nprint(list(permutations('AB', 2)))\nprint(list(islice(count(10), 5)))\n\ndata = [('a',1), ('a',2), ('b',3)]\nfor key, group in groupby(data, key=lambda x: x[0]):\n    print(key, list(group))"
+    ],
+    "functools": [
+      "ฟังก์ชันระดับสูง: lru_cache, cache (3.9+), partial, reduce, singledispatch, wraps ข้อผิดพลาดทั่วไป: การไม่ใช้ functools.wraps บน decorators — ทำให้สูญเสีย metadata ของฟังก์ชันเดิม แนวปฏิบัติที่ดี: ใช้ @functools.cache สำหรับ memoization ง่ายๆ",
+      "from functools import lru_cache, partial, reduce, singledispatch\n\n@lru_cache(maxsize=128)\ndef fib(n):\n    return n if n < 2 else fib(n-1) + fib(n-2)\n\nprint(fib(50))\n\nsquare = partial(pow, exp=2)\nprint(square(5))\n\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))"
+    ],
+    "contextlib": [
+      "Utilities สำหรับ context managers: contextmanager, suppress, ExitStack, redirect_stdout ข้อผิดพลาดทั่วไป: การใช้ suppress(Error) แทน try/except เมื่อต้องการ log หรือจัดการ exception แนวปฏิบัติที่ดี: ใช้ @contextmanager สำหรับ wrapper context ง่ายๆ",
+      "from contextlib import contextmanager, suppress, ExitStack\n\n@contextmanager\ndef managed():\n    print('enter')\n    yield\n    print('exit')\n\nwith managed():\n    print('inside')\n\nwith suppress(FileNotFoundError):\n    open('nonexistent.txt')\n\nwith ExitStack() as stack:\n    f = stack.enter_context(open('file.txt'))"
+    ],
+    "operator module": [
+      " equivalents เชิงฟังก์ชันของ operators: itemgetter, attrgetter, methodcaller, add, mul ข้อผิดพลาดทั่วไป: การเขียน lambda x: x[1] เมื่อ operator.itemgetter(1) ชัดเจนและเร็วกว่า แนวปฏิบัติที่ดี: ใช้ operator functions เป็น key functions สำหรับ sorted(), max(), min()",
+      "from operator import itemgetter, attrgetter\n\ndata = [('Bob', 25), ('Alice', 30), ('Charlie', 20)]\nsorted_by_age = sorted(data, key=itemgetter(1))\nprint(sorted_by_age)\n\nclass Point:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\npts = [Point(3, 4), Point(1, 2)]\nsorted_pts = sorted(pts, key=attrgetter('x'))"
+    ]
+  },
+  "Decorators & Closures": {
+    "Function Decorators": [
+      "ฟังก์ชันที่รับฟังก์ชันและคืนฟังก์ชันที่ถูกห่อหุ้ม ใช้ @syntax สำหรับ logging, timing, access control, memoization ข้อผิดพลาดทั่วไป: การลืม return wrapper function จาก decorator — ฟังก์ชันเดิมถูกแทนที่ด้วย None แนวปฏิบัติที่ดี: ใช้ functools.wraps เสมอใน decorators",
+      "import functools\nimport time\n\ndef timer(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        start = time.perf_counter()\n        result = func(*args, **kwargs)\n        elapsed = time.perf_counter() - start\n        print(f'{func.__name__} took {elapsed:.4f}s')\n        return result\n    return wrapper\n\n@timer\ndef slow_function():\n    time.sleep(0.5)\n    return 42\n\nprint(slow_function())\nprint(slow_function.__name__)"
+    ],
+    "Decorators with Arguments": [
+      "Decorators ที่รับพารามิเตอร์ต้องการสามระดับ: outer function (params) -> decorator -> wrapper ข้อผิดพลาดทั่วไป: การสับสน signature เมื่อเพิ่มพารามิเตอร์ให้ decorator ที่มีอยู่ แนวปฏิบัติที่ดี: ใช้ decorator factory pattern",
+      "import functools\n\ndef repeat(times=2):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for _ in range(times):\n                result = func(*args, **kwargs)\n            return result\n        return wrapper\n    return decorator\n\n@repeat(times=3)\ndef greet(name):\n    print(f'Hello, {name}')\n\ngreet('Alice')"
+    ],
+    "Class Decorators": [
+      "Decorators ที่ใช้กับคลาส (ไม่ใช่ methods) สามารถแก้ไข attributes เพิ่ม methods หรือลงทะเบียนคลาส ข้อผิดพลาดทั่วไป: class decorators ไม่รองรับ inheritance — พิจารณาใช้ metaclasses แทน",
+      "def add_repr(cls):\n    def __repr__(self):\n        attrs = ', '.join(f'{k}={v!r}' for k, v in self.__dict__.items())\n        return f'{cls.__name__}({attrs})'\n    cls.__repr__ = __repr__\n    return cls\n\n@add_repr\nclass Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n\np = Person('Alice', 30)\nprint(p)"
+    ],
+    "Closures": [
+      "ฟังก์ชันที่จำตัวแปรจากขอบเขตที่ครอบอยู่แม้ฟังก์ชันภายนอกจบไปแล้ว ใช้สำหรับ data hiding, factory functions, และ decorators ข้อผิดพลาดทั่วไป: late-binding ใน closures กับ loops — closures ทั้งหมดอ้างถึงค่าสุดท้ายของตัวแปรลูป",
+      "def make_multiplier(factor):\n    def multiply(x):\n        return x * factor\n    return multiply\n\ndouble = make_multiplier(2)\ntriple = make_multiplier(3)\nprint(double(5))\nprint(triple(5))\n\nfuncs = [lambda i=i: i for i in range(3)]\nprint([f() for f in funcs])"
+    ],
+    "Nested Functions & nonlocal": [
+      "ฟังก์ชันที่นิยามภายในฟังก์ชันอื่น ใช้ 'nonlocal' เพื่อ rebind ตัวแปรในขอบเขตที่ครอบอยู่ ข้อผิดพลาดทั่วไป: การลืม 'nonlocal' เมื่อแก้ไขตัวแปรจากฟังก์ชันภายนอก — สร้างตัวแปร local ใหม่แทน",
+      "def counter(start=0):\n    count = start\n    def increment(step=1):\n        nonlocal count\n        count += step\n        return count\n    def get_value():\n        return count\n    return {'inc': increment, 'value': get_value}\n\nc = counter(10)\nprint(c['inc']())\nprint(c['inc'](5))\nprint(c['value']())"
+    ],
+    "@wraps (functools.wraps)": [
+      "functools.wraps คัดลอก __name__, __doc__, __module__, __annotations__ จากฟังก์ชันที่ถูกห่อไปยัง wrapper จำเป็นสำหรับ decorators ข้อผิดพลาดทั่วไป: การละเว้น wraps ทำให้ debug ยากขึ้น — ฟังก์ชันที่ถูกตกแต่งสูญเสียชื่อและ docstring",
+      "import functools\n\ndef debug(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(f'Calling {func.__name__}')\n        return func(*args, **kwargs)\n    return wrapper\n\n@debug\ndef calculate(x, y):\n    \"\"\"Multiply two numbers.\"\"\"\n    return x * y\n\nprint(calculate.__name__)\nprint(calculate.__doc__)"
+    ]
+  },
+  "การทดสอบและการดีบัก": {
+    "doctest": [
+      "การทดสอบที่ฝังใน docstrings รันด้วย python -m doctest module.py ข้อผิดพลาดทั่วไป: doctests เปราะบาง — ช่องว่างและการจัดรูปแบบ output ต้องตรงกันทุกประการ แนวปฏิบัติที่ดี: ใช้ doctest สำหรับตัวอย่างง่ายๆ; ใช้ pytest สำหรับชุดทดสอบที่ครอบคลุม",
+      "def add(a, b):\n    \"\"\"Return the sum of a and b.\n\n    >>> add(2, 3)\n    5\n    >>> add(-1, 1)\n    0\n    \"\"\"\n    return a + b\n\nif __name__ == '__main__':\n    import doctest\n    doctest.testmod(verbose=True)"
+    ],
+    "unittest": [
+      "เฟรมเวิร์กทดสอบในตัวกับ TestCase, assert methods, setUp/tearDown, และ test discovery ข้อผิดพลาดทั่วไป: การลืมเรียก super().setUp() ในคลาสลูก แนวปฏิบัติที่ดี: ใช้ unittest.mock สำหรับ mocking; ใช้ subTest สำหรับกรณีทดสอบที่คล้ายกัน",
+      "import unittest\nfrom unittest.mock import Mock\n\nclass TestUserService(unittest.TestCase):\n    def setUp(self):\n        self.mock_api = Mock()\n    def test_get_user_success(self):\n        self.mock_api.get.return_value = {'id': 1, 'name': 'Alice'}\n        result = self.mock_api.get('/users/1')\n        self.assertEqual(result['name'], 'Alice')\n\nif __name__ == '__main__':\n    unittest.main()"
+    ],
+    "pytest": [
+      "เฟรมเวิร์กทดสอบสมัยใหม่กับ fixture system, parameterization, และ assertion introspection ที่ทรงพลัง ข้อผิดพลาดทั่วไป: การใช้ unittest-style classes เมื่อ pytest functions เพียงพอ แนวปฏิบัติที่ดี: ใช้ pytest fixtures สำหรับ shared setup; ใช้ parametrize สำหรับหลาย test cases",
+      "import pytest\n\n@pytest.fixture\ndef sample_data():\n    return {'name': 'Alice', 'scores': [85, 92]}\n\n@pytest.mark.parametrize('score,expected', [\n    (85, True),\n    (40, False),\n])\ndef test_passing(score, expected):\n    assert (score >= 50) == expected\n\ndef test_fixture_usage(sample_data):\n    assert sample_data['name'] == 'Alice'"
+    ],
+    "pdb (Debugger)": [
+      "debugger ในตัว ใช้ breakpoint() (Python 3.7+) เพื่อตั้งจุดหยุด คำสั่ง: n(ext), s(tep), c(ontinue), l(ist), p(rint) ข้อผิดพลาดทั่วไป: การทิ้ง breakpoint() calls ในโค้ด production — ใช้ PYTHONBREAKPOINT=0 เพื่อปิดทั้งหมด",
+      "def buggy_function(x):\n    result = []\n    for i in range(x):\n        breakpoint()\n        result.append(i * 2)\n    return result"
+    ],
+    "cProfile & Profiling": [
+      "วัดเวลาทำงานของ Python code ใช้ cProfile.run() หรือ python -m cProfile script.py ข้อผิดพลาดทั่วไป: การ optimize ก่อน profile — profile ก่อนเสมอเพื่อหา bottlenecks ที่แท้จริง",
+      "import cProfile\n\ndef slow_function():\n    total = 0\n    for i in range(10**6):\n        total += i ** 2\n    return total\n\ncProfile.run('slow_function()', sort='cumtime')"
+    ],
+    "unittest.mock": [
+      "แทนที่ส่วนของระบบด้วย mock objects: Mock, patch, MagicMock, PropertyMock, side_effect ข้อผิดพลาดทั่วไป: การ patching พาธผิด — patch ที่ที่ชื่อถูกค้นหา (โมดูลที่ถูกทดสอบ) ไม่ใช่ที่ที่มันถูกนิยาม",
+      "from unittest.mock import Mock, patch\n\nm = Mock(return_value=42)\nprint(m())\n\nm.side_effect = [1, 2, ValueError('Boom')]\nprint(m(), m())\n\nwith patch('os.path.exists', return_value=True):\n    import os\n    print(os.path.exists('/fake/path'))"
+    ]
   }
 }
