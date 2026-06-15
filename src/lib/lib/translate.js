@@ -53,58 +53,14 @@ export function applySavedLanguage() {
   window.dispatchEvent(new CustomEvent('language-changed', { detail: { lang: _currentLang } }));
 }
 
-// ── Mutation Observer to protect dynamic code blocks ──
-
-function startNotranslateObserver() {
-  if (notranslateObserver) return;
-  notranslateObserver = new MutationObserver((mutations) => {
-    let needsProtection = false;
-    for (const mutation of mutations) {
-      if (mutation.addedNodes.length > 0) {
-        needsProtection = true;
-        break;
-      }
-    }
-    if (needsProtection) {
-      markCodeAsNotranslate(document);
-    }
-  });
-  notranslateObserver.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-function stopNotranslateObserver() {
-  if (notranslateObserver) {
-    notranslateObserver.disconnect();
-    notranslateObserver = null;
-  }
-}
-
-// ── Load Google Translate ──
+// ── Load Google Translate (removed — native toggle used instead) ──
 
 export function loadGoogleTranslate(callback) {
-  // No-op: Google Translate removed. Native toggle used instead.
   callback?.();
-}
-
-// ── Apply saved language on page load ──
-
-export function applySavedLanguage() {
-  detectLangFromCookie();
-  if (gtCurrentLang !== 'en') {
-    // Trigger Google Translate to apply the saved language
-    const teCombo = document.querySelector('.goog-te-combo');
-    if (teCombo) {
-      teCombo.value = gtCurrentLang;
-      teCombo.dispatchEvent(new Event('change'));
-    }
-  }
 }
 
 // ── Cleanup ──
 
 export function destroyTranslate() {
-  stopNotranslateObserver();
+  // No cleanup needed — Google Translate removed
 }
