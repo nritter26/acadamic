@@ -12,6 +12,8 @@
     'lua','php','py','rb','rs','scala','swift','ts','wasm','zig',
   ];
 
+  let hoveredLang = $state(null);
+
   function selectLang(lang) {
     curr.lang = lang;
     curr.loadLangData(lang);
@@ -26,6 +28,9 @@
       <button
         class:active={curr.lang === lang}
         onclick={() => selectLang(lang)}
+        onmouseenter={() => hoveredLang = lang}
+        onmouseleave={() => hoveredLang = null}
+        style={hoveredLang === lang ? 'transform: scale(1.05); transition: transform 0.15s;' : ''}
         aria-label={LANG_NAMES[lang] || lang}
       >
         <img class="lang-logo" src="/public/logos/{lang}.svg" alt="" onerror={e => e.target.style.display = 'none'}>
