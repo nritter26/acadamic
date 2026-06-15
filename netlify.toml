@@ -1,7 +1,7 @@
 [build]
   functions = "netlify/functions"
   publish = "."
-  command = "npm run build"
+  command = "cd backend/rust && cargo build --release && npm run build"
 
 [[redirects]]
   from = "/api/*"

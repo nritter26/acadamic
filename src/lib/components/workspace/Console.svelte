@@ -3,6 +3,7 @@
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
   import { getEditorState } from '$lib/stores/editor.svelte.js';
   import { runPipeline, highlightCode, renderTokens, renderAST, renderStats } from '$lib/lib/compiler.js';
+  import * as Tabs from '$lib/components/ui/tabs/index.js';
 
   let exec = $derived(getExecutionState());
   let curr = $derived(getCurriculumState());
@@ -89,57 +90,53 @@
   }
 </script>
 
-<div class="console">
-  <div class="console-label">
+<div class="flex flex-col h-full min-h-0">
+  <div class="px-3 py-1.5 text-[11px] font-bold text-[#94a3b8] border-b border-[#1e293b] flex items-center gap-2">
     Console
     {#if exec.running}
-      <span class="running-indicator">⟳ running...</span>
+      <span class="text-[#6366f1] text-[10px]">⟳ running...</span>
     {/if}
     <button class="benchmark-btn" onclick={handleBenchmark} disabled={exec.running}>Benchmark</button>
   </div>
-  <div class="console-tabs">
-    <button class="console-tab" class:active={activeTab === 'output'} onclick={() => activeTab = 'output'}>Output</button>
-    <button class="console-tab" class:active={activeTab === 'api'} onclick={() => activeTab = 'api'}>API Response</button>
-    <button class="console-tab" class:active={activeTab === 'compiler'} onclick={() => { activeTab = 'compiler'; loadAppData(); compilerRunPipeline(-1); }}>Compiler</button>
-  </div>
-  {#if activeTab === 'output'}
-    <pre class="console-output" class:has-error={exec.error}>{exec.error ? exec.error : exec.output || '// Run code to see output'}</pre>
-  {:else if activeTab === 'api'}
-    <div class="api-res-topbar">
-      <span class="api-res-status">{exec.apiStatus || '—'}</span>
-      <button class="api-res-copy" onclick={copyApiResponse}>Copy</button>
-    </div>
-    {#if exec.apiHeaders}
-      <div class="api-res-headers">
-        <button class="api-res-headers-toggle" onclick={() => showHeaders = !showHeaders}>
-          {showHeaders ? '▼' : '▶'} Response Headers
-        </button>
-        {#if showHeaders}
-          <pre class="api-res-pre">{exec.apiHeaders}</pre>
-        {/if}
+  <Tabs.Root bind:value={activeTab} class="flex flex-1 min-h-0">
+    <Tabs.List variant="line" class="border-b border-[#1e293b]">
+      <Tabs.Trigger value="output" class="text-[10px] font-semibold">Output</Tabs.Trigger>
+      <Tabs.Trigger value="api" class="text-[10px] font-semibold">API Response</Tabs.Trigger>
+      <Tabs.Trigger value="compiler" class="text-[10px] font-semibold" onclick={() => { loadAppData(); compilerRunPipeline(-1); }}>Compiler</Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="output" class="flex-1 p-0">
+      <pre class="flex-1 m-0 p-3 font-mono text-xs leading-relaxed text-[#e2e8f0] overflow-auto whitespace-pre-wrap" class:has-error={exec.error}>{exec.error ? exec.error : exec.output || '// Run code to see output'}</pre>
+    </Tabs.Content>
+    <Tabs.Content value="api" class="flex-1 flex flex-col p-0">
+      <div class="api-res-topbar">
+        <span class="api-res-status">{exec.apiStatus || '—'}</span>
+        <button class="api-res-copy" onclick={copyApiResponse}>Copy</button>
       </div>
-    {/if}
-    <pre class="console-output">{exec.apiResponse || 'Send a request to see the response'}</pre>
-  {:else if activeTab === 'compiler'}
-    <div class="compiler-tabs">
-      {#each ['Source', 'Tokens', 'AST', 'Stats'] as stage}
-        <button class="cp-tab" class:active={exec.compilerStage === stage.toLowerCase()} onclick={() => handleCompilerStageClick(stage)} disabled={exec.running}>{stage}</button>
-      {/each}
-    </div>
-    <div class="console-output compiler-html">{@html exec.compilerOutput || '<span class="cp-empty">Click a pipeline stage button to analyze your code.</span>'}</div>
-  {/if}
+      {#if exec.apiHeaders}
+        <div class="api-res-headers">
+          <button class="api-res-headers-toggle" onclick={() => showHeaders = !showHeaders}>
+            {showHeaders ? '▼' : '▶'} Response Headers
+          </button>
+          {#if showHeaders}
+            <pre class="api-res-pre">{exec.apiHeaders}</pre>
+          {/if}
+        </div>
+      {/if}
+      <pre class="flex-1 m-0 p-3 font-mono text-xs leading-relaxed text-[#e2e8f0] overflow-auto whitespace-pre-wrap">{exec.apiResponse || 'Send a request to see the response'}</pre>
+    </Tabs.Content>
+    <Tabs.Content value="compiler" class="flex-1 flex flex-col p-0">
+      <div class="compiler-tabs">
+        {#each ['Source', 'Tokens', 'AST', 'Stats'] as stage}
+          <button class="cp-tab" class:active={exec.compilerStage === stage.toLowerCase()} onclick={() => handleCompilerStageClick(stage)} disabled={exec.running}>{stage}</button>
+        {/each}
+      </div>
+      <div class="flex-1 m-0 p-3 font-mono text-xs leading-relaxed text-[#e2e8f0] overflow-auto whitespace-pre-wrap compiler-html">{@html exec.compilerOutput || '<span class="cp-empty">Click a pipeline stage button to analyze your code.</span>'}</div>
+    </Tabs.Content>
+  </Tabs.Root>
 </div>
 
 <style>
-  .console { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-  .console-label { padding: 6px 12px; font-size: 11px; font-weight: 700; color: #94a3b8; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; }
-  .running-indicator { color: #6366f1; font-size: 10px; }
-  .console-tabs { display: flex; border-bottom: 1px solid #1e293b; }
-  .console-tab { flex: 1; padding: 4px 8px; font-size: 10px; font-weight: 600; background: transparent; border: none; border-bottom: 2px solid transparent; color: #64748b; cursor: pointer; }
-  .console-tab.active { color: #e2e8f0; border-bottom-color: #6366f1; }
-  .console-tab:hover { color: #cbd5e1; }
-  .console-output { flex: 1; margin: 0; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.5; color: #e2e8f0; overflow: auto; white-space: pre-wrap; }
-  .console-output.has-error { color: #ef4444; }
+  .has-error { color: #ef4444; }
   .benchmark-btn { margin-left: auto; background: #1e293b; border: none; color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 800; }
   .benchmark-btn:hover:not(:disabled) { background: #334155; color: #e2e8f0; }
   .benchmark-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -154,7 +151,6 @@
   .cp-tab { flex: 1; padding: 4px 8px; font-size: 10px; font-weight: 600; background: transparent; border: none; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
   .cp-tab.active { color: #a5f3fc; border-bottom-color: #a5f3fc; }
   .cp-tab:hover { color: #cbd5e1; }
-  .compiler-html { padding: 12px; font-size: 12px; line-height: 1.6; overflow: auto; white-space: pre-wrap; }
   .compiler-html :global(.cp-token-summary) { color: #64748b; font-size: 10px; font-weight: 700; margin-bottom: 8px; }
   .compiler-html :global(.cp-token-list) { display: flex; flex-wrap: wrap; gap: 4px; }
   .compiler-html :global(.cp-token) { padding: 2px 6px; border-radius: 3px; background: rgba(0,0,0,0.2); font-family: 'JetBrains Mono', monospace; font-size: 11px; white-space: nowrap; }

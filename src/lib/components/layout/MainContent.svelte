@@ -265,11 +265,11 @@
 </script>
 
 {#if isStandalone}
-  <div class="standalone-layout">
+  <div class="flex-1 flex overflow-hidden bg-[#0f172a]">
     {#if mode === 'dblab'}
       <DbLab />
     {:else if mode === 'projects'}
-      <div class="projects-layout">
+      <div class="flex flex-1 overflow-hidden">
         <aside class="projects-sidebar">
           <div class="pfilters">
             <div class="pfilter-row">
@@ -321,8 +321,8 @@
 {:else if isQuizMode}
   <QuizView />
 {:else}
-  <div class="curriculum-layout" class:tool-mode={usesCustomWorkspace}>
-    <div class="col col-curriculum">
+  <div class="flex-1 grid" class:tool-mode={usesCustomWorkspace} style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1px; background: #1e293b;">
+    <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       {#if isStylingMode}
         <div class="styling-scenarios-header">Scenarios</div>
         {#each SCENARIO_ORDER as id}
@@ -383,7 +383,7 @@
         <TopicList />
       {/if}
     </div>
-    <div class="col col-theory">
+    <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       {#if isTechStackMode}
         {#if !curr.topic}
           {@const intro = appData?.techStackIntro?.[curr.lang]}
@@ -445,7 +445,7 @@
       {/if}
     </div>
     {#if app.workspaceOpen}
-    <div class="col col-workspace">
+    <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       {#if isBackendMode}
         {#if showApiClient}
           <APIClient />
@@ -483,14 +483,14 @@
     </div>
   {/if}
   {#if isStylingMode}
-    <div class="col col-console">
+    <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       <div class="styling-console">
         <div class="styling-console-header">Preview</div>
         <iframe title="Styling preview" srcdoc={stylingPreview} class="styling-iframe"></iframe>
       </div>
     </div>
   {:else}
-    <div class="col col-console">
+    <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       <Console />
     </div>
   {/if}
@@ -498,12 +498,7 @@
 {/if}
 
 <style>
-  .curriculum-layout { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; flex: 1; overflow: hidden; gap: 1px; background: #1e293b; }
-  .curriculum-layout.tool-mode { grid-template-columns: 1fr 1fr 2fr 1fr; }
-  .col { overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; min-height: 0; }
-
-  .standalone-layout { flex: 1; display: flex; overflow: hidden; background: #0f172a; }
-  .projects-layout { display: flex; flex: 1; overflow: hidden; }
+  .tool-mode { grid-template-columns: 1fr 1fr 2fr 1fr; }
   .projects-sidebar { width: 300px; min-width: 300px; overflow-y: auto; border-right: 1px solid #1e293b; background: #0f172a; display: flex; flex-direction: column; }
   .projects-main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
   .pfilters { padding: 8px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid #1e293b; }

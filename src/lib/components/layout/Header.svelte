@@ -5,6 +5,7 @@
   import { page } from '$app/stores';
   import { getCurrentLang, toggleLanguage } from '$lib/lib/translate.js';
   import { onMount } from 'svelte';
+  import CommandPalette from '$lib/components/search/CommandPalette.svelte';
 
   let { onmodechange = () => {} } = $props();
   let app = $derived(getAppState());
@@ -74,9 +75,9 @@
   });
 </script>
 
-<header id="app-header" class="header">
-  <div class="header-left">
-    <div class="header-title">
+<header id="app-header" class="flex items-center px-4 py-2 bg-[#0f172a] border-b border-[#1e293b] gap-3">
+  <div class="flex items-center gap-3 flex-1">
+    <div class="font-black text-[22px] flex items-center gap-2 text-[#e2e8f0]">
       KODEX'S <span class="accent" id="header-title">{LANG_NAMES[app.mode]?.toUpperCase() || app.mode.toUpperCase()}</span>
       <button class="kodex-nav-btn" onclick={toggleKodex} title="About Kodex's Lab">
         <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" width="22" height="22">
@@ -91,36 +92,35 @@
         </svg>
       </button>
       <button id="lang-btn" class="kodex-nav-btn lang-btn" onclick={quickToggleLang} oncontextmenu={(e) => { e.preventDefault(); toggleLang(); }} title="Click: quick switch EN/TH • Right-click: open language menu">{uiLang}</button>
+      <button class="search-btn" onclick={() => window.dispatchEvent(new CustomEvent('open-search'))} title="Search (Ctrl+K)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
     </div>
-    <div class="header-extra-tabs">
+    <div class="flex gap-1 flex-wrap max-md:hidden">
       {#each EXTRA_TABS as tab}
-        <button class="game-nav-btn" onclick={() => handleMode(tab.id)}
+        <button class="px-2.5 py-1 text-[11px] font-bold bg-transparent border rounded cursor-pointer" onclick={() => handleMode(tab.id)}
           style={tab.color ? `color:${tab.color};border-color:${tab.color}` : ''}>
           {tab.label}
         </button>
       {/each}
     </div>
   </div>
-  <div class="cyber-motto">
-    <span class="cyber-line"></span>
-    <span class="cyber-text">Just code <span class="cyber-dash">&mdash;</span> don't overthink</span>
-    <span class="cyber-line"></span>
+  <div class="flex items-center gap-2 text-[#64748b] text-[11px]">
+    <span class="h-px bg-[#334155] w-[60px] shrink-0"></span>
+    <span>Just code <span>&mdash;</span> don't overthink</span>
+    <span class="h-px bg-[#334155] w-[60px] shrink-0"></span>
   </div>
-  <button class="hamburger-btn" onclick={() => app.toggleSidebar()}>☰</button>
+  <button class="hidden max-md:block bg-none border-none text-[#e2e8f0] text-[22px] cursor-pointer" onclick={() => app.toggleSidebar()}>☰</button>
+  <CommandPalette />
 </header>
 
 <style>
-  .header { display: flex; align-items: center; padding: 8px 16px; background: #0f172a; border-bottom: 1px solid #1e293b; gap: 12px; }
-  .header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-  .header-title { font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 8px; color: #e2e8f0; }
   .accent { color: var(--accent, #6366f1); }
   .kodex-nav-btn { background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; }
   .lang-btn { font-size: 11px; font-weight: 800; color: var(--accent, #6366f1); letter-spacing: 0.5px; margin-left: 4px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s; }
   .lang-btn:hover { background: #1e293b; }
-  .header-extra-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-  .game-nav-btn { padding: 4px 10px; font-size: 11px; font-weight: 700; background: transparent; border: 1px solid; border-radius: 4px; cursor: pointer; }
-  .cyber-motto { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 11px; }
-  .cyber-line { flex: 1; height: 1px; background: #334155; width: 60px; }
-  .hamburger-btn { display: none; background: none; border: none; color: #e2e8f0; font-size: 22px; cursor: pointer; }
-  @media (max-width: 768px) { .hamburger-btn { display: block; } .header-extra-tabs { display: none; } }
+  .search-btn { background: transparent; border: none; cursor: pointer; color: #64748b; padding: 4px; display: inline-flex; align-items: center; }
+  .search-btn:hover { color: #e2e8f0; }
 </style>
