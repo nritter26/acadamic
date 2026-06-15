@@ -5,6 +5,7 @@
   import { page } from '$app/stores';
   import { getCurrentLang, toggleLanguage } from '$lib/lib/translate.js';
   import { onMount } from 'svelte';
+  import CommandPalette from '$lib/components/search/CommandPalette.svelte';
 
   let { onmodechange = () => {} } = $props();
   let app = $derived(getAppState());
@@ -91,6 +92,11 @@
         </svg>
       </button>
       <button id="lang-btn" class="kodex-nav-btn lang-btn" onclick={quickToggleLang} oncontextmenu={(e) => { e.preventDefault(); toggleLang(); }} title="Click: quick switch EN/TH • Right-click: open language menu">{uiLang}</button>
+      <button class="search-btn" onclick={() => window.dispatchEvent(new CustomEvent('open-search'))} title="Search (Ctrl+K)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
     </div>
     <div class="header-extra-tabs">
       {#each EXTRA_TABS as tab}
@@ -107,6 +113,7 @@
     <span class="cyber-line"></span>
   </div>
   <button class="hamburger-btn" onclick={() => app.toggleSidebar()}>☰</button>
+  <CommandPalette />
 </header>
 
 <style>
@@ -117,6 +124,8 @@
   .kodex-nav-btn { background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; }
   .lang-btn { font-size: 11px; font-weight: 800; color: var(--accent, #6366f1); letter-spacing: 0.5px; margin-left: 4px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s; }
   .lang-btn:hover { background: #1e293b; }
+  .search-btn { background: transparent; border: none; cursor: pointer; color: #64748b; padding: 4px; display: inline-flex; align-items: center; }
+  .search-btn:hover { color: #e2e8f0; }
   .header-extra-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
   .game-nav-btn { padding: 4px 10px; font-size: 11px; font-weight: 700; background: transparent; border: 1px solid; border-radius: 4px; cursor: pointer; }
   .cyber-motto { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 11px; }
