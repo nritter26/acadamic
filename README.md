@@ -105,8 +105,9 @@ Complete compiler curriculum: tokenization, AST, parsing, code generation, optim
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Vanilla HTML/CSS/JS (primary), Svelte (alternative UI) |
-| Backend | Node.js (Express) or Go (alternative) |
+| Frontend | Svelte 5 + Tailwind CSS v4 + Shadcn-Svelte |
+| Backend (primary) | Rust (Axum) |
+| Backend (fallback) | Node.js (Express) |
 | Runtime | Node.js 18+, Go 1.22+ |
 | Database (SQL) | better-sqlite3 (built-in), optional pg + mysql2 |
 | AI | Hybrid keyword + tiny-LLM tutor (default), OpenAI, Anthropic, Google Gemini, local Ollama/LM Studio |
