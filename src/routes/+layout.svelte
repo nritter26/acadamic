@@ -41,6 +41,14 @@
     curr.lang = mode;
   }
 
+  let pageTransition = $state(1);
+
+  $effect(() => {
+    $page.route.id;
+    pageTransition = 0;
+    requestAnimationFrame(() => { pageTransition = 1; });
+  });
+
   onMount(() => {
     // Apply saved language preference
     applySavedLanguage();
@@ -88,11 +96,13 @@
 <div class="workspace">
   <Sidebar onmodechange={handleModeChange} />
   <main>
+    <div style="opacity: {pageTransition}; transition: opacity 0.2s ease;">
     {#if isStandalone}
       {@render children()}
     {:else}
       <MainContent />
     {/if}
+    </div>
   </main>
 </div>
 <AIPanel />
