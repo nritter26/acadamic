@@ -1,4 +1,5 @@
 import { getCurrentLang } from '$lib/lib/translate.js';
+import { buildSearchIndex } from '$lib/lib/search.js';
 
 let _lang = $state('js');
 let _uiLang = $state(getCurrentLang() || 'en'); // 'en' or 'th' — controls curriculum language
@@ -74,6 +75,7 @@ export function getCurriculumState() {
       if (typeof courseData !== 'undefined' && courseData[lang]) {
         _topicData = courseData;
         _curriculumLoading = false;
+        buildSearchIndex();
         return;
       }
       try {
@@ -87,6 +89,7 @@ export function getCurriculumState() {
             const cd = _topicData || {};
             cd[lang] = res2.data;
             _topicData = cd;
+            buildSearchIndex();
           }
           _curriculumLoading = false;
           return;
@@ -96,6 +99,7 @@ export function getCurriculumState() {
         const cd = _topicData || {};
         cd[lang] = res.data;
         _topicData = cd;
+        buildSearchIndex();
       } catch (e) {
         console.error('Failed to load curriculum for', lang, e);
       }
