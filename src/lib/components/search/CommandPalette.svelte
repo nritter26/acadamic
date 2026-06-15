@@ -65,7 +65,7 @@
       <input
         class="flex-1 bg-transparent border-none outline-none text-sm text-[#e2e8f0] placeholder:text-[#64748b]"
         placeholder="Search topics, phases, languages..."
-        {value}={query}
+        value={query}
         oninput={handleInput}
         onkeydown={handleKeydown}
         autofocus
