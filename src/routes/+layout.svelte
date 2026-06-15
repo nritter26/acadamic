@@ -96,7 +96,7 @@
 <div class="workspace">
   <Sidebar onmodechange={handleModeChange} />
   <main>
-    <div style="opacity: {pageTransition}; transition: opacity 0.2s ease;">
+    <div style="opacity: {pageTransition}; transition: opacity 0.2s ease; display: flex; flex-direction: column; flex: 1; min-height: 0;">
     {#if isStandalone}
       {@render children()}
     {:else}
