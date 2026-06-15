@@ -1,26 +1,39 @@
 services:
-  # Your main multi-language application
-  app:
+  rust-backend:
+    build:
+      context: ./backend/rust
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - AI_PROVIDER=keyword
+      - PORT=3001
+      - NODE_ENV=development
+    volumes:
+      - ./data:/app/data
+      - ./curriculum:/app/curriculum
+
+  node-backend:
     build:
       context: .
-      dockerfile: Dockerfile  # Directly in the main folder
-    read_only: false
+      dockerfile: Dockerfile
     ports:
-      - "3001:3000"
-    volumes:
-      - .:/code  # Shares your local project root folder
+      - "3000:3000"
     environment:
       - AI_PROVIDER=keyword
       - PORT=3000
       - NODE_ENV=development
+    volumes:
+      - .:/code
+    profiles:
+      - fallback
 
-  # Your dedicated Scala workspace container
   scala-runner:
     build:
       context: .
-      dockerfile: docker/dockerfile.scala  # Look inside the docker/ subfolder
+      dockerfile: docker/Dockerfile.scala
     volumes:
-      - .:/code  # Shares your local project root folder
+      - .:/code
     environment:
       - PORT=3000
 
