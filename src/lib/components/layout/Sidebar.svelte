@@ -22,31 +22,24 @@
   }
 </script>
 
-<aside class="sidebar" class:open={app.sidebarOpen}>
-  <nav class="selector" aria-label="Language selector">
+<aside class="w-20 min-w-20 bg-[#0f172a] border-r border-[#1e293b] overflow-y-auto max-md:hidden" class:max-md:block={app.sidebarOpen} class:max-md:fixed={app.sidebarOpen} class:max-md:z-[100]={app.sidebarOpen} class:max-md:h-full={app.sidebarOpen}>
+  <nav class="flex flex-col gap-0.5 p-2" aria-label="Language selector">
     {#each LANGUAGES as lang}
       <button
-        class:active={curr.lang === lang}
+        class="flex flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold bg-transparent border-none text-[#64748b] cursor-pointer rounded text-center hover:bg-[#1e293b] hover:text-[#e2e8f0]"
+        class:bg-[#1e293b]={curr.lang === lang}
+        class:text-[var(--accent,#6366f1)]={curr.lang === lang}
         onclick={() => selectLang(lang)}
         onmouseenter={() => hoveredLang = lang}
         onmouseleave={() => hoveredLang = null}
         style={hoveredLang === lang ? 'transform: scale(1.05); transition: transform 0.15s;' : ''}
         aria-label={LANG_NAMES[lang] || lang}
       >
-        <img class="lang-logo" src="/public/logos/{lang}.svg" alt="" onerror={e => e.target.style.display = 'none'}>
-        <span class="lang-label">{lang === 'htmlcss' ? 'HTML/CSS' : lang.toUpperCase()}</span>
+        <img class="w-[28px] h-[28px] object-contain" src="/public/logos/{lang}.svg" alt="" onerror={e => e.target.style.display = 'none'}>
+        <span class="leading-none">{lang === 'htmlcss' ? 'HTML/CSS' : lang.toUpperCase()}</span>
       </button>
     {/each}
   </nav>
 </aside>
 
-<style>
-  .sidebar { width: 80px; min-width: 80px; background: #0f172a; border-right: 1px solid #1e293b; overflow-y: auto; }
-  .selector { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
-  .selector button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; font-size: 10px; font-weight: 700; background: transparent; border: none; color: #64748b; cursor: pointer; border-radius: 4px; text-align: center; }
-  .lang-logo { width: 28px; height: 28px; object-fit: contain; }
-  .lang-label { line-height: 1; }
-  .selector button:hover { background: #1e293b; color: #e2e8f0; }
-  .selector button.active { background: #1e293b; color: var(--accent, #6366f1); }
-  @media (max-width: 768px) { .sidebar { display: none; } .sidebar.open { display: block; position: fixed; z-index: 100; height: 100%; } }
-</style>
+
