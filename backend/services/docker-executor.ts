@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -12,6 +12,7 @@ interface DockerRunnerConfig {
   runCmd: string;
   needsCompile: boolean;
   memoryLimit?: string;
+  poolSize?: number;
 }
 
 const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
@@ -60,7 +61,52 @@ export function getSupportedDockerLangs(): string[] {
   return Object.keys(DOCKER_RUNNERS);
 }
 
-export async function dockerExecute(lang: string, code: string, stdin?: string): Promise<DockerExecResult> {
+interface SpawnWithTimeoutOpts {
+  stdin?: string;
+  timeout?: number;
+  onChunk?: (chunk: string) => void;
+}
+
+function spawnWithTimeout(cmd: string, args: string[], opts: SpawnWithTimeoutOpts): Promise<{ stdout: string; exitCode: number | null }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: opts.stdin ? 'pipe' : 'inherit' });
+    let stdout = '';
+    let timer: NodeJS.Timeout | null = null;
+
+    if (opts.stdin) {
+      child.stdin!.write(opts.stdin);
+      child.stdin!.end();
+    }
+
+    child.stdout?.on('data', (d: Buffer) => {
+      const chunk = d.toString();
+      stdout += chunk;
+      opts.onChunk?.(chunk);
+    });
+
+    child.stderr?.on('data', (d: Buffer) => {
+      const chunk = d.toString();
+      stdout += chunk;
+      opts.onChunk?.(chunk);
+    });
+
+    child.on('close', (code) => {
+      if (timer) clearTimeout(timer);
+      resolve({ stdout, exitCode: code });
+    });
+
+    child.on('error', reject);
+
+    if (opts.timeout && opts.timeout > 0) {
+      timer = setTimeout(() => {
+        child.kill('SIGTERM');
+        resolve({ stdout: stdout + '\nExecution timed out', exitCode: 1 });
+      }, opts.timeout);
+    }
+  });
+}
+
+export async function dockerExecute(lang: string, code: string, stdin?: string, onChunk?: (chunk: string) => void): Promise<DockerExecResult> {
   const config = DOCKER_RUNNERS[lang];
   if (!config) {
     return { output: `Docker execution not available for ${lang}`, error: true, dockerAvailable: isDockerAvailable() };

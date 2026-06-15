@@ -81,7 +81,7 @@
   let stylingPreview = $derived.by(() => {
     const s = STYLING_SCENARIOS[stylingScenario];
     if (!s) return '';
-    return `<html><head><meta charset="UTF-8"><style>${s.demoStyle}\n${stylingCss}</style></head><body>${s.demoHtml}</body></html>`;
+    return `<html><head><meta charset="UTF-8"><sty${'le'}>${s.demoStyle}\n${stylingCss}</sty${'le'}></head><body>${s.demoHtml}</body></html>`;
   });
 
   function stylingLoadScenario(id) {
