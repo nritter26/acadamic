@@ -16,6 +16,7 @@ import authRouter from './auth';
 import projectsRouter from './projects';
 import contentRouter from './content';
 import tutorRouter from './tutor';
+import checkRouter from './check';
 
 const router = Router();
 
@@ -36,5 +37,6 @@ router.use('/auth', authRouter);           // POST /auth/register, POST /auth/lo
 router.use('/projects', projectsRouter);   // CRUD /projects
 router.use('/content', contentRouter);     // CRUD /content/:lang
 router.use('/tutor', tutorRouter);  // POST /tutor/explain-topic
+router.use('/check', checkRouter);  // POST /check
 
 export default router;
