@@ -4,7 +4,7 @@
   import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
   import { apiStream } from '$lib/lib/api.js';
 
-  let { value = '' } = $props();
+  let { value = '', highlightLine = null } = $props();
 
   let ai = $derived(getAIState());
   let curr = $derived(getCurriculumState());
@@ -70,6 +70,12 @@
     toolbarVisible = true;
   }
 
+  let gutterEl;
+
+  function syncScroll() {
+    if (gutterEl) gutterEl.scrollTop = textareaEl?.scrollTop || 0;
+  }
+
   let clickHandler;
 
   $effect(() => {
@@ -95,12 +101,18 @@
 </script>
 
 <div class="mini-editor">
+  <div class="me-gutter" bind:this={gutterEl}>
+    {#each (value || '').split('\n') as _, i}
+      <span class="me-gutter-line" class:me-gutter-active={highlightLine !== null && i === highlightLine}>{i + 1}</span>
+    {/each}
+  </div>
   <textarea
     bind:this={textareaEl}
     bind:value
     class="me-textarea"
     spellcheck="false"
     onmouseup={handleMouseUp}
+    onscroll={syncScroll}
   ></textarea>
 </div>
 
@@ -116,5 +128,8 @@
 
 <style>
   .mini-editor { flex: 1; display: flex; background: #0a0f1e; }
+  .me-gutter { width: 32px; padding: 16px 4px; font-family: 'JetBrains Mono', monospace; font-size: 15px; line-height: 1.7; color: #475569; text-align: right; user-select: none; border-right: 1px solid #111827; overflow: hidden; }
+  .me-gutter-line { display: block; }
+  .me-gutter-active { color: #6366f1; font-weight: 700; background: rgba(99, 102, 241, 0.1); border-right: 2px solid #6366f1; }
   .me-textarea { width: 100%; min-height: 100px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 15px; line-height: 1.7; color: #e2e8f0; background: transparent; border: none; resize: vertical; outline: none; tab-size: 2; }
 </style>
