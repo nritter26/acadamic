@@ -1,7 +1,13 @@
 <script>
   import CodeActionToolbar from '$lib/components/workspace/CodeActionToolbar.svelte';
+  import { getAIState } from '$lib/stores/ai.svelte.js';
+  import { getCurriculumState } from '$lib/stores/curriculum.svelte.js';
+  import { apiStream } from '$lib/lib/api.js';
 
-  let { value = '', onexplain, onreview, onfix } = $props();
+  let { value = '' } = $props();
+
+  let ai = $derived(getAIState());
+  let curr = $derived(getCurriculumState());
 
   let toolbarVisible = $state(false);
   let toolbarX = $state(0);
@@ -9,6 +15,46 @@
   let selectedText = $state('');
 
   let textareaEl;
+
+  function handleCodeAction(action, text) {
+    toolbarVisible = false;
+    ai.togglePanel();
+    ai.toggleAI();
+    ai.addMessage(`Explain this code:\n\`\`\`\n${text}\n\`\`\``, 'user');
+    ai.addMessage('', 'bot');
+    ai.setStreaming(true);
+
+    const endpoint = action === 'fix' ? '/api/tutor/transform' : action === 'review' ? '/api/review' : '/api/explain';
+    const body = action === 'fix'
+      ? { code: text, lang: curr.lang, type: 'fix' }
+      : { code: text, lang: curr.lang, topic: curr.topic };
+
+    let streamed = '';
+    if (action === 'fix') {
+      apiStream(endpoint, body, (chunk) => {
+        streamed += chunk;
+        ai.updateLastMessage(streamed);
+      }, () => {
+        ai.setStreaming(false);
+      }, (error) => {
+        ai.updateLastMessage(`Error: ${error}`);
+        ai.setStreaming(false);
+      });
+    } else {
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(r => r.json()).then(data => {
+        const text = data.explanation || data.review || data.output || '(no response)';
+        ai.updateLastMessage(text);
+        ai.setStreaming(false);
+      }).catch(e => {
+        ai.updateLastMessage(`Error: ${e.message}`);
+        ai.setStreaming(false);
+      });
+    }
+  }
 
   function handleMouseUp() {
     const sel = window.getSelection();
@@ -63,9 +109,9 @@
   x={toolbarX}
   y={toolbarY}
   visible={toolbarVisible}
-  onexplain={(t) => { toolbarVisible = false; onexplain?.(t); }}
-  onreview={(t) => { toolbarVisible = false; onreview?.(t); }}
-  onfix={(t) => { toolbarVisible = false; onfix?.(t); }}
+  onexplain={(t) => handleCodeAction('explain', t)}
+  onreview={(t) => handleCodeAction('review', t)}
+  onfix={(t) => handleCodeAction('fix', t)}
 />
 
 <style>
