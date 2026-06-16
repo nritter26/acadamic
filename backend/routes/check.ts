@@ -15,6 +15,11 @@ router.post('/', validate(CheckSchema), async (req: Request, res: Response) => {
 
   const useLang = (lang as string) || 'js';
 
+  if (!code.trim()) {
+    res.json({ result: 'No code to check.', issues: [], score: 0, source: 'static' });
+    return;
+  }
+
   const { review, issues, score } = generateStructureReview(code, useLang);
 
   res.json({ result: review, issues, score, source: 'static' });
