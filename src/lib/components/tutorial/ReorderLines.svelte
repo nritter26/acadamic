@@ -131,7 +131,7 @@
   .check-btn { margin-top: 12px; padding: 8px 20px; background: #f97316; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; }
   .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .check-btn:hover:not(:disabled) { background: #ea580c; }
-  .feedback { margin-top: 12px; padding: 12px; background: #1e293b; border-radius: 8px; font-size: 13px; font-weight: 700; line-height: 1.5; }
+  .feedback { margin-top: 12px; padding: 12px; background: #1e293b; border-radius: 8px; font-size: 13px; font-weight: 700; line-height: 1.6; }
   .feedback.correct { color: #22c55e; border: 1px solid #22c55e; }
   .feedback.wrong { color: #ef4444; border: 1px solid #ef4444; }
   .feedback-icon { margin-right: 4px; }
