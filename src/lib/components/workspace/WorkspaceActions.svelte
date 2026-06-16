@@ -91,6 +91,12 @@
   function toggleSchema() {
     window.dispatchEvent(new CustomEvent('toggle-schema'));
   }
+
+  function formatCheckOutput(output) {
+    return output
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/- \[([A-Z]+)\]/g, '[$1]');
+  }
 </script>
 
 <div class="workspace-actions">
