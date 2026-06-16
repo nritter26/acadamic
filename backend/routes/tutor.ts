@@ -223,7 +223,7 @@ router.post('/attempt-exercise', validate(AttemptExerciseSchema), async (req: Re
     issues: reviewResult.issues,
     attempts: session.codeAttempts,
     hint: hint || undefined,
-    passed: !hasErrors && session.codeAttempts >= 1,
+    passed: !hasErrors && (reviewResult.score !== null ? reviewResult.score >= 7 : session.codeAttempts >= 1),
   });
 });
 
