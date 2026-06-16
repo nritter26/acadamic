@@ -93,7 +93,7 @@
       {#if correct}
         &#10003; Correct
       {:else}
-        &#10007; Not quite. Expected fix:
+        &#10007; Not quite. The expected fix:
         <pre class="expected-code">{exercise.expected}</pre>
         {#if aiHint}
           <div class="ai-hint">&#128161; {aiHint}</div>
