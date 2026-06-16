@@ -155,6 +155,13 @@ export const CheckSchema = z.object({
 });
 export type CheckInput = z.infer<typeof CheckSchema>;
 
+export const TransformSchema = z.object({
+  code: z.string().min(1),
+  lang: z.string().optional(),
+  type: z.enum(['async', 'error-handling', 'typescript', 'optimize', 'document', 'test', 'fix']),
+});
+export type TransformInput = z.infer<typeof TransformSchema>;
+
 export const ExplainErrorSchema = z.object({
   code: z.string().min(1),
   errorOutput: z.string().min(1),

@@ -4,7 +4,7 @@ import { createSession, transitionState, getSession } from '../services/teaching
 import { searchWithSources } from '../ai/embeddings';
 import { getConceptMastery } from '../ai/learner';
 import { validate } from '../middleware';
-import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema, ExplainErrorSchema } from '../types';
+import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema, ExplainErrorSchema, TransformSchema } from '../types';
 import { generateExercise } from '../ai/exercises';
 import { review as codeReview } from '../ai/reviewer';
 import { getNextRecommendedTopic, trackAttempt, trackError } from '../ai/learner';
@@ -230,6 +230,80 @@ Explain what caused this error and how to fix it.` },
     clearTimeout(timeoutHandle);
     res.write('data: [DONE]\n\n');
     res.end();
+  }
+});
+
+router.post('/transform', validate(TransformSchema), async (req: Request, res: Response) => {
+  const { code, lang, type } = req.body;
+  const useLang = lang || 'js';
+
+  const typeLabels: Record<string, string> = {
+    'async': 'Make this code use async/await instead of callbacks or promises',
+    'error-handling': 'Add proper error handling to this code (try/catch, error boundaries, etc.)',
+    'typescript': 'Convert this code to TypeScript with proper type annotations',
+    'optimize': 'Optimize this code for better performance',
+    'document': 'Add comprehensive documentation comments to this code',
+    'test': 'Write unit tests for this code',
+    'fix': 'Fix bugs and issues in this code',
+  };
+
+  const instruction = typeLabels[type] || `Transform this code with the following goal: ${type}`;
+
+  const systemPrompt = `You are a code transformation assistant. Transform code based on the requested change.
+Return your response as valid JSON with these fields:
+- "transformedCode": the transformed code as a string
+- "explanation": a brief explanation of what changed
+- "diff": an array of { "type": "add" | "remove" | "keep", "line": string } objects showing line-by-line changes
+
+Do NOT include markdown code fences in the JSON values. Return ONLY the JSON object.`;
+
+  const messages: LLMMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: `${instruction}\n\nCode to transform:\n\`\`\`${useLang}\n${code}\n\`\`\`` },
+  ];
+
+  try {
+    let fullResponse = '';
+    await askLLM(messages, (chunk) => { fullResponse += chunk; }, { lang: useLang, topic: `transform-${type}` });
+
+    const jsonStr = fullResponse.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(jsonStr);
+
+    const originalLines = code.split('\n');
+    const transformedLines = (parsed.transformedCode || code).split('\n');
+
+    const diff: Array<{ type: string; line: string }> = [];
+    const maxLen = Math.max(originalLines.length, transformedLines.length);
+    for (let i = 0; i < maxLen; i++) {
+      const orig = originalLines[i];
+      const trans = transformedLines[i];
+      if (orig === undefined) {
+        diff.push({ type: 'add', line: trans });
+      } else if (trans === undefined) {
+        diff.push({ type: 'remove', line: orig });
+      } else if (orig !== trans) {
+        diff.push({ type: 'remove', line: orig });
+        diff.push({ type: 'add', line: trans });
+      } else {
+        diff.push({ type: 'keep', line: orig });
+      }
+    }
+
+    res.json({
+      originalCode: code,
+      transformedCode: parsed.transformedCode || code,
+      explanation: parsed.explanation || 'Code transformed successfully.',
+      diff,
+    });
+  } catch (e) {
+    console.error('[tutor] transform error:', (e as Error).message);
+    res.status(500).json({
+      error: 'Failed to transform code. Try asking Devin directly in chat.',
+      originalCode: code,
+      transformedCode: code,
+      explanation: 'Transformation failed.',
+      diff: code.split('\n').map((line: string) => ({ type: 'keep' as const, line })),
+    });
   }
 });
 
