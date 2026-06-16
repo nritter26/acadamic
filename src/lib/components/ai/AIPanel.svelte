@@ -145,7 +145,7 @@
     {/if}
     <div class="ai-messages" bind:this={messagesEl}>
       {#each ai.messages as message (message.id)}
-        <AIMessage text={message.text} role={message.role} />
+        <AIMessage text={message.text} role={message.role} source={message.source || ''} />
       {/each}
       {#if ai.streaming}
         <div class="typing">Devin is thinking...</div>

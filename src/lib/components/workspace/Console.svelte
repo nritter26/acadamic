@@ -24,8 +24,8 @@
     explainErrorLoading = true;
     ai.togglePanel();
     ai.toggleAI();
-    ai.addMessage(`Explain this error:\n\`\`\`\n${errorText}\n\`\`\``, 'user');
-    ai.addMessage('', 'bot');
+    ai.addMessage(`Explain this error:\n\`\`\`\n${errorText}\n\`\`\``, 'user', 'error-analysis');
+    ai.addMessage('', 'bot', 'error-analysis');
     ai.setStreaming(true);
     let streamed = '';
     apiStream('/api/tutor/explain-error', { code: editor.code || '', errorOutput: errorText, lang: curr.lang, topic: curr.topic }, (chunk) => {

@@ -1,7 +1,7 @@
 <script>
   import { escapeHtml } from '$lib/lib/syntax.js';
 
-  let { text, role } = $props();
+  let { text, role, source = '' } = $props();
   let formatted = $derived(
     escapeHtml(text)
       .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
@@ -11,7 +11,12 @@
 </script>
 
 <div class="ai-message {role}">
-  <div class="label">{role === 'user' ? 'You' : 'Devin'}</div>
+  <div class="label">
+    {role === 'user' ? 'You' : 'Devin'}
+    {#if source}
+      <span class="source-badge">{source.replace(/-/g, ' ')}</span>
+    {/if}
+  </div>
   <div class="content">{@html formatted}</div>
 </div>
 
@@ -24,4 +29,5 @@
   .content :global(code.inline) { background: #1e293b; padding: 1px 4px; border-radius: 3px; font-size: 12px; color: #f472b6; }
   .content :global(pre) { background: #0a0f1e; padding: 8px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
   .content :global(code) { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .source-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; font-size: 9px; font-weight: 700; background: #1e293b; color: #94a3b8; border-radius: 3px; text-transform: none; }
 </style>

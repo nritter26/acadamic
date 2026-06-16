@@ -89,10 +89,14 @@ function nextId() {
   return Date.now().toString(36) + '-' + _idCounter;
 }
 
-function _addMessage(text, role = 'bot') {
-  _messages = [..._messages, { text, role, id: nextId() }];
+function _addMessage(text, role = 'bot', source = '') {
+  _messages = [..._messages, { text, role, id: nextId(), source }];
   save();
   broadcast('messages', _messages);
+}
+
+export function addMessageWithSource(text, role, source) {
+  _addMessage(text, role, source);
 }
 
 function _updateLastMessage(text) {
@@ -167,8 +171,8 @@ export function getAIState() {
       }
     },
 
-    addMessage(text, role = 'bot') {
-      _addMessage(text, role);
+    addMessage(text, role = 'bot', source = '') {
+      _addMessage(text, role, source);
     },
 
     updateLastMessage(text) {
