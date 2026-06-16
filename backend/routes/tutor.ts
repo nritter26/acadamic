@@ -14,6 +14,23 @@ import fs from 'fs';
 
 const router = Router();
 
+async function generateSuggestions(context: string, lang: string, topic: string): Promise<string[]> {
+  try {
+    const suggestionMessages: LLMMessage[] = [
+      { role: 'system', content: `Generate 2-3 short follow-up questions the student might ask next based on this teaching context. Return ONLY a valid JSON array of strings. Example: ["What about edge cases?", "How does this relate to other topics?"]` },
+      { role: 'user', content: `Context: ${context}\nLanguage: ${lang}\nTopic: ${topic}` },
+    ];
+    let raw = '';
+    await askLLM(suggestionMessages, (chunk: string) => { raw += chunk; }, { lang, topic });
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed)) return parsed.slice(0, 3);
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const prereqPath = path.join(__dirname, '..', 'data', 'prerequisites.json');
@@ -163,6 +180,12 @@ Keep it conversational and encourage the student to try it themselves.`;
   }
 
   if (aborted) return;
+
+  const suggestions = await generateSuggestions(`${topic} in ${useLang}`, useLang, topic);
+  if (suggestions.length > 0 && !aborted) {
+    res.write(`event: suggestions\ndata: ${JSON.stringify({ suggestions })}\n\n`);
+  }
+
   res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
   res.write('data: [DONE]\n\n');
   res.end();
@@ -228,6 +251,12 @@ Explain what caused this error and how to fix it.` },
   if (!sseDoneCalled && !aborted) {
     sseDoneCalled = true;
     clearTimeout(timeoutHandle);
+
+    const suggestions = await generateSuggestions(`error analysis in ${useLang}`, useLang, topic || useLang);
+    if (suggestions.length > 0 && !aborted) {
+      res.write(`event: suggestions\ndata: ${JSON.stringify({ suggestions })}\n\n`);
+    }
+
     res.write('data: [DONE]\n\n');
     res.end();
   }
@@ -418,6 +447,12 @@ router.post('/hint', async (req: Request, res: Response) => {
   if (!sseDoneCalled && !aborted) {
     sseDoneCalled = true;
     clearTimeout(timeoutHandle);
+
+    const suggestions = await generateSuggestions(`${topic || 'programming'} in ${useLang}`, useLang, topic || 'programming');
+    if (suggestions.length > 0 && !aborted) {
+      res.write(`event: suggestions\ndata: ${JSON.stringify({ suggestions })}\n\n`);
+    }
+
     res.write('data: [DONE]\n\n');
     res.end();
   }
