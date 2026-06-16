@@ -9,6 +9,8 @@
   let showAiExplain = $state(false);
   let aiExplain = $state('');
   let aiExplainLoading = $state(false);
+  let attempts = $state(0);
+  const MAX_ATTEMPTS = 2;
 
   function selectOption(i) {
     if (answered || !exercise) return;
@@ -25,9 +27,16 @@
 
   function handleCheck() {
     if (answered || selectedIndex === null) return;
-    answered = true;
     if (selectedIndex === exercise.correctIndex) {
+      answered = true;
       oncomplete();
+    } else {
+      attempts += 1;
+      if (attempts >= MAX_ATTEMPTS) {
+        answered = true;
+      } else {
+        selectedIndex = null;
+      }
     }
   }
 
@@ -101,6 +110,9 @@
       </button>
     {/each}
   </div>
+  {#if attempts > 0 && !answered}
+    <div class="mcq-retry-hint">Not quite. Try again ({attempts}/{MAX_ATTEMPTS})</div>
+  {/if}
   <button class="check-btn" onclick={handleCheck} disabled={selectedIndex === null || answered}>
     Check Answer
   </button>
@@ -133,6 +145,7 @@
   .mcq-opt.correct { border-color: #22c55e; background: rgba(34,197,94,0.1); color: #22c55e; }
   .mcq-opt.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
   .mcq-opt:disabled { cursor: default; opacity: 0.7; }
+  .mcq-retry-hint { margin-top: 8px; color: #f59e0b; font-size: 12px; font-weight: 600; }
   .check-btn { margin-top: 12px; padding: 8px 20px; background: #f97316; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; }
   .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .check-btn:hover:not(:disabled) { background: #ea580c; }
