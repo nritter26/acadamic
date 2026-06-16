@@ -58,7 +58,7 @@
     aiHintController = ac;
     const promptText = exercise.hint
       ? `Exercise hint: ${exercise.hint}\nExpected fix: ${exercise.expected}\nUser code: ${userCode}\nGive a hint without revealing the full answer.`
-      : `The user is fixing a bug. Prompt: ${exercise.prompt || 'no prompt'}. Expected fix: ${exercise.expected}. User code: ${userCode}. Give a helpful hint.`;
+      : `The user is fixing a bug. Prompt: ${exercise.prompt || 'no prompt'}. Expected fix: ${exercise.expected}. User code: ${userCode}. Give a helpful hint without revealing the fix directly.`;
     requestHint(topic, lang, userCode, promptText,
       (hint) => { aiHint = hint; },
       () => { aiHintLoading = false; },
