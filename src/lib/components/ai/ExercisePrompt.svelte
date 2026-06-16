@@ -8,6 +8,9 @@
   let hintRevealed = $state(false);
   let checkResult = $state(null);
   let checking = $state(false);
+  let generatingPractice = $state(false);
+  let recommendedTopics = $state(null);
+  let practiceResult = $state(null);
 
   async function check() {
     if (checking) return;
@@ -21,9 +24,7 @@
         learnerId: 'default',
       });
       checkResult = res;
-      if (res.passed) {
-        ai.sessionState = 'reviewing';
-      }
+      await handleCheckResult(res);
     } catch {
       checkResult = { error: 'Check failed. Make sure the server is running.', score: 0, attempts: 0, passed: false };
     } finally {
@@ -42,9 +43,52 @@
     checkResult = null;
     hintRevealed = false;
   }
+
+  async function generatePractice() {
+    generatingPractice = true;
+    practiceResult = null;
+    try {
+      const res = await apiPost('/api/tutor/start-exercise', {
+        topic: curr.topic,
+        lang: curr.lang,
+        level: 'beginner',
+        learnerId: 'default',
+      });
+      ai.exercise = res.exercise;
+      ai.sessionState = 'exercising';
+      practiceResult = res;
+    } catch {
+      practiceResult = { error: 'Failed to generate exercise.' };
+    } finally {
+      generatingPractice = false;
+    }
+  }
+
+  async function loadRecommendations() {
+    try {
+      const r = await fetch(`/api/tutor/recommend?lang=${curr.lang}&learnerId=default`);
+      const data = await r.json();
+      if (data && data.topic) {
+        recommendedTopics = data;
+      }
+    } catch {}
+  }
+
+  async function handleCheckResult(result) {
+    if (result.passed) {
+      ai.sessionState = 'reviewing';
+      await loadRecommendations();
+    }
+  }
 </script>
 
-{#if ai.sessionState === 'explaining'}
+{#if ai.sessionState === 'idle'}
+  <div class="exercise-offer">
+    <button class="ex-btn" onclick={generatePractice} disabled={generatingPractice}>
+      {generatingPractice ? 'Generating...' : 'Generate practice exercise'}
+    </button>
+  </div>
+{:else if ai.sessionState === 'explaining'}
   <div class="exercise-offer">
     <button class="ex-btn" onclick={startExercise}>Try it yourself</button>
   </div>
@@ -80,6 +124,14 @@
         {/if}
       </div>
     {/if}
+    {#if checkResult?.passed && recommendedTopics}
+      <div class="ex-recommend">
+        <strong>Recommended next:</strong> {recommendedTopics.topic}
+        {#if recommendedTopics.reason}
+          <p class="ex-recommend-reason">{recommendedTopics.reason}</p>
+        {/if}
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -101,4 +153,6 @@
   .ex-failed-msg { margin-top: 6px; color: #f59e0b; font-weight: 600; }
   .ex-review { margin-top: 8px; padding: 8px; background: #0a0f1e; border-radius: 6px; font-size: 11px; color: #94a3b8; white-space: pre-wrap; }
   .ex-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .ex-recommend { margin-top: 8px; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; font-size: 11px; color: #22c55e; }
+  .ex-recommend-reason { color: #94a3b8; font-size: 10px; margin: 4px 0 0; }
 </style>
