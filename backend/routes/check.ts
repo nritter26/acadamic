@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { generateStructureReview } from '../ai/reviewer';
+import { validate } from '../middleware';
+import { CheckSchema } from '../types';
 
 const router = Router();
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(CheckSchema), async (req: Request, res: Response) => {
   const { lang, code } = req.body;
 
   if (!code || typeof code !== 'string') {
