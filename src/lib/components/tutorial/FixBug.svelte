@@ -84,7 +84,7 @@
       {:else if aiHintLoading}
         <div class="ai-hint-loading">Generating hint...</div>
       {:else if aiHintError}
-        <div class="ai-hint-error">Hint unavailable: {aiHintError}</div>
+        <div class="ai-hint-error">&#9888; Hint unavailable: {aiHintError}</div>
       {/if}
     </div>
   {/if}
