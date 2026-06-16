@@ -5,7 +5,6 @@
   let { exercise, oncomplete = () => {}, lang = 'js' } = $props();
 
   let topic = $derived(exercise.prompt?.split('\n')[0] || 'programming');
-
   let userCode = $state(exercise.code);
   let answered = $state(false);
   let correct = $state(false);
@@ -13,6 +12,8 @@
   let aiHintLoading = $state(false);
   let aiHintError = $state('');
   let aiHintController = null;
+  let attempts = $state(0);
+  const MAX_ATTEMPTS = 2;
 
   $effect(() => {
     userCode = exercise.code;
@@ -21,6 +22,7 @@
     aiHint = '';
     aiHintLoading = false;
     aiHintError = '';
+    attempts = 0;
     return () => {
       aiHintController?.abort();
       aiHintController = null;
@@ -29,10 +31,22 @@
 
   function handleCheck() {
     if (answered || userCode.trim() === '') return;
-    correct = userCode.trim() === exercise.expected.trim();
-    answered = true;
-    if (correct) {
+
+    const exactMatch = userCode.trim() === exercise.expected.trim();
+
+    if (exactMatch) {
+      correct = true;
+      answered = true;
       oncomplete();
+      return;
+    }
+
+    attempts += 1;
+
+    if (attempts >= MAX_ATTEMPTS) {
+      correct = false;
+      answered = true;
+      requestAiHint();
     } else {
       requestAiHint();
     }
@@ -42,8 +56,8 @@
     aiHintLoading = true;
     const ac = new AbortController();
     aiHintController = ac;
-    requestHint(topic, lang, userCode,
-      'The user is filling in blank code and got it wrong. Give them a hint.',
+    const promptText = `The user is filling in blank code. Prompt: ${exercise.prompt || 'no prompt'}. Expected: ${exercise.expected}. The user wrote: ${userCode}. Give them a hint without revealing the full answer.`;
+    requestHint(topic, lang, userCode, promptText,
       (hint) => { aiHint = hint; },
       () => { aiHintLoading = false; },
       (err) => { aiHintError = err; aiHintLoading = false; },
@@ -58,21 +72,30 @@
   <button class="check-btn" onclick={handleCheck} disabled={answered || userCode.trim() === ''}>
     Check Answer
   </button>
+  {#if !answered && attempts > 0}
+    <div class="feedback wrong" aria-live="polite">
+      <span class="feedback-icon">&#10007;</span> Not quite. {attempts}/{MAX_ATTEMPTS} attempts used
+      {#if aiHint}
+        <div class="ai-hint">&#128161; {aiHint}</div>
+      {:else if aiHintLoading}
+        <div class="ai-hint-loading">Generating hint...</div>
+      {:else if aiHintError}
+        <div class="ai-hint-error">Hint unavailable: {aiHintError}</div>
+      {/if}
+    </div>
+  {/if}
   {#if answered}
     <div class="feedback" class:correct class:wrong={!correct} aria-live="polite">
       {#if correct}
-        <span class="feedback-icon">&#10003;</span> Correct
+        <span class="feedback-icon">&#10003;</span> Correct!
       {:else}
-        <span class="feedback-icon">&#10007;</span> Not quite
+        <span class="feedback-icon">&#10007;</span> Not quite. The expected answer:
+        <pre class="expected-code">{exercise.expected}</pre>
         {#if aiHint}
           <div class="ai-hint">&#128161; {aiHint}</div>
         {:else if aiHintLoading}
           <div class="ai-hint-loading">Generating hint...</div>
         {/if}
-        <div class="expected-block">
-          <div class="expected-label">Expected:</div>
-          <pre class="expected-code">{exercise.expected}</pre>
-        </div>
         <TutorialHelpButton
           label="Ask Devin for more help"
           topic={topic}
@@ -101,6 +124,5 @@
   .expected-code { margin-top: 8px; padding: 10px; background: #0a0f1e; border: 1px solid #334155; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #e2e8f0; white-space: pre; overflow-x: auto; }
   .ai-hint { margin-top: 8px; padding: 10px; background: #1e1b4b; border: 1px solid #4c1d95; border-radius: 6px; font-size: 12px; color: #c4b5fd; line-height: 1.5; font-weight: 400; }
   .ai-hint-loading { margin-top: 8px; padding: 10px; font-size: 12px; color: #8b5cf6; font-style: italic; }
-  .expected-block { margin-top: 8px; }
-  .expected-label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 400; }
+  .ai-hint-error { margin-top: 8px; padding: 10px; background: #1e1b4b; border: 1px solid #ef4444; border-radius: 6px; font-size: 12px; color: #fca5a5; line-height: 1.5; font-weight: 400; }
 </style>
