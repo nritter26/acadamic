@@ -77,7 +77,7 @@
         body: JSON.stringify({ lang: curr.lang, code: editor.code }),
       });
       const data = await r.json();
-      exec.output = data.result || data.output || JSON.stringify(data, null, 2) || '(no issues found)';
+      exec.output = data.result || data.output || '(no issues found)';
     } catch (e) {
       exec.error = 'Failed: ' + e.message;
     }
