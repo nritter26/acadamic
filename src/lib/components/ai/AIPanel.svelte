@@ -13,6 +13,18 @@
   let input = $state('');
   let showSettings = $state(false);
   let offlineStatus = $state('⟳ Checking server...');
+  let showCommands = $state(false);
+  let selectedCmdIndex = $state(0);
+
+  const COMMANDS = [
+    { name: '/async', desc: 'Convert to async/await' },
+    { name: '/error-handling', desc: 'Add error handling' },
+    { name: '/typescript', desc: 'Convert to TypeScript' },
+    { name: '/optimize', desc: 'Optimize performance' },
+    { name: '/document', desc: 'Add documentation' },
+    { name: '/test', desc: 'Write unit tests' },
+    { name: '/fix', desc: 'Fix bugs/issues' },
+  ];
 
   let messagesEl;
   let inputEl;
@@ -35,6 +47,39 @@
     }
   }
 
+  function getCommandMatch(text) {
+    const cmd = COMMANDS.find(c => text.startsWith(c.name + ' ') || text === c.name);
+    return cmd || null;
+  }
+
+  async function handleTransformCommand(cmdName) {
+    const code = ai.editorCode;
+    if (!code) {
+      ai.updateLastMessage('No code available to transform. Open a file or write some code first.');
+      ai.setStreaming(false);
+      return;
+    }
+
+    const cmdType = cmdName.slice(1);
+    let streamed = '';
+    try {
+      const r = await fetch('/api/tutor/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, lang: curr.lang, type: cmdType }),
+      });
+      const data = await r.json();
+      if (data.error) {
+        ai.updateLastMessage(`Transformation failed: ${data.error}`);
+      } else {
+        ai.updateLastMessage(`**${cmdName}**\n\n${data.explanation}\n\nTransformed code:\n\`\`\`\n${data.transformedCode}\n\`\`\``);
+      }
+    } catch (e) {
+      ai.updateLastMessage(`Error: ${e.message}`);
+    }
+    ai.setStreaming(false);
+  }
+
   async function send() {
     if (!ai.useAI) {
       ai.toggleAI();
@@ -55,10 +100,17 @@
       }
     }
 
+    showCommands = false;
     input = '';
     ai.addMessage(message, 'user');
     ai.addMessage('', 'bot');
     ai.setStreaming(true);
+
+    const cmd = getCommandMatch(message);
+    if (cmd) {
+      await handleTransformCommand(cmd.name);
+      return;
+    }
 
     let streamed = '';
     const body = { message, lang: curr.lang, topic: curr.topic, phase: curr.phase, code: ai.editorCode || undefined };
@@ -157,15 +209,32 @@
       <div class="ai-offline-badge">{offlineStatus}</div>
     {/if}
     <div class="ai-input-row">
-      <textarea
-        bind:this={inputEl}
-        bind:value={input}
-        onkeydown={handleKeydown}
-        oninput={autoGrow}
-        placeholder="Ask a question... (Ctrl+K)"
-        rows="1"
-        aria-label="Ask Devin"
-      ></textarea>
+      <div class="ai-input-wrapper">
+        <textarea
+          bind:this={inputEl}
+          bind:value={input}
+          onkeydown={handleKeydown}
+          oninput={() => { autoGrow(); showCommands = input.startsWith('/') && input.length > 1; }}
+          onblur={() => setTimeout(() => showCommands = false, 200)}
+          onfocus={() => { showCommands = input.startsWith('/') && input.length > 1; }}
+          placeholder="Ask a question... (Ctrl+K)"
+          rows="1"
+          aria-label="Ask Devin"
+        ></textarea>
+        {#if showCommands}
+          <div class="commands-dropdown">
+            {#each COMMANDS.filter(c => c.name.startsWith(input.toLowerCase().split(' ')[0])) as cmd, i}
+              <button
+                class="cmd-item"
+                onmousedown={(e) => { e.preventDefault(); input = cmd.name + ' '; showCommands = false; inputEl?.focus(); }}
+              >
+                <span class="cmd-name">{cmd.name}</span>
+                <span class="cmd-desc">{cmd.desc}</span>
+              </button>
+            {/each}
+          </div>
+        {/if}
+      </div>
       {#if ai.streaming}
         <button class="ai-stop-btn" onclick={stopStreaming} title="Stop generating">■</button>
       {:else}
@@ -195,8 +264,15 @@
   .typing { padding: 8px 12px; color: #64748b; font-size: 12px; }
   .ai-offline-badge { padding: 4px 10px; font-size: 9px; color: #94a3b8; background: #1e293b; border-top: 1px solid #334155; text-align: center; }
   .ai-input-row { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid #1e293b; align-items: flex-end; }
-  .ai-input-row textarea { flex: 1; padding: 8px; border: 1px solid #334155; border-radius: 6px; background: #0a0f1e; color: #e2e8f0; font-size: 12px; resize: none; max-height: 120px; line-height: 1.4; }
+  .ai-input-row .ai-input-wrapper { flex: 1; }
   .ai-input-row button { padding: 8px 14px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
   .ai-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
   .ai-stop-btn { background: #ef4444 !important; }
+  .ai-input-wrapper { position: relative; flex: 1; display: flex; }
+  .ai-input-wrapper textarea { flex: 1; padding: 8px; border: 1px solid #334155; border-radius: 6px; background: #0a0f1e; color: #e2e8f0; font-size: 12px; resize: none; max-height: 120px; line-height: 1.4; }
+  .commands-dropdown { position: absolute; bottom: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid #334155; border-radius: 6px; margin-bottom: 4px; max-height: 200px; overflow-y: auto; z-index: 100; }
+  .cmd-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; background: transparent; border: none; color: #e2e8f0; font-size: 11px; cursor: pointer; text-align: left; }
+  .cmd-item:hover { background: #334155; }
+  .cmd-name { font-weight: 700; color: #6366f1; }
+  .cmd-desc { color: #94a3b8; font-size: 10px; }
 </style>
