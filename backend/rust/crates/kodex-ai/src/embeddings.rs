@@ -8,6 +8,8 @@ use kodex_core::error::AppError;
 pub struct EmbeddingEngine {
     /// Maps normalized topic name to its TF-IDF vector
     topic_vectors: Vec<(String, Vec<f64>)>,
+    /// Maps topic name (as stored in vectors) to its raw curriculum text
+    content_store: std::collections::HashMap<String, String>,
     /// The vocabulary (all unique terms across all documents)
     vocabulary: Vec<String>,
     /// Number of documents
@@ -36,20 +38,6 @@ fn term_frequency(tokens: &[String]) -> HashMap<String, f64> {
     tf
 }
 
-/// Extract text content from a curriculum topic value (which can be string, array, or object)
-fn extract_text(value: &serde_json::Value) -> String {
-    match value {
-        serde_json::Value::String(s) => s.clone(),
-        serde_json::Value::Array(arr) => {
-            arr.iter().map(extract_text).collect::<Vec<_>>().join(" ")
-        }
-        serde_json::Value::Object(obj) => {
-            obj.values().map(extract_text).collect::<Vec<_>>().join(" ")
-        }
-        _ => String::new(),
-    }
-}
-
 /// Default topics used when no content files are available
 fn get_default_topics() -> Vec<(String, String)> {
     vec![
@@ -71,14 +59,27 @@ impl EmbeddingEngine {
     pub fn new() -> Self {
         Self {
             topic_vectors: Vec::new(),
+            content_store: std::collections::HashMap::new(),
             vocabulary: Vec::new(),
             doc_count: 0,
         }
     }
 
+    pub fn use_default_topics(&mut self) {
+        let docs = get_default_topics();
+        self.build(docs);
+    }
+
+    /// Core languages to include in the index (others fall back to defaults)
+    const CORE_LANGS: &'static [&'static str] = &[
+        "js", "py", "ts", "java", "html", "css", "go", "rs", "cpp", "cs",
+        "swift", "kotlin", "php", "ruby", "r", "sql", "bash", "scala", "dart",
+    ];
+
     /// Build the index from curriculum JSON files in content_dir.
     /// Each JSON file has structure: { "Phase Name": { "Topic Name": { ... } } }
     /// Extract topic names and their descriptions as documents.
+    /// Only indexes core languages for performance; others use default topics.
     pub async fn build_from_content(&mut self, content_dir: &Path) -> Result<(), AppError> {
         use tokio::fs;
         use tokio::io::AsyncReadExt;
@@ -87,7 +88,8 @@ impl EmbeddingEngine {
 
         let mut dir = match fs::read_dir(content_dir).await {
             Ok(d) => d,
-            Err(_) => {
+            Err(e) => {
+                tracing::warn!("read_dir failed for {:?}: {}", content_dir, e);
                 all_docs = get_default_topics();
                 self.build(all_docs);
                 return Ok(());
@@ -97,10 +99,18 @@ impl EmbeddingEngine {
         let mut entries = Vec::new();
         while let Ok(Some(entry)) = dir.next_entry().await {
             let path = entry.path();
-            if path.extension().map_or(false, |ext| ext == "json") {
+            let fname = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+            if path.extension().map_or(false, |ext| ext == "json")
+                && fname != "app-data"
+                && fname != "curriculum"
+                && !fname.ends_with("_th")
+                && Self::CORE_LANGS.contains(&fname)
+            {
                 entries.push(path);
             }
         }
+
+        tracing::info!("Indexing {} content files ({} core languages)", entries.len(), Self::CORE_LANGS.len());
 
         for path in &entries {
             let mut contents = String::new();
@@ -116,8 +126,14 @@ impl EmbeddingEngine {
                     for (_phase_name, phase_data) in obj {
                         if let Some(topics) = phase_data.as_object() {
                             for (topic_name, topic_data) in topics {
-                                let text = extract_text(topic_data);
-                                all_docs.push((format!("{}::{}", _phase_name, topic_name), text));
+                                // Only index the explanation text, skip code/exercises
+                                let text = topic_data.get("exp")
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("")
+                                    .to_string();
+                                if !text.is_empty() {
+                                    all_docs.push((format!("{}::{}", _phase_name, topic_name), text));
+                                }
                             }
                         }
                     }
@@ -126,10 +142,13 @@ impl EmbeddingEngine {
         }
 
         if all_docs.is_empty() {
+            tracing::warn!("No documents found from content files, using default topics");
             all_docs = get_default_topics();
         }
 
+        tracing::info!("Building TF-IDF index from {} documents...", all_docs.len());
         self.build(all_docs);
+        tracing::info!("Embedding index built with {} topics (vocab size: {})", self.topic_vectors.len(), self.vocabulary.len());
         Ok(())
     }
 
@@ -144,6 +163,7 @@ impl EmbeddingEngine {
         let mut doc_vectors: Vec<(String, HashMap<String, f64>)> = Vec::new();
 
         for (name, text) in &docs {
+            self.content_store.insert(name.clone(), text.clone());
             let tokens = tokenize(text);
             let tf = term_frequency(&tokens);
             for token in tf.keys() {
@@ -166,15 +186,16 @@ impl EmbeddingEngine {
             return;
         }
 
+        // Precompute df per term from the already-built term-frequency maps (O(vocab × docs) hash lookups)
+        let doc_term_sets: Vec<HashSet<&String>> = doc_vectors.iter().map(|(_, tf)| tf.keys().collect()).collect();
+        let df_cache: Vec<usize> = self.vocabulary.iter().map(|term| {
+            doc_term_sets.iter().filter(|set| set.contains(term)).count().max(1)
+        }).collect();
+
         for (name, tf) in &doc_vectors {
             let mut vector = vec![0.0_f64; vocab_size];
             for (i, term) in self.vocabulary.iter().enumerate() {
-                let df = docs
-                    .iter()
-                    .filter(|(_, text)| text.to_lowercase().contains(term))
-                    .count()
-                    .max(1);
-
+                let df = df_cache[i];
                 let idf = (self.doc_count as f64 / df as f64).ln() + 1.0;
                 let term_freq = tf.get(term).copied().unwrap_or(0.0);
                 vector[i] = term_freq * idf;
@@ -228,6 +249,34 @@ impl EmbeddingEngine {
         scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         scores.truncate(k);
         scores.into_iter().filter(|(_, score)| *score > 0.01).collect()
+    }
+
+    /// Retrieve raw curriculum text for a topic by its name.
+    /// Matches exact (phase-prefixed), suffix-only (after `::`), or case-insensitive.
+    pub fn get_content(&self, topic: &str) -> Option<&str> {
+        let lower = topic.to_lowercase();
+        // Phase 1: exact match
+        if let Some(text) = self.content_store.get(topic) {
+            return Some(text.as_str());
+        }
+        // Phase 2: case-insensitive or suffix match
+        for (k, v) in &self.content_store {
+            let k_lower = k.to_lowercase();
+            if k_lower == lower {
+                return Some(v.as_str());
+            }
+            if let Some(suffix) = k.rsplit("::").next() {
+                if suffix.to_lowercase() == lower {
+                    return Some(v.as_str());
+                }
+            }
+        }
+        None
+    }
+
+    /// List all indexed topic names
+    pub fn topic_names(&self) -> Vec<&str> {
+        self.topic_vectors.iter().map(|(name, _)| name.as_str()).collect()
     }
 }
 

@@ -5,6 +5,10 @@
       "code": "",
       "exercises": []
     },
+    "MySQL Data Types": [
+      "MySQL supports many data types: INT, BIGINT, VARCHAR, CHAR, TEXT, DATE, DATETIME, TIMESTAMP, FLOAT, DOUBLE, DECIMAL, JSON, ENUM, SET, BLOB. Choose types carefully — VARCHAR(255) for short strings, TEXT for long, DECIMAL for money.",
+      "CREATE TABLE example (\n  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n  name VARCHAR(100) NOT NULL,\n  price DECIMAL(10,2) DEFAULT 0.00,\n  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n  status ENUM('active', 'inactive') DEFAULT 'active',\n  metadata JSON\n);"
+    ],
     "What is MySQL": [
       "MySQL is the world's most popular open-source relational database. It uses SQL for querying and is commonly used with LAMP/LEMP stacks. Known for speed, reliability, and ease of use. Owned by Oracle, with MariaDB as a popular fork.",
       "SELECT VERSION();\n-- MySQL 8.0.36 on Linux"
@@ -16,10 +20,6 @@
     "Connecting with mysql CLI": [
       "The mysql CLI connects to a MySQL server. Options: -h host, -P port, -u user, -p password prompt. Use -e for inline queries. \\q or exit to quit. Use \\u db_name to switch databases.",
       "mysql -h localhost -u root -p\n\nmysql> SHOW DATABASES;\nmysql> USE mydb;\nmysql> SHOW TABLES;\nmysql> \\u mydb;\nmysql> \\q"
-    ],
-    "MySQL Data Types": [
-      "MySQL supports many data types: INT, BIGINT, VARCHAR, CHAR, TEXT, DATE, DATETIME, TIMESTAMP, FLOAT, DOUBLE, DECIMAL, JSON, ENUM, SET, BLOB. Choose types carefully — VARCHAR(255) for short strings, TEXT for long, DECIMAL for money.",
-      "CREATE TABLE example (\n  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n  name VARCHAR(100) NOT NULL,\n  price DECIMAL(10,2) DEFAULT 0.00,\n  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n  status ENUM('active', 'inactive') DEFAULT 'active',\n  metadata JSON\n);"
     ]
   },
   "Core Concepts": {
@@ -28,6 +28,20 @@
       "code": "",
       "exercises": []
     }
+  },
+  "Functions & Expressions": {
+    "Conditional Expressions": [
+      "IF(condition, true_val, false_val) — simple ternary. CASE WHEN ... THEN ... ELSE ... END — multi-way branching. IFNULL(val, default) — coalesce null. COALESCE(val1, val2, ..., default) — first non-null.",
+      "SELECT name, IF(price > 100, 'expensive', 'cheap') AS category FROM products;\n\nSELECT\n  CASE\n    WHEN score >= 90 THEN 'A'\n    WHEN score >= 80 THEN 'B'\n    WHEN score >= 70 THEN 'C'\n    ELSE 'F'\n  END AS grade\nFROM exam_results;\n\nSELECT COALESCE(phone, email, 'no contact') FROM users;"
+    ],
+    "String Functions": [
+      "MySQL has powerful string functions: CONCAT (join strings), SUBSTRING (extract part), LENGTH (byte count), CHAR_LENGTH (character count), UPPER/LOWER (case), TRIM (remove spaces), REPLACE (find/replace), LOCATE (position of substring).",
+      "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users;\nSELECT UPPER(email) FROM users;\nSELECT SUBSTRING(phone, 1, 3) AS area_code FROM customers;\nSELECT REPLACE(description, 'old', 'new') FROM products;\nSELECT CHAR_LENGTH(comment) AS char_count FROM reviews;"
+    ],
+    "Date & Time Functions": [
+      "Key functions: NOW() (current datetime), CURDATE() (date), CURTIME() (time). DATE_FORMAT for custom formatting. DATE_ADD/DATE_SUB for arithmetic. DATEDIFF for difference. EXTRACT for parts (YEAR, MONTH, DAY).",
+      "SELECT NOW(), CURDATE(), CURTIME();\nSELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') FROM orders;\nSELECT * FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY);\nSELECT DATEDIFF(NOW(), created_at) AS days_ago FROM orders;\nSELECT EXTRACT(YEAR_MONTH FROM created_at) AS ym FROM orders GROUP BY ym;"
+    ]
   },
   "Data Modeling": {
     "MySQL Schema Design": {
@@ -39,39 +53,6 @@
   "Querying": {
     "MySQL Queries": {
       "exp": "Querying data in MySQL.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Indexes & Performance": {
-    "MySQL Performance": {
-      "exp": "Optimizing MySQL performance.",
-      "code": "",
-      "exercises": []
-    },
-    "Index Basics": [
-      "Indexes speed up SELECT queries at the cost of slower INSERT/UPDATE. CREATE INDEX on frequently queried columns. PRIMARY KEY is a clustered index. UNIQUE index enforces uniqueness. Use EXPLAIN to check if queries use indexes.",
-      "CREATE INDEX idx_email ON users(email);\nCREATE UNIQUE INDEX idx_username ON users(username);\nCREATE INDEX idx_name_status ON users(name, status);\n\n-- Check index usage\nEXPLAIN SELECT * FROM users WHERE email = 'test@example.com';"
-    ],
-    "EXPLAIN Query Analysis": [
-      "EXPLAIN shows how MySQL executes a query. Key fields: type (ALL=full scan, ref/eq_ref=index lookup), possible_keys (indexes MySQL could use), key (index actually used), rows (estimated rows examined), Extra (Using index=covered, Using filesort=bad).",
-      "EXPLAIN SELECT u.name, COUNT(o.id) AS orders\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.created_at > '2024-01-01'\nGROUP BY u.id\nORDER BY orders DESC\nLIMIT 10;\n-- Look for: type=ALL (bad), Using filesort (bad), rows (high=bad)"
-    ],
-    "Slow Query Log": [
-      "Enable the slow query log to find performance issues. Set long_query_time (default 10s). Log queries that don't use indexes with log_queries_not_using_indexes. Analyze with mysqldumpslow or pt-query-digest.",
-      "-- Enable slow query log\nSET GLOBAL slow_query_log = ON;\nSET GLOBAL long_query_time = 2;\nSET GLOBAL log_queries_not_using_indexes = ON;\n\n-- View slow log location\nSHOW VARIABLES LIKE 'slow_query_log_file';\n\n# Analyze slow queries\n# mysqldumpslow /var/log/mysql/mysql-slow.log"
-    ]
-  },
-  "Security": {
-    "MySQL Security": {
-      "exp": "Securing your MySQL databases.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Features": {
-    "MySQL Advanced": {
-      "exp": "Advanced MySQL features and techniques.",
       "code": "",
       "exercises": []
     }
@@ -139,53 +120,17 @@
     ]
   },
   "Aggregation & Grouping": {
-    "GROUP BY & HAVING": [
-      "GROUP BY groups rows by column values. Aggregate functions (COUNT, SUM, AVG, MIN, MAX) compute per-group stats. HAVING filters groups (like WHERE for groups). SELECT columns must be in GROUP BY or aggregate functions.",
-      "SELECT status, COUNT(*) AS count, SUM(total) AS revenue\nFROM orders\nGROUP BY status;\n\nSELECT user_id, COUNT(*) AS orders, SUM(total) AS spent\nFROM orders\nGROUP BY user_id\nHAVING spent > 1000\nORDER BY spent DESC;"
-    ],
     "Aggregate Functions": [
       "COUNT(*): row count. COUNT(col): non-null count. SUM(col): total. AVG(col): average. MIN(col): minimum. MAX(col): maximum. GROUP_CONCAT(col): concatenates values into a string. DISTINCT inside aggregates: COUNT(DISTINCT col).",
       "SELECT\n  COUNT(*) AS total_orders,\n  COUNT(DISTINCT user_id) AS unique_customers,\n  SUM(total) AS revenue,\n  AVG(total) AS avg_order,\n  MIN(total) AS min_order,\n  MAX(total) AS max_order,\n  GROUP_CONCAT(DISTINCT status ORDER BY status SEPARATOR ', ') AS statuses\nFROM orders;"
     ],
+    "GROUP BY & HAVING": [
+      "GROUP BY groups rows by column values. Aggregate functions (COUNT, SUM, AVG, MIN, MAX) compute per-group stats. HAVING filters groups (like WHERE for groups). SELECT columns must be in GROUP BY or aggregate functions.",
+      "SELECT status, COUNT(*) AS count, SUM(total) AS revenue\nFROM orders\nGROUP BY status;\n\nSELECT user_id, COUNT(*) AS orders, SUM(total) AS spent\nFROM orders\nGROUP BY user_id\nHAVING spent > 1000\nORDER BY spent DESC;"
+    ],
     "ROLLUP & GROUPING": [
       "WITH ROLLUP adds subtotal and grand total rows to GROUP BY results. GROUPING() distinguishes subtotal rows from regular rows. Useful for summary reports and dashboards.",
       "SELECT\n  COALESCE(region, 'ALL') AS region,\n  COALESCE(product_category, 'ALL') AS category,\n  SUM(amount) AS total\nFROM sales\nGROUP BY region, product_category WITH ROLLUP;"
-    ]
-  },
-  "Functions & Expressions": {
-    "String Functions": [
-      "MySQL has powerful string functions: CONCAT (join strings), SUBSTRING (extract part), LENGTH (byte count), CHAR_LENGTH (character count), UPPER/LOWER (case), TRIM (remove spaces), REPLACE (find/replace), LOCATE (position of substring).",
-      "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users;\nSELECT UPPER(email) FROM users;\nSELECT SUBSTRING(phone, 1, 3) AS area_code FROM customers;\nSELECT REPLACE(description, 'old', 'new') FROM products;\nSELECT CHAR_LENGTH(comment) AS char_count FROM reviews;"
-    ],
-    "Date & Time Functions": [
-      "Key functions: NOW() (current datetime), CURDATE() (date), CURTIME() (time). DATE_FORMAT for custom formatting. DATE_ADD/DATE_SUB for arithmetic. DATEDIFF for difference. EXTRACT for parts (YEAR, MONTH, DAY).",
-      "SELECT NOW(), CURDATE(), CURTIME();\nSELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') FROM orders;\nSELECT * FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY);\nSELECT DATEDIFF(NOW(), created_at) AS days_ago FROM orders;\nSELECT EXTRACT(YEAR_MONTH FROM created_at) AS ym FROM orders GROUP BY ym;"
-    ],
-    "Conditional Expressions": [
-      "IF(condition, true_val, false_val) — simple ternary. CASE WHEN ... THEN ... ELSE ... END — multi-way branching. IFNULL(val, default) — coalesce null. COALESCE(val1, val2, ..., default) — first non-null.",
-      "SELECT name, IF(price > 100, 'expensive', 'cheap') AS category FROM products;\n\nSELECT\n  CASE\n    WHEN score >= 90 THEN 'A'\n    WHEN score >= 80 THEN 'B'\n    WHEN score >= 70 THEN 'C'\n    ELSE 'F'\n  END AS grade\nFROM exam_results;\n\nSELECT COALESCE(phone, email, 'no contact') FROM users;"
-    ]
-  },
-  "Advanced": {
-    "Transactions": [
-      "Transactions group operations as atomic units: all succeed or all roll back. START TRANSACTION / BEGIN, COMMIT, ROLLBACK. SAVEPOINT creates rollback points. InnoDB supports transactions (MyISAM does not).",
-      "START TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n-- ROLLBACK if error occurs\n\n-- Savepoint example\nSTART TRANSACTION;\nINSERT INTO logs SET message = 'step 1';\nSAVEPOINT sp1;\nINSERT INTO logs SET message = 'step 2';\nROLLBACK TO SAVEPOINT sp1;\nCOMMIT;"
-    ],
-    "Stored Procedures": [
-      "Stored procedures are reusable SQL blocks stored on the server. DELIMITER changes the statement delimiter. IN, OUT, INOUT parameters. Variables with DECLARE. Handlers for error handling. Reduces network traffic for complex operations.",
-      "DELIMITER $$\nCREATE PROCEDURE GetUserOrders(IN userId INT)\nBEGIN\n  SELECT * FROM orders WHERE user_id = userId\n  ORDER BY created_at DESC;\nEND$$\nDELIMITER ;\n\nCALL GetUserOrders(123);\nDROP PROCEDURE GetUserOrders;"
-    ],
-    "Views": [
-      "Views are saved SQL queries that act like virtual tables. Simplify complex queries, add security layers (restrict columns), and provide abstraction. WITH CHECK OPTION prevents inserts/updates that don't match the view condition.",
-      "CREATE VIEW active_customers AS\nSELECT u.id, u.name, COUNT(o.id) AS order_count, SUM(o.total) AS total_spent\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.status = 'active'\nGROUP BY u.id, u.name;\n\n-- Use like a table\nSELECT * FROM active_customers WHERE total_spent > 500;"
-    ],
-    "Triggers": [
-      "Triggers automatically execute SQL when a table event occurs (INSERT, UPDATE, DELETE). BEFORE/AFTER timing. FOR EACH ROW per-row trigger. OLD/ NEW refer to row values. Useful for auditing, validation, and derived data.",
-      "CREATE TRIGGER before_user_update\nBEFORE UPDATE ON users\nFOR EACH ROW\nSET NEW.updated_at = NOW();\n\n-- Audit log trigger\nCREATE TRIGGER after_order_insert\nAFTER INSERT ON orders\nFOR EACH ROW\nINSERT INTO audit_log (table_name, action, record_id)\nVALUES ('orders', 'INSERT', NEW.id);"
-    ],
-    "JSON in MySQL": [
-      "MySQL has native JSON data type and functions: JSON_EXTRACT (or -> operator), JSON_UNQUOTE (or ->>), JSON_ARRAY, JSON_OBJECT, JSON_SET, JSON_KEYS, JSON_CONTAINS. Index JSON fields with generated columns.",
-      "CREATE TABLE events (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  data JSON\n);\n\nINSERT INTO events (data) VALUES\n  ('{\"type\": \"click\", \"page\": \"/home\", \"userId\": 42}'),\n  ('{\"type\": \"purchase\", \"total\": 29.99, \"items\": [\"book\", \"pen\"]}');\n\nSELECT data->>'$.type' AS event_type FROM events;\nSELECT * FROM events WHERE JSON_CONTAINS(data->>'$.type', '\"click\"');\n\n-- Generated column index for JSON field\nALTER TABLE events ADD COLUMN event_type VARCHAR(50) GENERATED ALWAYS AS (data->>'$.type') STORED;\nCREATE INDEX idx_event_type ON events(event_type);"
     ]
   },
   "MySQL Cloud": {
@@ -209,10 +154,6 @@
       "Oracle HeatWave is MySQL on OCI with an integrated in-memory query accelerator. HeatWave engine runs analytics directly on MySQL data — no ETL. Up to 6.5x faster than Aurora at half the cost. Built-in ML: HeatWave AutoML trains models inside the database. Lakehouse: query object storage (AWS S3, Azure Blob, OCI) directly from MySQL. Consistent pricing across all global regions. Automatic in-memory caching of InnoDB buffer pool.",
       "# Create HeatWave MySQL on OCI\n# Via OCI CLI or Console\n# Shape: MySQL.Intel.32.256GB\n# Storage: 10TB\n# HeatWave cluster: 8 nodes\n\n# Connect (standard MySQL protocol)\nmysql -h my-instance.mysql.us-ashburn-1.oci.oraclecloud.com -u admin -p\n\n# Load data into HeatWave (no manual loading needed)\n# HeatWave auto-loads based on usage patterns\n\n# ML inference inside MySQL\nSELECT id, name,\n  ML_PREDICT_ROW(\n    '{\"table\": \"customer_churn\", \"model\": \"churn_model\"}',\n    JSON_OBJECT('tenure', 12, 'monthly_charges', 79.99)\n  ) AS churn_probability\nFROM dual;"
     ],
-    "PlanetScale": [
-      "PlanetScale is a serverless MySQL-compatible platform built on Vitess (YouTube's MySQL sharding layer). Git-like database branching: create schema branches, test changes, deploy via deploy requests with zero-downtime. Automatic horizontal scaling via Vitess sharding. Deploy requests for schema change review. Non-blocking schema migrations using gh-ost. Point-in-time recovery. Global read replicas. Connect via standard MySQL protocol. Foreign keys limited (Vitess constraint). Free $5/mo starter plan.",
-      "# Install CLI\nbrew install planetscale/tap/pscale\n# or: curl -fsSL https://cli.planetscale.com/install.sh | sh\n\npscale auth login\n\n# Create database\npscale database create my-app --region us-east\n\n# Create branch (like git branch)\npscale branch create my-app add-user-index\n\n# Connect locally via proxy\npscale connect my-app main --port 3309\n# mysql -h 127.0.0.1 -P 3309 -u root\n\n# Deploy request (merge schema change)\npscale deploy-request create my-app add-user-index\n\n# Production connection string\n# mysql://username:password@us-east.connect.psdb.cloud/my-app?ssl-mode=require"
-    ],
     "DigitalOcean & Aiven": [
       "DigitalOcean Managed Databases: simple managed MySQL with automated backups, HA failover, monitoring. Starts at $15/mo (1 vCPU, 1GB). Aiven: multi-cloud MySQL on AWS/Azure/GCP, with BYOC option. Free tier available. PlanetScale, Aiven, and DigitalOcean offer managed MySQL outside the big 3 clouds, often simpler pricing and less lock-in.",
       "# DigitalOcean: create via API/CLI\n# doctl databases create --engine mysql --region nyc1 --size db-s-1vcpu-1gb --name my-db\n\n# Connection\n# mysql -h db-mysql-nyc1-xxxxx.db.ondigitalocean.com -u doadmin -p -P 25060 mydb\n\n# Aiven: create via CLI\navn service create \\\n  --service-type mysql \\\n  --plan startup-4 \\\n  --cloud aws-us-east-1 \\\n  my-mysql\n\n# Aiven connection\n# mysql -h my-mysql.aivencloud.com -u avnadmin -p -P 3306"
@@ -220,6 +161,75 @@
     "Migration to Cloud MySQL": [
       "Strategies: dump-and-restore (mysqldump to cloud), logical replication, or physical migration (AWS DMS, GCP Database Migration Service, Azure DMS). For minimal downtime use CDC-based replication. Validate character sets, timezone, sql_mode differences. Plan for network latency — co-locate app and DB in same region. Use connection pooling (ProxySQL, RDS Proxy) for serverless apps.",
       "# mysqldump migration (offline)\nmysqldump -h source-host -u root -p \\\n  --single-transaction \\\n  --routines --triggers --events \\\n  --databases mydb > dump.sql\n\n# Import to cloud\nmysql -h cloud-host -u admin -p < dump.sql\n\n# AWS DMS replication task (CDC, minimal downtime)\n# aws dms create-replication-task \\\n#   --source-endpoint-arn arn:aws:dms:... \\\n#   --target-endpoint-arn arn:aws:dms:... \\\n#   --migration-type full-load-and-cdc\n\n# Check compatibility\nmysql -h cloud-host -u admin -p -e \"SHOW VARIABLES LIKE 'sql_mode';\"\n# Ensure timezone matches application expectations"
+    ],
+    "PlanetScale": [
+      "PlanetScale is a serverless MySQL-compatible platform built on Vitess (YouTube's MySQL sharding layer). Git-like database branching: create schema branches, test changes, deploy via deploy requests with zero-downtime. Automatic horizontal scaling via Vitess sharding. Deploy requests for schema change review. Non-blocking schema migrations using gh-ost. Point-in-time recovery. Global read replicas. Connect via standard MySQL protocol. Foreign keys limited (Vitess constraint). Free $5/mo starter plan.",
+      "# Install CLI\nbrew install planetscale/tap/pscale\n# or: curl -fsSL https://cli.planetscale.com/install.sh | sh\n\npscale auth login\n\n# Create database\npscale database create my-app --region us-east\n\n# Create branch (like git branch)\npscale branch create my-app add-user-index\n\n# Connect locally via proxy\npscale connect my-app main --port 3309\n# mysql -h 127.0.0.1 -P 3309 -u root\n\n# Deploy request (merge schema change)\npscale deploy-request create my-app add-user-index\n\n# Production connection string\n# mysql://username:password@us-east.connect.psdb.cloud/my-app?ssl-mode=require"
+    ]
+  },
+  "Administration": {
+    "User Management": [
+      "CREATE USER creates a new user with a host (e.g., 'user'@'localhost'). GRANT assigns privileges: SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALL PRIVILEGES. REVOKE removes privileges. FLUSH PRIVILEGES reloads the grant tables (not needed if using GRANT/REVOKE directly, but needed after manual INSERT/UPDATE on mysql.user). Common mistake: creating 'user'@'%' (any host) when only localhost is needed — a security risk. Always use strong passwords. SHOW GRANTS to inspect current privileges.",
+      "CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'strong_password_123';\nCREATE USER 'readonly'@'%' IDENTIFIED BY 'readonly_pass';\n\n-- Grant specific privileges\nGRANT SELECT, INSERT, UPDATE ON mydb.* TO 'app_user'@'localhost';\nGRANT SELECT ON mydb.* TO 'readonly'@'%';\n\n-- Grant all privileges on a database\nGRANT ALL PRIVILEGES ON mydb.* TO 'admin'@'localhost';\n\n-- Grant with grant option (can grant to others)\nGRANT ALL PRIVILEGES ON *.* TO 'superadmin'@'localhost' WITH GRANT OPTION;\n\n-- Revoke privileges\nREVOKE DELETE ON mydb.* FROM 'app_user'@'localhost';\n\n-- Flush privileges (needed if modifying grant tables directly)\nFLUSH PRIVILEGES;\n\n-- Show user privileges\nSHOW GRANTS FOR 'app_user'@'localhost';\n\n-- Drop user\nDROP USER IF EXISTS 'old_user'@'localhost';\n\n-- Change password\nALTER USER 'app_user'@'localhost' IDENTIFIED BY 'new_strong_password';"
+    ],
+    "Backup & Restore": [
+      "mysqldump is the primary backup tool. Use --single-transaction for InnoDB consistency without locking. --routines, --triggers, --events include them. --all-databases or --databases for specific DBs. mysqlimport bulk-loads data from text files. SELECT INTO OUTFILE exports query results to a file on the server. Common mistake: forgetting --single-transaction on a live InnoDB DB (causes table locks). For large DBs, use Percona XtraBackup for physical/hot backups — mysqldump is too slow for >50GB.",
+      "# Full backup of a single database\nmysqldump -u root -p --single-transaction --routines --triggers --events mydb > mydb_backup.sql\n\n# Backup all databases\nmysqldump -u root -p --single-transaction --all-databases > all_dbs.sql\n\n# Backup specific tables\nmysqldump -u root -p mydb users orders > users_orders.sql\n\n# Restore a backup\nmysql -u root -p mydb < mydb_backup.sql\n\n# Restore all databases\nmysql -u root -p < all_dbs.sql\n\n# Export query result to file\nSELECT id, name, email INTO OUTFILE '/tmp/users_export.csv'\n  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'\n  LINES TERMINATED BY '\\n'\nFROM users WHERE status = 'active';\n\n# Bulk import from CSV\n# mysqlimport --local --fields-terminated-by=',' --fields-optionally-enclosed-by='\"' \\\n#   -u root -p mydb /path/to/users.csv\n\n# Run from mysql CLI\n# mysql> SOURCE /path/to/backup.sql;"
+    ]
+  },
+  "Indexes & Performance": {
+    "Index Basics": [
+      "Indexes speed up SELECT queries at the cost of slower INSERT/UPDATE. CREATE INDEX on frequently queried columns. PRIMARY KEY is a clustered index. UNIQUE index enforces uniqueness. Use EXPLAIN to check if queries use indexes.",
+      "CREATE INDEX idx_email ON users(email);\nCREATE UNIQUE INDEX idx_username ON users(username);\nCREATE INDEX idx_name_status ON users(name, status);\n\n-- Check index usage\nEXPLAIN SELECT * FROM users WHERE email = 'test@example.com';"
+    ],
+    "EXPLAIN Query Analysis": [
+      "EXPLAIN shows how MySQL executes a query. Key fields: type (ALL=full scan, ref/eq_ref=index lookup), possible_keys (indexes MySQL could use), key (index actually used), rows (estimated rows examined), Extra (Using index=covered, Using filesort=bad).",
+      "EXPLAIN SELECT u.name, COUNT(o.id) AS orders\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.created_at > '2024-01-01'\nGROUP BY u.id\nORDER BY orders DESC\nLIMIT 10;\n-- Look for: type=ALL (bad), Using filesort (bad), rows (high=bad)"
+    ],
+    "Slow Query Log": [
+      "Enable the slow query log to find performance issues. Set long_query_time (default 10s). Log queries that don't use indexes with log_queries_not_using_indexes. Analyze with mysqldumpslow or pt-query-digest.",
+      "-- Enable slow query log\nSET GLOBAL slow_query_log = ON;\nSET GLOBAL long_query_time = 2;\nSET GLOBAL log_queries_not_using_indexes = ON;\n\n-- View slow log location\nSHOW VARIABLES LIKE 'slow_query_log_file';\n\n# Analyze slow queries\n# mysqldumpslow /var/log/mysql/mysql-slow.log"
+    ],
+    "MySQL Performance": {
+      "exp": "Optimizing MySQL performance.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Security": {
+    "MySQL Security": {
+      "exp": "Securing your MySQL databases.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Features": {
+    "MySQL Advanced": {
+      "exp": "Advanced MySQL features and techniques.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Transactions": [
+      "Transactions group operations as atomic units: all succeed or all roll back. START TRANSACTION / BEGIN, COMMIT, ROLLBACK. SAVEPOINT creates rollback points. InnoDB supports transactions (MyISAM does not).",
+      "START TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n-- ROLLBACK if error occurs\n\n-- Savepoint example\nSTART TRANSACTION;\nINSERT INTO logs SET message = 'step 1';\nSAVEPOINT sp1;\nINSERT INTO logs SET message = 'step 2';\nROLLBACK TO SAVEPOINT sp1;\nCOMMIT;"
+    ],
+    "Stored Procedures": [
+      "Stored procedures are reusable SQL blocks stored on the server. DELIMITER changes the statement delimiter. IN, OUT, INOUT parameters. Variables with DECLARE. Handlers for error handling. Reduces network traffic for complex operations.",
+      "DELIMITER $$\nCREATE PROCEDURE GetUserOrders(IN userId INT)\nBEGIN\n  SELECT * FROM orders WHERE user_id = userId\n  ORDER BY created_at DESC;\nEND$$\nDELIMITER ;\n\nCALL GetUserOrders(123);\nDROP PROCEDURE GetUserOrders;"
+    ],
+    "Views": [
+      "Views are saved SQL queries that act like virtual tables. Simplify complex queries, add security layers (restrict columns), and provide abstraction. WITH CHECK OPTION prevents inserts/updates that don't match the view condition.",
+      "CREATE VIEW active_customers AS\nSELECT u.id, u.name, COUNT(o.id) AS order_count, SUM(o.total) AS total_spent\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.status = 'active'\nGROUP BY u.id, u.name;\n\n-- Use like a table\nSELECT * FROM active_customers WHERE total_spent > 500;"
+    ],
+    "Triggers": [
+      "Triggers automatically execute SQL when a table event occurs (INSERT, UPDATE, DELETE). BEFORE/AFTER timing. FOR EACH ROW per-row trigger. OLD/ NEW refer to row values. Useful for auditing, validation, and derived data.",
+      "CREATE TRIGGER before_user_update\nBEFORE UPDATE ON users\nFOR EACH ROW\nSET NEW.updated_at = NOW();\n\n-- Audit log trigger\nCREATE TRIGGER after_order_insert\nAFTER INSERT ON orders\nFOR EACH ROW\nINSERT INTO audit_log (table_name, action, record_id)\nVALUES ('orders', 'INSERT', NEW.id);"
+    ],
+    "JSON in MySQL": [
+      "MySQL has native JSON data type and functions: JSON_EXTRACT (or -> operator), JSON_UNQUOTE (or ->>), JSON_ARRAY, JSON_OBJECT, JSON_SET, JSON_KEYS, JSON_CONTAINS. Index JSON fields with generated columns.",
+      "CREATE TABLE events (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  data JSON\n);\n\nINSERT INTO events (data) VALUES\n  ('{\"type\": \"click\", \"page\": \"/home\", \"userId\": 42}'),\n  ('{\"type\": \"purchase\", \"total\": 29.99, \"items\": [\"book\", \"pen\"]}');\n\nSELECT data->>'$.type' AS event_type FROM events;\nSELECT * FROM events WHERE JSON_CONTAINS(data->>'$.type', '\"click\"');\n\n-- Generated column index for JSON field\nALTER TABLE events ADD COLUMN event_type VARCHAR(50) GENERATED ALWAYS AS (data->>'$.type') STORED;\nCREATE INDEX idx_event_type ON events(event_type);"
     ]
   },
   "Advanced SQL": {
@@ -242,16 +252,6 @@
     "Transactions & Isolation": [
       "START TRANSACTION begins a transaction. COMMIT saves changes permanently. ROLLBACK undoes all changes since START TRANSACTION. SAVEPOINT creates a named rollback point; ROLLBACK TO SAVEPOINT undoes to that point. Isolation levels: READ UNCOMMITTED (dirty reads), READ COMMITTED (default in most DBs, no dirty reads), REPEATABLE READ (default in MySQL/InnoDB, no non-repeatable reads), SERIALIZABLE (fully isolated, slowest). Higher isolation = less concurrency. A common mistake is forgetting that DDL statements (CREATE, ALTER, DROP) implicitly commit the current transaction.",
       "START TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n\n-- Rollback on error\nSTART TRANSACTION;\nUPDATE inventory SET stock = stock - 1 WHERE product_id = 10;\nUPDATE orders SET status = 'confirmed' WHERE id = 100;\n-- If something goes wrong:\nROLLBACK;\n\n-- Savepoints\nSTART TRANSACTION;\nINSERT INTO audit_log SET action = 'start';\nSAVEPOINT sp1;\nUPDATE products SET price = price * 1.1 WHERE category = 'Electronics';\nROLLBACK TO SAVEPOINT sp1; -- undo the price update\nCOMMIT; -- only the audit log insert is saved\n\n-- Check/set isolation level\nSELECT @@transaction_isolation;\nSET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;\nSET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;"
-    ]
-  },
-  "Administration": {
-    "User Management": [
-      "CREATE USER creates a new user with a host (e.g., 'user'@'localhost'). GRANT assigns privileges: SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALL PRIVILEGES. REVOKE removes privileges. FLUSH PRIVILEGES reloads the grant tables (not needed if using GRANT/REVOKE directly, but needed after manual INSERT/UPDATE on mysql.user). Common mistake: creating 'user'@'%' (any host) when only localhost is needed — a security risk. Always use strong passwords. SHOW GRANTS to inspect current privileges.",
-      "CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'strong_password_123';\nCREATE USER 'readonly'@'%' IDENTIFIED BY 'readonly_pass';\n\n-- Grant specific privileges\nGRANT SELECT, INSERT, UPDATE ON mydb.* TO 'app_user'@'localhost';\nGRANT SELECT ON mydb.* TO 'readonly'@'%';\n\n-- Grant all privileges on a database\nGRANT ALL PRIVILEGES ON mydb.* TO 'admin'@'localhost';\n\n-- Grant with grant option (can grant to others)\nGRANT ALL PRIVILEGES ON *.* TO 'superadmin'@'localhost' WITH GRANT OPTION;\n\n-- Revoke privileges\nREVOKE DELETE ON mydb.* FROM 'app_user'@'localhost';\n\n-- Flush privileges (needed if modifying grant tables directly)\nFLUSH PRIVILEGES;\n\n-- Show user privileges\nSHOW GRANTS FOR 'app_user'@'localhost';\n\n-- Drop user\nDROP USER IF EXISTS 'old_user'@'localhost';\n\n-- Change password\nALTER USER 'app_user'@'localhost' IDENTIFIED BY 'new_strong_password';"
-    ],
-    "Backup & Restore": [
-      "mysqldump is the primary backup tool. Use --single-transaction for InnoDB consistency without locking. --routines, --triggers, --events include them. --all-databases or --databases for specific DBs. mysqlimport bulk-loads data from text files. SELECT INTO OUTFILE exports query results to a file on the server. Common mistake: forgetting --single-transaction on a live InnoDB DB (causes table locks). For large DBs, use Percona XtraBackup for physical/hot backups — mysqldump is too slow for >50GB.",
-      "# Full backup of a single database\nmysqldump -u root -p --single-transaction --routines --triggers --events mydb > mydb_backup.sql\n\n# Backup all databases\nmysqldump -u root -p --single-transaction --all-databases > all_dbs.sql\n\n# Backup specific tables\nmysqldump -u root -p mydb users orders > users_orders.sql\n\n# Restore a backup\nmysql -u root -p mydb < mydb_backup.sql\n\n# Restore all databases\nmysql -u root -p < all_dbs.sql\n\n# Export query result to file\nSELECT id, name, email INTO OUTFILE '/tmp/users_export.csv'\n  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'\n  LINES TERMINATED BY '\\n'\nFROM users WHERE status = 'active';\n\n# Bulk import from CSV\n# mysqlimport --local --fields-terminated-by=',' --fields-optionally-enclosed-by='\"' \\\n#   -u root -p mydb /path/to/users.csv\n\n# Run from mysql CLI\n# mysql> SOURCE /path/to/backup.sql;"
     ]
   }
 }

@@ -47,10 +47,14 @@ pub async fn init_globals(cfg: AppConfig, db: &'static DbManager) {
     let cache = LLMCache::new();
     let _ = GLOBAL_LLM_CACHE.set(cache);
 
-    // Initialize embedding engine
-    let content_path = &app_config.content_dir;
+    // Initialize embedding engine from actual curriculum content
     let mut engine = EmbeddingEngine::new();
-    let _ = engine.build_from_content(&content_path).await;
+    let content_dir = app_config.content_dir.clone();
+    tracing::info!("Building embedding engine from content dir: {:?}", &content_dir);
+    if let Err(e) = engine.build_from_content(&content_dir).await {
+        tracing::warn!("Failed to build embedding engine from content files: {}. Using default topics.", e);
+        engine.use_default_topics();
+    }
     let _ = GLOBAL_EMBEDDING_ENGINE.set(engine);
 
     // Build strategy pipeline
@@ -101,6 +105,10 @@ pub fn conversation_store() -> &'static ConversationStore {
 
 pub fn llm_cache() -> &'static LLMCache {
     GLOBAL_LLM_CACHE.get().expect("LLMCache not initialized")
+}
+
+pub fn embedding_engine() -> &'static EmbeddingEngine {
+    GLOBAL_EMBEDDING_ENGINE.get().expect("EmbeddingEngine not initialized")
 }
 
 /// Extract Bearer token from Authorization header.

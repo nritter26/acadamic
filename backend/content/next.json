@@ -46,49 +46,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Next Data": {
-      "exp": "Working with data and APIs in Next.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Next Testing": {
-      "exp": "Testing strategies for Next.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Next Deployment": {
-      "exp": "Deploying Next applications.",
-      "code": "",
-      "exercises": []
-    },
-    "Vercel": [
-      "Vercel is the official deployment platform for Next.js, offering zero-config deploys from Git, automatic HTTPS, edge functions, and preview deployments for every pull request.",
-      "// vercel.json\n{ \"framework\": \"nextjs\", \"buildCommand\": \"next build\", \"outputDirectory\": \".next\" }"
-    ],
-    "Docker": [
-      "Next.js apps can be containerized with Docker for deployment on any container orchestration platform. A multi-stage Dockerfile optimizes for build speed and image size.",
-      "FROM node:18-alpine AS base\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\nEXPOSE 3000\nCMD [\"npm\", \"start\"]"
-    ],
-    "Self-hosted": [
-      "Next.js supports self-hosting on any Node.js server using the standalone output mode. The standalone folder includes only production dependencies, minimizing deployment size.",
-      "// next.config.js\nmodule.exports = { output: 'standalone' };\n# Run: node .next/standalone/server.js"
-    ]
-  },
   "Best Practices": {
     "Next Best Practices": {
       "exp": "Best practices for Next development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Next Advanced": {
-      "exp": "Advanced Next topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -126,10 +86,6 @@
     ]
   },
   "Styling": {
-    "CSS Modules": [
-      "CSS Modules scope styles locally to the component by generating unique class names. Files named *.module.css are automatically supported, preventing style conflicts across components.",
-      "/* styles/Button.module.css */\n.primary { background: blue; color: white; }\n// Component\nimport styles from './Button.module.css';\n<button className={styles.primary}>Click</button>"
-    ],
     "Tailwind": [
       "Next.js integrates with Tailwind CSS out of the box. Tailwind's utility classes enable rapid styling directly in JSX, with purging of unused styles in production builds.",
       "export default function Card() {\n  return <div className='p-6 max-w-sm mx-auto bg-white rounded-xl shadow-lg'>Content</div>;\n}"
@@ -137,62 +93,10 @@
     "CSS-in-JS": [
       "CSS-in-JS libraries like styled-components and Emotion work with Next.js but require configuration. The app router requires using a registry to collect styles during server-side rendering.",
       "'use client';\nimport styled from 'styled-components';\nconst Title = styled.h1`font-size: 2rem; color: ${props => props.color};`;"
-    ]
-  },
-  "API Routes": {
-    "REST": [
-      "Next.js API routes let you build REST endpoints inside the pages/api directory. Each file exports functions matching HTTP methods (GET, POST, PUT, DELETE) that receive req and res objects.",
-      "export default function handler(req, res) {\n  if (req.method === 'GET') {\n    res.status(200).json({ name: 'John Doe' });\n  } else {\n    res.status(405).end();\n  }\n}"
     ],
-    "Middleware": [
-      "Middleware runs before every request and can modify headers, redirect users, or rewrite URLs. It is defined as middleware.ts in the root of the project and executes on the Edge runtime.",
-      "export function middleware(request) {\n  const token = request.cookies.get('token');\n  if (!token) return Response.redirect(new URL('/login', request.url));\n}"
-    ],
-    "Edge Functions": [
-      "Edge Functions run on the Vercel Edge Network using the Edge Runtime. They provide low-latency, globally distributed execution for API routes, middleware, and server rendering.",
-      "export const runtime = 'edge';\nexport async function GET(request) {\n  return new Response(JSON.stringify({ hello: 'edge' }), {\n    headers: { 'content-type': 'application/json' },\n  });\n}"
-    ]
-  },
-  "Authentication": {
-    "NextAuth": [
-      "NextAuth.js (now Auth.js) provides a complete authentication solution for Next.js. It supports OAuth providers, email magic links, and credentials with minimal setup using the app router.",
-      "import NextAuth from 'next-auth';\nimport GithubProvider from 'next-auth/providers/github';\nexport default NextAuth({ providers: [GithubProvider({ clientId: '', clientSecret: '' })] });"
-    ],
-    "JWT": [
-      "JSON Web Tokens are commonly used for stateless authentication in Next.js. Tokens are signed server-side and verified on each request, often stored in httpOnly cookies for security.",
-      "import jwt from 'jsonwebtoken';\nconst token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });"
-    ],
-    "Session Management": [
-      "Session management in Next.js can use database-backed sessions or JWT-based sessions via NextAuth. The session is accessed via useSession on the client or getServerSession on the server.",
-      "import { getServerSession } from 'next-auth';\nconst session = await getServerSession(req, res, authOptions);"
-    ]
-  },
-  "Performance": {
-    "Image Optimization": [
-      "The next/image component automatically optimizes images with lazy loading, responsive sizes, and WebP/AVIF format conversion. Images are served via the built-in image optimizer API.",
-      "import Image from 'next/image';\n<Image src='/hero.jpg' alt='Hero' width={1200} height={600} priority />"
-    ],
-    "Fonts": [
-      "next/font automatically optimizes and self-hosts Google Fonts and custom fonts, eliminating external requests. It supports variable fonts and subsetting for reduced bundle size.",
-      "import { Inter } from 'next/font/google';\nconst inter = Inter({ subsets: ['latin'] });\n<html className={inter.className}>"
-    ],
-    "Bundle Analysis": [
-      "Next.js provides built-in bundle analysis through @next/bundle-analyzer. It generates visual reports showing the size of each JavaScript bundle and its dependencies to identify optimization targets.",
-      "// next.config.js\nconst withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: true });\nmodule.exports = withBundleAnalyzer({});"
-    ]
-  },
-  "App Router Advanced": {
-    "Route Groups": [
-      "Route groups organize routes without affecting URL paths by wrapping folder names in parentheses. They are useful for separating marketing, admin, and auth sections with different layouts.",
-      "app/\n  (marketing)/\n    page.tsx\n    about/page.tsx\n  (admin)/\n    layout.tsx\n    dashboard/page.tsx"
-    ],
-    "Parallel Routes": [
-      "Parallel routes render multiple pages simultaneously in the same layout using named slots. Each slot has its own loading and error states, enabling complex dashboard and feed layouts.",
-      "// app/layout.tsx\nexport default function Layout({ children, analytics, team }: {\n  children: React.ReactNode\n  analytics: React.ReactNode\n  team: React.ReactNode\n}) {\n  return <>{children}{analytics}{team}</>;\n}"
-    ],
-    "Intercepting Routes": [
-      "Intercepting routes overlay content from another route within the current layout using (..) syntax. They are commonly used for modal previews that render as full pages on hard refresh.",
-      "app/\n  feed/\n    page.tsx\n    (..)photo/[id]/page.tsx  // intercepts /photo/[id] from /feed\n  photo/\n    [id]/page.tsx"
+    "CSS Modules": [
+      "CSS Modules scope styles locally to the component by generating unique class names. Files named *.module.css are automatically supported, preventing style conflicts across components.",
+      "/* styles/Button.module.css */\n.primary { background: blue; color: white; }\n// Component\nimport styles from './Button.module.css';\n<button className={styles.primary}>Click</button>"
     ]
   },
   "Metadata & SEO": {
@@ -209,6 +113,13 @@
       "export const metadata = {\n  alternates: { canonical: '/', languages: { 'en-US': '/en', 'de-DE': '/de' } },\n  robots: { index: true, follow: true },\n  verification: { google: 'code' }\n};"
     ]
   },
+  "Testing": {
+    "Next Testing": {
+      "exp": "Testing strategies for Next.",
+      "code": "",
+      "exercises": []
+    }
+  },
   "Build & Tooling": {
     "Turbopack": [
       "Turbopack is Next.js's Rust-based incremental bundler replacing webpack in development. It provides near-instant HMR, sub-second cold starts, and incremental computation for large projects.",
@@ -221,6 +132,95 @@
     "Instrumentation": [
       "Instrumentation hooks allow running code on server startup. The register() function in instrumentation.ts is useful for OpenTelemetry tracing, metrics setup, and infrastructure initialization.",
       "// instrumentation.ts\nexport async function register() {\n  await initializeTracing();\n  await connectToDatabase();\n}"
+    ]
+  },
+  "Data & APIs": {
+    "Next Data": {
+      "exp": "Working with data and APIs in Next.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "API Routes": {
+    "Edge Functions": [
+      "Edge Functions run on the Vercel Edge Network using the Edge Runtime. They provide low-latency, globally distributed execution for API routes, middleware, and server rendering.",
+      "export const runtime = 'edge';\nexport async function GET(request) {\n  return new Response(JSON.stringify({ hello: 'edge' }), {\n    headers: { 'content-type': 'application/json' },\n  });\n}"
+    ],
+    "Middleware": [
+      "Middleware runs before every request and can modify headers, redirect users, or rewrite URLs. It is defined as middleware.ts in the root of the project and executes on the Edge runtime.",
+      "export function middleware(request) {\n  const token = request.cookies.get('token');\n  if (!token) return Response.redirect(new URL('/login', request.url));\n}"
+    ],
+    "REST": [
+      "Next.js API routes let you build REST endpoints inside the pages/api directory. Each file exports functions matching HTTP methods (GET, POST, PUT, DELETE) that receive req and res objects.",
+      "export default function handler(req, res) {\n  if (req.method === 'GET') {\n    res.status(200).json({ name: 'John Doe' });\n  } else {\n    res.status(405).end();\n  }\n}"
+    ]
+  },
+  "Deployment": {
+    "Vercel": [
+      "Vercel is the official deployment platform for Next.js, offering zero-config deploys from Git, automatic HTTPS, edge functions, and preview deployments for every pull request.",
+      "// vercel.json\n{ \"framework\": \"nextjs\", \"buildCommand\": \"next build\", \"outputDirectory\": \".next\" }"
+    ],
+    "Self-hosted": [
+      "Next.js supports self-hosting on any Node.js server using the standalone output mode. The standalone folder includes only production dependencies, minimizing deployment size.",
+      "// next.config.js\nmodule.exports = { output: 'standalone' };\n# Run: node .next/standalone/server.js"
+    ],
+    "Next Deployment": {
+      "exp": "Deploying Next applications.",
+      "code": "",
+      "exercises": []
+    },
+    "Docker": [
+      "Next.js apps can be containerized with Docker for deployment on any container orchestration platform. A multi-stage Dockerfile optimizes for build speed and image size.",
+      "FROM node:18-alpine AS base\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\nEXPOSE 3000\nCMD [\"npm\", \"start\"]"
+    ]
+  },
+  "Authentication": {
+    "JWT": [
+      "JSON Web Tokens are commonly used for stateless authentication in Next.js. Tokens are signed server-side and verified on each request, often stored in httpOnly cookies for security.",
+      "import jwt from 'jsonwebtoken';\nconst token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });"
+    ],
+    "Session Management": [
+      "Session management in Next.js can use database-backed sessions or JWT-based sessions via NextAuth. The session is accessed via useSession on the client or getServerSession on the server.",
+      "import { getServerSession } from 'next-auth';\nconst session = await getServerSession(req, res, authOptions);"
+    ],
+    "NextAuth": [
+      "NextAuth.js (now Auth.js) provides a complete authentication solution for Next.js. It supports OAuth providers, email magic links, and credentials with minimal setup using the app router.",
+      "import NextAuth from 'next-auth';\nimport GithubProvider from 'next-auth/providers/github';\nexport default NextAuth({ providers: [GithubProvider({ clientId: '', clientSecret: '' })] });"
+    ]
+  },
+  "Performance": {
+    "Fonts": [
+      "next/font automatically optimizes and self-hosts Google Fonts and custom fonts, eliminating external requests. It supports variable fonts and subsetting for reduced bundle size.",
+      "import { Inter } from 'next/font/google';\nconst inter = Inter({ subsets: ['latin'] });\n<html className={inter.className}>"
+    ],
+    "Bundle Analysis": [
+      "Next.js provides built-in bundle analysis through @next/bundle-analyzer. It generates visual reports showing the size of each JavaScript bundle and its dependencies to identify optimization targets.",
+      "// next.config.js\nconst withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: true });\nmodule.exports = withBundleAnalyzer({});"
+    ],
+    "Image Optimization": [
+      "The next/image component automatically optimizes images with lazy loading, responsive sizes, and WebP/AVIF format conversion. Images are served via the built-in image optimizer API.",
+      "import Image from 'next/image';\n<Image src='/hero.jpg' alt='Hero' width={1200} height={600} priority />"
+    ]
+  },
+  "Advanced Topics": {
+    "Next Advanced": {
+      "exp": "Advanced Next topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "App Router Advanced": {
+    "Route Groups": [
+      "Route groups organize routes without affecting URL paths by wrapping folder names in parentheses. They are useful for separating marketing, admin, and auth sections with different layouts.",
+      "app/\n  (marketing)/\n    page.tsx\n    about/page.tsx\n  (admin)/\n    layout.tsx\n    dashboard/page.tsx"
+    ],
+    "Intercepting Routes": [
+      "Intercepting routes overlay content from another route within the current layout using (..) syntax. They are commonly used for modal previews that render as full pages on hard refresh.",
+      "app/\n  feed/\n    page.tsx\n    (..)photo/[id]/page.tsx  // intercepts /photo/[id] from /feed\n  photo/\n    [id]/page.tsx"
+    ],
+    "Parallel Routes": [
+      "Parallel routes render multiple pages simultaneously in the same layout using named slots. Each slot has its own loading and error states, enabling complex dashboard and feed layouts.",
+      "// app/layout.tsx\nexport default function Layout({ children, analytics, team }: {\n  children: React.ReactNode\n  analytics: React.ReactNode\n  team: React.ReactNode\n}) {\n  return <>{children}{analytics}{team}</>;\n}"
     ]
   },
   "Next.js Advanced Patterns": {

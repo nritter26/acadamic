@@ -39,7 +39,7 @@ export function getExecutionState() {
         });
         const data = await response.json();
         if (data.error) {
-          _error = data.error;
+          _error = typeof data.error === 'string' ? data.error : (data.output || 'Execution failed');
         } else {
           _output = data.output || '(no output)';
         }

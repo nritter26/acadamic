@@ -2,7 +2,7 @@ import { getCurrentLang } from '$lib/lib/translate.js';
 import { buildSearchIndex } from '$lib/lib/search.js';
 
 let _lang = $state('js');
-let _uiLang = $state(getCurrentLang() || 'en'); // 'en' or 'th' — controls curriculum language
+let _uiLang = $state(getCurrentLang() || 'en');
 let _phase = $state('');
 let _topic = $state('');
 let _level = $state('all');
@@ -19,9 +19,13 @@ export function getCurriculumState() {
     set lang(v) { _lang = v; },
     get uiLang() { return _uiLang; },
     set uiLang(v) {
-      if (v === 'en' || v === 'th') {
+      if ((v === 'en' || v === 'th') && v !== _uiLang) {
         _uiLang = v;
-        // Reload current language data with new UI language
+        if (_topicData && _lang && _topicData[_lang]) {
+          const next = { ..._topicData };
+          delete next[_lang];
+          _topicData = next;
+        }
         this.loadLangData(_lang);
       }
     },
@@ -65,7 +69,6 @@ export function getCurriculumState() {
       const version = _loadVersion;
       _curriculumLoading = true;
 
-      // Determine filename based on UI language and programming language
       const isThai = _uiLang === 'th';
       let filename;
       const langMap = { rs: 'rust', wasm: 'wasm', asm: 'asm' };
@@ -81,7 +84,6 @@ export function getCurriculumState() {
       try {
         const r = await fetch(`/api/content/${filename}`);
         if (!r.ok) {
-          // Fallback to English if Thai content not available yet
           if (isThai) {
             const r2 = await fetch(`/api/content/${baseName}`);
             const res2 = await r2.json();
@@ -90,6 +92,8 @@ export function getCurriculumState() {
             cd[lang] = res2.data;
             _topicData = cd;
             buildSearchIndex();
+          } else {
+            console.warn(`Curriculum fetch failed for ${lang} (${r.status})`);
           }
           _curriculumLoading = false;
           return;

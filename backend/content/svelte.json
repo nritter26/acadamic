@@ -25,6 +25,20 @@
       "exercises": []
     }
   },
+  "SvelteKit Basics": {
+    "Routing": [
+      "SvelteKit uses filesystem-based routing where each +page.svelte file in src/routes creates a route. Dynamic parameters are captured with [bracket] notation in directory names.",
+      "src/routes/blog/[slug]/+page.svelte"
+    ],
+    "Endpoints": [
+      "Endpoints are server-only API routes defined as +server.js files exporting request handlers. They handle GET, POST, PUT, DELETE requests and return JSON or other responses.",
+      "export async function GET({ params }) {\n  const data = await db.getPost(params.slug);\n  return json(data);\n}"
+    ],
+    "SSR": [
+      "SvelteKit renders pages server-side by default, generating HTML on the server for fast initial loads and SEO. SSR can be disabled per route or globally for fully client-rendered apps.",
+      "export const ssr = false;"
+    ]
+  },
   "Components & UI": {
     "Svelte Components": {
       "exp": "Building user interfaces with Svelte.",
@@ -46,45 +60,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Svelte Data": {
-      "exp": "Working with data and APIs in Svelte.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Svelte Testing": {
-      "exp": "Testing strategies for Svelte.",
-      "code": "",
-      "exercises": []
-    },
-    "Vitest": [
-      "Vitest integrates seamlessly with SvelteKit projects for fast unit and integration testing with Vite-powered HMR, Jest-compatible API, and native ESM support.",
-      "import { describe, it, expect } from 'vitest';\nimport { render } from '@testing-library/svelte';\n\nit('renders', () => {\n  const { getByText } = render(MyComponent, { props: { name: 'World' } });\n  expect(getByText('Hello World')).toBeTruthy();\n});"
-    ],
-    "Playwright": [
-      "Playwright is the recommended E2E testing framework for SvelteKit, providing cross-browser automation, network interception, and component testing across Chromium, Firefox, and WebKit.",
-      "test('home page loads', async ({ page }) => {\n  await page.goto('/');\n  await expect(page.locator('h1')).toContainText('Welcome');\n});"
-    ]
-  },
-  "Deployment": {
-    "Svelte Deployment": {
-      "exp": "Deploying Svelte applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Svelte Best Practices": {
       "exp": "Best practices for Svelte development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Svelte Advanced": {
-      "exp": "Advanced Svelte topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -153,34 +131,6 @@
       "{#each items as item (item.id)}\n  <div animate:flip>{item.name}</div>\n{/each}"
     ]
   },
-  "Advanced": {
-    "Actions": [
-      "Actions are Svelte's approach to integrating with DOM elements imperatively, similar to use:action. They receive the element and optional parameters, returning lifecycle methods like destroy for cleanup.",
-      "function clickOutside(node, callback) {\n  function handle(e) { if (!node.contains(e.target)) callback(); }\n  window.addEventListener('click', handle);\n  return { destroy: () => window.removeEventListener('click', handle) };\n}"
-    ],
-    "Context API": [
-      "The context API allows passing data to a component and all its descendants without prop drilling. setContext and getContext are scoped to the component tree, not globally like stores.",
-      "setContext('theme', 'dark');\nconst theme = getContext('theme');"
-    ],
-    "Special Elements": [
-      "Svelte provides special elements like <svelte:body>, <svelte:head>, <svelte:window>, and <svelte:options> for declaring side effects and configuration directly in templates.",
-      "<svelte:head>\n  <title>My App</title>\n</svelte:head>"
-    ]
-  },
-  "SvelteKit Basics": {
-    "Routing": [
-      "SvelteKit uses filesystem-based routing where each +page.svelte file in src/routes creates a route. Dynamic parameters are captured with [bracket] notation in directory names.",
-      "src/routes/blog/[slug]/+page.svelte"
-    ],
-    "Endpoints": [
-      "Endpoints are server-only API routes defined as +server.js files exporting request handlers. They handle GET, POST, PUT, DELETE requests and return JSON or other responses.",
-      "export async function GET({ params }) {\n  const data = await db.getPost(params.slug);\n  return json(data);\n}"
-    ],
-    "SSR": [
-      "SvelteKit renders pages server-side by default, generating HTML on the server for fast initial loads and SEO. SSR can be disabled per route or globally for fully client-rendered apps.",
-      "export const ssr = false;"
-    ]
-  },
   "Svelte 5 Runes": {
     "Runes: $state, $derived, $effect": [
       "Svelte 5 introduces runes — explicit reactive primitives that replace the Svelte 4 <code>let</code> / <code>export let</code> / <code>$:</code> magic. <code>$state()</code> creates reactive state. <code>$derived()</code> creates derived values that update automatically. <code>$effect()</code> runs side effects when tracked dependencies change. <code>$props()</code> explicitly declares component props. Runes work both in <code>.svelte</code> files and <code>.svelte.js</code>/<code>.svelte.ts</code> modules, enabling shared reactive logic outside components. <code>$bindable()</code> creates two-way bindable props. Runes make reactivity explicit and TypeScript-friendly.",
@@ -203,6 +153,56 @@
     "Children Snippet": [
       "The implicit children snippet captures default content between component tags. It provides a cleaner alternative to the default slot for wrapping content in layout components.",
       "// Parent\n<Card>\n  Card content here\n\n</Card>\n\n// Card.svelte\nlet { children } = $props();\n<div class=\"card\">\n  {@render children()}\n</div>"
+    ]
+  },
+  "Testing": {
+    "Vitest": [
+      "Vitest integrates seamlessly with SvelteKit projects for fast unit and integration testing with Vite-powered HMR, Jest-compatible API, and native ESM support.",
+      "import { describe, it, expect } from 'vitest';\nimport { render } from '@testing-library/svelte';\n\nit('renders', () => {\n  const { getByText } = render(MyComponent, { props: { name: 'World' } });\n  expect(getByText('Hello World')).toBeTruthy();\n});"
+    ],
+    "Playwright": [
+      "Playwright is the recommended E2E testing framework for SvelteKit, providing cross-browser automation, network interception, and component testing across Chromium, Firefox, and WebKit.",
+      "test('home page loads', async ({ page }) => {\n  await page.goto('/');\n  await expect(page.locator('h1')).toContainText('Welcome');\n});"
+    ],
+    "Svelte Testing": {
+      "exp": "Testing strategies for Svelte.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Svelte Data": {
+      "exp": "Working with data and APIs in Svelte.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Svelte Deployment": {
+      "exp": "Deploying Svelte applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Svelte Advanced": {
+      "exp": "Advanced Svelte topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Actions": [
+      "Actions are Svelte's approach to integrating with DOM elements imperatively, similar to use:action. They receive the element and optional parameters, returning lifecycle methods like destroy for cleanup.",
+      "function clickOutside(node, callback) {\n  function handle(e) { if (!node.contains(e.target)) callback(); }\n  window.addEventListener('click', handle);\n  return { destroy: () => window.removeEventListener('click', handle) };\n}"
+    ],
+    "Special Elements": [
+      "Svelte provides special elements like <svelte:body>, <svelte:head>, <svelte:window>, and <svelte:options> for declaring side effects and configuration directly in templates.",
+      "<svelte:head>\n  <title>My App</title>\n</svelte:head>"
+    ],
+    "Context API": [
+      "The context API allows passing data to a component and all its descendants without prop drilling. setContext and getContext are scoped to the component tree, not globally like stores.",
+      "setContext('theme', 'dark');\nconst theme = getContext('theme');"
     ]
   }
 }

@@ -14,29 +14,32 @@
   let grouped = $derived(groupProjectsByDifficulty(projects, { language: 'all' }));
   let activeLanguage = $derived(language);
 
-  function getLangBadge(langs) {
-    if (!langs) return '<span class="badge badge-js">JS</span>';
-    return langs.map(l => {
-      if (l === 'python' || l === 'py') return '<span class="badge badge-py"><span class="py-p">P</span><span class="py-y">Y</span></span>';
-      if (l === 'go') return '<span class="badge badge-go">GO</span>';
-      if (l === 'typescript' || l === 'ts') return '<span class="badge badge-ts">TS</span>';
-      if (l === 'java') return '<span class="badge badge-java">JV</span>';
-      if (l === 'cs') return '<span class="badge badge-cs">C#</span>';
-      if (l === 'ruby' || l === 'rb') return '<span class="badge badge-rb">RB</span>';
-      if (l === 'php') return '<span class="badge badge-php">PHP</span>';
-      if (l === 'rust' || l === 'rs') return '<span class="badge badge-rs">RS</span>';
-      if (l === 'cpp') return '<span class="badge badge-cpp">C++</span>';
-      if (l === 'c') return '<span class="badge badge-c">C</span>';
-      if (l === 'zig') return '<span class="badge badge-zig">ZIG</span>';
-      if (l === 'kt' || l === 'kotlin') return '<span class="badge badge-kt">KT</span>';
-      if (l === 'lua') return '<span class="badge badge-lua">LUA</span>';
-      if (l === 'swift') return '<span class="badge badge-swift">SW</span>';
-      if (l === 'scala') return '<span class="badge badge-scala">SCA</span>';
-      if (l === 'bash' || l === 'shell') return '<span class="badge badge-bash">SH</span>';
-      if (l === 'asm' || l === 'assembly') return '<span class="badge badge-asm">ASM</span>';
-      if (l === 'wasm') return '<span class="badge badge-wasm">WASM</span>';
-      return '<span class="badge badge-js">JS</span>';
-    }).join(' ');
+  function getLangLogos(langs) {
+    if (!langs) return [{ file: 'js', alt: 'JS' }];
+    const langFiles = {
+      'python': 'py', 'py': 'py',
+      'go': 'go',
+      'typescript': 'ts', 'ts': 'ts',
+      'java': 'java',
+      'cs': 'cs',
+      'ruby': 'rb', 'rb': 'rb',
+      'php': 'php',
+      'rust': 'rs', 'rs': 'rs',
+      'cpp': 'cpp',
+      'c': 'c',
+      'zig': 'zig',
+      'kt': 'kt', 'kotlin': 'kt',
+      'lua': 'lua',
+      'swift': 'swift',
+      'scala': 'scala',
+      'bash': 'bash', 'shell': 'bash',
+      'asm': 'asm', 'assembly': 'asm',
+      'wasm': 'wasm',
+    };
+    return langs.map(l => ({
+      file: langFiles[l] || 'js',
+      alt: (langFiles[l] || 'js').toUpperCase()
+    }));
   }
 
   function getAccent(langs) {
@@ -98,6 +101,7 @@
         {@const total = projectTotal(project)}
         {@const status = projectStatus(project)}
         {@const accent = getAccent(project.languages)}
+        {@const logos = getLangLogos(project.serverMode ? (project.languages||[]).filter(l => ['js','ts','py','go','java','cs','rb','php','kt','scala'].includes(l)) : (project.languages || ['javascript']))}
         <button
           class="project-card"
           class:active={selectedId === project.id}
@@ -109,7 +113,11 @@
           </div>
           <div class="card-desc">{(project.description || '').substring(0, 60)}...</div>
           <div class="card-meta">
-            <span class="card-badges">{@html getLangBadge(project.serverMode ? (project.languages||[]).filter(l => ['js','ts','py','go','java','cs','rb','php','kt','scala'].includes(l)) : (project.languages || ['javascript']))}</span>
+            <span class="card-logos">
+              {#each logos as logo}
+                <img class="lang-logo" src="/public/logos/{logo.file}.svg" alt={logo.alt} onerror={e => e.target.style.display = 'none'}>
+              {/each}
+            </span>
             {#if project.serverMode}
               <span class="proj-badge badge-api">API</span>
             {/if}
@@ -170,34 +178,13 @@
   .card-title { font-weight: 700; color: #e2e8f0; font-size: 12px; }
   .card-desc { font-size: 10px; color: #64748b; line-height: 1.3; padding-left: 22px; }
   .card-meta { display: flex; align-items: center; justify-content: space-between; padding-left: 22px; }
-  .card-badges { display: flex; gap: 2px; }
+  .card-logos { display: flex; gap: 4px; align-items: center; }
+  .lang-logo { width: 14px; height: 14px; display: inline-block; object-fit: contain; }
   .card-steps { font-size: 9px; color: #94a3b8; display: flex; align-items: center; gap: 3px; }
   .steps-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
   .card-bar { height: 3px; background: #1e293b; border-radius: 999px; overflow: hidden; }
   .card-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); transition: width 0.3s; border-radius: 999px; }
-  .badge { display: inline-block; padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; }
-  .badge-js { background: #f1e05a; color: #000; }
-  .badge-ts { background: #3178c6; color: #fff; }
-  .badge-py { background: #3572A5; color: #fff; padding: 0 2px; }
-  .badge-go { background: #00add8; color: #000; }
   .badge-api { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); padding: 0 4px; font-size: 8px; font-weight: 800; border-radius: 2px; line-height: 14px; display: inline-block; }
-  .badge-java { background: #b07219; color: #fff; }
-  .badge-cs { background: #178600; color: #fff; }
-  .badge-rb { background: #701516; color: #fff; }
-  .badge-php { background: #4F5D95; color: #fff; }
-  .badge-rs { background: #dea584; color: #000; }
-  .badge-cpp { background: #f34b7d; color: #fff; }
-  .badge-c { background: #555555; color: #fff; }
-  .badge-zig { background: #ec915c; color: #000; }
-  .badge-kt { background: #A97BFF; color: #000; }
-  .badge-lua { background: #000080; color: #fff; }
-  .badge-swift { background: #F05138; color: #fff; }
-  .badge-scala { background: #c22d40; color: #fff; }
-  .badge-bash { background: #89e051; color: #000; }
-  .badge-asm { background: #6E4C13; color: #fff; }
-  .badge-wasm { background: #04133b; color: #fff; }
-  .py-p { color: #FFD43B; font-weight: 800; }
-  .py-y { color: #FFD43B; font-weight: 800; }
 
   .loading-bar { height: 2px; background: #1e293b; margin: 0 8px 4px; border-radius: 999px; overflow: hidden; }
   .loading-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); transition: width 0.2s; border-radius: 999px; }

@@ -1,15 +1,19 @@
 <script>
   import { TUTORIAL_QUIZZES } from '$lib/lib/tutorial-content.js';
+  import { shuffleOptions } from '$lib/lib/quiz-utils';
 
   let { open = false, courseId = 'js', phaseId = null, oncomplete = () => {}, onclose = () => {} } = $props();
 
-  let questions = $derived(phaseId ? (TUTORIAL_QUIZZES[`${courseId}:${phaseId}`] || []) : []);
+  let rawQuestions = $derived(phaseId ? (TUTORIAL_QUIZZES[`${courseId}:${phaseId}`] || []) : []);
+  let questions = $derived(rawQuestions.map(q => {
+    const { shuffledOptions, newCorrectIdx } = shuffleOptions(q.options, q.answer);
+    return { ...q, options: shuffledOptions, answer: newCorrectIdx };
+  }));
   let currentQuestion = $state(0);
   let selectedAnswer = $state(null);
   let showResult = $state(false);
   let correctCount = $state(0);
   let finished = $state(false);
-
   function selectAnswer(index) {
     if (showResult) return;
     selectedAnswer = index;

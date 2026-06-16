@@ -1,5 +1,6 @@
 <script>
   import { getAIState } from '$lib/stores/ai.svelte.js';
+  import { shuffleOptions } from '$lib/lib/quiz-utils';
   let { topic, lang = 'js', phase = '', alreadyCompleted = false } = $props();
 
   let collapsed = $state(alreadyCompleted);
@@ -67,7 +68,8 @@
           try {
             const parsed = JSON.parse(data);
             if (parsed.type === 'checkin') {
-              checkinQuestion = parsed;
+              const { shuffledOptions, newCorrectIdx } = shuffleOptions(parsed.options, parsed.answerIndex);
+              checkinQuestion = { ...parsed, options: shuffledOptions, answerIndex: newCorrectIdx };
               guide = streamed;
             } else if (parsed.type === 'explanation_end') {
               continue;

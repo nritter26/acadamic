@@ -29,23 +29,9 @@
       "exercises": []
     }
   },
-  "Configuration": {
-    "Cypress Config": {
-      "exp": "Configuring cypress for your project.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Cypress Best Practices": {
       "exp": "Best practices for using cypress.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Usage": {
-    "Cypress Advanced": {
-      "exp": "Advanced cypress techniques and patterns.",
       "code": "",
       "exercises": []
     }
@@ -69,13 +55,13 @@
     ]
   },
   "Interacting": {
-    "click": [
-      "cy.click simulates a mouse click on a DOM element. It supports options like multiple clicks, position offsets, and force-clicking hidden elements.",
-      "cy.get('.btn').click({ force: true });"
-    ],
     "type": [
       "cy.type simulates keyboard input into form fields character by character. It supports special keys via curly braces like {enter}.",
       "cy.get('input[name=email]').type('user@example.com{enter}');"
+    ],
+    "click": [
+      "cy.click simulates a mouse click on a DOM element. It supports options like multiple clicks, position offsets, and force-clicking hidden elements.",
+      "cy.get('.btn').click({ force: true });"
     ],
     "select": [
       "cy.select picks an option from a <select> element by value, text, or index. It supports multiple selection when the multiple attribute is present.",
@@ -86,29 +72,11 @@
       "cy.get('.menu-item').trigger('mouseover');"
     ]
   },
-  "Network": {
-    "Intercept": [
-      "cy.intercept spies on and modifies HTTP requests at the network level. It can stub responses, wait for requests, and assert on request details.",
-      "cy.intercept('GET', '/api/users').as('getUsers');\ncy.wait('@getUsers');"
-    ],
-    "Mock": [
-      "Request stubbing returns static data instead of hitting the real server, making tests fast, deterministic, and independent of backend availability.",
-      "cy.intercept('GET', '/api/users', { fixture: 'users.json' }).as('getUsers');"
-    ],
-    "Wait": [
-      "cy.wait pauses test execution until a specific aliased network request completes. It can also wait for a specified amount of time.",
-      "cy.wait('@getUsers').its('response.statusCode').should('eq', 200);"
-    ],
-    "Stub": [
-      "Stubbing replaces server responses entirely, useful for testing edge cases, loading states, and error handling without a real server.",
-      "cy.intercept('POST', '/api/login', { statusCode: 401, body: { error: 'Unauthorized' } });"
-    ],
-    "API Testing": [
-      "Test API endpoints directly with cy.request. It bypasses the UI and allows testing backend logic, authentication, and data shapes.",
-      "cy.request('POST', '/api/users', { name: 'Alice' }).then((response) => {\n  expect(response.status).to.eq(201);\n  expect(response.body).to.have.property('id');\n});"
-    ]
-  },
   "Fixtures & Data": {
+    "Custom Commands with TypeScript": [
+      "Custom commands can be strongly typed using TypeScript. Augment the Cypress namespace for autocomplete and type safety.",
+      "// cypress/support/index.d.ts\ndeclare namespace Cypress {\n  interface Chainable {\n    login(email: string, password: string): Chainable<void>\n  }\n}\n\n// cypress/support/commands.ts\nCypress.Commands.add('login', (email: string, password: string) => {\n  cy.get('[data-cy=email]').type(email);\n  cy.get('[data-cy=password]').type(password);\n  cy.get('[data-cy=submit]').click();\n});"
+    ],
     "Fixtures": [
       "Fixtures are external data files (JSON, images, etc.) stored in cypress/fixtures. They provide realistic test data that can be reused across tests.",
       "cy.fixture('users.json').then((users) => { cy.wrap(users[0]); });"
@@ -117,45 +85,9 @@
       "Custom commands wrap reusable logic into chainable Cypress commands via Cypress.Commands.add, improving test readability and reducing duplication.",
       "Cypress.Commands.add('login', (email, pass) => {\n  cy.get('[data-cy=email]').type(email);\n  cy.get('[data-cy=password]').type(pass);\n  cy.get('[data-cy=submit]').click();\n});"
     ],
-    "Custom Commands with TypeScript": [
-      "Custom commands can be strongly typed using TypeScript. Augment the Cypress namespace for autocomplete and type safety.",
-      "// cypress/support/index.d.ts\ndeclare namespace Cypress {\n  interface Chainable {\n    login(email: string, password: string): Chainable<void>\n  }\n}\n\n// cypress/support/commands.ts\nCypress.Commands.add('login', (email: string, password: string) => {\n  cy.get('[data-cy=email]').type(email);\n  cy.get('[data-cy=password]').type(password);\n  cy.get('[data-cy=submit]').click();\n});"
-    ],
     "Test Data": [
       "Test data factories generate consistent, repeatable data for tests. Using beforeEach hooks ensures a clean state before each test run.",
       "beforeEach(() => { cy.fixture('testData').as('data'); });\nit('works', function() { cy.wrap(this.data.user); });"
-    ]
-  },
-  "Advanced": {
-    "Screenshots": [
-      "Cypress automatically captures screenshots on test failure. Manual screenshots can be taken with cy.screenshot for visual documentation.",
-      "cy.screenshot('login-page', { capture: 'fullPage' });"
-    ],
-    "Videos": [
-      "Cypress records video of the entire test run. Videos are stored in cypress/videos and can be configured or disabled in cypress.config.js.",
-      "// cypress.config.js\nmodule.exports = { video: true, videoCompression: 32 }"
-    ],
-    "CI Integration": [
-      "Cypress runs headlessly in CI with cypress run. The Cypress GitHub Action or Docker image provides browsers and dependencies.",
-      "npx cypress run --browser chrome --headless"
-    ],
-    "Accessibility Testing": [
-      "Use cypress-axe for automated accessibility checks. It scans the DOM for WCAG violations and integrates directly into your test assertions.",
-      "cy.injectAxe();\ncy.checkA11y();\n\n// Scoped check\ncy.checkA11y('.main-content', {\n  runOnly: { type: 'tag', values: ['wcag2a'] }\n});"
-    ]
-  },
-  "Component Testing": {
-    "Mount": [
-      "Component testing mounts individual components in isolation using cy.mount. It requires the @cypress/react or @cypress/vue adapter.",
-      "import { mount } from 'cypress/react';\ncy.mount(<Button label=\"Click\" />);"
-    ],
-    "Props": [
-      "Props are passed directly to the mounted component to test different states and configurations without needing the full application.",
-      "cy.mount(<Button variant=\"primary\" disabled={true} />);\ncy.get('button').should('be.disabled');"
-    ],
-    "Events": [
-      "Event callbacks can be verified using Cypress spies. cy.spy wraps a function and tracks whether it was called with expected arguments.",
-      "const onClick = cy.spy();\ncy.mount(<Button onClick={onClick} />).click();\ncy.wrap(onClick).should('have.been.calledOnce');"
     ]
   },
   "E2E Patterns": {
@@ -181,13 +113,81 @@
       "Cypress Dashboard records test runs, provides parallelization, flaky test detection, and video/screenshot history. Connect via project ID.",
       "// cypress.config.js\nconst { defineConfig } = require('cypress');\nmodule.exports = defineConfig({\n  projectId: 'abc123',\n  e2e: { /* ... */ }\n});\n\n# Run with recording\nnpx cypress run --record --key your-record-key"
     ],
-    "Parallelization": [
-      "Split test files across multiple CI machines to reduce test suite duration. Requires Cypress Dashboard for orchestration.",
-      "# CI config (GitHub Actions example)\nnpx cypress run --record --parallel --group 'E2E'"
-    ],
     "Flaky Test Detection]": [
       "Cypress Cloud automatically detects flaky tests by analyzing test history. It provides flakiness scores and auto-retries for unreliable tests.",
       "# Configure auto-retry in cypress.config.js\nconst { defineConfig } = require('cypress');\nmodule.exports = defineConfig({\n  retries: {\n    runMode: 2,        // Retry in CI\n    openMode: 0        // No retry in interactive\n  }\n});"
+    ],
+    "Parallelization": [
+      "Split test files across multiple CI machines to reduce test suite duration. Requires Cypress Dashboard for orchestration.",
+      "# CI config (GitHub Actions example)\nnpx cypress run --record --parallel --group 'E2E'"
+    ]
+  },
+  "Configuration": {
+    "Cypress Config": {
+      "exp": "Configuring cypress for your project.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Component Testing": {
+    "Mount": [
+      "Component testing mounts individual components in isolation using cy.mount. It requires the @cypress/react or @cypress/vue adapter.",
+      "import { mount } from 'cypress/react';\ncy.mount(<Button label=\"Click\" />);"
+    ],
+    "Props": [
+      "Props are passed directly to the mounted component to test different states and configurations without needing the full application.",
+      "cy.mount(<Button variant=\"primary\" disabled={true} />);\ncy.get('button').should('be.disabled');"
+    ],
+    "Events": [
+      "Event callbacks can be verified using Cypress spies. cy.spy wraps a function and tracks whether it was called with expected arguments.",
+      "const onClick = cy.spy();\ncy.mount(<Button onClick={onClick} />).click();\ncy.wrap(onClick).should('have.been.calledOnce');"
+    ]
+  },
+  "Network": {
+    "Intercept": [
+      "cy.intercept spies on and modifies HTTP requests at the network level. It can stub responses, wait for requests, and assert on request details.",
+      "cy.intercept('GET', '/api/users').as('getUsers');\ncy.wait('@getUsers');"
+    ],
+    "Mock": [
+      "Request stubbing returns static data instead of hitting the real server, making tests fast, deterministic, and independent of backend availability.",
+      "cy.intercept('GET', '/api/users', { fixture: 'users.json' }).as('getUsers');"
+    ],
+    "Wait": [
+      "cy.wait pauses test execution until a specific aliased network request completes. It can also wait for a specified amount of time.",
+      "cy.wait('@getUsers').its('response.statusCode').should('eq', 200);"
+    ],
+    "Stub": [
+      "Stubbing replaces server responses entirely, useful for testing edge cases, loading states, and error handling without a real server.",
+      "cy.intercept('POST', '/api/login', { statusCode: 401, body: { error: 'Unauthorized' } });"
+    ],
+    "API Testing": [
+      "Test API endpoints directly with cy.request. It bypasses the UI and allows testing backend logic, authentication, and data shapes.",
+      "cy.request('POST', '/api/users', { name: 'Alice' }).then((response) => {\n  expect(response.status).to.eq(201);\n  expect(response.body).to.have.property('id');\n});"
+    ]
+  },
+  "Advanced Usage": {
+    "Cypress Advanced": {
+      "exp": "Advanced cypress techniques and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Screenshots": [
+      "Cypress automatically captures screenshots on test failure. Manual screenshots can be taken with cy.screenshot for visual documentation.",
+      "cy.screenshot('login-page', { capture: 'fullPage' });"
+    ],
+    "Videos": [
+      "Cypress records video of the entire test run. Videos are stored in cypress/videos and can be configured or disabled in cypress.config.js.",
+      "// cypress.config.js\nmodule.exports = { video: true, videoCompression: 32 }"
+    ],
+    "CI Integration": [
+      "Cypress runs headlessly in CI with cypress run. The Cypress GitHub Action or Docker image provides browsers and dependencies.",
+      "npx cypress run --browser chrome --headless"
+    ],
+    "Accessibility Testing": [
+      "Use cypress-axe for automated accessibility checks. It scans the DOM for WCAG violations and integrates directly into your test assertions.",
+      "cy.injectAxe();\ncy.checkA11y();\n\n// Scoped check\ncy.checkA11y('.main-content', {\n  runOnly: { type: 'tag', values: ['wcag2a'] }\n});"
     ]
   },
   "Cypress Advanced": {

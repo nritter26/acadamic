@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW = 60000;
-const RATE_MAX = 30;
+const RATE_MAX = 10000;
 
 // Cleanup stale entries every 5 minutes
 setInterval(() => {

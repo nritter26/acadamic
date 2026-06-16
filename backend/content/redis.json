@@ -25,27 +25,6 @@
       "exercises": []
     }
   },
-  "Configuration": {
-    "Redis Config": {
-      "exp": "Configuring redis for your project.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Best Practices": {
-    "Redis Best Practices": {
-      "exp": "Best practices for using redis.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Usage": {
-    "Redis Advanced": {
-      "exp": "Advanced redis techniques and patterns.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Strings & Numbers": {
     "SET/GET": [
       "Strings are the most fundamental Redis data type, capable of storing text, numbers, or binary data up to 512MB. SET stores a key-value pair, GET retrieves it, and commands like `SETNX` help with distributed locks.",
@@ -87,6 +66,13 @@
       "Sorted Sets excel at real-time leaderboards with atomic score updates, range queries, and pagination. Combined with aggregation commands like ZCOUNT and ZREMRANGEBYSCORE, they handle ranking systems efficiently.",
       "ZREVRANGE leaderboard 0 9 WITHSCORES\n# Top 10 players\n\nZCOUNT leaderboard 80 100\n# Count players with scores between 80-100\n\nZREVRANK leaderboard \"Alice\"\n# Rank from high to low\n\nZREMRANGEBYRANK leaderboard 0 -11\n# Keep only top 10, remove rest\n\nZUNIONSTORE weekly 2 week:1 week:2 WEIGHTS 0.5 0.5\n# Combine two weeks' scores with weighting"
     ]
+  },
+  "Best Practices": {
+    "Redis Best Practices": {
+      "exp": "Best practices for using redis.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Persistence": {
     "RDB": [
@@ -131,10 +117,6 @@
     ]
   },
   "Use Cases": {
-    "Caching": [
-      "Redis caching improves application performance by storing frequently accessed data in memory. Common patterns include cache-aside (lazy loading), write-through, and TTL-based expiry with automatic cache invalidation.",
-      "// Cache-aside pattern with Node.js\nconst cache = async (key, ttl, fetchFn) => {\n  const cached = await redis.get(key);\n  if (cached) return JSON.parse(cached);\n  \n  const data = await fetchFn();\n  await redis.setex(key, ttl, JSON.stringify(data));\n  return data;\n};\n\n// Usage\napp.get('/api/products', async (req, res) => {\n  const products = await cache('products:all', 300, () =>\n    Product.find({ active: true }).lean()\n  );\n  res.json(products);\n});\n\n// Invalidate on update\napp.post('/api/products', async (req, res) => {\n  await Product.create(req.body);\n  await redis.del('products:all');  // Invalidate cache\n  res.status(201).end();\n});"
-    ],
     "Rate Limiting": [
       "Redis enables efficient distributed rate limiting using INCR with TTL. The sliding window algorithm tracks request counts per time window, and the token bucket algorithm offers more flexible rate control.",
       "// Sliding window rate limiter\nconst rateLimit = async (ip, limit = 100, window = 60) => {\n  const key = `ratelimit:${ip}:${Math.floor(Date.now() / 1000 / window)}`;\n  const count = await redis.incr(key);\n  if (count === 1) await redis.expire(key, window);\n  \n  return count <= limit;\n};\n\n// Express middleware\napp.use(async (req, res, next) => {\n  const allowed = await rateLimit(req.ip, 100, 60);\n  if (!allowed) {\n    return res.status(429).json({ error: 'Too many requests' });\n  }\n  next();\n});\n\n// More precise: sliding window with sorted sets\nconst preciseRateLimit = async (userId, maxRequests, windowMs) => {\n  const now = Date.now();\n  const key = `ratelimit:precise:${userId}`;\n  \n  await redis.zadd(key, now, `${now}`);\n  await redis.zremrangebyscore(key, 0, now - windowMs);\n  \n  const count = await redis.zcard(key);\n  await redis.expire(key, Math.ceil(windowMs / 1000));\n  \n  return count <= maxRequests;\n};"
@@ -146,7 +128,25 @@
     "Queues": [
       "Redis Lists provide the foundation for lightweight job queues. `LPUSH` + `BRPOP` implement reliable FIFO queues with blocking pops. Bull and Kue are popular Node.js queue libraries built on Redis.",
       "// Simple queue using Redis Lists\nconst addToQueue = async (queue, job) => {\n  await redis.lpush(queue, JSON.stringify(job));\n};\n\nconst processQueue = async (queue) => {\n  while (true) {\n    const result = await redis.brpop(queue, 0);\n    const job = JSON.parse(result[1]);\n    try {\n      console.log('Processing:', job);\n      await handleJob(job);\n      console.log('Completed:', job.id);\n    } catch (err) {\n      console.error('Failed:', job.id, err.message);\n      // Re-queue to dead letter queue\n      await redis.lpush(`${queue}:failed`, JSON.stringify({ ...job, error: err.message }));\n    }\n  }\n};\n\n// Bull queue example\nconst Queue = require('bull');\nconst emailQueue = new Queue('email', 'redis://127.0.0.1:6379');\n\nemailQueue.process(async (job) => {\n  await sendEmail(job.data.to, job.data.subject, job.data.body);\n});\n\nemailQueue.add({ to: 'user@example.com', subject: 'Welcome', body: '...' }, {\n  attempts: 3,\n  backoff: { type: 'exponential', delay: 2000 }\n});"
+    ],
+    "Caching": [
+      "Redis caching improves application performance by storing frequently accessed data in memory. Common patterns include cache-aside (lazy loading), write-through, and TTL-based expiry with automatic cache invalidation.",
+      "// Cache-aside pattern with Node.js\nconst cache = async (key, ttl, fetchFn) => {\n  const cached = await redis.get(key);\n  if (cached) return JSON.parse(cached);\n  \n  const data = await fetchFn();\n  await redis.setex(key, ttl, JSON.stringify(data));\n  return data;\n};\n\n// Usage\napp.get('/api/products', async (req, res) => {\n  const products = await cache('products:all', 300, () =>\n    Product.find({ active: true }).lean()\n  );\n  res.json(products);\n});\n\n// Invalidate on update\napp.post('/api/products', async (req, res) => {\n  await Product.create(req.body);\n  await redis.del('products:all');  // Invalidate cache\n  res.status(201).end();\n});"
     ]
+  },
+  "Configuration": {
+    "Redis Config": {
+      "exp": "Configuring redis for your project.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Usage": {
+    "Redis Advanced": {
+      "exp": "Advanced redis techniques and patterns.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Redis Advanced Use Cases": {
     "Redis Pub/Sub & Streams": [

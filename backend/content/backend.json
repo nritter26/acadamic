@@ -5,16 +5,6 @@
       "code": "DNS, IP addresses, routers, ISPs, and the client-server model.",
       "exercises": []
     },
-    "HTTP Protocol": {
-      "exp": "The Hypertext Transfer Protocol.",
-      "code": "HTTP/1.1, HTTP/2, HTTP/3; request/response cycle; headers, methods, status codes.",
-      "exercises": []
-    },
-    "REST API Design": {
-      "exp": "Designing RESTful APIs.",
-      "code": "Resources, HTTP methods (GET, POST, PUT, DELETE), status codes, versioning.",
-      "exercises": []
-    },
     "DNS": {
       "exp": "Domain Name System resolution.",
       "code": "A, CNAME, MX records; TTL; DNS propagation.",
@@ -25,11 +15,47 @@
       "code": "Three-way handshake, ports, sockets, connection lifecycle.",
       "exercises": []
     },
+    "HTTP Protocol": {
+      "exp": "The Hypertext Transfer Protocol.",
+      "code": "HTTP/1.1, HTTP/2, HTTP/3; request/response cycle; headers, methods, status codes.",
+      "exercises": []
+    },
+    "REST API Design": {
+      "exp": "Designing RESTful APIs.",
+      "code": "Resources, HTTP methods (GET, POST, PUT, DELETE), status codes, versioning.",
+      "exercises": []
+    },
     "WebSockets": {
       "exp": "Bidirectional real-time communication.",
       "code": "WebSocket handshake, frames, full-duplex communication.",
       "exercises": []
     }
+  },
+  "Internet & Fundamentals": {
+    "How the Internet Works": [
+      "The internet is a global network of interconnected computers that communicate using standardized protocols. Data is broken into packets, routed through multiple nodes, and reassembled at the destination. Key concepts include IP addresses, DNS, TCP/IP, and the client-server model.",
+      "// The internet in a nutshell\n// Your browser (client) sends a request\n// DNS translates domain -> IP address\n// TCP establishes a connection\n// Server processes and sends back a response\n// Your browser renders the HTML\n\n// This entire flow happens in milliseconds!"
+    ],
+    "DNS & How It Works": [
+      "DNS (Domain Name System) translates human-readable domain names (google.com) into machine-readable IP addresses (142.250.190.46). It's a hierarchical system with root servers, TLD servers, and authoritative nameservers. DNS resolution involves recursive queries that cache results for performance.",
+      "// DNS resolution steps:\n// 1. Browser checks local DNS cache\n// 2. Checks OS hosts file\n// 3. Queries recursive DNS resolver (ISP)\n// 4. Resolver queries root nameserver\n// 5. Queries TLD nameserver (.com)\n// 6. Queries authoritative nameserver\n// 7. Returns IP address to browser\n\n// Result: example.com -> 93.184.216.34"
+    ],
+    "What is Hosting": [
+      "Web hosting is a service that stores your website files on a server and makes them accessible via the internet. Types include shared hosting (multiple sites on one server), VPS (virtual private server), dedicated hosting (physical server for one client), and cloud hosting (scalable resources across multiple servers).",
+      "// Hosting types comparison:\n// Shared:   Cheap, limited resources, \"noisy neighbors\"\n// VPS:      Isolated virtual machine, root access\n// Dedicated: Full physical server, maximum performance\n// Cloud:    Auto-scaling, pay-as-you-go (AWS, GCP, Azure)\n// Serverless: Just deploy code, no server management"
+    ],
+    "Browsers & How They Work": [
+      "Browsers (Chrome, Firefox, Safari) are user agents that fetch, render, and display web content. The browser engine parses HTML, CSS, and JavaScript, constructs the DOM and CSSOM trees, performs layout calculations, and paints pixels to screen. Key components include the rendering engine, JavaScript engine (V8, SpiderMonkey), and networking stack.",
+      "// Browser rendering pipeline:\n// 1. Parse HTML -> DOM Tree\n// 2. Parse CSS -> CSSOM Tree\n// 3. Combine -> Render Tree\n// 4. Layout -> Box model calculations\n// 5. Paint -> Pixel rasterization\n// 6. Composite -> Final screen output\n\n// JavaScript can block parsing!\n// <script defer> or async for performance"
+    ],
+    "What is HTTP": [
+      "HTTP (Hypertext Transfer Protocol) is the foundation of data communication on the web. It's a request-response protocol where clients send requests (GET, POST, PUT, DELETE) to servers, which return status codes (200 OK, 404 Not Found, 500 Server Error) and response bodies.",
+      "// HTTP Request/Response cycle\n// Request:\nGET /api/users HTTP/1.1\nHost: example.com\nAuthorization: Bearer <token>\nAccept: application/json\n\n// Response:\nHTTP/1.1 200 OK\nContent-Type: application/json\n{\n  \"users\": [\n    {\"id\": 1, \"name\": \"Alice\"}\n  ]\n}"
+    ],
+    "What is a Domain Name": [
+      "A domain name is a unique, human-readable address that identifies a website on the internet. Domain structure includes TLD (top-level domain like .com, .org), second-level domain (the name you choose), and subdomains (like www or blog). Domains are registered through registrars and must be renewed periodically.",
+      "// Domain structure:\n// blog.example.co.uk\n//  |     |     |   |\n//  |     |     |   TLD (.uk)\n//  |     |     SLD (.co)\n//  |     Domain (example)\n//  Subdomain (blog)"
+    ]
   },
   "Server-Side Languages": {
     "Node.js Runtime": {
@@ -84,6 +110,11 @@
       "code": "Normalization, denormalization, indexing strategies, relationships.",
       "exercises": []
     },
+    "Migrations": {
+      "exp": "Managing database schema changes.",
+      "code": "Version-controlled schema changes, rollbacks, seeding data.",
+      "exercises": []
+    },
     "Query Optimization": {
       "exp": "Optimizing database query performance.",
       "code": "EXPLAIN, query plans, index usage, connection pooling.",
@@ -93,129 +124,6 @@
       "exp": "Caching strategies for database access.",
       "code": "Redis, Memcached, cache-aside, write-through, cache invalidation.",
       "exercises": []
-    },
-    "Migrations": {
-      "exp": "Managing database schema changes.",
-      "code": "Version-controlled schema changes, rollbacks, seeding data.",
-      "exercises": []
-    }
-  },
-  "Authentication & Authorization": {
-    "JWT (JSON Web Tokens)": [
-      "JWT is a compact, URL-safe token format for transmitting claims between parties. It consists of three parts: header (algorithm, type), payload (claims like user_id, role, exp), and signature (verified with a secret or key pair). JWTs are stateless — the server doesn't need to store session data, but they can't be revoked without a blocklist.",
-      "// JWT structure:\n// header.payload.signature\n\n// Header\n{\n  \"alg\": \"HS256\",\n  \"typ\": \"JWT\"\n}\n\n// Payload\n{\n  \"sub\": \"user123\",\n  \"role\": \"admin\",\n  \"iat\": 1516239022,\n  \"exp\": 1516242622\n}\n\n// Verification (Node.js)\nconst jwt = require('jsonwebtoken');\nconst decoded = jwt.verify(token, SECRET);\nconsole.log(decoded.userId);"
-    ],
-    "Session-Based Auth": {
-      "exp": "Server-side session management.",
-      "code": "Session IDs, cookies, session stores (Redis, DB).",
-      "exercises": []
-    },
-    "OAuth 2.0": [
-      "OAuth 2.0 is an authorization framework that allows third-party apps to access user data without sharing passwords. It involves authorization server, resource server, and client. Grant types include Authorization Code (most common), Client Credentials (machine-to-machine), Implicit (legacy), and Refresh Token. Used by Google, GitHub, and Facebook login systems.",
-      "// OAuth 2.0 Authorization Code Flow:\n// 1. User clicks \"Login with Google\"\n// 2. Redirected to Google's auth server\n// 3. User approves permissions\n// 4. Auth server returns authorization code\n// 5. Backend exchanges code for access token\n// 6. Backend uses token to call Google's API\n\nGET https://accounts.google.com/o/oauth2/v2/auth?\n  client_id=YOUR_CLIENT_ID&\n  redirect_uri=https://yourapp.com/callback&\n  response_type=code&\n  scope=profile%20email"
-    ],
-    "RBAC": {
-      "exp": "Role-Based Access Control.",
-      "code": "Users, roles, permissions; hierarchical roles.",
-      "exercises": []
-    },
-    "Security Best Practices": {
-      "exp": "Protecting against common vulnerabilities.",
-      "code": "Password hashing (bcrypt), rate limiting, input validation, XSS/CSRF prevention.",
-      "exercises": []
-    },
-    "API Keys": {
-      "exp": "Managing API authentication with keys.",
-      "code": "Key generation, rotation, rate limiting per key.",
-      "exercises": []
-    },
-    "Basic Authentication": [
-      "Basic Authentication is the simplest HTTP authentication method. The client sends the username and password encoded in Base64 in the Authorization header. It's insecure over plain HTTP (easily decoded) and should only be used over HTTPS. Typically paired with session tokens or API keys for modern applications.",
-      "// Basic Auth header format:\n// Authorization: Basic base64(username:password)\n\nconst credentials = Buffer.from('alice:secret123')\n  .toString('base64');\n// YWxpY2U6c2VjcmV0MTIz\n\nfetch('https://api.example.com/data', {\n  headers: {\n    'Authorization': `Basic ${credentials}`\n  }\n});\n\n// Always use over HTTPS!\n// Base64 is NOT encryption — it's encoding"
-    ],
-    "Session & Cookie Auth": [
-      "Session-based authentication uses server-side sessions identified by a cookie. When a user logs in, the server creates a session, stores it (in memory, Redis, or database), and sends the session ID as a cookie. The browser sends the cookie with each request. Provides easy revocation (delete the session) but requires server-side storage.",
-      "// Session auth flow:\n// 1. POST /login with credentials\n// 2. Server validates, creates session\n// 3. Response includes Set-Cookie header\n// 4. Browser stores cookie\n// 5. Each request includes cookie\n// 6. Server looks up session\n// 7. Session expires or user logs out\n\nSet-Cookie: session_id=abc123;\n  HttpOnly; Secure; SameSite=Strict;\n  Max-Age=86400"
-    ],
-    "API Security Best Practices": [
-      "API security involves multiple layers: rate limiting (prevent abuse), input validation (sanitize all inputs), HTTPS everywhere, proper authentication/authorization (least privilege principle), CORS configuration, request size limits, SQL injection prevention (parameterized queries), XSS protection, CSRF tokens, and security headers (CSP, HSTS, X-Frame-Options).",
-      "# API security checklist:\n# [ ] HTTPS enforced (HSTS header)\n# [ ] Rate limiting (100 req/min per user)\n# [ ] Input validation & sanitization\n# [ ] Parameterized queries (no raw SQL)\n# [ ] CORS whitelist (not *)\n# [ ] Authentication on all endpoints\n# [ ] Role-based access control (RBAC)\n# [ ] Audit logging\n# [ ] Security headers (CSP, X-Frame-Options)\n# [ ] Request size limits"
-    ]
-  },
-  "API Development": {
-    "GraphQL": {
-      "exp": "Query language for APIs.",
-      "code": "Schema definition, resolvers, queries, mutations, subscriptions.",
-      "exercises": []
-    },
-    "gRPC": {
-      "exp": "High-performance RPC framework.",
-      "code": "Protocol buffers, service definitions, streaming, HTTP/2.",
-      "exercises": []
-    },
-    "WebSockets": {
-      "exp": "Real-time bidirectional communication.",
-      "code": "Socket.io, ws library, rooms, broadcasting.",
-      "exercises": []
-    },
-    "API Versioning": {
-      "exp": "Strategies for API version management.",
-      "code": "URL versioning, header versioning, content negotiation.",
-      "exercises": []
-    },
-    "API Documentation": {
-      "exp": "Documenting APIs for consumers.",
-      "code": "Swagger/OpenAPI, Postman collections, API blueprints.",
-      "exercises": []
-    },
-    "Rate Limiting": {
-      "exp": "Controlling API request rates.",
-      "code": "Token bucket, leaky bucket, sliding window; per-user, per-IP.",
-      "exercises": []
-    }
-  },
-  "Testing Backend": {
-    "Unit Testing": {
-      "exp": "Testing individual components in isolation.",
-      "code": "Jest, Mocha, Vitest; mocking, stubbing, assertions.",
-      "exercises": []
-    },
-    "Integration Testing": {
-      "exp": "Testing component interactions.",
-      "code": "Supertest for HTTP, database test containers, API integration tests.",
-      "exercises": []
-    },
-    "End-to-End Testing": {
-      "exp": "Testing the complete application flow.",
-      "code": "Cypress, Playwright; full user journey testing.",
-      "exercises": []
-    },
-    "Test-Driven Development": {
-      "exp": "Writing tests before implementation.",
-      "code": "Red-green-refactor cycle, test-first methodology.",
-      "exercises": []
-    }
-  },
-  "DevOps & Deployment": {
-    "Docker": {
-      "exp": "Containerization platform.",
-      "code": "Dockerfiles, images, containers, docker-compose, multi-stage builds.",
-      "exercises": []
-    },
-    "CI/CD": {
-      "exp": "Continuous Integration and Deployment.",
-      "code": "GitHub Actions, GitLab CI, Jenkins; automated testing and deployment.",
-      "exercises": []
-    },
-    "Cloud Deployment": {
-      "exp": "Deploying to cloud platforms.",
-      "code": "AWS (EC2, Lambda, ECS), GCP (Cloud Run, GKE), Azure (App Service).",
-      "exercises": []
-    },
-    "Monitoring": {
-      "exp": "Tracking application health and performance.",
-      "code": "Logging (Winston, Morgan), metrics (Prometheus), alerting.",
-      "exercises": []
     }
   },
   "System Design": {
@@ -224,19 +132,9 @@
       "code": "Horizontal vs vertical scaling, load balancing, database sharding.",
       "exercises": []
     },
-    "Microservices": {
-      "exp": "Architecting distributed systems.",
-      "code": "Service decomposition, inter-service communication, API gateways.",
-      "exercises": []
-    },
     "Message Queues": {
       "exp": "Async communication between services.",
       "code": "RabbitMQ, Kafka, Redis streams; producers, consumers, topics.",
-      "exercises": []
-    },
-    "Caching Strategies": {
-      "exp": "Multi-level caching patterns.",
-      "code": "CDN, application cache, database cache; cache invalidation strategies.",
       "exercises": []
     },
     "Database Sharding": {
@@ -248,33 +146,17 @@
       "exp": "Distributed agreement protocols.",
       "code": "Raft, Paxos, Zab; leader election, log replication.",
       "exercises": []
+    },
+    "Caching Strategies": {
+      "exp": "Multi-level caching patterns.",
+      "code": "CDN, application cache, database cache; cache invalidation strategies.",
+      "exercises": []
+    },
+    "Microservices": {
+      "exp": "Architecting distributed systems.",
+      "code": "Service decomposition, inter-service communication, API gateways.",
+      "exercises": []
     }
-  },
-  "Internet & Fundamentals": {
-    "How the Internet Works": [
-      "The internet is a global network of interconnected computers that communicate using standardized protocols. Data is broken into packets, routed through multiple nodes, and reassembled at the destination. Key concepts include IP addresses, DNS, TCP/IP, and the client-server model.",
-      "// The internet in a nutshell\n// Your browser (client) sends a request\n// DNS translates domain -> IP address\n// TCP establishes a connection\n// Server processes and sends back a response\n// Your browser renders the HTML\n\n// This entire flow happens in milliseconds!"
-    ],
-    "What is HTTP": [
-      "HTTP (Hypertext Transfer Protocol) is the foundation of data communication on the web. It's a request-response protocol where clients send requests (GET, POST, PUT, DELETE) to servers, which return status codes (200 OK, 404 Not Found, 500 Server Error) and response bodies.",
-      "// HTTP Request/Response cycle\n// Request:\nGET /api/users HTTP/1.1\nHost: example.com\nAuthorization: Bearer <token>\nAccept: application/json\n\n// Response:\nHTTP/1.1 200 OK\nContent-Type: application/json\n{\n  \"users\": [\n    {\"id\": 1, \"name\": \"Alice\"}\n  ]\n}"
-    ],
-    "DNS & How It Works": [
-      "DNS (Domain Name System) translates human-readable domain names (google.com) into machine-readable IP addresses (142.250.190.46). It's a hierarchical system with root servers, TLD servers, and authoritative nameservers. DNS resolution involves recursive queries that cache results for performance.",
-      "// DNS resolution steps:\n// 1. Browser checks local DNS cache\n// 2. Checks OS hosts file\n// 3. Queries recursive DNS resolver (ISP)\n// 4. Resolver queries root nameserver\n// 5. Queries TLD nameserver (.com)\n// 6. Queries authoritative nameserver\n// 7. Returns IP address to browser\n\n// Result: example.com -> 93.184.216.34"
-    ],
-    "What is Hosting": [
-      "Web hosting is a service that stores your website files on a server and makes them accessible via the internet. Types include shared hosting (multiple sites on one server), VPS (virtual private server), dedicated hosting (physical server for one client), and cloud hosting (scalable resources across multiple servers).",
-      "// Hosting types comparison:\n// Shared:   Cheap, limited resources, \"noisy neighbors\"\n// VPS:      Isolated virtual machine, root access\n// Dedicated: Full physical server, maximum performance\n// Cloud:    Auto-scaling, pay-as-you-go (AWS, GCP, Azure)\n// Serverless: Just deploy code, no server management"
-    ],
-    "Browsers & How They Work": [
-      "Browsers (Chrome, Firefox, Safari) are user agents that fetch, render, and display web content. The browser engine parses HTML, CSS, and JavaScript, constructs the DOM and CSSOM trees, performs layout calculations, and paints pixels to screen. Key components include the rendering engine, JavaScript engine (V8, SpiderMonkey), and networking stack.",
-      "// Browser rendering pipeline:\n// 1. Parse HTML -> DOM Tree\n// 2. Parse CSS -> CSSOM Tree\n// 3. Combine -> Render Tree\n// 4. Layout -> Box model calculations\n// 5. Paint -> Pixel rasterization\n// 6. Composite -> Final screen output\n\n// JavaScript can block parsing!\n// <script defer> or async for performance"
-    ],
-    "What is a Domain Name": [
-      "A domain name is a unique, human-readable address that identifies a website on the internet. Domain structure includes TLD (top-level domain like .com, .org), second-level domain (the name you choose), and subdomains (like www or blog). Domains are registered through registrars and must be renewed periodically.",
-      "// Domain structure:\n// blog.example.co.uk\n//  |     |     |   |\n//  |     |     |   TLD (.uk)\n//  |     |     SLD (.co)\n//  |     Domain (example)\n//  Subdomain (blog)"
-    ]
   },
   "Version Control Systems": {
     "Git Basics": [
@@ -346,44 +228,100 @@
       "// Elasticsearch query\nGET /products/_search\n{\n  \"query\": {\n    \"bool\": {\n      \"must\": [{ \"match\": { \"name\": \"laptop\" } }],\n      \"filter\": [\n        { \"range\": { \"price\": { \"gte\": 500, \"lte\": 2000 } } }\n      ]\n    }\n  },\n  \"aggs\": {\n    \"by_category\": {\n      \"terms\": { \"field\": \"category.keyword\" }\n    }\n  }\n}"
     ]
   },
-  "APIs & Web Services": {
-    "REST APIs": [
-      "REST (Representational State Transfer) is an architectural style for designing networked applications. It uses HTTP methods (GET, POST, PUT, PATCH, DELETE) to perform CRUD operations on resources identified by URLs. REST APIs should be stateless, use proper HTTP status codes, and support pagination, filtering, and versioning.",
-      "// REST API design\nGET    /api/users          # List users\nPOST   /api/users          # Create user\nGET    /api/users/:id      # Get user by ID\nPUT    /api/users/:id      # Replace user\nPATCH  /api/users/:id      # Update user fields\nDELETE /api/users/:id      # Delete user\n\n// Response\nHTTP/1.1 201 Created\n{\n  \"id\": 123,\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+  "Message Brokers & Streaming": {
+    "RabbitMQ": [
+      "RabbitMQ is a message broker implementing AMQP (Advanced Message Queuing Protocol). Producers send messages to exchanges, which route them to queues based on bindings and routing keys. Consumers process messages from queues. Supports multiple exchange types: direct, topic, fanout, and headers. Offers message durability, acknowledgments, and dead-letter queues for reliability.",
+      "// RabbitMQ concepts\n// Producer -> Exchange -> Queue -> Consumer\n\n// Exchange types:\n// direct:     Routes to queue with matching routing key\n// topic:      Routes by pattern (* matches one word, # matches many)\n// fanout:     Broadcasts to all bound queues\n// headers:    Routes by message header attributes\n\n// Connection (Node.js amqplib)\nconst amqp = require('amqplib');\nconst conn = await amqp.connect('amqp://localhost');\nconst ch = await conn.createChannel();\nawait ch.assertQueue('tasks', { durable: true });\nch.sendToQueue('tasks', Buffer.from('work'), { persistent: true });"
     ],
-    "GraphQL": [
-      "GraphQL is a query language for APIs developed by Meta. Clients request exactly the data they need, reducing over-fetching and under-fetching. A single endpoint (/graphql) handles all operations. Type system defines the schema, resolvers fetch data from various sources. Supports queries, mutations, and subscriptions for real-time data.",
-      "// GraphQL query\nquery {\n  user(id: \"123\") {\n    name\n    email\n    posts(limit: 5) {\n      title\n      comments { text }\n    }\n  }\n}\n\n// GraphQL schema\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  posts(limit: Int): [Post!]!\n}\n\ntype Post {\n  title: String!\n  comments: [Comment!]!\n}"
+    "Apache Kafka": [
+      "Apache Kafka is a distributed event streaming platform designed for high-throughput, fault-tolerant data pipelines. Topics are partitioned and replicated across brokers. Producers write events, consumers read from offsets. Unlike RabbitMQ, Kafka persists all messages for a configurable retention period. Used for event sourcing, log aggregation, stream processing, and data integration at scale.",
+      "# Kafka concepts\n# Topic:  A category/feed name (e.g., \"orders\")\n# Partition: Ordered, immutable sequence of records\n# Offset:  Unique ID of a record within a partition\n# Broker:  A Kafka server in the cluster\n# Consumer Group: Group of consumers sharing work\n\n# CLI commands\nkafka-topics.sh --create --topic orders --partitions 3 --replication-factor 2\nkafka-console-producer.sh --topic orders\nkafka-console-consumer.sh --topic orders --from-beginning --group my-group"
     ],
-    "gRPC": [
-      "gRPC is a high-performance RPC framework by Google that uses Protocol Buffers for serialization and HTTP/2 for transport. It supports bidirectional streaming, flow control, and multiplexing. Service definitions are written in .proto files, generating client and server code in multiple languages. Ideal for microservices communication.",
-      "// Protocol Buffer definition\nservice UserService {\n  rpc GetUser (GetUserRequest) returns (User);\n  rpc ListUsers (ListUsersRequest) returns (stream User);\n  rpc UpdateUser (stream UpdateRequest) returns (User);\n}\n\nmessage User {\n  int32 id = 1;\n  string name = 2;\n  string email = 3;\n}\n\n// Benefits over REST:\n// - Binary protocol (smaller payloads)\n// - Strongly typed schemas\n// - Built-in code generation"
-    ],
-    "WebSockets": [
-      "WebSockets provide full-duplex communication over a single TCP connection, enabling real-time data exchange. Unlike HTTP request-response, the server can push data to clients. Used for chat apps, live notifications, collaborative editing, and gaming. Libraries like Socket.IO add fallback transports and room management.",
-      "// Client-side WebSocket\nconst ws = new WebSocket('wss://example.com/chat');\n\nws.onopen = () => {\n  ws.send(JSON.stringify({ type: 'join', room: 'general' }));\n};\n\nws.onmessage = (event) => {\n  const msg = JSON.parse(event.data);\n  console.log('Received:', msg);\n};\n\nws.onclose = () => console.log('Disconnected');\n\n// Server-side (Node.js)\nconst WebSocket = require('ws');\nconst wss = new WebSocket.Server({ port: 8080 });"
-    ],
-    "OpenAPI / Swagger": [
-      "OpenAPI (formerly Swagger) is a standard for describing REST APIs using a YAML or JSON specification. It defines endpoints, request/response schemas, authentication, and error codes. Tools like Swagger UI generate interactive documentation, and code generators create client SDKs and server stubs automatically.",
-      "# OpenAPI 3.0 specification\nopenapi: 3.0.0\ninfo:\n  title: User API\n  version: 1.0.0\npaths:\n  /users:\n    get:\n      summary: List all users\n      responses:\n        '200':\n          description: Successful response\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  $ref: '#/components/schemas/User'"
+    "Message Queue Patterns": [
+      "Common messaging patterns include: Work Queues (competing consumers distribute tasks), Pub/Sub (one-to-many broadcast), RPC (request-response over queue), Event Sourcing (storing events as authoritative state), CQRS (separate read/write models), Saga Pattern (distributed transactions via compensating actions), and Dead Letter Queues (failed message handling).",
+      "# Common messaging patterns\n\n# 1. Work Queue (Task distribution)\n# Multiple consumers compete for messages\n# Each message processed exactly once\n\n# 2. Pub/Sub (Broadcast)\n# One message -> multiple consumers\n# Each consumer gets every message\n\n# 3. Saga (Distributed transaction)\n# Order Service: Create order -> publish OrderCreated\n# Payment Service: Consume -> process payment -> publish PaymentProcessed\n# Inventory Service: Consume -> reserve items -> publish InventoryReserved\n# If any step fails, compensating events undo previous steps"
     ]
   },
-  "Caching": {
-    "Caching Strategies": [
-      "Caching stores frequently accessed data in a fast storage layer to reduce latency and database load. Common strategies include: Cache-Aside (application checks cache first), Read-Through (cache layer fetches from DB on miss), Write-Through (write to cache AND DB simultaneously), Write-Behind (async write to DB), and Cache Eviction policies (LRU, TTL, FIFO).",
-      "// Cache-Aside pattern (most common)\nfunction getUser(id) {\n  let user = cache.get(`user:${id}`);\n  if (!user) {\n    user = db.query('SELECT * FROM users WHERE id = ?', [id]);\n    cache.set(`user:${id}`, user, 'EX', 3600);\n  }\n  return user;\n}\n\n// Cache invalidation is hard!\nfunction updateUser(id, data) {\n  db.query('UPDATE users SET ? WHERE id = ?', [data, id]);\n  cache.del(`user:${id}`);  // Invalidate cache\n}"
+  "AI in Backend Development": {
+    "AI-Assisted Coding": [
+      "AI coding assistants (GitHub Copilot, Cursor, Claude Code) use large language models to generate, refactor, and explain code. They integrate with IDEs and support context-aware completions, test generation, bug fixing, and code review. Best practices: provide clear context, review generated code, never blindly accept, and treat AI as a pair programmer, not a replacement.",
+      "# AI-assisted coding best practices:\n# - Write clear comments and function names\n# - Provide examples in the context\n# - Break complex tasks into smaller prompts\n# - Review generated code for correctness\n# - Write tests first (AI generates implementations)\n# - Use AI for boilerplate, refactoring, and docs\n# - Never paste sensitive data into AI tools\n# - Understand what AI generates - don't black-box"
     ],
-    "Redis as Cache": [
-      "Redis is the most popular caching solution due to its in-memory performance and rich data structures. Common caching patterns include: session storage, database query result caching, page caching (full HTML), rate limiting counters, leaderboards, and distributed locks. Redis Cluster provides automatic sharding for large-scale deployments.",
-      "// Redis caching patterns\n// 1. Query result caching\nSET product:42:details $productJson EX 300\n\n// 2. Session storage\nSET session:token123 '{\"userId\":1,\"role\":\"admin\"}' EX 86400\n\n// 3. Rate limiting\nINCR rate:user:123\nEXPIRE rate:user:123 60\n\n// 4. Distributed lock\nSET lock:resource $uuid NX EX 10\n// ... do work ...\nDEL lock:resource  # release lock"
+    "Prompt Engineering": [
+      "Prompt engineering is the practice of designing input prompts to get desired outputs from LLMs. Techniques include: few-shot prompting (providing examples), chain-of-thought (step-by-step reasoning), system prompts (setting behavior/role), structured output constraints (JSON mode), and temperature control (creativity vs precision). Key for building reliable AI-powered backend features.",
+      "# Prompt engineering techniques\n\n# System message (sets behavior)\nYou are a code reviewer. Analyze the following\ncode for bugs, security issues, and performance\nproblems. Respond in JSON format.\n\n# Few-shot prompting (examples)\nTranslate these SQL queries to MongoDB:\nSQL: SELECT * FROM users WHERE age > 18\nMQL: db.users.find({ age: { $gt: 18 } })\n\nSQL: <user query>\nMQL:\n\n# Chain of thought (step by step)\nLet's think step by step about whether this\nquery will use the index..."
     ],
-    "Content Delivery Networks": [
-      "A CDN (Content Delivery Network) is a distributed network of servers that delivers cached static content (images, CSS, JS, videos) from locations geographically closer to users. Leading providers include Cloudflare, AWS CloudFront, Fastly, and Akamai. CDNs reduce latency, offload origin servers, and provide DDoS protection. Dynamic content can also be accelerated through edge computing.",
-      "# CDN workflow:\n# 1. User requests example.com/image.png\n# 2. DNS resolves to nearest CDN edge server\n# 3. Edge server checks cache\n# 4. Cache HIT -> Serve directly\n# 5. Cache MISS -> Fetch from origin, cache, serve\n# 6. Subsequent requests are fast!\n\n# Cache-Control headers control behavior:\nCache-Control: public, max-age=31536000, immutable"
+    "Building AI Features": [
+      "Backend developers integrate AI capabilities through API calls to LLM providers (OpenAI, Anthropic, Google) or self-hosted models (Llama, Mistral). Patterns include: RAG (Retrieval Augmented Generation — search documents + ask LLM), embeddings for semantic search, streaming responses for real-time chat, function calling for structured outputs, and AI agents for multi-step tasks.",
+      "// Integrating LLMs into your backend\nconst OpenAI = require('openai');\nconst openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Streaming chat completion\nconst stream = await openai.chat.completions.create({\n  model: 'gpt-4',\n  messages: [\n    { role: 'system', content: 'You are a helpful assistant.' },\n    { role: 'user', content: 'Explain database indexing' }\n  ],\n  stream: true,\n});\n\nfor await (const chunk of stream) {\n  process.stdout.write(chunk.choices[0]?.delta?.content || '');\n}"
+    ]
+  },
+  "System Design & Architecture": {
+    "Database Scaling": [
+      "Scaling databases involves read replicas (offload read queries to copies), connection pooling (manage DB connections efficiently), caching layers (Redis/Memcached), partitioning (vertical/horizontal), and sharding. Read replicas improve read throughput but introduce eventual consistency. Connection poolers like PgBouncer manage thousands of concurrent connections efficiently.",
+      "# Database scaling strategies\n\n# 1. Read Replicas\n# Primary handles writes, replicas handle reads\n# Eventually consistent (replication lag)\n\n# 2. Connection Pooling\n# PgBouncer: Lightweight connection pooler\n# Maintains persistent connections to DB\n# Apps borrow/release connections\n\n# 3. Vertical Scaling\n# Bigger instance (more CPU, RAM, IOPS)\n# Simpler but has upper limits\n\n# 4. Sharding\n# Split data across multiple databases\n# Each shard handles subset of data"
     ],
-    "HTTP Caching": [
-      "HTTP caching allows browsers and proxies to store responses and reuse them. Cache-Control directives (max-age, no-cache, no-store, public, private) and ETags/Last-Modified headers control caching behavior. Conditional requests with If-None-Match (ETag) or If-Modified-Since allow servers to return 304 Not Modified instead of full responses, saving bandwidth.",
-      "# HTTP caching headers\n\n# Strong caching (browser caches for 1 year)\nCache-Control: public, max-age=31536000, immutable\n\n# Validate with server each time\nCache-Control: no-cache\nETag: \"abc123\"\n\n# Never cache sensitive data\nCache-Control: no-store, private\n\n# Conditional request (browser sends)\nIf-None-Match: \"abc123\"\n# Server responds:\n# 304 Not Modified (no body) -- or --\n# 200 OK with new content"
+    "Load Balancing": [
+      "Load balancing distributes incoming traffic across multiple servers to ensure reliability and performance. Types: DNS load balancing (round-robin), hardware load balancers (F5), software load balancers (HAProxy, Nginx), and cloud load balancers (AWS ALB/ELB, Google Cloud LB). Algorithms include round-robin, least connections, IP hash, and weighted distribution.",
+      "# Load balancing algorithms\n\n# Round Robin: Requests distributed sequentially\n# Least Connections: Send to server with fewest active connections\n# IP Hash: Same client always goes to same server\n# Weighted: Servers with higher capacity get more traffic\n# Geographic: Route based on client location\n\n# Nginx load balancing config\nupstream backend {\n    least_conn;\n    server app1:3000;\n    server app2:3000;\n    server app3:3000;\n}\n\n# Health check = server removed from pool automatically"
+    ],
+    "Caching Architecture": [
+      "Multi-layer caching architecture: browser cache (private), CDN (edge cache), reverse proxy/load balancer (Nginx cache), application cache (in-memory), and database cache (buffer pool). Cache invalidation strategies include TTL-based (time to live), write-through (update cache and DB), write-behind (async), and event-driven invalidation (publish cache invalidation events).",
+      "# Multi-layer caching\n# Browser:         Cache-Control, ETag, Service Worker\n# CDN:              Cloudflare, Fastly, CloudFront\n# Reverse Proxy:    Nginx, Varnish (microcaching)\n# Application:      Redis, Memcached\n# Database:         InnoDB buffer pool, Query cache\n\n# Cache invalidation strategies:\n# TTL:        \"This data expires in 5 minutes\"\n# Write-through: \"Write to cache AND database\"\n# Write-behind:  \"Write to cache, async write to DB\"\n# Event-based:   \"Publish event when data changes, cache subscribes\""
+    ],
+    "Microservices": [
+      "Microservices architecture decomposes an application into small, independent services that communicate over a network. Each service owns its data (database-per-service), can be deployed independently, and is built around a business capability. Benefits include: independent scaling, technology diversity, and smaller codebases. Challenges include: distributed complexity, data consistency, and service discovery.",
+      "# Microservices principles:\n# - Single Responsibility (one business capability)\n# - Database per Service (no shared databases)\n# - API-first design (REST/gRPC for communication)\n# - Independent deployability\n# - Decentralized governance (teams choose tech)\n# - Resilience (circuit breakers, retries)\n# - Observability (logging, metrics, tracing)\n# - Automation (CI/CD for each service)"
+    ]
+  },
+  "Testing Backend": {
+    "Test-Driven Development": {
+      "exp": "Writing tests before implementation.",
+      "code": "Red-green-refactor cycle, test-first methodology.",
+      "exercises": []
+    },
+    "Unit Testing": {
+      "exp": "Testing individual components in isolation.",
+      "code": "Jest, Mocha, Vitest; mocking, stubbing, assertions.",
+      "exercises": []
+    },
+    "Integration Testing": {
+      "exp": "Testing component interactions.",
+      "code": "Supertest for HTTP, database test containers, API integration tests.",
+      "exercises": []
+    },
+    "End-to-End Testing": {
+      "exp": "Testing the complete application flow.",
+      "code": "Cypress, Playwright; full user journey testing.",
+      "exercises": []
+    }
+  },
+  "Testing": {
+    "Unit Testing": [
+      "Unit testing validates individual components (functions, methods, classes) in isolation. Tests should be fast, deterministic, and independent. Follow the AAA pattern: Arrange (set up), Act (execute), Assert (verify). Mock external dependencies. Aim for high coverage on critical business logic. Use test runners like Jest, pytest, JUnit, or Go test.",
+      "// Unit test example (Jest)\ndescribe('calculateDiscount', () => {\n  it('applies 10% discount for premium members', () => {\n    // Arrange\n    const user = { role: 'premium', total: 100 };\n\n    // Act\n    const result = calculateDiscount(user);\n\n    // Assert\n    expect(result).toBe(90);\n  });\n\n  it('returns full price for regular members', () => {\n    const user = { role: 'regular', total: 100 };\n    expect(calculateDiscount(user)).toBe(100);\n  });\n});"
+    ],
+    "Integration Testing": [
+      "Integration testing verifies that different components work together correctly — database queries, API endpoints, file I/O, and third-party service interactions. Unlike unit tests, integration tests use real (or containerized) dependencies. Test the boundary between your code and external systems. Use test databases and clean up data between tests.",
+      "// Integration test example\n// Testing a database repository\n\ndescribe('UserRepository', () => {\n  beforeEach(async () => {\n    await db.migrate.latest();\n    await db.seed.run();\n  });\n\n  afterEach(async () => {\n    await db.migrate.rollback();\n  });\n\n  it('creates and retrieves a user', async () => {\n    const repo = new UserRepository(db);\n    const user = await repo.create({\n      name: 'Alice',\n      email: 'alice@test.com'\n    });\n\n    const found = await repo.findById(user.id);\n    expect(found.name).toBe('Alice');\n  });\n});"
+    ],
+    "API / E2E Testing": [
+      "End-to-end testing validates the entire system from the user's perspective. For backend APIs, this means sending real HTTP requests and verifying responses, status codes, headers, and side effects. Tools like Supertest (Node.js), pytest + requests (Python), REST Assured (Java), and Postman/Newman automate API testing.",
+      "// API test (Supertest)\nconst request = require('supertest');\nconst app = require('../app');\n\ndescribe('POST /api/users', () => {\n  it('creates a new user', async () => {\n    const res = await request(app)\n      .post('/api/users')\n      .send({ name: 'Alice', email: 'alice@test.com' })\n      .expect(201);\n\n    expect(res.body).toHaveProperty('id');\n    expect(res.body.name).toBe('Alice');\n  });\n\n  it('rejects invalid email', async () => {\n    await request(app)\n      .post('/api/users')\n      .send({ name: 'Bob', email: 'not-an-email' })\n      .expect(400);\n  });\n});"
+    ]
+  },
+  "Backend Testing & Quality": {
+    "Database Migrations & Versioning": [
+      "Database migrations manage schema changes across environments. Tools like Flyway, Liquibase, and knex.js provide versioned migration files. Each migration is a forward-only change (with optional rollback). Best practices: one logical change per migration, never modify existing migrations (create a new one instead), test migrations against a copy of production data, use repeatable migrations for views/functions, and separate schema migrations from data migrations. CI/CD should run migrations as part of deployment with proper locking.",
+      "// Knex.js migration example\n// migrations/20240610_create_orders.js\nexports.up = function(knex) {\n  return knex.schema\n    .createTable('orders', (table) => {\n      table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));\n      table.uuid('user_id').notNullable().references('id').inTable('users');\n      table.enum('status', ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])\n        .defaultTo('pending');\n      table.decimal('total', 12, 2).notNullable();\n      table.jsonb('shipping_address');\n      table.timestamp('created_at').defaultTo(knex.fn.now());\n      table.timestamp('updated_at').defaultTo(knex.fn.now());\n      \n      table.index('user_id', 'idx_orders_user');\n      table.index('status', 'idx_orders_status');\n    })\n    .createTable('order_items', (table) => {\n      table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));\n      table.uuid('order_id').notNullable().references('id').inTable('orders').onDelete('CASCADE');\n      table.uuid('product_id').notNullable();\n      table.integer('quantity').unsigned().notNullable();\n      table.decimal('unit_price', 10, 2).notNullable();\n    });\n};\n\nexports.down = function(knex) {\n  return knex.schema\n    .dropTableIfExists('order_items')\n    .dropTableIfExists('orders');\n};\n\n// Flyway Java migration example\n// V2__create_order_tables.sql\n/*\nCREATE TABLE orders (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID NOT NULL REFERENCES users(id),\n    status VARCHAR(20) NOT NULL DEFAULT 'pending'\n        CHECK (status IN ('pending','confirmed','shipped','delivered','cancelled')),\n    total DECIMAL(12,2) NOT NULL,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\nCREATE INDEX idx_orders_user ON orders(user_id);\n*/"
+    ],
+    "Unit & Integration Testing": [
+      "Testing ensures backend reliability. Unit tests verify individual functions/methods in isolation (mocking external dependencies). Integration tests verify components work together (database, external APIs). Test pyramid: lots of unit tests, fewer integration tests, even fewer E2E tests. Use test fixtures and factories for consistent test data. Database tests should use transactions that roll back after each test. Mock external HTTP APIs with tools like nock or WireMock. Aim for >80% coverage on business logic, but prioritize critical paths over coverage numbers.",
+      "// Unit tests with Jest\nconst { OrderService } = require('./order.service');\nconst { MockRepository } = require('./__mocks__/repository');\n\njest.mock('./payment.gateway');\nconst PaymentGateway = require('./payment.gateway');\n\ndescribe('OrderService', () => {\n  let orderService;\n  let mockRepo;\n\n  beforeEach(() => {\n    mockRepo = new MockRepository();\n    PaymentGateway.mockClear();\n    orderService = new OrderService(mockRepo);\n  });\n\n  test('creates order with valid items', async () => {\n    const order = await orderService.createOrder({\n      userId: 'user-1',\n      items: [{ productId: 'prod-1', quantity: 2 }]\n    });\n\n    expect(order.status).toBe('pending');\n    expect(order.total).toBeGreaterThan(0);\n    expect(mockRepo.save).toHaveBeenCalledWith(\n      expect.objectContaining({ userId: 'user-1' })\n    );\n  });\n\n  test('rejects order with empty cart', async () => {\n    await expect(orderService.createOrder({ userId: 'user-1', items: [] }))\n      .rejects\n      .toThrow('Cart cannot be empty');\n  });\n\n  test('processes payment for valid order', async () => {\n    PaymentGateway.prototype.charge.mockResolvedValue({ id: 'txn-1', status: 'success' });\n    \n    const result = await orderService.processPayment('order-1', {\n      method: 'card',\n      token: 'tok_visa'\n    });\n\n    expect(result.status).toBe('completed');\n    expect(PaymentGateway).toHaveBeenCalledTimes(1);\n  });\n});\n\n// Integration test with database\nconst { db, TestFactory } = require('./test-helpers');\n\ndescribe('Order API Integration', () => {\n  beforeEach(async () => {\n    await db.beginTransaction();\n  });\n\n  afterEach(async () => {\n    await db.rollback();\n  });\n\n  test('GET /api/orders/:id returns full order', async () => {\n    const user = await TestFactory.createUser();\n    const order = await TestFactory.createOrder({ userId: user.id });\n\n    const res = await request(app)\n      .get(`/api/orders/${order.id}`)\n      .set('Authorization', `Bearer ${user.token}`);\n\n    expect(res.status).toBe(200);\n    expect(res.body.id).toBe(order.id);\n    expect(res.body.items).toHaveLength(2);\n  });\n});"
+    ],
+    "Performance Testing & Benchmarking": [
+      "Performance testing validates backend speed and scalability. Types: load testing (expected traffic), stress testing (beyond expected), soak testing (sustained load over time), and spike testing (sudden traffic surges). Tools: k6 (modern, scriptable), Artillery (Node.js-friendly), locust (Python), wrk/ab (CLI). Key metrics: requests per second (RPS), latency percentiles (p50, p95, p99), error rate, and resource utilization (CPU, memory, I/O). Always test with production-like data volumes. Identify bottlenecks (DB queries, external API calls, serialization) before optimization.",
+      "// k6 load test script\nimport http from 'k6/http';\nimport { check, sleep } from 'k6';\nimport { Rate, Trend } from 'k6/metrics';\n\nconst errorRate = new Rate('errors');\nconst orderLatency = new Trend('order_latency');\n\nexport const options = {\n  stages: [\n    { duration: '2m', target: 100 },  // Ramp up\n    { duration: '5m', target: 100 },  // Stay\n    { duration: '2m', target: 200 },  // Spike\n    { duration: '3m', target: 0 },    // Ramp down\n  ],\n  thresholds: {\n    http_req_duration: ['p(95)<500', 'p(99)<1000'],\n    errors: ['rate<0.01'],\n  }\n};\n\nexport default function () {\n  const headers = { 'Authorization': `Bearer ${__ENV.API_TOKEN}` };\n  \n  // GET orders list\n  const listRes = http.get('http://api.example.com/api/orders?limit=20', { headers });\n  check(listRes, { 'status 200': (r) => r.status === 200 });\n  \n  // GET single order\n  const orderRes = http.get('http://api.example.com/api/orders/order-123', { headers });\n  check(orderRes, { 'order status 200': (r) => r.status === 200 });\n  orderLatency.add(orderRes.timings.duration);\n  \n  // POST create order\n  const payload = JSON.stringify({\n    items: [{ productId: 'prod-1', quantity: 1 }],\n    shipping: { address: '123 Test St', zip: '12345' }\n  });\n  const createRes = http.post('http://api.example.com/api/orders', payload, {\n    headers: { 'Content-Type': 'application/json', ...headers }\n  });\n  check(createRes, { 'created 201': (r) => r.status === 201 });\n  errorRate.add(createRes.status >= 400);\n  \n  sleep(1);\n}"
     ]
   },
   "Web Servers": {
@@ -400,46 +338,140 @@
       "# Nginx as reverse proxy\nupstream backend {\n    server app1:3000 weight=3;\n    server app2:3000 weight=2;\n    server app3:3000 backup;\n}\n\nserver {\n    listen 80;\n    location / {\n        proxy_pass http://backend;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}\n\n# Load balancing methods:\n# round-robin (default), least_conn, ip_hash"
     ]
   },
-  "Testing": {
-    "Unit Testing": [
-      "Unit testing validates individual components (functions, methods, classes) in isolation. Tests should be fast, deterministic, and independent. Follow the AAA pattern: Arrange (set up), Act (execute), Assert (verify). Mock external dependencies. Aim for high coverage on critical business logic. Use test runners like Jest, pytest, JUnit, or Go test.",
-      "// Unit test example (Jest)\ndescribe('calculateDiscount', () => {\n  it('applies 10% discount for premium members', () => {\n    // Arrange\n    const user = { role: 'premium', total: 100 };\n\n    // Act\n    const result = calculateDiscount(user);\n\n    // Assert\n    expect(result).toBe(90);\n  });\n\n  it('returns full price for regular members', () => {\n    const user = { role: 'regular', total: 100 };\n    expect(calculateDiscount(user)).toBe(100);\n  });\n});"
+  "API Development": {
+    "GraphQL": {
+      "exp": "Query language for APIs.",
+      "code": "Schema definition, resolvers, queries, mutations, subscriptions.",
+      "exercises": []
+    },
+    "gRPC": {
+      "exp": "High-performance RPC framework.",
+      "code": "Protocol buffers, service definitions, streaming, HTTP/2.",
+      "exercises": []
+    },
+    "Rate Limiting": {
+      "exp": "Controlling API request rates.",
+      "code": "Token bucket, leaky bucket, sliding window; per-user, per-IP.",
+      "exercises": []
+    },
+    "WebSockets": {
+      "exp": "Real-time bidirectional communication.",
+      "code": "Socket.io, ws library, rooms, broadcasting.",
+      "exercises": []
+    },
+    "API Versioning": {
+      "exp": "Strategies for API version management.",
+      "code": "URL versioning, header versioning, content negotiation.",
+      "exercises": []
+    },
+    "API Documentation": {
+      "exp": "Documenting APIs for consumers.",
+      "code": "Swagger/OpenAPI, Postman collections, API blueprints.",
+      "exercises": []
+    }
+  },
+  "APIs & Web Services": {
+    "GraphQL": [
+      "GraphQL is a query language for APIs developed by Meta. Clients request exactly the data they need, reducing over-fetching and under-fetching. A single endpoint (/graphql) handles all operations. Type system defines the schema, resolvers fetch data from various sources. Supports queries, mutations, and subscriptions for real-time data.",
+      "// GraphQL query\nquery {\n  user(id: \"123\") {\n    name\n    email\n    posts(limit: 5) {\n      title\n      comments { text }\n    }\n  }\n}\n\n// GraphQL schema\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  posts(limit: Int): [Post!]!\n}\n\ntype Post {\n  title: String!\n  comments: [Comment!]!\n}"
     ],
-    "Integration Testing": [
-      "Integration testing verifies that different components work together correctly — database queries, API endpoints, file I/O, and third-party service interactions. Unlike unit tests, integration tests use real (or containerized) dependencies. Test the boundary between your code and external systems. Use test databases and clean up data between tests.",
-      "// Integration test example\n// Testing a database repository\n\ndescribe('UserRepository', () => {\n  beforeEach(async () => {\n    await db.migrate.latest();\n    await db.seed.run();\n  });\n\n  afterEach(async () => {\n    await db.migrate.rollback();\n  });\n\n  it('creates and retrieves a user', async () => {\n    const repo = new UserRepository(db);\n    const user = await repo.create({\n      name: 'Alice',\n      email: 'alice@test.com'\n    });\n\n    const found = await repo.findById(user.id);\n    expect(found.name).toBe('Alice');\n  });\n});"
+    "gRPC": [
+      "gRPC is a high-performance RPC framework by Google that uses Protocol Buffers for serialization and HTTP/2 for transport. It supports bidirectional streaming, flow control, and multiplexing. Service definitions are written in .proto files, generating client and server code in multiple languages. Ideal for microservices communication.",
+      "// Protocol Buffer definition\nservice UserService {\n  rpc GetUser (GetUserRequest) returns (User);\n  rpc ListUsers (ListUsersRequest) returns (stream User);\n  rpc UpdateUser (stream UpdateRequest) returns (User);\n}\n\nmessage User {\n  int32 id = 1;\n  string name = 2;\n  string email = 3;\n}\n\n// Benefits over REST:\n// - Binary protocol (smaller payloads)\n// - Strongly typed schemas\n// - Built-in code generation"
     ],
-    "API / E2E Testing": [
-      "End-to-end testing validates the entire system from the user's perspective. For backend APIs, this means sending real HTTP requests and verifying responses, status codes, headers, and side effects. Tools like Supertest (Node.js), pytest + requests (Python), REST Assured (Java), and Postman/Newman automate API testing.",
-      "// API test (Supertest)\nconst request = require('supertest');\nconst app = require('../app');\n\ndescribe('POST /api/users', () => {\n  it('creates a new user', async () => {\n    const res = await request(app)\n      .post('/api/users')\n      .send({ name: 'Alice', email: 'alice@test.com' })\n      .expect(201);\n\n    expect(res.body).toHaveProperty('id');\n    expect(res.body.name).toBe('Alice');\n  });\n\n  it('rejects invalid email', async () => {\n    await request(app)\n      .post('/api/users')\n      .send({ name: 'Bob', email: 'not-an-email' })\n      .expect(400);\n  });\n});"
+    "REST APIs": [
+      "REST (Representational State Transfer) is an architectural style for designing networked applications. It uses HTTP methods (GET, POST, PUT, PATCH, DELETE) to perform CRUD operations on resources identified by URLs. REST APIs should be stateless, use proper HTTP status codes, and support pagination, filtering, and versioning.",
+      "// REST API design\nGET    /api/users          # List users\nPOST   /api/users          # Create user\nGET    /api/users/:id      # Get user by ID\nPUT    /api/users/:id      # Replace user\nPATCH  /api/users/:id      # Update user fields\nDELETE /api/users/:id      # Delete user\n\n// Response\nHTTP/1.1 201 Created\n{\n  \"id\": 123,\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+    ],
+    "WebSockets": [
+      "WebSockets provide full-duplex communication over a single TCP connection, enabling real-time data exchange. Unlike HTTP request-response, the server can push data to clients. Used for chat apps, live notifications, collaborative editing, and gaming. Libraries like Socket.IO add fallback transports and room management.",
+      "// Client-side WebSocket\nconst ws = new WebSocket('wss://example.com/chat');\n\nws.onopen = () => {\n  ws.send(JSON.stringify({ type: 'join', room: 'general' }));\n};\n\nws.onmessage = (event) => {\n  const msg = JSON.parse(event.data);\n  console.log('Received:', msg);\n};\n\nws.onclose = () => console.log('Disconnected');\n\n// Server-side (Node.js)\nconst WebSocket = require('ws');\nconst wss = new WebSocket.Server({ port: 8080 });"
+    ],
+    "OpenAPI / Swagger": [
+      "OpenAPI (formerly Swagger) is a standard for describing REST APIs using a YAML or JSON specification. It defines endpoints, request/response schemas, authentication, and error codes. Tools like Swagger UI generate interactive documentation, and code generators create client SDKs and server stubs automatically.",
+      "# OpenAPI 3.0 specification\nopenapi: 3.0.0\ninfo:\n  title: User API\n  version: 1.0.0\npaths:\n  /users:\n    get:\n      summary: List all users\n      responses:\n        '200':\n          description: Successful response\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  $ref: '#/components/schemas/User'"
     ]
   },
-  "Containers & Orchestration": {
-    "Docker": [
-      "Docker packages applications and dependencies into lightweight, portable containers that run consistently across environments. Images are built from Dockerfiles using layered filesystems. Key concepts: Dockerfile (build instructions), images (read-only templates), containers (running instances), volumes (persistent data), networks (container communication), and Docker Compose (multi-container apps).",
-      "# Dockerfile example\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/index.js\"]"
+  "Authentication & Authorization": {
+    "JWT (JSON Web Tokens)": [
+      "JWT is a compact, URL-safe token format for transmitting claims between parties. It consists of three parts: header (algorithm, type), payload (claims like user_id, role, exp), and signature (verified with a secret or key pair). JWTs are stateless — the server doesn't need to store session data, but they can't be revoked without a blocklist.",
+      "// JWT structure:\n// header.payload.signature\n\n// Header\n{\n  \"alg\": \"HS256\",\n  \"typ\": \"JWT\"\n}\n\n// Payload\n{\n  \"sub\": \"user123\",\n  \"role\": \"admin\",\n  \"iat\": 1516239022,\n  \"exp\": 1516242622\n}\n\n// Verification (Node.js)\nconst jwt = require('jsonwebtoken');\nconst decoded = jwt.verify(token, SECRET);\nconsole.log(decoded.userId);"
     ],
-    "Docker Compose": [
-      "Docker Compose defines and runs multi-container Docker applications using a YAML file. Each service specifies its image, ports, volumes, environment variables, and dependencies. Compose handles network creation, service discovery, and startup ordering. Essential for local development environments with multiple services (app + database + cache + queue).",
-      "# docker-compose.yml\nversion: '3.8'\nservices:\n  app:\n    build: .\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - db\n      - redis\n    environment:\n      - DATABASE_URL=postgres://user:pass@db:5432/myapp\n\n  db:\n    image: postgres:16\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    environment:\n      POSTGRES_PASSWORD: pass\n\n  redis:\n    image: redis:7-alpine\n\nvolumes:\n  pgdata:"
+    "RBAC": {
+      "exp": "Role-Based Access Control.",
+      "code": "Users, roles, permissions; hierarchical roles.",
+      "exercises": []
+    },
+    "API Keys": {
+      "exp": "Managing API authentication with keys.",
+      "code": "Key generation, rotation, rate limiting per key.",
+      "exercises": []
+    },
+    "Session-Based Auth": {
+      "exp": "Server-side session management.",
+      "code": "Session IDs, cookies, session stores (Redis, DB).",
+      "exercises": []
+    },
+    "OAuth 2.0": [
+      "OAuth 2.0 is an authorization framework that allows third-party apps to access user data without sharing passwords. It involves authorization server, resource server, and client. Grant types include Authorization Code (most common), Client Credentials (machine-to-machine), Implicit (legacy), and Refresh Token. Used by Google, GitHub, and Facebook login systems.",
+      "// OAuth 2.0 Authorization Code Flow:\n// 1. User clicks \"Login with Google\"\n// 2. Redirected to Google's auth server\n// 3. User approves permissions\n// 4. Auth server returns authorization code\n// 5. Backend exchanges code for access token\n// 6. Backend uses token to call Google's API\n\nGET https://accounts.google.com/o/oauth2/v2/auth?\n  client_id=YOUR_CLIENT_ID&\n  redirect_uri=https://yourapp.com/callback&\n  response_type=code&\n  scope=profile%20email"
     ],
-    "Kubernetes Basics": [
-      "Kubernetes (K8s) is an open-source container orchestration platform for automating deployment, scaling, and management of containerized applications. Key concepts: Pods (smallest deployable unit), Deployments (declarative updates), Services (networking abstraction), ConfigMaps/Secrets (configuration), and Ingress (external access). Kubectl is the command-line tool.",
-      "# Kubernetes manifests\n# deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: myapp\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: myapp\n  template:\n    metadata:\n      labels:\n        app: myapp\n    spec:\n      containers:\n      - name: app\n        image: myapp:latest\n        ports:\n        - containerPort: 3000\n---\n# service.yaml\napiVersion: v1\nkind: Service\nspec:\n  type: LoadBalancer\n  selector:\n    app: myapp\n  ports:\n  - port: 80\n    targetPort: 3000"
+    "Session & Cookie Auth": [
+      "Session-based authentication uses server-side sessions identified by a cookie. When a user logs in, the server creates a session, stores it (in memory, Redis, or database), and sends the session ID as a cookie. The browser sends the cookie with each request. Provides easy revocation (delete the session) but requires server-side storage.",
+      "// Session auth flow:\n// 1. POST /login with credentials\n// 2. Server validates, creates session\n// 3. Response includes Set-Cookie header\n// 4. Browser stores cookie\n// 5. Each request includes cookie\n// 6. Server looks up session\n// 7. Session expires or user logs out\n\nSet-Cookie: session_id=abc123;\n  HttpOnly; Secure; SameSite=Strict;\n  Max-Age=86400"
+    ],
+    "Security Best Practices": {
+      "exp": "Protecting against common vulnerabilities.",
+      "code": "Password hashing (bcrypt), rate limiting, input validation, XSS/CSRF prevention.",
+      "exercises": []
+    },
+    "Basic Authentication": [
+      "Basic Authentication is the simplest HTTP authentication method. The client sends the username and password encoded in Base64 in the Authorization header. It's insecure over plain HTTP (easily decoded) and should only be used over HTTPS. Typically paired with session tokens or API keys for modern applications.",
+      "// Basic Auth header format:\n// Authorization: Basic base64(username:password)\n\nconst credentials = Buffer.from('alice:secret123')\n  .toString('base64');\n// YWxpY2U6c2VjcmV0MTIz\n\nfetch('https://api.example.com/data', {\n  headers: {\n    'Authorization': `Basic ${credentials}`\n  }\n});\n\n// Always use over HTTPS!\n// Base64 is NOT encryption — it's encoding"
+    ],
+    "API Security Best Practices": [
+      "API security involves multiple layers: rate limiting (prevent abuse), input validation (sanitize all inputs), HTTPS everywhere, proper authentication/authorization (least privilege principle), CORS configuration, request size limits, SQL injection prevention (parameterized queries), XSS protection, CSRF tokens, and security headers (CSP, HSTS, X-Frame-Options).",
+      "# API security checklist:\n# [ ] HTTPS enforced (HSTS header)\n# [ ] Rate limiting (100 req/min per user)\n# [ ] Input validation & sanitization\n# [ ] Parameterized queries (no raw SQL)\n# [ ] CORS whitelist (not *)\n# [ ] Authentication on all endpoints\n# [ ] Role-based access control (RBAC)\n# [ ] Audit logging\n# [ ] Security headers (CSP, X-Frame-Options)\n# [ ] Request size limits"
     ]
   },
-  "Message Brokers & Streaming": {
-    "RabbitMQ": [
-      "RabbitMQ is a message broker implementing AMQP (Advanced Message Queuing Protocol). Producers send messages to exchanges, which route them to queues based on bindings and routing keys. Consumers process messages from queues. Supports multiple exchange types: direct, topic, fanout, and headers. Offers message durability, acknowledgments, and dead-letter queues for reliability.",
-      "// RabbitMQ concepts\n// Producer -> Exchange -> Queue -> Consumer\n\n// Exchange types:\n// direct:     Routes to queue with matching routing key\n// topic:      Routes by pattern (* matches one word, # matches many)\n// fanout:     Broadcasts to all bound queues\n// headers:    Routes by message header attributes\n\n// Connection (Node.js amqplib)\nconst amqp = require('amqplib');\nconst conn = await amqp.connect('amqp://localhost');\nconst ch = await conn.createChannel();\nawait ch.assertQueue('tasks', { durable: true });\nch.sendToQueue('tasks', Buffer.from('work'), { persistent: true });"
+  "DevOps & Deployment": {
+    "CI/CD": {
+      "exp": "Continuous Integration and Deployment.",
+      "code": "GitHub Actions, GitLab CI, Jenkins; automated testing and deployment.",
+      "exercises": []
+    },
+    "Cloud Deployment": {
+      "exp": "Deploying to cloud platforms.",
+      "code": "AWS (EC2, Lambda, ECS), GCP (Cloud Run, GKE), Azure (App Service).",
+      "exercises": []
+    },
+    "Monitoring": {
+      "exp": "Tracking application health and performance.",
+      "code": "Logging (Winston, Morgan), metrics (Prometheus), alerting.",
+      "exercises": []
+    },
+    "Docker": {
+      "exp": "Containerization platform.",
+      "code": "Dockerfiles, images, containers, docker-compose, multi-stage builds.",
+      "exercises": []
+    }
+  },
+  "Caching": {
+    "Redis as Cache": [
+      "Redis is the most popular caching solution due to its in-memory performance and rich data structures. Common caching patterns include: session storage, database query result caching, page caching (full HTML), rate limiting counters, leaderboards, and distributed locks. Redis Cluster provides automatic sharding for large-scale deployments.",
+      "// Redis caching patterns\n// 1. Query result caching\nSET product:42:details $productJson EX 300\n\n// 2. Session storage\nSET session:token123 '{\"userId\":1,\"role\":\"admin\"}' EX 86400\n\n// 3. Rate limiting\nINCR rate:user:123\nEXPIRE rate:user:123 60\n\n// 4. Distributed lock\nSET lock:resource $uuid NX EX 10\n// ... do work ...\nDEL lock:resource  # release lock"
     ],
-    "Apache Kafka": [
-      "Apache Kafka is a distributed event streaming platform designed for high-throughput, fault-tolerant data pipelines. Topics are partitioned and replicated across brokers. Producers write events, consumers read from offsets. Unlike RabbitMQ, Kafka persists all messages for a configurable retention period. Used for event sourcing, log aggregation, stream processing, and data integration at scale.",
-      "# Kafka concepts\n# Topic:  A category/feed name (e.g., \"orders\")\n# Partition: Ordered, immutable sequence of records\n# Offset:  Unique ID of a record within a partition\n# Broker:  A Kafka server in the cluster\n# Consumer Group: Group of consumers sharing work\n\n# CLI commands\nkafka-topics.sh --create --topic orders --partitions 3 --replication-factor 2\nkafka-console-producer.sh --topic orders\nkafka-console-consumer.sh --topic orders --from-beginning --group my-group"
+    "Content Delivery Networks": [
+      "A CDN (Content Delivery Network) is a distributed network of servers that delivers cached static content (images, CSS, JS, videos) from locations geographically closer to users. Leading providers include Cloudflare, AWS CloudFront, Fastly, and Akamai. CDNs reduce latency, offload origin servers, and provide DDoS protection. Dynamic content can also be accelerated through edge computing.",
+      "# CDN workflow:\n# 1. User requests example.com/image.png\n# 2. DNS resolves to nearest CDN edge server\n# 3. Edge server checks cache\n# 4. Cache HIT -> Serve directly\n# 5. Cache MISS -> Fetch from origin, cache, serve\n# 6. Subsequent requests are fast!\n\n# Cache-Control headers control behavior:\nCache-Control: public, max-age=31536000, immutable"
     ],
-    "Message Queue Patterns": [
-      "Common messaging patterns include: Work Queues (competing consumers distribute tasks), Pub/Sub (one-to-many broadcast), RPC (request-response over queue), Event Sourcing (storing events as authoritative state), CQRS (separate read/write models), Saga Pattern (distributed transactions via compensating actions), and Dead Letter Queues (failed message handling).",
-      "# Common messaging patterns\n\n# 1. Work Queue (Task distribution)\n# Multiple consumers compete for messages\n# Each message processed exactly once\n\n# 2. Pub/Sub (Broadcast)\n# One message -> multiple consumers\n# Each consumer gets every message\n\n# 3. Saga (Distributed transaction)\n# Order Service: Create order -> publish OrderCreated\n# Payment Service: Consume -> process payment -> publish PaymentProcessed\n# Inventory Service: Consume -> reserve items -> publish InventoryReserved\n# If any step fails, compensating events undo previous steps"
+    "Caching Strategies": [
+      "Caching stores frequently accessed data in a fast storage layer to reduce latency and database load. Common strategies include: Cache-Aside (application checks cache first), Read-Through (cache layer fetches from DB on miss), Write-Through (write to cache AND DB simultaneously), Write-Behind (async write to DB), and Cache Eviction policies (LRU, TTL, FIFO).",
+      "// Cache-Aside pattern (most common)\nfunction getUser(id) {\n  let user = cache.get(`user:${id}`);\n  if (!user) {\n    user = db.query('SELECT * FROM users WHERE id = ?', [id]);\n    cache.set(`user:${id}`, user, 'EX', 3600);\n  }\n  return user;\n}\n\n// Cache invalidation is hard!\nfunction updateUser(id, data) {\n  db.query('UPDATE users SET ? WHERE id = ?', [data, id]);\n  cache.del(`user:${id}`);  // Invalidate cache\n}"
+    ],
+    "HTTP Caching": [
+      "HTTP caching allows browsers and proxies to store responses and reuse them. Cache-Control directives (max-age, no-cache, no-store, public, private) and ETags/Last-Modified headers control caching behavior. Conditional requests with If-None-Match (ETag) or If-Modified-Since allow servers to return 304 Not Modified instead of full responses, saving bandwidth.",
+      "# HTTP caching headers\n\n# Strong caching (browser caches for 1 year)\nCache-Control: public, max-age=31536000, immutable\n\n# Validate with server each time\nCache-Control: no-cache\nETag: \"abc123\"\n\n# Never cache sensitive data\nCache-Control: no-store, private\n\n# Conditional request (browser sends)\nIf-None-Match: \"abc123\"\n# Server responds:\n# 304 Not Modified (no body) -- or --\n# 200 OK with new content"
     ]
   },
   "Monitoring & Observability": {
@@ -447,13 +479,13 @@
       "Logging records application events for debugging, auditing, and monitoring. Structured logging (JSON format) enables machine parsing and search. Log levels (DEBUG, INFO, WARN, ERROR, FATAL) control verbosity. Centralized logging with tools like ELK Stack (Elasticsearch, Logstash, Kibana) or Loki + Grafana aggregates logs from multiple services. Avoid logging sensitive data.",
       "// Structured logging (Node.js with Pino)\nconst pino = require('pino');\nconst logger = pino({\n  level: process.env.LOG_LEVEL || 'info',\n  formatters: {\n    level: (label) => ({ level: label })\n  }\n});\n\nlogger.info({ userId: 123, action: 'login' }, 'User logged in');\nlogger.error({ err, requestId }, 'Failed to process payment');\n\n// Output:\n// {\"level\":\"info\",\"userId\":123,\"action\":\"login\",\"msg\":\"User logged in\"}\n// Use jq to parse: | jq '.level, .msg'"
     ],
-    "Metrics & Monitoring": [
-      "Metrics are numerical measurements of system health and performance collected over time. Key categories: RED (Rate, Errors, Duration) for services, USE (Utilization, Saturation, Errors) for resources. Common metrics: request latency (p50, p95, p99), error rates, throughput, CPU/memory usage, and database query times. Prometheus collects metrics; Grafana visualizes them.",
-      "# RED Method for services:\n# Rate:     Requests per second\n# Errors:   Failed requests / total requests\n# Duration: Latency distribution (p50, p95, p99)\n\n# USE Method for resources:\n# Utilization:  % time resource is busy\n# Saturation:   Queue length / contention\n# Errors:       Count of error events\n\n# Prometheus query examples:\n# Request rate: rate(http_requests_total[5m])\n# Error ratio:  sum(rate(http_errors_total[5m])) / sum(rate(http_requests_total[5m]))\n# P99 latency: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))"
-    ],
     "Distributed Tracing": [
       "Distributed tracing tracks requests as they flow through multiple services in a microservices architecture. Each request gets a trace ID, and each span represents a unit of work. Tools like Jaeger, Zipkin, and OpenTelemetry provide end-to-end visibility. Helpful for identifying latency bottlenecks, error propagation, and service dependencies.",
       "# Distributed tracing with OpenTelemetry\nconst { trace } = require('@opentelemetry/api');\n\nasync function handleRequest(req, res) {\n  const tracer = trace.getTracer('my-service');\n  const span = tracer.startSpan('process-order');\n\n  span.setAttribute('order.id', req.body.orderId);\n\n  try {\n    const result = await processPayment(req.body);\n    span.setStatus({ code: SpanStatusCode.OK });\n  } catch (err) {\n    span.setStatus({\n      code: SpanStatusCode.ERROR,\n      message: err.message\n    });\n    span.recordException(err);\n  } finally {\n    span.end();\n  }\n}"
+    ],
+    "Metrics & Monitoring": [
+      "Metrics are numerical measurements of system health and performance collected over time. Key categories: RED (Rate, Errors, Duration) for services, USE (Utilization, Saturation, Errors) for resources. Common metrics: request latency (p50, p95, p99), error rates, throughput, CPU/memory usage, and database query times. Prometheus collects metrics; Grafana visualizes them.",
+      "# RED Method for services:\n# Rate:     Requests per second\n# Errors:   Failed requests / total requests\n# Duration: Latency distribution (p50, p95, p99)\n\n# USE Method for resources:\n# Utilization:  % time resource is busy\n# Saturation:   Queue length / contention\n# Errors:       Count of error events\n\n# Prometheus query examples:\n# Request rate: rate(http_requests_total[5m])\n# Error ratio:  sum(rate(http_errors_total[5m])) / sum(rate(http_requests_total[5m]))\n# P99 latency: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))"
     ],
     "Application Performance Monitoring": [
       "APM tools provide comprehensive monitoring of application performance, including transaction traces, dependency maps, error tracking, and real-user monitoring. Popular solutions include Datadog, New Relic, Dynatrace, and open-source alternatives like SigNoz and Grafana Faro. APM helps identify slow queries, memory leaks, N+1 problems, and external service degradation.",
@@ -465,63 +497,13 @@
       "CI automatically builds and tests every code change to detect integration issues early. Developers merge changes frequently (multiple times daily) into a shared branch. CI servers run automated tests, linting, type checking, and security scans. Failures are reported immediately. Tools include GitHub Actions, GitLab CI, Jenkins, CircleCI, and Travis CI.",
       "# GitHub Actions CI workflow\nname: CI\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n\n      - run: npm ci\n      - run: npm run lint\n      - run: npm run typecheck\n      - run: npm test\n      - run: npm run build"
     ],
-    "Continuous Deployment": [
-      "CD automatically deploys validated code changes to production (or staging) environments. The deployment pipeline includes building artifacts, running integration tests, deploying to staging, running smoke tests, and promoting to production with strategies like blue-green (two identical environments) or canary (gradual rollout). Rollbacks should be fast and reliable.",
-      "# CD deployment strategies\n\n# Blue-Green:\n# Blue = current production\n# Green = new version\n# Switch load balancer from Blue to Green\n# Rollback: switch back to Blue\n\n# Canary:\n# Route 5% of traffic to new version\n# Monitor error rates and latency\n# Gradually increase to 25%, 50%, 100%\n# Rollback: route 0% to canary\n\n# Rolling:\n# Update instances one-by-one\n# Keep some running during update\n# Rollback: redeploy previous version"
-    ],
     "Infrastructure as Code": [
       "IaC manages infrastructure (servers, networks, databases) through machine-readable definition files, enabling version control, reproducibility, and automation. Tools include Terraform (multi-cloud provisioning), AWS CloudFormation, Pulumi (general-purpose languages), and Ansible (configuration management). IaC eliminates manual server configuration and drift between environments.",
       "# Terraform example (AWS)\nresource \"aws_db_instance\" \"main\" {\n  engine         = \"postgres\"\n  engine_version = \"16.3\"\n  instance_class  = \"db.t3.medium\"\n  db_name         = \"myapp\"\n  username        = \"admin\"\n  password        = var.db_password\n  skip_final_snapshot = true\n\n  tags = {\n    Name        = \"myapp-db\"\n    Environment = \"production\"\n  }\n}\n\nresource \"aws_s3_bucket\" \"assets\" {\n  bucket = \"myapp-assets-prod\"\n  tags   = { Environment = \"production\" }\n}"
-    ]
-  },
-  "System Design & Architecture": {
-    "Microservices": [
-      "Microservices architecture decomposes an application into small, independent services that communicate over a network. Each service owns its data (database-per-service), can be deployed independently, and is built around a business capability. Benefits include: independent scaling, technology diversity, and smaller codebases. Challenges include: distributed complexity, data consistency, and service discovery.",
-      "# Microservices principles:\n# - Single Responsibility (one business capability)\n# - Database per Service (no shared databases)\n# - API-first design (REST/gRPC for communication)\n# - Independent deployability\n# - Decentralized governance (teams choose tech)\n# - Resilience (circuit breakers, retries)\n# - Observability (logging, metrics, tracing)\n# - Automation (CI/CD for each service)"
     ],
-    "Load Balancing": [
-      "Load balancing distributes incoming traffic across multiple servers to ensure reliability and performance. Types: DNS load balancing (round-robin), hardware load balancers (F5), software load balancers (HAProxy, Nginx), and cloud load balancers (AWS ALB/ELB, Google Cloud LB). Algorithms include round-robin, least connections, IP hash, and weighted distribution.",
-      "# Load balancing algorithms\n\n# Round Robin: Requests distributed sequentially\n# Least Connections: Send to server with fewest active connections\n# IP Hash: Same client always goes to same server\n# Weighted: Servers with higher capacity get more traffic\n# Geographic: Route based on client location\n\n# Nginx load balancing config\nupstream backend {\n    least_conn;\n    server app1:3000;\n    server app2:3000;\n    server app3:3000;\n}\n\n# Health check = server removed from pool automatically"
-    ],
-    "Database Scaling": [
-      "Scaling databases involves read replicas (offload read queries to copies), connection pooling (manage DB connections efficiently), caching layers (Redis/Memcached), partitioning (vertical/horizontal), and sharding. Read replicas improve read throughput but introduce eventual consistency. Connection poolers like PgBouncer manage thousands of concurrent connections efficiently.",
-      "# Database scaling strategies\n\n# 1. Read Replicas\n# Primary handles writes, replicas handle reads\n# Eventually consistent (replication lag)\n\n# 2. Connection Pooling\n# PgBouncer: Lightweight connection pooler\n# Maintains persistent connections to DB\n# Apps borrow/release connections\n\n# 3. Vertical Scaling\n# Bigger instance (more CPU, RAM, IOPS)\n# Simpler but has upper limits\n\n# 4. Sharding\n# Split data across multiple databases\n# Each shard handles subset of data"
-    ],
-    "Caching Architecture": [
-      "Multi-layer caching architecture: browser cache (private), CDN (edge cache), reverse proxy/load balancer (Nginx cache), application cache (in-memory), and database cache (buffer pool). Cache invalidation strategies include TTL-based (time to live), write-through (update cache and DB), write-behind (async), and event-driven invalidation (publish cache invalidation events).",
-      "# Multi-layer caching\n# Browser:         Cache-Control, ETag, Service Worker\n# CDN:              Cloudflare, Fastly, CloudFront\n# Reverse Proxy:    Nginx, Varnish (microcaching)\n# Application:      Redis, Memcached\n# Database:         InnoDB buffer pool, Query cache\n\n# Cache invalidation strategies:\n# TTL:        \"This data expires in 5 minutes\"\n# Write-through: \"Write to cache AND database\"\n# Write-behind:  \"Write to cache, async write to DB\"\n# Event-based:   \"Publish event when data changes, cache subscribes\""
-    ]
-  },
-  "AI in Backend Development": {
-    "AI-Assisted Coding": [
-      "AI coding assistants (GitHub Copilot, Cursor, Claude Code) use large language models to generate, refactor, and explain code. They integrate with IDEs and support context-aware completions, test generation, bug fixing, and code review. Best practices: provide clear context, review generated code, never blindly accept, and treat AI as a pair programmer, not a replacement.",
-      "# AI-assisted coding best practices:\n# - Write clear comments and function names\n# - Provide examples in the context\n# - Break complex tasks into smaller prompts\n# - Review generated code for correctness\n# - Write tests first (AI generates implementations)\n# - Use AI for boilerplate, refactoring, and docs\n# - Never paste sensitive data into AI tools\n# - Understand what AI generates - don't black-box"
-    ],
-    "Building AI Features": [
-      "Backend developers integrate AI capabilities through API calls to LLM providers (OpenAI, Anthropic, Google) or self-hosted models (Llama, Mistral). Patterns include: RAG (Retrieval Augmented Generation — search documents + ask LLM), embeddings for semantic search, streaming responses for real-time chat, function calling for structured outputs, and AI agents for multi-step tasks.",
-      "// Integrating LLMs into your backend\nconst OpenAI = require('openai');\nconst openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n\n// Streaming chat completion\nconst stream = await openai.chat.completions.create({\n  model: 'gpt-4',\n  messages: [\n    { role: 'system', content: 'You are a helpful assistant.' },\n    { role: 'user', content: 'Explain database indexing' }\n  ],\n  stream: true,\n});\n\nfor await (const chunk of stream) {\n  process.stdout.write(chunk.choices[0]?.delta?.content || '');\n}"
-    ],
-    "Prompt Engineering": [
-      "Prompt engineering is the practice of designing input prompts to get desired outputs from LLMs. Techniques include: few-shot prompting (providing examples), chain-of-thought (step-by-step reasoning), system prompts (setting behavior/role), structured output constraints (JSON mode), and temperature control (creativity vs precision). Key for building reliable AI-powered backend features.",
-      "# Prompt engineering techniques\n\n# System message (sets behavior)\nYou are a code reviewer. Analyze the following\ncode for bugs, security issues, and performance\nproblems. Respond in JSON format.\n\n# Few-shot prompting (examples)\nTranslate these SQL queries to MongoDB:\nSQL: SELECT * FROM users WHERE age > 18\nMQL: db.users.find({ age: { $gt: 18 } })\n\nSQL: <user query>\nMQL:\n\n# Chain of thought (step by step)\nLet's think step by step about whether this\nquery will use the index..."
-    ]
-  },
-  "Microservices Architecture": {
-    "Service Decomposition": [
-      "Microservices decompose applications into small, independently deployable services. Each service owns its data and communicates via APIs. Decomposition strategies: domain-driven design with bounded contexts, business capability patterns, and strangler fig for legacy migration. Services should be loosely coupled and highly cohesive. Common pitfalls: distributed monoliths (services that require synchronous deployment), chatty communication between services, and improper service granularity. Best practices include single responsibility per service, database-per-service pattern, and API versioning from day one.",
-      "// Service decomposition - User Service (Node.js/Express)\nconst express = require('express');\nconst app = express();\n\n// User service owns user data exclusively\napp.get('/api/v1/users/:id', async (req, res) => {\n  try {\n    const user = await db.users.findById(req.params.id);\n    // Return only user-owned data\n    res.json({ id: user.id, name: user.name, email: user.email });\n  } catch (err) {\n    res.status(404).json({ error: 'User not found', code: 'USER_001' });\n  }\n});\n\n// Event-driven communication (instead of direct DB access)\napp.post('/api/v1/users', async (req, res) => {\n  const user = await db.users.create(req.body);\n  await eventBus.publish('user.created', { userId: user.id, email: user.email });\n  res.status(201).json(user);\n});\n\napp.listen(3001);"
-    ],
-    "API Gateway Pattern": [
-      "An API Gateway is a single entry point that routes requests to appropriate microservices. It handles cross-cutting concerns: authentication, rate limiting, request transformation, aggregation, and protocol translation. Popular gateways include Kong, NGINX Plus, AWS API Gateway, and Envoy. Benefits include client simplification (single endpoint), centralized security, and protocol bridging (HTTP to gRPC). Drawbacks include increased latency, potential single point of failure, and added complexity. Backend-for-frontend (BFF) pattern extends this by creating dedicated gateways per client type (web, mobile, IoT).",
-      "// Kong Gateway declarative config (kong.yml)\n_format_version: \"3.0\"\nservices:\n  - name: user-service\n    url: http://user-svc:3001\n    routes:\n      - name: user-routes\n        paths:\n          - /api/v1/users\n        methods: [GET, POST, PUT, DELETE]\n    plugins:\n      - name: rate-limiting\n        config:\n          minute: 100\n          policy: local\n      - name: key-auth\n        config:\n          key_names: [\"X-API-Key\"]\n\n  - name: order-service\n    url: http://order-svc:3002\n    routes:\n      - name: order-routes\n        paths:\n          - /api/v1/orders\n\n# BFF for mobile (aggregated responses)\nupstreams:\n  - name: mobile-bff\n    targets:\n      - target: mobile-bff-svc:3100\n        weight: 100"
-    ],
-    "Service Mesh & Sidecar Pattern": [
-      "A service mesh manages microservice-to-microservice communication via a dedicated infrastructure layer. Sidecar proxies (like Envoy) are deployed alongside each service to handle traffic management, observability, and security. Istio and Linkerd are popular meshes. Features include mTLS encryption, circuit breaking, retry logic, traffic splitting (canary deployments), and distributed tracing. The sidecar handles East-West traffic (service-to-service), freeing application code from networking concerns. Adoption considerations include operational complexity, resource overhead (each sidecar consumes ~50MB RAM), and debugging challenges.",
-      "# Istio VirtualService for canary deployment\napiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: user-service\nspec:\n  hosts:\n    - user-service\n  http:\n    - match:\n        - headers:\n            x-canary:\n              exact: \"true\"\n      route:\n        - destination:\n            host: user-service\n            subset: v2\n          weight: 100\n    - route:\n        - destination:\n            host: user-service\n            subset: v1\n          weight: 90\n        - destination:\n            host: user-service\n            subset: v2\n          weight: 10"
-    ],
-    "Event-Driven Architecture": [
-      "Event-driven architecture enables asynchronous communication between services via events. Events represent state changes and are published to message brokers (Kafka, RabbitMQ, NATS). Services consume events asynchronously, enabling loose coupling and eventual consistency. Patterns include event sourcing (storing state changes as events), CQRS (separating read/write models), saga patterns for distributed transactions, and outbox patterns for reliable event publishing. Event schemas should be versioned and evolve compatibly using Schema Registry (Avro, Protobuf).",
-      "// Kafka producer with outbox pattern\nimport { Kafka } from 'kafkajs';\n\nconst kafka = new Kafka({ clientId: 'order-svc', brokers: ['kafka:9092'] });\nconst producer = kafka.producer();\n\nasync function createOrder(orderData) {\n  const trx = await db.beginTransaction();\n  try {\n    // 1. Write to DB (atomic operation)\n    const order = await trx.orders.create(orderData);\n    \n    // 2. Write event to outbox table (same DB transaction)\n    await trx.outbox.create({\n      aggregateType: 'order',\n      aggregateId: order.id,\n      eventType: 'OrderCreated',\n      payload: JSON.stringify(order)\n    });\n    \n    await trx.commit();\n    \n    // 3. Publish events from outbox (separate process)\n    // Outbox publisher runs as a background job\n    await publishOutboxEvents();\n  } catch (err) {\n    await trx.rollback();\n    throw err;\n  }\n}\n\nasync function publishOutboxEvents() {\n  await producer.connect();\n  const events = await db.outbox.findUnpublished();\n  for (const event of events) {\n    await producer.send({\n      topic: 'order-events',\n      messages: [{ key: String(event.aggregateId), value: event.payload }]\n    });\n    await db.outbox.markPublished(event.id);\n  }\n}"
+    "Continuous Deployment": [
+      "CD automatically deploys validated code changes to production (or staging) environments. The deployment pipeline includes building artifacts, running integration tests, deploying to staging, running smoke tests, and promoting to production with strategies like blue-green (two identical environments) or canary (gradual rollout). Rollbacks should be fast and reliable.",
+      "# CD deployment strategies\n\n# Blue-Green:\n# Blue = current production\n# Green = new version\n# Switch load balancer from Blue to Green\n# Rollback: switch back to Blue\n\n# Canary:\n# Route 5% of traffic to new version\n# Monitor error rates and latency\n# Gradually increase to 25%, 50%, 100%\n# Rollback: route 0% to canary\n\n# Rolling:\n# Update instances one-by-one\n# Keep some running during update\n# Rollback: redeploy previous version"
     ]
   },
   "Observability & Monitoring": {
@@ -539,6 +521,10 @@
     ]
   },
   "Backend Security": {
+    "Secrets Management": [
+      "Secrets management securely stores and rotates sensitive configuration: database passwords, API keys, TLS certificates, and encryption keys. Tools include HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, and Kubernetes Secrets (with encryption). Best practices: never commit secrets to git, use environment variables with .env files locally, encrypt secrets at rest and in transit, rotate secrets regularly (90 days), audit secret access, and use short-lived dynamic secrets when possible. Vault's dynamic secrets generate credentials on-demand with TTL enforcement.",
+      "# HashiCorp Vault secrets configuration\n# vault policy for app\npath \"secret/data/backend/*\" {\n  capabilities = [\"read\"]\n}\npath \"database/creds/backend-role\" {\n  capabilities = [\"read\"]\n}\n\n// Node.js Vault integration\nimport vault from 'node-vault';\n\nconst client = vault({\n  apiVersion: 'v1',\n  endpoint: process.env.VAULT_ADDR,\n  token: process.env.VAULT_TOKEN\n});\n\nasync function getSecrets() {\n  // Static secrets\n  const { data } = await client.read('secret/data/backend/production');\n  process.env.DB_PASSWORD = data.data.data.db_password;\n  \n  // Dynamic database credentials (auto-expires)\n  const dbCreds = await client.read('database/creds/backend-role');\n  const dbClient = new Pool({\n    host: process.env.DB_HOST,\n    user: dbCreds.data.username,\n    password: dbCreds.data.password,\n    database: 'app'\n  });\n  // Credentials auto-expire after Vault lease TTL (e.g., 1 hour)\n  return dbClient;\n}\n\n// Kubernetes: External Secrets Operator\napiVersion: external-secrets.io/v1beta1\nkind: ExternalSecret\nmetadata:\n  name: backend-secrets\nspec:\n  refreshInterval: 1h\n  secretStoreRef:\n    name: vault-backend\n    kind: SecretStore\n  target:\n    name: backend-app-secrets\n  data:\n    - secretKey: DB_PASSWORD\n      remoteRef:\n        key: secret/data/backend/production\n        property: db_password"
+    ],
     "Authentication & Authorization (OAuth 2.1/OIDC)": [
       "OAuth 2.1 consolidates best practices from OAuth 2.0: PKCE is required for all public clients, refresh tokens must be sender-constrained, and the implicit grant is removed. OpenID Connect (OIDC) adds an identity layer via the ID token (JWT). Key flows: authorization code flow (server-side apps), device authorization flow (CLI/smart TVs), and client credentials flow (machine-to-machine). Authorization servers (Keycloak, Auth0, Supabase Auth) issue JWTs that services validate. Token introspection and revocation endpoints manage active sessions. Best practices: short-lived access tokens (15 min), longer-lived refresh tokens with rotation, and never store tokens in localStorage.",
       "// OAuth 2.1 with PKCE (Authorization Code Flow)\n// Frontend: Generate code verifier & challenge\nconst generatePKCE = async () => {\n  const verifier = crypto.randomBytes(32).toString('base64url');\n  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');\n  sessionStorage.setItem('code_verifier', verifier);\n  return challenge;\n};\n\n// Backend: Token validation middleware\nconst jwt = require('jsonwebtoken');\nconst jwksClient = require('jwks-rsa');\n\nconst client = jwksClient({ jwksUri: process.env.OIDC_JWKS_URL });\n\nasync function validateToken(req, res, next) {\n  const authHeader = req.headers.authorization;\n  if (!authHeader?.startsWith('Bearer ')) {\n    return res.status(401).json({ error: 'Missing token' });\n  }\n  \n  const token = authHeader.split(' ')[1];\n  try {\n    const decoded = await new Promise((resolve, reject) => {\n      jwt.verify(token, (header, callback) => {\n        client.getSigningKey(header.kid, (err, key) => {\n          if (err) return reject(err);\n          callback(null, key.getPublicKey());\n        });\n      }, { algorithms: ['RS256'], issuer: process.env.OIDC_ISSUER }, (err, decoded) => {\n        if (err) reject(err);\n        else resolve(decoded);\n      });\n    });\n    \n    req.user = decoded;\n    next();\n  } catch (err) {\n    res.status(401).json({ error: 'Invalid token' });\n  }\n}\n\n// RBAC middleware\nfunction requireRole(...roles) {\n  return (req, res, next) => {\n    if (!roles.some(r => req.user.roles.includes(r))) {\n      return res.status(403).json({ error: 'Insufficient permissions' });\n    }\n    next();\n  };\n}\n\napp.get('/api/admin/users', validateToken, requireRole('admin'), async (req, res) => {\n  const users = await db.users.findAll();\n  res.json(users);\n});"
@@ -546,34 +532,48 @@
     "API Security Best Practices": [
       "API security protects backend services from attacks. Key measures: input validation (never trust client data), rate limiting per user/IP, CORS configuration, SQL injection prevention via parameterized queries, CSRF tokens for cookie-based auth, and proper error handling (don't leak stack traces). Security headers (CSP, HSTS, X-Frame-Options) should be set. API keys should be rotated regularly. Webhook signatures verify payload authenticity. Implement proper logging for security events (failed auth, rate limit hits, suspicious patterns). Regular dependency scanning (Snyk, Dependabot) catches vulnerable packages.",
       "// Security middleware stack (Express)\nconst helmet = require('helmet');\nconst rateLimit = require('express-rate-limit');\nconst cors = require('cors');\nconst { body, validationResult } = require('express-validator');\n\n// Security headers\napp.use(helmet({\n  contentSecurityPolicy: { directives: { defaultSrc: [\"'self'\"] } },\n  hsts: { maxAge: 31536000, includeSubDomains: true }\n}));\n\n// CORS - whitelist specific origins\napp.use(cors({\n  origin: ['https://app.example.com', 'https://admin.example.com'],\n  methods: ['GET', 'POST', 'PUT', 'DELETE'],\n  allowedHeaders: ['Authorization', 'Content-Type', 'X-Correlation-ID'],\n  maxAge: 86400\n}));\n\n// Rate limiting by user or IP\nconst limiter = rateLimit({\n  windowMs: 15 * 60 * 1000, // 15 min\n  max: 100,\n  keyGenerator: (req) => req.user?.id || req.ip,\n  handler: (req, res) => {\n    logger.warn({ ip: req.ip, userId: req.user?.id }, 'Rate limit exceeded');\n    res.status(429).json({ error: 'Too many requests', retryAfter: '15min' });\n  }\n});\napp.use('/api/', limiter);\n\n// Input validation\napp.post('/api/users', [\n  body('email').isEmail().normalizeEmail(),\n  body('name').trim().isLength({ min: 2, max: 100 }).escape(),\n  body('age').optional().isInt({ min: 0, max: 150 })\n], (req, res) => {\n  const errors = validationResult(req);\n  if (!errors.isEmpty()) {\n    return res.status(400).json({ errors: errors.array() });\n  }\n  // Safe to proceed with validated input\n  res.json({ message: 'Valid input received' });\n});\n\n// Webhook signature verification (Stripe example)\napp.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (req, res) => {\n  const sig = req.headers['stripe-signature'];\n  try {\n    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);\n    // Process verified event\n    res.json({ received: true });\n  } catch (err) {\n    res.status(400).json({ error: 'Invalid signature' });\n  }\n});"
-    ],
-    "Secrets Management": [
-      "Secrets management securely stores and rotates sensitive configuration: database passwords, API keys, TLS certificates, and encryption keys. Tools include HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, and Kubernetes Secrets (with encryption). Best practices: never commit secrets to git, use environment variables with .env files locally, encrypt secrets at rest and in transit, rotate secrets regularly (90 days), audit secret access, and use short-lived dynamic secrets when possible. Vault's dynamic secrets generate credentials on-demand with TTL enforcement.",
-      "# HashiCorp Vault secrets configuration\n# vault policy for app\npath \"secret/data/backend/*\" {\n  capabilities = [\"read\"]\n}\npath \"database/creds/backend-role\" {\n  capabilities = [\"read\"]\n}\n\n// Node.js Vault integration\nimport vault from 'node-vault';\n\nconst client = vault({\n  apiVersion: 'v1',\n  endpoint: process.env.VAULT_ADDR,\n  token: process.env.VAULT_TOKEN\n});\n\nasync function getSecrets() {\n  // Static secrets\n  const { data } = await client.read('secret/data/backend/production');\n  process.env.DB_PASSWORD = data.data.data.db_password;\n  \n  // Dynamic database credentials (auto-expires)\n  const dbCreds = await client.read('database/creds/backend-role');\n  const dbClient = new Pool({\n    host: process.env.DB_HOST,\n    user: dbCreds.data.username,\n    password: dbCreds.data.password,\n    database: 'app'\n  });\n  // Credentials auto-expire after Vault lease TTL (e.g., 1 hour)\n  return dbClient;\n}\n\n// Kubernetes: External Secrets Operator\napiVersion: external-secrets.io/v1beta1\nkind: ExternalSecret\nmetadata:\n  name: backend-secrets\nspec:\n  refreshInterval: 1h\n  secretStoreRef:\n    name: vault-backend\n    kind: SecretStore\n  target:\n    name: backend-app-secrets\n  data:\n    - secretKey: DB_PASSWORD\n      remoteRef:\n        key: secret/data/backend/production\n        property: db_password"
-    ]
-  },
-  "Backend Testing & Quality": {
-    "Unit & Integration Testing": [
-      "Testing ensures backend reliability. Unit tests verify individual functions/methods in isolation (mocking external dependencies). Integration tests verify components work together (database, external APIs). Test pyramid: lots of unit tests, fewer integration tests, even fewer E2E tests. Use test fixtures and factories for consistent test data. Database tests should use transactions that roll back after each test. Mock external HTTP APIs with tools like nock or WireMock. Aim for >80% coverage on business logic, but prioritize critical paths over coverage numbers.",
-      "// Unit tests with Jest\nconst { OrderService } = require('./order.service');\nconst { MockRepository } = require('./__mocks__/repository');\n\njest.mock('./payment.gateway');\nconst PaymentGateway = require('./payment.gateway');\n\ndescribe('OrderService', () => {\n  let orderService;\n  let mockRepo;\n\n  beforeEach(() => {\n    mockRepo = new MockRepository();\n    PaymentGateway.mockClear();\n    orderService = new OrderService(mockRepo);\n  });\n\n  test('creates order with valid items', async () => {\n    const order = await orderService.createOrder({\n      userId: 'user-1',\n      items: [{ productId: 'prod-1', quantity: 2 }]\n    });\n\n    expect(order.status).toBe('pending');\n    expect(order.total).toBeGreaterThan(0);\n    expect(mockRepo.save).toHaveBeenCalledWith(\n      expect.objectContaining({ userId: 'user-1' })\n    );\n  });\n\n  test('rejects order with empty cart', async () => {\n    await expect(orderService.createOrder({ userId: 'user-1', items: [] }))\n      .rejects\n      .toThrow('Cart cannot be empty');\n  });\n\n  test('processes payment for valid order', async () => {\n    PaymentGateway.prototype.charge.mockResolvedValue({ id: 'txn-1', status: 'success' });\n    \n    const result = await orderService.processPayment('order-1', {\n      method: 'card',\n      token: 'tok_visa'\n    });\n\n    expect(result.status).toBe('completed');\n    expect(PaymentGateway).toHaveBeenCalledTimes(1);\n  });\n});\n\n// Integration test with database\nconst { db, TestFactory } = require('./test-helpers');\n\ndescribe('Order API Integration', () => {\n  beforeEach(async () => {\n    await db.beginTransaction();\n  });\n\n  afterEach(async () => {\n    await db.rollback();\n  });\n\n  test('GET /api/orders/:id returns full order', async () => {\n    const user = await TestFactory.createUser();\n    const order = await TestFactory.createOrder({ userId: user.id });\n\n    const res = await request(app)\n      .get(`/api/orders/${order.id}`)\n      .set('Authorization', `Bearer ${user.token}`);\n\n    expect(res.status).toBe(200);\n    expect(res.body.id).toBe(order.id);\n    expect(res.body.items).toHaveLength(2);\n  });\n});"
-    ],
-    "Performance Testing & Benchmarking": [
-      "Performance testing validates backend speed and scalability. Types: load testing (expected traffic), stress testing (beyond expected), soak testing (sustained load over time), and spike testing (sudden traffic surges). Tools: k6 (modern, scriptable), Artillery (Node.js-friendly), locust (Python), wrk/ab (CLI). Key metrics: requests per second (RPS), latency percentiles (p50, p95, p99), error rate, and resource utilization (CPU, memory, I/O). Always test with production-like data volumes. Identify bottlenecks (DB queries, external API calls, serialization) before optimization.",
-      "// k6 load test script\nimport http from 'k6/http';\nimport { check, sleep } from 'k6';\nimport { Rate, Trend } from 'k6/metrics';\n\nconst errorRate = new Rate('errors');\nconst orderLatency = new Trend('order_latency');\n\nexport const options = {\n  stages: [\n    { duration: '2m', target: 100 },  // Ramp up\n    { duration: '5m', target: 100 },  // Stay\n    { duration: '2m', target: 200 },  // Spike\n    { duration: '3m', target: 0 },    // Ramp down\n  ],\n  thresholds: {\n    http_req_duration: ['p(95)<500', 'p(99)<1000'],\n    errors: ['rate<0.01'],\n  }\n};\n\nexport default function () {\n  const headers = { 'Authorization': `Bearer ${__ENV.API_TOKEN}` };\n  \n  // GET orders list\n  const listRes = http.get('http://api.example.com/api/orders?limit=20', { headers });\n  check(listRes, { 'status 200': (r) => r.status === 200 });\n  \n  // GET single order\n  const orderRes = http.get('http://api.example.com/api/orders/order-123', { headers });\n  check(orderRes, { 'order status 200': (r) => r.status === 200 });\n  orderLatency.add(orderRes.timings.duration);\n  \n  // POST create order\n  const payload = JSON.stringify({\n    items: [{ productId: 'prod-1', quantity: 1 }],\n    shipping: { address: '123 Test St', zip: '12345' }\n  });\n  const createRes = http.post('http://api.example.com/api/orders', payload, {\n    headers: { 'Content-Type': 'application/json', ...headers }\n  });\n  check(createRes, { 'created 201': (r) => r.status === 201 });\n  errorRate.add(createRes.status >= 400);\n  \n  sleep(1);\n}"
-    ],
-    "Database Migrations & Versioning": [
-      "Database migrations manage schema changes across environments. Tools like Flyway, Liquibase, and knex.js provide versioned migration files. Each migration is a forward-only change (with optional rollback). Best practices: one logical change per migration, never modify existing migrations (create a new one instead), test migrations against a copy of production data, use repeatable migrations for views/functions, and separate schema migrations from data migrations. CI/CD should run migrations as part of deployment with proper locking.",
-      "// Knex.js migration example\n// migrations/20240610_create_orders.js\nexports.up = function(knex) {\n  return knex.schema\n    .createTable('orders', (table) => {\n      table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));\n      table.uuid('user_id').notNullable().references('id').inTable('users');\n      table.enum('status', ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])\n        .defaultTo('pending');\n      table.decimal('total', 12, 2).notNullable();\n      table.jsonb('shipping_address');\n      table.timestamp('created_at').defaultTo(knex.fn.now());\n      table.timestamp('updated_at').defaultTo(knex.fn.now());\n      \n      table.index('user_id', 'idx_orders_user');\n      table.index('status', 'idx_orders_status');\n    })\n    .createTable('order_items', (table) => {\n      table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));\n      table.uuid('order_id').notNullable().references('id').inTable('orders').onDelete('CASCADE');\n      table.uuid('product_id').notNullable();\n      table.integer('quantity').unsigned().notNullable();\n      table.decimal('unit_price', 10, 2).notNullable();\n    });\n};\n\nexports.down = function(knex) {\n  return knex.schema\n    .dropTableIfExists('order_items')\n    .dropTableIfExists('orders');\n};\n\n// Flyway Java migration example\n// V2__create_order_tables.sql\n/*\nCREATE TABLE orders (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID NOT NULL REFERENCES users(id),\n    status VARCHAR(20) NOT NULL DEFAULT 'pending'\n        CHECK (status IN ('pending','confirmed','shipped','delivered','cancelled')),\n    total DECIMAL(12,2) NOT NULL,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\nCREATE INDEX idx_orders_user ON orders(user_id);\n*/"
     ]
   },
   "Deployment & DevOps": {
-    "Containerization (Docker Deep Dive)": [
-      "Docker packages backend services with dependencies. Multi-stage builds reduce image size (from 1GB+ to <200MB for Node.js). Best practices: use specific base image versions (not 'latest'), minimize layers by combining RUN commands, use .dockerignore, run as non-root user, use health checks, and leverage layer caching. Distroless images improve security by removing package managers and shells. Alpine-based images are 5x smaller but may have compatibility issues (musl libc vs glibc). Docker Compose simplifies local development with service dependencies.",
-      "# Multi-stage Dockerfile for Node.js backend\n# Build stage\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\n\n# Production stage\nFROM gcr.io/distroless/nodejs20-debian12\nWORKDIR /app\n\n# Copy only what's needed\nCOPY --from=builder /app/node_modules ./node_modules\nCOPY --from=builder /app/package.json ./\nCOPY dist/ ./dist/\nCOPY config/ ./config/\n\n# Security: non-root user\nUSER nonroot\n\n# Health check\nHEALTHCHECK --interval=30s --timeout=3s --retries=3 \\\n  CMD [\"node\", \"dist/health.js\"]\n\nEXPOSE 3000\nENV NODE_ENV=production\n\nCMD [\"node\", \"dist/server.js\"]\n\n# .dockerignore\nnode_modules/\nnpm-debug.log\n.env\n.git\ntest/\ncoverage/\n*.md\n\n# Docker Compose for dev\nversion: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - '3000:3000'\n    environment:\n      - DB_HOST=postgres\n      - REDIS_HOST=redis\n    depends_on:\n      postgres:\n        condition: service_healthy\n      redis:\n        condition: service_started\n  \n  postgres:\n    image: postgres:16-alpine\n    healthcheck:\n      test: ['CMD-SHELL', 'pg_isready -U app']\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n  \n  redis:\n    image: redis:7-alpine\n\nvolumes:\n  pgdata:"
-    ],
     "CI/CD Pipelines": [
       "CI/CD pipelines automate building, testing, and deploying backend services. Stages typically: lint/format check, unit tests, build, integration tests, security scan, deploy to staging, E2E tests, deploy to production. Use caching to speed up builds (Docker layer cache, node_modules cache). Environment-specific configuration via CI/CD variables (not in code). Approval gates for production deployments. Rollback strategies: blue-green, canary, or rollback to previous version. Git flow with trunk-based development (short-lived branches, frequent merges to main).",
       "# GitHub Actions CI/CD for backend\nname: Backend CI/CD\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\nenv:\n  REGISTRY: ghcr.io\n  IMAGE_NAME: ${{ github.repository }}\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    services:\n      postgres:\n        image: postgres:16-alpine\n        env:\n          POSTGRES_PASSWORD: testpass\n        options: >-\n          --health-cmd pg_isready\n          --health-interval 10s\n      redis:\n        image: redis:7-alpine\n    \n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'npm'\n      \n      - run: npm ci\n      - run: npm run lint\n      - run: npm run test:unit\n      - run: npm run test:integration\n        env:\n          DATABASE_URL: postgres://postgres:testpass@localhost:5432/testdb\n          REDIS_URL: redis://localhost:6379\n  \n  build-and-push:\n    needs: test\n    if: github.ref == 'refs/heads/main'\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: docker/setup-buildx-action@v3\n      - uses: docker/login-action@v3\n        with:\n          registry: ${{ env.REGISTRY }}\n          username: ${{ github.actor }}\n          password: ${{ secrets.GITHUB_TOKEN }}\n      \n      - uses: docker/build-push-action@v5\n        with:\n          push: true\n          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}\n          cache-from: type=gha\n          cache-to: type=gha,mode=max\n  \n  deploy:\n    needs: build-and-push\n    runs-on: ubuntu-latest\n    environment: production\n    steps:\n      - uses: actions/checkout@v4\n      - uses: superfly/flyctl-actions/setup-flyctl@master\n      - run: flyctl deploy --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}\n        env:\n          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}"
+    ],
+    "Containerization (Docker Deep Dive)": [
+      "Docker packages backend services with dependencies. Multi-stage builds reduce image size (from 1GB+ to <200MB for Node.js). Best practices: use specific base image versions (not 'latest'), minimize layers by combining RUN commands, use .dockerignore, run as non-root user, use health checks, and leverage layer caching. Distroless images improve security by removing package managers and shells. Alpine-based images are 5x smaller but may have compatibility issues (musl libc vs glibc). Docker Compose simplifies local development with service dependencies.",
+      "# Multi-stage Dockerfile for Node.js backend\n# Build stage\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\n\n# Production stage\nFROM gcr.io/distroless/nodejs20-debian12\nWORKDIR /app\n\n# Copy only what's needed\nCOPY --from=builder /app/node_modules ./node_modules\nCOPY --from=builder /app/package.json ./\nCOPY dist/ ./dist/\nCOPY config/ ./config/\n\n# Security: non-root user\nUSER nonroot\n\n# Health check\nHEALTHCHECK --interval=30s --timeout=3s --retries=3 \\\n  CMD [\"node\", \"dist/health.js\"]\n\nEXPOSE 3000\nENV NODE_ENV=production\n\nCMD [\"node\", \"dist/server.js\"]\n\n# .dockerignore\nnode_modules/\nnpm-debug.log\n.env\n.git\ntest/\ncoverage/\n*.md\n\n# Docker Compose for dev\nversion: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - '3000:3000'\n    environment:\n      - DB_HOST=postgres\n      - REDIS_HOST=redis\n    depends_on:\n      postgres:\n        condition: service_healthy\n      redis:\n        condition: service_started\n  \n  postgres:\n    image: postgres:16-alpine\n    healthcheck:\n      test: ['CMD-SHELL', 'pg_isready -U app']\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n  \n  redis:\n    image: redis:7-alpine\n\nvolumes:\n  pgdata:"
+    ]
+  },
+  "Containers & Orchestration": {
+    "Kubernetes Basics": [
+      "Kubernetes (K8s) is an open-source container orchestration platform for automating deployment, scaling, and management of containerized applications. Key concepts: Pods (smallest deployable unit), Deployments (declarative updates), Services (networking abstraction), ConfigMaps/Secrets (configuration), and Ingress (external access). Kubectl is the command-line tool.",
+      "# Kubernetes manifests\n# deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: myapp\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: myapp\n  template:\n    metadata:\n      labels:\n        app: myapp\n    spec:\n      containers:\n      - name: app\n        image: myapp:latest\n        ports:\n        - containerPort: 3000\n---\n# service.yaml\napiVersion: v1\nkind: Service\nspec:\n  type: LoadBalancer\n  selector:\n    app: myapp\n  ports:\n  - port: 80\n    targetPort: 3000"
+    ],
+    "Docker": [
+      "Docker packages applications and dependencies into lightweight, portable containers that run consistently across environments. Images are built from Dockerfiles using layered filesystems. Key concepts: Dockerfile (build instructions), images (read-only templates), containers (running instances), volumes (persistent data), networks (container communication), and Docker Compose (multi-container apps).",
+      "# Dockerfile example\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/index.js\"]"
+    ],
+    "Docker Compose": [
+      "Docker Compose defines and runs multi-container Docker applications using a YAML file. Each service specifies its image, ports, volumes, environment variables, and dependencies. Compose handles network creation, service discovery, and startup ordering. Essential for local development environments with multiple services (app + database + cache + queue).",
+      "# docker-compose.yml\nversion: '3.8'\nservices:\n  app:\n    build: .\n    ports:\n      - \"3000:3000\"\n    depends_on:\n      - db\n      - redis\n    environment:\n      - DATABASE_URL=postgres://user:pass@db:5432/myapp\n\n  db:\n    image: postgres:16\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    environment:\n      POSTGRES_PASSWORD: pass\n\n  redis:\n    image: redis:7-alpine\n\nvolumes:\n  pgdata:"
+    ]
+  },
+  "Microservices Architecture": {
+    "Service Decomposition": [
+      "Microservices decompose applications into small, independently deployable services. Each service owns its data and communicates via APIs. Decomposition strategies: domain-driven design with bounded contexts, business capability patterns, and strangler fig for legacy migration. Services should be loosely coupled and highly cohesive. Common pitfalls: distributed monoliths (services that require synchronous deployment), chatty communication between services, and improper service granularity. Best practices include single responsibility per service, database-per-service pattern, and API versioning from day one.",
+      "// Service decomposition - User Service (Node.js/Express)\nconst express = require('express');\nconst app = express();\n\n// User service owns user data exclusively\napp.get('/api/v1/users/:id', async (req, res) => {\n  try {\n    const user = await db.users.findById(req.params.id);\n    // Return only user-owned data\n    res.json({ id: user.id, name: user.name, email: user.email });\n  } catch (err) {\n    res.status(404).json({ error: 'User not found', code: 'USER_001' });\n  }\n});\n\n// Event-driven communication (instead of direct DB access)\napp.post('/api/v1/users', async (req, res) => {\n  const user = await db.users.create(req.body);\n  await eventBus.publish('user.created', { userId: user.id, email: user.email });\n  res.status(201).json(user);\n});\n\napp.listen(3001);"
+    ],
+    "Service Mesh & Sidecar Pattern": [
+      "A service mesh manages microservice-to-microservice communication via a dedicated infrastructure layer. Sidecar proxies (like Envoy) are deployed alongside each service to handle traffic management, observability, and security. Istio and Linkerd are popular meshes. Features include mTLS encryption, circuit breaking, retry logic, traffic splitting (canary deployments), and distributed tracing. The sidecar handles East-West traffic (service-to-service), freeing application code from networking concerns. Adoption considerations include operational complexity, resource overhead (each sidecar consumes ~50MB RAM), and debugging challenges.",
+      "# Istio VirtualService for canary deployment\napiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: user-service\nspec:\n  hosts:\n    - user-service\n  http:\n    - match:\n        - headers:\n            x-canary:\n              exact: \"true\"\n      route:\n        - destination:\n            host: user-service\n            subset: v2\n          weight: 100\n    - route:\n        - destination:\n            host: user-service\n            subset: v1\n          weight: 90\n        - destination:\n            host: user-service\n            subset: v2\n          weight: 10"
+    ],
+    "API Gateway Pattern": [
+      "An API Gateway is a single entry point that routes requests to appropriate microservices. It handles cross-cutting concerns: authentication, rate limiting, request transformation, aggregation, and protocol translation. Popular gateways include Kong, NGINX Plus, AWS API Gateway, and Envoy. Benefits include client simplification (single endpoint), centralized security, and protocol bridging (HTTP to gRPC). Drawbacks include increased latency, potential single point of failure, and added complexity. Backend-for-frontend (BFF) pattern extends this by creating dedicated gateways per client type (web, mobile, IoT).",
+      "// Kong Gateway declarative config (kong.yml)\n_format_version: \"3.0\"\nservices:\n  - name: user-service\n    url: http://user-svc:3001\n    routes:\n      - name: user-routes\n        paths:\n          - /api/v1/users\n        methods: [GET, POST, PUT, DELETE]\n    plugins:\n      - name: rate-limiting\n        config:\n          minute: 100\n          policy: local\n      - name: key-auth\n        config:\n          key_names: [\"X-API-Key\"]\n\n  - name: order-service\n    url: http://order-svc:3002\n    routes:\n      - name: order-routes\n        paths:\n          - /api/v1/orders\n\n# BFF for mobile (aggregated responses)\nupstreams:\n  - name: mobile-bff\n    targets:\n      - target: mobile-bff-svc:3100\n        weight: 100"
+    ],
+    "Event-Driven Architecture": [
+      "Event-driven architecture enables asynchronous communication between services via events. Events represent state changes and are published to message brokers (Kafka, RabbitMQ, NATS). Services consume events asynchronously, enabling loose coupling and eventual consistency. Patterns include event sourcing (storing state changes as events), CQRS (separating read/write models), saga patterns for distributed transactions, and outbox patterns for reliable event publishing. Event schemas should be versioned and evolve compatibly using Schema Registry (Avro, Protobuf).",
+      "// Kafka producer with outbox pattern\nimport { Kafka } from 'kafkajs';\n\nconst kafka = new Kafka({ clientId: 'order-svc', brokers: ['kafka:9092'] });\nconst producer = kafka.producer();\n\nasync function createOrder(orderData) {\n  const trx = await db.beginTransaction();\n  try {\n    // 1. Write to DB (atomic operation)\n    const order = await trx.orders.create(orderData);\n    \n    // 2. Write event to outbox table (same DB transaction)\n    await trx.outbox.create({\n      aggregateType: 'order',\n      aggregateId: order.id,\n      eventType: 'OrderCreated',\n      payload: JSON.stringify(order)\n    });\n    \n    await trx.commit();\n    \n    // 3. Publish events from outbox (separate process)\n    // Outbox publisher runs as a background job\n    await publishOutboxEvents();\n  } catch (err) {\n    await trx.rollback();\n    throw err;\n  }\n}\n\nasync function publishOutboxEvents() {\n  await producer.connect();\n  const events = await db.outbox.findUnpublished();\n  for (const event of events) {\n    await producer.send({\n      topic: 'order-events',\n      messages: [{ key: String(event.aggregateId), value: event.payload }]\n    });\n    await db.outbox.markPublished(event.id);\n  }\n}"
     ]
   }
 }

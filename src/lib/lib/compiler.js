@@ -22,6 +22,10 @@ const LANG_CONFIG_DEFAULT = {
   wasm: { lineComment: ';;', blockComment: ['(;', ';)'], blockOpen: null, blockClose: null, stmtTerm: '\n', indentBased: false, caseSensitive: false, strings: ['"'] },
 };
 
+export function tokenizeSource(code, lang, configs) {
+  return tokenize(code, lang, configs).filter(t => t.type !== 'whitespace');
+}
+
 export function tokenize(code, lang, configs) {
   const cfg = (configs?.LANG_CONFIG || LANG_CONFIG_DEFAULT)[lang] || LANG_CONFIG_DEFAULT.js;
   const TT = configs?.TOKEN_TYPES || TOKEN_TYPES_DEFAULT;

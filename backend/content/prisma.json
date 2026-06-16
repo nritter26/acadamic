@@ -25,23 +25,9 @@
       "exercises": []
     }
   },
-  "Configuration": {
-    "Prisma Config": {
-      "exp": "Configuring prisma for your project.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Prisma Best Practices": {
       "exp": "Best practices for using prisma.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Usage": {
-    "Prisma Advanced": {
-      "exp": "Advanced prisma techniques and patterns.",
       "code": "",
       "exercises": []
     }
@@ -120,46 +106,18 @@
       "npx prisma migrate dev --name revert_previous # Create inverse migration and npx prisma migrate resolve --rolled-back 'migration_name' # Mark as rolled back"
     ]
   },
-  "Advanced": {
-    "Middleware": [
-      "Prisma middleware (deprecated in favor of extensions) allows intercepting queries for logging, caching, access control, and input/output transformation.",
-      "prisma.$use(async (params, next) => { console.log('Query:', params.model, params.action); const start = Date.now(); const result = await next(params); console.log('Duration:', Date.now() - start, 'ms'); return result; });"
-    ],
-    "Extensions": [
-      "Prisma Extensions (preview) enable model-scoped and client-scoped functionality including computed fields, access policies, and custom queries.",
-      "const prisma = new PrismaClient().$extends({ result: { user: { fullName: { needs: { firstName: true, lastName: true }, compute(user) { return user.firstName + ' ' + user.lastName; } } } }, query: { user: { async $allOperations({ args, query }) { console.log('User query'); return query(args); } } } });"
-    ],
-    "Logging": [
-      "Prisma Client provides configurable logging for queries, info, warnings, and errors. Useful for debugging and performance monitoring in development.",
-      "const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] }); const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query' }] }); prisma.$on('query', (e) => console.log('Query:', e.query, 'Params:', e.params, 'Duration:', e.duration, 'ms'));"
-    ]
-  },
-  "Deployment": {
-    "Connection Pooling": [
-      "Connection pooling via PgBouncer or Prisma Accelerate manages database connections efficiently, preventing connection exhaustion under load.",
-      "datasource db { provider = 'postgresql' url = env('DATABASE_URL') connection_limit = 20 } const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });"
-    ],
-    "Edge": [
-      "Prisma Edge Client is optimized for serverless environments like Cloudflare Workers and Vercel Edge. Uses HTTP-based Data Proxy instead of direct connections.",
-      "import { PrismaClient } from '@prisma/client/edge'; const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }); export default async function handler(req) { const users = await prisma.user.findMany(); return new Response(JSON.stringify(users)); }"
-    ],
-    "Production": [
-      "Production considerations: connection pooling, migration safety, timeouts, error-only logging, environment variables, and graceful shutdown.",
-      "const prisma = new PrismaClient(); async function safeQuery(fn) { try { return await fn(); } catch (error) { if (error.code === 'P2002') throw new Error('Duplicate'); if (error.code === 'P2025') throw new Error('Not found'); throw error; } } process.on('SIGTERM', async () => { await prisma.$disconnect(); process.exit(0); });"
-    ]
-  },
   "Prisma Accelerate": {
     "Accelerate Overview": [
       "Prisma Accelerate is a global cache and connection pooler that sits between your app and database. It caches queries at the edge, reduces connection overhead, and provides real-time analytics.",
       "import { PrismaClient } from '@prisma/client';\nconst prisma = new PrismaClient({\n  datasourceUrl: process.env.DATABASE_URL\n});\n// Configure Accelerate in Prisma Data Platform dashboard"
     ],
-    "Caching Strategies": [
-      "Accelerate supports TTL-based caching with swr and ttl options per query. Cached responses serve instantly from the edge while the database is updated asynchronously.",
-      "const users = await prisma.user.findMany({\n  cache: { ttl: 30, swr: 60 }\n});\nconst post = await prisma.post.findUnique({\n  where: { id: 1 },\n  cache: { ttl: 300 }\n});"
-    ],
     "Connection Pooling": [
       "Accelerate replaces direct database connections with HTTP-based queries through a global connection pool, eliminating connection limits in serverless environments and cold starts.",
       "// No direct database connection needed\n// DATABASE_URL points to Accelerate connection string\ndatasource db {\n  provider = 'postgresql'\n  url      = env('DATABASE_URL')  // Accelerate URL\n}"
+    ],
+    "Caching Strategies": [
+      "Accelerate supports TTL-based caching with swr and ttl options per query. Cached responses serve instantly from the edge while the database is updated asynchronously.",
+      "const users = await prisma.user.findMany({\n  cache: { ttl: 30, swr: 60 }\n});\nconst post = await prisma.post.findUnique({\n  where: { id: 1 },\n  cache: { ttl: 300 }\n});"
     ]
   },
   "Prisma Pulse": {
@@ -187,6 +145,10 @@
     ]
   },
   "Referential Actions": {
+    "Referential Action Types": [
+      "Cascade propagates delete/update to related records. Restrict prevents delete if relations exist. NoAction defers to the database. SetNull sets foreign keys to NULL. SetDefault uses the default value.",
+      "model Comment {\n  id     Int  @id @default(autoincrement())\n  postId Int?\n  post   Post @relation(fields: [postId], references: [id], onDelete: SetNull, onUpdate: Cascade)\n}"
+    ],
     "onDelete": [
       "Referential actions control what happens to related records when a parent record is deleted. Prisma supports Cascade, Restrict, NoAction, SetNull, and SetDefault for foreign key constraints.",
       "model User {\n  id    Int    @id @default(autoincrement())\n  posts Post[]\n}\n\nmodel Post {\n  id     Int  @id @default(autoincrement())\n  userId Int\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}"
@@ -194,10 +156,48 @@
     "onUpdate": [
       "onUpdate referential action specifies behavior when a parent's referenced field changes. These actions map to database-level ON UPDATE constraints and are validated during migrations.",
       "model Profile {\n  id     Int  @id @default(autoincrement())\n  userId Int  @unique\n  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)\n}"
+    ]
+  },
+  "Configuration": {
+    "Prisma Config": {
+      "exp": "Configuring prisma for your project.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Connection Pooling": [
+      "Connection pooling via PgBouncer or Prisma Accelerate manages database connections efficiently, preventing connection exhaustion under load.",
+      "datasource db { provider = 'postgresql' url = env('DATABASE_URL') connection_limit = 20 } const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });"
     ],
-    "Referential Action Types": [
-      "Cascade propagates delete/update to related records. Restrict prevents delete if relations exist. NoAction defers to the database. SetNull sets foreign keys to NULL. SetDefault uses the default value.",
-      "model Comment {\n  id     Int  @id @default(autoincrement())\n  postId Int?\n  post   Post @relation(fields: [postId], references: [id], onDelete: SetNull, onUpdate: Cascade)\n}"
+    "Edge": [
+      "Prisma Edge Client is optimized for serverless environments like Cloudflare Workers and Vercel Edge. Uses HTTP-based Data Proxy instead of direct connections.",
+      "import { PrismaClient } from '@prisma/client/edge'; const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }); export default async function handler(req) { const users = await prisma.user.findMany(); return new Response(JSON.stringify(users)); }"
+    ],
+    "Production": [
+      "Production considerations: connection pooling, migration safety, timeouts, error-only logging, environment variables, and graceful shutdown.",
+      "const prisma = new PrismaClient(); async function safeQuery(fn) { try { return await fn(); } catch (error) { if (error.code === 'P2002') throw new Error('Duplicate'); if (error.code === 'P2025') throw new Error('Not found'); throw error; } } process.on('SIGTERM', async () => { await prisma.$disconnect(); process.exit(0); });"
+    ]
+  },
+  "Advanced Usage": {
+    "Prisma Advanced": {
+      "exp": "Advanced prisma techniques and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Middleware": [
+      "Prisma middleware (deprecated in favor of extensions) allows intercepting queries for logging, caching, access control, and input/output transformation.",
+      "prisma.$use(async (params, next) => { console.log('Query:', params.model, params.action); const start = Date.now(); const result = await next(params); console.log('Duration:', Date.now() - start, 'ms'); return result; });"
+    ],
+    "Extensions": [
+      "Prisma Extensions (preview) enable model-scoped and client-scoped functionality including computed fields, access policies, and custom queries.",
+      "const prisma = new PrismaClient().$extends({ result: { user: { fullName: { needs: { firstName: true, lastName: true }, compute(user) { return user.firstName + ' ' + user.lastName; } } } }, query: { user: { async $allOperations({ args, query }) { console.log('User query'); return query(args); } } } });"
+    ],
+    "Logging": [
+      "Prisma Client provides configurable logging for queries, info, warnings, and errors. Useful for debugging and performance monitoring in development.",
+      "const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] }); const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query' }] }); prisma.$on('query', (e) => console.log('Query:', e.query, 'Params:', e.params, 'Duration:', e.duration, 'ms'));"
     ]
   },
   "Prisma Advanced Patterns": {

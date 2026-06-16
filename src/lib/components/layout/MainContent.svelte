@@ -15,13 +15,13 @@
   import QuizView from '$lib/components/quiz/QuizView.svelte';
   import ProjectList from '$lib/components/projects/ProjectList.svelte';
   import ProjectDetail from '$lib/components/projects/ProjectDetail.svelte';
-  import { loadProjectCatalog, loadProjectCatalogStream } from '$lib/lib/projects.js';
+  import { loadProjectCatalogStream } from '$lib/lib/projects.js';
   import { STYLING_SCENARIOS, SCENARIO_ORDER } from '$lib/lib/styling-scenarios.js';
   import { LANG_INTROS } from '$lib/lib/lang-intros.js';
   import { runPipeline, highlightCode, renderTokens, renderAST, renderStats } from '$lib/lib/compiler.js';
 
   const LANGUAGE_MODES = ['asm','htmlcss','bash','c','cs','cpp','db','go','java','js','kt','lua','php','py','rb','rs','scala','swift','ts','wasm','zig'];
-  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend', 'ai', 'debugging'];
+  const CURRICULUM_MODES = ['cicd', 'gamedev', 'mobile', 'backend', 'ai', 'debugging', 'system-design'];
   const CUSTOM_WORKSPACE_MODES = ['compiler', 'schema', 'styling', 'challenge', 'quiz'];
   const STANDALONE_MODES = ['dblab', 'projects'];
 
@@ -135,7 +135,6 @@
       if (m === 'projects') {
         projects = [];
         projectsLoading = { active: true, loaded: 0, total: 0 };
-        // Try streaming first for lazy loading
         let streamBatchTimer;
         loadProjectCatalogStream(
           (project, loaded, total) => {
@@ -149,15 +148,7 @@
             clearTimeout(streamBatchTimer);
             projectsLoading = { active: false, loaded, total };
           }
-        ).then(streamTotal => {
-          // If streaming failed (returned -1), fall back to bulk
-          if (streamTotal < 0) {
-            loadProjectCatalog().then(p => {
-              projects = p;
-              projectsLoading = { active: false, loaded: p.length, total: p.length };
-            });
-          }
-        });
+        );
       }
       app.workspaceOpen = !STANDALONE_MODES.includes(m);
     }
@@ -321,7 +312,7 @@
 {:else if isQuizMode}
   <QuizView />
 {:else}
-  <div class="flex-1 grid" class:tool-mode={usesCustomWorkspace} style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1px; background: #1e293b;">
+  <div class="flex-1 grid overflow-hidden" class:tool-mode={usesCustomWorkspace} style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1px; background: #1e293b;">
     <div class="overflow-y-auto bg-[#0f172a] flex flex-col min-h-0">
       {#if isStylingMode}
         <div class="styling-scenarios-header">Scenarios</div>

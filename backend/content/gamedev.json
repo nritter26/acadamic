@@ -37,14 +37,14 @@
     }
   },
   "2D Game Development": {
-    "Sprites & Textures": {
-      "exp": "Working with 2D assets.",
-      "code": "Sprite sheets, texture atlases, pixel art, filtering modes.",
-      "exercises": []
-    },
     "Tilemaps": {
       "exp": "Grid-based level systems.",
       "code": "Tile sets, layers, collision tiles, auto-tiling, procedural placement.",
+      "exercises": []
+    },
+    "Sprites & Textures": {
+      "exp": "Working with 2D assets.",
+      "code": "Sprite sheets, texture atlases, pixel art, filtering modes.",
       "exercises": []
     },
     "2D Physics": {
@@ -159,60 +159,6 @@
       "exercises": []
     }
   },
-  "Networking & Multiplayer": {
-    "Client-Server Model": {
-      "exp": "Network architecture for multiplayer.",
-      "code": "Authoritative server, client prediction, server reconciliation.",
-      "exercises": []
-    },
-    "Replication": {
-      "exp": "Synchronizing game state across network.",
-      "code": "Networked variables, RPCs, state synchronization, interpolation.",
-      "exercises": []
-    },
-    "Latency Management": {
-      "exp": "Handling network delay in games.",
-      "code": "Lag compensation, interpolation, extrapolation, input buffering.",
-      "exercises": []
-    },
-    "Matchmaking": {
-      "exp": "Connecting players for multiplayer.",
-      "code": "Lobbies, dedicated servers, peer-to-peer, ELO rating.",
-      "exercises": []
-    },
-    "Client-Server Architecture": [
-      "The server is authoritative: validates actions, simulates world state. Clients send input, receive updates. Thin client vs thick client. Tick rate, bandwidth, and latency tradeoffs.",
-      "class GameServer {\n    constructor() {\n        this.clients = new Map();\n        this.worldState = {};\n        this.tickRate = 20;\n    }\n    start() {\n        setInterval(() => {\n            this.processInputs();\n            this.updateWorld();\n            this.broadcastState();\n        }, 1000 / this.tickRate);\n    }\n    processInputs() {\n        for (const [id, client] of this.clients) {\n            for (const input of client.inputQueue) {\n                this.applyInput(id, input);\n            }\n            client.inputQueue = [];\n        }\n    }\n    broadcastState() {\n        for (const [id, client] of this.clients) {\n            const snapshot = this.createSnapshot(id);\n            client.send(snapshot);\n        }\n    }\n}"
-    ],
-    "Peer-to-Peer & Relay": [
-      "P2P: players connect directly—low latency, complex NAT traversal (STUN/TURN/ICE). Relay: server forwards traffic—simpler NAT handling, adds latency. Rollback netcode for fighting games.",
-      "// WebRTC P2P\nconst pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });\npc.onicecandidate = e => sendSignal({ candidate: e.candidate });\npc.ontrack = e => remoteVideo.srcObject = e.streams[0];\n\nasync function connect(offer) {\n    if (offer) {\n        await pc.setRemoteDescription(new RTCSessionDescription(offer));\n        const answer = await pc.createAnswer();\n        await pc.setLocalDescription(answer);\n        sendSignal({ answer });\n    } else {\n        const offer = await pc.createOffer();\n        await pc.setLocalDescription(offer);\n        sendSignal({ offer });\n    }\n}"
-    ],
-    "Netcode & State Synchronization": [
-      "Authoritative server sends world state deltas. Client-side prediction hides latency. Entity interpolation smooths other players. Snapshot compression (bitpacking, delta encoding).",
-      "function createSnapshot(entity, lastSent) {\n    const delta = {};\n    for (const [key, val] of Object.entries(entity.state)) {\n        if (val !== lastSent[key]) {\n            delta[key] = val; // only send changed values\n        }\n    }\n    return { id: entity.id, tick: serverTick, delta, timestamp: Date.now() };\n}\n\nfunction interpolate(snapshots, renderTime) {\n    if (snapshots.length < 2) return;\n    const t = (renderTime - snapshots[0].timestamp)\n            / (snapshots[1].timestamp - snapshots[0].timestamp);\n    return lerp(snapshots[0].state.pos, snapshots[1].state.pos, t);\n}"
-    ],
-    "Lag Compensation & Prediction": [
-      "Client predicts own movement immediately (no input lag). Server rewinds time for hit detection (lag compensation). Extrapolation estimates positions of others. Reconciliation corrects prediction errors.",
-      "class ClientPrediction {\n    constructor() {\n        this.pendingInputs = [];\n        this.lastServerState = null;\n    }\n    onInput(input) {\n        // Apply immediately\n        this.applyInput(input);\n        this.pendingInputs.push({ input, seq: nextSeq++ });\n    }\n    onServerUpdate(state, lastSeq) {\n        this.lastServerState = state;\n        // Remove acknowledged inputs\n        this.pendingInputs = this.pendingInputs.filter(i => i.seq > lastSeq);\n        // Re-apply unacknowledged inputs\n        for (const pending of this.pendingInputs) {\n            this.applyInput(pending.input);\n        }\n    }\n}"
-    ],
-    "Rollback Netcode": [
-      "Fighting game technique: simulate future frames, roll back when server disagrees. Saves snapshots for rollback. Input delay + prediction for responsive feel. GGPO-style implementation.",
-      "class RollbackSystem {\n    constructor() {\n        this.frames = []; // ring buffer of past states\n        this.inputQueue = [];\n        this.currentFrame = 0;\n    }\n    saveState(state, frame) {\n        this.frames[frame % 120] = structuredClone(state);\n    }\n    rollbackTo(frame, serverInputs) {\n        // Restore state at rollback frame\n        let state = structuredClone(this.frames[frame % 120]);\n        // Re-simulate with corrected inputs\n        for (let f = frame; f <= this.currentFrame; f++) {\n            const input = serverInputs[f] || this.inputQueue[f];\n            state = this.step(state, input, f);\n            this.saveState(state, f);\n        }\n    }\n}"
-    ],
-    "Matchmaking & Lobbies": [
-      "Matchmaking: skill-based (ELO, TrueSkill), ping-based, party support. Lobbies: pre-game rooms with player slots, ready states, chat. Steamworks / Epic Online Services for cross-platform.",
-      "class Matchmaker {\n    constructor() {\n        this.queue = []; // { userId, mmr, ping, partySize }\n        this.tolerance = 100;\n    }\n    enqueue(player) {\n        this.queue.push(player);\n        const match = this.findMatch(player);\n        if (match) {\n            this.queue = this.queue.filter(p => !match.includes(p));\n            return match;\n        }\n    }\n    findMatch(player) {\n        return this.queue.find(p =>\n            p.id !== player.id &&\n            Math.abs(p.mmr - player.mmr) < this.tolerance &&\n            Math.abs(p.ping - player.ping) < 50\n        );\n    }\n    startLobby(players) {\n        return { id: uuid(), players, state: 'LOBBY', maxPlayers: 8 };\n    }\n}"
-    ],
-    "WebSocket & REST for Games": [
-      "WebSocket: persistent full-duplex connection for real-time game data. REST: HTTP for authentication, leaderboards, store. gRPC / MessagePack for efficient binary protocols.",
-      "// WebSocket game client\nconst ws = new WebSocket('wss://game.example.com/play');\nws.onopen = () => {\n    ws.send(JSON.stringify({ type: 'auth', token: sessionToken }));\n};\nws.onmessage = e => {\n    const msg = JSON.parse(e.data);\n    switch (msg.type) {\n        case 'state': updateWorld(msg.state); break;\n        case 'chat': showChat(msg.sender, msg.text); break;\n        case 'matchFound': startGame(msg.matchId); break;\n    }\n};\n// Send player input at 60Hz\nsetInterval(() => ws.send(JSON.stringify({ type: 'input', data: currentInput })), 16);"
-    ],
-    "NAT Punchthrough & Relay Servers": [
-      "NAT (Network Address Translation) blocks direct P2P connections. STUN: discover public IP/port. TURN: relay traffic when P2P fails. ICE: combine STUN/TURN candidates. Server relay for fallback.",
-      "// ICE candidate exchange\nconst config = { iceServers: [\n    { urls: 'stun:stun.l.google.com:19302' },\n    { urls: 'turn:turn.example.com:3478', credential: 'pass', username: 'user' }\n]};\nconst pc = new RTCPeerConnection(config);\n\npc.onicecandidate = e => {\n    if (e.candidate) {\n        // Send candidate to peer via signaling server\n        signaling.send({ type: 'candidate', candidate: e.candidate });\n    }\n};\n\n// ICE connection state\npc.oniceconnectionstatechange = () => {\n    if (pc.iceConnectionState === 'connected')\n        console.log('P2P connection established');\n    else if (pc.iceConnectionState === 'failed')\n        console.log('Falling back to TURN relay');\n};"
-    ]
-  },
   "Unity Engine": {
     "Unity Scripting": {
       "exp": "C# scripting in Unity.",
@@ -272,10 +218,6 @@
       "Burst: high-performance LLVM-based compiler that translates C# to highly optimized native code. Unity Jobs System: safe multithreading with JobHandle and dependency management. ParallelFor jobs.",
       "using Unity.Burst;\nusing Unity.Jobs;\nusing Unity.Collections;\n\n[BurstCompile]\nstruct UpdatePositionsJob : IJobParallelFor {\n    public NativeArray<Vector3> positions;\n    public NativeArray<Vector3> velocities;\n    public float deltaTime;\n    \n    public void Execute(int i) {\n        positions[i] += velocities[i] * deltaTime;\n        // Simple bounce off floor\n        if (positions[i].y < 0) {\n            positions[i].y = 0;\n            velocities[i].y *= -0.5f;\n        }\n    }\n}\n\nvoid Update() {\n    var job = new UpdatePositionsJob {\n        positions = positionsArray,\n        velocities = velocitiesArray,\n        deltaTime = Time.deltaTime\n    };\n    JobHandle handle = job.Schedule(positionsArray.Length, 64);\n    handle.Complete();\n}"
     ],
-    "Profiling & Optimization": [
-      "Profiler window: CPU/GPU/Rendering/Memory usage. Deep Profiler traces every call. Memory Profiler for leak detection. Frame Debugger shows draw calls. Optimization: reduce draw calls, LODs, occlusion culling, object pooling.",
-      "using UnityEngine.Profiling;\n\npublic class OptimizedSpawner : MonoBehaviour {\n    private ObjectPool<Projectile> pool;\n    \n    void Update() {\n        Profiler.BeginSample(\"SpawnProjectiles\");\n        SpawnProjectiles();\n        Profiler.EndSample();\n        \n        // Use profiler markers in play mode\n        // Check Stats window: Batches, SetPass calls, Triangles\n        // Use Frame Debugger to see each draw call\n        // Memory: check Texture/Mesh/Asset sizes\n    }\n    \n    // Pooling reduces allocations\n    void SpawnProjectile() {\n        var proj = pool.Get();\n        proj.Launch();\n        // Return to pool after lifetime\n        StartCoroutine(ReturnToPool(proj, 3f));\n    }\n}"
-    ],
     "Scriptable Objects Deep": [
       "ScriptableObjects as data containers: avoid MonoBehaviour overhead, enable asset-based architecture. Use for game events, item definitions, dialogue trees, level configs. Create asset at runtime with CreateInstance. Custom editors for inspector polish.",
       "using UnityEngine;\nusing UnityEngine.Events;\n\n// Generic game event\n[CreateAssetMenu(menuName = \"Events/GameEvent\")]\npublic class GameEvent : ScriptableObject {\n    private readonly UnityEvent onRaised = new UnityEvent();\n    \n    public void Raise() => onRaised.Invoke();\n    public void Register(UnityAction listener) => onRaised.AddListener(listener);\n    public void Unregister(UnityAction listener) => onRaised.RemoveListener(listener);\n}\n\n// Item definition\n[CreateAssetMenu(menuName = \"Inventory/Item\")]\npublic class ItemData : ScriptableObject {\n    public string itemName;\n    public Sprite icon;\n    public int maxStack = 64;\n    [TextArea] public string description;\n    public GameObject pickupPrefab;\n    \n    // Runtime instance from asset\n    public static ItemData CreateRuntime(ItemData template) {\n        var instance = CreateInstance<ItemData>();\n        instance.itemName = template.itemName;\n        instance.icon = template.icon;\n        return instance;\n    }\n}"
@@ -299,6 +241,10 @@
     "VFX Graph": [
       "Unity Visual Effect Graph: GPU-accelerated particle systems, node-based graph editor. Event system, exposed properties for runtime control. Capacities (particle limits). Integration with Shader Graph for custom blocks and outputs.",
       "using UnityEngine.VFX;\nusing UnityEngine.VFX.Utility;\n\npublic class VFXController : MonoBehaviour {\n    public VisualEffect vfx;\n    \n    void Start() {\n        if (!vfx) vfx = GetComponent<VisualEffect>();\n        \n        // Play event\n        vfx.Play();\n        \n        // Set exposed properties\n        vfx.SetInt(\"SpawnRate\", 100);\n        vfx.SetFloat(\"Speed\", 2.5f);\n        vfx.SetVector3(\"WindDirection\", new Vector3(1, 0, 0.5f));\n        vfx.SetTexture(\"NoiseMap\", noiseTexture);\n    }\n    \n    void Update() {\n        // Update gradient over time\n        Color color = Color.Lerp(Color.red, Color.blue, Mathf.PingPong(Time.time, 1));\n        vfx.SetVector4(\"ParticleColor\", color);\n        \n        // Send event\n        if (Input.GetKeyDown(KeyCode.Space)) {\n            vfx.SendEvent(\"OnExplode\");\n        }\n    }\n    \n    void OnDestroy() {\n        if (vfx) vfx.Stop();\n    }\n}"
+    ],
+    "Profiling & Optimization": [
+      "Profiler window: CPU/GPU/Rendering/Memory usage. Deep Profiler traces every call. Memory Profiler for leak detection. Frame Debugger shows draw calls. Optimization: reduce draw calls, LODs, occlusion culling, object pooling.",
+      "using UnityEngine.Profiling;\n\npublic class OptimizedSpawner : MonoBehaviour {\n    private ObjectPool<Projectile> pool;\n    \n    void Update() {\n        Profiler.BeginSample(\"SpawnProjectiles\");\n        SpawnProjectiles();\n        Profiler.EndSample();\n        \n        // Use profiler markers in play mode\n        // Check Stats window: Batches, SetPass calls, Triangles\n        // Use Frame Debugger to see each draw call\n        // Memory: check Texture/Mesh/Asset sizes\n    }\n    \n    // Pooling reduces allocations\n    void SpawnProjectile() {\n        var proj = pool.Get();\n        proj.Launch();\n        // Return to pool after lifetime\n        StartCoroutine(ReturnToPool(proj, 3f));\n    }\n}"
     ]
   },
   "Unreal Engine": {
@@ -350,10 +296,6 @@
       "Control Rig: procedural animation system within UE. Full-body IK with FABRIK solver. Aim constraints, multi-priority IK. Sequencer integration for cinematic rigging. Python scripting for automation.",
       "// Control Rig C++ (UControlRig)\n// Typically done in graph, exposed here for reference\nFRigUnit_FABRIK_ItemArray::Execute()\n{\n    // Forward reach: from root to tip\n    for (int32 i = 0; i < Chain.Num(); i++) {\n        FTransform& Transform = Transforms[i];\n        FVector ToTarget = (Target - Transform.GetLocation()).GetSafeNormal();\n        Transform.SetLocation(Transform.GetLocation() + ToTarget * Chain[i].BoneLength);\n    }\n    // Backward reach: from tip to root maintaining bone lengths\n    for (int32 i = Chain.Num() - 2; i >= 0; i--) {\n        FVector Direction = (Transforms[i+1].GetLocation() - Transforms[i].GetLocation()).GetSafeNormal();\n        Transforms[i + 1].SetLocation(Transforms[i].GetLocation() + Direction * Chain[i].BoneLength);\n    }\n}"
     ],
-    "GameplayTags & GameFeatures": [
-      "GameplayTags: hierarchical tag system (Aura.Fire.Major). Fast, editor-managed. Used for state, interaction rules, ability blocking. GameFeatures: modular content plugins enabling/disabling entire systems.",
-      "// GameplayTags\nUPROPERTY(EditAnywhere, meta = (Categories = \"GameplayCue\"))\nFGameplayTagContainer DamageTags;\n\nbool CanAttack(const AActor* Target) const {\n    // Block attack if target has invulnerability tag\n    if (auto* ASC = Target->FindComponentByClass<UAbilitySystemComponent>()) {\n        return !ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(\"State.Invulnerable\"));\n    }\n    return true;\n}\n\n// GameFeature: .uplugin file\n// \"Plugins/GameFeatures/MyFeature/MyFeature.uplugin\"\n// Can add maps, blueprints, abilities conditionally"
-    ],
     "World Partition & OFPA": [
       "UE5's World Partition system replaces level streaming. One File Per Actor (OFPA): each actor in its own package. World partition grid with streaming cells. Runtime loading/unloading based on player proximity. HLOD for distant meshes.",
       "// World Partition settings in Project Settings\n// Enable World Partition in World Settings\n// Each actor gets its own .umap file\n\n// C++: query streaming state\nUCLASS()\nclass AMyWorldActor : public AActor {\n    GENERATED_BODY()\npublic:\n    virtual void BeginPlay() override {\n        Super::BeginPlay();\n        if (auto* WPSubsystem = GetWorld()->GetSubsystem<UWorldPartitionSubsystem>()) {\n            FWorldPartitionStreamingQuerySource Query;\n            Query.bUseGridLoadingRange = true;\n            Query.Location = GetActorLocation();\n            TArray<FWorldPartitionStreamingSource> Sources;\n            WPSubsystem->GetStreamingSources(Sources);\n        }\n    }\n\n    // HLOD: use HLODLayer to define distance-based proxy meshes\n    UPROPERTY(EditDefaultsOnly)\n    UHLODLayer* HLODLayer;\n};"
@@ -377,34 +319,16 @@
     "Mass Entity System & AI": [
       "UE5's Mass framework: data-oriented ECS for thousands of AI agents. Fragments (data), processors (logic), archetypes (composition). LOD system (full simulation → LOD → off-screen). Crowd avoidance, movement, AI sensory.",
       "// Mass fragment\nUSTRUCT()\nstruct FMoverMassFragment : public FMassFragment {\n    GENERATED_BODY()\n    FVector TargetLocation;\n    float Speed = 300.0f;\n};\n\n// Mass processor\nUCLASS()\nclass UMassMoveProcessor : public UMassProcessor {\n    GENERATED_BODY()\npublic:\n    UMassMoveProcessor() {\n        bRequiresGameThreadExecution = false;\n        ExecutionFlags = (int32)EProcessorExecutionFlags::All;\n    }\n\n    virtual void ConfigureQueries(const FMassEntityQueryBuilders& QueryBuilders) override {\n        EntityQuery.AddRequirement<FMoverMassFragment>(EMassFragmentPresence::All);\n        EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentPresence::All);\n    }\n\n    virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override {\n        EntityQuery.ForEachEntityChunk(EntityManager, Context, [](FMassExecutionContext& Ctx) {\n            auto& MoveList = Ctx.GetMutableFragmentView<FMoverMassFragment>();\n            auto& TransformList = Ctx.GetMutableFragmentView<FTransformFragment>();\n            const float DeltaTime = Ctx.GetDeltaTimeSeconds();\n            for (int32 i = 0; i < Ctx.GetNumEntities(); ++i) {\n                FVector Direction = (MoveList[i].TargetLocation - TransformList[i].GetTransform().GetLocation()).GetSafeNormal();\n                TransformList[i].GetMutableTransform().AddToTranslation(Direction * MoveList[i].Speed * DeltaTime);\n            }\n        });\n    }\n\n    FMassEntityQuery EntityQuery;\n};"
+    ],
+    "GameplayTags & GameFeatures": [
+      "GameplayTags: hierarchical tag system (Aura.Fire.Major). Fast, editor-managed. Used for state, interaction rules, ability blocking. GameFeatures: modular content plugins enabling/disabling entire systems.",
+      "// GameplayTags\nUPROPERTY(EditAnywhere, meta = (Categories = \"GameplayCue\"))\nFGameplayTagContainer DamageTags;\n\nbool CanAttack(const AActor* Target) const {\n    // Block attack if target has invulnerability tag\n    if (auto* ASC = Target->FindComponentByClass<UAbilitySystemComponent>()) {\n        return !ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(\"State.Invulnerable\"));\n    }\n    return true;\n}\n\n// GameFeature: .uplugin file\n// \"Plugins/GameFeatures/MyFeature/MyFeature.uplugin\"\n// Can add maps, blueprints, abilities conditionally"
     ]
   },
-  "Performance Optimization": {
-    "Profiling": {
-      "exp": "Identifying performance bottlenecks.",
-      "code": "CPU/GPU profilers, frame debugger, memory profiler.",
-      "exercises": []
-    },
-    "Draw Calls": {
-      "exp": "Reducing draw calls for rendering performance.",
-      "code": "Batching, instancing, texture atlases, LOD groups.",
-      "exercises": []
-    },
-    "Memory Management": {
-      "exp": "Efficient memory usage in games.",
-      "code": "Object pooling, resource loading/unloading, garbage collection optimization.",
-      "exercises": []
-    },
-    "Level of Detail": {
-      "exp": "LOD systems for performance.",
-      "code": "LOD groups, distance-based switching, impostors, occlusion culling.",
-      "exercises": []
-    }
-  },
   "Game Design": {
-    "Game Loops & Architecture": [
-      "The game loop is the heart of every game: input, update, render. Fixed timestep decouples simulation from framerate. Use accumulator pattern for fixed-update with variable rendering.",
-      "while (running) {\n    const currentTime = performance.now();\n    let accumulator = currentTime - lastTime;\n    while (accumulator >= fixedDt) {\n        fixedUpdate(fixedDt);\n        accumulator -= fixedDt;\n    }\n    const alpha = accumulator / fixedDt;\n    render(alpha);\n    lastTime = currentTime;\n}"
+    "Feedback Loops": [
+      "Positive loops amplify (snowballing—winner gets stronger), negative loops stabilize (rubber-banding—last place gets boost). Both used carefully to balance engagement and fairness.",
+      "function applyRubberBand(positions) {\n    const lastPlace = positions.indexOf(Math.min(...positions));\n    const powerUp = 1 + (positions.length - 1 - lastPlace) * 0.1;\n    players[lastPlace].speed *= powerUp;\n}"
     ],
     "ECS (Entity-Component-System)": [
       "ECS decouples data (components) from behavior (systems), iterated over entities (IDs). Cache-friendly, data-oriented design. Favors composition over inheritance.",
@@ -418,10 +342,6 @@
       "Juice is the extra polish: screen shake, particle bursts, tweening, sound cues, hit-stop, flash effects. These positive feedback loops make gameplay satisfying and responsive.",
       "function hitStop(duration = 0.1) {\n    Time.timeScale = 0;\n    Invoke(() => Time.timeScale = 1, duration);\n}\n\nfunction screenShake(intensity, duration) {\n    camera.position = originalPos + Random.insideUnitSphere * intensity;\n    Invoke(() => camera.position = originalPos, duration);\n}"
     ],
-    "Feedback Loops": [
-      "Positive loops amplify (snowballing—winner gets stronger), negative loops stabilize (rubber-banding—last place gets boost). Both used carefully to balance engagement and fairness.",
-      "function applyRubberBand(positions) {\n    const lastPlace = positions.indexOf(Math.min(...positions));\n    const powerUp = 1 + (positions.length - 1 - lastPlace) * 0.1;\n    players[lastPlace].speed *= powerUp;\n}"
-    ],
     "Difficulty Curves": [
       "Difficulty should ramp gradually with optional plateaus. Player-skill vs challenge must stay in flow channel—too easy bores, too hard frustrates. Adaptive difficulty adjusts in real-time.",
       "function getDifficulty(time) {\n    // sigmoid curve: slow start, steep middle, plateau\n    return 1 / (1 + Math.exp(-0.1 * (time - 30)));\n}\n\nfunction adaptiveDifficulty(playerScore, avgScore) {\n    return playerScore > avgScore * 1.2 ? spawnMoreEnemies() : spawnDefault();\n}"
@@ -433,6 +353,10 @@
     "State Machines for Game Logic": [
       "Finite state machines model entity behavior. Each state has Enter/Update/Exit. Transitions triggered by events or conditions. Hierarchical FSM nests states for complexity.",
       "class StateMachine {\n    constructor() { this.states = {}; this.current = null; }\n    add(name, state) { this.states[name] = state; }\n    set(name) {\n        if (this.current) this.current.exit();\n        this.current = this.states[name];\n        this.current.enter();\n    }\n    update(dt) {\n        if (this.current) this.current.update(dt);\n    }\n}"
+    ],
+    "Game Loops & Architecture": [
+      "The game loop is the heart of every game: input, update, render. Fixed timestep decouples simulation from framerate. Use accumulator pattern for fixed-update with variable rendering.",
+      "while (running) {\n    const currentTime = performance.now();\n    let accumulator = currentTime - lastTime;\n    while (accumulator >= fixedDt) {\n        fixedUpdate(fixedDt);\n        accumulator -= fixedDt;\n    }\n    const alpha = accumulator / fixedDt;\n    render(alpha);\n    lastTime = currentTime;\n}"
     ]
   },
   "Physics": {
@@ -448,10 +372,6 @@
       "Euler: simple but unstable. Verlet: excellent for springs/cloth (stores position, not velocity). RK4: 4th-order Runge-Kutta, most accurate for forces, used in scientific simulations.",
       "function euler(pos, vel, accel, dt) {\n    pos += vel * dt;\n    vel += accel * dt;\n}\nfunction verlet(pos, prevPos, accel, dt) {\n    const temp = pos;\n    pos = 2 * pos - prevPos + accel * dt * dt;\n    prevPos = temp;\n}\nfunction rk4(state, derivFn, dt) {\n    const k1 = derivFn(state);\n    const k2 = derivFn(state + k1 * dt * 0.5);\n    const k3 = derivFn(state + k2 * dt * 0.5);\n    const k4 = derivFn(state + k3 * dt);\n    return state + (k1 + 2 * k2 + 2 * k3 + k4) * dt / 6;\n}"
     ],
-    "Friction & Restitution": [
-      "Friction opposes sliding (Coulomb model: static vs kinetic). Restitution (bounciness, 0–1) controls energy retained after collision. Combined via coefficient of restitution formula.",
-      "function resolveCollision(a, b, normal) {\n    const relVel = { x: a.vx - b.vx, y: a.vy - b.vy };\n    const velAlongNormal = relVel.x * normal.x + relVel.y * normal.y;\n    if (velAlongNormal > 0) return;\n    const e = Math.min(a.restitution, b.restitution);\n    const j = -(1 + e) * velAlongNormal / (1 / a.mass + 1 / b.mass);\n    a.vx += j * normal.x / a.mass;\n    a.vy += j * normal.y / a.mass;\n    b.vx -= j * normal.x / b.mass;\n    b.vy -= j * normal.y / b.mass;\n}"
-    ],
     "Joints & Constraints": [
       "Joints connect rigid bodies: revolute (hinge), prismatic (slider), distance (rod), spring, fixed. Constraints restrict degrees of freedom. Solved via iterative impulse solvers (PBD, sequential impulses).",
       "class DistanceJoint {\n    constructor(a, b, length) {\n        this.a = a; this.b = b; this.length = length;\n    }\n    solve() {\n        const dx = this.b.x - this.a.x;\n        const dy = this.b.y - this.a.y;\n        const dist = Math.sqrt(dx * dx + dy * dy);\n        const correction = (dist - this.length) / dist * 0.5;\n        this.a.x += dx * correction;\n        this.a.y += dy * correction;\n        this.b.x -= dx * correction;\n        this.b.y -= dy * correction;\n    }\n}"
@@ -464,16 +384,16 @@
       "Partition space to avoid O(n²) checks. Grid: simple, good for uniform分布. Quadtree/Octree: recursive subdivision, adapts to density. BVH: bounding volume hierarchy for dynamic objects.",
       "class Quadtree {\n    constructor(bounds, capacity = 4) {\n        this.bounds = bounds;\n        this.capacity = capacity;\n        this.objects = [];\n        this.divided = false;\n    }\n    insert(obj) {\n        if (!contains(this.bounds, obj)) return false;\n        if (this.objects.length < this.capacity) {\n            this.objects.push(obj); return true;\n        }\n        if (!this.divided) this.subdivide();\n        return this.nw.insert(obj) || this.ne.insert(obj) ||\n               this.sw.insert(obj) || this.se.insert(obj);\n    }\n    query(range, result = []) {\n        if (!intersects(this.bounds, range)) return result;\n        for (const obj of this.objects) if (contains(range, obj)) result.push(obj);\n        if (this.divided) {\n            this.nw.query(range, result);\n            this.ne.query(range, result);\n            this.sw.query(range, result);\n            this.se.query(range, result);\n        }\n        return result;\n    }\n}"
     ],
+    "Friction & Restitution": [
+      "Friction opposes sliding (Coulomb model: static vs kinetic). Restitution (bounciness, 0–1) controls energy retained after collision. Combined via coefficient of restitution formula.",
+      "function resolveCollision(a, b, normal) {\n    const relVel = { x: a.vx - b.vx, y: a.vy - b.vy };\n    const velAlongNormal = relVel.x * normal.x + relVel.y * normal.y;\n    if (velAlongNormal > 0) return;\n    const e = Math.min(a.restitution, b.restitution);\n    const j = -(1 + e) * velAlongNormal / (1 / a.mass + 1 / b.mass);\n    a.vx += j * normal.x / a.mass;\n    a.vy += j * normal.y / a.mass;\n    b.vx -= j * normal.x / b.mass;\n    b.vy -= j * normal.y / b.mass;\n}"
+    ],
     "Physics Engine Architecture": [
       "Engines loop: broadphase (detect pairs), narrowphase (generate contacts), solve constraints, integrate. Common engines: Box2D, Bullet, PhysX, Jolt. Determinism matters for multiplayer.",
       "function physicsStep(dt) {\n    const pairs = broadphase(bodies);\n    const contacts = [];\n    for (const [a, b] of pairs) {\n        const contact = narrowphase(a, b);\n        if (contact) contacts.push(contact);\n    }\n    solveConstraints(contacts);\n    for (const body of bodies) {\n        body.integrate(dt);\n    }\n}"
     ]
   },
   "Rendering": {
-    "Rendering Pipeline": [
-      "The graphics pipeline transforms 3D data to pixels. Stages: vertex shader → tessellation → geometry → rasterization → fragment shader → output merger. Modern GPUs are massively parallel.",
-      "// Simplified pipeline flow\n// CPU: Submit draw calls\n// GPU: Vertex Shader (per-vertex transforms)\n//      → Rasterization (generate fragments)\n//      → Fragment Shader (per-pixel color)\n//      → Output Blending (depth test, blend)\n// DirectX 12 / Vulkan give low-level control."
-    ],
     "Shaders — Vertex & Fragment": [
       "Vertex shaders transform vertices and pass data. Fragment (pixel) shaders compute final color. GLSL/HLSL syntax. Input: attributes (per-vertex), uniforms (per-draw), varyings (interpolated).",
       "// GLSL Vertex Shader\n#version 330 core\nlayout(location = 0) in vec3 position;\nlayout(location = 1) in vec3 normal;\nuniform mat4 model, view, projection;\nout vec3 fragNormal;\nvoid main() {\n    gl_Position = projection * view * model * vec4(position, 1);\n    fragNormal = mat3(transpose(inverse(model))) * normal;\n}\n\n// GLSL Fragment Shader\n#version 330 core\nin vec3 fragNormal;\nout vec4 color;\nvoid main() {\n    vec3 lightDir = normalize(vec3(1, 1, 1));\n    float diff = max(dot(normalize(fragNormal), lightDir), 0.0);\n    color = vec4(vec3(diff), 1.0);\n}"
@@ -501,9 +421,17 @@
     "Culling (Frustum, Occlusion)": [
       "Frustum culling: discard objects outside camera view frustum using plane tests. Occlusion culling: skip objects behind occluders. Hierarchical Z-buffer (Hi-Z) for GPU occlusion.",
       "function frustumCulling(object, frustumPlanes) {\n    for (const plane of frustumPlanes) {\n        const d = dot(plane.normal, object.center) + plane.d;\n        if (d < -object.radius) return false; // fully outside\n    }\n    return true; // intersects or inside\n}\n\n// Test against all 6 planes: left, right, top, bottom, near, far"
+    ],
+    "Rendering Pipeline": [
+      "The graphics pipeline transforms 3D data to pixels. Stages: vertex shader → tessellation → geometry → rasterization → fragment shader → output merger. Modern GPUs are massively parallel.",
+      "// Simplified pipeline flow\n// CPU: Submit draw calls\n// GPU: Vertex Shader (per-vertex transforms)\n//      → Rasterization (generate fragments)\n//      → Fragment Shader (per-pixel color)\n//      → Output Blending (depth test, blend)\n// DirectX 12 / Vulkan give low-level control."
     ]
   },
   "Audio": {
+    "FMOD / Wwise Basics": [
+      "FMOD Studio: event-driven audio, parametric controls, real-time mixing. Wwise: full sound design pipeline with SoundBanks, RTPCs (real-time parameter controls), States, and Switches.",
+      "// FMOD Studio API pseudocode\n// fmodStudio.playEvent(\"event:/Weapons/Pistol/Fire\");\n// Set parameter: event.setParameter(\"RPM\", 600);\n// \n// Wwise: PostEvent(\"Play_Footstep\", gameObject);\n// RTPC: SetRTPCValue(\"Speed\", characterSpeed);\n// SoundBank: LoadBank(\"Sounds\", AkBankType.Static);"
+    ],
     "Audio Engines & Middleware": [
       "Audio engines manage playback, mixing, effects. Options: OpenAL (open-source), FMOD (popular in AAA), Wwise (full pipeline), Web Audio API (browser). Middleware handles platform differences.",
       "// Web Audio API: create engine\nconst ctx = new AudioContext();\nfunction playSound(buffer, loop = false) {\n    const source = ctx.createBufferSource();\n    source.buffer = buffer;\n    source.loop = loop;\n    source.connect(ctx.destination);\n    source.start(0);\n    return source;\n}"
@@ -524,16 +452,16 @@
       "Dynamic music adapts to gameplay. Techniques: horizontal resequencing (swap sections), vertical layering (add/subtract layers), stingers (transition cues). MIDI vs audio stems.",
       "class MusicSystem {\n    constructor(layers) {\n        this.layers = layers; // { bass: Audio, drums: Audio, melody: Audio }\n        this.activeLayers = new Set();\n    }\n    setIntensity(level) {\n        // level 0-1: gradually add layers\n        const targetLayers = Math.floor(level * this.layers.length);\n        for (let i = 0; i < this.layers.length; i++) {\n            const has = this.activeLayers.has(i);\n            if (i < targetLayers && !has) this.fadeIn(i);\n            else if (i >= targetLayers && has) this.fadeOut(i);\n        }\n    }\n}"
     ],
-    "FMOD / Wwise Basics": [
-      "FMOD Studio: event-driven audio, parametric controls, real-time mixing. Wwise: full sound design pipeline with SoundBanks, RTPCs (real-time parameter controls), States, and Switches.",
-      "// FMOD Studio API pseudocode\n// fmodStudio.playEvent(\"event:/Weapons/Pistol/Fire\");\n// Set parameter: event.setParameter(\"RPM\", 600);\n// \n// Wwise: PostEvent(\"Play_Footstep\", gameObject);\n// RTPC: SetRTPCValue(\"Speed\", characterSpeed);\n// SoundBank: LoadBank(\"Sounds\", AkBankType.Static);"
-    ],
     "Adaptive Audio": [
       "Audio reacts to game state: combat intensity, health, speed, environment. Blend snapshots, adjust reverb zones, trigger stingers. Prevents audio fatigue and heightens immersion.",
       "function updateAdaptiveAudio(player, reverb, music) {\n    // Room reverb based on environment\n    if (player.inCave) reverb.setWetLevel(0.7);\n    else reverb.setWetLevel(0.1);\n    \n    // Music intensity from threat\n    const threat = enemiesNearby.length / 10;\n    music.setIntensity(Math.min(1, threat));\n    \n    // Heartbeat at low health\n    if (player.health < 0.25) heartbeat.start();\n    else heartbeat.stop();\n}"
     ]
   },
   "Math": {
+    "Noise Functions": [
+      "Perlin noise: smooth, gradient-based, lattice noise. Simplex noise: faster, fewer artifacts, scales to N-dimensions. Used for terrain, textures, procedural generation. Fractal Brownian Motion layers octaves.",
+      "function perlinNoise(x, y) {\n    // Simplified 2D Perlin\n    const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255;\n    const xf = x - Math.floor(x), yf = y - Math.floor(y);\n    const u = xf * xf * (3 - 2 * xf);\n    const v = yf * yf * (3 - 2 * yf);\n    const aa = p[p[xi] + yi], ab = p[p[xi] + yi + 1];\n    const ba = p[p[xi + 1] + yi], bb = p[p[xi + 1] + yi + 1];\n    return lerp(lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u),\n                lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u), v);\n}\nfunction fbm(x, y, octaves = 6) {\n    let value = 0, amplitude = 1, frequency = 1, max = 0;\n    for (let i = 0; i < octaves; i++) {\n        value += amplitude * perlinNoise(x * frequency, y * frequency);\n        max += amplitude;\n        amplitude *= 0.5;\n        frequency *= 2;\n    }\n    return value / max;\n}"
+    ],
     "Vectors": [
       "Vectors represent positions, directions, velocities. Operations: add, subtract, scale, dot product (angle), cross product (perpendicular in 3D), normalize (unit length). Foundation of game math.",
       "class Vec3 {\n    constructor(x, y, z) { this.x = x; this.y = y; this.z = z; }\n    add(v) { return new Vec3(this.x + v.x, this.y + v.y, this.z + v.z); }\n    sub(v) { return new Vec3(this.x - v.x, this.y - v.y, this.z - v.z); }\n    dot(v) { return this.x * v.x + this.y * v.y + this.z * v.z; }\n    cross(v) { return new Vec3(\n        this.y * v.z - this.z * v.y,\n        this.z * v.x - this.x * v.z,\n        this.x * v.y - this.y * v.x\n    ); }\n    normalize() {\n        const len = Math.sqrt(this.dot(this));\n        return len > 0 ? new Vec3(this.x/len, this.y/len, this.z/len) : new Vec3(0,0,0);\n    }\n}"
@@ -549,10 +477,6 @@
     "Interpolation (Lerp, Slerp, Easing)": [
       "Lerp: linear interpolation (a + t*(b-a)). Slerp: spherical for quaternions. Easing functions: ease-in (quadratic), ease-out, ease-in-out, elastic, bounce. Used in animations and transitions.",
       "function lerp(a, b, t) { return a + (b - a) * t; }\nfunction slerp(qa, qb, t) {\n    let cosHalfTheta = qa.w*qb.w + qa.x*qb.x + qa.y*qb.y + qa.z*qb.z;\n    if (cosHalfTheta < 0) { qb = qb.negate(); cosHalfTheta = -cosHalfTheta; }\n    const theta = Math.acos(cosHalfTheta);\n    const sinHalfTheta = Math.sin(theta);\n    const ra = Math.sin((1 - t) * theta) / sinHalfTheta;\n    const rb = Math.sin(t * theta) / sinHalfTheta;\n    return qa.scale(ra).add(qb.scale(rb));\n}\nfunction easeOutBounce(t) {\n    if (t < 1/2.75) return 7.5625*t*t;\n    else if (t < 2/2.75) { t -= 1.5/2.75; return 7.5625*t*t + 0.75; }\n    else if (t < 2.5/2.75) { t -= 2.25/2.75; return 7.5625*t*t + 0.9375; }\n    else { t -= 2.625/2.75; return 7.5625*t*t + 0.984375; }\n}"
-    ],
-    "Noise Functions": [
-      "Perlin noise: smooth, gradient-based, lattice noise. Simplex noise: faster, fewer artifacts, scales to N-dimensions. Used for terrain, textures, procedural generation. Fractal Brownian Motion layers octaves.",
-      "function perlinNoise(x, y) {\n    // Simplified 2D Perlin\n    const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255;\n    const xf = x - Math.floor(x), yf = y - Math.floor(y);\n    const u = xf * xf * (3 - 2 * xf);\n    const v = yf * yf * (3 - 2 * yf);\n    const aa = p[p[xi] + yi], ab = p[p[xi] + yi + 1];\n    const ba = p[p[xi + 1] + yi], bb = p[p[xi + 1] + yi + 1];\n    return lerp(lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u),\n                lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u), v);\n}\nfunction fbm(x, y, octaves = 6) {\n    let value = 0, amplitude = 1, frequency = 1, max = 0;\n    for (let i = 0; i < octaves; i++) {\n        value += amplitude * perlinNoise(x * frequency, y * frequency);\n        max += amplitude;\n        amplitude *= 0.5;\n        frequency *= 2;\n    }\n    return value / max;\n}"
     ],
     "Curves & Splines": [
       "Catmull-Rom: interpolates through control points (used for camera paths). Bézier: uses control points (Cubic: 4 points). Hermite: specifies tangents. NURBS: rational curves for CAD.",
@@ -632,6 +556,10 @@
     ]
   },
   "Input": {
+    "Action Mapping": [
+      "Map abstract actions to concrete inputs. Digital (button press) vs Analog (stick, trigger). Value: 0/1 for digital, -1..1 for axis. Dead zones, inversion, sensitivity curves per action.",
+      "class ActionMap {\n    constructor() {\n        this.actions = {\n            'Move': { type: 'axis2D', deadZone: 0.2 },\n            'Jump': { type: 'digital', },\n            'Look': { type: 'axis2D', sensitivity: 2.0, invertY: false },\n        };\n        this.bindings = {};\n    }\n    getValue(action) {\n        const def = this.actions[action];\n        const inputs = this.bindings[action] || [];\n        let value = inputs.reduce((v, i) => v + i.getValue(), 0);\n        if (def.type === 'axis2D' && Math.abs(value) < def.deadZone) return 0;\n        return Math.max(-1, Math.min(1, value));\n    }\n}"
+    ],
     "Input Abstraction": [
       "Abstract input layer decouples game logic from hardware. Query actions (Jump, Shoot) instead of keys. Allows swapping keyboard/gamepad/touch without game changes.",
       "class InputSystem {\n    constructor() {\n        this.actions = new Map();\n        this.bindings = new Map();\n    }\n    bindAction(action, ...inputs) {\n        this.bindings.set(action, inputs);\n    }\n    getAction(action) {\n        const inputs = this.bindings.get(action);\n        return inputs?.some(i => i.isPressed()) ?? false;\n    }\n}\n// Usage: if (input.getAction('Jump')) player.jump();"
@@ -639,10 +567,6 @@
     "Input Rebinding": [
       "Allow players to reassign keys/buttons at runtime. Store bindings in config file. Detect conflicts, validate (ensure at least one binding per action). Present UI with waiting-for-input prompt.",
       "async function rebindAction(inputSystem, action, promptElement) {\n    promptElement.textContent = 'Press a key...';\n    const key = await waitForKeyPress();\n    const currentBinding = inputSystem.bindings.get(action);\n    currentBinding[0] = new KeyboardInput(key);\n    promptElement.textContent = `${action} → ${key}`;\n    saveBindings(inputSystem.bindings);\n}"
-    ],
-    "Action Mapping": [
-      "Map abstract actions to concrete inputs. Digital (button press) vs Analog (stick, trigger). Value: 0/1 for digital, -1..1 for axis. Dead zones, inversion, sensitivity curves per action.",
-      "class ActionMap {\n    constructor() {\n        this.actions = {\n            'Move': { type: 'axis2D', deadZone: 0.2 },\n            'Jump': { type: 'digital', },\n            'Look': { type: 'axis2D', sensitivity: 2.0, invertY: false },\n        };\n        this.bindings = {};\n    }\n    getValue(action) {\n        const def = this.actions[action];\n        const inputs = this.bindings[action] || [];\n        let value = inputs.reduce((v, i) => v + i.getValue(), 0);\n        if (def.type === 'axis2D' && Math.abs(value) < def.deadZone) return 0;\n        return Math.max(-1, Math.min(1, value));\n    }\n}"
     ],
     "Gamepad Input": [
       "Gamepad API provides sticks, buttons, triggers (pressure-sensitive), and rumble. Standard mapping: left stick move, right stick look, A/B/X/Y, shoulder buttons. XInput (Windows) / GameController (macOS/Linux).",
@@ -652,16 +576,20 @@
       "Touch events: touchstart, touchmove, touchend. Multi-touch tracking via identifier. Gestures: tap, double-tap, swipe, pinch (zoom), rotate, long-press. Gesture recognizers abstract raw touch.",
       "class GestureRecognizer {\n    constructor(element) {\n        this.touches = new Map();\n        element.addEventListener('touchstart', e => {\n            for (const t of e.changedTouches)\n                this.touches.set(t.identifier, { x: t.clientX, y: t.clientY, t: Date.now() });\n        });\n        element.addEventListener('touchmove', e => {\n            for (const t of e.changedTouches) {\n                const prev = this.touches.get(t.identifier);\n                const dx = t.clientX - prev.x, dy = t.clientY - prev.y;\n                const dist = Math.sqrt(dx*dx + dy*dy);\n                if (dist > 30) this.onSwipe?.({ dx, dy, id: t.identifier });\n            }\n        });\n    }\n    onSwipe = null;\n}"
     ],
-    "Gyroscope & Motion Sensors": [
-      "DeviceOrientation/Motion APIs provide alpha (compass), beta (tilt front-back), gamma (tilt left-right). Acceleration with/without gravity. Used for tilt controls, VR head tracking, step counting.",
-      "window.addEventListener('deviceorientation', e => {\n    // alpha: 0-360 (compass heading)\n    // beta: -180 to 180 (front-back tilt)\n    // gamma: -90 to 90 (left-right tilt)\n    const tiltX = e.gamma;  // steering\n    const tiltY = e.beta;   // accelerate/brake\n    vehicle.steer(tiltX / 45);  // normalize to [-1, 1]\n    vehicle.accelerate(1 - tiltY / 90);\n});\n\nwindow.addEventListener('devicemotion', e => {\n    const { x, y, z } = e.acceleration;\n    if (Math.abs(x) > 15) shakeDetected();\n});"
-    ],
     "Haptics & Accessibility": [
       "Haptic feedback: gamepad rumble (continuous/impulse), phone vibration. Accessibility: color-blind modes, subtitle sizing, remappable controls, auto-aim, slow-motion assists, single-switch input.",
       "function gamepadRumble(intensity = 1, duration = 200) {\n    const gp = navigator.getGamepads()[0];\n    if (gp?.vibrationActuator) {\n        gp.vibrationActuator.playEffect('dual-rumble', {\n            startDelay: 0, duration,\n            weakMagnitude: intensity,\n            strongMagnitude: intensity\n        });\n    }\n}\n\nclass AccessibilitySettings {\n    constructor() {\n        this.subtitleSize = 1.0;\n        this.colorBlindMode = 'none'; // 'protanopia'|'deuteranopia'|'tritanopia'\n        this.autoAim = false;\n        this.holdToSprint = false;\n    }\n}"
+    ],
+    "Gyroscope & Motion Sensors": [
+      "DeviceOrientation/Motion APIs provide alpha (compass), beta (tilt front-back), gamma (tilt left-right). Acceleration with/without gravity. Used for tilt controls, VR head tracking, step counting.",
+      "window.addEventListener('deviceorientation', e => {\n    // alpha: 0-360 (compass heading)\n    // beta: -180 to 180 (front-back tilt)\n    // gamma: -90 to 90 (left-right tilt)\n    const tiltX = e.gamma;  // steering\n    const tiltY = e.beta;   // accelerate/brake\n    vehicle.steer(tiltX / 45);  // normalize to [-1, 1]\n    vehicle.accelerate(1 - tiltY / 90);\n});\n\nwindow.addEventListener('devicemotion', e => {\n    const { x, y, z } = e.acceleration;\n    if (Math.abs(x) > 15) shakeDetected();\n});"
     ]
   },
   "Procedural Generation": {
+    "Wave Function Collapse": [
+      "WFC generates tile-based patterns matching input examples. Start with maximum entropy (superposition), observe (collapse) lowest-entropy cell, propagate constraints. Used for infinite worlds, architecture, puzzles.",
+      "function wfc(grid, patterns) {\n    // patterns: adjacency rules from example\n    // entropy = number of remaining tile options\n    while (true) {\n        const cell = findLowestEntropy(grid);\n        if (!cell) break; // all collapsed\n        collapse(cell, patterns);  // choose tile by weight\n        propagate(grid, cell, patterns);  // enforce constraints\n    }\n    return grid;\n}\n\nfunction propagate(grid, cell, patterns) {\n    const stack = [cell];\n    while (stack.length > 0) {\n        const current = stack.pop();\n        for (const neighbor of current.neighbors) {\n            const valid = getValidNeighborTiles(current, neighbor, patterns);\n            if (intersect(neighbor.options, valid).length < neighbor.options.length) {\n                neighbor.options = intersect(neighbor.options, valid);\n                if (neighbor.options.length === 0) return; // contradiction\n                stack.push(neighbor);\n            }\n        }\n    }\n}"
+    ],
     "Perlin & Simplex Noise": [
       "Perlin noise: lattice-based gradient noise (Ken Perlin, 1985). Simplex noise: faster, better isotropy, scales to any dimension. Fractal noise (FBM) layers octaves for natural-looking terrain.",
       "function simplexNoise2D(x, y) {\n    // Skew input space to simplex grid\n    const F2 = 0.5 * (Math.sqrt(3) - 1);\n    const s = (x + y) * F2;\n    const i = Math.floor(x + s), j = Math.floor(y + s);\n    const G2 = (3 - Math.sqrt(3)) / 6;\n    const t = (i + j) * G2;\n    const x0 = i - t, y0 = j - t;\n    const dx1 = x - x0, dy1 = y - y0;\n    // Determine simplex (triangle) and interpolate\n    // ... gradient dot products with distance vectors\n    return value; // range [-1, 1]\n}"
@@ -669,10 +597,6 @@
     "Cellular Automata": [
       "Grid of cells with states evolving by rules. Conway's Game of Life: birth on 3 neighbors, death on <2 or >3. Used for cave generation (cave-like automata with B678/S345678 rules).",
       "function cellularAutomata(grid, rules = 'cave') {\n    const h = grid.length, w = grid[0].length;\n    const next = Array.from({length: h}, () => new Array(w).fill(0));\n    for (let y = 0; y < h; y++) {\n        for (let x = 0; x < w; x++) {\n            const neighbors = countNeighbors(grid, x, y);\n            if (rules === 'cave') {\n                // Cave: fill if >= 5 walls nearby\n                next[y][x] = (grid[y][x] === 1 && neighbors >= 4) ||\n                             (grid[y][x] === 0 && neighbors >= 5) ? 1 : 0;\n            } else {\n                // Game of Life\n                if (grid[y][x]) next[y][x] = (neighbors === 2 || neighbors === 3) ? 1 : 0;\n                else next[y][x] = (neighbors === 3) ? 1 : 0;\n            }\n        }\n    }\n    return next;\n}"
-    ],
-    "Wave Function Collapse": [
-      "WFC generates tile-based patterns matching input examples. Start with maximum entropy (superposition), observe (collapse) lowest-entropy cell, propagate constraints. Used for infinite worlds, architecture, puzzles.",
-      "function wfc(grid, patterns) {\n    // patterns: adjacency rules from example\n    // entropy = number of remaining tile options\n    while (true) {\n        const cell = findLowestEntropy(grid);\n        if (!cell) break; // all collapsed\n        collapse(cell, patterns);  // choose tile by weight\n        propagate(grid, cell, patterns);  // enforce constraints\n    }\n    return grid;\n}\n\nfunction propagate(grid, cell, patterns) {\n    const stack = [cell];\n    while (stack.length > 0) {\n        const current = stack.pop();\n        for (const neighbor of current.neighbors) {\n            const valid = getValidNeighborTiles(current, neighbor, patterns);\n            if (intersect(neighbor.options, valid).length < neighbor.options.length) {\n                neighbor.options = intersect(neighbor.options, valid);\n                if (neighbor.options.length === 0) return; // contradiction\n                stack.push(neighbor);\n            }\n        }\n    }\n}"
     ],
     "L-Systems": [
       "Lindenmayer systems: recursive string rewriting for plants, fractals. Axiom + production rules. Each symbol is a turtle graphics command (F=forward, +=turn left, -=turn right, [=push, ]=pop).",
@@ -689,36 +613,6 @@
     "Procedural Textures": [
       "Generate textures mathematically: Voronoi (cellular), checkerboard, marble (sine + noise), wood (concentric rings), brick (tiling patterns). No external assets needed—infinite resolution.",
       "// Voronoi (Worley noise) texture\nvec3 voronoi(vec2 uv) {\n    vec2 i = floor(uv);\n    vec2 f = fract(uv);\n    float minDist = 1.0;\n    vec2 minPoint = vec2(0);\n    for (int x = -1; x <= 1; x++) {\n        for (int y = -1; y <= 1; y++) {\n            vec2 neighbor = vec2(float(x), float(y));\n            vec2 point = hash2(i + neighbor);\n            float dist = length(neighbor + point - f);\n            if (dist < minDist) {\n                minDist = dist;\n                minPoint = point;\n            }\n        }\n    }\n    return vec3(minDist);\n}\n// Marble: sin(x * freq + noise(x,y))"
-    ]
-  },
-  "Optimization & Profiling": {
-    "CPU Profiling": [
-      "Instrument your game to find hot spots. Frame time budget: 16ms (60fps). Tools: Chrome DevTools (web), Tracy (native), Unreal Insights, Unity Profiler. Identify dominant systems (physics, AI, rendering).",
-      "class Profiler {\n    constructor() {\n        this.samples = new Map();\n        this.stacks = [];\n    }\n    begin(name) {\n        this.stacks.push({ name, start: performance.now() });\n    }\n    end() {\n        const frame = this.stacks.pop();\n        const elapsed = performance.now() - frame.start;\n        if (!this.samples.has(frame.name)) this.samples.set(frame.name, []);\n        this.samples.get(frame.name).push(elapsed);\n    }\n    report() {\n        for (const [name, times] of this.samples) {\n            const avg = times.reduce((a, b) => a + b, 0) / times.length;\n            const max = Math.max(...times);\n            console.log(`${name}: avg=${avg.toFixed(2)}ms max=${max.toFixed(2)}ms`);\n        }\n    }\n}"
-    ],
-    "GPU Profiling & Optimization": [
-      "RenderDoc, NVIDIA Nsight, AMD Radeon GPU Profiler. Analyze draw calls, shader complexity, bandwidth. Bottlenecks: vertex-bound, pixel-bound, bandwidth-bound. Reduce overdraw, optimize shaders.",
-      "// GPU timing queries (WebGL 2)\nconst query = gl.createQuery();\ngl.beginQuery(gl.TIME_ELAPSED_EXT, query);\n// Draw calls...\ngl.endQuery(gl.TIME_ELAPSED_EXT);\n\nsetTimeout(() => {\n    const available = gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE);\n    if (available) {\n        const elapsed = gl.getQueryParameter(query, gl.QUERY_RESULT);\n        console.log(`GPU frame time: ${elapsed / 1000000}ms`);\n    }\n}, 100);"
-    ],
-    "Memory Management": [
-      "Avoid GC spikes: object pooling, structs (value types), pre-allocate arrays. Memory fragmentation. Asset lifetime management. Leak detection. Addressable assets for streaming.",
-      "class ObjectPool {\n    constructor(factory, reset, initialSize = 50) {\n        this.factory = factory;\n        this.reset = reset;\n        this.pool = [];\n        for (let i = 0; i < initialSize; i++) this.pool.push(factory());\n    }\n    get() {\n        if (this.pool.length > 0) return this.pool.pop();\n        return this.factory(); // pool exhausted, grow\n    }\n    release(obj) {\n        this.reset(obj);\n        this.pool.push(obj);\n    }\n}\n// Usage: pool.get() instead of 'new' — zero allocations during gameplay"
-    ],
-    "Draw Call Optimization": [
-      "Each draw call has CPU overhead. Batching: static (combine meshes), dynamic (GPU instancing). Reduce material changes (sort by shader/texture). Texture atlasing. SRP Batcher (Unity).",
-      "// Manual instancing\nfunction renderInstanced(mesh, material, transforms) {\n    const instanceCount = transforms.length;\n    const buffer = new Float32Array(instanceCount * 16); // 4x4 matrices\n    transforms.forEach((m, i) => buffer.set(m, i * 16));\n    \n    const instanceBuffer = gl.createBuffer();\n    gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);\n    gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);\n    \n    // One draw call for all instances\n    gl.drawArraysInstanced(gl.TRIANGLES, 0, mesh.vertexCount, instanceCount);\n}"
-    ],
-    "Asset Streaming & Bundling": [
-      "Stream assets in background while game runs. Priority loading (nearby first). Texture mipmap streaming. Asset bundles for DLC/patches. Compression: ASTC (mobile), BC7 (desktop), Oodle.",
-      "class AssetStreamer {\n    constructor() {\n        this.loadQueue = [];\n        this.loading = new Map();\n    }\n    requestLoad(path, priority = 0) {\n        this.loadQueue.push({ path, priority });\n        this.loadQueue.sort((a, b) => b.priority - a.priority);\n        this.processQueue();\n    }\n    async processQueue() {\n        if (this.loading.size >= 4) return; // max concurrent\n        const next = this.loadQueue.shift();\n        if (!next) return;\n        this.loading.set(next.path, true);\n        const asset = await loadAsset(next.path);\n        this.loading.delete(next.path);\n        this.processQueue();\n        return asset;\n    }\n}"
-    ],
-    "Threading & Job Systems": [
-      "Main thread handles rendering, game logic offloaded to worker threads. Job system: small, independent work units scheduled across cores. Task graph for dependencies. Fiber-based scheduling.",
-      "class JobSystem {\n    constructor(threadCount = navigator.hardwareConcurrency - 1) {\n        this.queue = [];\n        this.workers = [];\n        for (let i = 0; i < threadCount; i++) {\n            const worker = new Worker('job-worker.js');\n            worker.onmessage = e => this.onComplete(e.data);\n            this.workers.push(worker);\n        }\n    }\n    schedule(job) {\n        this.queue.push(job);\n        this.dispatch();\n    }\n    dispatch() {\n        for (const worker of this.workers) {\n            if (worker.busy || this.queue.length === 0) continue;\n            worker.busy = true;\n            worker.postMessage(this.queue.shift());\n        }\n    }\n    onComplete(result) {\n        result.worker.busy = false;\n        this.dispatch();\n        // Main thread: use result\n    }\n}"
-    ],
-    "Level-of-Detail Strategies": [
-      "Geometric LOD: swap mesh complexity by distance. Shader LOD: simpler shaders for distant objects. Texture LOD: mipmaps. Animation LOD: lower update rate for distant characters. Impostor billboards.",
-      "class LODSystem {\n    constructor(camera) {\n        this.camera = camera;\n        this.groups = [];\n    }\n    register(mesh, lods) {\n        // lods = [{ mesh, materials, maxDistance }, ...]\n        this.groups.push({ mesh, lods, currentLod: -1 });\n    }\n    update() {\n        for (const group of this.groups) {\n            const dist = distance(this.camera.position, group.mesh.position);\n            let lod = 0;\n            while (lod < group.lods.length - 1 && dist > group.lods[lod].maxDistance) lod++;\n            if (lod !== group.currentLod) {\n                group.mesh.switchTo(group.lods[lod]);\n                group.currentLod = lod;\n            }\n        }\n    }\n}"
     ]
   },
   "Save Systems & Serialization": {
@@ -738,42 +632,20 @@
       "Deflate/gzip: general purpose, good compression. LZ4: extremely fast decompression. Oodle Kraken (used in AAA). Texture compression: BCn, ASTC, ETC2. Mesh compression: Draco, meshoptimizer.",
       "// Compress save data with zlib\nimport { deflateSync, inflateSync } from 'zlib';\n\nfunction compressSave(data) {\n    const json = JSON.stringify(data);\n    const compressed = deflateSync(json);\n    return compressed.toString('base64');\n}\n\nfunction decompressSave(compressed) {\n    const buffer = Buffer.from(compressed, 'base64');\n    const json = inflateSync(buffer).toString();\n    return JSON.parse(json);\n}\n\n// Typical ratios:\n// JSON: 50KB → Deflate: 12KB → LZ4: 18KB\n// Oodle Kraken: 9KB (AAA games)"
     ],
-    "Config Files & Settings": [
-      "Separate game settings (video, audio, controls) from save data. INI, JSON, TOML, or binary config. Detect GPU/display on first launch. Cloud sync settings across devices.",
-      "class GameSettings {\n    constructor() {\n        this.defaults = {\n            resolution: { width: 1920, height: 1080 },\n            fullscreen: true,\n            vsync: true,\n            graphicsQuality: 'high',\n            volume: { master: 0.8, music: 0.7, sfx: 1.0 },\n            controls: { invertY: false, sensitivity: 2.0 }\n        };\n    }\n    async load() {\n        try {\n            const data = JSON.parse(await readFile('settings.json'));\n            Object.assign(this.defaults, data);\n        } catch { /* use defaults */ }\n    }\n    async save() {\n        await writeFile('settings.json', JSON.stringify(this.defaults, null, 2));\n    }\n}"
-    ],
     "Auto-Save & Checkpoints": [
       "Save at safe points: level transitions, after major events, on pause menu. Auto-save timer (every 5-10 min). Rotating slots (3 auto-saves). Prevent save during combat. Async save to avoid frame spikes.",
       "class AutoSaveManager {\n    constructor(saveManager, intervalMs = 300000) {\n        this.saveManager = saveManager;\n        this.interval = intervalMs;\n        this.lastSave = Date.now();\n        this.slots = ['autosave_1', 'autosave_2', 'autosave_3'];\n        this.currentSlot = 0;\n    }\n    update(gameState) {\n        if (gameState.inCombat) return;\n        if (Date.now() - this.lastSave > this.interval) {\n            this.trigger(gameState);\n        }\n    }\n    async trigger(gameState) {\n        const slot = this.slots[this.currentSlot % this.slots.length];\n        await this.saveManager.save(slot, gameState);\n        this.currentSlot++;\n        this.lastSave = Date.now();\n    }\n}"
-    ]
-  },
-  "Build & Deployment": {
-    "CI/CD for Games": [
-      "Automated build pipeline: trigger on commit, build for all platforms, run tests, upload artifacts. Jenkins, GitHub Actions, GitLab CI. Perforce/Git LFS for large binary assets.",
-      "# GitHub Actions game build workflow\nname: Build & Deploy\non: push to main\njobs:\n  build:\n    strategy:\n      matrix:\n        os: [ubuntu-latest, macos-latest, windows-latest]\n    runs-on: ${{ matrix.os }}\n    steps:\n      - uses: actions/checkout@v4\n        with: lfs: true\n      - name: Build\n        run: |\n          if runner.os == 'Windows'; then\n            .\\build.bat -platform=Win64\n          else\n            ./build.sh -platform=${{ runner.os == 'macOS' ? 'Mac' : 'Linux' }}\n          fi\n      - name: Upload artifact\n        uses: actions/upload-artifact@v4\n        with:\n          name: game-${{ runner.os }}\n          path: build/"
     ],
-    "Platform-Specific Builds": [
-      "Windows: MSVC, DirectX, Steamworks. macOS: Metal, App Bundle, notarization. Linux: Vulkan/OpenGL, AppImage/Flatpak. Console: Xbox GDK, PS5 SDK, Switch NX. Mobile: Android AAB, iOS IPA.",
-      "// Conditional compilation for platforms\n#ifdef PLATFORM_WINDOWS\n    #include <d3d11.h>\n    #define RENDERER \"DirectX 11\"\n#elif PLATFORM_MAC\n    #import <Metal/Metal.h>\n    #define RENDERER \"Metal\"\n#elif PLATFORM_LINUX\n    #include <vulkan/vulkan.h>\n    #define RENDERER \"Vulkan\"\n#elif PLATFORM_IOS\n    #define RENDERER \"Metal (Mobile)\"\n    #define TOUCH_CONTROLS\n#endif\n\n// Platform-specific asset paths\n#if PLATFORM_CONSOLE\n    const char* SavePath = \"/save/data/\";\n#else\n    const char* SavePath = GetPlatformSavePath();\n#endif"
-    ],
-    "Asset Building & Cooking": [
-      "Cook assets: convert source (PNG, FBX, WAV) to runtime format (DDS, mesh, Ogg). Deterministic builds. Dependency graph for incremental building. Asset bundles for patching.",
-      "class AssetCooker {\n    constructor() {\n        this.rules = new Map();\n        this.register('.png', (src, dst) => compressTexture(src, dst, 'BC7'));\n        this.register('.fbx', (src, dst) => convertMesh(src, dst, { optimize: true, normals: true }));\n        this.register('.wav', (src, dst) => encodeAudio(src, dst, 'vorbis', 128));\n    }\n    register(ext, cookFn) { this.rules.set(ext, cookFn); }\n    async cook(inputPath, outputPath) {\n        const ext = path.extname(inputPath);\n        const rule = this.rules.get(ext);\n        if (!rule) throw new Error(`No cooker for ${ext}`);\n        if (!this.needsUpdate(inputPath, outputPath)) return;\n        await rule(inputPath, outputPath);\n    }\n    needsUpdate(src, dst) {\n        try {\n            return fs.statSync(src).mtime > fs.statSync(dst).mtime;\n        } catch { return true; }\n    }\n}"
-    ],
-    "Content Patching & DLC": [
-      "Binary patching: bsdiff, Courgette for executables. Asset bundles for new content. Patch size minimization: chunk-based downloads. Steamworks UGC (User-Generated Content). Modding support.",
-      "class PatchSystem {\n    constructor() {\n        this.installedVersion = null;\n        this.baseUrl = 'https://cdn.game.com/patches/';\n    }\n    async checkForUpdates() {\n        const manifest = await fetch(`${this.baseUrl}manifest.json`).then(r => r.json());\n        if (manifest.version > this.installedVersion) {\n            await this.downloadPatch(manifest);\n        }\n    }\n    async downloadPatch(manifest) {\n        const neededChunks = manifest.chunks.filter(c => !this.hasChunk(c.hash));\n        for (const chunk of neededChunks) {\n            const data = await fetch(`${this.baseUrl}${chunk.hash}`).then(r => r.arrayBuffer());\n            await this.applyChunk(chunk, data);\n            // Report progress\n            this.onProgress?.(neededChunks.indexOf(chunk) / neededChunks.length);\n        }\n        this.installedVersion = manifest.version;\n    }\n}"
-    ],
-    "Steam & Console Integration": [
-      "Steamworks SDK: achievements, leaderboards, friends, cloud saves, matchmaking, DRM. Console SDKs: Xbox Live, PSN, Nintendo Switch Online. Cross-platform accounts and progression.",
-      "// Steamworks achievements C++\n#include <steam_api.h>\n\nvoid UnlockAchievement(const char* id) {\n    if (!SteamUserStats()) return;\n    SteamUserStats()->SetAchievement(id);\n    SteamUserStats()->StoreStats();\n}\n\nvoid UpdateLeaderboard(const char* name, int score) {\n    SteamUserStats()->UploadLeaderboardScore(\n        SteamUserStats()->FindLeaderboard(name),\n        k_ELeaderboardUploadScoreMethodKeepBest,\n        score, nullptr, 0\n    );"
-    ],
-    "Crash Reporting & Telemetry": [
-      "Crash reporters: Crashpad (Chrome), Google Breakpad, Unity Cloud Diagnostics. Symbolication for native crashes. Telemetry: frame rate, memory usage, heat maps. GDPR compliance for player data.",
-      "class TelemetryService {\n    constructor(endpoint) {\n        this.endpoint = endpoint;\n        this.sessionId = crypto.randomUUID();\n        this.events = [];\n        this.flushInterval = setInterval(() => this.flush(), 60000);\n    }\n    track(event, data = {}) {\n        this.events.push({\n            event, data,\n            timestamp: Date.now(),\n            sessionId: this.sessionId,\n            buildId: BUILD_ID\n        });\n    }\n    async flush() {\n        if (this.events.length === 0) return;\n        const batch = this.events.splice(0);\n        try {\n            await fetch(this.endpoint, {\n                method: 'POST',\n                body: JSON.stringify(batch)\n            });\n        } catch { /* queue for retry */ }\n    }\n    crash(error) {\n        this.track('crash', { message: error.message, stack: error.stack });\n        this.flush();\n    }\n}"
+    "Config Files & Settings": [
+      "Separate game settings (video, audio, controls) from save data. INI, JSON, TOML, or binary config. Detect GPU/display on first launch. Cloud sync settings across devices.",
+      "class GameSettings {\n    constructor() {\n        this.defaults = {\n            resolution: { width: 1920, height: 1080 },\n            fullscreen: true,\n            vsync: true,\n            graphicsQuality: 'high',\n            volume: { master: 0.8, music: 0.7, sfx: 1.0 },\n            controls: { invertY: false, sensitivity: 2.0 }\n        };\n    }\n    async load() {\n        try {\n            const data = JSON.parse(await readFile('settings.json'));\n            Object.assign(this.defaults, data);\n        } catch { /* use defaults */ }\n    }\n    async save() {\n        await writeFile('settings.json', JSON.stringify(this.defaults, null, 2));\n    }\n}"
     ]
   },
   "Accessibility & Localization": {
+    "Input Remapping & Accessibility": [
+      "Full control remapping UI. Hold/toggle options. Slow mode (game speed reduction). Auto-aim assistance. Single-switch input for motor disabilities. Speech-to-text for voice commands.",
+      "class AccessibilityOptions {\n    constructor() {\n        this.settings = {\n            gameSpeed: 1.0,\n            autoAim: false,\n            aimAssistStrength: 0.5,\n            holdToCrouch: false,\n            toggleSprint: false,\n            subtitleSize: 1.0,\n            highContrastMode: false,\n            reduceMotion: false,\n            singleSwitchMode: false,\n            switchDevice: null // keyboard button or external switch\n        };\n    }\n    apply(gameInstance) {\n        Time.timeScale = this.settings.gameSpeed;\n        gameInstance.autoAimEnabled = this.settings.autoAim;\n        gameInstance.aimAssist = this.settings.aimAssistStrength;\n        if (this.settings.reduceMotion) {\n            CameraShake.disable();\n            ScreenEffects.disable();\n        }\n    }\n}"
+    ],
     "Color Blindness Modes": [
       "8% of males have color vision deficiency. Modes: Protanopia (red-blind), Deuteranopia (green-blind), Tritanopia (blue-blind). Use patterns/shapes/icons in addition to color. Simulate in dev tools.",
       "// Simple color-blind simulation shader\n// Shift colors along the confusion line\nvec3 simulateColorBlind(vec3 color, int type) {\n    mat3 transform;\n    if (type == 1) { // Protanopia\n        transform = mat3(\n            0.567, 0.433, 0.0,\n            0.558, 0.442, 0.0,\n            0.0,   0.242, 0.758\n        );\n    } else if (type == 2) { // Deuteranopia\n        transform = mat3(\n            0.625, 0.375, 0.0,\n            0.7,   0.3,   0.0,\n            0.0,   0.3,   0.7\n        );\n    } else { // Tritanopia\n        transform = mat3(\n            0.95,  0.05,  0.0,\n            0.0,   0.433, 0.567,\n            0.0,   0.475, 0.525\n        );\n    }\n    return transform * color;\n}"
@@ -790,16 +662,20 @@
       "Bitmap fonts (sprite sheets) vs Signed Distance Field (SDF). SDF: resolution-independent, glow/shadow effects. TrueType/OpenType rendering: FreeType, HarfBuzz for complex scripts. Kerning, ligatures.",
       "// SDF font rendering shader\n#version 330 core\nuniform sampler2D sdfTexture;\nin vec2 uv;\nout vec4 color;\nuniform vec4 textColor;\nuniform float smoothing; // 0.25 for crisp, 0.5 for soft\n\nvoid main() {\n    float distance = texture(sdfTexture, uv).r;\n    float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n    // Glow effect\n    float glow = smoothstep(0.3, 0.5, distance) * 0.3;\n    color = vec4(textColor.rgb, textColor.a * (alpha + glow));\n    \n    if (color.a < 0.01) discard;\n}"
     ],
-    "Input Remapping & Accessibility": [
-      "Full control remapping UI. Hold/toggle options. Slow mode (game speed reduction). Auto-aim assistance. Single-switch input for motor disabilities. Speech-to-text for voice commands.",
-      "class AccessibilityOptions {\n    constructor() {\n        this.settings = {\n            gameSpeed: 1.0,\n            autoAim: false,\n            aimAssistStrength: 0.5,\n            holdToCrouch: false,\n            toggleSprint: false,\n            subtitleSize: 1.0,\n            highContrastMode: false,\n            reduceMotion: false,\n            singleSwitchMode: false,\n            switchDevice: null // keyboard button or external switch\n        };\n    }\n    apply(gameInstance) {\n        Time.timeScale = this.settings.gameSpeed;\n        gameInstance.autoAimEnabled = this.settings.autoAim;\n        gameInstance.aimAssist = this.settings.aimAssistStrength;\n        if (this.settings.reduceMotion) {\n            CameraShake.disable();\n            ScreenEffects.disable();\n        }\n    }\n}"
-    ],
     "Difficulty Options & Assist Modes": [
       "Granular difficulty sliders: enemy damage, health, speed, AI reaction time. Invulnerability mode. Infinite ammo. Skip puzzle option. Checkpoint frequency. Celeste-style assist mode inspires inclusion.",
       "class DifficultySettings {\n    constructor() {\n        this.presets = {\n            'story':  { enemyDamage: 0.3, enemyHealth: 0.5, enemySpeed: 0.7, aiDelay: 1.0, puzzlesSimplified: true },\n            'normal': { enemyDamage: 1.0, enemyHealth: 1.0, enemySpeed: 1.0, aiDelay: 0.5, puzzlesSimplified: false },\n            'hard':   { enemyDamage: 1.5, enemyHealth: 2.0, enemySpeed: 1.3, aiDelay: 0.2, puzzlesSimplified: false },\n            'nightmare': { enemyDamage: 3.0, enemyHealth: 3.0, enemySpeed: 1.5, aiDelay: 0.0, puzzlesSimplified: false },\n            'custom': null\n        };\n        this.custom = {};\n        this.current = 'normal';\n    }\n    applyTo(enemy) {\n        const d = this.presets[this.current];\n        if (!d) return;\n        enemy.damage *= d.enemyDamage;\n        enemy.health *= d.enemyHealth;\n        enemy.speed *= d.enemySpeed;\n        enemy.aiReactionDelay = d.aiDelay;\n    }\n}"
     ]
   },
   "Godot Engine": {
+    "Tilemaps & TileSets": [
+      "TileMapLayer node for grid-based levels. TileSet resource defines tiles with physics, navigation, terrain (auto-tiling). Custom data layers per tile. Animated and random tiles.",
+      "extends TileMapLayer\n\nfunc _ready():\n    # Create tileset programmatically\n    var tileset = TileSet.new()\n    var source = TileSetAtlasSource.new()\n    source.texture = preload(\"res://tileset.png\")\n    source.texture_region_size = Vector2i(16, 16)\n    tileset.add_source(source)\n    \n    # Set tile at coordinates\n    set_cell(Vector2i(5, 3), 0, Vector2i(0, 0))\n    \n    # Terrain (auto-tiling)\n    # Set terrain bits per corner for automatic connections\n    set_cells_terrain_connect(get_used_cells(), 0, 0)"
+    ],
+    "Input Map & Actions": [
+      "Godot's Input Map defines named actions (move_left, jump) bound to keys/buttons. Access via Input singleton. Action strength for analog input. Input events vs polling. Input processing order.",
+      "extends Node\n\nfunc _input(event: InputEvent) -> void:\n    # Process events (use for UI/interaction)\n    if event.is_action_pressed(\"interact\"):\n        open_chest()\n    \n    if event is InputEventMouseMotion:\n        camera_rotation += event.relative * 0.01\n\nfunc _process(delta: float) -> void:\n    # Polling (use for continuous input)\n    var move = Input.get_vector(\"move_left\", \"move_right\", \"move_forward\", \"move_back\")\n    var sprint_strength = Input.get_action_strength(\"sprint\")  # analog: 0.0-1.0\n    velocity = move * speed * (1.0 + sprint_strength)\n    move_and_slide()"
+    ],
     "GDScript Deep": [
       "Godot's primary scripting language. Dynamically typed with optional typing. Signals as first-class citizens. Features: match statements, @onready, @export, static typing, lambda functions.",
       "extends CharacterBody2D\n\n@export var speed: float = 300.0\n@export var jump_velocity: float = -400.0\nvar gravity: float = ProjectSettings.get_setting(\"physics/2d/default_gravity\")\nvar can_dash := true\n\nfunc _physics_process(delta: float) -> void:\n    var direction := Input.get_axis(\"move_left\", \"move_right\")\n    if direction:\n        velocity.x = direction * speed\n    else:\n        velocity.x = move_toward(velocity.x, 0, speed * 0.1)\n    if is_on_floor() and Input.is_action_just_pressed(\"ui_accept\"):\n        velocity.y = jump_velocity\n    velocity.y += gravity * delta\n    move_and_slide()"
@@ -816,10 +692,6 @@
       "Signals are Godot's event system: type-safe, built-in or custom. Connect via editor or code with bind/flags. Groups tag nodes for bulk operations. Alternative to tight coupling.",
       "extends Node\n\nsignal health_changed(old_value: int, new_value: int)\nsignal died()\n\nfunc take_damage(amount: int) -> void:\n    var old = health\n    health -= amount\n    if health <= 0:\n        health = 0\n        died.emit()\n    health_changed.emit(old, health)\n\nfunc _ready():\n    # Connect with one-shot\n    health_changed.connect(_on_health_changed, CONNECT_ONE_SHOT)\n    # Groups\n    add_to_group(\"enemies\")\n    # Call on all group members\n    get_tree().call_group(\"enemies\", \"pause\")\n    # Get all group nodes\n    var enemies = get_tree().get_nodes_in_group(\"enemies\")"
     ],
-    "Tilemaps & TileSets": [
-      "TileMapLayer node for grid-based levels. TileSet resource defines tiles with physics, navigation, terrain (auto-tiling). Custom data layers per tile. Animated and random tiles.",
-      "extends TileMapLayer\n\nfunc _ready():\n    # Create tileset programmatically\n    var tileset = TileSet.new()\n    var source = TileSetAtlasSource.new()\n    source.texture = preload(\"res://tileset.png\")\n    source.texture_region_size = Vector2i(16, 16)\n    tileset.add_source(source)\n    \n    # Set tile at coordinates\n    set_cell(Vector2i(5, 3), 0, Vector2i(0, 0))\n    \n    # Terrain (auto-tiling)\n    # Set terrain bits per corner for automatic connections\n    set_cells_terrain_connect(get_used_cells(), 0, 0)"
-    ],
     "Animation Player & AnimationTree": [
       "AnimationPlayer: keyframe animation for any node property. AnimationTree: state machine blending with parameters. Blend spaces (1D/2D). Root motion for animation-driven movement.",
       "extends CharacterBody3D\n\n@onready var anim_tree := $AnimationTree\n@onready var state_machine := anim_tree.get(\"parameters/playback\")\n\nfunc _physics_process(delta):\n    var speed = Input.get_axis(\"backward\", \"forward\")\n    var direction = Input.get_axis(\"left\", \"right\")\n    \n    # Drive animation parameters\n    anim_tree.set(\"parameters/move/blend_position\", speed)\n    anim_tree.set(\"parameters/turn/blend_position\", direction)\n    \n    # Transition state\n    if speed > 0.1:\n        state_machine.travel(\"move\")\n    else:\n        state_machine.travel(\"idle\")"
@@ -831,10 +703,6 @@
     "Multiplayer & Export": [
       "Godot's high-level multiplayer API: scene replication, RPCs (remote procedure calls), authority modes. Export presets for Windows, Linux, macOS, Android, iOS, Web. Autoloads for persistent singletons.",
       "# Multiplayer: server authoritative\n@rpc(\"authority\", \"call_local\", \"reliable\")\nfunc shoot():\n    var bullet = bullet_scene.instantiate()\n    bullet.global_position = $Muzzle.global_position\n    get_parent().add_child(bullet)\n\nfunc _ready():\n    if multiplayer.is_server():\n        # Server spawns enemies\n        spawn_enemies()\n\n# Export settings\n# Project → Export → Add platform\n# Templates required: ~/.local/share/godot/templates/<version>/"
-    ],
-    "Input Map & Actions": [
-      "Godot's Input Map defines named actions (move_left, jump) bound to keys/buttons. Access via Input singleton. Action strength for analog input. Input events vs polling. Input processing order.",
-      "extends Node\n\nfunc _input(event: InputEvent) -> void:\n    # Process events (use for UI/interaction)\n    if event.is_action_pressed(\"interact\"):\n        open_chest()\n    \n    if event is InputEventMouseMotion:\n        camera_rotation += event.relative * 0.01\n\nfunc _process(delta: float) -> void:\n    # Polling (use for continuous input)\n    var move = Input.get_vector(\"move_left\", \"move_right\", \"move_forward\", \"move_back\")\n    var sprint_strength = Input.get_action_strength(\"sprint\")  # analog: 0.0-1.0\n    velocity = move * speed * (1.0 + sprint_strength)\n    move_and_slide()"
     ],
     "Resources & Resource System": [
       "Resources are reusable data containers (.tres, .res). Built-in vs external resources. Custom resources for game data (items, stats, dialogue). Resource cache and preloading.",
@@ -855,6 +723,138 @@
     "Godot 4 Render Modes": [
       "Godot 4 offers 3 renderers: Forward+ (desktop, many lights, SSAO, glow), Mobile (faster, no SSAO, simpler), Compatibility (OpenGL 3.3 / GLES 3.0 fallback). Switch per-platform in Project Settings.",
       "# Project Settings → Rendering → Renderer\n# Options: forward_plus, mobile, gl_compatibility\n\n# RenderingDevice singleton for advanced GPU operations\nfunc setup_forward_plus():\n    # Full glow & SSAO\n    get_viewport().use_taa = true\n    get_viewport().scaling_3d_scale = 0.75  # FSR upscaling\n\nfunc setup_mobile():\n    # Limit lights for performance\n    RenderingServer.directional_soft_shadow_filter_set_quality(\n        RenderingServer.SHADOW_QUALITY_HARD)\n    RenderingServer.positional_soft_shadow_filter_set_quality(\n        RenderingServer.SHADOW_QUALITY_HARD)\n\n# Query current renderer\nfunc get_renderer_name() -> String:\n    match RenderingServer.get_rendering_device().get_device_name():\n        var name: return \"Forward+ (\" + name + \")\"\n        _: return \"Compatibility\""
+    ]
+  },
+  "Networking & Multiplayer": {
+    "Client-Server Model": {
+      "exp": "Network architecture for multiplayer.",
+      "code": "Authoritative server, client prediction, server reconciliation.",
+      "exercises": []
+    },
+    "Replication": {
+      "exp": "Synchronizing game state across network.",
+      "code": "Networked variables, RPCs, state synchronization, interpolation.",
+      "exercises": []
+    },
+    "Latency Management": {
+      "exp": "Handling network delay in games.",
+      "code": "Lag compensation, interpolation, extrapolation, input buffering.",
+      "exercises": []
+    },
+    "Matchmaking": {
+      "exp": "Connecting players for multiplayer.",
+      "code": "Lobbies, dedicated servers, peer-to-peer, ELO rating.",
+      "exercises": []
+    },
+    "Peer-to-Peer & Relay": [
+      "P2P: players connect directly—low latency, complex NAT traversal (STUN/TURN/ICE). Relay: server forwards traffic—simpler NAT handling, adds latency. Rollback netcode for fighting games.",
+      "// WebRTC P2P\nconst pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });\npc.onicecandidate = e => sendSignal({ candidate: e.candidate });\npc.ontrack = e => remoteVideo.srcObject = e.streams[0];\n\nasync function connect(offer) {\n    if (offer) {\n        await pc.setRemoteDescription(new RTCSessionDescription(offer));\n        const answer = await pc.createAnswer();\n        await pc.setLocalDescription(answer);\n        sendSignal({ answer });\n    } else {\n        const offer = await pc.createOffer();\n        await pc.setLocalDescription(offer);\n        sendSignal({ offer });\n    }\n}"
+    ],
+    "Netcode & State Synchronization": [
+      "Authoritative server sends world state deltas. Client-side prediction hides latency. Entity interpolation smooths other players. Snapshot compression (bitpacking, delta encoding).",
+      "function createSnapshot(entity, lastSent) {\n    const delta = {};\n    for (const [key, val] of Object.entries(entity.state)) {\n        if (val !== lastSent[key]) {\n            delta[key] = val; // only send changed values\n        }\n    }\n    return { id: entity.id, tick: serverTick, delta, timestamp: Date.now() };\n}\n\nfunction interpolate(snapshots, renderTime) {\n    if (snapshots.length < 2) return;\n    const t = (renderTime - snapshots[0].timestamp)\n            / (snapshots[1].timestamp - snapshots[0].timestamp);\n    return lerp(snapshots[0].state.pos, snapshots[1].state.pos, t);\n}"
+    ],
+    "Lag Compensation & Prediction": [
+      "Client predicts own movement immediately (no input lag). Server rewinds time for hit detection (lag compensation). Extrapolation estimates positions of others. Reconciliation corrects prediction errors.",
+      "class ClientPrediction {\n    constructor() {\n        this.pendingInputs = [];\n        this.lastServerState = null;\n    }\n    onInput(input) {\n        // Apply immediately\n        this.applyInput(input);\n        this.pendingInputs.push({ input, seq: nextSeq++ });\n    }\n    onServerUpdate(state, lastSeq) {\n        this.lastServerState = state;\n        // Remove acknowledged inputs\n        this.pendingInputs = this.pendingInputs.filter(i => i.seq > lastSeq);\n        // Re-apply unacknowledged inputs\n        for (const pending of this.pendingInputs) {\n            this.applyInput(pending.input);\n        }\n    }\n}"
+    ],
+    "Rollback Netcode": [
+      "Fighting game technique: simulate future frames, roll back when server disagrees. Saves snapshots for rollback. Input delay + prediction for responsive feel. GGPO-style implementation.",
+      "class RollbackSystem {\n    constructor() {\n        this.frames = []; // ring buffer of past states\n        this.inputQueue = [];\n        this.currentFrame = 0;\n    }\n    saveState(state, frame) {\n        this.frames[frame % 120] = structuredClone(state);\n    }\n    rollbackTo(frame, serverInputs) {\n        // Restore state at rollback frame\n        let state = structuredClone(this.frames[frame % 120]);\n        // Re-simulate with corrected inputs\n        for (let f = frame; f <= this.currentFrame; f++) {\n            const input = serverInputs[f] || this.inputQueue[f];\n            state = this.step(state, input, f);\n            this.saveState(state, f);\n        }\n    }\n}"
+    ],
+    "Matchmaking & Lobbies": [
+      "Matchmaking: skill-based (ELO, TrueSkill), ping-based, party support. Lobbies: pre-game rooms with player slots, ready states, chat. Steamworks / Epic Online Services for cross-platform.",
+      "class Matchmaker {\n    constructor() {\n        this.queue = []; // { userId, mmr, ping, partySize }\n        this.tolerance = 100;\n    }\n    enqueue(player) {\n        this.queue.push(player);\n        const match = this.findMatch(player);\n        if (match) {\n            this.queue = this.queue.filter(p => !match.includes(p));\n            return match;\n        }\n    }\n    findMatch(player) {\n        return this.queue.find(p =>\n            p.id !== player.id &&\n            Math.abs(p.mmr - player.mmr) < this.tolerance &&\n            Math.abs(p.ping - player.ping) < 50\n        );\n    }\n    startLobby(players) {\n        return { id: uuid(), players, state: 'LOBBY', maxPlayers: 8 };\n    }\n}"
+    ],
+    "NAT Punchthrough & Relay Servers": [
+      "NAT (Network Address Translation) blocks direct P2P connections. STUN: discover public IP/port. TURN: relay traffic when P2P fails. ICE: combine STUN/TURN candidates. Server relay for fallback.",
+      "// ICE candidate exchange\nconst config = { iceServers: [\n    { urls: 'stun:stun.l.google.com:19302' },\n    { urls: 'turn:turn.example.com:3478', credential: 'pass', username: 'user' }\n]};\nconst pc = new RTCPeerConnection(config);\n\npc.onicecandidate = e => {\n    if (e.candidate) {\n        // Send candidate to peer via signaling server\n        signaling.send({ type: 'candidate', candidate: e.candidate });\n    }\n};\n\n// ICE connection state\npc.oniceconnectionstatechange = () => {\n    if (pc.iceConnectionState === 'connected')\n        console.log('P2P connection established');\n    else if (pc.iceConnectionState === 'failed')\n        console.log('Falling back to TURN relay');\n};"
+    ],
+    "WebSocket & REST for Games": [
+      "WebSocket: persistent full-duplex connection for real-time game data. REST: HTTP for authentication, leaderboards, store. gRPC / MessagePack for efficient binary protocols.",
+      "// WebSocket game client\nconst ws = new WebSocket('wss://game.example.com/play');\nws.onopen = () => {\n    ws.send(JSON.stringify({ type: 'auth', token: sessionToken }));\n};\nws.onmessage = e => {\n    const msg = JSON.parse(e.data);\n    switch (msg.type) {\n        case 'state': updateWorld(msg.state); break;\n        case 'chat': showChat(msg.sender, msg.text); break;\n        case 'matchFound': startGame(msg.matchId); break;\n    }\n};\n// Send player input at 60Hz\nsetInterval(() => ws.send(JSON.stringify({ type: 'input', data: currentInput })), 16);"
+    ],
+    "Client-Server Architecture": [
+      "The server is authoritative: validates actions, simulates world state. Clients send input, receive updates. Thin client vs thick client. Tick rate, bandwidth, and latency tradeoffs.",
+      "class GameServer {\n    constructor() {\n        this.clients = new Map();\n        this.worldState = {};\n        this.tickRate = 20;\n    }\n    start() {\n        setInterval(() => {\n            this.processInputs();\n            this.updateWorld();\n            this.broadcastState();\n        }, 1000 / this.tickRate);\n    }\n    processInputs() {\n        for (const [id, client] of this.clients) {\n            for (const input of client.inputQueue) {\n                this.applyInput(id, input);\n            }\n            client.inputQueue = [];\n        }\n    }\n    broadcastState() {\n        for (const [id, client] of this.clients) {\n            const snapshot = this.createSnapshot(id);\n            client.send(snapshot);\n        }\n    }\n}"
+    ]
+  },
+  "Performance Optimization": {
+    "Draw Calls": {
+      "exp": "Reducing draw calls for rendering performance.",
+      "code": "Batching, instancing, texture atlases, LOD groups.",
+      "exercises": []
+    },
+    "Level of Detail": {
+      "exp": "LOD systems for performance.",
+      "code": "LOD groups, distance-based switching, impostors, occlusion culling.",
+      "exercises": []
+    },
+    "Profiling": {
+      "exp": "Identifying performance bottlenecks.",
+      "code": "CPU/GPU profilers, frame debugger, memory profiler.",
+      "exercises": []
+    },
+    "Memory Management": {
+      "exp": "Efficient memory usage in games.",
+      "code": "Object pooling, resource loading/unloading, garbage collection optimization.",
+      "exercises": []
+    }
+  },
+  "Optimization & Profiling": {
+    "Asset Streaming & Bundling": [
+      "Stream assets in background while game runs. Priority loading (nearby first). Texture mipmap streaming. Asset bundles for DLC/patches. Compression: ASTC (mobile), BC7 (desktop), Oodle.",
+      "class AssetStreamer {\n    constructor() {\n        this.loadQueue = [];\n        this.loading = new Map();\n    }\n    requestLoad(path, priority = 0) {\n        this.loadQueue.push({ path, priority });\n        this.loadQueue.sort((a, b) => b.priority - a.priority);\n        this.processQueue();\n    }\n    async processQueue() {\n        if (this.loading.size >= 4) return; // max concurrent\n        const next = this.loadQueue.shift();\n        if (!next) return;\n        this.loading.set(next.path, true);\n        const asset = await loadAsset(next.path);\n        this.loading.delete(next.path);\n        this.processQueue();\n        return asset;\n    }\n}"
+    ],
+    "Threading & Job Systems": [
+      "Main thread handles rendering, game logic offloaded to worker threads. Job system: small, independent work units scheduled across cores. Task graph for dependencies. Fiber-based scheduling.",
+      "class JobSystem {\n    constructor(threadCount = navigator.hardwareConcurrency - 1) {\n        this.queue = [];\n        this.workers = [];\n        for (let i = 0; i < threadCount; i++) {\n            const worker = new Worker('job-worker.js');\n            worker.onmessage = e => this.onComplete(e.data);\n            this.workers.push(worker);\n        }\n    }\n    schedule(job) {\n        this.queue.push(job);\n        this.dispatch();\n    }\n    dispatch() {\n        for (const worker of this.workers) {\n            if (worker.busy || this.queue.length === 0) continue;\n            worker.busy = true;\n            worker.postMessage(this.queue.shift());\n        }\n    }\n    onComplete(result) {\n        result.worker.busy = false;\n        this.dispatch();\n        // Main thread: use result\n    }\n}"
+    ],
+    "Level-of-Detail Strategies": [
+      "Geometric LOD: swap mesh complexity by distance. Shader LOD: simpler shaders for distant objects. Texture LOD: mipmaps. Animation LOD: lower update rate for distant characters. Impostor billboards.",
+      "class LODSystem {\n    constructor(camera) {\n        this.camera = camera;\n        this.groups = [];\n    }\n    register(mesh, lods) {\n        // lods = [{ mesh, materials, maxDistance }, ...]\n        this.groups.push({ mesh, lods, currentLod: -1 });\n    }\n    update() {\n        for (const group of this.groups) {\n            const dist = distance(this.camera.position, group.mesh.position);\n            let lod = 0;\n            while (lod < group.lods.length - 1 && dist > group.lods[lod].maxDistance) lod++;\n            if (lod !== group.currentLod) {\n                group.mesh.switchTo(group.lods[lod]);\n                group.currentLod = lod;\n            }\n        }\n    }\n}"
+    ],
+    "CPU Profiling": [
+      "Instrument your game to find hot spots. Frame time budget: 16ms (60fps). Tools: Chrome DevTools (web), Tracy (native), Unreal Insights, Unity Profiler. Identify dominant systems (physics, AI, rendering).",
+      "class Profiler {\n    constructor() {\n        this.samples = new Map();\n        this.stacks = [];\n    }\n    begin(name) {\n        this.stacks.push({ name, start: performance.now() });\n    }\n    end() {\n        const frame = this.stacks.pop();\n        const elapsed = performance.now() - frame.start;\n        if (!this.samples.has(frame.name)) this.samples.set(frame.name, []);\n        this.samples.get(frame.name).push(elapsed);\n    }\n    report() {\n        for (const [name, times] of this.samples) {\n            const avg = times.reduce((a, b) => a + b, 0) / times.length;\n            const max = Math.max(...times);\n            console.log(`${name}: avg=${avg.toFixed(2)}ms max=${max.toFixed(2)}ms`);\n        }\n    }\n}"
+    ],
+    "GPU Profiling & Optimization": [
+      "RenderDoc, NVIDIA Nsight, AMD Radeon GPU Profiler. Analyze draw calls, shader complexity, bandwidth. Bottlenecks: vertex-bound, pixel-bound, bandwidth-bound. Reduce overdraw, optimize shaders.",
+      "// GPU timing queries (WebGL 2)\nconst query = gl.createQuery();\ngl.beginQuery(gl.TIME_ELAPSED_EXT, query);\n// Draw calls...\ngl.endQuery(gl.TIME_ELAPSED_EXT);\n\nsetTimeout(() => {\n    const available = gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE);\n    if (available) {\n        const elapsed = gl.getQueryParameter(query, gl.QUERY_RESULT);\n        console.log(`GPU frame time: ${elapsed / 1000000}ms`);\n    }\n}, 100);"
+    ],
+    "Memory Management": [
+      "Avoid GC spikes: object pooling, structs (value types), pre-allocate arrays. Memory fragmentation. Asset lifetime management. Leak detection. Addressable assets for streaming.",
+      "class ObjectPool {\n    constructor(factory, reset, initialSize = 50) {\n        this.factory = factory;\n        this.reset = reset;\n        this.pool = [];\n        for (let i = 0; i < initialSize; i++) this.pool.push(factory());\n    }\n    get() {\n        if (this.pool.length > 0) return this.pool.pop();\n        return this.factory(); // pool exhausted, grow\n    }\n    release(obj) {\n        this.reset(obj);\n        this.pool.push(obj);\n    }\n}\n// Usage: pool.get() instead of 'new' — zero allocations during gameplay"
+    ],
+    "Draw Call Optimization": [
+      "Each draw call has CPU overhead. Batching: static (combine meshes), dynamic (GPU instancing). Reduce material changes (sort by shader/texture). Texture atlasing. SRP Batcher (Unity).",
+      "// Manual instancing\nfunction renderInstanced(mesh, material, transforms) {\n    const instanceCount = transforms.length;\n    const buffer = new Float32Array(instanceCount * 16); // 4x4 matrices\n    transforms.forEach((m, i) => buffer.set(m, i * 16));\n    \n    const instanceBuffer = gl.createBuffer();\n    gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);\n    gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);\n    \n    // One draw call for all instances\n    gl.drawArraysInstanced(gl.TRIANGLES, 0, mesh.vertexCount, instanceCount);\n}"
+    ]
+  },
+  "Build & Deployment": {
+    "Content Patching & DLC": [
+      "Binary patching: bsdiff, Courgette for executables. Asset bundles for new content. Patch size minimization: chunk-based downloads. Steamworks UGC (User-Generated Content). Modding support.",
+      "class PatchSystem {\n    constructor() {\n        this.installedVersion = null;\n        this.baseUrl = 'https://cdn.game.com/patches/';\n    }\n    async checkForUpdates() {\n        const manifest = await fetch(`${this.baseUrl}manifest.json`).then(r => r.json());\n        if (manifest.version > this.installedVersion) {\n            await this.downloadPatch(manifest);\n        }\n    }\n    async downloadPatch(manifest) {\n        const neededChunks = manifest.chunks.filter(c => !this.hasChunk(c.hash));\n        for (const chunk of neededChunks) {\n            const data = await fetch(`${this.baseUrl}${chunk.hash}`).then(r => r.arrayBuffer());\n            await this.applyChunk(chunk, data);\n            // Report progress\n            this.onProgress?.(neededChunks.indexOf(chunk) / neededChunks.length);\n        }\n        this.installedVersion = manifest.version;\n    }\n}"
+    ],
+    "Steam & Console Integration": [
+      "Steamworks SDK: achievements, leaderboards, friends, cloud saves, matchmaking, DRM. Console SDKs: Xbox Live, PSN, Nintendo Switch Online. Cross-platform accounts and progression.",
+      "// Steamworks achievements C++\n#include <steam_api.h>\n\nvoid UnlockAchievement(const char* id) {\n    if (!SteamUserStats()) return;\n    SteamUserStats()->SetAchievement(id);\n    SteamUserStats()->StoreStats();\n}\n\nvoid UpdateLeaderboard(const char* name, int score) {\n    SteamUserStats()->UploadLeaderboardScore(\n        SteamUserStats()->FindLeaderboard(name),\n        k_ELeaderboardUploadScoreMethodKeepBest,\n        score, nullptr, 0\n    );"
+    ],
+    "Crash Reporting & Telemetry": [
+      "Crash reporters: Crashpad (Chrome), Google Breakpad, Unity Cloud Diagnostics. Symbolication for native crashes. Telemetry: frame rate, memory usage, heat maps. GDPR compliance for player data.",
+      "class TelemetryService {\n    constructor(endpoint) {\n        this.endpoint = endpoint;\n        this.sessionId = crypto.randomUUID();\n        this.events = [];\n        this.flushInterval = setInterval(() => this.flush(), 60000);\n    }\n    track(event, data = {}) {\n        this.events.push({\n            event, data,\n            timestamp: Date.now(),\n            sessionId: this.sessionId,\n            buildId: BUILD_ID\n        });\n    }\n    async flush() {\n        if (this.events.length === 0) return;\n        const batch = this.events.splice(0);\n        try {\n            await fetch(this.endpoint, {\n                method: 'POST',\n                body: JSON.stringify(batch)\n            });\n        } catch { /* queue for retry */ }\n    }\n    crash(error) {\n        this.track('crash', { message: error.message, stack: error.stack });\n        this.flush();\n    }\n}"
+    ],
+    "CI/CD for Games": [
+      "Automated build pipeline: trigger on commit, build for all platforms, run tests, upload artifacts. Jenkins, GitHub Actions, GitLab CI. Perforce/Git LFS for large binary assets.",
+      "# GitHub Actions game build workflow\nname: Build & Deploy\non: push to main\njobs:\n  build:\n    strategy:\n      matrix:\n        os: [ubuntu-latest, macos-latest, windows-latest]\n    runs-on: ${{ matrix.os }}\n    steps:\n      - uses: actions/checkout@v4\n        with: lfs: true\n      - name: Build\n        run: |\n          if runner.os == 'Windows'; then\n            .\\build.bat -platform=Win64\n          else\n            ./build.sh -platform=${{ runner.os == 'macOS' ? 'Mac' : 'Linux' }}\n          fi\n      - name: Upload artifact\n        uses: actions/upload-artifact@v4\n        with:\n          name: game-${{ runner.os }}\n          path: build/"
+    ],
+    "Platform-Specific Builds": [
+      "Windows: MSVC, DirectX, Steamworks. macOS: Metal, App Bundle, notarization. Linux: Vulkan/OpenGL, AppImage/Flatpak. Console: Xbox GDK, PS5 SDK, Switch NX. Mobile: Android AAB, iOS IPA.",
+      "// Conditional compilation for platforms\n#ifdef PLATFORM_WINDOWS\n    #include <d3d11.h>\n    #define RENDERER \"DirectX 11\"\n#elif PLATFORM_MAC\n    #import <Metal/Metal.h>\n    #define RENDERER \"Metal\"\n#elif PLATFORM_LINUX\n    #include <vulkan/vulkan.h>\n    #define RENDERER \"Vulkan\"\n#elif PLATFORM_IOS\n    #define RENDERER \"Metal (Mobile)\"\n    #define TOUCH_CONTROLS\n#endif\n\n// Platform-specific asset paths\n#if PLATFORM_CONSOLE\n    const char* SavePath = \"/save/data/\";\n#else\n    const char* SavePath = GetPlatformSavePath();\n#endif"
+    ],
+    "Asset Building & Cooking": [
+      "Cook assets: convert source (PNG, FBX, WAV) to runtime format (DDS, mesh, Ogg). Deterministic builds. Dependency graph for incremental building. Asset bundles for patching.",
+      "class AssetCooker {\n    constructor() {\n        this.rules = new Map();\n        this.register('.png', (src, dst) => compressTexture(src, dst, 'BC7'));\n        this.register('.fbx', (src, dst) => convertMesh(src, dst, { optimize: true, normals: true }));\n        this.register('.wav', (src, dst) => encodeAudio(src, dst, 'vorbis', 128));\n    }\n    register(ext, cookFn) { this.rules.set(ext, cookFn); }\n    async cook(inputPath, outputPath) {\n        const ext = path.extname(inputPath);\n        const rule = this.rules.get(ext);\n        if (!rule) throw new Error(`No cooker for ${ext}`);\n        if (!this.needsUpdate(inputPath, outputPath)) return;\n        await rule(inputPath, outputPath);\n    }\n    needsUpdate(src, dst) {\n        try {\n            return fs.statSync(src).mtime > fs.statSync(dst).mtime;\n        } catch { return true; }\n    }\n}"
     ]
   }
 }

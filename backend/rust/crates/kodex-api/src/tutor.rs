@@ -1,10 +1,13 @@
 use std::collections::HashMap;
+use std::convert::Infallible;
 
 use axum::{
     extract::Query,
     Json,
+    response::sse::{Event, Sse},
     http::StatusCode,
 };
+use tokio_stream::StreamExt;
 
 use kodex_core::types::{ExplainTopicInput, StartExerciseInput, AttemptExerciseInput, LLMMessage, LLMRole};
 
@@ -19,15 +22,107 @@ fn static_explain(topic: &str, lang: &str) -> String {
     )
 }
 
-pub async fn explain_topic(
-    Json(input): Json<ExplainTopicInput>,
-) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
+fn extract_explanation(topic_data: &serde_json::Value) -> String {
+    match topic_data {
+        serde_json::Value::Object(_) => {
+            topic_data.get("exp")
+                .or_else(|| topic_data.get("explanation"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string()
+        }
+        serde_json::Value::Array(arr) => {
+            arr.first()
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string()
+        }
+        serde_json::Value::String(s) => s.clone(),
+        _ => String::new(),
+    }
+}
+
+fn lookup_topic_in_curriculum(lang: &str, topic: &str) -> Option<(String, String)> {
+    let content_dir = crate::config().content_dir.clone();
+    let file_path = content_dir.join(format!("{}.json", lang));
+    let data = std::fs::read_to_string(&file_path).ok()?;
+    let curriculum: serde_json::Value = serde_json::from_str(&data).ok()?;
+    let lower_topic = topic.to_lowercase();
+    if let Some(obj) = curriculum.as_object() {
+        for (_phase_name, phase_data) in obj {
+            if let Some(topics) = phase_data.as_object() {
+                for (topic_name, topic_data) in topics {
+                    if topic_name.to_lowercase() == lower_topic {
+                        let exp = extract_explanation(topic_data);
+                        return Some((topic_name.clone(), exp));
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+fn format_curriculum_content(topic: &str, content: &str) -> String {
+    // Split on likely HTML tags to provide a clean markdown-style explanation
+    let cleaned = content
+        .replace("<p>", "\n\n")
+        .replace("</p>", "")
+        .replace("<code>", "`")
+        .replace("</code>", "`")
+        .replace("<strong>", "**")
+        .replace("</strong>", "**")
+        .replace("<em>", "_")
+        .replace("</em>", "_")
+        .replace("<br>", "\n")
+        .replace("<br/>", "\n")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&");
+    format!(
+        "**{}**\n\n{}",
+        topic,
+        cleaned.trim()
+    )
+}
+
+async fn build_explanation(input: &ExplainTopicInput) -> (String, String, String) {
     let topic = input.topic.clone();
     let lang = input.lang.clone().unwrap_or_else(|| "js".to_string());
     let use_ai = input.use_ai.unwrap_or(true);
 
+    // Try language-specific curriculum file first (exact match)
+    if let Some((matched_name, exp)) = lookup_topic_in_curriculum(&lang, &topic) {
+        let explanation = format_curriculum_content(&matched_name, &exp);
+        return (explanation, matched_name, "curriculum".to_string());
+    }
+
+    // Fall back to cross-language embedding search
+    let engine = crate::embedding_engine();
+    if let Some(content) = engine.get_content(&topic) {
+        let explanation = format_curriculum_content(&topic, content);
+        return (explanation, topic, "curriculum".to_string());
+    }
+
+    let results = engine.search(&topic, 1);
+    if let Some((matched_topic, _score)) = results.first() {
+        if let Some(content) = engine.get_content(matched_topic) {
+            let explanation = if matched_topic.to_lowercase() == topic.to_lowercase() {
+                format_curriculum_content(&topic, content)
+            } else {
+                format!(
+                    "I found content about **{}** which is closely related to '{}':\n\n{}",
+                    matched_topic,
+                    topic,
+                    format_curriculum_content(matched_topic, content)
+                )
+            };
+            return (explanation, matched_topic.clone(), "curriculum".to_string());
+        }
+    }
+
     if !use_ai {
-        return Ok(Json(serde_json::json!({"explanation": static_explain(&topic, &lang), "source": "static"})));
+        return (static_explain(&topic, &lang), topic, "static".to_string());
     }
 
     let provider = crate::ai_provider();
@@ -38,9 +133,26 @@ pub async fn explain_topic(
     ];
 
     match provider.chat(messages, &provider_config).await {
-        Ok(explanation) => Ok(Json(serde_json::json!({"explanation": explanation, "source": "ai", "topic": topic, "lang": lang}))),
-        Err(_) => Ok(Json(serde_json::json!({"explanation": static_explain(&topic, &lang), "source": "fallback"}))),
+        Ok(explanation) => (explanation, topic, "ai".to_string()),
+        Err(_) => (static_explain(&topic, &lang), topic, "fallback".to_string()),
     }
+}
+
+pub async fn explain_topic(
+    Json(input): Json<ExplainTopicInput>,
+) -> Result<Sse<impl tokio_stream::Stream<Item = Result<Event, Infallible>>>, (StatusCode, Json<serde_json::Value>)> {
+    let topic = input.topic.clone();
+    let lang = input.lang.clone().unwrap_or_else(|| "js".to_string());
+
+    let (explanation, _matched_topic, _source) = build_explanation(&input).await;
+
+    let content_event = Event::default()
+        .data(serde_json::json!({"content": explanation, "topic": topic, "lang": lang}).to_string());
+    let done_event = Event::default().data("[DONE]");
+    let stream = tokio_stream::once(Ok::<_, Infallible>(content_event))
+        .chain(tokio_stream::once(Ok::<_, Infallible>(done_event)));
+
+    Ok(Sse::new(stream))
 }
 
 fn static_exercise(topic: &str, lang: &str, _level: &str) -> serde_json::Value {

@@ -12,6 +12,7 @@ interface DockerRunnerConfig {
   runCmd: string;
   needsCompile: boolean;
   memoryLimit?: string;
+  pidsLimit?: number;
   poolSize?: number;
 }
 
@@ -19,7 +20,7 @@ const DOCKER_RUNNERS: Record<string, DockerRunnerConfig> = {
   py:  { image: 'kodex-py', ext: '.py', runCmd: 'python3 -u /code/prog.py', needsCompile: false },
   js:  { image: 'kodex-js', ext: '.js', runCmd: 'node /code/prog.js', needsCompile: false },
   ts:  { image: 'kodex-ts', ext: '.ts', runCmd: 'tsx /code/prog.ts', needsCompile: false },
-  // go stays on the local runner — its compile path benefits from the larger host-side memory limit
+  go:  { image: 'kodex-go', ext: '.go', runCmd: 'go run /code/prog.go', needsCompile: false, memoryLimit: '512m', pidsLimit: 200 },
   rs:  { image: 'kodex-rs', ext: '.rs', compileCmd: 'rustc /code/prog.rs -o /code/out && /code/out', runCmd: '', needsCompile: true, memoryLimit: '512m' },
   c:   { image: 'kodex-c', ext: '.c', compileCmd: 'gcc -Wall /code/prog.c -o /code/out && /code/out', runCmd: '', needsCompile: true },
   cpp: { image: 'kodex-cpp', ext: '.cpp', compileCmd: 'g++ -std=c++20 -Wall /code/prog.cpp -o /code/out && /code/out', runCmd: '', needsCompile: true },
@@ -69,7 +70,7 @@ interface SpawnWithTimeoutOpts {
 
 function spawnWithTimeout(cmd: string, args: string[], opts: SpawnWithTimeoutOpts): Promise<{ stdout: string; exitCode: number | null }> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: opts.stdin ? 'pipe' : 'inherit' });
+    const child = spawn(cmd, args, { stdio: [opts.stdin ? 'pipe' : 'inherit', 'pipe', 'pipe'] });
     let stdout = '';
     let timer: NodeJS.Timeout | null = null;
 
@@ -84,11 +85,7 @@ function spawnWithTimeout(cmd: string, args: string[], opts: SpawnWithTimeoutOpt
       opts.onChunk?.(chunk);
     });
 
-    child.stderr?.on('data', (d: Buffer) => {
-      const chunk = d.toString();
-      stdout += chunk;
-      opts.onChunk?.(chunk);
-    });
+    child.stderr?.on('data', () => {});
 
     child.on('close', (code) => {
       if (timer) clearTimeout(timer);
@@ -124,12 +121,14 @@ export async function dockerExecute(lang: string, code: string, stdin?: string, 
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-exec-'));
+  fs.chmodSync(tmpDir, 0o777);
   const srcName = config.src || 'prog';
   const tmpFile = path.join(tmpDir, srcName + config.ext);
   fs.writeFileSync(tmpFile, code);
 
   const innerCmd = config.needsCompile && config.compileCmd ? config.compileCmd : config.runCmd;
-  const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit 50 -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
+  const pidsLimit = config.pidsLimit || 50;
+  const cmd = `docker run --rm -i --network none --memory ${config.memoryLimit || '256m'} --cpus 1 --pids-limit ${pidsLimit} -v "${tmpDir}:/code" ${config.image} sh -c "${innerCmd} 2>&1"`;
 
   logger.debug({ lang, cmd: cmd.slice(0, 100) }, 'Docker execute');
 

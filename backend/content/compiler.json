@@ -14,16 +14,6 @@
       "Compilation is organized into front-end (lexical analysis, syntax analysis, semantic analysis), middle-end (IR generation, optimization), and back-end (instruction selection, register allocation, code emission). This separation enables retargeting and shared optimizations.",
       "// Frontend: language-specific (clang)\n// Middle-end: IR optimization (opt)\n// Backend: target-specific (llc)\n// clang -S -emit-llvm input.c | opt -O2 | llc -o output.s"
     ],
-    "Symbol Tables": {
-      "exp": "Managing identifiers during compilation.",
-      "code": "Symbol table structure, scope management, inserting and looking up symbols.",
-      "exercises": []
-    },
-    "Error Handling": {
-      "exp": "Strategies for compiler error handling.",
-      "code": "Error detection, reporting, recovery; panic mode, error productions.",
-      "exercises": []
-    },
     "What is a Compiler": [
       "A compiler translates high-level source code into low-level machine code (binary) executable by hardware. Unlike interpreters that execute code line-by-line, compilers process entire programs before execution. The compilation process involves multiple phases: lexical analysis (tokenization), syntax analysis (parsing), semantic analysis (type checking), intermediate code generation, optimization, and final code generation. Compiled languages (C, Rust, Go) generally produce faster executables than interpreted ones (Python, JavaScript) because optimization happens at compile-time. Cross-compilers generate code for different target architectures (e.g., compiling on x86 for ARM). Just-in-Time (JIT) compilers like V8's TurboFan and Java's HotSpot combine compilation with runtime profiling for adaptive optimization. The first compiler was written by Grace Hopper in 1952 (A-0 system), and the first self-hosting compiler (able to compile its own source code) was for Lisp in 1962.",
       "// Simple compiler pipeline visualization\n// Source code → Lexer → Tokens → Parser → AST → Semantic → IR → Optimizer → IR → CodeGen → Assembly\n\n// A minimal compiler in JavaScript\nclass MiniCompiler {\n  constructor() {\n    this.tokens = [];\n    this.ast = null;\n  }\n\n  // Phase 1: Lexical Analysis\n  lex(source) {\n    const tokens = [];\n    let i = 0;\n    while (i < source.length) {\n      if (/\\s/.test(source[i])) { i++; continue; }\n      if (/[0-9]/.test(source[i])) {\n        let num = '';\n        while (i < source.length && /[0-9.]/.test(source[i])) num += source[i++];\n        tokens.push({ type: 'NUMBER', value: parseFloat(num) });\n      } else if ('+-*/()'.includes(source[i])) {\n        tokens.push({ type: 'OPERATOR', value: source[i++] });\n      } else {\n        throw new Error(`Unexpected character: ${source[i]}`);\n      }\n    }\n    tokens.push({ type: 'EOF', value: null });\n    return tokens;\n  }\n\n  // Phase 2: Syntax Analysis (Recursive Descent Parser)\n  parse(tokens) {\n    let pos = 0;\n    const peek = () => tokens[pos];\n    const consume = (type) => {\n      if (peek().type === type) return tokens[pos++];\n      throw new Error(`Expected ${type}, got ${peek().type}`);\n    };\n\n    // Grammar: Expr → Term (('+'|'-') Term)*\n    const parseExpr = () => {\n      let left = parseTerm();\n      while (peek().value === '+' || peek().value === '-') {\n        const op = consume('OPERATOR').value;\n        const right = parseTerm();\n        left = { type: 'BINARY', operator: op, left, right };\n      }\n      return left;\n    };\n\n    // Grammar: Term → Factor (('*'|'/') Factor)*\n    const parseTerm = () => {\n      let left = parseFactor();\n      while (peek().value === '*' || peek().value === '/') {\n        const op = consume('OPERATOR').value;\n        const right = parseFactor();\n        left = { type: 'BINARY', operator: op, left, right };\n      }\n      return left;\n    };\n\n    // Grammar: Factor → NUMBER | '(' Expr ')'\n    const parseFactor = () => {\n      if (peek().type === 'NUMBER') {\n        return { type: 'NUMBER', value: consume('NUMBER').value };\n      }\n      if (peek().value === '(') {\n        consume('OPERATOR'); // '('\n        const expr = parseExpr();\n        consume('OPERATOR'); // ')'\n        return expr;\n      }\n      throw new Error(`Unexpected token: ${peek().value}`);\n    };\n\n    const ast = parseExpr();\n    consume('EOF');\n    this.ast = ast;\n    return ast;\n  }\n\n  // Phase 3: Code Generation (to simple assembly-like instructions)\n  generate(ast) {\n    const instructions = [];\n    let tempCounter = 0;\n\n    const emit = (inst) => instructions.push(inst);\n\n    const gen = (node) => {\n      if (node.type === 'NUMBER') {\n        const temp = `t${tempCounter++}`;\n        emit(`  ${temp} = ${node.value}`);\n        return temp;\n      }\n      if (node.type === 'BINARY') {\n        const left = gen(node.left);\n        const right = gen(node.right);\n        const result = `t${tempCounter++}`;\n        emit(`  ${result} = ${left} ${node.operator} ${right}`);\n        return result;\n      }\n    };\n\n    const result = gen(ast);\n    emit(`  return ${result}`);\n    return instructions;\n  }\n\n  // Full pipeline\n  compile(source) {\n    console.log('Source:', source);\n    const tokens = this.lex(source);\n    console.log('Tokens:', tokens);\n    const ast = this.parse(tokens);\n    console.log('AST:', JSON.stringify(ast, null, 2));\n    const code = this.generate(ast);\n    console.log('Generated IR:');\n    code.forEach(l => console.log(l));\n    return { tokens, ast, code };\n  }\n}\n\nconst compiler = new MiniCompiler();\ncompiler.compile('3 + 4 * (5 + 2)');\n/* Output:\n  t0 = 3\n  t1 = 4\n  t2 = 5\n  t3 = 2\n  t4 = t2 + t3\n  t5 = t1 * t4\n  t6 = t0 + t5\n  return t6\n*/"
@@ -31,17 +21,78 @@
     "Interpreters vs Compilers": [
       "Interpreters execute source code directly without a separate compilation step. They process code statement-by-statement, making them easier to debug (immediate feedback) but slower at runtime due to repeated analysis. Pure interpreters parse and execute each time code runs, while JIT (Just-in-Time) compilers like V8 (JavaScript), HotSpot (Java), and LuaJIT combine both approaches: profiling execution paths and compiling hot code to native machine code at runtime. Trade-offs: compilers have slower startup (compilation time) but faster execution, interpreters have instant startup but slower execution. Ahead-of-Time (AOT) compilation (e.g., C, Rust, Go) produces standalone executables. Modern language implementations often use multi-tier compilation: fast interpreter → simple JIT → optimizing JIT based on execution frequency. GraalVM (polyglot) and .NET's RyuJIT demonstrate advanced compilation techniques. WebAssembly represents a portable compilation target that runs in a virtual ISA at near-native speed.",
       "// Performance comparison: Compiler vs Interpreter\nconst { performance } = require('perf_hooks');\n\n// Interpreted approach: execute AST directly\nfunction interpret(ast) {\n  if (ast.type === 'NUMBER') return ast.value;\n  if (ast.type === 'BINARY') {\n    const left = interpret(ast.left);\n    const right = interpret(ast.right);\n    switch (ast.operator) {\n      case '+': return left + right;\n      case '-': return left - right;\n      case '*': return left * right;\n      case '/': return left / right;\n    }\n  }\n}\n\n// Compiled approach: generate code and execute\nfunction compileAndRun(ast) {\n  const instructions = [];\n  let tempCounter = 0;\n  \n  function gen(node) {\n    if (node.type === 'NUMBER') {\n      const t = `t${tempCounter++}`;\n      instructions.push({ op: 'LOAD', dest: t, val: node.value });\n      return t;\n    }\n    if (node.type === 'BINARY') {\n      const left = gen(node.left);\n      const right = gen(node.right);\n      const result = `t${tempCounter++}`;\n      instructions.push({ op: node.operator, dest: result, left, right });\n      return result;\n    }\n  }\n  \n  gen(ast);\n  \n  // Execute instructions (simplified VM)\n  const registers = {};\n  for (const inst of instructions) {\n    switch (inst.op) {\n      case 'LOAD': registers[inst.dest] = inst.val; break;\n      case '+': registers[inst.dest] = registers[inst.left] + registers[inst.right]; break;\n      case '-': registers[inst.dest] = registers[inst.left] - registers[inst.right]; break;\n      case '*': registers[inst.dest] = registers[inst.left] * registers[inst.right]; break;\n      case '/': registers[inst.dest] = registers[inst.left] / registers[inst.right]; break;\n    }\n  }\n  return Object.values(registers).pop();\n}\n\n// Benchmark\nconst expr = {\n  type: 'BINARY', operator: '*',\n  left: { type: 'BINARY', operator: '+',\n    left: { type: 'NUMBER', value: 3 },\n    right: { type: 'NUMBER', value: 4 } },\n  right: { type: 'BINARY', operator: '+',\n    left: { type: 'NUMBER', value: 5 },\n    right: { type: 'NUMBER', value: 2 } }\n};\n\nconst ITERATIONS = 100000;\nlet t0 = performance.now();\nfor (let i = 0; i < ITERATIONS; i++) { interpret(expr); }\nconsole.log(`Interpreted: ${(performance.now() - t0).toFixed(2)}ms`);\n\nt0 = performance.now();\nfor (let i = 0; i < ITERATIONS; i++) { compileAndRun(expr); }\nconsole.log(`Compiled: ${(performance.now() - t0).toFixed(2)}ms`);\n// Compiled approach separates code generation from execution -> \"compile once, run many\"\n// Usually 2-5x faster for repeated execution of the same code"
-    ]
-  },
-  "Lexical Analysis": {
-    "Tokens & Lexemes": {
-      "exp": "Understanding tokens in the compilation process.",
-      "code": "Keywords, identifiers, literals, operators, delimiters; token patterns and attributes.",
+    ],
+    "Error Handling": {
+      "exp": "Strategies for compiler error handling.",
+      "code": "Error detection, reporting, recovery; panic mode, error productions.",
       "exercises": []
     },
+    "Symbol Tables": {
+      "exp": "Managing identifiers during compilation.",
+      "code": "Symbol table structure, scope management, inserting and looking up symbols.",
+      "exercises": []
+    }
+  },
+  "Syntax Analysis": {
+    "Abstract Syntax Trees": [
+      "ASTs represent the essential structure of code, abstracting away syntactic details like parentheses and semicolons. Each node represents a language construct with typed children.",
+      "// AST for '3 + 4 * 5'\n// BinaryExpr(+)\n//   Number(3)\n//   BinaryExpr(*)\n//     Number(4)\n//     Number(5)"
+    ],
+    "Parsing Fundamentals": [
+      "Parsing builds an Abstract Syntax Tree (AST) from the token stream. The parser verifies the program follows the language grammar (CFG in BNF notation). Parse errors indicate syntax violations.",
+      "// BNF Grammar for expressions\n// <expr> ::= <term> (('+' | '-') <term>)*\n// <term> ::= <factor> (('*' | '/') <factor>)*\n// <factor> ::= NUMBER | '(' <expr> ')'"
+    ],
+    "Context-Free Grammars": {
+      "exp": "CFG fundamentals for parsing.",
+      "code": "Productions, terminals, non-terminals, start symbol; derivation and parse trees.",
+      "exercises": []
+    },
+    "Top-Down Parsing": {
+      "exp": "Recursive descent and LL parsing.",
+      "code": "FIRST and FOLLOW sets, LL(1) grammars, left recursion elimination.",
+      "exercises": []
+    },
+    "Bottom-Up Parsing": {
+      "exp": "LR parsing techniques.",
+      "code": "LR(0), SLR, LR(1), LALR(1) parsers; shift-reduce and reduce-reduce conflicts.",
+      "exercises": []
+    },
+    "LL vs LR Parsing": [
+      "LL parsers (top-down) are simpler and easier to write by hand. LR parsers (bottom-up) can handle more grammars. LALR(1) is used by Yacc/Bison. GLR handles ambiguous grammars.",
+      "// LL(1): recursive descent, easy to hand-write\n// LALR(1): generated from grammar, more powerful\n// LL trades power for simplicity"
+    ],
+    "Error Recovery in Parsing": {
+      "exp": "Handling syntax errors gracefully.",
+      "code": "Panic mode, phrase-level recovery, error productions, global correction.",
+      "exercises": []
+    },
+    "Error Recovery": [
+      "Panic mode skips to a synchronizing token on error. Phrase-level recovery applies local fixes. Modern compilers produce multiple errors with useful suggestions.",
+      "// Panic mode: skip to sync token\nconst SYNCH_TOKENS = new Set([';', '}', '{']);\nfunction recover() {\n    while (pos < tokens.length) {\n        if (SYNCH_TOKENS.has(tokens[pos].value)) return;\n        pos++;\n    }\n}"
+    ],
+    "Parser Generators": {
+      "exp": "Automated parser generation.",
+      "code": "Yacc/Bison, ANTLR; grammar specifications, action code, conflict resolution.",
+      "exercises": []
+    }
+  },
+  "Lexical Analysis": {
+    "Tokenization Basics": [
+      "Lexical analysis (tokenization or lexing) is the first compiler phase, converting source code characters into tokens. A lexer reads the input stream and groups characters into lexemes (meaningful sequences) tagged with token types: keywords (if, while, return), identifiers (variable names), literals (numbers, strings), operators (+, -, *), delimiters ({, }, ;), and comments. Lexers use deterministic finite automata (DFAs) to recognize patterns. Regular expressions define token patterns. The lexer discards whitespace and comments. Lexer generators like Lex (flex) and ANTLR produce efficient lexers from declarative specifications. Maximal munch principle: always match the longest possible token. Error recovery in lexers involves skipping bad characters and reporting meaningful diagnostics. Reserved keywords are separate from identifiers: 'if' is a keyword, not a variable. Modern compilers often combine lexing and parsing in a single pass.",
+      "// Complete lexer for a simple language\nclass Lexer {\n  constructor(source) {\n    this.source = source;\n    this.pos = 0;\n    this.line = 1;\n    this.col = 1;\n    this.tokens = [];\n    \n    // Token type definitions\n    this.keywords = new Set(['if', 'else', 'while', 'for', 'return', 'let', 'const', 'function', 'class', 'true', 'false', 'null']);\n  }\n\n  tokenize() {\n    while (this.pos < this.source.length) {\n      const ch = this.source[this.pos];\n      \n      // Skip whitespace\n      if (/\\s/.test(ch)) {\n        if (ch === '\\n') { this.line++; this.col = 1; }\n        else { this.col++; }\n        this.pos++;\n        continue;\n      }\n      \n      // Comments (// and /* */)\n      if (ch === '/' && this.peek() === '/') {\n        while (this.pos < this.source.length && this.source[this.pos] !== '\\n') this.pos++;\n        continue;\n      }\n      if (ch === '/' && this.peek() === '*') {\n        this.pos += 2;\n        while (this.pos < this.source.length) {\n          if (this.source[this.pos] === '*' && this.peek() === '/') { this.pos += 2; break; }\n          if (this.source[this.pos] === '\\n') this.line++;\n          this.pos++;\n        }\n        continue;\n      }\n      \n      // Numbers (integers and floats)\n      if (/[0-9]/.test(ch)) {\n        let num = '';\n        while (this.pos < this.source.length && /[0-9]/.test(this.source[this.pos])) {\n          num += this.source[this.pos++];\n        }\n        // Check for float\n        if (this.source[this.pos] === '.' && /[0-9]/.test(this.peek(1))) {\n          num += '.' + this.source[++this.pos];\n          while (this.pos < this.source.length && /[0-9]/.test(this.source[++this.pos])) {\n            num += this.source[this.pos];\n          }\n        }\n        this.addToken('NUMBER', parseFloat(num));\n        continue;\n      }\n      \n      // Strings\n      if (ch === '\"' || ch === \"'\") {\n        const quote = ch;\n        let str = '';\n        this.pos++;\n        while (this.pos < this.source.length) {\n          if (this.source[this.pos] === '\\\\') {\n            str += this.source[this.pos + 1];\n            this.pos += 2;\n          } else if (this.source[this.pos] === quote) {\n            this.pos++;\n            break;\n          } else {\n            if (this.source[this.pos] === '\\n') this.line++;\n            str += this.source[this.pos++];\n          }\n        }\n        this.addToken('STRING', str);\n        continue;\n      }\n      \n      // Identifiers and keywords\n      if (/[a-zA-Z_$]/.test(ch)) {\n        let ident = '';\n        while (this.pos < this.source.length && /[a-zA-Z0-9_$]/.test(this.source[this.pos])) {\n          ident += this.source[this.pos++];\n        }\n        const type = this.keywords.has(ident) ? 'KEYWORD' : 'IDENTIFIER';\n        this.addToken(type, ident);\n        continue;\n      }\n      \n      // Multi-character operators\n      if (ch === '=' && this.peek() === '=') { this.addToken('OPERATOR', '=='); this.pos += 2; continue; }\n      if (ch === '!' && this.peek() === '=') { this.addToken('OPERATOR', '!='); this.pos += 2; continue; }\n      if (ch === '<' && this.peek() === '=') { this.addToken('OPERATOR', '<='); this.pos += 2; continue; }\n      if (ch === '>' && this.peek() === '=') { this.addToken('OPERATOR', '>='); this.pos += 2; continue; }\n      if (ch === '&' && this.peek() === '&') { this.addToken('OPERATOR', '&&'); this.pos += 2; continue; }\n      if (ch === '|' && this.peek() === '|') { this.addToken('OPERATOR', '||'); this.pos += 2; continue; }\n      \n      // Single-character operators and delimiters\n      if ('+-*/%=<>!&|(){}[];,.:@#'.includes(ch)) {\n        this.addToken('PUNCTUATION', ch);\n        this.pos++;\n        continue;\n      }\n      \n      throw new Error(`Unexpected character '${ch}' at line ${this.line}, col ${this.col}`);\n    }\n    \n    this.addToken('EOF', null);\n    return this.tokens;\n  }\n  \n  peek(offset = 1) {\n    return this.source[this.pos + offset];\n  }\n  \n  addToken(type, value) {\n    this.tokens.push({ type, value, line: this.line, col: this.col });\n    this.col += String(value).length;\n  }\n}\n\n// Example usage\nconst source = `\nlet x = 42;\nlet y = \"hello\";\nif (x > 10) {\n  return x * 2;\n}\n/* comment */\n// line comment\n`;\n\nconst lexer = new Lexer(source);\nconst tokens = lexer.tokenize();\ntokens.forEach(t => {\n  console.log(`${t.line}:${t.col} ${t.type.padEnd(12)} ${t.value}`);\n});\n/* Output:\n2:1  KEYWORD      let\n2:5  IDENTIFIER   x\n2:7  OPERATOR     =\n2:9  NUMBER       42\n2:11 PUNCTUATION  ;\n3:1  KEYWORD      let\n3:5  IDENTIFIER   y\n...\n*/"
+    ],
     "Regular Expressions": {
       "exp": "Using regex for token specification.",
       "code": "Regular expressions, NFA/DFA conversion, Thompson construction.",
+      "exercises": []
+    },
+    "Regular Expressions & DFAs": [
+      "Regular expressions describe token patterns. A DFA recognizes regular languages in O(n) time. Lexer generators like Flex convert regex patterns to efficient DFA-based matchers.",
+      "// DFA state machine for number matching\n// States: start -> int -> accept\n// Int: digit -> int (loop), non-digit -> accept\n// [0-9]+ matches one or more digits"
+    ],
+    "Tokens & Lexemes": {
+      "exp": "Understanding tokens in the compilation process.",
+      "code": "Keywords, identifiers, literals, operators, delimiters; token patterns and attributes.",
       "exercises": []
     },
     "Finite Automata": {
@@ -59,92 +110,45 @@
       "code": "Buffer management, lookahead, sentinel characters, performance optimization.",
       "exercises": []
     },
-    "Tokenization Basics": [
-      "Lexical analysis (tokenization or lexing) is the first compiler phase, converting source code characters into tokens. A lexer reads the input stream and groups characters into lexemes (meaningful sequences) tagged with token types: keywords (if, while, return), identifiers (variable names), literals (numbers, strings), operators (+, -, *), delimiters ({, }, ;), and comments. Lexers use deterministic finite automata (DFAs) to recognize patterns. Regular expressions define token patterns. The lexer discards whitespace and comments. Lexer generators like Lex (flex) and ANTLR produce efficient lexers from declarative specifications. Maximal munch principle: always match the longest possible token. Error recovery in lexers involves skipping bad characters and reporting meaningful diagnostics. Reserved keywords are separate from identifiers: 'if' is a keyword, not a variable. Modern compilers often combine lexing and parsing in a single pass.",
-      "// Complete lexer for a simple language\nclass Lexer {\n  constructor(source) {\n    this.source = source;\n    this.pos = 0;\n    this.line = 1;\n    this.col = 1;\n    this.tokens = [];\n    \n    // Token type definitions\n    this.keywords = new Set(['if', 'else', 'while', 'for', 'return', 'let', 'const', 'function', 'class', 'true', 'false', 'null']);\n  }\n\n  tokenize() {\n    while (this.pos < this.source.length) {\n      const ch = this.source[this.pos];\n      \n      // Skip whitespace\n      if (/\\s/.test(ch)) {\n        if (ch === '\\n') { this.line++; this.col = 1; }\n        else { this.col++; }\n        this.pos++;\n        continue;\n      }\n      \n      // Comments (// and /* */)\n      if (ch === '/' && this.peek() === '/') {\n        while (this.pos < this.source.length && this.source[this.pos] !== '\\n') this.pos++;\n        continue;\n      }\n      if (ch === '/' && this.peek() === '*') {\n        this.pos += 2;\n        while (this.pos < this.source.length) {\n          if (this.source[this.pos] === '*' && this.peek() === '/') { this.pos += 2; break; }\n          if (this.source[this.pos] === '\\n') this.line++;\n          this.pos++;\n        }\n        continue;\n      }\n      \n      // Numbers (integers and floats)\n      if (/[0-9]/.test(ch)) {\n        let num = '';\n        while (this.pos < this.source.length && /[0-9]/.test(this.source[this.pos])) {\n          num += this.source[this.pos++];\n        }\n        // Check for float\n        if (this.source[this.pos] === '.' && /[0-9]/.test(this.peek(1))) {\n          num += '.' + this.source[++this.pos];\n          while (this.pos < this.source.length && /[0-9]/.test(this.source[++this.pos])) {\n            num += this.source[this.pos];\n          }\n        }\n        this.addToken('NUMBER', parseFloat(num));\n        continue;\n      }\n      \n      // Strings\n      if (ch === '\"' || ch === \"'\") {\n        const quote = ch;\n        let str = '';\n        this.pos++;\n        while (this.pos < this.source.length) {\n          if (this.source[this.pos] === '\\\\') {\n            str += this.source[this.pos + 1];\n            this.pos += 2;\n          } else if (this.source[this.pos] === quote) {\n            this.pos++;\n            break;\n          } else {\n            if (this.source[this.pos] === '\\n') this.line++;\n            str += this.source[this.pos++];\n          }\n        }\n        this.addToken('STRING', str);\n        continue;\n      }\n      \n      // Identifiers and keywords\n      if (/[a-zA-Z_$]/.test(ch)) {\n        let ident = '';\n        while (this.pos < this.source.length && /[a-zA-Z0-9_$]/.test(this.source[this.pos])) {\n          ident += this.source[this.pos++];\n        }\n        const type = this.keywords.has(ident) ? 'KEYWORD' : 'IDENTIFIER';\n        this.addToken(type, ident);\n        continue;\n      }\n      \n      // Multi-character operators\n      if (ch === '=' && this.peek() === '=') { this.addToken('OPERATOR', '=='); this.pos += 2; continue; }\n      if (ch === '!' && this.peek() === '=') { this.addToken('OPERATOR', '!='); this.pos += 2; continue; }\n      if (ch === '<' && this.peek() === '=') { this.addToken('OPERATOR', '<='); this.pos += 2; continue; }\n      if (ch === '>' && this.peek() === '=') { this.addToken('OPERATOR', '>='); this.pos += 2; continue; }\n      if (ch === '&' && this.peek() === '&') { this.addToken('OPERATOR', '&&'); this.pos += 2; continue; }\n      if (ch === '|' && this.peek() === '|') { this.addToken('OPERATOR', '||'); this.pos += 2; continue; }\n      \n      // Single-character operators and delimiters\n      if ('+-*/%=<>!&|(){}[];,.:@#'.includes(ch)) {\n        this.addToken('PUNCTUATION', ch);\n        this.pos++;\n        continue;\n      }\n      \n      throw new Error(`Unexpected character '${ch}' at line ${this.line}, col ${this.col}`);\n    }\n    \n    this.addToken('EOF', null);\n    return this.tokens;\n  }\n  \n  peek(offset = 1) {\n    return this.source[this.pos + offset];\n  }\n  \n  addToken(type, value) {\n    this.tokens.push({ type, value, line: this.line, col: this.col });\n    this.col += String(value).length;\n  }\n}\n\n// Example usage\nconst source = `\nlet x = 42;\nlet y = \"hello\";\nif (x > 10) {\n  return x * 2;\n}\n/* comment */\n// line comment\n`;\n\nconst lexer = new Lexer(source);\nconst tokens = lexer.tokenize();\ntokens.forEach(t => {\n  console.log(`${t.line}:${t.col} ${t.type.padEnd(12)} ${t.value}`);\n});\n/* Output:\n2:1  KEYWORD      let\n2:5  IDENTIFIER   x\n2:7  OPERATOR     =\n2:9  NUMBER       42\n2:11 PUNCTUATION  ;\n3:1  KEYWORD      let\n3:5  IDENTIFIER   y\n...\n*/"
-    ],
-    "Regular Expressions & DFAs": [
-      "Regular expressions describe token patterns. A DFA recognizes regular languages in O(n) time. Lexer generators like Flex convert regex patterns to efficient DFA-based matchers.",
-      "// DFA state machine for number matching\n// States: start -> int -> accept\n// Int: digit -> int (loop), non-digit -> accept\n// [0-9]+ matches one or more digits"
-    ],
     "Lexer Generators": [
       "Flex and Lex generate fast DFA-based lexers from regex specifications. Modern alternatives include ANTLR and RE2C. Hand-written lexers are common for simpler languages.",
       "// Flex rule example\n// [a-zA-Z_][a-zA-Z0-9_]*  { return IDENTIFIER; }\n// [0-9]+                   { return NUMBER; }\n// [ \\t\\n]                  { /* skip whitespace */ }"
     ]
   },
-  "Syntax Analysis": {
-    "Context-Free Grammars": {
-      "exp": "CFG fundamentals for parsing.",
-      "code": "Productions, terminals, non-terminals, start symbol; derivation and parse trees.",
-      "exercises": []
-    },
-    "Top-Down Parsing": {
-      "exp": "Recursive descent and LL parsing.",
-      "code": "FIRST and FOLLOW sets, LL(1) grammars, left recursion elimination.",
-      "exercises": []
-    },
-    "Bottom-Up Parsing": {
-      "exp": "LR parsing techniques.",
-      "code": "LR(0), SLR, LR(1), LALR(1) parsers; shift-reduce and reduce-reduce conflicts.",
-      "exercises": []
-    },
-    "Parser Generators": {
-      "exp": "Automated parser generation.",
-      "code": "Yacc/Bison, ANTLR; grammar specifications, action code, conflict resolution.",
-      "exercises": []
-    },
-    "Abstract Syntax Trees": [
-      "ASTs represent the essential structure of code, abstracting away syntactic details like parentheses and semicolons. Each node represents a language construct with typed children.",
-      "// AST for '3 + 4 * 5'\n// BinaryExpr(+)\n//   Number(3)\n//   BinaryExpr(*)\n//     Number(4)\n//     Number(5)"
-    ],
-    "Error Recovery in Parsing": {
-      "exp": "Handling syntax errors gracefully.",
-      "code": "Panic mode, phrase-level recovery, error productions, global correction.",
-      "exercises": []
-    },
-    "Parsing Fundamentals": [
-      "Parsing builds an Abstract Syntax Tree (AST) from the token stream. The parser verifies the program follows the language grammar (CFG in BNF notation). Parse errors indicate syntax violations.",
-      "// BNF Grammar for expressions\n// <expr> ::= <term> (('+' | '-') <term>)*\n// <term> ::= <factor> (('*' | '/') <factor>)*\n// <factor> ::= NUMBER | '(' <expr> ')'"
-    ],
-    "LL vs LR Parsing": [
-      "LL parsers (top-down) are simpler and easier to write by hand. LR parsers (bottom-up) can handle more grammars. LALR(1) is used by Yacc/Bison. GLR handles ambiguous grammars.",
-      "// LL(1): recursive descent, easy to hand-write\n// LALR(1): generated from grammar, more powerful\n// LL trades power for simplicity"
-    ],
-    "Error Recovery": [
-      "Panic mode skips to a synchronizing token on error. Phrase-level recovery applies local fixes. Modern compilers produce multiple errors with useful suggestions.",
-      "// Panic mode: skip to sync token\nconst SYNCH_TOKENS = new Set([';', '}', '{']);\nfunction recover() {\n    while (pos < tokens.length) {\n        if (SYNCH_TOKENS.has(tokens[pos].value)) return;\n        pos++;\n    }\n}"
-    ]
-  },
   "Semantic Analysis": {
+    "Type Systems": {
+      "exp": "Designing and implementing type systems.",
+      "code": "Strong vs weak typing, static vs dynamic, subtyping, polymorphism.",
+      "exercises": []
+    },
     "Type Checking": [
       "Type checking ensures operations are applied to compatible types. It builds a symbol table mapping names to types and scopes. Static typing checks at compile time; dynamic typing defers to runtime.",
       "class TypeChecker {\n    check(node) {\n        if (node.type === 'NumberExpr') return 'number';\n        if (node.type === 'BinaryExpr') {\n            const l = this.check(node.left);\n            const r = this.check(node.right);\n            if (l !== r) throw new TypeError('Type mismatch');\n            return l;\n        }\n    }\n}"
     ],
-    "Scope Resolution": {
-      "exp": "Resolving identifiers in scopes.",
-      "code": "Lexical scoping, nested scopes, name hiding, hoisting.",
-      "exercises": []
-    },
     "Attribute Grammars": {
       "exp": "Augmenting CFGs with semantic rules.",
       "code": "Synthesized attributes, inherited attributes, attribute evaluation, L-attributed grammars.",
-      "exercises": []
-    },
-    "Type Systems": {
-      "exp": "Designing and implementing type systems.",
-      "code": "Strong vs weak typing, static vs dynamic, subtyping, polymorphism.",
       "exercises": []
     },
     "Type Inference": [
       "Hindley-Milner type inference deduces types without annotations via unification. Type variables are assigned to unknown types, constraints are collected and solved to find the most general type.",
       "// Type inference assigns fresh type variables\n// then unifies constraints to find the type\n// let x = 5;  // x: number (inferred)\n// let y = x + 3;  // y: number (from x)"
     ],
+    "Scope Resolution": {
+      "exp": "Resolving identifiers in scopes.",
+      "code": "Lexical scoping, nested scopes, name hiding, hoisting.",
+      "exercises": []
+    },
     "Symbol Tables": [
       "Symbol tables map identifiers to their attributes. Scopes are nested; inner scopes can access outer scopes. The most-closely-nested rule governs name resolution.",
       "class Scope {\n    constructor(parent) {\n        this.symbols = new Map();\n        this.parent = parent;\n    }\n    lookup(name) {\n        if (this.symbols.has(name)) return this.symbols.get(name);\n        if (this.parent) return this.parent.lookup(name);\n        throw new Error('Undefined: ' + name);\n    }\n}"
     ]
   },
   "Intermediate Representation": {
+    "Control Flow Graphs": [
+      "A CFG represents all paths through a program. Nodes are basic blocks (straight-line code). Edges represent control flow. Dominance, natural loops, and data-flow analysis use the CFG structure.",
+      "// Basic block: straight-line code\n// BB0: entry -> if (x > 0) goto BB1 else BB2\n// BB1: y = 5; goto BB3\n// BB2: y = 10; goto BB3\n// BB3: print(y) -> exit"
+    ],
     "Three-Address Code": [
       "Three-Address Code (TAC) decomposes expressions into simple operations with at most three operands. Each instruction is a quad (op, arg1, arg2, result). TAC exposes data flow for optimization.",
       "// TAC for 'x = a + b * c'\n// t0 = b * c\n// t1 = a + t0\n// x  = t1"
@@ -153,44 +157,18 @@
       "Static Single Assignment (SSA) assigns each variable exactly once. Phi functions merge values at control flow joins. SSA simplifies constant propagation, dead code elimination, and register allocation.",
       "// SSA Form\n// L1: y1 = 5          \\n// L2: y2 = 10          \\n// L3: y3 = phi(y1, y2)  // picks from source\n// print(y3)"
     ],
-    "Control Flow Graphs": [
-      "A CFG represents all paths through a program. Nodes are basic blocks (straight-line code). Edges represent control flow. Dominance, natural loops, and data-flow analysis use the CFG structure.",
-      "// Basic block: straight-line code\n// BB0: entry -> if (x > 0) goto BB1 else BB2\n// BB1: y = 5; goto BB3\n// BB2: y = 10; goto BB3\n// BB3: print(y) -> exit"
-    ],
     "IR Generation": {
       "exp": "Generating IR from AST.",
       "code": "Translation schemes, addressing modes, temporary variables.",
       "exercises": []
     }
   },
-  "Code Optimization": {
-    "Local Optimizations": {
-      "exp": "Optimizations within basic blocks.",
-      "code": "Common subexpression elimination, constant folding, algebraic simplification.",
-      "exercises": []
-    },
-    "Global Optimizations": {
-      "exp": "Optimizations across basic blocks.",
-      "code": "Data-flow analysis, reaching definitions, live variable analysis.",
-      "exercises": []
-    },
-    "Loop Optimizations": {
-      "exp": "Optimizing loop execution.",
-      "code": "Loop invariant code motion, induction variable elimination, loop unrolling.",
-      "exercises": []
-    },
-    "Register Allocation": {
-      "exp": "Efficient register usage.",
-      "code": "Graph coloring, liveness analysis, interference graphs, spilling.",
-      "exercises": []
-    },
-    "Instruction Scheduling": {
-      "exp": "Ordering instructions for performance.",
-      "code": "Pipeline hazards, instruction latencies, list scheduling, software pipelining.",
-      "exercises": []
-    }
-  },
   "Code Generation": {
+    "Function Prologues/Epilogues": {
+      "exp": "Calling conventions and stack frames.",
+      "code": "Caller/callee save registers, stack layout, activation records.",
+      "exercises": []
+    },
     "Target Code": {
       "exp": "Generating machine code from IR.",
       "code": "Instruction selection, addressing modes, machine-specific idioms.",
@@ -203,12 +181,7 @@
     "Instruction Selection": [
       "Instruction selection matches IR operations to target instructions. Tree rewriting, maximal munch, and DAG-based selection are common approaches. LLVM uses DAG-based matching.",
       "// IR -> x86-64\n// add t1, t2  ->  add rax, rbx\n// a[i] -> mov rax, [rdi + rsi*4]\n// f(a,b) -> mov rdi, a; mov rsi, b; call f"
-    ],
-    "Function Prologues/Epilogues": {
-      "exp": "Calling conventions and stack frames.",
-      "code": "Caller/callee save registers, stack layout, activation records.",
-      "exercises": []
-    }
+    ]
   },
   "Compiler Construction Tools": {
     "Lex & Yacc": {
@@ -237,6 +210,47 @@
       "exercises": []
     }
   },
+  "Compiler Tools & Practice": {
+    "Type Systems & Language Design": [
+      "Type systems range from nominal (Java) to structural (TypeScript, Go). Gradual typing mixes static and dynamic checks. Rust's ownership model uses linear types. Algebraic data types with pattern matching provide safe sum types.",
+      "// Structural typing (TypeScript)\n// Point: { x: number, y: number }\n// Any matching structure works\n\n// Algebraic data types (Rust)\n// enum Option<T> { Some(T), None }"
+    ],
+    "LLVM & Clang": [
+      "LLVM provides a modular compiler infrastructure: Clang frontend, LLVM IR middle-end, and target-specific backends. Rust, Swift, and Julia use LLVM. MLIR extends LLVM for domain-specific compilers.",
+      "// LLVM pipeline\n// clang -S -emit-llvm input.c | opt -O2 | llc\n// The same IR can target x86, ARM, WebAssembly"
+    ],
+    "Parser Generators": [
+      "Yacc and Bison generate LALR(1) parsers from grammar specifications. ANTLR generates LL(*) parsers. Tree-sitter provides incremental parsing for IDEs.",
+      "// Bison grammar\n// expr: NUMBER\n//     | expr '+' expr  { $$ = $1 + $3; }\n//     | expr '*' expr  { $$ = $1 * $3; }\n//     ;"
+    ]
+  },
+  "Code Optimization": {
+    "Register Allocation": {
+      "exp": "Efficient register usage.",
+      "code": "Graph coloring, liveness analysis, interference graphs, spilling.",
+      "exercises": []
+    },
+    "Instruction Scheduling": {
+      "exp": "Ordering instructions for performance.",
+      "code": "Pipeline hazards, instruction latencies, list scheduling, software pipelining.",
+      "exercises": []
+    },
+    "Local Optimizations": {
+      "exp": "Optimizations within basic blocks.",
+      "code": "Common subexpression elimination, constant folding, algebraic simplification.",
+      "exercises": []
+    },
+    "Global Optimizations": {
+      "exp": "Optimizations across basic blocks.",
+      "code": "Data-flow analysis, reaching definitions, live variable analysis.",
+      "exercises": []
+    },
+    "Loop Optimizations": {
+      "exp": "Optimizing loop execution.",
+      "code": "Loop invariant code motion, induction variable elimination, loop unrolling.",
+      "exercises": []
+    }
+  },
   "Optimization": {
     "Constant Folding": [
       "Constant folding evaluates constant expressions at compile time. x = 2 * 3 becomes x = 6. Constant propagation replaces variables that are always constant with their values.",
@@ -249,20 +263,6 @@
     "Loop Optimizations": [
       "Key loop optimizations: invariant code motion, induction variable strength reduction, loop unrolling, fusion, fission, and vectorization. Loops are the primary optimization target.",
       "// Loop invariant hoisting\n// Before: for(i=0;i<n;i++) a[i]=a[i]*(PI/180);\n// After: const s=PI/180; for(i=0;i<n;i++) a[i]=a[i]*s;"
-    ]
-  },
-  "Compiler Tools & Practice": {
-    "Parser Generators": [
-      "Yacc and Bison generate LALR(1) parsers from grammar specifications. ANTLR generates LL(*) parsers. Tree-sitter provides incremental parsing for IDEs.",
-      "// Bison grammar\n// expr: NUMBER\n//     | expr '+' expr  { $$ = $1 + $3; }\n//     | expr '*' expr  { $$ = $1 * $3; }\n//     ;"
-    ],
-    "LLVM & Clang": [
-      "LLVM provides a modular compiler infrastructure: Clang frontend, LLVM IR middle-end, and target-specific backends. Rust, Swift, and Julia use LLVM. MLIR extends LLVM for domain-specific compilers.",
-      "// LLVM pipeline\n// clang -S -emit-llvm input.c | opt -O2 | llc\n// The same IR can target x86, ARM, WebAssembly"
-    ],
-    "Type Systems & Language Design": [
-      "Type systems range from nominal (Java) to structural (TypeScript, Go). Gradual typing mixes static and dynamic checks. Rust's ownership model uses linear types. Algebraic data types with pattern matching provide safe sum types.",
-      "// Structural typing (TypeScript)\n// Point: { x: number, y: number }\n// Any matching structure works\n\n// Algebraic data types (Rust)\n// enum Option<T> { Some(T), None }"
     ]
   }
 }
