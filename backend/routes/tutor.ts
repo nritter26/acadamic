@@ -227,6 +227,63 @@ router.post('/attempt-exercise', validate(AttemptExerciseSchema), async (req: Re
   });
 });
 
+router.post('/hint', async (req: Request, res: Response) => {
+  const { topic, lang, code, learnerId, promptContext } = req.body;
+  const useLang = lang || 'js';
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  let aborted = false;
+  let sseDoneCalled = false;
+  res.on('close', () => { aborted = true; });
+
+  const TIMEOUT_MS = 15000;
+  const timeoutHandle = setTimeout(() => {
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      res.write(`data: ${JSON.stringify({ content: "\n\n[HINT TIMEOUT] Try again." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }, TIMEOUT_MS);
+
+  const systemMessage = promptContext
+    ? promptContext
+    : 'You are a helpful tutor. Give a short, specific hint to help the student fix their code. Do not give the full answer.';
+
+  const messages: LLMMessage[] = [
+    { role: 'system', content: systemMessage },
+    { role: 'user', content: `The student is working on "${topic}" in ${useLang}.\nTheir code:\n\`\`\`${useLang}\n${code || ''}\n\`\`\`\nGive them a helpful hint.` },
+  ];
+
+  const sseSend = (chunk: string) => {
+    if (aborted || sseDoneCalled) return;
+    res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+  };
+
+  try {
+    await askLLM(messages, sseSend, { lang: useLang, topic });
+  } catch (e) {
+    console.error('[tutor] hint error:', (e as Error).message);
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      clearTimeout(timeoutHandle);
+      res.write(`data: ${JSON.stringify({ content: "Sorry, I couldn't generate a hint." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }
+
+  if (!sseDoneCalled && !aborted) {
+    sseDoneCalled = true;
+    clearTimeout(timeoutHandle);
+    res.write('data: [DONE]\n\n');
+    res.end();
+  }
+});
+
 router.get('/recommend', async (req: Request, res: Response) => {
   const lang = req.query.lang as string;
   const learnerId = (req.query.learnerId as string) || 'default';
