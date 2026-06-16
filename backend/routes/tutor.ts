@@ -4,7 +4,7 @@ import { createSession, transitionState, getSession } from '../services/teaching
 import { searchWithSources } from '../ai/embeddings';
 import { getConceptMastery } from '../ai/learner';
 import { validate } from '../middleware';
-import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema, ExplainErrorSchema, TransformSchema } from '../types';
+import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema, ExplainErrorSchema, TransformSchema, StepThroughSchema } from '../types';
 import { generateExercise } from '../ai/exercises';
 import { review as codeReview } from '../ai/reviewer';
 import { getNextRecommendedTopic, trackAttempt, trackError } from '../ai/learner';
@@ -257,6 +257,70 @@ Explain what caused this error and how to fix it.` },
       res.write(`event: suggestions\ndata: ${JSON.stringify({ suggestions })}\n\n`);
     }
 
+    res.write('data: [DONE]\n\n');
+    res.end();
+  }
+});
+
+router.post('/step-through', validate(StepThroughSchema), async (req: Request, res: Response) => {
+  const { code, lang, topic } = req.body;
+  const useLang = lang || 'js';
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  let aborted = false;
+  let sseDoneCalled = false;
+  res.on('close', () => { aborted = true; });
+
+  const TIMEOUT_MS = 30000;
+  const timeoutHandle = setTimeout(() => {
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      res.write(`data: ${JSON.stringify({ content: "\n\n[TIMEOUT] Try again." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }, TIMEOUT_MS);
+
+  const lines = code.split('\n');
+  const lineCount = lines.length;
+
+  const systemPrompt = `You are a code tutor. Walk through the code line by line, explaining what each line does.
+For each line, provide a brief explanation. Keep explanations concise and educational.
+Return your response as a series of line-by-line explanations.`;
+
+  const messages: LLMMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: `Walk through this ${useLang} code line by line${topic ? ` (topic: ${topic})` : ''}:
+\`\`\`${useLang}
+${code}
+\`\`\`
+There are ${lineCount} lines. Explain each line or logical block.` },
+  ];
+
+  const sseSend = (chunk: string) => {
+    if (aborted || sseDoneCalled) return;
+    res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+  };
+
+  try {
+    await askLLM(messages, sseSend, { lang: useLang, topic: topic || 'code-walk' });
+  } catch (e) {
+    console.error('[tutor] step-through error:', (e as Error).message);
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      clearTimeout(timeoutHandle);
+      res.write(`data: ${JSON.stringify({ content: "Sorry, I couldn't walk through the code." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }
+
+  if (!sseDoneCalled && !aborted) {
+    sseDoneCalled = true;
+    clearTimeout(timeoutHandle);
     res.write('data: [DONE]\n\n');
     res.end();
   }

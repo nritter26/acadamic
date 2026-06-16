@@ -155,6 +155,13 @@ export const CheckSchema = z.object({
 });
 export type CheckInput = z.infer<typeof CheckSchema>;
 
+export const StepThroughSchema = z.object({
+  code: z.string().min(1),
+  lang: z.string().optional(),
+  topic: z.string().optional(),
+});
+export type StepThroughInput = z.infer<typeof StepThroughSchema>;
+
 export const TransformSchema = z.object({
   code: z.string().min(1),
   lang: z.string().optional(),
