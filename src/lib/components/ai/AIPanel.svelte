@@ -7,6 +7,7 @@
   import AISuggestions from './AISuggestions.svelte';
   import ExercisePrompt from './ExercisePrompt.svelte';
   import DiffView from './DiffView.svelte';
+  import StepThrough from './StepThrough.svelte';
   import { slide } from 'svelte/transition';
 
   let ai = $derived(getAIState());
@@ -18,6 +19,8 @@
   let selectedCmdIndex = $state(0);
   let currentSuggestions = $state([]);
   let transformResult = $state(null);
+  let stepThroughState = $state(null);
+  let stepThroughLines = $state([]);
 
   const COMMANDS = [
     { name: '/async', desc: 'Convert to async/await' },
@@ -145,6 +148,36 @@
     });
   }
 
+  function handleHighlightLine(lineIndex) {
+    ai.editorCode = (ai.editorCode || '').split('\n').map((line, i) => {
+      return line;
+    }).join('\n');
+  }
+
+  async function handleWalkThrough() {
+    const code = ai.editorCode;
+    if (!code || !code.trim()) return;
+
+    stepThroughState = code;
+    stepThroughLines = [];
+    ai.addMessage('', 'bot', 'step-through');
+    let streamed = '';
+    apiStream('/api/tutor/step-through', { code, lang: curr.lang, topic: curr.topic }, (chunk) => {
+      streamed += chunk;
+      stepThroughLines = code.split('\n').map((line, i) => ({
+        number: i + 1,
+        explanation: 'Loading...',
+      }));
+    }, () => {
+      stepThroughLines = code.split('\n').map((line, i) => ({
+        number: i + 1,
+        explanation: streamed || 'See explanation above.',
+      }));
+    }, (error) => {
+      stepThroughState = null;
+    });
+  }
+
   function stopStreaming() {
     ai.setStreaming(false);
   }
@@ -224,6 +257,17 @@
       {/if}
     </div>
     <AISuggestions onsuggest={handleSuggest} suggestions={currentSuggestions} />
+    {#if ai.editorCode && ai.editorCode.trim() && !stepThroughState}
+      <button class="walkthrough-btn" onclick={handleWalkThrough}>Walk me through this code</button>
+    {/if}
+    {#if stepThroughState}
+      <StepThrough
+        code={stepThroughState}
+        lines={stepThroughLines}
+        onClose={() => stepThroughState = null}
+        onHighlightLine={(idx) => {}}
+      />
+    {/if}
     <ExercisePrompt />
     {#if offlineStatus}
       <div class="ai-offline-badge">{offlineStatus}</div>
@@ -297,4 +341,6 @@
   .cmd-desc { color: #94a3b8; font-size: 10px; }
   .apply-transform-btn { display: block; margin: 4px 12px 8px; padding: 6px 14px; background: #22c55e; color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
   .apply-transform-btn:hover { background: #16a34a; }
+  .walkthrough-btn { display: block; margin: 4px 12px; padding: 6px 14px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; }
+  .walkthrough-btn:hover { background: #4f46e5; }
 </style>
