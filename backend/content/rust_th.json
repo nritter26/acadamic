@@ -1,0 +1,639 @@
+{
+  "พื้นฐาน": {
+    "บทนำ": {
+      "exp": "แนะนำภาษา Rust",
+      "code": "",
+      "exercises": []
+    },
+    "ตัวแปรและชนิดข้อมูล": {
+      "exp": "ตัวแปรและชนิดข้อมูลใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "ตัวดำเนินการ": {
+      "exp": "ตัวดำเนินการใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "การควบคุมการทำงาน": {
+      "exp": "คำสั่งควบคุมการทำงานใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "ฟังก์ชัน": {
+      "exp": "ฟังก์ชันใน Rust",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "โครงสร้างข้อมูล": {
+    "อาร์เรย์และคอลเล็กชัน": {
+      "exp": "การทำงานกับคอลเล็กชันใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "สตริง": {
+      "exp": "การจัดการสตริงใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "แผนที่และดิกชันนารี": {
+      "exp": "โครงสร้างข้อมูลแบบคีย์-ค่าใน Rust",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "การเขียนโปรแกรมเชิงวัตถุ": {
+    "คลาสและอ็อบเจกต์": {
+      "exp": "แนวคิด OOP ใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "การสืบทอด": {
+      "exp": "รูปแบบการสืบทอดใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "อินเทอร์เฟซ": {
+      "exp": "อินเทอร์เฟซและสัญญาใน Rust",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "การจัดการข้อผิดพลาด": {
+    "ข้อยกเว้น": {
+      "exp": "การจัดการข้อยกเว้นใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "การดีบัก": {
+      "exp": "การดีบักโค้ด Rust",
+      "code": "",
+      "exercises": []
+    },
+    "Result และ Option": [
+      "`Result<T, E>` สำหรับข้อผิดพลาดที่กู้คืนได้ `Option<T>` สำหรับค่าที่อาจเป็น null ตัวดำเนินการ `?` ส่งต่อข้อผิดพลาด `unwrap()` และ `expect()` ดึงค่าหรือ panic `ok_or()` แปลง Option เป็น Result",
+      "fn divide(a: f64, b: f64) -> Result<f64, String> {\n    if b == 0.0 {\n        Err(\"division by zero\".to_string())\n    } else {\n        Ok(a / b)\n    }\n}\nmatch divide(10.0, 2.0) {\n    Ok(v) => println!(\"{}\", v),\n    Err(e) => println!(\"error: {}\", e),\n}"
+    ],
+    "ตัวดำเนินการ ?": [
+      "`?` ปลดห่อ `Result` หรือ `Option` และคืนค่า early เมื่อเกิด error/None แปลงชนิดข้อผิดพลาดผ่าน `From` trait ใช้งานได้เฉพาะในฟังก์ชันที่คืนค่า Result, Option หรือชนิดที่ implement `FromResidual`",
+      "use std::num::ParseIntError;\nfn parse_and_add(a: &str, b: &str) -> Result<i32, ParseIntError> {\n    let x: i32 = a.parse()?;\n    let y: i32 = b.parse()?;\n    Ok(x + y)\n}\nprintln!(\"{:?}\", parse_and_add(\"5\", \"3\"));"
+    ],
+    "Panic และข้อผิดพลาดที่ไม่สามารถกู้คืนได้": [
+      "`panic!()` ปลดสแต็ก (หรือ abort ด้วย `panic = \"abort\"`) ใช้สำหรับสภาวะที่ไม่สามารถกู้คืนได้ `unwrap`, `expect`, `unreachable!()`, `todo!()`, `unimplemented!()` ล้วน panic เมื่อใช้งาน",
+      "fn check(n: i32) {\n    if n < 0 {\n        panic!(\"negative: {}\", n);\n    }\n    println!(\"ok: {}\", n);\n}"
+    ],
+    "ชนิดข้อผิดพลาดแบบกำหนดเอง": [
+      "Implement `std::error::Error` สำหรับข้อผิดพลาดที่กำหนดเอง ต้องการ `Display` + `Debug` เมธอด `source()` สำหรับการโยงข้อผิดพลาด `Box<dyn Error>` สำหรับการจัดการข้อผิดพลาดแบบ type-erased",
+      "#[derive(Debug)]\nstruct MyError { details: String }\nimpl std::fmt::Display for MyError {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{}\", self.details)\n    }\n}\nimpl std::error::Error for MyError {}\nfn fail() -> Result<(), MyError> {\n    Err(MyError { details: \"oops\".into() })\n}"
+    ],
+    "Crate thiserror": [
+      "thiserror ใช้ derive `std::error::Error` โดยมี boilerplate น้อยที่สุด รองรับ `#[error(\"...\")]` สำหรับ Display, `#[source]` สำหรับการโยงข้อผิดพลาด และ `#[from]` สำหรับการ implement From อัตโนมัติ",
+      "use thiserror::Error;\n#[derive(Error, Debug)]\npub enum ParseError {\n    #[error(\"invalid format: {0}\")]\n    InvalidFormat(String),\n    #[error(\"parse int error: {0}\")]\n    IntError(#[from] std::num::ParseIntError),\n}\nfn parse(s: &str) -> Result<i32, ParseError> {\n    Ok(s.parse::<i32>()?)\n}"
+    ],
+    "Crates anyhow / eyre": [
+      "anyhow ให้ `Result<T, anyhow::Error>` สำหรับการจัดการข้อผิดพลาดระดับแอปพลิเคชัน มาโคร `bail!()` และ `ensure!()` เมธอด `.context()` eyre เป็นทางเลือกที่คล้ายกันพร้อมรายงานข้อผิดพลาดที่ดีกว่า",
+      "use anyhow::{Context, Result};\nfn read_and_parse(path: &str) -> Result<i32> {\n    let content = std::fs::read_to_string(path)\n        .with_context(|| format!(\"failed to read {}\", path))?;\n    let n: i32 = content.trim().parse()\n        .context(\"failed to parse number\")?;\n    Ok(n)\n}"
+    ],
+    "การโยงข้อผิดพลาด": [
+      "ข้อผิดพลาดโยงกันผ่าน `source()` หรือ `.context()` ตัวดำเนินการ `?` แปลงอัตโนมัติผ่าน `From` ไลบรารีกำหนดชนิดข้อผิดพลาดเฉพาะ แอปใช้ anyhow/eyre `Error::source` วนซ้ำในลูกโซ่",
+      "use std::error::Error;\nfn print_chain(e: &dyn Error) {\n    let mut source = Some(e);\n    while let Some(err) = source {\n        println!(\"{}\", err);\n        source = err.source();\n    }\n}"
+    ],
+    "Result Combinators": [
+      "`map`, `map_err`, `and_then`, `or_else`, `unwrap_or`, `unwrap_or_else`, `ok`, `err`, `transpose` — คอมบิเนเตอร์เหล่านี้แปลง Result โดยไม่ต้อง match แบบชัดแจ้ง",
+      "fn parse(s: &str) -> Result<i32, String> {\n    s.parse().map_err(|e| format!(\"{}\", e))\n}\nfn add_results(a: Result<i32, String>, b: Result<i32, String>) -> Result<i32, String> {\n    a.and_then(|x| b.map(|y| x + y))\n}\nlet r = add_results(parse(\"5\"), parse(\"3\"));\nprintln!(\"{:?}\", r);"
+    ]
+  },
+  "I/O และระบบไฟล์": {
+    "การดำเนินการกับไฟล์": {
+      "exp": "I/O ไฟล์ใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "อินพุต/เอาต์พุต": {
+      "exp": "การดำเนินการอินพุตและเอาต์พุตใน Rust",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "หัวข้อขั้นสูง": {
+    "การทำงานพร้อมกัน": {
+      "exp": "Concurrency ใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "โมดูล": {
+      "exp": "การเขียนโปรแกรมแบบโมดูลใน Rust",
+      "code": "",
+      "exercises": []
+    },
+    "แนวปฏิบัติที่ดี": {
+      "exp": "แนวปฏิบัติที่ดีสำหรับ Rust",
+      "code": "",
+      "exercises": []
+    },
+    "ประสิทธิภาพ": {
+      "exp": "การปรับแต่งโค้ด Rust",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "การเริ่มต้น": {
+    "Rust คืออะไร": [
+      "Rust เป็นภาษาโปรแกรมสำหรับระบบที่เน้นความปลอดภัย ความเร็ว และการทำงานพร้อมกัน มันรับประกันความปลอดภัยของหน่วยความจำโดยไม่ต้องมี garbage collector ผ่านระบบ ownership และ zero-cost abstractions",
+      "fn main() {\n    println!(\"Hello, Rust!\");\n}"
+    ],
+    "พื้นฐานไวยากรณ์ Rust": [
+      "Rust ใช้ `fn` สำหรับฟังก์ชัน `let` สำหรับตัวแปร และมาโครด้วย `!` อัฒภาคจบ expression บล็อกใช้ปีกกา `main` คือจุดเริ่มต้นโปรแกรม ความแตกต่างระหว่าง statement และ expression เป็นสิ่งสำคัญ",
+      "let name = \"Doge\";\nlet age: u32 = 5;\nfn greet() -> String {\n    format!(\"Hello {}\", name)\n}\nprintln!(\"{}\", greet());"
+    ],
+    "ตัวแปรและความสามารถในการเปลี่ยนแปลง": [
+      "ตัวแปรไม่สามารถเปลี่ยนแปลงได้โดยเริ่มต้น ใช้ `mut` เพื่อให้เปลี่ยนแปลงได้ `const` สำหรับค่าคงที่เวลา compile Shadowing ประกาศตัวแปรใหม่ด้วย `let` ทำให้เปลี่ยนชนิดได้",
+      "let x = 5; // immutable\nlet mut y = 10;\ny += 5;\nconst MAX: u32 = 100;\nlet z = 1;\nlet z = z + \"2\"; // shadowing: now &str\nprintln!(\"x={}, y={}, max={}\", x, y, MAX);"
+    ],
+    "ชนิด Scalar": [
+      "ชนิด scalar สี่ชนิด: integers (i8-u128, i64, usize), floats (f32, f64), bool, char Integer overflow ห่อค่าใน release, panic ใน debug ขีดเส้นใต้เพิ่มความอ่านง่าย: `1_000_000`",
+      "let int: i32 = -42;\nlet uint: u64 = 100;\nlet float: f64 = 3.14159;\nlet done: bool = true;\nlet letter: char = 'R';\nlet big = 1_000_000u64;\nprintln!(\"{} {} {} {} {} {}\", int, uint, float, done, letter, big);"
+    ],
+    "rustup และ Toolchains": [
+      "rustup จัดการ Rust toolchains สลับระหว่าง stable, beta, nightly `rustup target add` สำหรับ cross-compilation `rustup component add` สำหรับเครื่องมือ `rustup show` แสดง toolchain ที่ใช้งานอยู่",
+      "# shell commands\n$ rustup install nightly\n$ rustup default stable\n$ rustup target add wasm32-unknown-unknown\n$ rustup component add rust-src"
+    ],
+    "พื้นฐาน Cargo": [
+      "Cargo คือระบบ build และ package manager ของ Rust `cargo new`, `cargo build`, `cargo run`, `cargo test`, `cargo check`, `cargo clean` Cargo.toml กำหนด metadata และ dependencies",
+      "# shell commands\n$ cargo new my_project --bin\n$ cd my_project\n$ cargo add serde --features derive\n$ cargo run --release\n$ cargo check"
+    ],
+    "rustfmt": [
+      "rustfmt จัดรูปแบบโค้ดอัตโนมัติตามแนวทางสไตล์ `cargo fmt` จัดรูปแบบทั้งโปรเจกต์ `rustfmt --check` ตรวจสอบความถูกต้องใน CI กำหนดค่าด้วย `rustfmt.toml`",
+      "# shell commands\n$ cargo fmt\n$ rustfmt --check src/main.rs\n# rustfmt.toml\nmax_width = 100\nedition = \"2021\""
+    ],
+    "Clippy": [
+      "Clippy คือ linter ของ Rust ที่มีกฎ 550+ รายการ `cargo clippy` จับข้อผิดพลาดทั่วไป โค้ดที่ไม่เป็นidiomatic และปัญหาประสิทธิภาพ `#[allow(clippy::...)]` ปิดการแจ้งเตือนเฉพาะรายการ",
+      "# shell commands\n$ cargo clippy\n$ cargo clippy -- -W clippy::pedantic\n$ cargo clippy --fix"
+    ],
+    "rust-analyzer": [
+      "rust-analyzer ให้การสนับสนุน IDE: auto-complete, goto-definition, type hints, inlay hints, rename, diagnostics LSP server ที่ใช้โดย VS Code, Neovim, Emacs และ Zed",
+      "// In VS Code settings.json\n\"rust-analyzer.inlayHints.typeHints\": true,\n\"rust-analyzer.check.command\": \"clippy\""
+    ]
+  },
+  "การควบคุมการทำงาน": {
+    "if / else if / else": [
+      "เงื่อนไขต้องเป็น `bool` — ไม่มีการแปลง truthy/falsy `if` เป็น expression สามารถกำหนดค่าให้ `let` ทุกแขนงต้องคืนค่าชนิดเดียวกัน บล็อกประเมินค่าจาก expression สุดท้าย",
+      "let n = 7;\nif n % 2 == 0 {\n    println!(\"even\");\n} else {\n    println!(\"odd\");\n}\nlet label = if n > 5 { \"big\" } else { \"small\" };\nprintln!(\"{}\", label);"
+    ],
+    "ลูป (loop, while, for)": [
+      "`loop` วนซ้ำตลอดไปจนกว่า `break` `while` วนซ้ำตามเงื่อนไข `for` วนซ้ำบน iterators `(0..n)` คือไวยากรณ์ range ใช้ `continue` เพื่อข้ามไป iteration ถัดไป",
+      "let mut count = 0;\nloop {\n    count += 1;\n    if count == 3 { break; }\n}\nwhile count > 0 { count -= 1; }\nfor i in 0..5 { print!(\"{}\", i); }\nprintln!();"
+    ],
+    "Pattern Matching (match)": [
+      "`match` คือการจับคู่รูปแบบอันทรงพลังของ Rust แขนงต้องครอบคลุมทั้งหมด รูปแบบสามารถ bind, จับคู่ช่วง (`..=`), ใช้ `|` สำหรับทางเลือก และ guard ด้วย `if`",
+      "let value = 3;\nmatch value {\n    1 => println!(\"one\"),\n    2 | 3 => println!(\"two or three\"),\n    4..=10 => println!(\"four to ten\"),\n    _ => println!(\"other\"),\n}"
+    ],
+    "if let": [
+      "`if let` รวม `match` สำหรับรูปแบบเดียว ละเว้นรูปแบบอื่น มีประโยชน์กับ `Option`, `Result` และ enums ลด boilerplate เมื่อมีแขนงเดียวที่สำคัญ",
+      "let opt = Some(42);\nif let Some(x) = opt {\n    println!(\"value: {}\", x);\n} else {\n    println!(\"none\");\n}"
+    ],
+    "while let": [
+      "`while let` จับคู่รูปแบบซ้ำๆ จนกว่าจะล้มเหลว พบได้ทั่วไปกับ iterators, ฟังก์ชันที่ให้ผลลัพธ์ `Option` และรูปแบบ mutable borrow",
+      "let mut stack = vec![1, 2, 3];\nwhile let Some(top) = stack.pop() {\n    print!(\"{}\", top);\n}\nprintln!();\nlet mut iter = 0..3;\nwhile let Some(x) = iter.next() {\n    print!(\"{}\", x);\n}"
+    ],
+    "Labeled Break และ Continue": [
+      "ป้ายชื่อลูป (`'label`) แยกแยะลูปที่ซ้อนกัน `break 'label` ออกจากลูปที่ระบุชื่อ `continue 'label` ข้ามไป iteration ถัดไปของลูปที่ระบุชื่อ",
+      "'outer: for i in 0..3 {\n    for j in 0..3 {\n        if i == 1 && j == 1 {\n            break 'outer;\n        }\n        println!(\"({}, {})\", i, j);\n    }\n}"
+    ],
+    "การคืนค่าจากลูป": [
+      "`loop` สามารถคืนค่าด้วย `break value` `break` โดยไม่มีค่าคืน `()` มีประโยชน์สำหรับ retry logic หรือการเริ่มต้นค่าจากการดำเนินการที่อาจล้มเหลว",
+      "let mut tries = 0;\nlet result = loop {\n    tries += 1;\n    if tries >= 3 {\n        break \"timeout\".to_string();\n    }\n    break \"ok\".to_string();\n};\nprintln!(\"{}\", result);"
+    ]
+  },
+  "Ownership และ Borrowing": {
+    "กฎ Ownership": [
+      "แต่ละค่ามีเจ้าหนึ่งคน เมื่อเจ้าออกจากขอบเขต ค่าจะถูก drop Ownership สามารถย้ายได้ สิ่งนี้รับประกันความปลอดภัยของหน่วยความจำโดยไม่ต้อง GC",
+      "let s1 = String::from(\"hello\");\nlet s2 = s1; // move\n// println!(\"{}\", s1); // error: borrowed after move\nprintln!(\"{}\", s2);"
+    ],
+    "Move Semantics": [
+      "การกำหนดค่าหรือส่งผ่านค่าเป็นการย้าย ownership เว้นแต่ชนิดนั้น implement `Copy` ชนิดที่อยู่บนสแต็กเท่านั้น (integers, bools, floats, chars, tuples ของ Copy types) ที่จะถูกคัดลอก",
+      "fn take_ownership(s: String) { println!(\"{}\", s); }\nlet s = String::from(\"hello\");\ntake_ownership(s);\n// println!(\"{}\", s); // error\nlet x = 42; // Copy\nlet y = x; // copy, not move\nprintln!(\"{} {}\", x, y);"
+    ],
+    "Borrowing และ References": [
+      "References ยืมค่าโดยไม่รับ ownership `&T` (immutable, shared) `&mut T` (mutable, exclusive) References ต้องไม่มีอายุยืนกว่าตัวที่มันอ้างถึง",
+      "fn calc_len(s: &String) -> usize { s.len() }\nfn append(s: &mut String) { s.push_str(\"!\"); }\nlet mut s = String::from(\"hello\");\nprintln!(\"{}\", calc_len(&s));\nappend(&mut s);\nprintln!(\"{}\", s);"
+    ],
+    "กฎ Borrow แบบลึก": [
+      "ในเวลาใดก็ตาม: มี mutable reference ได้หนึ่งอัน หรือ immutable references กี่อันก็ได้ References ต้องใช้ได้เสมอ Borrow checker บังคับใช้สิ่งนี้ตอน compile time",
+      "let mut v = vec![1, 2, 3];\nlet r1 = &v;\nlet r2 = &v;\nprintln!(\"{:?} {:?}\", r1, r2); // ok: many &T\n// let r3 = &mut v; // error: already borrowed immutably\nlet r3 = &mut v;\nr3.push(4);\nprintln!(\"{:?}\", r3);"
+    ],
+    "Split Borrows": [
+      "Rust อนุญาตให้ยืมฟิลด์ต่างๆ ของ struct พร้อมกันได้ Borrow checker ติดตาม borrow ที่ระดับฟิลด์ ทำให้สามารถเข้าถึงฟิลด์ที่ไม่ทับซ้อนกันแบบ mutable ได้",
+      "struct Point { x: i32, y: i32 }\nlet mut p = Point { x: 0, y: 0 };\nlet rx = &p.x;\nlet ry = &mut p.y;\nprintln!(\"{}\", rx);\n*ry = 10;\n// let r = &mut p.x; // error: rx still borrows p.x"
+    ],
+    "Non-Lexical Lifetimes (NLL)": [
+      "NLL ทำให้ borrow checker ฉลาดขึ้น: borrows สิ้นสุดเมื่อถูกใช้ครั้งสุดท้าย ไม่ใช่เมื่อสิ้นสุดขอบเขต ซึ่งลดแรงเสียดทานกับ borrow checker อย่างมีนัยสำคัญ",
+      "let mut s = String::from(\"hello\");\nlet r = &s;\nprintln!(\"{}\", r); // r last used here\nlet r2 = &mut s; // ok: r is no longer needed\nr2.push_str(\" world\");\nprintln!(\"{}\", r2);"
+    ],
+    "Slices": [
+      "Slices เป็นมุมมองขนาดไดนามิกต่อลำดับที่ต่อเนื่องกัน `&str` คือ string slice `&[T]` คือ array slice พวกมันเป็น fat pointers (ptr + length) และไม่เป็นเจ้าของข้อมูล",
+      "let s = String::from(\"hello world\");\nlet hello = &s[0..5];\nlet world = &s[6..];\nlet arr = [1, 2, 3, 4];\nlet slice = &arr[1..3];\nprintln!(\"{} {} {:?}\", hello, world, slice);"
+    ],
+    "Interior Mutability": [
+      "Interior mutability อนุญาตให้เปลี่ยนแปลงข้อมูลผ่าน shared references โดยใช้ `Cell<T>` (Copy types, ไม่รองรับ threads), `RefCell<T>` (ตรวจสอบ borrow ตอน runtime, ไม่รองรับ threads) และ `Mutex<T>` (thread-safe)",
+      "use std::cell::RefCell;\nlet data = RefCell::new(5);\n{\n    let mut b = data.borrow_mut();\n    *b += 1;\n}\nprintln!(\"{}\", data.borrow());"
+    ],
+    "RefCell และการตรวจสอบ Borrow ตอน Runtime": [
+      "RefCell บังคับใช้กฎ borrow ตอน runtime — panic เมื่อละเมิด `borrow()` คืน `Ref<T>`, `borrow_mut()` คืน `RefMut<T>` มีประโยชน์เมื่อ compiler ไม่สามารถตรวจสอบความถูกต้องได้",
+      "use std::cell::RefCell;\nlet cell = RefCell::new(vec![1, 2, 3]);\n// let mut r1 = cell.borrow_mut();\n// let r2 = cell.borrow(); // panic: already mutably borrowed\n{\n    let mut r = cell.borrow_mut();\n    r.push(4);\n}\nprintln!(\"{:?}\", cell.borrow());"
+    ]
+  },
+  "ฟังก์ชัน": {
+    "การประกาศฟังก์ชัน": [
+      "ฟังก์ชันใช้ `fn` ด้วยการตั้งชื่อแบบ snake_case พารามิเตอร์ต้องมีคำอธิบายชนิด ชนิดที่คืนค่าคือ `-> Type` expression สุดท้ายในบล็อกถูกคืนค่าโดยปริยาย คืนค่า early ด้วย `return`",
+      "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\nfn greet(name: &str) -> String {\n    format!(\"Hello {}\", name)\n}\nfn early(x: i32) -> i32 {\n    if x < 0 { return 0; }\n    x * 2\n}\nprintln!(\"{}\", add(5, 3));"
+    ],
+    "เมธอดและฟังก์ชันที่เกี่ยวข้อง": [
+      "เมธอดคือฟังก์ชันที่กำหนดในบล็อก `impl` ที่มีพารามิเตอร์ `self`, `&self` หรือ `&mut self` ฟังก์ชันที่เกี่ยวข้อง (เช่น constructors) ไม่รับ `self` และเรียกด้วย `::`",
+      "struct Circle { r: f64 }\nimpl Circle {\n    fn new(r: f64) -> Self { Self { r } }\n    fn area(&self) -> f64 { std::f64::consts::PI * self.r * self.r }\n}\nlet c = Circle::new(3.0);\nprintln!(\"{}\", c.area());"
+    ],
+    "Closures": [
+      "Closures คือฟังก์ชันนิรนามที่จับ capture สภาพแวดล้อมของมัน ไวยากรณ์ `||` Traits: `Fn` (immutable capture), `FnMut` (mutable capture), `FnOnce` (consume capture) แต่ละ closure มีชนิดเฉพาะตัว",
+      "let add_one = |x: i32| x + 1;\nlet sum = |a, b| a + b;\nlet factor = 2;\nlet multiply = |x| x * factor;\nprintln!(\"{} {} {}\", add_one(5), sum(3, 4), multiply(6));"
+    ],
+    "Diverging Functions และ Never Type": [
+      "`!` (never type) บ่งชี้ฟังก์ชันที่ไม่เคยคืนค่า `panic!()`, `loop {}`, `todo!()`, `unreachable!()` ล้วน diverge ใช้ในแขนง match ที่ต้องตรงกับทุกชนิด",
+      "fn diverge() -> ! {\n    panic!(\"crash\");\n}\nfn forever() -> ! {\n    loop {}\n}\nlet x: u32 = match some_option {\n    Some(v) => v,\n    None => diverge(), // ok: ! coerces to u32\n};"
+    ],
+    "Function Pointers": [
+      "`fn(T) -> U` คือชนิด function pointer ไม่ใช่ closure ไม่สามารถ capture environment มีประโยชน์สำหรับ callbacks และ FFI ถูกแปลงจาก closures ที่ไม่มีการ capture",
+      "fn add_one(x: i32) -> i32 { x + 1 }\nfn apply(f: fn(i32) -> i32, x: i32) -> i32 { f(x) }\nlet r = apply(add_one, 5);\nlet f: fn(i32) -> i32 = |x| x + 1; // no-capture closure coerces\nprintln!(\"{}\", r);"
+    ],
+    "Where Clauses": [
+      "`where` clauses ระบุ trait bounds หลังลายเซ็นฟังก์ชัน อ่านง่ายกว่าสำหรับ generics ที่ซับซ้อน ความหมายเหมือนกับ inline bounds จำเป็นสำหรับรูปแบบ bound ที่ซับซ้อนบางรูปแบบ",
+      "fn complex<T, U>(t: T, u: U) -> String\nwhere\n    T: std::fmt::Display + Clone,\n    U: std::fmt::Debug,\n{\n    format!(\"{} {:?}\", t, u)\n}\nprintln!(\"{}\", complex(\"hi\", vec![1, 2]));"
+    ],
+    "Higher-Order Functions": [
+      "ฟังก์ชันสามารถรับ closures เป็นพารามิเตอร์โดยใช้ generic bounds Iterator adapters เช่น `map`, `filter`, `fold` ทำให้เกิด functional pipelines Combinators ประกอบกันได้ดี",
+      "let nums = vec![1, 2, 3, 4, 5];\nlet evens: Vec<_> = nums.iter().filter(|&&x| x % 2 == 0).collect();\nlet squared: Vec<_> = nums.iter().map(|x| x * x).collect();\nlet sum: i32 = nums.iter().sum();\nprintln!(\"{:?} {:?} {}\", evens, squared, sum);"
+    ]
+  },
+  "ชนิดประกอบ": {
+    "Tuples": [
+      "Tuples จัดกลุ่มค่าชนิดต่างๆ ความยาวคงที่ destructure ด้วย pattern matching หรือไวยากรณ์ดัชนี `.0`, `.1` Unit tuple `()` คือ tuple ว่าง แสดงถึงการไม่มีค่า",
+      "let tup: (i32, f64, char) = (42, 3.14, 'R');\nlet (x, y, z) = tup;\nprintln!(\"{} {} {}\", x, y, z);\nprintln!(\"first: {}\", tup.0);"
+    ],
+    "อาร์เรย์": [
+      "อาร์เรย์มีความยาวคงที่ `[T; N]` เก็บในสแต็ก ตรวจสอบขอบเขตตอน runtime Slices `&[T]` ยืมสมาชิกอาร์เรย์ `[0; 100]` สร้างอาร์เรย์ที่เติมค่าเดียวกัน",
+      "let arr: [i32; 3] = [1, 2, 3];\nlet ones = [1; 5]; // [1, 1, 1, 1, 1]\nlet slice = &arr[0..2];\nprintln!(\"{:?} {:?} {:?}\", arr, ones, slice);"
+    ],
+    "Vectors": [
+      "`Vec<T>` คืออาร์เรย์ที่ขยายขนาดได้บน heap ใช้มาโคร `vec![]` การ push แบบ amortized O(1) `Vec::with_capacity(n)` จองล่วงหน้า `drain`, `retain`, `splice` เป็นเมธอดที่ทรงพลัง",
+      "let mut vec = vec![1, 2, 3];\nvec.push(4);\nvec.extend([5, 6]);\nvec.retain(|&x| x > 3);\nfor i in &vec { print!(\"{}\", i); }\nprintln!();\nprintln!(\"cap: {}\", vec.capacity());"
+    ],
+    "สตริง (&str vs String)": [
+      "`&str` คือ string slice ที่ยืมมา (UTF-8) `String` คือ buffer UTF-8 ที่เป็นเจ้าของและขยายขนาดได้ แปลง `&str` เป็น `String` ด้วย `.to_string()` หรือ `String::from()` สตริงไม่ implement `Index` เนื่องจาก UTF-8",
+      "let literal: &str = \"hello\";\nlet owned = String::from(\"hello\");\nlet mut mutable = String::new();\nmutable.push_str(\"world\");\nlet combined = format!(\"{} {}\", literal, mutable);\nprintln!(\"{}\", combined);"
+    ],
+    "Structs": [
+      "Structs กำหนดข้อมูลที่กำหนดเองด้วยฟิลด์ที่มีชื่อ ใช้บล็อก `impl` สำหรับเมธอด Field init shorthand เมื่อตัวแปรตรงกับชื่อฟิลด์ Struct update syntax `..other` เติมฟิลด์ที่เหลือ",
+      "struct Person {\n    name: String,\n    age: u32,\n}\nlet name = String::from(\"Alice\");\nlet p = Person {\n    name, // field init shorthand\n    age: 30,\n};\nlet q = Person { age: 25, ..p }; // struct update\nprintln!(\"{} is {}\", q.name, q.age);"
+    ],
+    "Tuple Structs": [
+      "Tuple structs มีฟิลด์ที่ไม่มีชื่อ เข้าถึงตามตำแหน่ง Newtype pattern ห่อหุ้มชนิดเดียว เหมาะสำหรับ type safety โดยไม่ต้องมี overhead ของชื่อฟิลด์ `struct Wrapper(T)`",
+      "struct Color(i32, i32, i32);\nstruct Meters(f64);\nlet black = Color(0, 0, 0);\nlet dist = Meters(100.0);\nprintln!(\"r={} dist={}\", black.0, dist.0);"
+    ],
+    "Unit Structs": [
+      "Unit structs ไม่มีฟิลด์ — ทำหน้าที่เป็น marker หรือ flags ขนาดเป็นศูนย์ มีประโยชน์สำหรับการ implement traits โดยไม่มีข้อมูล หรือเป็น phantom types ร่วมกับ `PhantomData`",
+      "struct Unit;\nimpl Unit {\n    fn do_something(&self) -> &str { \"done\" }\n}\nlet u = Unit;\nprintln!(\"{}\", u.do_something());"
+    ],
+    "Enums": [
+      "Enums กำหนด sum types พร้อม variants Variants สามารถเก็บข้อมูลได้ (tuple หรือ struct) `Option<T>` และ `Result<T, E>` เป็น enums ที่พบบ่อยที่สุด `match` บังคับการจัดการที่ครอบคลุม",
+      "enum Status { Active, Inactive }\nenum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n}\nlet s = Status::Active;\nlet m = Message::Move { x: 10, y: 20 };"
+    ]
+  },
+  "Traits และ Generics": {
+    "Generics": [
+      "Generics ทำให้เป็นนามธรรมเหนือชนิด ทำให้โค้ดสามารถนำกลับมาใช้ใหม่ได้ Monomorphization สร้างโค้ดเฉพาะสำหรับแต่ละชนิดที่เป็นรูปธรรมตอน compile time พารามิเตอร์ชนิดประกาศด้วย `<T>`",
+      "fn largest<T: PartialOrd>(list: &[T]) -> &T {\n    &list[..]\n}\nstruct Point<T> {\n    x: T, y: T,\n}\nlet p = Point { x: 5, y: 10 };\nprintln!(\"point: {}, {}\", p.x, p.y);"
+    ],
+    "Traits": [
+      "Traits กำหนดพฤติกรรมที่ใช้ร่วมกัน (เหมือน interfaces) ชนิด implement traits ด้วย `impl Trait for Type` Traits สามารถมีการ implement เมธอดเริ่มต้นได้ ต้องอยู่ใน scope จึงจะใช้เมธอดได้",
+      "trait Speak {\n    fn speak(&self) -> String;\n}\nstruct Dog;\nimpl Speak for Dog {\n    fn speak(&self) -> String { \"Woof!\".to_string() }\n}\nlet d = Dog;\nprintln!(\"{}\", d.speak());"
+    ],
+    "Derive Macros": [
+      "`#[derive(...)]` implement traits ทั่วไปอัตโนมัติ: Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord ประหยัด boilerplate และรับประกันความถูกต้อง",
+      "#[derive(Debug, Clone, PartialEq, Default)]\nstruct User { id: u32, name: String }\nlet u1 = User { id: 1, name: \"Alice\".into() };\nlet u2 = u1.clone();\nprintln!(\"{:?}\", u1);\nprintln!(\"{}\", u1 == u2);"
+    ],
+    "Supertraits": [
+      "Supertraits แสดงว่า trait หนึ่งขยายอีก trait หนึ่ง `trait A: B` หมายถึงชนิดที่ implement A ต้อง implement B ด้วย ใช้ `where Self: SuperTrait` เพื่อเข้าถึงเมธอด",
+      "trait Greet: std::fmt::Display {\n    fn greet(&self) -> String {\n        format!(\"Hello, {}\", self)\n    }\n}\nstruct Person { name: String }\nimpl std::fmt::Display for Person {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{}\", self.name)\n    }\n}\nimpl Greet for Person {}\nprintln!(\"{}\", Person { name: \"Alice\".into() }.greet());"
+    ],
+    "Trait Objects และ dyn Trait": [
+      "Trait objects เปิดใช้งาน dynamic dispatch ผ่าน vtable `dyn Trait` ไม่มีขนาด — ต้องอยู่หลัง pointer (`&dyn Trait`, `Box<dyn Trait>`) Objects ต้องเป็น object-safe (ไม่มี generic methods, ไม่มี Self by value)",
+      "trait Animal { fn sound(&self) -> String; }\nstruct Cat;\nimpl Animal for Cat { fn sound(&self) -> String { \"meow\".into() } }\nlet animals: Vec<Box<dyn Animal>> = vec![Box::new(Cat)];\nprintln!(\"{}\", animals[0].sound());"
+    ],
+    "impl Trait Syntax": [
+      "`impl Trait` ในตำแหน่งอาร์กิวเมนต์เหมือน generic ในตำแหน่งที่คืนค่า จะคืนชนิด opaque ที่ implement Trait ไม่สามารถคืนหลายชนิดได้ มีประโยชน์สำหรับการคืน closures/iterators",
+      "fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |y| x + y\n}\nfn displayable() -> impl std::fmt::Display {\n    \"hello world\"\n}\nlet add5 = make_adder(5);\nprintln!(\"{}\", add5(3));\nprintln!(\"{}\", displayable());"
+    ],
+    "Associated Types": [
+      "Associated types กำหนดชนิด placeholder ภายใน trait หนึ่ง implementation ต่อชนิด — ต่างจาก generics ที่อนุญาตหลาย impls ใช้อย่างกว้างขวางใน Iterator, Deref และ operator traits",
+      "trait Container {\n    type Item;\n    fn first(&self) -> Option<&Self::Item>;\n}\nimpl<T> Container for Vec<T> {\n    type Item = T;\n    fn first(&self) -> Option<&Self::Item> {\n        self.first()\n    }\n}\nlet v = vec![1, 2, 3];\nprintln!(\"{:?}\", v.first());"
+    ],
+    "Blanket Implementations": [
+      "Blanket impls implement trait สำหรับทุกชนิดที่滿足 bounds `impl<T: Display> ToString for T {}` คือ blanket impl พวกมันอนุญาตให้เพิ่มเมธอดให้ทุกชนิดที่ตรงตามเกณฑ์",
+      "trait Double { fn double(self) -> Self; }\nimpl<T: std::ops::Add<Output = T> + Clone> Double for T {\n    fn double(self) -> Self {\n        self.clone() + self\n    }\n}\nprintln!(\"{}\", 5.double());\nprintln!(\"{}\", 3.2.double());"
+    ],
+    "Trait Bounds และ where Clauses": [
+      "Trait bounds จำกัดขอบเขต generics หลาย bounds: `T: Clone + Debug` `where` clauses เพิ่มความอ่านง่าย `impl Trait` เป็นรูปแบบย่อ `?Sized` เลือกไม่ใช้ implicit Sized bound",
+      "fn print_debug<T: std::fmt::Debug>(t: &T) { println!(\"{:?}\", t); }\nfn compare<T, U>(a: &T, b: &U) -> bool\nwhere T: PartialEq<U> { a == b }\nprintln!(\"{}\", compare(&5, &5));"
+    ]
+  },
+  "คอลเล็กชัน": {
+    "Vec": [
+      "`Vec<T>` เป็นชนิดลำดับหลัก — ขยายขนาดได้, อยู่บน heap, ต่อเนื่องกัน push/pop แบบ amortized O(1) insert/remove แบบ O(n) `with_capacity` จองล่วงหน้า `drain`, `splice`, `retain` สำหรับการดำเนินการขั้นสูง",
+      "let mut v = vec![1, 2, 3];\nv.push(4);\nlet last = v.pop();\nv.splice(1..2, [10, 11]);\nprintln!(\"{:?} {:?}\", v, last);"
+    ],
+    "VecDeque": [
+      "`VecDeque<T>` คือคิวสองทิศทางที่มี push/pop O(1) ที่ปลายทั้งสองข้าง ภายในเป็น ring buffer ใช้สำหรับรูปแบบ queue/sliding window `make_contiguous()` สำหรับการเข้าถึงแบบ slice",
+      "use std::collections::VecDeque;\nlet mut q = VecDeque::new();\nq.push_back(1);\nq.push_front(0);\nq.push_back(2);\nwhile let Some(x) = q.pop_front() {\n    print!(\"{}\", x);\n}"
+    ],
+    "HashMap และ HashSet": [
+      "`HashMap<K, V>` เก็บคู่คีย์-ค่า โดยเฉลี่ย O(1) `HashSet<T>` คือเซตของค่าที่ไม่ซ้ำกัน ทั้งคู่ต้องการให้ keys implement `Hash + Eq` API `entry()` จัดการ insert-or-update",
+      "use std::collections::HashMap;\nlet mut scores = HashMap::new();\nscores.insert(String::from(\"Alice\"), 100);\nscores.entry(String::from(\"Bob\")).or_insert(50);\nfor (name, score) in &scores {\n    println!(\"{}: {}\", name, score);\n}"
+    ],
+    "BTreeMap และ BTreeSet": [
+      "`BTreeMap` / `BTreeSet` รักษาลำดับที่เรียงแล้วด้วยการดำเนินการ O(log n) Keys ต้อง implement `Ord` ใช้เมื่อลำดับมีความสำคัญหรือต้องการ range queries `range()` คืนค่ารายการภายในขอบเขต",
+      "use std::collections::BTreeMap;\nlet mut map = BTreeMap::new();\nmap.insert(3, \"c\");\nmap.insert(1, \"a\");\nmap.insert(2, \"b\");\nfor (k, v) in &map {\n    print!(\"{}:{}\", k, v);\n}\nprintln!();\nlet range: Vec<_> = map.range(1..=2).collect();\nprintln!(\"{:?}\", range);"
+    ],
+    "BinaryHeap": [
+      "`BinaryHeap<T>` คือคิวลำดับความสำคัญแบบ max-heap peek O(1), push/pop O(log n) ใช้ `Reverse<T>` สำหรับ min-heap `into_sorted_vec()` ดึงออกมาตามลำดับ",
+      "use std::collections::BinaryHeap;\nlet mut heap = BinaryHeap::new();\nheap.push(3);\nheap.push(1);\nheap.push(5);\nprintln!(\"{}\", heap.peek().unwrap());\nwhile let Some(x) = heap.pop() {\n    print!(\"{}\", x);\n}\nuse std::cmp::Reverse;\nlet mut min_heap: BinaryHeap<Reverse<i32>> = BinaryHeap::new();\nmin_heap.push(Reverse(5));"
+    ],
+    "LinkedList": [
+      "`LinkedList<T>` คือ linked list แบบสองทิศทาง push/pop O(1) ที่ปลายทั้งสองข้าง การ split/append โดยทั่วไปช้ากว่า Vec/VecDeque เนื่องจากลักษณะการทำงานของแคช ใช้สำหรับการแยกที่หนักหน่วง",
+      "use std::collections::LinkedList;\nlet mut list = LinkedList::new();\nlist.push_back(1);\nlist.push_front(0);\nlet mut other = LinkedList::new();\nother.push_back(2);\nlist.append(&mut other);\nprintln!(\"{:?}\", list);"
+    ],
+    "Iterators เจาะลึก": [
+      "Iterators ทำงานแบบ lazy Adapters: `map`, `filter`, `flat_map`, `flatten`, `take`, `skip`, `zip`, `enumerate`, `chain`, `cycle` Consumers: `collect`, `sum`, `fold`, `reduce`, `any`, `all`, `find`",
+      "let nums = vec![1, 2, 3, 4, 5];\nlet result: Vec<_> = nums.iter()\n    .filter(|&&x| x % 2 == 0)\n    .map(|x| x * 10)\n    .collect();\nlet sum: i32 = nums.iter().sum();\nlet any_big = nums.iter().any(|&x| x > 3);\nprintln!(\"{:?} {} {}\", result, sum, any_big);"
+    ]
+  },
+  "Rust ขั้นสูง": {
+    "Box<T> (การจัดสรร Heap)": [
+      "`Box<T>` จัดสรรบน heap ใช้สำหรับ recursive types (linked lists), trait objects (`Box<dyn Trait>`), และข้อมูลขนาดใหญ่ที่ย้ายไม่บ่อย Derefs เป็น `&T` / `&mut T`",
+      "let x = Box::new(5);\nprintln!(\"{}\", *x);\nenum List { Cons(i32, Box<List>), Nil }\nlet list = List::Cons(1, Box::new(List::Cons(2, Box::new(List::Nil))));"
+    ],
+    "Rc<T> (Reference Counting)": [
+      "`Rc<T>` เปิดใช้งานการเป็นเจ้าของร่วมกันในเธรดเดียวกัน `Rc::clone()` เพิ่ม reference count `strong_count` / `weak_count` `Weak<T>` ป้องกัน cycle ใช้ `Arc` สำหรับหลายเธรด",
+      "use std::rc::Rc;\nlet a = Rc::new(5);\nlet b = Rc::clone(&a);\nprintln!(\"count: {}\", Rc::strong_count(&a));\nprintln!(\"{} {}\", a, b);\nlet weak = Rc::downgrade(&a);\nprintln!(\"weak: {}\", weak.upgrade().unwrap());"
+    ],
+    "Arc<T> (Atomic RC)": [
+      "`Arc<T>` คือ `Rc` + การนับอ้างอิงแบบ atomic — thread-safe `Arc::clone()` เป็น atomic จับคู่กับ `Mutex<T>` สำหรับ mutable shared state `Arc<[T]>` สำหรับ shared slices",
+      "use std::sync::Arc;\nlet data = Arc::new(vec![1, 2, 3]);\nlet mut handles = vec![];\nfor _ in 0..3 {\n    let d = Arc::clone(&data);\n    handles.push(std::thread::spawn(move || {\n        println!(\"{:?}\", d);\n    }));\n}\nfor h in handles { h.join().unwrap(); }"
+    ],
+    "Cell<T> และ RefCell<T>": [
+      "`Cell<T>` ให้ interior mutability สำหรับ Copy types (ไม่ตรวจสอบ borrow — คัดลอกเข้า/ออก) `RefCell<T>` ให้ interior mutability สำหรับทุกชนิด ตรวจสอบ borrow ตอน runtime",
+      "use std::cell::Cell;\nlet cell = Cell::new(42);\ncell.set(100);\nprintln!(\"{}\", cell.get());\nuse std::cell::RefCell;\nlet rc = RefCell::new(vec![1, 2, 3]);\nrc.borrow_mut().push(4);\nprintln!(\"{:?}\", rc.borrow());"
+    ],
+    "Cow (Clone-on-Write)": [
+      "`Cow<'a, B>` ทำให้เป็นนามธรรมระหว่างข้อมูลที่ยืมมาและเป็นเจ้าของ `Cow::Borrowed(&str)` / `Cow::Owned(String)` เรียก `.to_mut()` เพื่อเข้าถึงแบบ mutable โดย clone ถ้าถูกยืม เหมาะสำหรับ API ที่อ่านเป็นส่วนใหญ่",
+      "use std::borrow::Cow;\nfn normalize(input: &str) -> Cow<str> {\n    if input.contains(' ') {\n        input.replace(' ', \"_\").into()\n    } else {\n        Cow::Borrowed(input)\n    }\n}\nlet s1 = normalize(\"hello world\");\nlet s2 = normalize(\"hello\");\nprintln!(\"{} {}\", s1, s2);"
+    ],
+    "Pin<T>": [
+      "`Pin<T>` รับประกันว่าค่าจะไม่ถูกย้ายอีก จำเป็นสำหรับ self-referential structs และ async generators `Pin<&mut T>` / `Pin<Box<T>>` การสร้างไม่ปลอดภัย เป็นพื้นฐานของ async Rust",
+      "use std::pin::Pin;\nstruct NeverMove { data: String }\nlet n = NeverMove { data: \"hello\".into() };\nlet pinned = Box::pin(n);\n// Can't move out of pinned\nprintln!(\"{}\", pinned.data);"
+    ],
+    "ลำดับ Drop": [
+      "ตัวแปร drop ในลำดับย้อนกลับของการประกาศ ฟิลด์ struct drop ตามลำดับการประกาศ `std::mem::forget` ข้าม Drop `ManuallyDrop` ควบคุม Drop ค่าที่ซ้อนกัน: outer drop ก่อน แล้ว inner",
+      "struct A;\nimpl Drop for A { fn drop(&mut self) { println!(\"A\"); } }\nstruct B;\nimpl Drop for B { fn drop(&mut self) { println!(\"B\"); } }\nlet _a = A;\nlet _b = B;\n// prints B then A (reverse order)"
+    ],
+    "Mutex, RwLock, Condvar": [
+      "`Mutex<T>` ปกป้องข้อมูลที่แชร์ข้ามเธรด `RwLock<T>` อนุญาตการอ่านพร้อมกัน / การเขียนเฉพาะ `Condvar` บล็อกเธรดจนกว่าจะตรงตามเงื่อนไข `PoisonError` เมื่อเกิด panic",
+      "use std::sync::{Mutex, Arc};\nlet counter = Arc::new(Mutex::new(0));\nlet mut handles = vec![];\nfor _ in 0..10 {\n    let c = Arc::clone(&counter);\n    handles.push(std::thread::spawn(move || {\n        let mut num = c.lock().unwrap();\n        *num += 1;\n    }));\n}\nfor h in handles { h.join().unwrap(); }\nprintln!(\"{}\", *counter.lock().unwrap());"
+    ],
+    "Channels (mpsc)": [
+      "`std::sync::mpsc` ให้ช่องสัญญาณแบบ multi-producer, single-consumer `Sender` clone สำหรับผู้ผลิตหลายราย `Receiver` มี `recv`, `try_recv`, `iter` `crossbeam` มี variants แบบ multi-consumer",
+      "use std::sync::mpsc;\nuse std::thread;\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send(\"hello\").unwrap();\n});\nlet msg = rx.recv().unwrap();\nprintln!(\"{}\", msg);"
+    ],
+    "Pinning และ Pin<P>": [
+      "Pin รับประกันว่าค่าจะไม่ถูกย้ายในหน่วยความจำ จำเป็นสำหรับ self-referential structs (เช่น async Futures) `Pin<Box<T>>` (heap-pinned), `Pin<&mut T>` (stack-pinned ผ่านมาโคร `pin!`) เมื่อถูก pin แล้ว จะย้ายอย่างปลอดภัยไม่ได้ `Unpin` เป็น auto-trait: ชนิดส่วนใหญ่เป็น Unpin Async blocks/futures เป็น `!Unpin` การใช้ `get_unchecked_mut` ที่ไม่ปลอดภัยเพื่อ mutate ข้อมูลที่ถูก pin `PhantomPinned` marker ทำให้ชนิดเป็น !Unpin",
+      "use std::marker::PhantomPinned;\nuse std::pin::Pin;\n\nstruct SelfReferential {\n    data: String,\n    ptr: *const String,\n    _pin: PhantomPinned,\n}\n\nimpl SelfReferential {\n    fn new(data: String) -> Pin<Box<Self>> {\n        let mut s = Self {\n            ptr: std::ptr::null(),\n            data,\n            _pin: PhantomPinned,\n        };\n        let mut pinned = Box::pin(s);\n        unsafe {\n            let mut_ref = Pin::as_mut(&mut pinned);\n            mut_ref.get_unchecked_mut().ptr = &mut_ref.get_unchecked_mut().data;\n        }\n        pinned\n    }\n\n    fn get_ptr(&self) -> &String {\n        unsafe { &*self.ptr }\n    }\n}\n\nasync fn example() -> i32 {\n    42\n}\n\nfn main() {\n    let pinned = SelfReferential::new(\"Hello\".to_string());\n    println!(\"{}\", pinned.get_ptr());\n    \n    let fut = example();\n    \n    println!(\"Self-referential pointer OK\");\n}"
+    ]
+  },
+  "โมดูลและ Cargo": {
+    "โมดูลและพาธ": [
+      "`mod` ประกาศโมดูล ไฟล์และไดเรกทอรีสะท้อนโมดูล `pub` ควบคุมการมองเห็น `super` / `crate` / `self` keywords สำหรับพาธ `pub(crate)` จำกัดเฉพาะ crate",
+      "// src/garden/vegetables.rs\npub struct Vegetable;\n// src/lib.rs\nmod garden;\npub use garden::vegetables::Vegetable;"
+    ],
+    "Re-exports": [
+      "`pub use` นำเข้าสินค้าอีกครั้งที่พาธอื่น ทำให้เป็นส่วนหนึ่งของ public API มีประโยชน์สำหรับการทำให้ลำดับชั้นโมดูลแบนราบและการเปลี่ยนชื่อ `pub(crate) use` สำหรับ re-exports ภายใน",
+      "mod inner {\n    pub struct Hidden;\n}\npub use inner::Hidden; // re-exported at crate root\nuse crate::Hidden; // available at crate root"
+    ],
+    "โมดูลที่ซ้อนกันและระบบไฟล์": [
+      "โมดูลสามารถซ้อนกันในบรรทัดหรือในไฟล์ `mod foo;` ค้นหา `foo.rs` หรือ `foo/mod.rs` `mod foo { ... }` สำหรับ inline รุ่นปี 2018 ใช้แบบแผน `foo.rs`",
+      "// src/lib.rs\nmod outer {\n    pub mod inner {\n        pub fn hello() { println!(\"hi\"); }\n    }\n}\n// File structure:\n// src/\n//   lib.rs\n//   network/\n//     mod.rs (or network.rs in 2021)\n//     client.rs"
+    ],
+    "Cargo.toml และชนิด Crate": [
+      "ชนิด crate: `bin` (binary), `lib` (library), `cdylib` (C-compatible dynamic lib), `staticlib`, `proc-macro` ฟิลด์ `edition` เลือกรุ่น Rust `[profile.*]` สำหรับตั้งค่าการปรับแต่ง",
+      "[package]\nname = \"myapp\"\nversion = \"0.1.0\"\nedition = \"2021\"\n[lib]\ncrate-type = [\"lib\", \"cdylib\"]\n[profile.release]\nopt-level = 3\nlto = true"
+    ],
+    "Dependencies และ Features": [
+      "Dependencies จาก crates.io, git หรือ path `features` เปิดใช้งาน conditional compilation `default-features = false` เพื่อเลือกไม่รับ `[target.'cfg(...)'.dependencies]` สำหรับ dependencies เฉพาะแพลตฟอร์ม",
+      "[dependencies]\nserde = { version = \"1\", features = [\"derive\"], optional = true }\ntokio = { version = \"1\", features = [\"full\"] }\nmycrate = { git = \"https://github.com/user/mycrate\", branch = \"main\" }\n[features]\ndefault = [\"std\"]\nstd = []"
+    ],
+    "Workspaces": [
+      "Workspaces จัดการหลาย crates ในหนึ่งโปรเจกต์ แชร์ `target/` และ `Cargo.lock` สมาชิกอยู่ใน `[workspace]` `cargo build -p specific-crate` เพื่อ build สมาชิกเฉพาะ",
+      "[workspace]\nmembers = [\"crates/core\", \"crates/cli\"]\nresolver = \"2\"\n# crates/core/Cargo.toml\n[package]\nname = \"core\"\nversion = \"0.1.0\""
+    ],
+    "การคอมไพล์แบบมีเงื่อนไข": [
+      "`#[cfg()]` เปิด/ปิดโค้ดตาม target, feature หรือ OS `cfg!()` เป็น boolean ตอน runtime `#[cfg_attr(...)]` ใช้ attributes แบบมีเงื่อนไข `cfg(test)` เปิดโค้ดเฉพาะการทดสอบ",
+      "#[cfg(target_os = \"linux\")]\nfn platform() { println!(\"Linux\"); }\n#[cfg(not(target_os = \"linux\"))]\nfn platform() { println!(\"Not Linux\"); }\nif cfg!(debug_assertions) {\n    println!(\"debug mode\");\n}"
+    ]
+  },
+  "Lifetimes": {
+    "การใส่คำอธิบาย Lifetime พื้นฐาน": [
+      "Lifetimes (`'a`) อธิบายว่า references มีอายุการใช้งานนานแค่ไหน ป้องกัน dangling references Borrow checker ตรวจสอบ lifetimes ตอน compile time กฎ elision จัดการรูปแบบทั่วไปโดยอัตโนมัติ",
+      "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}\nlet result = longest(\"hello\", \"world\");\nprintln!(\"{}\", result);"
+    ],
+    "กฎ Lifetime Elision": [
+      "กฎ elision สามข้อ: 1) แต่ละ input reference ได้ lifetime ของตัวเอง 2) ถ้ามี input lifetime เดียว output ได้ lifetime นั้น 3) ถ้ามี `&self`/`&mut self` output ได้ lifetime ของ self กฎเหล่านี้ครอบคลุม 95%+ ของกรณี",
+      "fn first_word(s: &str) -> &str { // elided: 'a\n    s.split_whitespace().next().unwrap_or(\"\")\n}\nimpl<'a> Book<'a> {\n    fn title(&self) -> &str { self.title } // elided: self's lifetime\n}"
+    ],
+    "Lifetime 'static": [
+      "references `'static` มีอายุตลอดทั้งโปรแกรม String literals มีชนิด `&'static str` `Box::leak` สร้าง `&'static mut` Const items มีผลเป็น static โดยปริยาย",
+      "const MSG: &str = \"hi\";\nfn get() -> &'static str { \"Hello\" }\nfn leak() -> &'static [i32] {\n    let v = Box::new([1, 2, 3]);\n    Box::leak(v)\n}"
+    ],
+    "Lifetime Bounds และ Subtyping": [
+      "`'a: 'b` หมายความว่า 'a มีอายุยืนกว่า 'b (เป็น subtype ของ 'b) จำเป็นเมื่อ lifetime หนึ่งต้องมีอายุยืนกว่าอีกอันหนึ่ง พบได้ทั่วไปใน structs และลายเซ็นฟังก์ชันที่ซับซ้อน",
+      "struct Book<'a> {\n    title: &'a str,\n    author: &'a str,\n}\nimpl<'a> Book<'a> {\n    fn summary(&self) -> &str { self.title }\n}\nfn choose<'a, 'b>(x: &'a str, y: &'b str) -> &'a str where 'a: 'b {\n    if true { x } else { y }\n}"
+    ],
+    "Higher-Ranked Trait Bounds (HRTB)": [
+      "HRTBs ด้วย `for<'a>` แสดงว่า bound ต้องเป็นจริงสำหรับทุก lifetime `Fn(&i32)` เป็นน้ำตาลสำหรับ `for<'a> Fn(&'a i32)` จำเป็นสำหรับ trait objects และ closure bounds",
+      "fn call_for_all<F>(f: F) where F: for<'a> Fn(&'a i32) {\n    let x = 42;\n    f(&x);\n}\ncall_for_all(|x| println!(\"{}\", x));\n// Equivalent sugar:\nfn call_any<F: Fn(&i32)>(f: F) { f(&0); }"
+    ],
+    "Variance": [
+      "Variance อธิบายว่า lifetimes ประกอบกันอย่างไร: `&'a T` เป็น covariant ใน 'a, `&'a mut T` เป็น invariant ใน 'a, `fn(T) -> U` เป็น contravariant ใน T `Cell<T>` ทำให้ T invariant สำคัญสำหรับ type safety",
+      "use std::cell::Cell;\n// &'a T: covariant in 'a\nfn foo<'a>(x: &'a str) {}\n// &'a mut T: invariant in 'a\nfn bar<'a>(x: &'a mut str) {}\n// Cell<T>: invariant in T\nfn baz<T>(x: Cell<T>) {}\n// These prevent unsound lifetime shortening"
+    ],
+    "Lifetime Coercion": [
+      "Rust แปลง lifetimes ที่สั้นกว่าให้ยาวขึ้นเมื่อปลอดภัย `&'a T` แปลงเป็น `&'b T` ถ้า `'a: 'b` เกิดขึ้นโดยปริยายที่ตำแหน่ง conversion",
+      "fn takes_static(_: &'static str) {}\nlet s = String::from(\"hello\");\nlet r: &str = &s;\n// takes_static(r); // error: r doesn't live long enough\nfn coerce<'a>(x: &'a str) -> &'a str { x }\nlet coerced: &'static str = coerce(\"static\"); // works: literal is 'static"
+    ],
+    "NLL เจาะลึก": [
+      "NLL (Non-Lexical Lifetimes) อนุญาตให้ borrows สิ้นสุดก่อนขอบเขตจะสิ้นสุด Two-phase borrows อนุญาตให้ reborrow ระหว่างการเรียกเมธอด Borrow checker ใช้การวิเคราะห์แบบรู้ตำแหน่ง",
+      "let mut data = vec![1, 2, 3];\nlet slice = &data[0..1];\nprintln!(\"{:?}\", slice); // borrow ends here\ndata.push(4); // OK: immutable borrow no longer needed\nlet s = &mut data[0];\n*s = 10;\nprintln!(\"{:?}\", data);"
+    ]
+  },
+  "Rust แบบอะซิงก์": {
+    "พื้นฐาน async/await": [
+      "`async fn` คืนค่า `Future` `.await` poll future จนเสร็จ Futures เป็น lazy — พวกมันไม่ทำอะไรจนกว่าจะถูก await หรือ poll จำเป็นต้องมี executor เพื่อขับเคลื่อน futures",
+      "async fn fetch_data() -> String {\n    \"data\".to_string()\n}\n#[tokio::main]\nasync fn main() {\n    let result = fetch_data().await;\n    println!(\"{}\", result);\n}"
+    ],
+    "Tokio Runtime เจาะลึก": [
+      "Tokio ให้ runtime แบบ multi-threaded (work-stealing) หรือ single-threaded attribute `#[tokio::main]` ตั้งค่า runtime ส่วนประกอบสำคัญ: reactor (I/O events), scheduler (tasks), timers",
+      "#[tokio::main(flavor = \"multi_thread\", worker_threads = 4)]\nasync fn main() {\n    let handle = tokio::spawn(async {\n        \"hello from task\".to_string()\n    });\n    let result = handle.await.unwrap();\n    println!(\"{}\", result);\n}"
+    ],
+    "Async Traits": [
+      "Async traits ต้องการ nightly หรือ workarounds crate `async-trait` แปลงเป็น `Pin<Box<dyn Future>>` Native async traits ที่กำลังจะมาใน Rust จะลบ overhead นี้",
+      "use async_trait::async_trait;\n#[async_trait]\npub trait Repository {\n    async fn get_user(&self, id: u32) -> String;\n}\nstruct DbRepo;\n#[async_trait]\nimpl Repository for DbRepo {\n    async fn get_user(&self, id: u32) -> String {\n        format!(\"user-{}\", id)\n    }\n}\n#[tokio::main]\nasync fn main() {\n    let r = DbRepo;\n    println!(\"{}\", r.get_user(1).await);\n}"
+    ],
+    "มาโคร select! และ join!": [
+      "`tokio::select!` รอหลาย futures โดยสมบูรณ์เมื่ออันแรกเสร็จ `futures::join!` รอหลาย futures พร้อมกัน `try_join!` คืนเมื่อพบ error แรก",
+      "use tokio::time::{sleep, Duration};\n#[tokio::main]\nasync fn main() {\n    tokio::select! {\n        _ = sleep(Duration::from_millis(100)) => println!(\"fast\"),\n        _ = sleep(Duration::from_millis(200)) => println!(\"slow\"),\n    }\n}"
+    ],
+    "join_all / FuturesUnordered": [
+      "`futures::future::join_all` รอ collection ของ futures และคืนผลลัพธ์ทั้งหมด `FuturesUnordered` poll เซตของ futures โดยให้ผลลัพธ์เมื่อสมบูรณ์ — เหมาะสำหรับ workloads แบบไดนามิก",
+      "use futures::future::join_all;\nasync fn task(id: u32) -> u32 {\n    tokio::time::sleep(std::time::Duration::from_millis(10 * id as u64)).await;\n    id\n}\n#[tokio::main]\nasync fn main() {\n    let results = join_all((1..=5).map(task)).await;\n    println!(\"{:?}\", results);\n}"
+    ],
+    "Async Streams": [
+      "`Stream` trait เป็นเวอร์ชัน async ของ `Iterator` `StreamExt` มี `next()`, `map`, `filter`, `fold` ไลบรารี `tokio_stream` และ `futures` มาโคร `async-stream` สร้าง streams",
+      "use futures::stream::{self, StreamExt};\n#[tokio::main]\nasync fn main() {\n    let s = stream::iter(0..5);\n    let result: Vec<_> = s.map(|x| x * 2).collect().await;\n    println!(\"{:?}\", result);\n}"
+    ],
+    "Pin Projection": [
+      "Pin projection อนุญาตให้เข้าถึงฟิลด์ของ pinned struct อย่างปลอดภัยโดยใช้ `pin_project` หรือ `pin_utils` สำคัญสำหรับ self-referential async state machines attribute `#[pin_project]` จัดการส่วนที่ไม่ปลอดภัย",
+      "use pin_project::pin_project;\n#[pin_project]\nstruct Wrapper<T> {\n    #[pin]\n    inner: T,\n    name: String,\n}\nimpl<T> Wrapper<T> {\n    fn project(self: Pin<&mut Self>) -> Pin<&mut T> {\n        self.project().inner\n    }\n}"
+    ],
+    "Async Sync Primitives": [
+      "Tokio มี synchronization ที่รู้จัก async: `Mutex` (ถือข้าม .await), `RwLock`, `Semaphore`, `Barrier`, `Notify`, `watch`, `broadcast` channels อย่าถือ `std::sync::Mutex` ข้าม .await",
+      "use tokio::sync::Mutex;\nuse std::sync::Arc;\n#[tokio::main]\nasync fn main() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec![];\n    for _ in 0..10 {\n        let c = Arc::clone(&counter);\n        handles.push(tokio::spawn(async move {\n            let mut val = c.lock().await;\n            *val += 1;\n        }));\n    }\n    for h in handles { h.await.unwrap(); }\n    println!(\"{}\", *counter.lock().await);\n}"
+    ]
+  },
+  "Unsafe และ FFI": {
+    "Raw Pointers": [
+      "`*const T` และ `*mut T` คือ raw pointers ที่ไม่มีการรับประกันความปลอดภัย สามารถเป็น null, dangling หรือ aliased การ dereference ต้องใช้ `unsafe` สร้างจาก references ด้วย `as *const T` ใช้สำหรับ FFI และประสิทธิภาพ",
+      "let x = 5;\nlet r1 = &x as *const i32;\nlet mut y = 10;\nlet r2 = &mut y as *mut i32;\nunsafe {\n    println!(\"r1: {}, r2: {}\", *r1, *r2);\n}"
+    ],
+    "Unsafe Functions และ Blocks": [
+      "`unsafe fn` ทำเครื่องหมายฟังก์ชันที่ไม่ปลอดภัยที่ผู้เรียกต้องห่อใน `unsafe {}` blocks `unsafe` ใช้สำหรับ: deref raw pointers, เรียก unsafe fns, เข้าถึง mutable statics, implement unsafe traits",
+      "unsafe fn dangerous() {}\nunsafe {\n    dangerous();\n}\nstatic mut COUNTER: u32 = 0;\nunsafe {\n    COUNTER += 1;\n}\nunsafe trait UnsafeTrait {}\nunsafe impl UnsafeTrait for i32 {}"
+    ],
+    "การเรียก C (FFI)": [
+      "`extern \"C\"` ประกาศฟังก์ชันจากไลบรารี C `#[link(name = \"...\")]` เชื่อมโยง native libs `#[no_mangle]` ป้องกัน name mangling `unsafe` เพื่อเรียก `libc` crate ให้ type aliases ของ C",
+      "extern \"C\" {\n    fn abs(input: i32) -> i32;\n    fn printf(fmt: *const u8, ...) -> i32;\n}\nunsafe {\n    println!(\"abs: {}\", abs(-5));\n}"
+    ],
+    "#[repr(C)] และ repr Attributes": [
+      "`#[repr(C)]` จัดวางฟิลด์ struct เหมือน C (ไม่มีการจัดเรียงใหม่) `#[repr(transparent)]` ห่อฟิลด์เดียวด้วย layout เดียวกัน `#[repr(packed)]` เอา padding ออก `#[repr(align(n))]` กำหนด alignment",
+      "#[repr(C)]\nstruct Point {\n    x: f32,\n    y: f32,\n}\n#[repr(transparent)]\nstruct Wrapper {\n    inner: i32,\n}\n#[repr(C, align(16))]\nstruct Aligned {\n    data: [u8; 32],\n}"
+    ],
+    "no_std และ Global Allocator": [
+      "`#![no_std]` เอามาตรฐานไลบรารีออกสำหรับเป้าหมาย embedded/kernel ใช้ crates `core` และ `alloc` `#[global_allocator]` แทนที่ allocator เริ่มต้น `alloc_error_handler` สำหรับ OOM",
+      "#![no_std]\n#![no_main]\nextern crate alloc;\nuse core::panic::PanicInfo;\n#[panic_handler]\nfn panic(_info: &PanicInfo) -> ! { loop {}\n#[global_allocator]\nstatic ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;"
+    ],
+    "#[link] และ extern Blocks": [
+      "`#[link(name = \"foo\", kind = \"static\")]` เชื่อมโยง native libraries `extern \"C\"` (หรือ \"system\", \"stdcall\") blocks ประกาศ foreign functions `#[link_name = \"actual_name\"]` แทนที่ชื่อ symbol",
+      "#[link(name = \"pthread\")]\nextern \"C\" {\n    fn pthread_create(\n        thread: *mut u64,\n        attr: *const u64,\n        start: extern \"C\" fn(*mut u8) -> *mut u8,\n        arg: *mut u8,\n    ) -> i32;\n}"
+    ],
+    "การเปิดเผย Rust ให้ C (cdylib)": [
+      "`#[no_mangle]` กับ `extern \"C\"` เปิดเผยฟังก์ชัน Rust ให้ C `CString` สร้างสตริงที่ลงท้ายด้วย null `Cargo.toml` ต้องมี `[lib] crate-type = [\"cdylib\"]` ใช้ได้เฉพาะชนิดที่ FFI-safe",
+      "#[no_mangle]\npub extern \"C\" fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n#[no_mangle]\npub extern \"C\" fn greet(name: *const std::os::raw::c_char) -> *mut std::os::raw::c_char {\n    let s = unsafe { std::ffi::CStr::from_ptr(name) };\n    let greeting = format!(\"Hello {}!\", s.to_str().unwrap());\n    std::ffi::CString::new(greeting).unwrap().into_raw()\n}"
+    ]
+  },
+  "รูปแบบและ Idioms": {
+    "Builder Pattern": [
+      "Builder pattern สร้างอ็อบเจกต์ที่ซับซ้อนพร้อมพารามิเตอร์เสริมมากมาย เมธอดคืน `&mut Self` หรือ `Self` สำหรับ chaining `build()` ใช้ builder และสร้างค่าสุดท้าย",
+      "struct RequestBuilder { url: String, method: String, body: Option<String> }\nimpl RequestBuilder {\n    fn new(url: &str) -> Self { Self { url: url.into(), method: \"GET\".into(), body: None } }\n    fn method(mut self, m: &str) -> Self { self.method = m.into(); self }\n    fn body(mut self, b: &str) -> Self { self.body = Some(b.into()); self }\n    fn build(&self) -> Request { Request { url: self.url.clone(), method: self.method.clone(), body: self.body.clone() } }\n}\nstruct Request { url: String, method: String, body: Option<String> }"
+    ],
+    "RAII (Resource Acquisition Is Initialization)": [
+      "RAII ผูกอายุทรัพยากรกับขอบเขต ไฟล์, ล็อก และหน่วยความจำถูกปล่อยใน `Drop` `MutexGuard`, `File`, `Box` ทั้งหมดใช้ RAII ไม่สามารถลืมปล่อยได้ — compiler จัดการให้",
+      "use std::fs::File;\nuse std::io::Write;\nfn write_file() -> std::io::Result<()> {\n    let mut f = File::create(\"hello.txt\")?;\n    f.write_all(b\"hello\")?;\n    Ok(())\n}\nuse std::sync::Mutex;\nlet m = Mutex::new(42);\n{\n    let guard = m.lock().unwrap();\n    println!(\"{}\", *guard);\n}"
+    ],
+    "Newtype Pattern": [
+      "ห่อชนิดเดียวใน tuple struct เพื่อ type safety และ trait impls Zero-cost abstraction — wrapper ถูก optimize ออก ใช้สำหรับ units, IDs และการ implement external traits บน external types",
+      "struct UserId(u64);\nstruct Meters(f64);\nfn add_distance(a: Meters, b: Meters) -> Meters {\n    Meters(a.0 + b.0)\n}\nimpl std::fmt::Display for Meters {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{}m\", self.0)\n    }\n}\nlet d = Meters(5.0);\nprintln!(\"{}\", d);"
+    ],
+    "Deref Pattern และ Deref Coercion": [
+      "การ implement `Deref<Target=U>` ทำให้ smart pointers ทำตัวเหมือน references `Box<T>`, `Rc<T>`, `Arc<T>` ทั้งหมด deref เป็นชนิดภายใน `DerefMut` สำหรับ mutable deref `.` auto-derefs เป็นลูกโซ่",
+      "use std::ops::Deref;\nstruct MyBox<T>(T);\nimpl<T> Deref for MyBox<T> {\n    type Target = T;\n    fn deref(&self) -> &Self::Target { &self.0 }\n}\nlet b = MyBox(5);\nassert_eq!(*b, 5);\nfn hello(s: &str) { println!(\"{}\", s); }\nlet m = MyBox(String::from(\"hi\"));\nhello(&m);"
+    ],
+    "ลำดับ Drop ในชนิดประกอบ": [
+      "ฟิลด์ struct drop ตามลำดับการประกาศ ฟิลด์ tuple drop ตามลำดับดัชนี Slices/vectors drop elements จากหน้าไปหลัง Closures drop captures ของพวกมันเมื่อ closure drop",
+      "struct Droppable(&'static str);\nimpl Drop for Droppable {\n    fn drop(&mut self) { println!(\"dropping {}\", self.0); }\n}\nstruct Demo { a: Droppable, b: Droppable }\nlet d = Demo { a: Droppable(\"a\"), b: Droppable(\"b\") };"
+    ],
+    "Typestate Pattern": [
+      "Typestate encoding ใช้ระบบชนิดเพื่อบังคับการเปลี่ยนสถานะ เมธอดใช้สถานะปัจจุบันและคืนสถานะถัดไป การเปลี่ยนที่ไม่ถูกต้องเป็นข้อผิดพลาดตอน compile พบได้ทั่วไปใน builders และ protocols",
+      "struct Door;\nstruct OpenDoor;\nimpl Door {\n    fn open(self) -> OpenDoor { OpenDoor }\n}\nimpl OpenDoor {\n    fn close(self) -> Door { Door }\n}\nlet door = Door;\nlet open = door.open();\nlet _closed = open.close();"
+    ],
+    "รูปแบบ Interior Mutability": [
+      "Interior mutability: เปลี่ยนแปลงข้อมูลผ่าน shared references ชนิด: Cell<T> (Copy types, ไม่ sync), RefCell<T> (non-Copy, ตรวจสอบ borrow ตอน runtime, ไม่ sync), OnceCell<T> (เขียนครั้งเดียว, ไม่ sync) เวอร์ชัน sync: Mutex<T>, RwLock<T>, AtomicBool/isize/ptr, OnceLock<T> RefCell borrows ตรวจสอบตอน runtime — panic เมื่อ double borrow Rc<RefCell<T>> สำหรับ shared mutable ownership (single-thread) Arc<Mutex<T>> สำหรับหลายเธรด",
+      "use std::cell::{Cell, RefCell};\nuse std::rc::Rc;\nuse std::sync::{Arc, Mutex};\nuse std::thread;\n\nfn cell_demo() {\n    let count = Cell::new(0);\n    count.set(count.get() + 1);\n    count.set(count.get() + 1);\n    println!(\"Cell count: {}\", count.get());\n}\n\nfn refcell_demo() -> i32 {\n    let data = RefCell::new(vec![1, 2, 3]);\n    data.borrow_mut().push(4);\n    data.borrow_mut().push(5);\n    let sum: i32 = data.borrow().iter().sum();\n    sum\n}\n\nfn rc_refcell_demo() {\n    let shared: Rc<RefCell<Vec<i32>>> = Rc::new(RefCell::new(vec![]));\n    let c1 = Rc::clone(&shared);\n    let c2 = Rc::clone(&shared);\n    \n    c1.borrow_mut().push(1);\n    c2.borrow_mut().push(2);\n    \n    println!(\"Shared vec: {:?}\", shared.borrow());\n}\n\nfn arc_mutex_demo() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec![];\n    \n    for _ in 0..10 {\n        let c = Arc::clone(&counter);\n        handles.push(thread::spawn(move || {\n            let mut val = c.lock().unwrap();\n            *val += 1;\n        }));\n    }\n    \n    for h in handles { h.join().unwrap(); }\n    println!(\"Final count: {}\", *counter.lock().unwrap());\n}\n\nfn main() {\n    cell_demo();\n    println!(\"RefCell sum: {}\", refcell_demo());\n    rc_refcell_demo();\n    arc_mutex_demo();\n}"
+    ]
+  },
+  "การทดสอบ": {
+    "Unit Tests": [
+      "Unit tests อยู่ใน `#[cfg(test)] mod tests` ในไฟล์เดียวกัน ฟังก์ชันทดสอบมีคำอธิบาย `#[test]` ยืนยันด้วย `assert!`, `assert_eq!`, `assert_ne!` `#[should_panic]` สำหรับการ panic ที่คาดไว้",
+      "fn add(x: i32, y: i32) -> i32 { x + y }\n#[cfg(test)]\nmod tests {\n    use super::*;\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n    #[test]\n    fn test_negative() {\n        assert!(add(-1, 1) == 0);\n    }\n}"
+    ],
+    "Integration Tests": [
+      "Integration tests อยู่ในไดเรกทอรี `tests/` ที่ราก crate แต่ละไฟล์เป็น crate แยกต่างหาก พวกมันทดสอบเฉพาะ public API `cargo test --test integration_test_name` รันไฟล์เฉพาะ",
+      "// tests/api_test.rs\nuse my_crate::add;\n#[test]\nfn test_integration() {\n    assert_eq!(add(2, 3), 5);\n}\n// Common: tests/common/mod.rs for shared setup\nmod common;\n#[test]\nfn with_common() {\n    common::setup();\n}"
+    ],
+    "Doc Tests": [
+      "Doc tests คือบล็อกโค้ดในคอมเมนต์ `///` หรือ `//!` รันด้วย `cargo test` บล็อกโค้ด ` ``` ` ถูกรวบรวมและรัน ` ```ignore ` ข้ามการคอมไพล์ ` ```no_run ` คอมไพล์แต่ไม่รัน",
+      "/// Adds two numbers.\n/// ```\n/// let result = my_crate::add(2, 3);\n/// assert_eq!(result, 5);\n/// ```\npub fn add(x: i32, y: i32) -> i32 { x + y }"
+    ],
+    "การจัดระเบียบการทดสอบและ Attributes": [
+      "`#[cfg(test)]` คอมไพล์เฉพาะโมดูลทดสอบ `#[test]` ทำเครื่องหมายการทดสอบ `#[should_panic(expected = \"...\")]` `#[ignore]` ข้ามการทดสอบ `#[bench]` สำหรับ benchmarks (nightly) `cargo test -- --nocapture` สำหรับ stdout",
+      "#[cfg(test)]\nmod tests {\n    #[test]\n    #[ignore = \"expensive\"]\n    fn expensive_test() {}\n    #[test]\n    #[should_panic(expected = \"overflow\")]\n    fn test_overflow() { panic!(\"overflow\"); }\n}"
+    ],
+    "Benchmarks": [
+      "`cargo bench` รันฟังก์ชัน benchmark ด้วย `#[bench]` (nightly) หรือใช้ `criterion` crate (stable) Criterion วัดเวลา สร้างรายงาน และตรวจจับ regression",
+      "// Nightly:\n#![feature(test)]\nextern crate test;\n#[bench]\nfn bench_add(b: &mut test::Bencher) {\n    b.iter(|| 2 + 3);\n}\n// Criterion:\nuse criterion::{black_box, Criterion};\nfn bench(c: &mut Criterion) {\n    c.bench_function(\"add\", |b| b.iter(|| black_box(2) + black_box(3)));\n}"
+    ],
+    "Property Testing ด้วย proptest": [
+      "proptest สร้างอินพุตสุ่มจำนวนมากเพื่อตรวจสอบคุณสมบัติ มาโคร `proptest!` กำหนด strategies `#[proptest]` เป็นทางเลือก ตรวจสอบว่า invariants คงอยู่สำหรับอินพุตทั้งหมด ค้นหากรณีขอบ",
+      "use proptest::prelude::*;\nproptest! {\n    #[test]\n    fn test_reverse_twice(v: Vec<i32>) {\n        let v2: Vec<_> = v.iter().cloned().rev().rev().collect();\n        assert_eq!(v, v2);\n    }\n    #[test]\n    fn test_add_commutative(a: i32, b: i32) {\n        assert_eq!(a + b, b + a);\n    }\n}"
+    ],
+    "Mocking และ Test Doubles": [
+      "Mock objects จำลอง dependencies `mockall` crate สร้าง mock types จากคำจำกัดความของ trait `#[automock]` สำหรับเมธอดเดี่ยว ใช้กับ dependency injection สำหรับการทดสอบแบบแยกส่วน",
+      "use mockall::automock;\n#[automock]\npub trait Database {\n    fn get_user(&self, id: u32) -> String;\n}\nfn greet_user(db: &impl Database, id: u32) -> String {\n    format!(\"Hello {}\", db.get_user(id))\n}\nlet mut mock = MockDatabase::new();\nmock.expect_get_user()\n    .with(predicate::eq(1))\n    .returning(|_| \"Alice\".into());\nassert_eq!(greet_user(&mock, 1), \"Hello Alice\");"
+    ]
+  },
+  "มาโคร": {
+    "Declarative Macros (macro_rules!)": [
+      "`macro_rules!` จับคู่รูปแบบและสร้างโค้ด Metavariables: `$expr`, `$ty`, `$ident`, `$stmt`, `$pat`, `$tt` การซ้ำด้วย `$()*`, `$()+`, `$()?` Hygiene ป้องกันการชนกันของชื่อ",
+      "macro_rules! vec_of {\n    ($($x:expr),* $(,)?) => {\n        {\n            let mut v = Vec::new();\n            $(v.push($x);)*\n            v\n        }\n    };\n}\nlet v = vec_of![1, 2, 3,];\nprintln!(\"{:?}\", v);"
+    ],
+    "รูปแบบมาโครและ Designators": [
+      "Designators: `block`, `expr`, `ident`, `item`, `lifetime`, `literal`, `meta`, `pat`, `path`, `stmt`, `tt`, `ty`, `vis` `tt` (token tree) ยืดหยุ่นที่สุด — จับคู่กลุ่ม token ใดก็ได้",
+      "macro_rules! make_struct {\n    ($name:ident, $field:ident: $ty:ty) => {\n        struct $name { $field: $ty }\n    };\n}\nmake_struct!(Point, x: f64);\nlet p = Point { x: 1.0 };\nprintln!(\"{}\", p.x);"
+    ],
+    "Procedural Macros (proc-macro)": [
+      "Procedural macros ดำเนินการบน stream ของ token สามชนิด: `#[derive]`, attribute-like `#[...]`, function-like `name!()` กำหนดใน proc-macro crates `proc_macro::TokenStream` เป็นอินพุต/เอาต์พุต",
+      "// Cargo.toml\n[lib]\nproc-macro = true\n// src/lib.rs\nuse proc_macro::TokenStream;\n#[proc_macro]\npub fn make_answer(_: TokenStream) -> TokenStream {\n    \"fn answer() -> u32 { 42 }\".parse().unwrap()\n}\n// Usage:\nmake_answer!();\nprintln!(\"{}\", answer());"
+    ],
+    "Derive Macros": [
+      "Derive macros implement traits อัตโนมัติ Custom derive macros ใช้ `#[proc_macro_derive(Name)]` สร้าง impl blocks `syn` crate แยกวิเคราะห์ token streams `quote` crate สร้าง output tokens",
+      "// proc-macro crate\nuse proc_macro::TokenStream;\nuse quote::quote;\nuse syn;\n#[proc_macro_derive(Hello)]\npub fn hello_derive(input: TokenStream) -> TokenStream {\n    let ast = syn::parse_macro_input!(input as syn::DeriveInput);\n    let name = &ast.ident;\n    let gen = quote! {\n        impl #name {\n            fn hello(&self) -> String {\n                format!(\"Hello from {}\", stringify!(#name))\n            }\n        }\n    };\n    gen.into()\n}"
+    ],
+    "Attribute Macros": [
+      "Attribute macros ปรับแต่ง items ที่พวกมันกำกับไว้ `#[proc_macro_attribute]` รับอาร์กิวเมนต์ attribute และ tokens ของ item ที่ถูกกำกับ ใช้สำหรับ `#[tokio::main]`, `#[async_trait]` ฯลฯ",
+      "// proc-macro crate\n#[proc_macro_attribute]\npub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {\n    println!(\"attr: \\\"{}\\\"\", attr.to_string());\n    println!(\"item: \\\"{}\\\"\", item.to_string());\n    item\n}\n// Usage:\n#[show_streams(hello = \"world\")]\nfn foo() {}"
+    ],
+    "การดีบักมาโคร": [
+      "`cargo expand` (cargo-expand) แสดงผลลัพธ์การขยายมาโคร `log_syntax!()` พิมพ์ tokens ระหว่างการขยาย `trace_macros!()` บันทึกการเรียกมาโครทั้งหมด `stringify!()` แปลงเป็นสตริง",
+      "macro_rules! debug_log {\n    ($x:expr) => {\n        {\n            let val = $x;\n            println!(\"{} = {:?}\", stringify!($x), val);\n            val\n        }\n    };\n}\nlet x = debug_log!(42 + 1);\nprintln!(\"x = {}\", x);"
+    ],
+    "รูปแบบ Declarative Macro": [
+      "รูปแบบ macro_rules! ขั้นสูง: TT muncher (การประมวลผล token tree แบบเรียกซ้ำ), กฎภายใน, การควบคุม hygiene, ชนิด token (ident, expr, ty, pat, stmt, block, literal, tt, meta, lifetime, vis) ทั่วไป: vec! (expr ซ้ำ), hashmap! (คู่ key=>value), builder patterns การซ้ำ: `$($x:expr),*` (ศูนย์+), `$($x:expr),+` (หนึ่ง+) ใช้ `@` สำหรับกฎภายใน ส่งออกด้วย `#[macro_export]`",
+      "#[macro_export]\nmacro_rules! hashmap {\n    ($($key:expr => $val:expr),* $(,)?) => {{\n        let mut map = ::std::collections::HashMap::new();\n        $(map.insert($key, $val);)*\n        map\n    }};\n}\n\n#[macro_export]\nmacro_rules! builder {\n    ($name:ident { $($field:ident: $ty:ty),* $(,)? }) => {\n        struct $name {\n            $($field: $ty,)*\n        }\n        \n        struct $name {\n            $($field: Option<$ty>,)*\n            _private: (),\n        }\n        \n        impl $name {\n            fn new() -> Self {\n                Self {\n                    $($field: None,)*\n                    _private: (),\n                }\n            }\n            $(fn $field(mut self, val: $ty) -> Self {\n                self.$field = Some(val);\n                self\n            })*\n            fn build(self) -> Result<$name, &'static str> {\n                Ok($name {\n                    $($field: self.$field.ok_or(concat!(\n                        stringify!($field), \" is required\"))?,)*\n                })\n            }\n        }\n    };\n}\n\n#[macro_export]\nmacro_rules! compute {\n    ($x:expr) => { $x };\n    ($x:expr + $($rest:tt)+) => { $x + compute!($($rest)*) };\n    ($x:expr * $($rest:tt)+) => { $x * compute!($($rest)*) };\n}\n\nfn main() {\n    let m = hashmap!(\n        \"one\" => 1,\n        \"two\" => 2,\n        \"three\" => 3,\n    );\n    println!(\"Map len: {}\", m.len());\n    \n    let result = compute!(1 + 2 * 3 + 4);\n    println!(\"Compute: {}\", result);\n}"
+    ]
+  }
+}

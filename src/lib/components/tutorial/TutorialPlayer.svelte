@@ -74,27 +74,33 @@
     const loaded = (data) => {
       if (id !== topicLoadId) return;
       queueMicrotask(() => {
-        if (id !== topicLoadId) return;
-        const course = currentCourse;
-        const phase = currentPhase;
-        const topic = topicName;
-        if (!course || !phase || !topic || !data) { topicLoading = false; return; }
-        if (data[phase.title] && data[phase.title][topic]) {
-          topicData = data[phase.title][topic];
-          editableCode = topicData[1] || '';
-        } else {
+        try {
+          if (id !== topicLoadId) return;
+          const course = currentCourse;
+          const phase = currentPhase;
+          const topic = topicName;
+          if (!course || !phase || !topic || !data) { topicLoading = false; return; }
+          const raw = data.data?.[phase.title]?.[topic];
+          if (raw) {
+            topicData = Array.isArray(raw) ? raw : [raw.exp, raw.code, raw.exercises];
+            editableCode = topicData[1] || '';
+          } else {
+            topicData = null;
+          }
+          topicLoading = false;
+        } catch {
           topicData = null;
+          topicLoading = false;
         }
-        topicLoading = false;
       });
     };
 
     if (!contentCache[lang]) {
       pendingLang = lang;
-      fetch(`/content/${lang}.json`)
-        .then(r => r.json())
+      fetch(`/api/content/${lang}`)
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
         .then(data => { contentCache[lang] = data; pendingLang = null; loaded(data); })
-        .catch(() => { if (id === topicLoadId) { pendingLang = null; queueMicrotask(() => { if (id === topicLoadId) { topicData = null; topicLoading = false; }}); } });
+        .catch(() => { if (id === topicLoadId) { pendingLang = null; queueMicrotask(() => { if (id === topicLoadId) { contentCache[lang] = null; topicData = null; topicLoading = false; }}); } });
     } else {
       loaded(contentCache[lang]);
     }

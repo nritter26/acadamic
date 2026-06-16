@@ -5,47 +5,16 @@
 
 <Modal {open} {onclose}>
   <div class="kodex-paper-body">
-    <pre class="kodex-ascii" aria-label="Kodex ASCII art">              ▄              ▄
-              ▐█▌            ▐█▌
-              ▐█▌            ▐█▌
-               █▌    ▄▄▄▄    ▐█
-              ▐██   ██████   ██▌
-            ▄███▌  ██▄▄▄▄██  ▐███▄
-           ▐████   ████████   ████▌
-           █████▌  ▀██████▀  ▐█████
-          ███████▄  ▀████▀  ▄██████
-         ▐██████████▄▄▄▄▄▄█████████▌
-         ███████████████████████████
-         ███████████████████████████
-         ▐████████▀      ▀████████▌
-          ███████   ▄▄▄▄   ███████
-          ▐██████  ██████  ██████▌
-           ███████ ██████ ███████
-            ████████████████████
-            ▐██████████████████▌
-             ██████████████████
-              ▀██████████████▀
-               ▄█████▄▄▄█████▄
-              ▐███████████████▌
-              █████████████████
-              █████████████████
-              ██████▀    ▀██████
-             ▐█████      ██████▌
-             █████▌      ▐██████
-            ██████        ███████
-           ▐█████▌        ▐██████▌
-           ██████          ███████
-           ██████          ███████</pre>
     <div class="kodex-desc">
-      <h2>Welcome to Kodex's Lab!</h2>
-      <p>An interactive multi-language programming textbook and code playground. Learn 15+ programming languages with built-in code execution, quizzes, challenges, an AI assistant, and a PostgreSQL schema designer.</p>
+      <h2>Kodex's Lab</h2>
+      <p>An interactive multi-language programming textbook and code playground. Learn 20+ programming languages with hands-on exercises, real-time code execution, interactive quizzes, and an AI-powered tutor.</p>
       <div class="kodex-features">
-        <span>15+ Languages</span>
-        <span>Live Code Execution</span>
-        <span>Devin AI</span>
-        <span>Code Challenges</span>
+        <span>20+ Languages</span>
+        <span>Real-time Code Execution</span>
+        <span>AI Tutor</span>
+        <span>Interactive Quizzes</span>
         <span>Schema Designer</span>
-        <span>Quiz Mode</span>
+        <span>Code Challenges</span>
       </div>
     </div>
   </div>
@@ -53,7 +22,6 @@
 
 <style>
   .kodex-paper-body { text-align: center; }
-  .kodex-ascii { font-size: 7px; line-height: 1.1; color: var(--accent, #6366f1); user-select: none; white-space: pre; overflow-x: auto; }
   .kodex-desc { margin-top: 16px; }
   .kodex-desc h2 { color: #e2e8f0; font-size: 18px; margin: 0 0 8px; }
   .kodex-desc p { color: #94a3b8; font-size: 13px; line-height: 1.5; max-width: 500px; margin: 0 auto 16px; }

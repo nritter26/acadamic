@@ -43,7 +43,7 @@ pub async fn auth_middleware(
         || path == "/api/metrics"
         || path == "/api/ws/stats"
         || path == "/api/rate-limit/stats"
-        // Public content & learning routes (GET only, no auth needed)
+        // Public content, learning & execution routes (no auth needed)
         || path == "/api/courses"
         || path.starts_with("/api/content/")
         || path == "/api/content"
@@ -52,6 +52,15 @@ pub async fn auth_middleware(
         || path == "/api/ollama/models"
         || path == "/api/tutor/recommend"
         || path.starts_with("/api/learner/")
+        || path == "/api/execute"
+        // Public AI/tutor routes (no auth needed for dev)
+        || path == "/api/tutor/explain-topic"
+        || path == "/api/tutor/start-exercise"
+        || path == "/api/tutor/attempt-exercise"
+        || path == "/api/chat"
+        || path == "/api/explain"
+        || path == "/api/exercise"
+        || path == "/api/quiz/generate"
     {
         return Ok(next.run(req).await);
     }

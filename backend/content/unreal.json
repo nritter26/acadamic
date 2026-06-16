@@ -17,6 +17,12 @@
       "exercises": []
     }
   },
+  "Sequencer & Cinematics": {
+    "Sequencer & Cutscenes": [
+      "Sequencer is UE's cinematic editor for in-game cutscenes and cinematics. Key components: <code>Level Sequence</code> (tracks actors, cameras, audio, events), <code>Camera Cut Track</code> (switches cameras), <code>Take Recorder</code> (record in-editor performances). Supports animation tracks, sub-sequences, and event tracks triggering Blueprints. Cinematic Camera actors with film presets and depth of field.",
+      "UCLASS()\nclass ASequencerController : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UPROPERTY(EditAnywhere, Category = \"Cinematics\")\n    ULevelSequence* CutsceneSequence;\n\n    UPROPERTY(EditAnywhere, Category = \"Cinematics\")\n    ACineCameraActor* CinematicCamera;\n\n    UFUNCTION(BlueprintCallable, Category = \"Cinematics\")\n    void PlayCutscene()\n    {\n        if (!CutsceneSequence) return;\n\n        auto* Player = GetWorld()->GetFirstPlayerController();\n        if (!Player) return;\n\n        // Create sequence actor and play\n        ALeverSequenceActor* SeqActor;\n        auto* MovieScene = CutsceneSequence->GetMovieScene();\n\n        ULevelSequencePlayer* PlayerActor = ULevelSequencePlayer::CreateLevelSequencePlayer(\n            GetWorld(),\n            CutsceneSequence,\n            FMovieSceneSequencePlaybackSettings(),\n            SeqActor\n        );\n\n        if (PlayerActor)\n        {\n            // Blend to cinematic camera\n            auto* CameraManager = Player->PlayerCameraManager;\n            if (CinematicCamera)\n            {\n                CameraManager->SetViewTarget(CinematicCamera, FViewTargetTransitionParams());\n            }\n\n            PlayerActor->OnFinished.AddDynamic(this, &ASequencerController::OnCutsceneEnd);\n            PlayerActor->Play();\n        }\n    }\n\n    UFUNCTION()\n    void OnCutsceneEnd()\n    {\n        // Return to player camera\n        if (auto* Player = GetWorld()->GetFirstPlayerController())\n        {\n            auto* Pawn = Player->GetPawn();\n            if (Pawn)\n            {\n                Player->SetViewTarget(Pawn, FViewTargetTransitionParams());\n            }\n        }\n    }\n\n    // Take Recorder: Window > Take Recorder\n    // Record actor transforms, camera movement, and audio in real-time\n\n    // Sub-sequences: nest sequences for modular cutscenes\n    // Event tracks: fire custom Blueprint events at specific times\n};"
+    ]
+  },
   "Components & UI": {
     "Unreal Components": {
       "exp": "Building user interfaces with Unreal.",
@@ -38,37 +44,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Unreal Data": {
-      "exp": "Working with data and APIs in Unreal.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Unreal Testing": {
-      "exp": "Testing strategies for Unreal.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Unreal Deployment": {
-      "exp": "Deploying Unreal applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Unreal Best Practices": {
       "exp": "Best practices for Unreal development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Unreal Advanced": {
-      "exp": "Advanced Unreal topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -157,12 +135,6 @@
       "UCLASS()\nclass ALandscapeManager : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UFUNCTION(BlueprintCallable, Category = \"Landscape\")\n    void SculptTerrain()\n    {\n        // Landscape tools are primarily editor-based\n        // But you can modify at runtime via:\n        if (auto* Landscape = FindObject<ALandscape>())\n        {\n            // Modify landscape heightmap at runtime\n            TArray<uint16> HeightData;\n            // Fill with modified heights...\n            Landscape->Import(FIntRect(0, 0, 256, 256), HeightData);\n        }\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Foliage\")\n    void AddFoliage()\n    {\n        // Procedural Foliage Spawner\n        auto* Volume = GetWorld()->SpawnActor<AProceduralFoliageVolume>(\n            AProceduralFoliageVolume::StaticClass(),\n            GetActorLocation(),\n            FRotator::ZeroRotator\n        );\n\n        if (Volume && Volume->ProceduralComponent)\n        {\n            // Set spawner properties\n            Volume->ProceduralComponent->TileSize = 10000.0f;\n            Volume->ProceduralComponent->bSpawnInProceduralWorld = true;\n\n            // Add procedural foliage types\n            for (auto& Type : Volume->ProceduralComponent->FoliageTypes)\n            {\n                Type.Density = 0.3f;\n                Type.MaxAge = 5.0f;\n                Type.Scale = FFloatInterval(0.8f, 1.5f);\n            }\n\n            Volume->ProceduralComponent->Simulate();\n        }\n    }\n\n    // Manual foliage painting:\n    // Place Foliage Mode (Shift+3) > Select foliage types > Paint on Landscape\n    // Foliage types: StaticMesh with materials, collision, and LOD\n\n    // Landscape layers:\n    // Layer Info: weight-blended textures based on height, angle\n    // Edit layers: Landscape > Manage > Layers > Add\n};"
     ]
   },
-  "Sequencer & Cinematics": {
-    "Sequencer & Cutscenes": [
-      "Sequencer is UE's cinematic editor for in-game cutscenes and cinematics. Key components: <code>Level Sequence</code> (tracks actors, cameras, audio, events), <code>Camera Cut Track</code> (switches cameras), <code>Take Recorder</code> (record in-editor performances). Supports animation tracks, sub-sequences, and event tracks triggering Blueprints. Cinematic Camera actors with film presets and depth of field.",
-      "UCLASS()\nclass ASequencerController : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UPROPERTY(EditAnywhere, Category = \"Cinematics\")\n    ULevelSequence* CutsceneSequence;\n\n    UPROPERTY(EditAnywhere, Category = \"Cinematics\")\n    ACineCameraActor* CinematicCamera;\n\n    UFUNCTION(BlueprintCallable, Category = \"Cinematics\")\n    void PlayCutscene()\n    {\n        if (!CutsceneSequence) return;\n\n        auto* Player = GetWorld()->GetFirstPlayerController();\n        if (!Player) return;\n\n        // Create sequence actor and play\n        ALeverSequenceActor* SeqActor;\n        auto* MovieScene = CutsceneSequence->GetMovieScene();\n\n        ULevelSequencePlayer* PlayerActor = ULevelSequencePlayer::CreateLevelSequencePlayer(\n            GetWorld(),\n            CutsceneSequence,\n            FMovieSceneSequencePlaybackSettings(),\n            SeqActor\n        );\n\n        if (PlayerActor)\n        {\n            // Blend to cinematic camera\n            auto* CameraManager = Player->PlayerCameraManager;\n            if (CinematicCamera)\n            {\n                CameraManager->SetViewTarget(CinematicCamera, FViewTargetTransitionParams());\n            }\n\n            PlayerActor->OnFinished.AddDynamic(this, &ASequencerController::OnCutsceneEnd);\n            PlayerActor->Play();\n        }\n    }\n\n    UFUNCTION()\n    void OnCutsceneEnd()\n    {\n        // Return to player camera\n        if (auto* Player = GetWorld()->GetFirstPlayerController())\n        {\n            auto* Pawn = Player->GetPawn();\n            if (Pawn)\n            {\n                Player->SetViewTarget(Pawn, FViewTargetTransitionParams());\n            }\n        }\n    }\n\n    // Take Recorder: Window > Take Recorder\n    // Record actor transforms, camera movement, and audio in real-time\n\n    // Sub-sequences: nest sequences for modular cutscenes\n    // Event tracks: fire custom Blueprint events at specific times\n};"
-    ]
-  },
   "AI Behavior Trees": {
     "AI & Behavior Trees": [
       "Unreal's AI system centers on Behavior Trees — hierarchical task graphs with Sequence, Selector, Condition, Task, and Decorator nodes. Blackboard stores shared AI data (target, location, state). Environment Query System (EQS) finds tactical positions. AI Perception Component handles sight, hearing, and damage detection. Use <code>AAIController</code> to run behavior trees on pawns.",
@@ -173,18 +145,6 @@
     "Legacy Audio & Attenuation": [
       "Alongside MetaSounds, UE supports Sound Cues (wave player, delay, mixer, modulator). <code>USoundAttenuation</code> sets distance falloff, reverb send, and occlusion. <code>USoundConcurrency</code> limits overlapping instances. <code>UAudioVolume</code> changes audio settings in world regions. Audio Mixing: master/submix buses, EQ, compression, and reverb effects on audio submixes.",
       "UCLASS()\nclass AMyAudioPlayer : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Audio\")\n    USoundBase* SoundEffect;\n\n    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Audio\")\n    USoundAttenuation* AttenuationSettings;\n\n    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Audio\")\n    USoundConcurrency* ConcurrencySettings;\n\n    UFUNCTION(BlueprintCallable, Category = \"Audio\")\n    void PlaySound(FVector Location)\n    {\n        if (!SoundEffect) return;\n\n        UGameplayStatics::PlaySoundAtLocation(\n            GetWorld(),\n            SoundEffect,\n            Location,\n            1.0f,   // Volume\n            1.0f,   // Pitch\n            0.0f,   // Start time\n            AttenuationSettings,\n            ConcurrencySettings\n        );\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Audio\")\n    void PlaySound2D()\n    {\n        UGameplayStatics::PlaySound2D(\n            GetWorld(),\n            SoundEffect,\n            1.0f,\n            1.0f,\n            0.0f,\n            ConcurrencySettings\n        );\n    }\n\n    void SetupAudioVolume()\n    {\n        // Place AAudioVolume in level\n        auto* Volume = GetWorld()->SpawnActor<AAudioVolume>(\n            AAudioVolume::StaticClass(),\n            FVector(0, 0, 0),\n            FRotator::ZeroRotator\n        );\n\n        if (Volume)\n        {\n            Volume->SetReverbSettings(FReverbSettings {\n                /* Reverb preset */\n                ReverbPreset::REVERB_Cave\n            });\n            Volume->SetPriority(1.0f);\n            Volume->bEnabled = true;\n        }\n    }\n\n    // Sound Cue editor: right-click > Sounds > Sound Cue\n    // Nodes: Wave Player, Delay, Modulator, Mixer, Random, Concatenator\n    // Submix: assign output to submix for per-effect bus routing\n};"
-    ]
-  },
-  "Optimization & Profiling": {
-    "Unreal Insights & Optimization": [
-      "Unreal Insights is UE5's central profiling tool. Use console commands: <code>stat fps</code>, <code>stat unit</code>, <code>stat game</code>, <code>stat rhi</code>. ProfileGPU shows per-draw-call cost. Key optimizations: Nanite for high-poly meshes, Virtual Shadow Maps, Lumen scalability settings, HLOD merging, texture streaming pool, and PSO caching. Use <code>-trace</code> launch args for Unreal Insights capture.",
-      "UCLASS()\nclass AOptimizationHelper : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UFUNCTION(BlueprintCallable, Category = \"Optimization\")\n    void EnableProfiling()\n    {\n        // Console commands\n        auto* Cmd = GetWorld()->GetFirstPlayerController();\n        if (Cmd)\n        {\n            Cmd->ConsoleCommand(TEXT(\"stat fps\"));\n            Cmd->ConsoleCommand(TEXT(\"stat unit\"));\n            Cmd->ConsoleCommand(TEXT(\"stat rhi\"));   // Render hardware interface\n            Cmd->ConsoleCommand(TEXT(\"stat game\"));  // Game thread timing\n            Cmd->ConsoleCommand(TEXT(\"stat d3d12\")); // DirectX 12 stats\n        }\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Optimization\")\n    void SetQuality(FString Preset)\n    {\n        // Set scalability quality\n        auto* Settings = UGameUserSettings::GetGameUserSettings();\n        if (Preset == \"Low\")\n        {\n            Settings->SetOverallScalabilityLevel(0);\n        }\n        else if (Preset == \"Medium\")\n        {\n            Settings->SetOverallScalabilityLevel(1);\n        }\n        else if (Preset == \"High\")\n        {\n            Settings->SetOverallScalabilityLevel(2);\n        }\n        else if (Preset == \"Epic\")\n        {\n            Settings->SetOverallScalabilityLevel(3);\n        }\n        Settings->ApplyNonResolutionSettings();\n        Settings->ApplySettings(false);\n    }\n\n    // Nanite: enable per-mesh in Static Mesh settings\n    // Virtual Shadow Maps: Project Settings > Rendering > Shadow Map Method\n    // Lumen: Project Settings > Rendering > Dynamic Global Illumination\n\n    // HLOD: merge distant meshes into single proxy\n    // Volume > HLOD > Create HLODLayer\n    // Merge distance, polygon count, texture size per layer\n\n    // PSO (Pipeline State Object) caching:\n    // Project Settings > Platform > D3D12 > PSO Cache\n\n    // Launch with tracing:\n    // GameName.exe -trace=cpu,gpu,frame -tracefile=profile.utrace\n};"
-    ]
-  },
-  "Packaging & Deployment": {
-    "Project Packaging": [
-      "Package your UE project via File > Package Project. Target platforms: Windows, Mac, Linux, Android, iOS, and consoles (Xbox, PS5, Switch). Configure project settings: maps, default game mode, input, packaging (cook everything vs. by the book). Handle platform-specific SDKs (Steamworks, Epic Online Services). Create installer with NSIS or platform store submission packages.",
-      "UCLASS()\nclass ADeploymentHelper : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UFUNCTION(BlueprintCallable, Category = \"Deployment\")\n    void GetPlatformInfo()\n    {\n        FString PlatformName;\n        #if PLATFORM_WINDOWS\n            PlatformName = TEXT(\"Windows\");\n        #elif PLATFORM_MAC\n            PlatformName = TEXT(\"Mac\");\n        #elif PLATFORM_LINUX\n            PlatformName = TEXT(\"Linux\");\n        #elif PLATFORM_ANDROID\n            PlatformName = TEXT(\"Android\");\n        #elif PLATFORM_IOS\n            PlatformName = TEXT(\"iOS\");\n        #elif PLATFORM_SWITCH\n            PlatformName = TEXT(\"Switch\");\n        #elif PLATFORM_XBOX\n            PlatformName = TEXT(\"Xbox\");\n        #elif PLATFORM_PS5\n            PlatformName = TEXT(\"PlayStation 5\");\n        #endif\n\n        UE_LOG(LogTemp, Display, TEXT(\"Running on: %s\"), *PlatformName);\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Deployment\")\n    void ConfigureProject()\n    {\n        // Default maps\n        const FString EditorEntry = TEXT(\"/Game/Maps/EntryMap\");\n        const FString GameMap = TEXT(\"/Game/Maps/GameplayMap\");\n\n        // Project settings equivalent via code:\n        auto* Settings = GetMutableDefault<UGeneralProjectSettings>();\n        Settings->CompanyName = TEXT(\"My Studio\");\n        Settings->ProjectName = TEXT(\"My Game\");\n        Settings->ProjectVersion = TEXT(\"1.0.0\");\n        Settings->CopyrightNotice = TEXT(\"Copyright 2026\");\n        Settings->UpdateDefaultConfigFile();\n    }\n\n    // Packaging steps:\n    // 1. Project Settings > Maps & Modes > Set Entry + Game Default\n    // 2. Project Settings > Packaging > Build Configuration (Shipping)\n    // 3. File > Package Project > [Platform]\n    // 4. For Steam: configure Steamworks SDK, app ID, DRM\n    // 5. Create installer: NSIS (Windows), DMG (Mac), .deb/.AppImage (Linux)\n    // 6. Submit to store: Steamworks, Epic Games Store, Itch.io\n\n    // Android: configure SDK/NDK, keystore, API level\n    // iOS: provisioning profile, bundle ID, App Store Connect\n};"
     ]
   },
   "Control Rig & IK": {
@@ -198,5 +158,45 @@
       "The Gameplay Ability System (GAS) is a robust framework for abilities, buffs, cooldowns, and attributes. Core components: <code>UAbilitySystemComponent</code> (attach to characters), <code>UGameplayAbility</code> (skill definitions), <code>UGameplayEffect</code> (temporary/permanent stat changes), <code>UAttributeSet</code> (character stats). Uses <code>FGameplayTag</code> for blocking, stacking, and categorization. Widely used in AAA shooters and RPGs.",
       "UCLASS()\nclass UMyGameplayAbility : public UGameplayAbility\n{\n    GENERATED_BODY()\n\npublic:\n    UMyGameplayAbility()\n    {\n        InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;\n        NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;\n    }\n\n    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Damage\")\n    TSubclassOf<UGameplayEffect> DamageEffect;\n\n    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Cooldown\")\n    FGameplayTag CooldownTag;\n\n    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Cost\")\n    float ManaCost = 10.0f;\n\n    virtual void ActivateAbility(\n        const FGameplayAbilitySpecHandle Handle,\n        const FGameplayAbilityActorInfo* ActorInfo,\n        const FGameplayAbilityActivationInfo ActivationInfo,\n        const FGameplayEventData* TriggerEventData) override\n    {\n        Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);\n\n        // Commit cost and cooldown\n        if (!CommitAbility(Handle, ActorInfo, ActivationInfo))\n        {\n            EndAbility(Handle, ActorInfo, ActivationInfo, true, false);\n            return;\n        }\n\n        // Apply damage effect\n        if (DamageEffect)\n        {\n            FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(\n                DamageEffect, GetAbilityLevel()\n            );\n            ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpec()->GetContext(),\n                SpecHandle, GetAbilitySystemTarget());\n        }\n    }\n\n    // AttributeSet\n    UCLASS()\n    class UMyAttributeSet : public UAttributeSet\n    {\n        GENERATED_BODY()\n\n    public:\n        UPROPERTY(ReplicatedUsing = OnRep_Health)\n        FGameplayAttributeData Health;\n\n        UPROPERTY(ReplicatedUsing = OnRep_MaxHealth)\n        FGameplayAttributeData MaxHealth;\n\n        UPROPERTY(ReplicatedUsing = OnRep_Mana)\n        FGameplayAttributeData Mana;\n    };\n\n    // GameplayEffect: instant (instant damage), duration (buff 10s),\n    // infinite (until removed). Modifiers: Add, Multiply, Override\n};"
     ]
+  },
+  "Testing": {
+    "Unreal Testing": {
+      "exp": "Testing strategies for Unreal.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Unreal Data": {
+      "exp": "Working with data and APIs in Unreal.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Unreal Deployment": {
+      "exp": "Deploying Unreal applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Optimization & Profiling": {
+    "Unreal Insights & Optimization": [
+      "Unreal Insights is UE5's central profiling tool. Use console commands: <code>stat fps</code>, <code>stat unit</code>, <code>stat game</code>, <code>stat rhi</code>. ProfileGPU shows per-draw-call cost. Key optimizations: Nanite for high-poly meshes, Virtual Shadow Maps, Lumen scalability settings, HLOD merging, texture streaming pool, and PSO caching. Use <code>-trace</code> launch args for Unreal Insights capture.",
+      "UCLASS()\nclass AOptimizationHelper : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UFUNCTION(BlueprintCallable, Category = \"Optimization\")\n    void EnableProfiling()\n    {\n        // Console commands\n        auto* Cmd = GetWorld()->GetFirstPlayerController();\n        if (Cmd)\n        {\n            Cmd->ConsoleCommand(TEXT(\"stat fps\"));\n            Cmd->ConsoleCommand(TEXT(\"stat unit\"));\n            Cmd->ConsoleCommand(TEXT(\"stat rhi\"));   // Render hardware interface\n            Cmd->ConsoleCommand(TEXT(\"stat game\"));  // Game thread timing\n            Cmd->ConsoleCommand(TEXT(\"stat d3d12\")); // DirectX 12 stats\n        }\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Optimization\")\n    void SetQuality(FString Preset)\n    {\n        // Set scalability quality\n        auto* Settings = UGameUserSettings::GetGameUserSettings();\n        if (Preset == \"Low\")\n        {\n            Settings->SetOverallScalabilityLevel(0);\n        }\n        else if (Preset == \"Medium\")\n        {\n            Settings->SetOverallScalabilityLevel(1);\n        }\n        else if (Preset == \"High\")\n        {\n            Settings->SetOverallScalabilityLevel(2);\n        }\n        else if (Preset == \"Epic\")\n        {\n            Settings->SetOverallScalabilityLevel(3);\n        }\n        Settings->ApplyNonResolutionSettings();\n        Settings->ApplySettings(false);\n    }\n\n    // Nanite: enable per-mesh in Static Mesh settings\n    // Virtual Shadow Maps: Project Settings > Rendering > Shadow Map Method\n    // Lumen: Project Settings > Rendering > Dynamic Global Illumination\n\n    // HLOD: merge distant meshes into single proxy\n    // Volume > HLOD > Create HLODLayer\n    // Merge distance, polygon count, texture size per layer\n\n    // PSO (Pipeline State Object) caching:\n    // Project Settings > Platform > D3D12 > PSO Cache\n\n    // Launch with tracing:\n    // GameName.exe -trace=cpu,gpu,frame -tracefile=profile.utrace\n};"
+    ]
+  },
+  "Packaging & Deployment": {
+    "Project Packaging": [
+      "Package your UE project via File > Package Project. Target platforms: Windows, Mac, Linux, Android, iOS, and consoles (Xbox, PS5, Switch). Configure project settings: maps, default game mode, input, packaging (cook everything vs. by the book). Handle platform-specific SDKs (Steamworks, Epic Online Services). Create installer with NSIS or platform store submission packages.",
+      "UCLASS()\nclass ADeploymentHelper : public AActor\n{\n    GENERATED_BODY()\n\npublic:\n    UFUNCTION(BlueprintCallable, Category = \"Deployment\")\n    void GetPlatformInfo()\n    {\n        FString PlatformName;\n        #if PLATFORM_WINDOWS\n            PlatformName = TEXT(\"Windows\");\n        #elif PLATFORM_MAC\n            PlatformName = TEXT(\"Mac\");\n        #elif PLATFORM_LINUX\n            PlatformName = TEXT(\"Linux\");\n        #elif PLATFORM_ANDROID\n            PlatformName = TEXT(\"Android\");\n        #elif PLATFORM_IOS\n            PlatformName = TEXT(\"iOS\");\n        #elif PLATFORM_SWITCH\n            PlatformName = TEXT(\"Switch\");\n        #elif PLATFORM_XBOX\n            PlatformName = TEXT(\"Xbox\");\n        #elif PLATFORM_PS5\n            PlatformName = TEXT(\"PlayStation 5\");\n        #endif\n\n        UE_LOG(LogTemp, Display, TEXT(\"Running on: %s\"), *PlatformName);\n    }\n\n    UFUNCTION(BlueprintCallable, Category = \"Deployment\")\n    void ConfigureProject()\n    {\n        // Default maps\n        const FString EditorEntry = TEXT(\"/Game/Maps/EntryMap\");\n        const FString GameMap = TEXT(\"/Game/Maps/GameplayMap\");\n\n        // Project settings equivalent via code:\n        auto* Settings = GetMutableDefault<UGeneralProjectSettings>();\n        Settings->CompanyName = TEXT(\"My Studio\");\n        Settings->ProjectName = TEXT(\"My Game\");\n        Settings->ProjectVersion = TEXT(\"1.0.0\");\n        Settings->CopyrightNotice = TEXT(\"Copyright 2026\");\n        Settings->UpdateDefaultConfigFile();\n    }\n\n    // Packaging steps:\n    // 1. Project Settings > Maps & Modes > Set Entry + Game Default\n    // 2. Project Settings > Packaging > Build Configuration (Shipping)\n    // 3. File > Package Project > [Platform]\n    // 4. For Steam: configure Steamworks SDK, app ID, DRM\n    // 5. Create installer: NSIS (Windows), DMG (Mac), .deb/.AppImage (Linux)\n    // 6. Submit to store: Steamworks, Epic Games Store, Itch.io\n\n    // Android: configure SDK/NDK, keystore, API level\n    // iOS: provisioning profile, bundle ID, App Store Connect\n};"
+    ]
+  },
+  "Advanced Topics": {
+    "Unreal Advanced": {
+      "exp": "Advanced Unreal topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   }
 }

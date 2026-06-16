@@ -5,6 +5,10 @@
       "code": "",
       "exercises": []
     },
+    "App Setup": [
+      "Setting up an Express app involves creating the app instance, configuring middleware, defining routes, and starting the server with app.listen(). Includes error handling middleware defined last.",
+      "const express = require('express'); const app = express(); const PORT = process.env.PORT || 3000; app.use(express.json()); app.get('/', (req, res) => res.json({ status: 'OK' })); app.listen(PORT);"
+    ],
     "Routing": [
       "Routing defines how an application responds to client requests at specific endpoints (URIs) and HTTP methods. Express provides intuitive methods like app.get(), app.post(), and app.all() for route definition.",
       "const express = require('express'); const app = express(); app.get('/', (req, res) => res.send('Home')); app.post('/api/users', (req, res) => res.status(201).json({ id: 1 }));"
@@ -12,10 +16,6 @@
     "Middleware": [
       "Middleware functions execute in sequence during the request-response cycle, with access to the request and response objects. They can modify objects, end the cycle, or call the next middleware via next().",
       "const logger = (req, res, next) => { console.log(req.method, req.url); next(); }; app.use(logger); app.use(express.json());"
-    ],
-    "App Setup": [
-      "Setting up an Express app involves creating the app instance, configuring middleware, defining routes, and starting the server with app.listen(). Includes error handling middleware defined last.",
-      "const express = require('express'); const app = express(); const PORT = process.env.PORT || 3000; app.use(express.json()); app.get('/', (req, res) => res.json({ status: 'OK' })); app.listen(PORT);"
     ]
   },
   "Core Concepts": {
@@ -33,6 +33,10 @@
     }
   },
   "Routing": {
+    "Query Strings": [
+      "Query strings pass key-value pairs after the ? in the URL. Express parses them and makes them available via req.query. Useful for filtering, pagination, and search parameters.",
+      "app.get('/api/users', (req, res) => { const { page = 1, limit = 10, sort } = req.query; const skip = (page - 1) * limit; res.json({ page, limit, sort }); });"
+    ],
     "Express Routing": {
       "exp": "Navigation and routing in Express.",
       "code": "",
@@ -45,10 +49,6 @@
     "Route Params": [
       "Route parameters capture values from the URL path. They are defined with a colon prefix and accessed via req.params. Params can be optional or use regex patterns.",
       "app.get('/users/:userId', (req, res) => { const id = req.params.userId; res.json({ userId: id }); }); app.get('/files/:filename(\\\\.png)', handler);"
-    ],
-    "Query Strings": [
-      "Query strings pass key-value pairs after the ? in the URL. Express parses them and makes them available via req.query. Useful for filtering, pagination, and search parameters.",
-      "app.get('/api/users', (req, res) => { const { page = 1, limit = 10, sort } = req.query; const skip = (page - 1) * limit; res.json({ page, limit, sort }); });"
     ]
   },
   "State Management": {
@@ -58,37 +58,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Express Data": {
-      "exp": "Working with data and APIs in Express.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Express Testing": {
-      "exp": "Testing strategies for Express.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Express Deployment": {
-      "exp": "Deploying Express applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Express Best Practices": {
       "exp": "Best practices for Express development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Express Advanced": {
-      "exp": "Advanced Express topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -153,19 +125,19 @@
       "const session = require('express-session'); const RedisStore = require('connect-redis')(session); const redis = require('redis'); const client = redis.createClient(); app.use(session({ store: new RedisStore({ client }), secret: 'secret', resave: false, saveUninitialized: false }));"
     ]
   },
-  "Authentication": {
-    "JWT": [
-      "JSON Web Tokens (JWT) provide stateless authentication. After login, a signed token containing user claims is sent to the client, which includes it in the Authorization header for protected routes.",
-      "const jwt = require('jsonwebtoken'); const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' }); const verifyToken = (req, res, next) => { const token = req.headers.authorization?.split(' ')[1]; try { req.user = jwt.verify(token, process.env.JWT_SECRET); next(); } catch (e) { res.status(401).json({ error: 'Invalid token' }); } };"
-    ],
-    "Sessions": [
-      "Express-session creates server-side sessions stored in memory or external stores like Redis. A signed cookie identifies the session, keeping user data on the server for security.",
-      "const session = require('express-session'); app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true, cookie: { secure: true, httpOnly: true, maxAge: 86400000 } })); app.get('/login', (req, res) => { req.session.userId = user.id; res.redirect('/'); });"
-    ],
-    "Passport": [
-      "Passport.js provides strategy-based authentication supporting local, OAuth (Google, GitHub, Facebook), JWT, and many other providers. serializeUser/deserializeUser manage session persistence.",
-      "const passport = require('passport'); const LocalStrategy = require('passport-local'); passport.use(new LocalStrategy(async (username, password, done) => { const user = await User.findOne({ username }); if (!user || !user.verifyPassword(password)) return done(null, false); return done(null, user); })); app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));"
-    ]
+  "Testing": {
+    "Express Testing": {
+      "exp": "Testing strategies for Express.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Express Data": {
+      "exp": "Working with data and APIs in Express.",
+      "code": "",
+      "exercises": []
+    }
   },
   "REST APIs": {
     "Best Practices": [
@@ -182,10 +154,6 @@
     ]
   },
   "WebSockets": {
-    "Socket.io Integration": [
-      "Socket.io enables real-time bidirectional communication between the server and clients. Express apps integrate Socket.io by wrapping the HTTP server and attaching socket handlers with namespace support.",
-      "const http = require('http'); const { Server } = require('socket.io'); const server = http.createServer(app); const io = new Server(server, { cors: { origin: '*' } }); io.on('connection', (socket) => { console.log('User connected'); socket.on('message', (data) => io.emit('message', data)); socket.on('disconnect', () => console.log('Disconnected')); }); server.listen(3000);"
-    ],
     "ws Library": [
       "The ws library is a lightweight WebSocket implementation for Express. It attaches to the HTTP server and provides a simple event-based API with support for rooms and binary data.",
       "const { WebSocketServer } = require('ws'); const server = app.listen(3000); const wss = new WebSocketServer({ server }); wss.on('connection', (ws) => { ws.on('message', (data) => wss.clients.forEach(client => client.send(data))); ws.send('Connected'); });"
@@ -193,6 +161,31 @@
     "Broadcasting": [
       "Socket.io rooms and namespaces organize connections into logical groups for targeted broadcasting. The broadcast flag sends to all clients except the sender, and rooms isolate groups.",
       "io.on('connection', (socket) => { socket.join('room-' + userId); socket.broadcast.to('room-' + userId).emit('user-online', userId); io.to('room-' + userId).emit('notification', { text: 'New message' }); });"
+    ],
+    "Socket.io Integration": [
+      "Socket.io enables real-time bidirectional communication between the server and clients. Express apps integrate Socket.io by wrapping the HTTP server and attaching socket handlers with namespace support.",
+      "const http = require('http'); const { Server } = require('socket.io'); const server = http.createServer(app); const io = new Server(server, { cors: { origin: '*' } }); io.on('connection', (socket) => { console.log('User connected'); socket.on('message', (data) => io.emit('message', data)); socket.on('disconnect', () => console.log('Disconnected')); }); server.listen(3000);"
+    ]
+  },
+  "Deployment": {
+    "Express Deployment": {
+      "exp": "Deploying Express applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Authentication": {
+    "JWT": [
+      "JSON Web Tokens (JWT) provide stateless authentication. After login, a signed token containing user claims is sent to the client, which includes it in the Authorization header for protected routes.",
+      "const jwt = require('jsonwebtoken'); const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' }); const verifyToken = (req, res, next) => { const token = req.headers.authorization?.split(' ')[1]; try { req.user = jwt.verify(token, process.env.JWT_SECRET); next(); } catch (e) { res.status(401).json({ error: 'Invalid token' }); } };"
+    ],
+    "Sessions": [
+      "Express-session creates server-side sessions stored in memory or external stores like Redis. A signed cookie identifies the session, keeping user data on the server for security.",
+      "const session = require('express-session'); app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true, cookie: { secure: true, httpOnly: true, maxAge: 86400000 } })); app.get('/login', (req, res) => { req.session.userId = user.id; res.redirect('/'); });"
+    ],
+    "Passport": [
+      "Passport.js provides strategy-based authentication supporting local, OAuth (Google, GitHub, Facebook), JWT, and many other providers. serializeUser/deserializeUser manage session persistence.",
+      "const passport = require('passport'); const LocalStrategy = require('passport-local'); passport.use(new LocalStrategy(async (username, password, done) => { const user = await User.findOne({ username }); if (!user || !user.verifyPassword(password)) return done(null, false); return done(null, user); })); app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));"
     ]
   },
   "Security": {
@@ -212,6 +205,13 @@
       "Input validation libraries like Joi, express-validator, or Zod prevent injection attacks and malformed data. Validation middleware sanitizes and validates request bodies, params, and queries.",
       "const { body, validationResult } = require('express-validator'); app.post('/user', [ body('email').isEmail().normalizeEmail(), body('age').isInt({ min: 0 }) ], (req, res) => { const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() }); });"
     ]
+  },
+  "Advanced Topics": {
+    "Express Advanced": {
+      "exp": "Advanced Express topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Express Advanced Patterns": {
     "Middleware Architecture & Error Handling": [

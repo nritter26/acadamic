@@ -1,13 +1,13 @@
 {
   "AI Fundamentals": {
-    "What is Artificial Intelligence?": {
-      "exp": "Introduction to AI, ML, and deep learning. AI vs ML vs DL, narrow vs general AI, history of AI, real-world applications across industries including healthcare, finance, transportation, and entertainment.",
-      "code": "# AI is transforming every industry\n# Key areas: machine learning, NLP, computer vision, robotics\n\nprint(\"Welcome to AI!\")\nprint(\"Artificial Intelligence is the simulation of human intelligence by machines\")",
-      "exercises": []
-    },
     "Types of AI": {
       "exp": "Different categories of AI systems based on capability: Reactive Machines (limited memory), Theory of Mind, Self-Aware AI. Also categorized by functionality: Narrow AI (specialized), General AI (human-level), and Super AI (beyond human).",
       "code": "# Categories of AI\nai_types = {\n    \"narrow\": \"Specialized task performance\",\n    \"general\": \"Human-level intelligence\",\n    \"super\": \"Beyond human capability\"\n}\nfor t, desc in ai_types.items():\n    print(f\"{t}: {desc}\")",
+      "exercises": []
+    },
+    "What is Artificial Intelligence?": {
+      "exp": "Introduction to AI, ML, and deep learning. AI vs ML vs DL, narrow vs general AI, history of AI, real-world applications across industries including healthcare, finance, transportation, and entertainment.",
+      "code": "# AI is transforming every industry\n# Key areas: machine learning, NLP, computer vision, robotics\n\nprint(\"Welcome to AI!\")\nprint(\"Artificial Intelligence is the simulation of human intelligence by machines\")",
       "exercises": []
     },
     "AI Problem Solving": {
@@ -54,6 +54,11 @@
     }
   },
   "Machine Learning": {
+    "Ensemble Methods": {
+      "exp": "Combining multiple models for better performance: bagging (Random Forests), boosting (AdaBoost, Gradient Boosting, XGBoost, LightGBM), stacking, voting classifiers. Understanding ensemble diversity and bias-variance reduction.",
+      "code": "from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.datasets import make_classification\n\nX, y = make_classification(n_samples=1000, random_state=42)\n\n# Create ensemble\nrf = RandomForestClassifier(n_estimators=100)\ngb = GradientBoostingClassifier(n_estimators=100)\nensemble = VotingClassifier([('rf', rf), ('gb', gb)], voting='soft')\nensemble.fit(X, y)\nprint(f\"Ensemble trained with {len(ensemble.estimators_)} estimators\")",
+      "exercises": []
+    },
     "Supervised Learning": {
       "exp": "Supervised learning: training models on labeled data. Covers regression (linear, polynomial, ridge, lasso) and classification (logistic regression, decision trees, SVM, k-nearest neighbors). Understanding bias-variance tradeoff and model capacity.",
       "code": "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import mean_squared_error\nimport numpy as np\n\n# Simple linear regression\nX = np.random.randn(100, 1) * 10\ny = 2 * X.squeeze() + 1 + np.random.randn(100) * 2\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\npredictions = model.predict(X_test)\nmse = mean_squared_error(y_test, predictions)\nprint(f\"Slope: {model.coef_[0]:.3f}, Intercept: {model.intercept_:.3f}\")\nprint(f\"Test MSE: {mse:.3f}\")",
@@ -69,11 +74,6 @@
       "code": "from sklearn.model_selection import cross_val_score\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.datasets import make_classification\n\nX, y = make_classification(n_samples=1000, n_features=20, random_state=42)\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\n\n# 5-fold cross-validation\nscores = cross_val_score(model, X, y, cv=5, scoring='accuracy')\nprint(f\"Cross-validation scores: {scores}\")\nprint(f\"Mean accuracy: {scores.mean():.3f} +/- {scores.std():.3f}\")",
       "exercises": []
     },
-    "Ensemble Methods": {
-      "exp": "Combining multiple models for better performance: bagging (Random Forests), boosting (AdaBoost, Gradient Boosting, XGBoost, LightGBM), stacking, voting classifiers. Understanding ensemble diversity and bias-variance reduction.",
-      "code": "from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.datasets import make_classification\n\nX, y = make_classification(n_samples=1000, random_state=42)\n\n# Create ensemble\nrf = RandomForestClassifier(n_estimators=100)\ngb = GradientBoostingClassifier(n_estimators=100)\nensemble = VotingClassifier([('rf', rf), ('gb', gb)], voting='soft')\nensemble.fit(X, y)\nprint(f\"Ensemble trained with {len(ensemble.estimators_)} estimators\")",
-      "exercises": []
-    },
     "Feature Engineering": {
       "exp": "Creating and selecting features for ML models: feature extraction, feature selection methods (filter, wrapper, embedded), normalization and standardization, one-hot encoding, handling categorical variables, polynomial features, and automated feature engineering.",
       "code": "from sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom sklearn.compose import ColumnTransformer\nimport pandas as pd\n\n# Feature engineering pipeline\ndata = pd.DataFrame({\n    'age': [25, 30, 35],\n    'city': ['NYC', 'LA', 'SF'],\n    'income': [50000, 60000, 70000]\n})\n\npreprocessor = ColumnTransformer(\n    transformers=[\n        ('num', StandardScaler(), ['age', 'income']),\n        ('cat', OneHotEncoder(), ['city'])\n    ])\nX_processed = preprocessor.fit_transform(data)\nprint(f\"Processed feature shape: {X_processed.shape}\")",
@@ -86,11 +86,6 @@
     }
   },
   "Deep Learning": {
-    "Neural Networks": {
-      "exp": "Building neural networks from scratch: perceptron algorithm, activation functions (ReLU, sigmoid, tanh, softmax), forward propagation, backpropagation, loss functions (MSE, cross-entropy), and the universal approximation theorem.",
-      "code": "import torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\n# Simple neural network\nclass SimpleNN(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc1 = nn.Linear(10, 64)\n        self.fc2 = nn.Linear(64, 32)\n        self.fc3 = nn.Linear(32, 1)\n    \n    def forward(self, x):\n        x = F.relu(self.fc1(x))\n        x = F.relu(self.fc2(x))\n        x = torch.sigmoid(self.fc3(x))\n        return x\n\nmodel = SimpleNN()\nprint(f\"Neural network with {sum(p.numel() for p in model.parameters())} parameters\")",
-      "exercises": []
-    },
     "CNNs": {
       "exp": "Convolutional Neural Networks for image data: convolution operations, filters, stride, padding, pooling layers, feature maps. Major architectures: LeNet, AlexNet, VGG, ResNet, Inception, EfficientNet. Transfer learning with pre-trained CNNs.",
       "code": "import torch.nn as nn\n\n# Simple CNN for image classification\nclass SimpleCNN(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv1 = nn.Conv2d(3, 32, 3, padding=1)\n        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)\n        self.pool = nn.MaxPool2d(2, 2)\n        self.fc1 = nn.Linear(64 * 8 * 8, 128)\n        self.fc2 = nn.Linear(128, 10)\n    \n    def forward(self, x):\n        x = self.pool(F.relu(self.conv1(x)))\n        x = self.pool(F.relu(self.conv2(x)))\n        x = x.view(-1, 64 * 8 * 8)\n        x = F.relu(self.fc1(x))\n        x = self.fc2(x)\n        return x\n\n# Print architecture summary\nmodel = SimpleCNN()\nprint(\"CNN model created with convolution and pooling layers\")",
@@ -130,14 +125,14 @@
       "exp": "TensorFlow deep learning framework.",
       "code": "Keras API, eager execution, tf.data, SavedModel, TensorFlow Lite.",
       "exercises": []
+    },
+    "Neural Networks": {
+      "exp": "Building neural networks from scratch: perceptron algorithm, activation functions (ReLU, sigmoid, tanh, softmax), forward propagation, backpropagation, loss functions (MSE, cross-entropy), and the universal approximation theorem.",
+      "code": "import torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\n# Simple neural network\nclass SimpleNN(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc1 = nn.Linear(10, 64)\n        self.fc2 = nn.Linear(64, 32)\n        self.fc3 = nn.Linear(32, 1)\n    \n    def forward(self, x):\n        x = F.relu(self.fc1(x))\n        x = F.relu(self.fc2(x))\n        x = torch.sigmoid(self.fc3(x))\n        return x\n\nmodel = SimpleNN()\nprint(f\"Neural network with {sum(p.numel() for p in model.parameters())} parameters\")",
+      "exercises": []
     }
   },
   "Large Language Models": {
-    "LLM Architecture": {
-      "exp": "Understanding large language models: GPT architecture, transformer decoder-only design, scaling laws (Kaplan, Chinchilla), emergent abilities, in-context learning. How LLMs process and generate text at massive scale.",
-      "code": "# LLM architecture concepts\nprint(\"Large Language Model Components:\")\nprint(\"1. Token Embedding Layer\")\nprint(\"2. Positional Encoding\")\nprint(\"3. Transformer Decoder Blocks\")\nprint(\"4. Layer Normalization\")\nprint(\"5. Feed-Forward Networks\")\nprint(\"6. Output Projection Layer\")\nprint(\"7. Softmax for Token Prediction\")",
-      "exercises": []
-    },
     "Attention Mechanisms": {
       "exp": "Deep dive into attention mechanisms: self-attention, causal/masked attention (for autoregressive generation), cross-attention (for encoder-decoder models), multi-head attention, sparse attention, FlashAttention for efficiency, and grouped-query attention.",
       "code": "import torch\nimport torch.nn.functional as F\nimport math\n\n# Implement scaled dot-product attention\ndef scaled_dot_product_attention(Q, K, V, mask=None):\n    d_k = Q.size(-1)\n    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)\n    if mask is not None:\n        scores = scores.masked_fill(mask == 0, float('-inf'))\n    attention_weights = F.softmax(scores, dim=-1)\n    return torch.matmul(attention_weights, V), attention_weights\n\n# Example usage\nbatch, heads, seq_len, d_k = 1, 1, 4, 8\nQ = torch.randn(batch, heads, seq_len, d_k)\nK = torch.randn(batch, heads, seq_len, d_k)\nV = torch.randn(batch, heads, seq_len, d_k)\n\noutput, weights = scaled_dot_product_attention(Q, K, V)\nprint(f\"Attention output shape: {output.shape}\")\nprint(f\"Attention weights shape: {weights.shape}\")",
@@ -182,14 +177,14 @@
       "exp": "Hugging Face tools and libraries.",
       "code": "Transformers library, Datasets, PEFT, Tokenizers, Hub, Spaces.",
       "exercises": []
+    },
+    "LLM Architecture": {
+      "exp": "Understanding large language models: GPT architecture, transformer decoder-only design, scaling laws (Kaplan, Chinchilla), emergent abilities, in-context learning. How LLMs process and generate text at massive scale.",
+      "code": "# LLM architecture concepts\nprint(\"Large Language Model Components:\")\nprint(\"1. Token Embedding Layer\")\nprint(\"2. Positional Encoding\")\nprint(\"3. Transformer Decoder Blocks\")\nprint(\"4. Layer Normalization\")\nprint(\"5. Feed-Forward Networks\")\nprint(\"6. Output Projection Layer\")\nprint(\"7. Softmax for Token Prediction\")",
+      "exercises": []
     }
   },
   "AI Agents": {
-    "Agent Architecture": {
-      "exp": "Building autonomous AI agents: goal-oriented agents, reactive vs deliberative agents, hybrid architectures. Understanding the perception-action loop, environment interaction, and how agents make decisions to achieve goals.",
-      "code": "# Simple agent framework\nclass AIAgent:\n    def __init__(self, name, system_prompt):\n        self.name = name\n        self.system_prompt = system_prompt\n        self.memory = []\n    \n    def think(self, input_text):\n        # Core reasoning loop\n        self.memory.append({\"role\": \"user\", \"content\": input_text})\n        # In practice: call LLM with context\n        response = f\"[{self.name}] Processing: {input_text}\"\n        self.memory.append({\"role\": \"assistant\", \"content\": response})\n        return response\n    \n    def act(self, tool_name, params):\n        # Execute a tool/action\n        return f\"Executed {tool_name} with {params}\"\n\nagent = AIAgent(\"Helper\", \"You are a helpful assistant\")\nprint(agent.think(\"What's the weather like?\"))",
-      "exercises": []
-    },
     "Tool Use": {
       "exp": "Giving AI agents access to tools and APIs: function calling, tool definitions with OpenAI/Anthropic APIs, search capabilities, code execution, calculator, database queries. Understanding tool selection, argument generation, and error handling.",
       "code": "# Tool definition pattern\nimport json\n\ndef define_tool():\n    return {\n        \"type\": \"function\",\n        \"function\": {\n            \"name\": \"search_web\",\n            \"description\": \"Search the web for information\",\n            \"parameters\": {\n                \"type\": \"object\",\n                \"properties\": {\n                    \"query\": {\n                        \"type\": \"string\",\n                        \"description\": \"Search query\"\n                    }\n                },\n                \"required\": [\"query\"]\n            }\n        }\n    }\n\ntool = define_tool()\nprint(json.dumps(tool, indent=2))",
@@ -205,46 +200,19 @@
       "code": "# ReAct pattern outline\nprint(\"ReAct (Reasoning + Acting) Pattern:\")\nprint()\nprint(\"1. Thought: What do I need to do?\")\nprint(\"2. Action: Execute a specific action/tool\")\nprint(\"3. Observation: Observe the result\")\nprint(\"4. Repeat: Think again based on observation\")\nprint()\nprint(\"Example:\")\nprint(\"Thought: I need to find the current stock price\")\nprint(\"Action: search_web(query='AAPL stock price today')\")\nprint(\"Observation: AAPL is trading at $172.50\")\nprint(\"Thought: I have the answer, now I can respond\")",
       "exercises": []
     },
+    "Agent Frameworks": {
+      "exp": "Popular frameworks for building AI agents: LangChain (chains, agents, retrievers), AutoGen (multi-agent conversations), CrewAI (role-based agents), OpenAI Assistants API, Anthropic tool use, and custom agent implementations. Comparing frameworks and choosing the right one.",
+      "code": "# Framework comparison\nprint(\"AI Agent Frameworks:\")\nprint()\nprint(\"1. LangChain/LangGraph\")\nprint(\"   - Chains, agents, tools, memory\")\nprint(\"   - Graph-based state management\")\nprint()\nprint(\"2. AutoGen (Microsoft)\")\nprint(\"   - Multi-agent conversations\")\nprint(\"   - Code execution sandbox\")\nprint()\nprint(\"3. CrewAI\")\nprint(\"   - Role-based agent teams\")\nprint(\"   - Task delegation patterns\")\nprint()\nprint(\"4. OpenAI Assistants API\")\nprint(\"   - Managed agent infrastructure\")\nprint(\"   - Built-in code interpreter, RAG\")",
+      "exercises": []
+    },
     "Memory Systems": {
       "exp": "Memory for AI agents.",
       "code": "Short-term vs long-term memory, vector memory, conversation history, summarization.",
       "exercises": []
     },
-    "Agent Frameworks": {
-      "exp": "Popular frameworks for building AI agents: LangChain (chains, agents, retrievers), AutoGen (multi-agent conversations), CrewAI (role-based agents), OpenAI Assistants API, Anthropic tool use, and custom agent implementations. Comparing frameworks and choosing the right one.",
-      "code": "# Framework comparison\nprint(\"AI Agent Frameworks:\")\nprint()\nprint(\"1. LangChain/LangGraph\")\nprint(\"   - Chains, agents, tools, memory\")\nprint(\"   - Graph-based state management\")\nprint()\nprint(\"2. AutoGen (Microsoft)\")\nprint(\"   - Multi-agent conversations\")\nprint(\"   - Code execution sandbox\")\nprint()\nprint(\"3. CrewAI\")\nprint(\"   - Role-based agent teams\")\nprint(\"   - Task delegation patterns\")\nprint()\nprint(\"4. OpenAI Assistants API\")\nprint(\"   - Managed agent infrastructure\")\nprint(\"   - Built-in code interpreter, RAG\")",
-      "exercises": []
-    }
-  },
-  "MLOps & Production": {
-    "Model Deployment": {
-      "exp": "Deploying ML models to production: model serving with FastAPI, TorchServe, TensorFlow Serving, Triton Inference Server. Serverless deployment, edge deployment, containerization with Docker, and API design for ML services.",
-      "code": "# ML model serving with FastAPI\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport torch\nimport torch.nn as nn\n\napp = FastAPI()\n\n# Load model\nclass PredictRequest(BaseModel):\n    features: list\n\nclass PredictResponse(BaseModel):\n    prediction: float\n    confidence: float\n\n@app.post(\"/predict\", response_model=PredictResponse)\nasync def predict(request: PredictRequest):\n    # Placeholder inference\n    prediction = sum(request.features) / len(request.features)\n    confidence = 0.95\n    return PredictResponse(prediction=prediction, confidence=confidence)",
-      "exercises": []
-    },
-    "ML Pipelines": {
-      "exp": "Building production ML pipelines: data validation (Great Expectations), feature pipelines, training pipelines, model registry (MLflow), pipeline orchestration (Airflow, Kubeflow), and automated retraining triggers.",
-      "code": "# ML pipeline stages\nprint(\"Production ML Pipeline:\")\nprint()\nprint(\"1. Data Ingestion\")\nprint(\"   - Collect from sources\")\nprint(\"   - Validate with Great Expectations\")\nprint()\nprint(\"2. Feature Engineering\")\nprint(\"   - Transform raw data to features\")\nprint(\"   - Store in feature store\")\nprint()\nprint(\"3. Model Training\")\nprint(\"   - Train with tracked parameters\")\nprint(\"   - Log to MLflow registry\")\nprint()\nprint(\"4. Model Evaluation\")\nprint(\"   - Validate against test data\")\nprint(\"   - Compare with current production model\")",
-      "exercises": []
-    },
-    "Model Monitoring": {
-      "exp": "Monitoring ML models in production: data drift detection (population stability index, KS test), concept drift, model decay, prediction monitoring, performance metrics tracking, alerting systems, and automated rollback and retraining workflows.",
-      "code": "# Model monitoring concepts\nprint(\"Model Monitoring Strategies:\")\nprint()\nprint(\"1. Data Drift\")\nprint(\"   - Monitor input distributions\")\nprint(\"   - PSI (Population Stability Index)\")\nprint(\"   - KS test for distribution comparison\")\nprint()\nprint(\"2. Concept Drift\")\nprint(\"   - Monitor prediction vs actual\")\nprint(\"   - Track accuracy over time windows\")\nprint()\nprint(\"3. Infrastructure\")\nprint(\"   - Prediction latency\")\nprint(\"   - Throughput (QPS)\")\nprint(\"   - Error rates\")",
-      "exercises": []
-    },
-    "Experiment Tracking": {
-      "exp": "Tracking ML experiments systematically: MLflow, Weights & Biases, Neptune.ai. Logging parameters, metrics, artifacts, and model versions. Experiment comparison, reproducibility, and collaboration features.",
-      "code": "# Experiment tracking with MLflow pattern\nimport mlflow\n\n# Start experiment tracking\nwith mlflow.start_run(run_name=\"experiment_1\"):\n    # Log parameters\n    mlflow.log_param(\"learning_rate\", 0.001)\n    mlflow.log_param(\"batch_size\", 32)\n    mlflow.log_param(\"model\", \"resnet50\")\n    \n    # Log metrics\n    for epoch in range(10):\n        train_loss = 0.5 * (0.9 ** epoch)\n        val_acc = 0.7 + 0.03 * epoch\n        mlflow.log_metric(\"train_loss\", train_loss, step=epoch)\n        mlflow.log_metric(\"val_accuracy\", val_acc, step=epoch)\n    \n    # Log model artifact\n    mlflow.log_artifact(\"model.pkl\")\n    \n    print(f\"Experiment logged: {mlflow.active_run().info.run_id}\")",
-      "exercises": []
-    },
-    "A/B Testing": {
-      "exp": "Testing model versions in production.",
-      "code": "Shadow deployment, canary deployment, statistical significance, metrics tracking.",
-      "exercises": []
-    },
-    "Model Versioning": {
-      "exp": "Versioning models and datasets.",
-      "code": "DVC, model registries, dataset versioning, reproducibility.",
+    "Agent Architecture": {
+      "exp": "Building autonomous AI agents: goal-oriented agents, reactive vs deliberative agents, hybrid architectures. Understanding the perception-action loop, environment interaction, and how agents make decisions to achieve goals.",
+      "code": "# Simple agent framework\nclass AIAgent:\n    def __init__(self, name, system_prompt):\n        self.name = name\n        self.system_prompt = system_prompt\n        self.memory = []\n    \n    def think(self, input_text):\n        # Core reasoning loop\n        self.memory.append({\"role\": \"user\", \"content\": input_text})\n        # In practice: call LLM with context\n        response = f\"[{self.name}] Processing: {input_text}\"\n        self.memory.append({\"role\": \"assistant\", \"content\": response})\n        return response\n    \n    def act(self, tool_name, params):\n        # Execute a tool/action\n        return f\"Executed {tool_name} with {params}\"\n\nagent = AIAgent(\"Helper\", \"You are a helpful assistant\")\nprint(agent.think(\"What's the weather like?\"))",
       "exercises": []
     }
   },
@@ -333,6 +301,11 @@
       "code": "PagedAttention, continuous batching, tensor parallelism, quantization.",
       "exercises": []
     },
+    "Hugging Face": {
+      "exp": "The Hugging Face ecosystem: Transformers library for model access, Datasets for data handling, PEFT for efficient fine-tuning, Tokenizers for text processing, Hub for model sharing, Spaces for demos, and AutoClasses for model agnostic code.",
+      "code": "from transformers import AutoTokenizer, AutoModelForCausalLM\nimport torch\n\n# Load model from Hugging Face Hub\nmodel_name = \"microsoft/phi-2\"  # Small but capable model\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModelForCausalLM.from_pretrained(\n    model_name,\n    torch_dtype=torch.float16,\n    device_map=\"auto\"\n)\n\n# Generate text\nprompt = \"Machine learning is\"\ninputs = tokenizer(prompt, return_tensors=\"pt\")\noutputs = model.generate(**inputs, max_length=50)\nresponse = tokenizer.decode(outputs[0], skip_special_tokens=True)\n\nprint(f\"Loaded model: {model_name}\")\nprint(f\"Model parameters: {model.num_parameters() / 1e9:.1f}B\")",
+      "exercises": []
+    },
     "OpenAI API": {
       "exp": "Using OpenAI models via API: chat completions, embeddings, function calling, vision capabilities, text-to-speech, assistants API, fine-tuning API. Understanding token pricing, rate limits, streaming, and best practices.",
       "code": "# OpenAI API usage pattern\nimport openai\n\n# Configuration\nclient = openai.OpenAI(api_key=\"sk-...\")\n\n# Chat completion\nresponse = client.chat.completions.create(\n    model=\"gpt-4\",\n    messages=[\n        {\"role\": \"system\", \"content\": \"You are helpful.\"},\n        {\"role\": \"user\", \"content\": \"Explain AI in 3 sentences\"}\n    ],\n    temperature=0.7,\n    max_tokens=150\n)\n\n# OpenAI client initialized and ready\nprint(\"OpenAI API client configured\")\nprint(\"Models available: GPT-4, GPT-4o, GPT-3.5-Turbo\")",
@@ -342,10 +315,37 @@
       "exp": "Using Claude models via API.",
       "code": "Messages API, tool use, extended thinking, safety features.",
       "exercises": []
+    }
+  },
+  "MLOps & Production": {
+    "Experiment Tracking": {
+      "exp": "Tracking ML experiments systematically: MLflow, Weights & Biases, Neptune.ai. Logging parameters, metrics, artifacts, and model versions. Experiment comparison, reproducibility, and collaboration features.",
+      "code": "# Experiment tracking with MLflow pattern\nimport mlflow\n\n# Start experiment tracking\nwith mlflow.start_run(run_name=\"experiment_1\"):\n    # Log parameters\n    mlflow.log_param(\"learning_rate\", 0.001)\n    mlflow.log_param(\"batch_size\", 32)\n    mlflow.log_param(\"model\", \"resnet50\")\n    \n    # Log metrics\n    for epoch in range(10):\n        train_loss = 0.5 * (0.9 ** epoch)\n        val_acc = 0.7 + 0.03 * epoch\n        mlflow.log_metric(\"train_loss\", train_loss, step=epoch)\n        mlflow.log_metric(\"val_accuracy\", val_acc, step=epoch)\n    \n    # Log model artifact\n    mlflow.log_artifact(\"model.pkl\")\n    \n    print(f\"Experiment logged: {mlflow.active_run().info.run_id}\")",
+      "exercises": []
     },
-    "Hugging Face": {
-      "exp": "The Hugging Face ecosystem: Transformers library for model access, Datasets for data handling, PEFT for efficient fine-tuning, Tokenizers for text processing, Hub for model sharing, Spaces for demos, and AutoClasses for model agnostic code.",
-      "code": "from transformers import AutoTokenizer, AutoModelForCausalLM\nimport torch\n\n# Load model from Hugging Face Hub\nmodel_name = \"microsoft/phi-2\"  # Small but capable model\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModelForCausalLM.from_pretrained(\n    model_name,\n    torch_dtype=torch.float16,\n    device_map=\"auto\"\n)\n\n# Generate text\nprompt = \"Machine learning is\"\ninputs = tokenizer(prompt, return_tensors=\"pt\")\noutputs = model.generate(**inputs, max_length=50)\nresponse = tokenizer.decode(outputs[0], skip_special_tokens=True)\n\nprint(f\"Loaded model: {model_name}\")\nprint(f\"Model parameters: {model.num_parameters() / 1e9:.1f}B\")",
+    "Model Versioning": {
+      "exp": "Versioning models and datasets.",
+      "code": "DVC, model registries, dataset versioning, reproducibility.",
+      "exercises": []
+    },
+    "A/B Testing": {
+      "exp": "Testing model versions in production.",
+      "code": "Shadow deployment, canary deployment, statistical significance, metrics tracking.",
+      "exercises": []
+    },
+    "Model Deployment": {
+      "exp": "Deploying ML models to production: model serving with FastAPI, TorchServe, TensorFlow Serving, Triton Inference Server. Serverless deployment, edge deployment, containerization with Docker, and API design for ML services.",
+      "code": "# ML model serving with FastAPI\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport torch\nimport torch.nn as nn\n\napp = FastAPI()\n\n# Load model\nclass PredictRequest(BaseModel):\n    features: list\n\nclass PredictResponse(BaseModel):\n    prediction: float\n    confidence: float\n\n@app.post(\"/predict\", response_model=PredictResponse)\nasync def predict(request: PredictRequest):\n    # Placeholder inference\n    prediction = sum(request.features) / len(request.features)\n    confidence = 0.95\n    return PredictResponse(prediction=prediction, confidence=confidence)",
+      "exercises": []
+    },
+    "ML Pipelines": {
+      "exp": "Building production ML pipelines: data validation (Great Expectations), feature pipelines, training pipelines, model registry (MLflow), pipeline orchestration (Airflow, Kubeflow), and automated retraining triggers.",
+      "code": "# ML pipeline stages\nprint(\"Production ML Pipeline:\")\nprint()\nprint(\"1. Data Ingestion\")\nprint(\"   - Collect from sources\")\nprint(\"   - Validate with Great Expectations\")\nprint()\nprint(\"2. Feature Engineering\")\nprint(\"   - Transform raw data to features\")\nprint(\"   - Store in feature store\")\nprint()\nprint(\"3. Model Training\")\nprint(\"   - Train with tracked parameters\")\nprint(\"   - Log to MLflow registry\")\nprint()\nprint(\"4. Model Evaluation\")\nprint(\"   - Validate against test data\")\nprint(\"   - Compare with current production model\")",
+      "exercises": []
+    },
+    "Model Monitoring": {
+      "exp": "Monitoring ML models in production: data drift detection (population stability index, KS test), concept drift, model decay, prediction monitoring, performance metrics tracking, alerting systems, and automated rollback and retraining workflows.",
+      "code": "# Model monitoring concepts\nprint(\"Model Monitoring Strategies:\")\nprint()\nprint(\"1. Data Drift\")\nprint(\"   - Monitor input distributions\")\nprint(\"   - PSI (Population Stability Index)\")\nprint(\"   - KS test for distribution comparison\")\nprint()\nprint(\"2. Concept Drift\")\nprint(\"   - Monitor prediction vs actual\")\nprint(\"   - Track accuracy over time windows\")\nprint()\nprint(\"3. Infrastructure\")\nprint(\"   - Prediction latency\")\nprint(\"   - Throughput (QPS)\")\nprint(\"   - Error rates\")",
       "exercises": []
     }
   }

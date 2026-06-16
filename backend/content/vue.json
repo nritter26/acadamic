@@ -25,6 +25,20 @@
       "exercises": []
     }
   },
+  "TypeScript": {
+    "Typed Props": [
+      "defineProps with TypeScript generics provides full type safety for component props. The generic syntax is the recommended approach over the runtime declaration for strict typing.",
+      "const props = defineProps<{\n  title: string\n  items?: { id: number; name: string }[]\n  onSelect?: (id: number) => void\n}>()"
+    ],
+    "Typed Emits": [
+      "defineEmits with TypeScript validates event payloads at compile time. The call signature syntax maps event names to their payload types for complete type coverage.",
+      "const emit = defineEmits<{\n  (e: 'update', id: number): void\n  (e: 'delete', payload: { id: number; reason: string }): void\n}>()"
+    ],
+    "Typed Refs": [
+      "Type parameters for ref, reactive, and computed enable strict type checking. Template refs use InstanceType to access the component type for direct method calls.",
+      "const count = ref<number>(0);\nconst user = reactive<{ name: string; age: number }>({ name: '', age: 0 });\nconst myForm = ref<InstanceType<typeof MyForm> | null>(null)"
+    ]
+  },
   "Components & UI": {
     "Vue Components": {
       "exp": "Building user interfaces with Vue.",
@@ -54,49 +68,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Vue Data": {
-      "exp": "Working with data and APIs in Vue.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Vue Testing": {
-      "exp": "Testing strategies for Vue.",
-      "code": "",
-      "exercises": []
-    },
-    "Vitest": [
-      "Vitest is a blazing-fast unit test framework powered by Vite, compatible with Jest API and offering native ESM support, HMR, and parallel execution out of the box.",
-      "import { describe, it, expect } from 'vitest';\n\ndescribe('Counter', () => {\n  it('increments', () => { expect(add(1, 1)).toBe(2); });\n});"
-    ],
-    "Vue Test Utils": [
-      "Vue Test Utils is the official testing utility library for Vue components, providing mount, shallowMount, and utilities for stubbing, mocking, and asserting component behavior.",
-      "const wrapper = mount(MyComponent, { props: { msg: 'Hello' } });\nexpect(wrapper.text()).toContain('Hello');"
-    ],
-    "Cypress": [
-      "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
-      "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
-    ]
-  },
-  "Deployment": {
-    "Vue Deployment": {
-      "exp": "Deploying Vue applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Vue Best Practices": {
       "exp": "Best practices for Vue development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Vue Advanced": {
-      "exp": "Advanced Vue topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -113,24 +87,6 @@
     "Emits": [
       "Emits define custom events a component can fire to communicate upward to its parent. Using defineEmits with TypeScript gives type safety for event payloads.",
       "const emit = defineEmits<{ (e: 'submit', id: number): void }>()"
-    ]
-  },
-  "Composition API": {
-    "ref": [
-      "ref creates a reactive reference to any value, wrapping it in an object with a .value property. Accessing .value triggers dependency tracking for Vue's reactivity system.",
-      "const count = ref(0);\nconsole.log(count.value);"
-    ],
-    "reactive": [
-      "reactive returns a deeply reactive proxy of an object, working directly with property access without .value. It's best suited for plain objects or arrays with nested data.",
-      "const state = reactive({ user: { name: 'Alice' } });\nstate.user.name = 'Bob';"
-    ],
-    "computed": [
-      "computed creates derived state that updates automatically when its dependencies change. Computed values are lazily evaluated and cached until their reactive sources change.",
-      "const doubled = computed(() => count.value * 2);"
-    ],
-    "watch": [
-      "watch observes one or more reactive sources and calls a callback when values change, providing old and new values. Use watchEffect for running side effects automatically.",
-      "watch(count, (newVal, oldVal) => {\n  console.log(`Count changed from ${oldVal} to ${newVal}`);\n});"
     ]
   },
   "State": {
@@ -161,20 +117,6 @@
       "<FormKit type=\"form\" @submit=\"handleSubmit\">\n  <FormKit type=\"text\" name=\"email\" label=\"Email\" />\n</FormKit>"
     ]
   },
-  "Advanced": {
-    "Transitions": [
-      "Vue's transition system automatically applies CSS classes when elements enter or leave the DOM. It supports JavaScript hooks, custom transition classes, and reusable transition components.",
-      "<Transition name=\"fade\">\n  <p v-if=\"visible\">Animated content\n\n</Transition>"
-    ],
-    "Teleport": [
-      "Teleport allows rendering a component's template fragment outside its parent DOM hierarchy, useful for modals, tooltips, and toasts that need to break out of overflow containers.",
-      "<Teleport to=\"body\">\n  <Modal :open=\"showModal\" />\n</Teleport>"
-    ],
-    "Suspense": [
-      "Suspense manages async dependencies in the component tree, showing fallback content while nested async components resolve. It works with async setup(), dynamic imports, and async components.",
-      "<Suspense>\n  <template #default><AsyncComponent /></template>\n  <template #fallback><Spinner /></template>\n</Suspense>"
-    ]
-  },
   "Composables": {
     "useMouse": [
       "Composables are functions that leverage the Composition API to encapsulate reusable stateful logic. A useMouse composable tracks mouse position with reactive coordinates that any component can consume.",
@@ -189,20 +131,6 @@
       "export function useCounter(initial = 0) {\n  const count = ref(initial);\n  const increment = () => count.value++;\n  const decrement = () => count.value--;\n  const reset = () => count.value = initial;\n  return { count: readonly(count), increment, decrement, reset };\n}"
     ]
   },
-  "TypeScript": {
-    "Typed Props": [
-      "defineProps with TypeScript generics provides full type safety for component props. The generic syntax is the recommended approach over the runtime declaration for strict typing.",
-      "const props = defineProps<{\n  title: string\n  items?: { id: number; name: string }[]\n  onSelect?: (id: number) => void\n}>()"
-    ],
-    "Typed Emits": [
-      "defineEmits with TypeScript validates event payloads at compile time. The call signature syntax maps event names to their payload types for complete type coverage.",
-      "const emit = defineEmits<{\n  (e: 'update', id: number): void\n  (e: 'delete', payload: { id: number; reason: string }): void\n}>()"
-    ],
-    "Typed Refs": [
-      "Type parameters for ref, reactive, and computed enable strict type checking. Template refs use InstanceType to access the component type for direct method calls.",
-      "const count = ref<number>(0);\nconst user = reactive<{ name: string; age: number }>({ name: '', age: 0 });\nconst myForm = ref<InstanceType<typeof MyForm> | null>(null)"
-    ]
-  },
   "Ecosystem": {
     "VueUse": [
       "VueUse is a collection of over 200 composable utilities for common patterns like geolocation, clipboard, dark mode, media queries, and fetch with reactive state management.",
@@ -215,6 +143,78 @@
     "VitePress": [
       "VitePress is a Vue-powered static site generator for documentation. It uses markdown content with Vue components, automatic search, and a default theme optimized for technical docs.",
       "npm create vitepress@latest && npm run docs:dev\n# docs/.vitepress/config.ts\nexport default { title: 'My Docs', themeConfig: { nav: [{ text: 'Guide', link: '/guide' }] } }"
+    ]
+  },
+  "Testing": {
+    "Vitest": [
+      "Vitest is a blazing-fast unit test framework powered by Vite, compatible with Jest API and offering native ESM support, HMR, and parallel execution out of the box.",
+      "import { describe, it, expect } from 'vitest';\n\ndescribe('Counter', () => {\n  it('increments', () => { expect(add(1, 1)).toBe(2); });\n});"
+    ],
+    "Vue Test Utils": [
+      "Vue Test Utils is the official testing utility library for Vue components, providing mount, shallowMount, and utilities for stubbing, mocking, and asserting component behavior.",
+      "const wrapper = mount(MyComponent, { props: { msg: 'Hello' } });\nexpect(wrapper.text()).toContain('Hello');"
+    ],
+    "Cypress": [
+      "Cypress provides component testing and E2E testing for Vue apps with an interactive runner, automatic waiting, and network stubbing. It mounts components directly in the browser.",
+      "cy.mount(MyComponent, { props: { title: 'Test' } });\ncy.contains('Test').should('be.visible');"
+    ],
+    "Vue Testing": {
+      "exp": "Testing strategies for Vue.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Vue Data": {
+      "exp": "Working with data and APIs in Vue.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Composition API": {
+    "ref": [
+      "ref creates a reactive reference to any value, wrapping it in an object with a .value property. Accessing .value triggers dependency tracking for Vue's reactivity system.",
+      "const count = ref(0);\nconsole.log(count.value);"
+    ],
+    "reactive": [
+      "reactive returns a deeply reactive proxy of an object, working directly with property access without .value. It's best suited for plain objects or arrays with nested data.",
+      "const state = reactive({ user: { name: 'Alice' } });\nstate.user.name = 'Bob';"
+    ],
+    "computed": [
+      "computed creates derived state that updates automatically when its dependencies change. Computed values are lazily evaluated and cached until their reactive sources change.",
+      "const doubled = computed(() => count.value * 2);"
+    ],
+    "watch": [
+      "watch observes one or more reactive sources and calls a callback when values change, providing old and new values. Use watchEffect for running side effects automatically.",
+      "watch(count, (newVal, oldVal) => {\n  console.log(`Count changed from ${oldVal} to ${newVal}`);\n});"
+    ]
+  },
+  "Deployment": {
+    "Vue Deployment": {
+      "exp": "Deploying Vue applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Vue Advanced": {
+      "exp": "Advanced Vue topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Transitions": [
+      "Vue's transition system automatically applies CSS classes when elements enter or leave the DOM. It supports JavaScript hooks, custom transition classes, and reusable transition components.",
+      "<Transition name=\"fade\">\n  <p v-if=\"visible\">Animated content\n\n</Transition>"
+    ],
+    "Teleport": [
+      "Teleport allows rendering a component's template fragment outside its parent DOM hierarchy, useful for modals, tooltips, and toasts that need to break out of overflow containers.",
+      "<Teleport to=\"body\">\n  <Modal :open=\"showModal\" />\n</Teleport>"
+    ],
+    "Suspense": [
+      "Suspense manages async dependencies in the component tree, showing fallback content while nested async components resolve. It works with async setup(), dynamic imports, and async components.",
+      "<Suspense>\n  <template #default><AsyncComponent /></template>\n  <template #fallback><Spinner /></template>\n</Suspense>"
     ]
   },
   "Vue 3 Composition API Deep Dive": {

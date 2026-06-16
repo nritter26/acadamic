@@ -1,4 +1,6 @@
 <script>
+  import { shuffleOptions } from '$lib/lib/quiz-utils';
+
   const QUIZ_LANG_NAMES = {
     c:'C', cpp:'C++', cs:'C#', js:'JavaScript', ts:'TypeScript', py:'Python',
     go:'Go', rs:'Rust', kt:'Kotlin', swift:'Swift', java:'Java', zig:'Zig',
@@ -23,6 +25,10 @@
   let quizLevelCleared = $state({});
 
   let allQuestions = $derived(appData?.quizData?.[quizLang] || []);
+  let shuffledQuestions = $derived(allQuestions.map(q => {
+    const { shuffledOptions, newCorrectIdx } = shuffleOptions(q.opts, q.ans);
+    return { ...q, opts: shuffledOptions, ans: newCorrectIdx };
+  }));
   let filteredQuestions = $derived(
     quizLevel === 'all' ? allQuestions : allQuestions.filter(q => q.level === quizLevel)
   );
@@ -71,7 +77,7 @@
     if (globalIdx === undefined || quizAnswers[globalIdx] !== undefined) return;
     quizAnswers[globalIdx] = optIdx;
     quizScore.total++;
-    if (optIdx === allQuestions[globalIdx].ans) quizScore.correct++;
+    if (optIdx === shuffledQuestions[globalIdx].ans) quizScore.correct++;
 
     const answeredInRound = quizRoundQuestions.filter(idx => quizAnswers[idx] !== undefined).length;
     if (answeredInRound >= quizRoundQuestions.length) {
@@ -90,7 +96,7 @@
         if (allQuestions[i].level === level) levelQIds.push(i);
       }
       if (levelQIds.length > 0 && levelQIds.every(idx => quizAnswers[idx] !== undefined)) {
-        const correct = levelQIds.filter(idx => quizAnswers[idx] === allQuestions[idx].ans).length;
+        const correct = levelQIds.filter(idx => quizAnswers[idx] === shuffledQuestions[idx].ans).length;
         quizLevelCleared = { ...quizLevelCleared, [key]: { total: levelQIds.length, correct } };
       }
     }
@@ -183,7 +189,7 @@
         <div class="qr-track"><div class="qr-bar" style="width:{roundProgress}%"></div></div>
       </div>
       {#if quizRoundDone}
-        {@const roundCorrect = quizRoundQuestions.filter(idx => quizAnswers[idx] === allQuestions[idx].ans).length}
+        {@const roundCorrect = quizRoundQuestions.filter(idx => quizAnswers[idx] === shuffledQuestions[idx].ans).length}
         <div class="quiz-round-banner">
           <span class="qrb-pass">Round {quizRoundNum} Complete! {roundCorrect}/{quizRoundQuestions.length} correct</span>
           <button class="qrb-next" onclick={nextRound}>Next Round ▶</button>
@@ -199,7 +205,7 @@
         </div>
       {:else}
         {#each quizRoundQuestions as globalIdx, i}
-          {@const q = allQuestions[globalIdx]}
+          {@const q = shuffledQuestions[globalIdx]}
           {@const sel = quizAnswers[globalIdx]}
           <div class="quiz-card">
             <div class="qc-header">

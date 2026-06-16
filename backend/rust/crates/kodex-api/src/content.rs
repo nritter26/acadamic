@@ -46,18 +46,30 @@ pub async fn list_courses() -> Json<serde_json::Value> {
 pub async fn get_content(
     Path(lang): Path<String>,
 ) -> Result<Json<serde_json::Value>, (axum::http::StatusCode, Json<serde_json::Value>)> {
-    let file_path = content_dir().join(format!("{}.json", lang));
-    match std::fs::read_to_string(&file_path) {
-        Ok(content) => {
-            let data: serde_json::Value = serde_json::from_str(&content).unwrap_or(serde_json::json!({}));
-            let phases = data.as_object().map(|o| o.len()).unwrap_or(0);
-            let topic_count = data.as_object()
-                .map(|o| o.values().filter_map(|v| v.as_object()).map(|p| p.len()).sum::<usize>())
-                .unwrap_or(0);
-            Ok(Json(serde_json::json!({ "lang": lang, "phases": phases, "topics": topic_count, "data": data })))
+    let content_dir = content_dir();
+    let file_path = content_dir.join(format!("{}.json", lang));
+
+    // Try primary file first, then TH → EN fallback
+    let content = match std::fs::read_to_string(&file_path) {
+        Ok(c) => c,
+        Err(_) if lang.ends_with("_th") => {
+            let base = lang.trim_end_matches("_th");
+            let fallback = content_dir.join(format!("{}.json", base));
+            std::fs::read_to_string(&fallback).map_err(|_| {
+                (axum::http::StatusCode::NOT_FOUND, Json(serde_json::json!({ "error": format!("Content file '{}' not found", lang) })))
+            })?
         }
-        Err(_) => Err((axum::http::StatusCode::NOT_FOUND, Json(serde_json::json!({ "error": format!("Content file '{}' not found", lang) })))),
-    }
+        Err(_) => {
+            return Err((axum::http::StatusCode::NOT_FOUND, Json(serde_json::json!({ "error": format!("Content file '{}' not found", lang) }))));
+        }
+    };
+
+    let data: serde_json::Value = serde_json::from_str(&content).unwrap_or(serde_json::json!({}));
+    let phases = data.as_object().map(|o| o.len()).unwrap_or(0);
+    let topic_count = data.as_object()
+        .map(|o| o.values().filter_map(|v| v.as_object()).map(|p| p.len()).sum::<usize>())
+        .unwrap_or(0);
+    Ok(Json(serde_json::json!({ "lang": lang, "phases": phases, "topics": topic_count, "data": data })))
 }
 
 pub async fn get_phase(

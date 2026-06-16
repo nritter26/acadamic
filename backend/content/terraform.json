@@ -29,23 +29,35 @@
       "exercises": []
     }
   },
-  "Configuration": {
-    "Terraform Config": {
-      "exp": "Configuring terraform for your project.",
-      "code": "",
-      "exercises": []
-    }
+  "Variables & Expressions": {
+    "Input Variables": [
+      "Input variables parameterize configurations for reuse across environments. They support type constraints, defaults, and validation blocks.",
+      "variable \"instance_type\" {\n  description = \"EC2 instance type\"\n  type        = string\n  default     = \"t3.micro\"\n  validation {\n    condition     = contains([\"t3.micro\", \"t3.small\"], var.instance_type)\n    error_message = \"Instance type must be t3.micro or t3.small.\"\n  }\n}"
+    ],
+    "Splat & Conditionals": [
+      "Splat expressions extract attributes from resource lists. Conditionals enable if-then-else logic inline in resource configurations.",
+      "# Splat expressions\noutput \"public_ips\" {\n  value = aws_instance.web[*].public_ip\n}\n\n# Conditional expressions\nresource \"aws_instance\" \"web\" {\n  instance_type = var.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n  associate_public_ip_address = var.create_eip ? true : false\n}\n\n# for expressions\noutput \"uppercase_names\" {\n  value = [for name in var.names : upper(name)]\n}"
+    ],
+    "Outputs": [
+      "Outputs expose resource attributes for use in other configurations or display after apply. They are essential for sharing data between modules.",
+      "output \"instance_ip\" {\n  description = \"Public IP of web instance\"\n  value       = aws_instance.web.public_ip\n}"
+    ],
+    "Locals": [
+      "Local values assign names to expressions for reuse. They reduce duplication and improve readability without being user-configurable.",
+      "locals {\n  name_prefix = \"${var.environment}-web\"\n  common_tags = { Environment = var.environment, Project = \"MyApp\" }\n}"
+    ],
+    "Dynamic Blocks": [
+      "Dynamic blocks generate nested configuration blocks from collections. They reduce duplication when creating multiple similar blocks.",
+      "resource \"aws_security_group\" \"main\" {\n  name = \"web-sg\"\n\n  dynamic \"ingress\" {\n    for_each = var.allowed_ports\n    content {\n      from_port   = ingress.value\n      to_port     = ingress.value\n      protocol    = \"tcp\"\n      cidr_blocks = [\"0.0.0.0/0\"]\n    }\n  }\n}\n\nvariable \"allowed_ports\" {\n  default = [80, 443, 8080]\n}"
+    ],
+    "for_each & count": [
+      "for_each creates multiple resources from a map or set of strings. count creates resources from a numeric index. for_each is preferred when keys matter.",
+      "variable \"users\" {\n  default = {\n    alice = { role = \"admin\" }\n    bob   = { role = \"viewer\" }\n  }\n}\n\nresource \"aws_iam_user\" \"this\" {\n  for_each = var.users\n  name     = each.key\n  tags     = { role = each.value.role }\n}\n\n# count example\nresource \"aws_subnet\" \"public\" {\n  count             = length(var.availability_zones)\n  vpc_id            = aws_vpc.main.id\n  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index)\n  availability_zone = var.availability_zones[count.index]\n}"
+    ]
   },
   "Best Practices": {
     "Terraform Best Practices": {
       "exp": "Best practices for using terraform.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Usage": {
-    "Terraform Advanced": {
-      "exp": "Advanced terraform techniques and patterns.",
       "code": "",
       "exercises": []
     }
@@ -64,32 +76,6 @@
       "resource \"aws_eip\" \"ip\" {\n  instance = aws_instance.web.id\n  depends_on = [aws_instance.web]\n}"
     ]
   },
-  "Variables & Expressions": {
-    "Input Variables": [
-      "Input variables parameterize configurations for reuse across environments. They support type constraints, defaults, and validation blocks.",
-      "variable \"instance_type\" {\n  description = \"EC2 instance type\"\n  type        = string\n  default     = \"t3.micro\"\n  validation {\n    condition     = contains([\"t3.micro\", \"t3.small\"], var.instance_type)\n    error_message = \"Instance type must be t3.micro or t3.small.\"\n  }\n}"
-    ],
-    "Outputs": [
-      "Outputs expose resource attributes for use in other configurations or display after apply. They are essential for sharing data between modules.",
-      "output \"instance_ip\" {\n  description = \"Public IP of web instance\"\n  value       = aws_instance.web.public_ip\n}"
-    ],
-    "Locals": [
-      "Local values assign names to expressions for reuse. They reduce duplication and improve readability without being user-configurable.",
-      "locals {\n  name_prefix = \"${var.environment}-web\"\n  common_tags = { Environment = var.environment, Project = \"MyApp\" }\n}"
-    ],
-    "Dynamic Blocks": [
-      "Dynamic blocks generate nested configuration blocks from collections. They reduce duplication when creating multiple similar blocks.",
-      "resource \"aws_security_group\" \"main\" {\n  name = \"web-sg\"\n\n  dynamic \"ingress\" {\n    for_each = var.allowed_ports\n    content {\n      from_port   = ingress.value\n      to_port     = ingress.value\n      protocol    = \"tcp\"\n      cidr_blocks = [\"0.0.0.0/0\"]\n    }\n  }\n}\n\nvariable \"allowed_ports\" {\n  default = [80, 443, 8080]\n}"
-    ],
-    "for_each & count": [
-      "for_each creates multiple resources from a map or set of strings. count creates resources from a numeric index. for_each is preferred when keys matter.",
-      "variable \"users\" {\n  default = {\n    alice = { role = \"admin\" }\n    bob   = { role = \"viewer\" }\n  }\n}\n\nresource \"aws_iam_user\" \"this\" {\n  for_each = var.users\n  name     = each.key\n  tags     = { role = each.value.role }\n}\n\n# count example\nresource \"aws_subnet\" \"public\" {\n  count             = length(var.availability_zones)\n  vpc_id            = aws_vpc.main.id\n  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index)\n  availability_zone = var.availability_zones[count.index]\n}"
-    ],
-    "Splat & Conditionals": [
-      "Splat expressions extract attributes from resource lists. Conditionals enable if-then-else logic inline in resource configurations.",
-      "# Splat expressions\noutput \"public_ips\" {\n  value = aws_instance.web[*].public_ip\n}\n\n# Conditional expressions\nresource \"aws_instance\" \"web\" {\n  instance_type = var.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n  associate_public_ip_address = var.create_eip ? true : false\n}\n\n# for expressions\noutput \"uppercase_names\" {\n  value = [for name in var.names : upper(name)]\n}"
-    ]
-  },
   "State": {
     "Local State": [
       "Terraform state maps real-world resources to configuration, storing IDs, attributes, and metadata in a JSON state file.",
@@ -106,38 +92,6 @@
     "State Migration": [
       "State can be migrated between backends using terraform init -migrate-state. This is needed when switching from local to remote state.",
       "terraform init -migrate-state\n# Terraform copies existing state to the new backend\n\n# Import existing resources\nterraform import aws_instance.web i-0abcd1234efgh5678"
-    ]
-  },
-  "Modules": {
-    "Root Module": [
-      "The root module is the directory containing main.tf where terraform is executed. It can call child modules to organize infrastructure.",
-      "# root main.tf\nmodule \"networking\" {\n  source = \"./modules/networking\"\n}\n\nmodule \"compute\" {\n  source = \"./modules/compute\"\n}"
-    ],
-    "Child Modules": [
-      "Child modules are reusable configurations called with source argument, accepting input variables and exposing outputs for composition.",
-      "# modules/networking/main.tf\nvariable \"vpc_cidr\" {}\nresource \"aws_vpc\" \"main\" {\n  cidr_block = var.vpc_cidr\n}\noutput \"vpc_id\" {\n  value = aws_vpc.main.id\n}"
-    ],
-    "Module Registry": [
-      "The Terraform Registry hosts thousands of pre-built public modules for AWS, Azure, GCP, and other providers, versioned with semantic tags.",
-      "module \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"5.0.0\"\n  name    = \"my-vpc\"\n  cidr    = \"10.0.0.0/16\"\n}"
-    ],
-    "Module Composition": [
-      "Multiple modules can be composed together, passing outputs from one module as inputs to another for building complete infrastructure stacks.",
-      "module \"network\" {\n  source = \"terraform-aws-modules/vpc/aws\"\n  cidr   = \"10.0.0.0/16\"\n}\n\nmodule \"app\" {\n  source     = \"./modules/app\"\n  vpc_id     = module.network.vpc_id\n  subnet_ids = module.network.public_subnets\n}\n\nmodule \"database\" {\n  source  = \"terraform-aws-modules/rds/aws\"\n  vpc_id  = module.network.vpc_id\n  db_name = \"myapp\"\n}"
-    ]
-  },
-  "CI/CD & Automation": {
-    "Terraform Cloud": [
-      "Terraform Cloud provides remote state storage, VCS integration, plan/apply workflows, cost estimation, and Sentinel policy enforcement.",
-      "# terraform cloud config\nterraform {\n  cloud {\n    organization = \"myorg\"\n    workspaces {\n      name = \"myapp-prod\"\n    }\n  }\n}\n\n# VCS-driven workflow:\n# 1. Push PR -> Terraform Cloud runs plan\n# 2. Comment results on PR\n# 3. Merge -> Triggers apply"
-    ],
-    "CI/CD Integration": [
-      "Terraform in CI/CD requires a backend for state storage, environment-specific variable files, and approval gates for production applies.",
-      "# GitHub Actions example\njobs:\n  terraform:\n    steps:\n    - uses: hashicorp/setup-terraform@v3\n    - run: terraform init\n    - run: terraform validate\n    - run: terraform plan -var-file=env/prod.tfvars\n    - run: terraform apply -auto-approve\n      # Add manual approval step for production"
-    ],
-    "Testing": [
-      "Terraform testing includes syntax validation, plan validation with custom rules, and integration testing with Terratest.",
-      "# Validate syntax\nterraform validate\n\n# Plan validation with sentinel (Terraform Cloud)\nimport \"tfplan\"\nmain = rule { all tfplan.resources.aws_instance as _, i {\n  i.applied.instance_type != \"t2.micro\"\n}}\n\n# Terratest (Go-based integration testing)\n// Test code in test/ directory\n// Deploys real infrastructure, validates, then destroys"
     ]
   },
   "Provisioners": {
@@ -167,6 +121,52 @@
       "Environments use workspace names in naming conventions, variable overrides, and module configuration to isolate infrastructure.",
       "locals {\n  env = terraform.workspace\n  name = \"${local.env}-app\"\n}\n\nresource \"aws_instance\" \"web\" {\n  instance_type = local.env == \"production\" ? \"t3.large\" : \"t3.micro\"\n}"
     ]
+  },
+  "Configuration": {
+    "Terraform Config": {
+      "exp": "Configuring terraform for your project.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Modules": {
+    "Root Module": [
+      "The root module is the directory containing main.tf where terraform is executed. It can call child modules to organize infrastructure.",
+      "# root main.tf\nmodule \"networking\" {\n  source = \"./modules/networking\"\n}\n\nmodule \"compute\" {\n  source = \"./modules/compute\"\n}"
+    ],
+    "Child Modules": [
+      "Child modules are reusable configurations called with source argument, accepting input variables and exposing outputs for composition.",
+      "# modules/networking/main.tf\nvariable \"vpc_cidr\" {}\nresource \"aws_vpc\" \"main\" {\n  cidr_block = var.vpc_cidr\n}\noutput \"vpc_id\" {\n  value = aws_vpc.main.id\n}"
+    ],
+    "Module Registry": [
+      "The Terraform Registry hosts thousands of pre-built public modules for AWS, Azure, GCP, and other providers, versioned with semantic tags.",
+      "module \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"5.0.0\"\n  name    = \"my-vpc\"\n  cidr    = \"10.0.0.0/16\"\n}"
+    ],
+    "Module Composition": [
+      "Multiple modules can be composed together, passing outputs from one module as inputs to another for building complete infrastructure stacks.",
+      "module \"network\" {\n  source = \"terraform-aws-modules/vpc/aws\"\n  cidr   = \"10.0.0.0/16\"\n}\n\nmodule \"app\" {\n  source     = \"./modules/app\"\n  vpc_id     = module.network.vpc_id\n  subnet_ids = module.network.public_subnets\n}\n\nmodule \"database\" {\n  source  = \"terraform-aws-modules/rds/aws\"\n  vpc_id  = module.network.vpc_id\n  db_name = \"myapp\"\n}"
+    ]
+  },
+  "CI/CD & Automation": {
+    "Terraform Cloud": [
+      "Terraform Cloud provides remote state storage, VCS integration, plan/apply workflows, cost estimation, and Sentinel policy enforcement.",
+      "# terraform cloud config\nterraform {\n  cloud {\n    organization = \"myorg\"\n    workspaces {\n      name = \"myapp-prod\"\n    }\n  }\n}\n\n# VCS-driven workflow:\n# 1. Push PR -> Terraform Cloud runs plan\n# 2. Comment results on PR\n# 3. Merge -> Triggers apply"
+    ],
+    "Testing": [
+      "Terraform testing includes syntax validation, plan validation with custom rules, and integration testing with Terratest.",
+      "# Validate syntax\nterraform validate\n\n# Plan validation with sentinel (Terraform Cloud)\nimport \"tfplan\"\nmain = rule { all tfplan.resources.aws_instance as _, i {\n  i.applied.instance_type != \"t2.micro\"\n}}\n\n# Terratest (Go-based integration testing)\n// Test code in test/ directory\n// Deploys real infrastructure, validates, then destroys"
+    ],
+    "CI/CD Integration": [
+      "Terraform in CI/CD requires a backend for state storage, environment-specific variable files, and approval gates for production applies.",
+      "# GitHub Actions example\njobs:\n  terraform:\n    steps:\n    - uses: hashicorp/setup-terraform@v3\n    - run: terraform init\n    - run: terraform validate\n    - run: terraform plan -var-file=env/prod.tfvars\n    - run: terraform apply -auto-approve\n      # Add manual approval step for production"
+    ]
+  },
+  "Advanced Usage": {
+    "Terraform Advanced": {
+      "exp": "Advanced terraform techniques and patterns.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Advanced": {
     "Sensitive Values": [

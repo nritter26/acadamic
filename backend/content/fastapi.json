@@ -5,10 +5,6 @@
       "code": "",
       "exercises": []
     },
-    "What is FastAPI": [
-      "FastAPI is a modern, fast (high-performance) Python web framework for building APIs with Python 3.8+ based on standard Python type hints. It automatically generates OpenAPI (Swagger) documentation and is built on Starlette for async support. Key features: automatic request validation via Pydantic models, automatic API docs at /docs and /redoc, async/await support, dependency injection system, WebSocket support, OAuth2 with JWT out of the box. FastAPI is one of the fastest Python frameworks, on par with Node.js and Go.",
-      "# Install FastAPI\npip install fastapi[all]  # includes uvicorn\n\n# main.py — minimal app\nfrom fastapi import FastAPI\n\napp = FastAPI(title='My API', version='1.0.0')\n\n@app.get('/')\ndef read_root():\n    return {'message': 'Hello, FastAPI!'}\n\n@app.get('/items/{item_id}')\ndef read_item(item_id: int, q: str = None):\n    return {'item_id': item_id, 'q': q}\n\n# Run: uvicorn main:app --reload\n# Docs: http://127.0.0.1:8000/docs\n# Alternate docs: http://127.0.0.1:8000/redoc"
-    ],
     "Project Structure": [
       "FastAPI projects can be structured by domain or by layer. A typical structure separates routes, models, schemas, services, and database. Use APIRouter for modular route organization. Config via Pydantic Settings. Alembic for database migrations. Dependency injection keeps views clean. Testing with TestClient from Starlette. Environment variables managed with pydantic-settings.",
       "myapi/\n├── app/\n│   ├── __init__.py\n│   ├── main.py              # FastAPI app creation\n│   ├── config.py             # Settings via Pydantic\n│   ├── database.py           # DB connection\n│   ├── dependencies.py       # Shared dependencies\n│   ├── models/\n│   │   ├── __init__.py\n│   │   └── user.py           # SQLAlchemy models\n│   ├── schemas/\n│   │   ├── __init__.py\n│   │   └── user.py           # Pydantic schemas\n│   ├── routers/\n│   │   ├── __init__.py\n│   │   ├── users.py          # User endpoints\n│   │   └── items.py          # Item endpoints\n│   └── services/\n│       ├── __init__.py\n│       └── user_service.py   # Business logic\n├── alembic/                  # DB migrations\n├── tests/\n├── requirements.txt\n└── .env\n\n# app/main.py\nfrom fastapi import FastAPI\nfrom app.routers import users, items\n\ndef create_app() -> FastAPI:\n    app = FastAPI(title='My API', version='1.0.0')\n    app.include_router(users.router, prefix='/users', tags=['users'])\n    app.include_router(items.router, prefix='/items', tags=['items'])\n    return app\n\napp = create_app()"
@@ -16,6 +12,10 @@
     "Configuration": [
       "Pydantic Settings handles configuration via environment variables with validation and type coercion. Inherit from BaseSettings, define fields with types and defaults. Load from .env file easily. Auto-completion in IDEs. SecretStr for sensitive values (hides in repr). Settings can be used as a dependency via Depends(). Configuration is validated at startup, catching misconfigurations early.",
       "# app/config.py\nfrom pydantic_settings import BaseSettings\nfrom pydantic import PostgresDsn, SecretStr\nfrom typing import Optional\n\nclass Settings(BaseSettings):\n    # App\n    app_name: str = 'FastAPI App'\n    debug: bool = False\n    version: str = '1.0.0'\n\n    # Database\n    database_url: PostgresDsn = 'postgresql://user:pass@localhost:5432/db'\n\n    # Auth\n    secret_key: SecretStr = SecretStr('change-me')\n    jwt_algorithm: str = 'HS256'\n    access_token_expire_minutes: int = 30\n\n    # Redis\n    redis_url: Optional[str] = None\n\n    # CORS\n    allowed_origins: list[str] = ['*']\n\n    class Config:\n        env_file = '.env'\n        env_file_encoding = 'utf-8'\n\nsettings = Settings()\n\n\n# .env file\n# DATABASE_URL=postgresql://user:pass@localhost/mydb\n# SECRET_KEY=super-secret-key-12345\n# DEBUG=true\n\n\n# Using settings in app\nfrom app.config import settings\n\napp = FastAPI(title=settings.app_name, debug=settings.debug)"
+    ],
+    "What is FastAPI": [
+      "FastAPI is a modern, fast (high-performance) Python web framework for building APIs with Python 3.8+ based on standard Python type hints. It automatically generates OpenAPI (Swagger) documentation and is built on Starlette for async support. Key features: automatic request validation via Pydantic models, automatic API docs at /docs and /redoc, async/await support, dependency injection system, WebSocket support, OAuth2 with JWT out of the box. FastAPI is one of the fastest Python frameworks, on par with Node.js and Go.",
+      "# Install FastAPI\npip install fastapi[all]  # includes uvicorn\n\n# main.py — minimal app\nfrom fastapi import FastAPI\n\napp = FastAPI(title='My API', version='1.0.0')\n\n@app.get('/')\ndef read_root():\n    return {'message': 'Hello, FastAPI!'}\n\n@app.get('/items/{item_id}')\ndef read_item(item_id: int, q: str = None):\n    return {'item_id': item_id, 'q': q}\n\n# Run: uvicorn main:app --reload\n# Docs: http://127.0.0.1:8000/docs\n# Alternate docs: http://127.0.0.1:8000/redoc"
     ]
   },
   "Core Concepts": {
@@ -46,37 +46,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Fastapi Data": {
-      "exp": "Working with data and APIs in Fastapi.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Fastapi Testing": {
-      "exp": "Testing strategies for Fastapi.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Fastapi Deployment": {
-      "exp": "Deploying Fastapi applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Fastapi Best Practices": {
       "exp": "Best practices for Fastapi development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Fastapi Advanced": {
-      "exp": "Advanced Fastapi topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -135,20 +107,48 @@
       "# app/database.py (async)\nfrom sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker\nfrom sqlalchemy.orm import declarative_base\n\nDATABASE_URL = 'postgresql+asyncpg://user:pass@localhost/db'\n\nengine = create_async_engine(DATABASE_URL)\nasync_session = async_sessionmaker(\n    engine, class_=AsyncSession, expire_on_commit=False\n)\nBase = declarative_base()\n\nasync def get_db():\n    async with async_session() as session:\n        yield session\n\n\n# app/models.py (async) — same column definitions\n\n\n# app/routers/users.py (async endpoints)\nfrom fastapi import APIRouter, Depends, HTTPException\nfrom sqlalchemy.ext.asyncio import AsyncSession\nfrom sqlalchemy import select\nfrom app import schemas, models\nfrom app.database import get_db\n\nrouter = APIRouter()\n\n@router.get('/users/', response_model=list[schemas.User])\nasync def list_users(\n    skip: int = 0,\n    limit: int = 100,\n    db: AsyncSession = Depends(get_db)\n):\n    result = await db.execute(\n        select(models.User).offset(skip).limit(limit)\n    )\n    users = result.scalars().all()\n    return users\n\n@router.get('/users/{user_id}', response_model=schemas.User)\nasync def get_user(user_id: int, db: AsyncSession = Depends(get_db)):\n    result = await db.execute(\n        select(models.User).where(models.User.id == user_id)\n    )\n    user = result.scalar_one_or_none()\n    if not user:\n        raise HTTPException(status_code=404, detail='User not found')\n    return user\n\n@router.post('/users/', response_model=schemas.User, status_code=201)\nasync def create_user(\n    user: schemas.UserCreate,\n    db: AsyncSession = Depends(get_db)\n):\n    hashed_password = get_password_hash(user.password)\n    db_user = models.User(\n        username=user.username,\n        email=user.email,\n        hashed_password=hashed_password\n    )\n    db.add(db_user)\n    await db.commit()\n    await db.refresh(db_user)\n    return db_user"
     ]
   },
+  "Testing": {
+    "Fastapi Testing": {
+      "exp": "Testing strategies for Fastapi.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "WebSockets & Testing": {
+    "Testing": [
+      "FastAPI provides TestClient based on Starlette's test client (uses httpx under the hood). TestClient can be used as a context manager for async endpoints. Override dependencies with app.dependency_overrides. Test database setup/teardown with pytest fixtures. Test WebSocket endpoints with TestClient's websocket_connect. Test status codes, response models, headers. Use pytest with httpx for advanced HTTP testing.",
+      "from fastapi.testclient import TestClient\nfrom app.main import app\nimport pytest\n\nclient = TestClient(app)\n\n# Basic test\ndef test_read_main():\n    response = client.get('/')\n    assert response.status_code == 200\n    assert response.json() == {'message': 'Hello World'}\n\n# Test with query params\ndef test_read_item():\n    response = client.get('/items/42?q=test')\n    assert response.status_code == 200\n    assert response.json() == {'item_id': 42, 'q': 'test'}\n\n# Test POST with body\ndef test_create_item():\n    response = client.post(\n        '/items/',\n        json={'name': 'Foo', 'price': 10.0}\n    )\n    assert response.status_code == 201\n    data = response.json()\n    assert data['name'] == 'Foo'\n    assert data['price'] == 10.0\n    assert 'id' in data\n\n# Test authentication\ndef test_auth():\n    response = client.post(\n        '/token',\n        data={'username': 'alice', 'password': 'secret'}\n    )\n    assert response.status_code == 200\n    token = response.json()['access_token']\n\n    response = client.get(\n        '/users/me',\n        headers={'Authorization': f'Bearer {token}'}\n    )\n    assert response.status_code == 200\n\n# Override dependencies\ndef override_get_db():\n    test_db = create_test_database()\n    yield test_db\n    test_db.close()\n\napp.dependency_overrides[get_db] = override_get_db\n\n# Async tests require pytest-asyncio\n@pytest.mark.anyio\nasync def test_async_endpoint():\n    async with AsyncClient(app=app, base_url='http://test') as ac:\n        response = await ac.get('/')\n    assert response.status_code == 200"
+    ],
+    "WebSockets": [
+      "FastAPI supports WebSockets natively via Starlette. Use @app.websocket() for WebSocket endpoints. Accept and close connections manually. Receive JSON/text/bytes messages. Send JSON/text/bytes messages. WebSocket disconnect handling. Dependencies can be used with WebSockets using Depends(). For production, use WebSocket managers for broadcasting to multiple clients. FastAPI's WebSocket support is asynchronous and efficient.",
+      "from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends\nfrom typing import Set\n\napp = FastAPI()\n\nclass ConnectionManager:\n    def __init__(self):\n        self.active_connections: Set[WebSocket] = set()\n\n    async def connect(self, websocket: WebSocket):\n        await websocket.accept()\n        self.active_connections.add(websocket)\n\n    def disconnect(self, websocket: WebSocket):\n        self.active_connections.remove(websocket)\n\n    async def broadcast(self, message: str):\n        for connection in self.active_connections:\n            await connection.send_text(message)\n\nmanager = ConnectionManager()\n\n@app.websocket('/ws/{client_id}')\nasync def websocket_endpoint(websocket: WebSocket, client_id: int):\n    await manager.connect(websocket)\n    try:\n        while True:\n            data = await websocket.receive_text()\n            await manager.broadcast(f'Client #{client_id}: {data}')\n    except WebSocketDisconnect:\n        manager.disconnect(websocket)\n        await manager.broadcast(f'Client #{client_id} left')\n\n\n@app.websocket('/ws/echo')\nasync def echo_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    try:\n        while True:\n            data = await websocket.receive_text()\n            await websocket.send_text(f'Echo: {data}')\n    except WebSocketDisconnect:\n        pass\n\n\n# JavaScript client:\n# const ws = new WebSocket('ws://localhost:8000/ws/123');\n# ws.onmessage = (event) => console.log(event.data);\n# ws.send('Hello!');"
+    ]
+  },
+  "Data & APIs": {
+    "Fastapi Data": {
+      "exp": "Working with data and APIs in Fastapi.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Fastapi Deployment": {
+      "exp": "Deploying Fastapi applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
   "Security & Auth": {
     "OAuth2 & JWT": [
       "FastAPI has first-class support for OAuth2. Common patterns: OAuth2 with password flow and JWT tokens. python-jose for JWT encoding/decoding, passlib for password hashing with bcrypt. Token endpoints return access_token and token_type. Protected routes use Depends(get_current_user) which validates the Bearer token. Refresh tokens for longer sessions. Scopes for fine-grained permissions.",
       "from fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes\nfrom jose import JWTError, jwt\nfrom passlib.context import CryptContext\nfrom pydantic import BaseModel, ValidationError\nfrom typing import Optional, List\nfrom datetime import datetime, timedelta\n\npwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')\noauth2_scheme = OAuth2PasswordBearer(\n    tokenUrl='/token',\n    scopes={'me': 'Read information about current user', 'items': 'Read items'}\n)\n\nclass Token(BaseModel):\n    access_token: str\n    token_type: str\n\nclass TokenData(BaseModel):\n    username: Optional[str] = None\n    scopes: List[str] = []\n\nclass User(BaseModel):\n    username: str\n    email: Optional[str] = None\n    disabled: Optional[bool] = None\n\nclass UserInDB(User):\n    hashed_password: str\n\ndef get_user(db, username: str):\n    if username in db:\n        user_dict = db[username]\n        return UserInDB(**user_dict)\n\ndef verify_password(plain_password, hashed_password):\n    return pwd_context.verify(plain_password, hashed_password)\n\ndef get_password_hash(password):\n    return pwd_context.hash(password)\n\ndef create_access_token(data: dict, expires_delta: Optional[timedelta] = None):\n    to_encode = data.copy()\n    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))\n    to_encode.update({'exp': expire})\n    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n    return encoded_jwt\n\nasync def get_current_user(\n    security_scopes: SecurityScopes,\n    token: str = Depends(oauth2_scheme)\n):\n    credentials_exception = HTTPException(\n        status_code=status.HTTP_401_UNAUTHORIZED,\n        detail='Not enough permissions',\n        headers={'WWW-Authenticate': f'Bearer scope=\"{security_scopes.scope_str}\"'},\n    )\n    try:\n        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])\n        username: str = payload.get('sub')\n        token_scopes = payload.get('scopes', [])\n        if username is None:\n            raise credentials_exception\n        token_data = TokenData(scopes=token_scopes, username=username)\n    except (JWTError, ValidationError):\n        raise credentials_exception\n    user = get_user(fake_users_db, username=token_data.username)\n    if user is None:\n        raise credentials_exception\n    for scope in security_scopes.scopes:\n        if scope not in token_data.scopes:\n            raise HTTPException(\n                status_code=status.HTTP_401_UNAUTHORIZED,\n                detail='Not enough permissions',\n            )\n    return user\n\n@app.post('/token', response_model=Token)\nasync def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):\n    user = get_user(fake_users_db, form_data.username)\n    if not user or not verify_password(form_data.password, user.hashed_password):\n        raise HTTPException(status_code=400, detail='Incorrect username or password')\n    access_token = create_access_token(\n        data={'sub': user.username, 'scopes': form_data.scopes}\n    )\n    return {'access_token': access_token, 'token_type': 'bearer'}"
     ]
   },
-  "WebSockets & Testing": {
-    "WebSockets": [
-      "FastAPI supports WebSockets natively via Starlette. Use @app.websocket() for WebSocket endpoints. Accept and close connections manually. Receive JSON/text/bytes messages. Send JSON/text/bytes messages. WebSocket disconnect handling. Dependencies can be used with WebSockets using Depends(). For production, use WebSocket managers for broadcasting to multiple clients. FastAPI's WebSocket support is asynchronous and efficient.",
-      "from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends\nfrom typing import Set\n\napp = FastAPI()\n\nclass ConnectionManager:\n    def __init__(self):\n        self.active_connections: Set[WebSocket] = set()\n\n    async def connect(self, websocket: WebSocket):\n        await websocket.accept()\n        self.active_connections.add(websocket)\n\n    def disconnect(self, websocket: WebSocket):\n        self.active_connections.remove(websocket)\n\n    async def broadcast(self, message: str):\n        for connection in self.active_connections:\n            await connection.send_text(message)\n\nmanager = ConnectionManager()\n\n@app.websocket('/ws/{client_id}')\nasync def websocket_endpoint(websocket: WebSocket, client_id: int):\n    await manager.connect(websocket)\n    try:\n        while True:\n            data = await websocket.receive_text()\n            await manager.broadcast(f'Client #{client_id}: {data}')\n    except WebSocketDisconnect:\n        manager.disconnect(websocket)\n        await manager.broadcast(f'Client #{client_id} left')\n\n\n@app.websocket('/ws/echo')\nasync def echo_endpoint(websocket: WebSocket):\n    await websocket.accept()\n    try:\n        while True:\n            data = await websocket.receive_text()\n            await websocket.send_text(f'Echo: {data}')\n    except WebSocketDisconnect:\n        pass\n\n\n# JavaScript client:\n# const ws = new WebSocket('ws://localhost:8000/ws/123');\n# ws.onmessage = (event) => console.log(event.data);\n# ws.send('Hello!');"
-    ],
-    "Testing": [
-      "FastAPI provides TestClient based on Starlette's test client (uses httpx under the hood). TestClient can be used as a context manager for async endpoints. Override dependencies with app.dependency_overrides. Test database setup/teardown with pytest fixtures. Test WebSocket endpoints with TestClient's websocket_connect. Test status codes, response models, headers. Use pytest with httpx for advanced HTTP testing.",
-      "from fastapi.testclient import TestClient\nfrom app.main import app\nimport pytest\n\nclient = TestClient(app)\n\n# Basic test\ndef test_read_main():\n    response = client.get('/')\n    assert response.status_code == 200\n    assert response.json() == {'message': 'Hello World'}\n\n# Test with query params\ndef test_read_item():\n    response = client.get('/items/42?q=test')\n    assert response.status_code == 200\n    assert response.json() == {'item_id': 42, 'q': 'test'}\n\n# Test POST with body\ndef test_create_item():\n    response = client.post(\n        '/items/',\n        json={'name': 'Foo', 'price': 10.0}\n    )\n    assert response.status_code == 201\n    data = response.json()\n    assert data['name'] == 'Foo'\n    assert data['price'] == 10.0\n    assert 'id' in data\n\n# Test authentication\ndef test_auth():\n    response = client.post(\n        '/token',\n        data={'username': 'alice', 'password': 'secret'}\n    )\n    assert response.status_code == 200\n    token = response.json()['access_token']\n\n    response = client.get(\n        '/users/me',\n        headers={'Authorization': f'Bearer {token}'}\n    )\n    assert response.status_code == 200\n\n# Override dependencies\ndef override_get_db():\n    test_db = create_test_database()\n    yield test_db\n    test_db.close()\n\napp.dependency_overrides[get_db] = override_get_db\n\n# Async tests require pytest-asyncio\n@pytest.mark.anyio\nasync def test_async_endpoint():\n    async with AsyncClient(app=app, base_url='http://test') as ac:\n        response = await ac.get('/')\n    assert response.status_code == 200"
-    ]
+  "Advanced Topics": {
+    "Fastapi Advanced": {
+      "exp": "Advanced Fastapi topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   }
 }

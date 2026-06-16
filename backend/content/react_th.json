@@ -1,0 +1,293 @@
+{
+  "React Fundamentals": {
+    "JSX": {
+      "exp": "JavaScript XML syntax extension.",
+      "code": "JSX expressions, embedding expressions, attributes, children, fragments.",
+      "exercises": []
+    },
+    "Components": {
+      "exp": "Building UI with components.",
+      "code": "Functional components, component composition, props, children.",
+      "exercises": []
+    },
+    "Props": {
+      "exp": "Passing data between components.",
+      "code": "Prop types, default props, children prop, prop drilling.",
+      "exercises": []
+    },
+    "State": {
+      "exp": "Managing component state.",
+      "code": "useState hook, state updates, batching, immutable updates.",
+      "exercises": []
+    },
+    "Events": {
+      "exp": "Handling events in React.",
+      "code": "Event handlers, synthetic events, event pooling, passing arguments.",
+      "exercises": []
+    },
+    "Conditional Rendering": {
+      "exp": "Rendering based on conditions.",
+      "code": "Ternary operator, && operator, if/else, conditional rendering patterns.",
+      "exercises": []
+    },
+    "Lists & Keys": {
+      "exp": "Rendering lists in React.",
+      "code": "map(), filter(), keys, key requirements, index as key pitfalls.",
+      "exercises": []
+    }
+  },
+  "Hooks": {
+    "useEffect": {
+      "exp": "Side effects in React components.",
+      "code": "Effect dependencies, cleanup, lifecycle mapping, common use cases.",
+      "exercises": []
+    },
+    "useRef": {
+      "exp": "Mutable references in React.",
+      "code": "DOM refs, storing mutable values, forwardRef, callback refs.",
+      "exercises": []
+    },
+    "useMemo": {
+      "exp": "Memoizing computed values.",
+      "code": "Dependencies, performance optimization, when to use memo.",
+      "exercises": []
+    },
+    "useCallback": {
+      "exp": "Memoizing function references.",
+      "code": "Dependencies, preventing re-renders, stable callbacks.",
+      "exercises": []
+    },
+    "useContext": {
+      "exp": "Consuming React context.",
+      "code": "Context creation, provider, consumer, useContext hook.",
+      "exercises": []
+    },
+    "useReducer": {
+      "exp": "Complex state management.",
+      "code": "Reducer functions, dispatch, action types, state shape.",
+      "exercises": []
+    },
+    "Custom Hooks": {
+      "exp": "Creating reusable hook logic.",
+      "code": "Hook composition, naming conventions, shared stateful logic.",
+      "exercises": []
+    }
+  },
+  "State Management": {
+    "Context API": [
+      "Context API provides a built-in way to share values across the component tree without prop drilling. It's best suited for low-frequency updates like theme, locale, or auth state.",
+      "const ThemeContext = createContext('light');\n<ThemeContext.Provider value=\"dark\">...</ThemeContext.Provider>"
+    ],
+    "Redux": [
+      "Redux is a predictable state container with a single store, immutable updates via pure reducers, and actions dispatched to trigger state changes. The Redux Toolkit simplifies boilerplate significantly.",
+      "const reducer = (state, action) => {\n  switch (action.type) {\n    case 'INCREMENT': return { count: state.count + 1 };\n    default: return state;\n  }\n};"
+    ],
+    "Zustand": [
+      "Zustand is a minimal state management library with a hook-based API, no boilerplate, and support for middleware. It's ideal for projects that need simple global state without Redux overhead.",
+      "const useStore = create((set) => ({\n  count: 0,\n  increment: () => set((state) => ({ count: state.count + 1 }))\n}));"
+    ],
+    "React Query": {
+      "exp": "Server state management.",
+      "code": "Queries, mutations, caching, refetching, optimistic updates.",
+      "exercises": []
+    },
+    "State Patterns": {
+      "exp": "State management patterns.",
+      "code": "Lifting state up, colocation, state normalization.",
+      "exercises": []
+    }
+  },
+  "Routing & Navigation": {
+    "React Router": {
+      "exp": "Client-side routing in React.",
+      "code": "BrowserRouter, Routes, Route, Link, useParams, useNavigate.",
+      "exercises": []
+    },
+    "Nested Routes": {
+      "exp": "Organizing routes hierarchically.",
+      "code": "Outlet, relative links, layout routes, index routes.",
+      "exercises": []
+    },
+    "Route Guards": {
+      "exp": "Protecting routes.",
+      "code": "Authentication check, redirects, lazy loading, error boundaries.",
+      "exercises": []
+    }
+  },
+  "Performance": {
+    "React.memo": {
+      "exp": "Preventing unnecessary re-renders.",
+      "code": "Props comparison, custom comparator, when to memoize.",
+      "exercises": []
+    },
+    "Code Splitting": [
+      "Code splitting breaks your bundle into smaller chunks loaded on demand, reducing initial load time. React.lazy and Suspense make code splitting declarative and easy to implement.",
+      "const LazyComponent = React.lazy(() => import('./HeavyComponent'));"
+    ],
+    "Virtualization": {
+      "exp": "Rendering large lists efficiently.",
+      "code": "react-window, react-virtualized, windowing techniques.",
+      "exercises": []
+    },
+    "Profiling": {
+      "exp": "Measuring React performance.",
+      "code": "React DevTools profiler, flame graphs, render count optimization.",
+      "exercises": []
+    },
+    "Lazy Loading": [
+      "Lazy loading defers loading of non-critical resources until they are needed. Combined with Suspense, it shows a fallback UI while the lazy component loads asynchronously.",
+      "<Suspense fallback={<Spinner />}>\n  <LazyComponent />\n</Suspense>"
+    ],
+    "Memoization": [
+      "React.memo is a higher-order component that prevents re-rendering when props haven't changed. useCallback memorizes callback functions to maintain referential equality across renders.",
+      "const Memoized = React.memo(MyComponent);"
+    ]
+  },
+  "Testing React": {
+    "React Testing Library": {
+      "exp": "Testing React components.",
+      "code": "render, screen, fireEvent, queries, async testing.",
+      "exercises": []
+    },
+    "Component Tests": {
+      "exp": "Testing component behavior.",
+      "code": "Props, state, events, async behavior, mock services.",
+      "exercises": []
+    },
+    "Integration Tests": {
+      "exp": "Testing component interactions.",
+      "code": "User flows, context providers, router integration.",
+      "exercises": []
+    }
+  },
+  "เริ่มต้นใช้งาน": {
+    "JSX": [
+      "JSX is a syntax extension for JavaScript that looks like HTML and allows you to write markup inside your components. It gets transpiled to React.createElement calls under the hood by tools like Babel.",
+      "const element = <h1>Hello, World!</h1>;"
+    ],
+    "Components": [
+      "Components are reusable, self-contained pieces of UI that can be either function-based or class-based. Modern React favors functional components with hooks.",
+      "function Welcome({ name }) {\n  return <h1>Hello, {name}</h1>;\n}"
+    ],
+    "Props": [
+      "Props (short for properties) are read-only inputs passed to components from their parent. They enable parent-to-child communication and make components configurable.",
+      "<Welcome name=\"Alice\" color=\"blue\" />"
+    ]
+  },
+  "State & Lifecycle": {
+    "useState": [
+      "useState is a hook that adds local state to function components. It returns a stateful value and a function to update it, triggering a re-render when called.",
+      "const [count, setCount] = useState(0);"
+    ],
+    "useEffect": [
+      "useEffect lets you perform side effects in function components such as data fetching, subscriptions, or DOM manipulation. The dependency array controls when the effect re-runs.",
+      "useEffect(() => {\n  document.title = `Count: ${count}`;\n}, [count]);"
+    ],
+    "useRef": [
+      "useRef returns a mutable ref object whose .current property persists across renders without causing re-renders. It's commonly used to access DOM elements directly.",
+      "const inputRef = useRef(null);\ninputRef.current.focus();"
+    ]
+  },
+  "Advanced Hooks": {
+    "useContext": [
+      "useContext consumes a context value created by React.createContext, allowing deep prop drilling to be avoided. It re-renders the component when the context value changes.",
+      "const theme = useContext(ThemeContext);"
+    ],
+    "useReducer": [
+      "useReducer is an alternative to useState for complex state logic involving multiple sub-values or when the next state depends on the previous one. It follows the reducer pattern from Redux.",
+      "const [state, dispatch] = useReducer(reducer, initialState);"
+    ],
+    "useMemo": [
+      "useMemo memoizes the result of an expensive computation, recomputing only when its dependencies change. Use it to optimize performance by avoiding unnecessary recalculations.",
+      "const sorted = useMemo(() => data.sort(), [data]);"
+    ]
+  },
+  "Styling": {
+    "CSS Modules": [
+      "CSS Modules scope CSS class names locally by default, preventing naming collisions across components. Files are imported like JavaScript objects and class names are accessed as properties.",
+      "import styles from './Button.module.css';\n<button className={styles.primary}>Click</button>"
+    ],
+    "Styled Components": [
+      "Styled Components is a CSS-in-JS library that lets you write actual CSS inside your JavaScript using tagged template literals. It automatically handles vendor prefixing and scoping.",
+      "const Button = styled.button`\n  background: palevioletred;\n  color: white;\n`;"
+    ],
+    "Tailwind": [
+      "Tailwind CSS is a utility-first framework providing low-level classes for rapid UI building. It pairs well with React through class composition and tools like clsx for conditional classes.",
+      "<div className=\"flex items-center p-4 bg-blue-500 text-white rounded-lg\">"
+    ]
+  },
+  "Forms & Routing": {
+    "Controlled Forms": [
+      "In controlled forms, form elements derive their value from React state and update via onChange handlers. This gives React single source of truth for form data and enables validation.",
+      "<input value={value} onChange={e => setValue(e.target.value)} />"
+    ],
+    "React Router": [
+      "React Router is the standard routing library for React apps, enabling navigation between views while keeping the UI in sync with the URL. It supports nested routes, params, and lazy loading.",
+      "<Route path=\"/users/:id\" element={<UserPage />} />"
+    ]
+  },
+  "Testing": {
+    "Jest": [
+      "Jest is a delightful JavaScript testing framework with zero configuration, built-in assertions, mocking, and code coverage. It's the default test runner in Create React App.",
+      "test('adds 1 + 2 to equal 3', () => {\n  expect(sum(1, 2)).toBe(3);\n});"
+    ],
+    "React Testing Library": [
+      "React Testing Library builds on top of DOM Testing Library and encourages testing components from the user's perspective. It queries rendered output rather than testing implementation details.",
+      "render(<Button label=\"Submit\" />);\nfireEvent.click(screen.getByText('Submit'));"
+    ],
+    "Cypress": [
+      "Cypress is an end-to-end testing framework that runs in the browser, providing real-time reloads, time travel debugging, and automatic waiting. It's ideal for integration and E2E tests.",
+      "cy.visit('/login');\ncy.get('[data-cy=submit]').click();"
+    ]
+  },
+  "Concurrent React": {
+    "useTransition": [
+      "useTransition marks state updates as non-urgent transitions, keeping the UI responsive during expensive re-renders. The isPending flag shows a loading state without blocking user input.",
+      "const [isPending, startTransition] = useTransition();\n\nfunction handleSearch(e) {\n  startTransition(() => {\n    setSearchQuery(e.target.value);\n  });\n}\n\n{isPending && <Spinner />}"
+    ],
+    "useDeferredValue": [
+      "useDeferredValue lets you defer re-rendering a non-urgent part of the tree. The deferred value lags behind the real value, allowing urgent updates (like input typing) to stay responsive.",
+      "const [query, setQuery] = useState('');\nconst deferredQuery = useDeferredValue(query);\n\nconst suggestions = useMemo(() => search(deferredQuery), [deferredQuery]);\n\nconst isStale = query !== deferredQuery;"
+    ]
+  },
+  "Server Components": {
+    "RSC Basics": [
+      "React Server Components run exclusively on the server, never sent to the client. They reduce bundle size by keeping heavy dependencies server-side and can directly access databases and file systems.",
+      "// ServerComponent.server.js — runs on server, no JS sent to client\nimport db from 'db';\n\nexport default async function PostList() {\n  const posts = await db.post.findMany();\n  return (\n    <ul>\n      {posts.map(post => (\n        <li key={post.id}>{post.title}</li>\n      ))}\n    </ul>\n  );\n}"
+    ],
+    "Server Actions": [
+      "Server Actions are async functions that run on the server, invoked from client components. Use 'use server' to mark them, enabling direct mutations without building API routes.",
+      "// actions.js\n'use server';\nexport async function createPost(formData) {\n  const title = formData.get('title');\n  await db.post.create({ data: { title } });\n  revalidatePath('/posts');\n}\n\n// Client component\n<form action={createPost}>\n  <input name=\"title\" />\n  <button type=\"submit\">Create</button>\n</form>"
+    ]
+  },
+  "การจัดการข้อผิดพลาด": {
+    "Error Boundaries": [
+      "Error Boundaries catch JavaScript errors in their child component tree, displaying a fallback UI instead of crashing the whole app. Class components with componentDidCatch are required.",
+      "class ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false };\n  }\n  static getDerivedStateFromError(error) {\n    return { hasError: true };\n  }\n  componentDidCatch(error, errorInfo) {\n    logErrorToService(error, errorInfo);\n  }\n  render() {\n    if (this.state.hasError) {\n      return <h1>Something went wrong.</h1>;\n    }\n    return this.props.children;\n  }\n}\n\n<ErrorBoundary>\n  <MyComponent />\n</ErrorBoundary>"
+    ],
+    "Error Recovery": [
+      "Use key props to reset error boundaries. Changing the key unmounts and remounts the component tree, clearing the error state without a full page refresh.",
+      "function App() {\n  const [resetKey, setResetKey] = useState(0);\n  \n  return (\n    <ErrorBoundary key={resetKey}>\n      <MyComponent />\n      <button onClick={() => setResetKey(k => k + 1)}>Reset</button>\n    </ErrorBoundary>\n  );\n}"
+    ]
+  },
+  "Advanced Patterns": {
+    "Portals": [
+      "Portals render children into a DOM node outside the parent component's hierarchy, useful for modals, tooltips, and dropdowns that need to escape overflow or z-index clipping.",
+      "import { createPortal } from 'react-dom';\n\nfunction Modal({ children }) {\n  return createPortal(\n    <div className=\"modal-overlay\">\n      {children}\n    </div>,\n    document.getElementById('modal-root')\n  );\n}"
+    ],
+    "TypeScript with React": [
+      "TypeScript with React provides type safety for props, state, hooks, and event handlers. Use generic types for useState, useRef, and forwardRef for stricter typing.",
+      "interface ButtonProps {\n  label: string;\n  variant?: 'primary' | 'secondary';\n  onClick: () => void;\n}\n\nconst Button: React.FC<ButtonProps> = ({ label, variant = 'primary', onClick }) => {\n  return <button className={variant} onClick={onClick}>{label}</button>;\n};\n\nconst [count, setCount] = useState<number>(0);\nconst ref = useRef<HTMLInputElement>(null);"
+    ]
+  },
+  "React Server Components & Suspense": {
+    "React Server Components (RSC)": [
+      "React Server Components render on the server, reducing client bundle size by sending only the rendered output. RSC can directly access databases, files, and backend services without exposing secrets to the client. <code>'use client'</code> directive marks client components. Server components cannot use hooks, event handlers, or browser APIs. App Router (Next.js 13+) uses RSC by default. Benefits: direct backend access, zero client JS for static content, automatic code splitting, and streaming HTML. Streaming with Suspense sends UI progressively as data loads, improving perceived performance.",
+      "// React Server Component (Next.js App Router)\n// app/products/page.tsx\nimport { ProductCard } from '@/components/product-card';\nimport { Suspense } from 'react';\n\n// Server Component — no \"use client\" directive\nasync function ProductList() {\n  // Direct database access (no API route needed)\n  const db = await connectDB();\n  const products = await db.query(`\n    SELECT p.*, AVG(r.rating) as avg_rating\n    FROM products p\n    LEFT JOIN reviews r ON r.product_id = p.id\n    GROUP BY p.id\n    ORDER BY p.created_at DESC\n    LIMIT 20\n  `);\n\n  return (\n    <div className=\"grid grid-cols-3 gap-4\">\n      {products.map(product => (\n        <ProductCard key={product.id} product={product} />\n      ))}\n    </div>\n  );\n}\n\n// Parent page with streaming\nexport default function ProductsPage() {\n  return (\n    <div>\n      <h1>Products</h1>\n      {/* Static content renders immediately */}\n      Browse our latest products below.\n\n\n      {/* ProductList streams in as data loads */}\n      <Suspense fallback={<div className=\"spinner\">Loading products...</div>}>\n        <ProductList />\n      </Suspense>\n\n      {/* Independent sections load in parallel */}\n      <Suspense fallback={<div>Loading featured...</div>}>\n        <FeaturedProducts />\n      </Suspense>\n    </div>\n  );\n}\n\n// Client Component — interactive parts\n'use client';\n// app/components/ProductCard.tsx\nexport function ProductCard({ product }: { product: Product }) {\n  const [added, setAdded] = useState(false);\n\n  return (\n    <div className=\"card\">\n      <h3>{product.name}</h3>\n      ${product.price}\n\n      Rating: {product.avg_rating?.toFixed(1) || 'N/A'}\n\n      <button onClick={() => { addToCart(product.id); setAdded(true); }}>\n        {added ? '✓ Added' : 'Add to Cart'}\n      </button>\n    </div>\n  );\n}"
+    ],
+    "React Hooks Advanced": [
+      "Advanced React hooks for complex state management: <code>useReducer</code> for state with complex transitions (like Redux without the boilerplate). <code>useCallback</code> memoizes functions to prevent child re-renders. <code>useMemo</code> memoizes expensive computations. <code>useRef</code> stores mutable values across renders without causing re-renders. <code>useLayoutEffect</code> runs synchronously after DOM mutations. <code>useTransition</code> marks state updates as non-urgent. <code>useDeferredValue</code> debounces rapidly-changing values. Custom hooks compose these primitives. The React Compiler (React Forget) automatically memoizes values, making explicit memoization optional.",
+      "// Advanced custom hooks\nimport { useState, useCallback, useMemo, useRef, useTransition } from 'react';\n\n// Debounced search hook\nfunction useDebounce<T>(value: T, delay: number): T {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setDebouncedValue(value), delay);\n    return () => clearTimeout(timer);\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n\n// Intersection observer hook\nfunction useInView(ref: RefObject<HTMLElement>, options?: IntersectionObserverInit): boolean {\n  const [inView, setInView] = useState(false);\n\n  useEffect(() => {\n    const observer = new IntersectionObserver(([entry]) => {\n      setInView(entry.isIntersecting);\n    }, options);\n\n    if (ref.current) observer.observe(ref.current);\n    return () => observer.disconnect();\n  }, [ref, options]);\n\n  return inView;\n}\n\n// Usage in a component\nfunction ProductSearch() {\n  const [query, setQuery] = useState('');\n  const [isPending, startTransition] = useTransition();\n  const debouncedQuery = useDebounce(query, 300);\n  const loadMoreRef = useRef<HTMLDivElement>(null);\n  const isLoadMoreVisible = useInView(loadMoreRef);\n\n  // Memoized filtered products\n  const filteredProducts = useMemo(() =>\n    products.filter(p =>\n      p.name.toLowerCase().includes(debouncedQuery.toLowerCase())\n    ),\n    [debouncedQuery, products]\n  );\n\n  // Callback to avoid re-rendering child list\n  const handleItemClick = useCallback((id: number) => {\n    startTransition(() => {\n      navigate(`/product/${id}`);\n    });\n  }, []);\n\n  // Load more when sentinel element is visible\n  useEffect(() => {\n    if (isLoadMoreVisible) {\n      loadMore();\n    }\n  }, [isLoadMoreVisible]);\n\n  return (\n    <div>\n      <input\n        value={query}\n        onChange={e => setQuery(e.target.value)}\n        placeholder=\"Search products...\"\n      />\n      <ProductList\n        products={filteredProducts}\n        onItemClick={handleItemClick}\n      />\n      <div ref={loadMoreRef}>\n        {isPending && <Spinner />}\n      </div>\n    </div>\n  );\n}"
+    ]
+  }
+}

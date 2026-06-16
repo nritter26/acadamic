@@ -16,6 +16,10 @@ export function isChallengeSolved(lang, idx) {
   return !!loadChallengeProgress()[lang + '_' + idx];
 }
 
+export function buildChallengeCode(userCode, tests) {
+  return userCode + '\n' + tests.join('\n');
+}
+
 export function computeDiff(a, b) {
   const linesA = a.split('\n');
   const linesB = b.split('\n');

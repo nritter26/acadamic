@@ -46,53 +46,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Sveltekit Data": {
-      "exp": "Working with data and APIs in Sveltekit.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Sveltekit Testing": {
-      "exp": "Testing strategies for Sveltekit.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Sveltekit Deployment": {
-      "exp": "Deploying Sveltekit applications.",
-      "code": "",
-      "exercises": []
-    },
-    "Adapters": [
-      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
-      "npm install --save-dev @sveltejs/adapter-node"
-    ],
-    "Vercel": [
-      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
-      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
-    ],
-    "Netlify": [
-      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
-      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
-    ],
-    "Node": [
-      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
-      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
-    ]
-  },
   "Best Practices": {
     "Sveltekit Best Practices": {
       "exp": "Best practices for Sveltekit development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Sveltekit Advanced": {
-      "exp": "Advanced Sveltekit topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -120,13 +76,13 @@
       "POST handlers accept request bodies for creating resources, validating input, and returning appropriate status codes. They're used for REST APIs and can handle multipart uploads.",
       "export async function POST({ request }) {\n  const body = await request.json();\n  const created = await db.createPost(body);\n  return json(created, { status: 201 });\n}"
     ],
-    "API Routes": [
-      "API routes in SvelteKit are server-only endpoints defined alongside pages, sharing the same filesystem routing. They can use server-side secrets and databases without exposing them to the client.",
-      "export async function PUT({ params, request }) {\n  const body = await request.json();\n  await db.updatePost(params.slug, body);\n  return new Response(null, { status: 204 });\n}"
-    ],
     "Form Actions": [
       "Form actions handle POST form submissions with progressive enhancement, running on the server to mutate data and return validation errors or success responses without JavaScript required.",
       "export const actions = {\n  default: async ({ request }) => {\n    const data = await request.formData();\n    const name = data.get('name');\n    if (!name) return { error: 'Name required' };\n    await db.createUser(name);\n    return { success: true };\n  }\n};"
+    ],
+    "API Routes": [
+      "API routes in SvelteKit are server-only endpoints defined alongside pages, sharing the same filesystem routing. They can use server-side secrets and databases without exposing them to the client.",
+      "export async function PUT({ params, request }) {\n  const body = await request.json();\n  await db.updatePost(params.slug, body);\n  return new Response(null, { status: 204 });\n}"
     ]
   },
   "SSR & SSG": {
@@ -143,34 +99,6 @@
       "export const ssr = false;\nexport const csr = true;"
     ]
   },
-  "Auth": {
-    "Session Management": [
-      "SvelteKit sessions can be managed with cookies, JWTs, or server-side stores accessible via the event.locals object in hooks. Authentication libraries like Lucia or Auth.js integrate seamlessly with the hooks pattern.",
-      "export async function handle({ event, resolve }) {\n  const session = await getSession(event.cookies.get('sid'));\n  event.locals.user = session?.user ?? null;\n  return resolve(event);\n}"
-    ],
-    "Cookies": [
-      "SvelteKit provides a cookies API in server contexts for reading, setting, and deleting cookies with configurable options for path, maxAge, secure, httpOnly, and sameSite.",
-      "event.cookies.set('session', token, {\n  httpOnly: true, secure: true, maxAge: 60 * 60 * 24, path: '/'\n});"
-    ],
-    "OAuth": [
-      "OAuth authentication flows are handled server-side using endpoints or form actions, redirecting users to providers and exchanging authorization codes for tokens. Libraries like Lucia provide OAuth adapters.",
-      "export async function GET({ cookies, url, locals }) {\n  const code = url.searchParams.get('code');\n  const { tokens } = await githubAuth.validateAuthorizationCode(code);\n  locals.user = await createUserFromGithub(tokens);\n  return new Response(null, { status: 302, headers: { location: '/' } });\n}"
-    ]
-  },
-  "Advanced": {
-    "Hooks": [
-      "Hooks are server-side middleware that intercept every request in handle, or module-level functions like handleError and handleFetch. They enable session management, redirects, and error tracking.",
-      "export async function handle({ event, resolve }) {\n  if (event.url.pathname.startsWith('/api')) {\n    event.request.headers.set('X-API-Key', process.env.API_KEY);\n  }\n  return resolve(event);\n}"
-    ],
-    "Params": [
-      "Params matchers validate and transform dynamic route parameters before load runs, preventing invalid requests from reaching data loading logic. Built-in matchers include int, uuid, and custom matchers.",
-      "export function match(param) {\n  return /^\\d+$/.test(param);\n}"
-    ],
-    "Error Handling": [
-      "SvelteKit provides structured error handling with error/is-error utility, custom error pages (+error.svelte), and the handleError hook for logging and monitoring integration.",
-      "import { error } from '@sveltejs/kit';\n\nif (!post) throw error(404, 'Post not found');"
-    ]
-  },
   "View Transitions": {
     "Client Navigation": [
       "SvelteKit integrates with the View Transition API for smooth page transitions on client-side navigation. The onNavigate lifecycle runs before navigation, enabling transition setup.",
@@ -183,6 +111,20 @@
     "Element-level Transitions": [
       "Individual elements can have their own view-transition-name for independent animation. Paired with the View Transition API, elements morph smoothly between pages without layout shifts.",
       ".avatar {\n  view-transition-name: avatar;\n  contain: layout;\n}"
+    ]
+  },
+  "Link Options": {
+    "data-sveltekit-preload-data": [
+      "Link options control prefetching behavior. data-sveltekit-preload-data=\"hover\" starts loading data when the user hovers over a link, reducing perceived navigation time.",
+      "<a href=\"/blog\" data-sveltekit-preload-data=\"hover\">Blog</a>\n<a href=\"/dashboard\" data-sveltekit-preload-data=\"tap\">Dashboard</a>"
+    ],
+    "data-sveltekit-reload": [
+      "data-sveltekit-reload forces a full page navigation instead of client-side routing, useful when the target page uses different global CSS or needs a clean JavaScript context.",
+      "<a href=\"/legacy\" data-sveltekit-reload>Legacy Page</a>"
+    ],
+    "data-sveltekit-keepfocus": [
+      "data-sveltekit-keepfocus preserves the currently focused element across navigation, improving accessibility for keyboard users on single-page applications.",
+      "<a href=\"/next\" data-sveltekit-keepfocus>Next Step</a>"
     ]
   },
   "Environment & Config": {
@@ -199,18 +141,76 @@
       "import { env } from '$env/dynamic/public';\n// Runtime resolution: env.PUBLIC_API_URL"
     ]
   },
-  "Link Options": {
-    "data-sveltekit-preload-data": [
-      "Link options control prefetching behavior. data-sveltekit-preload-data=\"hover\" starts loading data when the user hovers over a link, reducing perceived navigation time.",
-      "<a href=\"/blog\" data-sveltekit-preload-data=\"hover\">Blog</a>\n<a href=\"/dashboard\" data-sveltekit-preload-data=\"tap\">Dashboard</a>"
+  "Testing": {
+    "Sveltekit Testing": {
+      "exp": "Testing strategies for Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Sveltekit Data": {
+      "exp": "Working with data and APIs in Sveltekit.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Auth": {
+    "Session Management": [
+      "SvelteKit sessions can be managed with cookies, JWTs, or server-side stores accessible via the event.locals object in hooks. Authentication libraries like Lucia or Auth.js integrate seamlessly with the hooks pattern.",
+      "export async function handle({ event, resolve }) {\n  const session = await getSession(event.cookies.get('sid'));\n  event.locals.user = session?.user ?? null;\n  return resolve(event);\n}"
     ],
-    "data-sveltekit-reload": [
-      "data-sveltekit-reload forces a full page navigation instead of client-side routing, useful when the target page uses different global CSS or needs a clean JavaScript context.",
-      "<a href=\"/legacy\" data-sveltekit-reload>Legacy Page</a>"
+    "Cookies": [
+      "SvelteKit provides a cookies API in server contexts for reading, setting, and deleting cookies with configurable options for path, maxAge, secure, httpOnly, and sameSite.",
+      "event.cookies.set('session', token, {\n  httpOnly: true, secure: true, maxAge: 60 * 60 * 24, path: '/'\n});"
     ],
-    "data-sveltekit-keepfocus": [
-      "data-sveltekit-keepfocus preserves the currently focused element across navigation, improving accessibility for keyboard users on single-page applications.",
-      "<a href=\"/next\" data-sveltekit-keepfocus>Next Step</a>"
+    "OAuth": [
+      "OAuth authentication flows are handled server-side using endpoints or form actions, redirecting users to providers and exchanging authorization codes for tokens. Libraries like Lucia provide OAuth adapters.",
+      "export async function GET({ cookies, url, locals }) {\n  const code = url.searchParams.get('code');\n  const { tokens } = await githubAuth.validateAuthorizationCode(code);\n  locals.user = await createUserFromGithub(tokens);\n  return new Response(null, { status: 302, headers: { location: '/' } });\n}"
+    ]
+  },
+  "Deployment": {
+    "Adapters": [
+      "Adapters configure SvelteKit for deployment on various platforms by transforming the build output. Each adapter optimizes for the target platform's capabilities and constraints.",
+      "npm install --save-dev @sveltejs/adapter-node"
+    ],
+    "Vercel": [
+      "The Vercel adapter deploys SvelteKit apps to Vercel's serverless edge network with automatic CDN caching, ISR, and serverless function support for dynamic routes.",
+      "import adapter from '@sveltejs/adapter-vercel';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Netlify": [
+      "The Netlify adapter deploys to Netlify's platform with serverless functions, split testing, and form handling. It supports on-demand builders for incremental static regeneration.",
+      "import adapter from '@sveltejs/adapter-netlify';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Node": [
+      "The Node adapter creates a standalone Node.js server for traditional hosting environments. It produces a single output with middleware support, ready for PM2 or Docker deployment.",
+      "import adapter from '@sveltejs/adapter-node';\n\nexport default { kit: { adapter: adapter() } };"
+    ],
+    "Sveltekit Deployment": {
+      "exp": "Deploying Sveltekit applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Sveltekit Advanced": {
+      "exp": "Advanced Sveltekit topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced": {
+    "Hooks": [
+      "Hooks are server-side middleware that intercept every request in handle, or module-level functions like handleError and handleFetch. They enable session management, redirects, and error tracking.",
+      "export async function handle({ event, resolve }) {\n  if (event.url.pathname.startsWith('/api')) {\n    event.request.headers.set('X-API-Key', process.env.API_KEY);\n  }\n  return resolve(event);\n}"
+    ],
+    "Params": [
+      "Params matchers validate and transform dynamic route parameters before load runs, preventing invalid requests from reaching data loading logic. Built-in matchers include int, uuid, and custom matchers.",
+      "export function match(param) {\n  return /^\\d+$/.test(param);\n}"
+    ],
+    "Error Handling": [
+      "SvelteKit provides structured error handling with error/is-error utility, custom error pages (+error.svelte), and the handleError hook for logging and monitoring integration.",
+      "import { error } from '@sveltejs/kit';\n\nif (!post) throw error(404, 'Post not found');"
     ]
   },
   "SvelteKit Advanced Patterns": {

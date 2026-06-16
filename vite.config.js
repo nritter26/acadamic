@@ -47,7 +47,7 @@ export default defineConfig({
     }),
   ],
   server: {
-    proxy: { '/api': 'http://localhost:3001' },
+    proxy: { '/api': 'http://localhost:3000' },
     watch: { ignored: ['**/target/**'] },
   },
 });

@@ -1,0 +1,772 @@
+{
+  "Fundamentals": {
+    "Introduction": {
+      "exp": "แนะนำภาษา Go",
+      "code": "",
+      "exercises": []
+    },
+    "Variables & Types": {
+      "exp": "ตัวแปรและชนิดข้อมูลใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Operators": {
+      "exp": "ตัวดำเนินการใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Control Flow": {
+      "exp": "คำสั่งควบคุมใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Functions": {
+      "exp": "ฟังก์ชันใน Go",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data Structures": {
+    "Arrays & Collections": {
+      "exp": "การทำงานกับคอลเลกชันใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Strings": {
+      "exp": "การจัดการสตริงใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Maps & Dictionaries": {
+      "exp": "โครงสร้างข้อมูลแบบคีย์-ค่าใน Go",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object-Oriented Programming": {
+    "Classes & Objects": {
+      "exp": "แนวคิด OOP ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Inheritance": {
+      "exp": "รูปแบบ Inheritance ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Interfaces": {
+      "exp": "Interface และสัญญาใน Go",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Error Handling": {
+    "Exceptions": {
+      "exp": "การจัดการ Exception ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Debugging": {
+      "exp": "การ Debug โค้ด Go",
+      "code": "",
+      "exercises": []
+    },
+    "Error Interface": [
+      "Errors (ข้อผิดพลาด) คือค่าที่ implement built-in error interface: Error() string ฟังก์ชันคืนค่า nil เพื่อแสดงว่าสำเร็จ",
+      "type error interface {\n\tError() string\n}\nvar err error = nil\n\nfunc Divide(a, b float64) (float64, error) {\n\tif b == 0 {\n\t\treturn 0, errors.New(\"division by zero\")\n\t}\n\treturn a / b, nil\n}"
+    ],
+    "Error Checking": [
+      "Go แบบ Idiomatic ตรวจสอบ errors ทันที ใช้ guard clauses สำหรับ early return จัดการ errors เพียงครั้งเดียว — อย่ามองข้ามหรือจัดการหลายครั้ง",
+      "val, err := doWork()\nif err != nil {\n\tfmt.Println(\"Error:\", err)\n\treturn\n}\nfmt.Println(val)\n\n// Immediate handling is preferred\nf, err := os.Open(file)\nif err != nil {\n\treturn fmt.Errorf(\"open: %w\", err)\n}\ndefer f.Close()"
+    ],
+    "Custom Error Types": [
+      "สร้าง custom error types โดยการ implement method Error() string Custom types สามารถพกพาข้อมูลเพิ่มเติมให้ผู้เรียกตรวจสอบได้",
+      "type ValidationError struct {\n\tField string\n\tValue any\n\tMsg   string\n}\n\nfunc (e *ValidationError) Error() string {\n\treturn fmt.Sprintf(\"%s: invalid %v (%s)\", e.Field, e.Value, e.Msg)\n}\n\nfunc Validate(v any) error {\n\treturn &ValidationError{Field: \"name\", Value: v, Msg: \"too short\"}\n}"
+    ],
+    "Sentinel Errors": [
+      "Sentinel errors คือ predefined error variables (ธรรมเนียม: ชื่อขึ้นต้นด้วย Err) ใช้เป็นค่าส่งสัญญาณสำหรับเงื่อนไขความล้มเหลวเฉพาะ เปรียบเทียบด้วย == หรือใช้ errors.Is",
+      "var ErrNotFound = errors.New(\"item not found\")\nvar ErrPermission = errors.New(\"permission denied\")\n\nfunc GetItem(id int) (Item, error) {\n\tif id < 0 {\n\t\treturn Item{}, ErrNotFound\n\t}\n\t// ...\n}\n\nitem, err := GetItem(-1)\nif errors.Is(err, ErrNotFound) {\n\tfmt.Println(\"handle not found\")\n}"
+    ],
+    "Error Wrapping": [
+      "ใช้ fmt.Errorf กับ %w เพื่อ wrap errors โดยคง error ดั้งเดิมไว้สำหรับ errors.Is และ errors.As",
+      "func processFile(path string) error {\n\terr := openFile(path)\n\tif err != nil {\n\t\treturn fmt.Errorf(\"process %s: %w\", path, err)\n\t}\n\treturn nil\n}\n\n// Unwrap with errors.Is\nif errors.Is(err, os.ErrNotExist) {\n\tfmt.Println(\"file doesn't exist\")\n}"
+    ],
+    "errors.Is and errors.As": [
+      "errors.Is(err, target) ตรวจสอบว่า error ใดใน chain ตรงกับ target หรือไม่ errors.As(err, targetType) ค้นหา error ตัวแรกของชนิดที่กำหนด ทั้งสองทำงานผ่าน wrapping layers",
+      "// errors.Is: match sentinel errors\nif errors.Is(err, io.EOF) {\n\tfmt.Println(\"end of file\")\n}\n\n// errors.As: extract custom type\nvar valErr *ValidationError\nif errors.As(err, &valErr) {\n\tfmt.Printf(\"field %s invalid\\n\", valErr.Field)\n}"
+    ],
+    "Panic & Recover": [
+      "Panic หยุดการทำงานปกติและ unwind stack Recover จับ panic ภายใน deferred function ใช้ panic สำหรับสถานการณ์พิเศษที่ไม่สามารถกู้คืนได้เท่านั้น",
+      "defer func() {\n\tif r := recover(); r != nil {\n\t\tfmt.Println(\"Recovered:\", r)\n\t}\n}()\npanic(\"Something went wrong\")\n// Code after panic never runs"
+    ]
+  },
+  "I/O & File System": {
+    "File Operations": {
+      "exp": "File I/O ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Input/Output": {
+      "exp": "การดำเนินการ Input และ Output ใน Go",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Concurrency": {
+      "exp": "Concurrency ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Modules": {
+      "exp": "การเขียนโปรแกรมแบบ Modular ใน Go",
+      "code": "",
+      "exercises": []
+    },
+    "Best Practices": {
+      "exp": "แนวปฏิบัติที่ดีสำหรับ Go",
+      "code": "",
+      "exercises": []
+    },
+    "Performance": {
+      "exp": "การปรับแต่งประสิทธิภาพ Go",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Getting Started": {
+    "What is Go": [
+      "Go เป็นภาษา compiled, statically-typed ที่ออกแบบมาเพื่อความเรียบง่าย, concurrency, และการทำงานที่รวดเร็ว สร้างโดย Google สำหรับ systems programming และ microservices ข้อผิดพลาดทั่วไป: คิดว่า Go เหมือน Java/C# — Go ไม่มี classes, ไม่มี inheritance, ไม่มี exceptions, และไม่มี generics (ก่อน 1.18) แนวปฏิบัติที่ดี: ยอมรับความเรียบง่ายของ Go — เลือก composition มากกว่า inheritance, ใช้ explicit error returns แทน exceptions, และใช้ goroutines สำหรับ concurrency",
+      "package main\nimport \"fmt\"\nfunc main() {\n\tfmt.Println(\"Hello, Go!\")\n}"
+    ],
+    "Go Syntax": [
+      "ไวยากรณ์ Go เน้นความชัดเจนและกระชับ ใช้ curly braces สำหรับบล็อก และ semicolons เป็น optional comments ใช้ // หรือ /* */ ข้อผิดพลาดทั่วไป: วาง opening brace ในบรรทัดใหม่ — Go ต้องการ opening brace บนบรรทัดเดียวกับการประกาศ ใช้ gofmt เพื่อจัดรูปแบบโค้ด",
+      "package main\n\nimport \"fmt\"\n\nfunc main() {\n\t// Single line comment\n\tfmt.Println(\"Hello\") // semicolons optional\n}\n\n/* Multi-line\n   comment */"
+    ],
+    "Your First Program": [
+      "ทุกโปรแกรม Go เริ่มต้นด้วย package declaration และ main() function สำหรับ executables package ต้องเป็น 'main' ข้อผิดพลาดทั่วไป: ใช้ 'print' หรือ 'println' — ควรใช้ fmt.Println สำหรับ output ที่จัดรูปแบบแล้ว",
+      "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Welcome to Go\")\n}"
+    ],
+    "Go Playground": [
+      "Go Playground (go.dev/play) ให้คุณเขียน รัน และแชร์โค้ด Go ในเบราว์เซอร์ เหมาะสำหรับการทดลองและแชร์ตัวอย่าง bug",
+      "// Try it at https://go.dev/play\npackage main\nimport \"fmt\"\nfunc main() {\n\tfmt.Println(\"Playground ready\")\n}"
+    ],
+    "go run vs go build": [
+      "go run คอมไพล์และรันโปรแกรมโดยไม่สร้าง binary go build สร้าง standalone executable ใน directory ปัจจุบัน",
+      "# Run directly (no binary)\ngo run main.go\n\n# Build an executable\n# Produces ./program (or .exe on Windows)\ngo build -o program main.go"
+    ],
+    "GOPATH & Module Basics": [
+      "GOPATH คือ workspace เดิม ปัจจุบัน Go ใช้ modules (go mod) แทน GOPATH ยังคงใช้สำหรับ global binary installs ผ่าน go install",
+      "export GOPATH=$HOME/go\n# Install a tool globally\ngo install golang.org/x/tools/cmd/goimports@latest\n# Installed binaries go to $GOPATH/bin"
+    ]
+  },
+  "Variables & Types": {
+    "Variable Declaration": [
+      "ประกาศตัวแปรโดยใช้ var, const, หรือ short declaration (:=) ชนิดสามารถระบุชัดเจนหรือให้ infer ก็ได้ ข้อผิดพลาดทั่วไป: ใช้ := นอกฟังก์ชัน — ใช้ได้เฉพาะภายใน function bodies; package-level declarations ต้องใช้ var หรือ const แนวปฏิบัติที่ดี: ใช้ := สำหรับ local variables; ใช้ var สำหรับ zero-value declarations; ใช้ const สำหรับ compile-time constants Scope และ shadowing: inner scopes สามารถประกาศชื่อซ้ำกับ outer scope ได้",
+      "var name string = \"Doge\"  // explicit type and value\nvar count = 42              // type inferred (int)\nvar score int               // zero value: 0\n\n// Short declaration (function only)\nfunc main() {\n\tmsg := \"Hello\"           // inferred as string\n\tn := 42                  // inferred as int\n\tpi := 3.14              // inferred as float64\n\t\n\t// Multiple variables\n\ta, b := 1, \"two\"\n\t\n\t// Reassignment with := (at least one new variable)\n\tcount, err := doSomething()  // count reassigned, err new\n}\n\n// Shadowing example\nvar x = 10\nfunc shadow() {\n\tx := 5    // shadows package-level x\n\tfmt.Println(x) // 5\n}\nfmt.Println(x) // 10 (package-level unchanged)"
+    ],
+    "Primitive Types": [
+      "Go มี bool, string, int, uint, float32, float64, complex64 และอื่นๆ Integer types มีขนาดคงที่ (int8, int16, int32, int64) Rune คือ alias สำหรับ int32 แทน Unicode code point Complex numbers (complex64, complex128) เป็น first-class พร้อมไวยากรณ์ real+imag String literals มีสองแบบ: raw (backtick-quoted, ไม่มี escapes) และ interpreted (double-quoted, รองรับ \\n, \\t ฯลฯ)",
+      "var active bool = true\nvar score int64 = 1000\nvar ratio float32 = 2.5\nvar c complex128 = 1 + 2i\n\n// Rune — Unicode code point\ntype rune = int32\nvar r rune = '\\u0041' // 'A'\nvar han rune = '世'    // Chinese character\n\n// Raw vs interpreted strings\nraw := `hello\\nworld`   // literal backslash-n\ninterp := \"hello\\nworld\" // actual newline"
+    ],
+    "Type Conversion": [
+      "แปลงระหว่างชนิดที่เข้ากันได้โดยใช้ T(value) syntax Go ไม่ทำ implicit type conversion",
+      "var x int = 42\nvar y float64 = float64(x)\nvar s string = string(rune(65)) // \"A\""
+    ],
+    "Constants": [
+      "Constants คือค่าที่เปลี่ยนไม่ได้และต้องรู้ตั้งแต่ compile time ใช้ const keyword กับ iota สำหรับ enumerated constants iota รีเซ็ตเป็น 0 ในแต่ละ const block และเพิ่มขึ้น 1 ทีละบรรทัด",
+      "const Pi = 3.14159            // untyped constant\nconst MaxPlayers = 100          // untyped constant\nconst Port int = 8080           // typed constant (can't mix types)\n\n// iota enumerator\nconst (\n\tStatusOK = iota  // 0\n\tStatusErr        // 1\n\tStatusWarn       // 2\n)\n\n// iota with skip and custom start\nconst (\n\t_ = iota          // 0 (discarded)\n\tKB = 1 << (10 * iota)  // 1 << 10 = 1024\n\tMB                   // 1 << 20 = 1048576\n\tGB                   // 1 << 30\n)\n\n// Constants CAN'T be computed at runtime\n// const runtime = time.Now()  // Compile error!"
+    ],
+    "Zero Values": [
+      "ตัวแปรที่ประกาศโดยไม่มีค่าเริ่มต้นจะถูกกำหนด zero value: 0 สำหรับตัวเลข, false สำหรับ bool, \"\" สำหรับ strings, nil สำหรับ pointers/slices/maps/channels/interfaces",
+      "var i int     // 0\nvar f float64 // 0\nvar b bool    // false\nvar s string  // \"\"\nvar p *int    // nil\nfmt.Println(i, f, b, s, p)"
+    ],
+    "Short Declaration (:=)": [
+      "ใช้ := ภายในฟังก์ชันสำหรับ type-inferred variable declaration และ assignment ไม่สามารถใช้ที่ package level ต้องมีตัวแปรใหม่อย่างน้อยหนึ่งตัวทางซ้าย",
+      "name := \"Alice\"\nage := 30\n// Re-declaration with new variable\nage, year := 31, 2026 // age reassigned, year new"
+    ],
+    "Type Inference": [
+      "Go infer ชนิดจากด้านขวาของ := หรือ var declarations Untyped numeric constants จะได้ default types (int, float64, complex128) เมื่อจำเป็น",
+      "x := 42       // int\npi := 3.14    // float64\nc := 1 + 2i   // complex128\n\nvar y float64 = 3\nz := y         // z is float64 (inferred from y)"
+    ]
+  },
+  "Operators": {
+    "Arithmetic Operators": [
+      "คณิตศาสตร์มาตรฐาน: +, -, *, /, % Go รองรับ ++ และ -- แต่เป็น statements ไม่ใช่ expressions",
+      "x := 10 + 5\ny := 20 - 3\nz := 4 * 5\nq := 20 / 4\nr := 17 % 5\nx++ // statement, OK\n// y = x++ // compile error"
+    ],
+    "Comparison Operators": [
+      "เปรียบเทียบค่าโดยใช้ ==, !=, <, >, <=, >= คืนค่า boolean ใช้ได้กับ comparable types",
+      "5 > 3   // true\n5 == 5  // true\n5 != 3  // true\n\"a\" < \"b\" // true (lexicographic)"
+    ],
+    "Logical Operators": [
+      "รวม booleans ด้วย &&, ||, และ ! รองรับ Short-circuit evaluation: && หยุดที่ false ตัวแรก, || หยุดที่ true ตัวแรก",
+      "if x > 0 && y < 10 {\n\tfmt.Println(\"Both true\")\n}\nif !done {\n\tfmt.Println(\"Not done\")\n}"
+    ],
+    "Bitwise Operators": [
+      "จัดการ bits โดยใช้ &, |, ^, <<, >>, และ &^ (AND NOT หรือ bit clear)",
+      "a := 5      // 0101\nb := 3      // 0011\nc := a & b  // 0001 = 1\nd := a | b  // 0111 = 7\ne := a ^ b  // 0110 = 6\nf := a &^ b // 0100 = 4 (clear bits set in b)"
+    ],
+    "Increment/Decrement Statements": [
+      "++ และ -- เป็น statements ไม่ใช่ expressions ไม่สามารถใช้ใน assignments หรือ comparisons ใช้ postfix notation เท่านั้น",
+      "i := 0\ni++          // OK: statement\n// j := i++  // ERROR: not an expression\n// if i++ > 0 {} // ERROR\nfor i < 5 {\n\ti++\n\tfmt.Println(i)\n}"
+    ],
+    "Operator Precedence": [
+      "ลำดับความสำคัญของ operators ใน Go จากสูงไปต่ำ: *, /, %, <<, >>, &, &^; แล้ว +, -, |, ^; แล้ว ==, !=, <, <=, >, >=; แล้ว &&; แล้ว || ใช้วงเล็บเพื่อความชัดเจน",
+      "x := 2 + 3 * 4   // 14 (not 20)\ny := (2 + 3) * 4 // 20\nz := 1<<2 + 3    // 7 (shift before add)"
+    ]
+  },
+  "Control Flow": {
+    "If & Else": [
+      "การแยกสาขาตามเงื่อนไข วงเล็บเป็น optional; braces จำเป็น If สามารถมี short statement ก่อนเงื่อนไขได้",
+      "if x > 10 {\n\tfmt.Println(\"Greater\")\n} else if x > 5 {\n\tfmt.Println(\"Medium\")\n} else {\n\tfmt.Println(\"Lesser\")\n}\n\nif err := doWork(); err != nil {\n\tfmt.Println(err)\n}"
+    ],
+    "Switch Statement": [
+      "การแยกสาขาหลายทางบน expression เดียว Cases ไม่ fall through โดยค่าเริ่มต้น ใช้ fallthrough keyword เมื่อต้องการ",
+      "switch day {\ncase \"Monday\":\n\tfmt.Println(\"Work day\")\ncase \"Saturday\", \"Sunday\":\n\tfmt.Println(\"Weekend\")\ndefault:\n\tfmt.Println(\"Other day\")\n}"
+    ],
+    "For Loop": [
+      "Go มี loop construct เดียว ใช้ for กับ init, condition, และ post หรือเป็น while/infinite loop",
+      "// Traditional for\nfor i := 0; i < 5; i++ {\n\tfmt.Println(i)\n}\n// While-style\nfor i < 10 { i++ }\n// Infinite\nfor { break }"
+    ],
+    "Break & Continue": [
+      "ออกจาก loop ก่อนกำหนดด้วย break หรือข้าม iteration ถัดไปด้วย continue Labels ให้คุณ break/continue outer loops ได้",
+      "for i := 0; i < 10; i++ {\n\tif i == 2 { continue }\n\tif i == 5 { break }\n\tfmt.Println(i)\n}"
+    ],
+    "Label Statements": [
+      "Labels ทำเครื่องหมายตำแหน่งในโค้ดสำหรับ break, continue, หรือ goto ใช้เพื่อออกหรือ continue outer loops จาก inner loops ที่ซ้อนกัน",
+      "outer:\nfor i := 0; i < 3; i++ {\n\tfor j := 0; j < 3; j++ {\n\t\tif i*j > 2 {\n\t\t\tbreak outer\n\t\t}\n\t\tfmt.Printf(\"%d,%d \", i, j)\n\t}\n}\n// Output: 0,0 0,1 0,2 1,0 1,1 1,2"
+    ],
+    "Type Switch": [
+      "Switch ที่ assert ชนิด dynamic ของ interface value แต่ละ case ระบุชนิด มีประโยชน์กับ interface{} หรือ any",
+      "var v any = 42\nswitch t := v.(type) {\ncase int:\n\tfmt.Printf(\"int: %d\\n\", t)\ncase string:\n\tfmt.Printf(\"string: %s\\n\", t)\ndefault:\n\tfmt.Printf(\"unknown: %T\\n\", t)\n}"
+    ],
+    "Defer": [
+      "Defer เลื่อนการเรียกฟังก์ชันจนกว่าฟังก์ชันที่ล้อมรอบจะ return deferred calls จะถูก実行ตามลำดับ LIFO arguments จะถูกประเมินทันที",
+      "func main() {\n\tdefer fmt.Println(\"first defer\")\n\tdefer fmt.Println(\"second defer\")\n\tfmt.Println(\"work\")\n}\n// Output: work, second defer, first defer"
+    ],
+    "Goto": [
+      "Goto กระโดดไปยัง labeled statement ภายในฟังก์ชันเดียวกัน ไม่สามารถข้าม variable declarations หรือเข้าไปในบล็อก ใช้เท่าที่จำเป็น",
+      "i := 0\nloop:\nif i < 3 {\n\tfmt.Println(i)\n\ti++\n\tgoto loop\n}"
+    ]
+  },
+  "Functions": {
+    "Function Declaration": [
+      "กำหนดฟังก์ชันด้วย func keyword ระบุชนิดพารามิเตอร์และชนิดที่คืนค่าอย่างชัดเจน",
+      "func greet(name string) string {\n\treturn \"Hello, \" + name\n}"
+    ],
+    "Multiple Return Values": [
+      "ฟังก์ชันสามารถคืนค่าได้หลายค่า มักใช้กับ pattern (result, error)",
+      "func divide(a, b float64) (float64, error) {\n\tif b == 0 {\n\t\treturn 0, errors.New(\"division by zero\")\n\t}\n\treturn a / b, nil\n}"
+    ],
+    "Named Return Values": [
+      "ตั้งชื่อ return values เพื่อให้โค้ดสะอาดขึ้น พวกมันทำตัวเหมือนตัวแปรที่ initialized เป็น zero values bare return คืนค่าปัจจุบันของ named returns",
+      "func swap(x, y string) (a, b string) {\n\ta = y\n\tb = x\n\treturn\n}"
+    ],
+    "Variadic Functions": [
+      "รับอาร์กิวเมนต์จำนวนแปรผันโดยใช้ ... syntax สร้าง slice ของอาร์กิวเมนต์ เฉพาะพารามิเตอร์ตัวสุดท้ายเท่านั้นที่สามารถเป็น variadic ได้",
+      "func sum(nums ...int) int {\n\ttotal := 0\n\tfor _, n := range nums {\n\t\ttotal += n\n\t}\n\treturn total\n}\nfmt.Println(sum(1, 2, 3)) // 6"
+    ],
+    "Anonymous Functions & Closures": [
+      "ฟังก์ชันที่ไม่มีชื่อกำหนดให้ตัวแปรหรือส่งผ่านโดยตรง Closures จับ capture ตัวแปรโดยรอบโดย reference",
+      "multiply := func(x, y int) int {\n\treturn x * y\n}\nfmt.Println(multiply(3, 4))\n\ncounter := func() func() int {\n\tcount := 0\n\treturn func() int {\n\t\tcount++\n\t\treturn count\n\t}\n}()\nfmt.Println(counter()) // 1\nfmt.Println(counter()) // 2"
+    ],
+    "init Functions": [
+      "init() ทำงานอัตโนมัติเมื่อ package ถูก initialise ก่อน main() หลาย init() ในไฟล์เดียวทำงานตามลำดับ ไม่มีพารามิเตอร์หรือ return values",
+      "var dbConn *sql.DB\n\nfunc init() {\n\tvar err error\n\tdbConn, err = sql.Open(\"postgres\", dsn)\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tlog.Println(\"db initialized\")\n}"
+    ],
+    "Function Values": [
+      "ฟังก์ชันเป็น first-class values ใน Go สามารถกำหนดให้ตัวแปร ส่งเป็นอาร์กิวเมนต์ และคืนค่าจากฟังก์ชันอื่น (higher-order functions)",
+      "// Function as argument\nfunc apply(a, b int, op func(int, int) int) int {\n\treturn op(a, b)\n}\n\nadd := func(a, b int) int { return a + b }\nfmt.Println(apply(3, 4, add)) // 7\n\n// Function returning function\nfunc makeAdder(x int) func(int) int {\n\treturn func(y int) int { return x + y }\n}\nadd5 := makeAdder(5)\nfmt.Println(add5(10)) // 15"
+    ]
+  },
+  "Collections": {
+    "Arrays": [
+      "ลำดับขนาดคงที่ที่มีสมาชิกชนิดเดียวกัน ขนาดเป็นส่วนหนึ่งของ type ([3]int != [4]int) ส่งผ่านโดย value (ถูกคัดลอก) เมื่อกำหนดหรือส่งให้ฟังก์ชัน",
+      "var scores [5]int\nscores[0] = 95\ntemps := [3]float64{98.6, 99.2, 101.3}\n// [...] infers size from initializer\nvals := [...]int{1, 2, 3}"
+    ],
+    "Slices": [
+      "มุมมองขนาดไดนามิกที่มี array อยู่เบื้องหลัง Slice expression [low:high] สร้างมุมมองเข้าไปใน array หรือ slice ที่มีอยู่โดยไม่ copy ข้อมูล",
+      "nums := []int{1, 2, 3, 4, 5}\npart := nums[1:4]  // [2, 3, 4]\nnums = append(nums, 6) // may allocate new backing array\nfmt.Println(len(nums), cap(nums))",
+      "Collections::Arrays"
+    ],
+    "Slice Internals": [
+      "Slice คือ descriptor: pointer ไปยัง array ต้นทาง, length, capacity Append เติบโตโดยเพิ่ม capacity เป็น 2 เท่าจนถึง 1024 จากนั้น ~25% การ slice เกิน len แต่ไม่เกิน cap จะ reuse backing array",
+      "s := make([]int, 3, 5) // len=3, cap=5\ns2 := s[:5]            // extends view to cap\ns[0] = 10\nfmt.Println(s2[0])      // 10 (same backing array)\n\ncopy(s2, []int{1,2,3,4,5}) // copy elements"
+    ],
+    "Maps": [
+      "คอลเลกชัน key-value ไม่มีลำดับที่สร้างบน hash tables Keys ต้องเป็น comparable types (== works) Maps เป็น reference types; zero value คือ nil",
+      "ages := map[string]int{\n\t\"Doge\": 5,\n\t\"Buddy\": 3,\n}\nages[\"Max\"] = 7\ndelete(ages, \"Buddy\")\n\n// Two-value lookup\nval, ok := ages[\"Unknown\"]\nif !ok {\n\tfmt.Println(\"key not found\")\n}"
+    ],
+    "Range Loops": [
+      "วนซ้ำด้วย range บน slices, maps, strings, channels สำหรับ slices: คืนค่า index, value สำหรับ maps: คืนค่า key, value สำหรับ strings: คืนค่า byte index, rune",
+      "for i, v := range []int{10, 20, 30} {\n\tfmt.Println(i, v)\n}\nfor key, value := range ages {\n\tfmt.Println(key, value)\n}\n// Skip index with _\nfor _, v := range items { fmt.Println(v) }"
+    ],
+    "make vs new": [
+      "make(T, args) สร้าง slices, maps, และ channels (initialised, พร้อมใช้) new(T) จัดสรร zero value และคืนค่า *T make คืนค่า T (ไม่ใช่ *T)",
+      "s := make([]int, 5)    // slice ready to use\nm := make(map[int]string) // map ready for insertion\n\np := new(int)    // *int pointing to 0\n*p = 42\nfmt.Println(*p)\n\n// new for struct\nu := new(User)   // *User with zero fields"
+    ]
+  },
+  "Pointers & References": {
+    "Pointer Basics": [
+      "Pointers เก็บที่อยู่ในหน่วยความจำ ใช้ & เพื่อ获取 address ของตัวแปร และ * เพื่อ dereference (อ่านหรือเขียนผ่าน pointer) Zero value คือ nil Go มี automatic memory management พร้อม garbage collection",
+      "x := 42\np := &x         // p points to x, type *int\nfmt.Println(*p) // 42 (dereference)\n*p = 100        // changes x to 100\nfmt.Println(x)  // 100"
+    ],
+    "Pointers to Structs": [
+      "เข้าถึง struct fields ผ่าน pointers โดยใช้ dot notation Go auto-dereferences struct pointers สำหรับ field access",
+      "type Person struct { Name string }\np := &Person{\"Alice\"}\np.Name = \"Bob\"  // Go translates to (*p).Name = \"Bob\"\nfmt.Println(p.Name)"
+    ],
+    "Pointers as Parameters": [
+      "Go เป็น pass-by-value ใช้ pointers เพื่อให้ฟังก์ชันแก้ไขข้อมูลของผู้เรียก หรือเพื่อหลีกเลี่ยงการคัดลอก structs ขนาดใหญ่",
+      "func increment(n *int) {\n\t*n++\n}\nval := 5\nincrement(&val)  // val becomes 6\n\nfunc update(u *User) {\n\tu.Name = \"Updated\"\n}"
+    ],
+    "new() Function": [
+      "new(T) จัดสรร zero-value storage สำหรับ T และคืนค่า *T ไม่คืนค่า nil เทียบเท่ากับ &T{} สำหรับ structs",
+      "p := new(int)\nfmt.Println(*p) // 0\n\nm := new(map[string]int)\n// *m is nil! new doesn't initialize maps/slices\n// Use make() for maps, slices, channels instead\n\ntype Config struct { Port int }\nc := new(Config)\nc.Port = 8080 // same as (*c).Port = 8080"
+    ],
+    "Pointer vs Value Receiver": [
+      "ใช้ pointer receiver (*T) เมื่อ method แก้ไข receiver หรือเมื่อ struct มีขนาดใหญ่ ใช้ value receiver (T) สำหรับชนิดเล็กที่ไม่เปลี่ยนแปลง",
+      "type Counter struct{ N int }\n\n// Value receiver: operates on copy\nfunc (c Counter) Value() int { return c.N }\n\n// Pointer receiver: modifies original\nfunc (c *Counter) Inc() { c.N++ }\n\nc := Counter{5}\nc.Inc()\nfmt.Println(c.Value()) // 6"
+    ],
+    "unsafe Package & uintptr": [
+      "unsafe package ให้ low-level memory operations: unsafe.Sizeof, unsafe.Alignof, unsafe.Offsetof, unsafe.Pointer (แปลง pointer ชนิดใดๆ และ uintptr) uintptr คือ integer ที่ใหญ่พอที่จะเก็บ pointer value",
+      "package main\n\nimport (\n\t\"fmt\"\n\t\"unsafe\"\n)\n\nfunc main() {\n\t// Size and alignment\n\tfmt.Println(\"Size of int:\", unsafe.Sizeof(int(0)))     // 8 (64-bit)\n\tfmt.Println(\"Size of string:\", unsafe.Sizeof(\"\"))   // 16 (ptr + len)\n\t\n\ttype Point struct {\n\t\tX int64\n\t\tY int64\n\t\tZ int32\n\t}\n\t\n\tp := Point{X: 10, Y: 20, Z: 30}\n\tfmt.Println(\"Point size:\", unsafe.Sizeof(p))          // 20\n\tfmt.Println(\"Offset X:\", unsafe.Offsetof(p.X))        // 0\n\tfmt.Println(\"Offset Y:\", unsafe.Offsetof(p.Y))        // 8\n\tfmt.Println(\"Offset Z:\", unsafe.Offsetof(p.Z))        // 16\n\t\n\t// Pointer arithmetic (like C)\n\tarr := [3]int16{100, 200, 300}\n\tbase := unsafe.Pointer(&arr[0])\n\t\n\t// Get arr[2] via pointer arithmetic\n\tptr := unsafe.Pointer(uintptr(base) + 2*unsafe.Sizeof(arr[0]))\n\tval := *(*int16)(ptr)\n\tfmt.Println(\"arr[2] via pointer:\", val)  // 300\n\t\n\t// Set arr[1]\n\tptr2 := unsafe.Pointer(uintptr(base) + unsafe.Sizeof(arr[0]))\n\t*(*int16)(ptr2) = 999\n\tfmt.Println(\"arr after:\", arr)  // [100 999 300]\n\t\n\t// WARNING: unsafe can cause crashes\n\t// var x int32 = 42\n\t// f := *(*float32)(unsafe.Pointer(&x))  // Reinterpret bits\n\t// fmt.Println(f)  // Garbage value\n}"
+    ]
+  },
+  "Structs & Composition": {
+    "Struct Definition": [
+      "จัดกลุ่ม fields ที่เกี่ยวข้องกันเป็น struct type Exported fields ขึ้นต้นด้วยตัวพิมพ์ใหญ่สำหรับการมองเห็นข้าม packages",
+      "type User struct {\n\tID    int\n\tName  string\n\tEmail string\n}\nuser := User{ID: 1, Name: \"Alice\", Email: \"alice@example.com\"}"
+    ],
+    "Struct Tags": [
+      "Struct tags คือ metadata strings ที่แนบกับ fields มักใช้โดย encoding/json, validation libraries, และ ORMs Tags ปรากฏหลัง field type ใน backticks",
+      "type Config struct {\n\tHost string `json:\"host\" yaml:\"host\"`\n\tPort int    `json:\"port\" default:\"8080\"`\n\tEnv  string `json:\"-\"` // \"-\" omits from JSON\n}\n\n// Tags accessed via reflect\nfield, _ := reflect.TypeOf(Config{}).FieldByName(\"Host\")\nfmt.Println(field.Tag.Get(\"json\")) // \"host\""
+    ],
+    "Anonymous (Embedded) Fields": [
+      "ฝัง types โดยไม่มี field name methods และ fields ของมันจะถูก promoted ไปยัง embedding struct นี่คือ composition ไม่ใช่ inheritance",
+      "type Person struct {\n\tName string\n\tAge  int\n}\ntype Employee struct {\n\tPerson          // embedded, promoted fields\n\tID      int\n\tCompany string\n}\n\ne := Employee{Person: Person{\"Alice\", 30}, ID: 1, Company: \"Acme\"}\nfmt.Println(e.Name) // promoted from Person"
+    ],
+    "Struct Methods": [
+      "แนบ methods กับ types โดยใช้ receiver syntax Methods คือฟังก์ชันที่มี receiver parameter ระหว่าง func และ method name",
+      "type Circle struct { Radius float64 }\nfunc (c Circle) Area() float64 {\n\treturn math.Pi * c.Radius * c.Radius\n}\n\nc := Circle{Radius: 5}\nfmt.Println(c.Area())"
+    ],
+    "Pointer Receivers": [
+      "Pointer receiver อนุญาตให้แก้ไข struct Value receiver ทำงานบน copy ความสอดคล้อง: ถ้า method ใดมี pointer receiver ควรใช้ทุกอัน",
+      "type Circle struct { Radius float64 }\n\n// Pointer receiver modifies original\nfunc (c *Circle) Scale(factor float64) {\n\tc.Radius *= factor\n}\n\nc := Circle{Radius: 5}\nc.Scale(2)\nfmt.Println(c.Radius) // 10"
+    ],
+    "Struct Comparison": [
+      "Structs ที่มีเฉพาะ comparable fields (ไม่มี slices, maps, หรือ functions) สามารถเปรียบเทียบด้วย == และใช้เป็น map keys ได้",
+      "type Point struct {\n\tX, Y int\n}\na := Point{1, 2}\nb := Point{1, 2}\nfmt.Println(a == b) // true\n\n// Not comparable (contains slice)\n// type Bad struct { Items []int }"
+    ],
+    "Constructor Functions": [
+      "Go ไม่มี constructors ใช้ factory functions (NewXxx หรือ New) ที่คืนค่า pointer ไปยัง struct",
+      "type Config struct {\n\tHost string\n\tPort int\n}\n\nfunc NewConfig(host string, port int) (*Config, error) {\n\tif host == \"\" {\n\t\treturn nil, errors.New(\"host required\")\n\t}\n\tif port <= 0 {\n\t\tport = 8080\n\t}\n\treturn &Config{Host: host, Port: port}, nil\n}"
+    ]
+  },
+  "Interfaces": {
+    "Interface Definition": [
+      "กำหนด interfaces เป็นชุดของ method signatures ชนิดใดที่ implement ทุก methods จะ satisfy interface โดยอัตโนมัติ",
+      "type Reader interface {\n\tRead([]byte) (int, error)\n}\ntype Writer interface {\n\tWrite([]byte) (int, error)\n}"
+    ],
+    "Implicit Implementation": [
+      "Go ใช้ structural typing ชนิด satisfy interface เพียงแค่ implement methods ของมัน ไม่ต้องประกาศ 'implements' อย่างชัดเจน",
+      "type File struct{}\nfunc (f File) Read(p []byte) (int, error) { return len(p), nil }\n// File implicitly satisfies io.Reader\n\nvar r io.Reader = File{}\nbuf := make([]byte, 10)\nr.Read(buf)"
+    ],
+    "Type Assertions": [
+      "ดึง concrete value จาก interface โดยใช้ value.(Type) รูปแบบสองค่าป้องกัน panic: val, ok := x.(Type)",
+      "var r interface{} = \"hello\"\ns := r.(string)         // panics if wrong type\nn, ok := r.(int)        // ok=false, n=0 (safe)\n\nif s, ok := r.(string); ok {\n\tfmt.Println(\"string:\", s)\n}"
+    ],
+    "Empty Interface (any)": [
+      "interface{} (หรือ 'any' ใน Go 1.18+) รับค่าทุกชนิด",
+      "var empty any\nempty = \"string\"\nempty = 42\nempty = []int{1, 2, 3}\n\nfunc PrintAll(vals []any) {\n\tfor _, v := range vals {\n\t\tfmt.Println(v)\n\t}\n}"
+    ],
+    "Interface Composition": [
+      "รวม interfaces โดยฝังไว้ใน interface ใหม่ ชนิดต้อง implement methods ทั้งหมดของ embedded interfaces จึงจะ satisfy composed interface",
+      "type Reader interface { Read([]byte) (int, error) }\ntype Writer interface { Write([]byte) (int, error) }\ntype Closer interface { Close() error }\n\n// Composed interface\ntype ReadWriteCloser interface {\n\tReader\n\tWriter\n\tCloser\n}"
+    ],
+    "Interface Values & Nil": [
+      "Interface value คือคู่ (type, value) Interface จะ nil ก็ต่อเมื่อทั้ง type และ value เป็น nil nil pointer ภายใน non-nil interface ไม่ใช่ nil!",
+      "var buf *bytes.Buffer = nil\nvar w io.Writer = buf  // type=*bytes.Buffer, value=nil\n\n// w != nil even though underlying pointer is nil\nif w != nil {\n\tw.Write([]byte(\"hi\")) // PANIC: nil pointer dereference\n}\n\n// Fix: check both\nfunc safeWrite(w io.Writer) {\n\tif w == nil { return }\n\tw.Write([]byte(\"ok\"))\n}"
+    ],
+    "Best Practices (Accept interfaces, return structs)": [
+      "รับ interfaces เพื่อให้ผู้เรียกมีความยืดหยุ่น; คืน concrete types เพื่อให้ผู้เรียกเข้าถึง fields และ methods โดยไม่ต้อง type assertions",
+      "// Accept interface\nfunc Process(r io.Reader) error {\n\tdata, _ := io.ReadAll(r)\n\treturn processData(data)\n}\n\n// Return concrete type\nfunc NewHandler() *Handler {\n\treturn &Handler{pool: &sync.Pool{}}\n}"
+    ]
+  },
+  "Concurrency": {
+    "Goroutines": [
+      "การทำงาน concurrent แบบเบาที่จัดการโดย Go runtime (ไม่ใช่ OS threads) เริ่มต้นด้วย go keyword Goroutines แชร์ address space เดียวกัน",
+      "go func() {\n\tfmt.Println(\"Running concurrently\")\n}()\nfmt.Println(\"Main continues\")\ntime.Sleep(time.Second)"
+    ],
+    "Channels": [
+      "ท่อสื่อสารแบบมีชนิดสำหรับ goroutines สร้างด้วย ch := make(chan T) ส่ง: ch <- v รับ: v := <-ch",
+      "ch := make(chan int)\ngo func() { ch <- 42 }()\nvalue := <-ch // blocks until value sent\nfmt.Println(value) // 42"
+    ],
+    "Buffered Channels": [
+      "Channels ที่มีความจุ: make(chan T, cap) ส่งจะ block เมื่อ buffer เต็ม; รับจะ block เมื่อ buffer ว่าง ลดจุด synchronization",
+      "ch := make(chan int, 2)\nch <- 1\nch <- 2\n// Non-blocking sends until buffer full\nfmt.Println(<-ch) // 1\nfmt.Println(<-ch) // 2"
+    ],
+    "Range & Close": [
+      "ผู้ส่งปิด channel ด้วย close(ch) ผู้รับสามารถ range เหนือ channel รับค่าจนกว่า channel จะถูกปิด",
+      "ch := make(chan int)\ngo func() {\n\tfor i := 0; i < 3; i++ {\n\t\tch <- i\n\t}\n\tclose(ch) // sender closes\n}()\n\nfor v := range ch {\n\tfmt.Println(v) // 0, 1, 2\n}"
+    ],
+    "Select Statement": [
+      "รอการดำเนินการ channel หลายอันพร้อมกัน Select จะ block จนกว่าหนึ่ง case พร้อม ใช้ default สำหรับ non-blocking operations",
+      "select {\ncase msg := <-ch1:\n\tfmt.Println(msg)\ncase msg := <-ch2:\n\tfmt.Println(msg)\ncase <-time.After(1 * time.Second):\n\tfmt.Println(\"timeout\")\ndefault:\n\tfmt.Println(\"no message ready\")\n}"
+    ],
+    "WaitGroup": [
+      "sync.WaitGroup block จนกว่า goroutines ทั้งหมดจะเสร็จ Add(n) เพิ่ม counter, Done() ลด, Wait() block จนกว่า counter เป็น 0",
+      "var wg sync.WaitGroup\nfor i := 0; i < 5; i++ {\n\twg.Add(1)\n\tgo func(id int) {\n\t\tdefer wg.Done()\n\t\tfmt.Println(\"worker\", id)\n\t}(i)\n}\nwg.Wait()\nfmt.Println(\"all done\")"
+    ],
+    "sync.Once": [
+      "sync.Once รับประกันว่าฟังก์ชันถูกดำเนินการเพียงครั้งเดียว แม้ข้ามหลาย goroutines ใช้สำหรับ lazy initialization, singleton setup",
+      "var once sync.Once\nvar config *Config\n\nfunc GetConfig() *Config {\n\tonce.Do(func() {\n\t\tfmt.Println(\"initializing config...\")\n\t\tconfig = &Config{Port: 8080}\n\t})\n\treturn config\n}"
+    ],
+    "Mutex & RWMutex": [
+      "sync.Mutex ให้ mutual exclusion Lock/Unlock ป้องกัน critical sections sync.RWMutex อนุญาตหลาย readers หรือหนึ่ง writer",
+      "var mu sync.RWMutex\ndata := make(map[string]string)\n\nfunc Read(key string) string {\n\tmu.RLock()\n\tdefer mu.RUnlock()\n\treturn data[key]\n}\n\nfunc Write(key, val string) {\n\tmu.Lock()\n\tdefer mu.Unlock()\n\tdata[key] = val\n}"
+    ],
+    "Worker Pools": [
+      "จำนวน goroutines ที่แน่นอนประมวลผล jobs จาก channel ควบคุม concurrency, จำกัดการใช้ทรัพยากร ใช้ buffered channel สำหรับ jobs",
+      "jobs := make(chan int, 100)\nresults := make(chan int, 100)\n\n// Start 3 workers\nfor w := 0; w < 3; w++ {\n\tgo func(id int) {\n\t\tfor j := range jobs {\n\t\t\tresults <- j * 2\n\t\t}\n\t}(w)\n}\n\n// Send jobs\nfor j := 0; j < 9; j++ {\n\tjobs <- j\n}\nclose(jobs)\n\n// Collect results\nfor r := 0; r < 9; r++ {\n\tfmt.Println(<-results)\n}"
+    ],
+    "Fan-in / Fan-out": [
+      "Fan-out: หลาย goroutines อ่านจาก channel เดียว Fan-in: หลาย goroutines เขียนไปยัง channel เดียว ใช้ merge function กับ sync.WaitGroup",
+      "// Fan-in: merge multiple channels into one\nfunc merge(cs ...<-chan int) <-chan int {\n\tout := make(chan int)\n\tvar wg sync.WaitGroup\n\tfor _, c := range cs {\n\t\twg.Add(1)\n\t\tgo func(ch <-chan int) {\n\t\t\tdefer wg.Done()\n\t\t\tfor v := range ch {\n\t\t\t\tout <- v\n\t\t\t}\n\t\t}(c)\n\t}\n\tgo func() {\n\t\twg.Wait()\n\t\tclose(out)\n\t}()\n\treturn out\n}"
+    ],
+    "Context Deep & Cancellation Patterns": [
+      "context.Context ส่ง deadlines, cancellation signals, และ request-scoped values ใช้ context.Background(), context.WithCancel, context.WithTimeout ตรวจสอบ ctx.Done() สำหรับการยกเลิก",
+      "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"math/rand\"\n\t\"time\"\n)\n\n// Simulate slow operation\nfunc slowOperation(ctx context.Context, id int) error {\n\tselect {\n\tcase <-time.After(time.Duration(rand.Intn(500)) * time.Millisecond):\n\t\tfmt.Printf(\"Operation %d completed\\n\", id)\n\t\treturn nil\n\tcase <-ctx.Done():\n\t\tfmt.Printf(\"Operation %d cancelled: %v\\n\", id, ctx.Err())\n\t\treturn ctx.Err()\n\t}\n}\n\n// With timeout\nfunc timeoutDemo() {\n\tctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)\n\tdefer cancel()\n\t\n\terr := slowOperation(ctx, 1)\n\tfmt.Println(\"Result:\", err)\n}\n\n// With cancellation\nfunc cancelDemo() {\n\tctx, cancel := context.WithCancel(context.Background())\n\t\n\tgo func() {\n\t\ttime.Sleep(50 * time.Millisecond)\n\t\tcancel()  // Cancel all child operations\n\t}()\n\t\n\terr := slowOperation(ctx, 2)\n\tfmt.Println(\"Result:\", err)\n}\n\n// With value\nfunc valueDemo() {\n\tctx := context.WithValue(context.Background(), \"request_id\", \"abc-123\")\n\t\n\tprocessRequest(ctx)\n}\n\nfunc processRequest(ctx context.Context) {\n\tif id := ctx.Value(\"request_id\"); id != nil {\n\t\tfmt.Println(\"Request ID:\", id)\n\t}\n\t\n\t// Propagate with timeout\n\tsubCtx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)\n\tdefer cancel()\n\t\n\tslowOperation(subCtx, 3)\n}\n\nfunc main() {\n\ttimeoutDemo()\n\tcancelDemo()\n\tvalueDemo()\n}"
+    ]
+  },
+  "Packages & Imports": {
+    "Package Declaration": [
+      "ทุกไฟล์ Go อยู่ใน package Executables ใช้ 'package main', libraries ใช้ชื่อที่สื่อความหมาย หนึ่ง directory = หนึ่ง package",
+      "// File: main.go\npackage main\n\n// Library packages\npackage mylib\npackage httpclient"
+    ],
+    "Importing Packages": [
+      "ใช้ import สำหรับ dependencies Standard library packages มี path สั้น; remote packages ใช้ full module paths go mod tidy จัดการเวอร์ชันที่จำเป็น",
+      "import \"fmt\"\nimport (\n\t\"strings\"\n\t\"github.com/user/pkg\"\n)\n\n// Tooling commands\n// $ go doc fmt.Println\n// $ go clean -cache\n// $ go version"
+    ],
+    "Exported Names": [
+      "ชื่อที่ขึ้นต้นด้วยตัวพิมพ์ใหญ่ถูก exported (public), ตัวพิมพ์เล็กคือ unexported (package-private) Exported names เข้าถึงได้ข้าม packages",
+      "type User struct{}      // Exported\ntype user struct{}      // Unexported\nfunc Public() {}          // Exported\nfunc private() {}         // Unexported\nconst MaxValue = 100      // Exported\nconst minValue = 1        // Unexported"
+    ],
+    "Package Initialization (init)": [
+      "init() ทำงานเมื่อ package ถูก import หลาย init() ใน package ทำงานตามลำดับชื่อไฟล์ init() functions ไม่สามารถเรียกโดยตรง",
+      "var schema = \"public\"\n\nfunc init() {\n\tif os.Getenv(\"DB_SCHEMA\") != \"\" {\n\t\tschema = os.Getenv(\"DB_SCHEMA\")\n\t}\n}\n\n// Init order: imported packages first (bottom-up), then package-level vars, then init()s, then main()"
+    ],
+    "Internal Packages": [
+      "Packages ภายใต้ 'internal/' directory สามารถ import ได้โดยโค้ดที่ root จาก internal's parent เท่านั้น",
+      "project/\n└── internal/\n    └── auth/\n        └── token.go  // only importable by project/...\n\npackage internal/auth\n// This can ONLY be imported by code inside project/"
+    ],
+    "Blank Imports": [
+      "Import package เพื่อ side effects (init() execution) โดยใช้ _ dot alias '.' import ชื่อที่ exported ทั้งหมดเข้า namespace ปัจจุบัน",
+      "import (\n\t_ \"net/http/pprof\" // registers pprof handlers via init()\n\t. \"fmt\"           // use Println directly (rare, avoid)\n\t_ \"image/png\"     // registers PNG decoder\n)\n\n// Blank import for side effects only"
+    ],
+    "Import Cycles": [
+      "Go ไม่อนุญาต import cycles A ไม่สามารถ import B ถ้า B import A (โดยตรงหรือโดยอ้อม) แก้โดยแยก shared types ไปยัง package ที่สาม",
+      "// BAD: import cycle\n// package a imports b\n// package b imports a\n\n// FIX: extract shared types\n// package a imports c\n// package b imports c\n// package c (no imports)"
+    ]
+  },
+  "File I/O": {
+    "Reading Files (os.ReadFile)": [
+      "os.ReadFile (Go 1.16+) อ่านไฟล์เข้าสู่หน่วยความจำ แทนที่ ioutil.ReadFile ที่ deprecated ใช้สำหรับไฟล์เล็ก สำหรับไฟล์ใหญ่ใช้ bufio.Scanner หรือ io.Copy",
+      "data, err := os.ReadFile(\"file.txt\")\nif err != nil {\n\tlog.Fatal(err)\n}\nfmt.Println(string(data))"
+    ],
+    "Writing Files (os.WriteFile)": [
+      "os.WriteFile เขียนข้อมูลไปยังไฟล์ สร้างหรือตัดทิ้ง อาร์กิวเมนต์ที่สามคือ file permissions (Unix mode)",
+      "content := []byte(\"Hello, Go!\")\nerr := os.WriteFile(\"output.txt\", content, 0644)\nif err != nil {\n\tlog.Fatal(err)\n}"
+    ],
+    "Buffered I/O (bufio)": [
+      "bufio ให้ buffered reading/writing เพื่อประสิทธิภาพ bufio.Scanner อ่านทีละบรรทัด bufio.Writer buffer writes เพื่อลด syscalls",
+      "file, err := os.Open(\"data.txt\")\nif err != nil { log.Fatal(err) }\ndefer file.Close()\n\nscanner := bufio.NewScanner(file)\nfor scanner.Scan() {\n\tfmt.Println(scanner.Text())\n}\nif err := scanner.Err(); err != nil {\n\tlog.Fatal(err)\n}"
+    ],
+    "io.ReadAll": [
+      "io.ReadAll อ่านจาก io.Reader จนถึง EOF คืนค่า full byte slice แทนที่ ioutil.ReadAll ใช้กับ reader ใดๆ: files, HTTP bodies, strings",
+      "r := strings.NewReader(\"hello world\")\ndata, err := io.ReadAll(r)\nif err != nil {\n\tlog.Fatal(err)\n}\nfmt.Println(string(data)) // \"hello world\""
+    ],
+    "io.Copy": [
+      "io.Copy คัดลอกจาก io.Reader ไปยัง io.Writer จนถึง EOF สตรีมข้อมูลอย่างมีประสิทธิภาพโดยไม่โหลดทุกอย่างลงหน่วยความจำ",
+      "src, _ := os.Open(\"source.txt\")\ndefer src.Close()\ndst, _ := os.Create(\"dest.txt\")\ndefer dst.Close()\n\nwritten, err := io.Copy(dst, src)\nfmt.Printf(\"copied %d bytes\\n\", written)"
+    ],
+    "File Permissions & ioutil Deprecation": [
+      "ioutil ถูก deprecate ตั้งแต่ Go 1.16 แทนที่ ioutil.ReadFile ด้วย os.ReadFile, ioutil.WriteFile ด้วย os.WriteFile, ioutil.ReadAll ด้วย io.ReadAll",
+      "// Old (deprecated)\n// data, _ := ioutil.ReadFile(\"f.txt\")\n// ioutil.WriteFile(\"f.txt\", data, 0644)\n// ioutil.ReadAll(r)\n\n// New (Go 1.16+)\ndata, _ := os.ReadFile(\"f.txt\")\nos.WriteFile(\"f.txt\", data, 0644)\nio.ReadAll(r)"
+    ],
+    "Directory Operations": [
+      "อ่าน directories ด้วย os.ReadDir (คืนค่า []os.DirEntry ที่เรียงลำดับ) เดิน directory trees ด้วย filepath.Walk หรือ filepath.WalkDir",
+      "entries, err := os.ReadDir(\".\")\nfor _, e := range entries {\n\tfmt.Println(e.Name(), e.IsDir())\n}\n\n// Walk directory tree\nfilepath.WalkDir(\".\", func(path string, d fs.DirEntry, err error) error {\n\tfmt.Println(path)\n\treturn nil\n})"
+    ]
+  },
+  "Testing": {
+    "Test Functions": [
+      "เขียน tests ในไฟล์ *_test.go Test functions ตามรูปแบบ func TestXxx(t *testing.T) ใช้ t.Error/t.Fatal สำหรับ failures รันด้วย go test",
+      "func TestAdd(t *testing.T) {\n\tresult := Add(2, 3)\n\tif result != 5 {\n\t\tt.Errorf(\"Expected 5, got %d\", result)\n\t}\n}\n\n// go test .\n// go test -v .  (verbose)"
+    ],
+    "Table-Driven Tests": [
+      "กำหนด test cases เป็น slice ของ structs วนซ้ำเพื่อ tests ที่สะอาดและ DRY ครอบคลุมหลาย inputs แต่ละ case สามารถมีชื่อสำหรับ output ที่ชัดเจน",
+      "cases := []struct {\n\tname string\n\ta, b int\n\twant int\n}{\n\t{\"positive\", 2, 3, 6},\n\t{\"zero\", 0, 5, 0},\n\t{\"negative\", -2, 3, -6},\n}\nfor _, tc := range cases {\n\tgot := Multiply(tc.a, tc.b)\n\tif got != tc.want {\n\t\tt.Errorf(\"%s: got %d, want %d\", tc.name, got, tc.want)\n\t}\n}"
+    ],
+    "Subtests": [
+      "รัน subtests ด้วย t.Run(name, fn) สำหรับการจัดระเบียบ test แบบลำดับชั้น Subtests แชร์ setup/teardown และสามารถรันแบบเลือกได้",
+      "func TestMath(t *testing.T) {\n\tt.Run(\"add\", func(t *testing.T) {\n\t\tif Add(1, 2) != 3 {\n\t\t\tt.Fatal(\"wrong\")\n\t\t}\n\t})\n\tt.Run(\"multiply\", func(t *testing.T) {\n\t\tif Multiply(2, 3) != 6 {\n\t\t\tt.Fatal(\"wrong\")\n\t\t}\n\t})\n}\n// go test -run \"TestMath/add\"  (selective)"
+    ],
+    "Test Helpers": [
+      "Helper functions ใน tests ลด boilerplate เรียก t.Helper() เพื่อให้ failure line numbers ชี้ไปที่ caller",
+      "func setupDB(t *testing.T) *sql.DB {\n\tt.Helper()\n\tdb, err := sql.Open(\"sqlite3\", \":memory:\")\n\tif err != nil {\n\t\tt.Fatalf(\"setup failed: %v\", err)\n\t}\n\treturn db\n}\n\nfunc TestQuery(t *testing.T) {\n\tdb := setupDB(t) // failure points here, not inside setupDB\n\tdefer db.Close()\n\t// ...\n}"
+    ],
+    "Test Coverage": [
+      "Go มี built-in coverage รัน go test -cover เพื่อดูเปอร์เซ็นต์ go test -coverprofile=coverage.out สร้าง profile",
+      "# Run with coverage\n$ go test -cover ./...\n# Output: ok  myapp/mypkg  0.002s  coverage: 85.2% of statements\n\n# Generate HTML report\ngo test -coverprofile=coverage.out ./...\ngo tool cover -html=coverage.out -o coverage.html"
+    ],
+    "Fuzzing": [
+      "Go 1.18+ fuzzing สุ่มสร้าง inputs เพื่อหา bugs Fuzz test: func FuzzXxx(f *testing.F) seed ด้วย f.Add(), แล้ว f.Fuzz(targetFn)",
+      "func FuzzReverse(f *testing.F) {\n\t// Seed corpus\n\tf.Add(\"hello\")\n\tf.Add(\"世界\")\n\n\tf.Fuzz(func(t *testing.T, s string) {\n\t\trev := Reverse(s)\n\t\tdouble := Reverse(rev)\n\t\tif s != double {\n\t\t\tt.Errorf(\"round-trip: %q -> %q -> %q\", s, rev, double)\n\t\t}\n\t})\n}\n// go test -fuzz=FuzzReverse"
+    ],
+    "Benchmarks": [
+      "วัดประสิทธิภาพด้วย BenchmarkXxx(b *testing.B) b.N ถูกปรับโดย framework เพื่อ timing ที่เสถียร ใช้ b.ResetTimer() และ b.ReportAllocs()",
+      "func BenchmarkAdd(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t\tAdd(2, 3)\n\t}\n}\n\nfunc BenchmarkComplex(b *testing.B) {\n\tdata := prepareData()\n\tb.ResetTimer() // exclude setup time\n\tb.ReportAllocs() // report allocation stats\n\tfor i := 0; i < b.N; i++ {\n\t\tprocess(data)\n\t}\n}\n// go test -bench=. -benchmem"
+    ],
+    "Fuzzing with go test -fuzz": [
+      "Go 1.18+ fuzzing: `go test -fuzz` สุ่มสร้าง inputs เพื่อหา bugs กำหนดด้วย `func FuzzFoo(f *testing.F)` เพิ่ม seed corpus ผ่าน `f.Add()`",
+      "package main\n\nimport (\n\t\"testing\"\n\t\"unicode/utf8\"\n)\n\n// Function to fuzz\nfunc Reverse(s string) string {\n\t// Bug: doesn't handle multi-byte UTF-8 correctly\n\trunes := []byte(s)\n\tfor i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {\n\t\trunes[i], runes[j] = runes[j], runes[i]\n\t}\n\treturn string(runes)\n}\n\n// Correct version\nfunc ReverseCorrect(s string) string {\n\trunes := []rune(s)\n\tfor i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {\n\t\trunes[i], runes[j] = runes[j], runes[i]\n\t}\n\treturn string(runes)\n}\n\n// Fuzz test\nfunc FuzzReverse(f *testing.F) {\n\t// Seed corpus\n\tf.Add(\"Hello\")\n\tf.Add(\"世界\")\n\tf.Add(\"The quick brown fox\")\n\t\n\tf.Fuzz(func(t *testing.T, s string) {\n\t\t// Property: reversed twice should equal original\n\t\treversed := ReverseCorrect(s)\n\t\tdoubleReversed := ReverseCorrect(reversed)\n\t\t\n\t\tif s != doubleReversed {\n\t\t\tt.Errorf(\"Double reverse failed: %q -> %q -> %q\", s, reversed, doubleReversed)\n\t\t}\n\t\t\n\t\t// Property: must be valid UTF-8\n\t\tif !utf8.ValidString(reversed) {\n\t\t\tt.Errorf(\"Reverse produced invalid UTF-8: %q\", reversed)\n\t\t}\n\t})\n}\n\n// Run: go test -fuzz=FuzzReverse -fuzztime 30s\n// View crashes: ls testdata/fuzz/FuzzReverse/\n// Replay: go test -run=FuzzReverse/<hash>"
+    ]
+  },
+  "Standard Library": {
+    "fmt Package": [
+      "Formatted I/O ด้วย Print, Printf, Println, Sprintf, Fprintf Verbs: %v (value), %+v (พร้อม fields), %T (type), %d (int), %s (string)",
+      "fmt.Println(\"Hello\")\nfmt.Printf(\"Value: %d, Type: %T\\n\", 42, 42)\ns := fmt.Sprintf(\"hex: %x\", 255) // \"ff\"\nfmt.Fprintf(os.Stderr, \"error: %v\\n\", err)"
+    ],
+    "strings & strconv Packages": [
+      "strings: Contains, Split, Join, ToUpper, ToLower, Trim, Replace, Builder (การสร้าง string ที่มีประสิทธิภาพ) strconv: Atoi, Itoa, ParseBool, FormatFloat, ParseInt",
+      "s := \"hello world\"\nfmt.Println(strings.ToUpper(s))\nparts := strings.Split(s, \" \")\n\nn, _ := strconv.Atoi(\"42\")\ns2 := strconv.Itoa(42)\n\nvar b strings.Builder\nfor i := 0; i < 100; i++ {\n\tb.WriteString(\"a\")\n}\nfmt.Println(b.String())"
+    ],
+    "io Package": [
+      "Core I/O interfaces: io.Reader, io.Writer, io.Closer, io.Seeker Utility functions: io.Copy, io.ReadAll, io.MultiReader, io.TeeReader, io.LimitReader",
+      "var w io.Writer = os.Stdout\nfmt.Fprint(w, \"output\")\n\n// MultiReader chains readers\nr := io.MultiReader(strings.NewReader(\"a\"), strings.NewReader(\"b\"))\n\n// TeeReader mirrors reads to a writer\npr, pw := io.Pipe()\nio.Copy(os.Stdout, pr) // reads from pr"
+    ],
+    "encoding/json Package": [
+      "Marshal/Unmarshal Go values ไปยัง/จาก JSON Struct tags ควบคุม field names, omitempty ข้าม zero values ใช้ json.NewDecoder สำหรับ streaming JSON",
+      "type Person struct {\n\tName string `json:\"name\"`\n\tAge  int    `json:\"age,omitempty\"`\n}\n\n// Marshal\nb, _ := json.Marshal(Person{\"Alice\", 30})\nfmt.Println(string(b)) // {\"name\":\"Alice\",\"age\":30}\n\n// Unmarshal\nvar p Person\njson.Unmarshal(b, &p)\n\n// Streaming\njson.NewDecoder(r).Decode(&p)"
+    ],
+    "flag Package": [
+      "แยก command-line flags ด้วย flag package รองรับ -flag, -flag=x, --flag ชนิด: String, Int, Bool, Duration, Float64",
+      "var port = flag.Int(\"port\", 8080, \"port to listen on\")\nvar name = flag.String(\"name\", \"world\", \"greeting name\")\nvar verbose = flag.Bool(\"v\", false, \"verbose output\")\nflag.Parse()\n\nfmt.Printf(\"port=%d\\n\", *port)\n\n// Usage: ./app -port=9090 -name=Alice -v"
+    ],
+    "log Package": [
+      "การ log อย่างง่ายไปยัง stderr พร้อม timestamps log.Printf, log.Fatalf (เรียก os.Exit(1)), log.Panicf (เรียก panic) ใช้ log.New สำหรับ custom output",
+      "log.Println(\"starting server...\")\nlog.Printf(\"port=%d\", 8080)\n// log.Fatalf(\"fatal: %v\", err) // exits\n\n// Custom logger\nl := log.New(os.Stderr, \"MYAPP: \", log.Ldate|log.Ltime|log.Lshortfile)\nl.Println(\"custom formatted log\")"
+    ],
+    "os/exec Package": [
+      "รันคำสั่งภายนอก exec.Command(name, args...) cmd.Output() คืน stdout, cmd.CombinedOutput() คืนทั้งสอง",
+      "cmd := exec.Command(\"ls\", \"-la\")\nout, err := cmd.Output()\nif err != nil {\n\tlog.Fatal(err)\n}\nfmt.Println(string(out))\n\n// With pipes\ncmd.Stdin = strings.NewReader(\"input data\")\ncmd.Stdout = os.Stdout\ncmd.Stderr = os.Stderr\ncmd.Run()"
+    ],
+    "time Package": [
+      "เวลาและ duration ด้วยความแม่นยำ nanosecond Parse (เวลาอ้างอิง: Mon Jan 2 15:04:05 MST 2006) Timer/Ticker สำหรับ events",
+      "now := time.Now()\nfuture := now.Add(24 * time.Hour)\nfmt.Println(now.Format(\"2006-01-02\"))\n\nparsed, _ := time.Parse(\"2006-01-02\", \"2026-05-13\")\n\n// Ticker\nticker := time.NewTicker(time.Second)\ngo func() {\n\tfor range ticker.C {\n\t\tfmt.Println(\"tick\")\n\t}\n}()"
+    ],
+    "context Package": [
+      "Context ส่ง deadlines, cancellation signals, และ request-scoped values สร้างด้วย context.Background() หรือ context.TODO()",
+      "ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)\ndefer cancel()\n\ngo func(ctx context.Context) {\n\tselect {\n\tcase <-ctx.Done():\n\t\tfmt.Println(\"cancelled:\", ctx.Err())\n\tcase result := <-doWork():\n\t\tfmt.Println(result)\n\t}\n}(ctx)"
+    ],
+    "sync Package": [
+      "Synchronization primitives: Mutex, RWMutex, WaitGroup, Once, Cond, Pool, Map",
+      "var mu sync.Mutex\nvar counter int\n\nvar wg sync.WaitGroup\nfor i := 0; i < 10; i++ {\n\twg.Add(1)\n\tgo func() {\n\t\tdefer wg.Done()\n\t\tmu.Lock()\n\t\tcounter++\n\t\tmu.Unlock()\n\t}()\n}\nwg.Wait()\nfmt.Println(\"Counter:\", counter)"
+    ]
+  },
+  "Modules & Tooling": {
+    "Go Modules": [
+      "Go modules กำหนด dependencies และ versioning ของโปรเจกต์ go.mod ประกาศ module path และ requirements go.sum มี checksums สำหรับ reproducibility Cross-compilation: ตั้ง GOOS และ GOARCH",
+      "go mod init github.com/user/myapp\ngo get github.com/gorilla/mux@v1.8.0\ngo mod tidy   # cleans go.mod and go.sum\ngo mod vendor # copies deps to vendor/\ngo mod verify # verifies checksums\n\n// Cross-compilation\n// $ GOOS=linux GOARCH=amd64 go build -o app-linux\n// $ GOOS=darwin GOARCH=arm64 go build -o app-macos\n// $ GOOS=windows GOARCH=amd64 go build -o app.exe\n// $ go tool dist list  # list all targets"
+    ],
+    "Workspace Mode": [
+      "Go 1.18+ workspace mode (go.work) ให้คุณทำงานกับหลาย modules พร้อมกัน มีประโยชน์สำหรับการพัฒนาแบบ interdependent modules",
+      "go.work file:\ngo 1.22\n\nuse (\n\t./myapp\n\t./sharedlib\n\t./tools\n)\n\n# Commands\n$ go work init ./myapp ./sharedlib\n$ go work use ./newmod\n$ go work sync"
+    ],
+    "Build Tags": [
+      "Build tags (หรือ build constraints) คอมไพล์ไฟล์แบบมีเงื่อนไข วางที่ด้านบนของไฟล์: //go:build tag",
+      "//go:build linux\n\npackage main\nfunc getOS() string { return \"Linux\" }\n\n//go:build !linux\n\npackage main\nfunc getOS() string { return \"non-Linux\" }\n\n// Build: go build -tags \"debug\"\n//go:build debug\nvar DebugMode = true"
+    ],
+    "go generate": [
+      "go generate สแกน //go:generate directives เพื่อรัน tools อัตโนมัติ มักใช้สำหรับ code generation",
+      "//go:generate stringer -type=Pill\n//go:generate protoc --go_out=. proto/*.proto\n//go:generate mockgen -source=interface.go -destination=mocks.go\n\ntype Pill int\n\nconst (\n\tAspirin Pill = iota\n\tIbuprofen\n\tAcetaminophen\n)\n\n// Run: go generate ./..."
+    ],
+    "go tooling (vet, fmt, fix)": [
+      "go vet ตรวจหา constructs ที่น่าสงสัย go fmt จัดรูปแบบโค้ดเป็น canonical style go fix อัปเดต API usage เก่าเป็นเวอร์ชันใหม่",
+      "go vet ./...      # static analysis\n# Detects: unreachable code, wrong Printf args, etc.\n\ngo fmt ./...      # formats all files\n# Equivalent to: gofmt -l -w .\n\ngo fix ./...      # migrate deprecated APIs\ngo tool pprof     # CPU/memory profiling\ngo tool trace     # execution trace"
+    ],
+    "Dependency Management (go get)": [
+      "go get จัดการ dependencies ของ module เวอร์ชันล่าสุด: go get pkg@latest เวอร์ชันเฉพาะ: go get pkg@v1.2.3",
+      "go get github.com/gorilla/mux@latest\n# upgrades to latest tagged version\n\ngo get github.com/gorilla/mux@v1.8.0\n# specific version\n\ngo get -u ./...\n# upgrade all direct/indirect deps\n\ngo mod tidy\n# removes unused deps, adds missing"
+    ],
+    "Generics": [
+      "Go 1.18+ รองรับ type parameters สำหรับ functions และ types ใช้ constraints (interface with type sets) เพื่อจำกัด types ที่ยอมรับ",
+      "func Map[T any, U any](input []T, fn func(T) U) []U {\n\tresult := make([]U, len(input))\n\tfor i, v := range input {\n\t\tresult[i] = fn(v)\n\t}\n\treturn result\n}\n\n// Generic type with constraint\ntype Stack[T comparable] struct {\n\titems []T\n}\nfunc (s *Stack[T]) Push(v T) {\n\ts.items = append(s.items, v)\n}\n\nnums := []int{1, 2, 3}\ndoubled := Map(nums, func(n int) int { return n * 2 })\nfmt.Println(doubled)"
+    ],
+    "Workspace Mode (go.work)": [
+      "Go 1.18+ workspace mode: ใช้ `go.work` เพื่อทำงานกับหลาย modules พร้อมกัน `go work init ./mod1 ./mod2` สร้าง go.work",
+      "# go.work file\n\ngo 1.22\n\nuse (\n\t./app\n\t./shared-lib\n\t./cli-tool\n)\n\nreplace example.com/old => ./local-fork\n\n# Initialize workspace:\n# mkdir myworkspace && cd myworkspace\n# git clone git@github.com:user/app.git\n# git clone git@github.com:user/shared-lib.git\n# go work init ./app ./shared-lib\n# cd app && go build\n\n# Adding a module:\n# go work use ./new-module\n\n# Remove a module:\n# Remove it from the use block or delete go.work\n\n# Disable workspace temporarily:\n# GOWORK=off go build ./...\n\n# Sync dependencies across modules:\n# go work sync"
+    ]
+  },
+  "Networking": {
+    "HTTP Server (net/http)": [
+      "สร้าง HTTP servers ด้วย http.HandleFunc หรือ http.Handler interface http.ListenAndServe เริ่มเซิร์ฟเวอร์",
+      "http.HandleFunc(\"/hello\", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprintf(w, \"Hello, %s!\", r.URL.Query().Get(\"name\"))\n})\nhttp.HandleFunc(\"/api/data\", func(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(map[string]string{\"key\": \"value\"})\n})\nlog.Fatal(http.ListenAndServe(\":8080\", nil))"
+    ],
+    "HTTP Client": [
+      "http.Client พร้อม Get, Post, Do methods เคารพ context cancellation, ปิด response body เสมอ, ตั้ง timeouts",
+      "client := &http.Client{\n\tTimeout: 10 * time.Second,\n}\n\nresp, err := client.Get(\"https://api.example.com/data\")\nif err != nil {\n\tlog.Fatal(err)\n}\ndefer resp.Body.Close()\n\nbody, err := io.ReadAll(resp.Body)\nif err != nil {\n\tlog.Fatal(err)\n}\nfmt.Println(string(body))"
+    ],
+    "Routing & ServeMux (Go 1.22+)": [
+      "Go 1.22 ปรับปรุง default mux ด้วย method-based routing และ path parameters โดยใช้ {param} และ {param...} patterns",
+      "mux := http.NewServeMux()\nmux.HandleFunc(\"GET /users/{id}\", func(w http.ResponseWriter, r *http.Request) {\n\tid := r.PathValue(\"id\")\n\tfmt.Fprintf(w, \"user %s\", id)\n})\nmux.HandleFunc(\"POST /users\", createUser)\n\n// Wildcard\nmux.HandleFunc(\"/static/{path...}\", serveStatic)\n\nlog.Fatal(http.ListenAndServe(\":8080\", mux))"
+    ],
+    "Middleware Pattern": [
+      "Middleware ห่อ http.Handler เพื่อเพิ่ม cross-cutting concerns: logging, auth, recovery, rate limiting, CORS",
+      "func Logger(next http.Handler) http.Handler {\n\treturn http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tstart := time.Now()\n\t\tnext.ServeHTTP(w, r)\n\t\tlog.Printf(\"%s %s %s\", r.Method, r.URL.Path, time.Since(start))\n\t})\n}\n\nfunc Recovery(next http.Handler) http.Handler {\n\treturn http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tdefer func() {\n\t\t\tif err := recover(); err != nil {\n\t\t\t\thttp.Error(w, \"Internal Error\", 500)\n\t\t\t}\n\t\t}()\n\t\tnext.ServeHTTP(w, r)\n\t})\n}\n\n// Chain\nhttp.ListenAndServe(\":8080\", Logger(Recovery(mux)))"
+    ],
+    "Templates (html/template)": [
+      "html/template สร้าง HTML output ที่ปลอดภัยด้วยการ escaping แบบ context-aware อัตโนมัติ",
+      "// Template file: index.html\n// <h1>{{.Title}}</h1>\n// <ul>{{range .Items}}<li>{{.}}</li>{{end}}</ul>\n\ntmpl := template.Must(template.ParseFiles(\"index.html\"))\ndata := struct {\n\tTitle string\n\tItems []string\n}{\n\tTitle: \"Go Page\",\n\tItems: []string{\"A\", \"B\", \"C\"},\n}\n\nhttp.HandleFunc(\"/\", func(w http.ResponseWriter, r *http.Request) {\n\ttmpl.Execute(w, data)\n})"
+    ],
+    "TLS & HTTPS": [
+      "ใช้ http.ListenAndServeTLS เพื่อให้บริการ HTTPS สร้าง self-signed certs ด้วย crypto/tls หรือใช้ Let's Encrypt",
+      "// Generate cert: go run crypto/tls/generate_cert.go --host localhost\n\nmux := http.NewServeMux()\nmux.HandleFunc(\"/\", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprintf(w, \"Secure connection!\")\n})\n\nlog.Fatal(http.ListenAndServeTLS(\":443\", \"cert.pem\", \"key.pem\", mux))\n\n// HTTP to HTTPS redirect\nhttp.ListenAndServe(\":80\", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\thttp.Redirect(w, r, \"https://\"+r.Host+r.URL.String(), 301)\n}))"
+    ],
+    "TCP & UDP Sockets": [
+      "เครือข่ายระดับต่ำด้วย net.Dial (TCP/UDP) และ net.Listen สร้าง custom protocols ใช้ bufio สำหรับ line-based protocols",
+      "// TCP echo server\nln, err := net.Listen(\"tcp\", \":8080\")\nif err != nil { log.Fatal(err) }\ndefer ln.Close()\n\nfor {\n\tconn, err := ln.Accept()\n\tif err != nil { continue }\n\tgo func(c net.Conn) {\n\t\tdefer c.Close()\n\t\tio.Copy(c, c) // echo back\n\t}(conn)\n}"
+    ]
+  },
+  "Database & SQL": {
+    "database/sql Interface": [
+      "database/sql ให้ generic SQL interface เปิดฐานข้อมูลด้วย sql.Open ใช้ sql.DB สำหรับ connection pooling รัน queries ด้วย Query, QueryRow, Exec",
+      "db, err := sql.Open(\"postgres\", \"host=localhost port=5432 user=app dbname=app sslmode=disable\")\nif err != nil {\n\tlog.Fatal(err)\n}\ndefer db.Close()\n\n// Ping to verify connection\nif err := db.Ping(); err != nil {\n\tlog.Fatal(err)\n}"
+    ],
+    "Querying (Query & QueryRow)": [
+      "Query คืนค่า *sql.Rows (cursor) วนซ้ำด้วย rows.Next() และ rows.Scan() QueryRow คืนค่าอย่างมากหนึ่งแถว",
+      "// Query multiple rows\nrows, err := db.Query(\"SELECT id, name FROM users WHERE active = $1\", true)\nif err != nil { log.Fatal(err) }\ndefer rows.Close()\n\nfor rows.Next() {\n\tvar id int\n\tvar name string\n\tif err := rows.Scan(&id, &name); err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tfmt.Println(id, name)\n}\nif err := rows.Err(); err != nil {\n\tlog.Fatal(err)\n}\n\n// Single row\nvar count int\nerr = db.QueryRow(\"SELECT COUNT(*) FROM users\").Scan(&count)"
+    ],
+    "Prepared Statements": [
+      "เตรียม statements ด้วย db.Prepare สำหรับ execution ซ้ำ ป้องกัน SQL injection และปรับปรุงประสิทธิภาพ",
+      "stmt, err := db.Prepare(\"INSERT INTO users(name, email) VALUES($1, $2)\")\nif err != nil { log.Fatal(err) }\ndefer stmt.Close()\n\n// Reuse\nstmt.Exec(\"Alice\", \"alice@example.com\")\nstmt.Exec(\"Bob\", \"bob@example.com\")\n\n// Or use Exec with args directly (implicit prepare)\ndb.Exec(\"INSERT INTO users(name) VALUES($1)\", name)"
+    ],
+    "Transactions": [
+      "ใช้ db.Begin() เพื่อเริ่ม transaction tx.Exec, tx.Query ภายใน transaction Commit หรือ Rollback",
+      "tx, err := db.Begin()\nif err != nil { log.Fatal(err) }\ndefer tx.Rollback() // no-op if committed\n\n_, err = tx.Exec(\"UPDATE accounts SET balance = balance - $1 WHERE id = $2\", 100, 1)\nif err != nil { return err }\n\n_, err = tx.Exec(\"UPDATE accounts SET balance = balance + $1 WHERE id = $2\", 100, 2)\nif err != nil { return err }\n\nif err := tx.Commit(); err != nil {\n\tlog.Fatal(err)\n}"
+    ],
+    "Connection Pooling": [
+      "sql.DB จัดการ connection pool กำหนดค่าด้วย SetMaxOpenConns, SetMaxIdleConns, SetConnMaxLifetime, SetConnMaxIdleTime",
+      "db, _ := sql.Open(\"postgres\", dsn)\n\n// Tune the pool\ndb.SetMaxOpenConns(25)   // max simultaneous connections\ndb.SetMaxIdleConns(5)    // keep 5 idle\ndb.SetConnMaxLifetime(5 * time.Minute)  // recycle connections\ndb.SetConnMaxIdleTime(1 * time.Minute)   // close idle connections\n\n// Ping checks a connection from the pool\nctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)\ndefer cancel()\ndb.PingContext(ctx)"
+    ],
+    "Migrations (golang-migrate)": [
+      "จัดการ schema changes ด้วย migration tools เช่น golang-migrate/migrate ไฟล์ Migration: 001_create_users.up.sql และ 001_create_users.down.sql",
+      "// Install: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest\n\n// Migration file: 001_create_users.up.sql\n// CREATE TABLE users (\n//     id SERIAL PRIMARY KEY,\n//     name VARCHAR(255) NOT NULL\n// );\n\n// Rollback: 001_create_users.down.sql\n// DROP TABLE IF EXISTS users;\n\n// Programmatic\nimport \"github.com/golang-migrate/migrate/v4\"\n\nm, err := migrate.New(\"file://migrations\", \"postgres://...\")\nm.Up()    // apply all up migrations\nm.Steps(2) // apply 2 migrations\nm.Down()   // rollback all"
+    ],
+    "Database Drivers": [
+      "ลงทะเบียน database drivers ผ่าน blank imports drivers ทั่วไป: lib/pq (PostgreSQL), go-sql-driver/mysql (MySQL)",
+      "import (\n\t_ \"github.com/lib/pq\"         // PostgreSQL driver\n\t_ \"github.com/go-sql-driver/mysql\" // MySQL driver\n\t_ \"github.com/mattn/go-sqlite3\"    // SQLite driver\n)\n\n// Opens PostgreSQL\ndb, _ := sql.Open(\"postgres\", dsn)\n// Opens MySQL\ndb, _ := sql.Open(\"mysql\", \"user:pass@tcp(host:3306)/db\")\n// Opens SQLite\ndb, _ := sql.Open(\"sqlite3\", \"./data.db\")"
+    ]
+  },
+  "Learning Go & Best Practices": {
+    "Go Design Philosophy": [
+      "การเรียนรู้ Go เน้นความเรียบง่าย: ไม่มี inheritance, ไม่มี generics (จนถึง 1.18), ไม่มี exceptions Go เลือก composition มากกว่า inheritance, explicit error handling, และ readability",
+      "// Composition over inheritance\ntype Reader interface { Read([]byte) (int, error) }\ntype Writer interface { Write([]byte) (int, error) }\n\n// Embedding promotes methods\ntype ReadWriter struct {\n\tReader\n\tWriter\n}\n\n// Explicit error handling (not exceptions)\nresult, err := doWork()\nif err != nil {\n\treturn fmt.Errorf(\"doWork: %w\", err)\n}"
+    ],
+    "nil & Zero Values Mental Model": [
+      "nil คือค่า ไม่ใช่ข้อผิดพลาด Nil slices มี len=0 และสามารถ append ได้ Nil maps คืนค่า zero values แต่ panic เมื่อ write",
+      "var s []int           // nil slice, len=0, append works\ns = append(s, 1)      // OK: makes new slice\nvar m map[string]int   // nil map, read returns zero\n_ = m[\"key\"]           // OK: returns 0\n// m[\"key\"] = 1       // PANIC: write to nil map\n\n// Nil interface trap\nvar buf *bytes.Buffer = nil\nvar w io.Writer = buf    // interface NOT nil (has type *bytes.Buffer)\nif w != nil { w.Write([]byte(\"hi\")) } // PANIC: nil deref\n\n// Zero value convention\ntype Counter struct{ n int } // zero value is ready to use\nfunc (c *Counter) Inc() { c.n++ }"
+    ],
+    "slog Structured Logging (Go 1.21+)": [
+      "slog ให้ structured, leveled logging พร้อม key-value pairs Levels: Debug, Info, Warn, Error ใช้ slog.New กับ JSONHandler หรือ TextHandler",
+      "import \"log/slog\"\n\n// Default logger (text)\nslog.Info(\"server starting\", \"port\", 8080, \"env\", \"production\")\n\n// JSON logger\nlogger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{\n\tLevel: slog.LevelDebug,\n\tAddSource: true,\n}))\nlogger.Debug(\"debug message\", \"key\", \"value\")\nlogger.Warn(\"rate limit\", \"ip\", \"10.0.0.1\", \"count\", 42)\nlogger.Error(\"db conn failed\", \"db\", \"users\", slog.Int(\"retry\", 3))\n\n// With: add context to all subsequent logs\nlogger = logger.With(\"service\", \"api\", \"version\", \"2.0\")\nlogger.Info(\"request\", \"path\", \"/users\")\n\n// Group\nslog.Info(\"request\", slog.Group(\"http\",\n\tslog.String(\"method\", \"GET\"),\n\tslog.Int(\"status\", 200),\n))"
+    ],
+    "errors.Join & Error Handling (Go 1.20+)": [
+      "errors.Join รวมหลาย errors เป็นอันเดียว มีประโยชน์สำหรับ batch validation และ deferred cleanup",
+      "func validate(user User) error {\n\tvar errs error\n\tif user.Name == \"\" {\n\t\terrs = errors.Join(errs, errors.New(\"name required\"))\n\t}\n\tif user.Age < 0 {\n\t\terrs = errors.Join(errs, errors.New(\"invalid age\"))\n\t}\n\tif user.Email == \"\" {\n\t\terrs = errors.Join(errs, errors.New(\"email required\"))\n\t}\n\treturn errs\n}\n\n// Go 1.20+: wrap multiple errors (experimental)\n// return fmt.Errorf(\"validate: %w; %w\", err1, err2)\n\n// errors.Is works through Join\nerr := validate(User{})\nif errors.Is(err, errors.New(\"name required\")) {\n\tfmt.Println(\"handle name error\")\n}"
+    ],
+    "maps & slices Packages (Go 1.21+)": [
+      "Standard library packages สำหรับ generic operations บน maps และ slices ไม่ต้องเขียน Contains, DeleteFunc, Filter เองอีกต่อไป",
+      "import (\n\t\"maps\"\n\t\"slices\"\n)\n\n// slices\nnames := []string{\"bob\", \"alice\", \"charlie\"}\nslices.Sort(names)                         // in-place sort\nslices.SortFunc(names, strings.Compare)    // custom comparator\nslices.Reverse(names)\nidx := slices.Index(names, \"bob\")          // find index\nfound := slices.Contains(names, \"alice\")    // contains check\nuniq := slices.Compact([]string{\"a\",\"a\",\"b\"}) // deduplicate adjacent\n\n// maps\nages := map[string]int{\"alice\": 30, \"bob\": 25}\nmaps.DeleteFunc(ages, func(k string, v int) bool { return v < 28 })\nkeys := maps.Keys(ages)    // slice of keys\nvals := maps.Values(ages)  // slice of values\nclone := maps.Clone(ages)"
+    ],
+    "Range over Iterators & func (Go 1.23+)": [
+      "Go 1.23 เพิ่ม range-over-iterator support ฟังก์ชันใดที่มี func(yield func(K, V) bool) สามารถ range ได้",
+      "package main\n\n// Backwards iterates over a slice in reverse\nfunc Backwards[E any](s []E) func(func(int, E) bool) {\n\treturn func(yield func(int, E) bool) {\n\t\tfor i := len(s) - 1; i >= 0; i-- {\n\t\t\tif !yield(i, s[i]) {\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n}\n\nfunc main() {\n\ts := []string{\"a\", \"b\", \"c\"}\n\tfor i, v := range Backwards(s) {\n\t\tfmt.Println(i, v)  // 2 c, 1 b, 0 a\n\t}\n}\n\n// Standard library iterator examples (Go 1.23+)\n// for k, v := range maps.All(m) { ... }"
+    ],
+    "Embedding (//go:embed)": [
+      "go:embed ฝังไฟล์เข้าไปใน binary ตอน compile time รองรับ files, directories, และ globs",
+      "import \"embed\"\n\n//go:embed static/index.html\nvar indexHTML string\n\n//go:embed static/*.css\nvar cssFiles embed.FS\n\n//go:embed config.toml\nvar configBytes []byte\n\nhttp.HandleFunc(\"/\", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprint(w, indexHTML)\n})\n\nhttp.Handle(\"/static/\", http.FileServer(http.FS(cssFiles)))\n\n// Use embedded config\nvar cfg Config\ntoml.Unmarshal(configBytes, &cfg)"
+    ],
+    "Race Detector & Data Races": [
+      "Go race detector จับ concurrent unsafe access รันด้วย -race flag",
+      "// Race example (detect with: go run -race .)\nvar counter int\nvar wg sync.WaitGroup\nfor i := 0; i < 1000; i++ {\n\twg.Add(1)\n\tgo func() {\n\t\tdefer wg.Done()\n\t\tcounter++  // RACE: unsynchronized write\n\t}()\n}\nwg.Wait()\n\n// Fix: use atomic or mutex\nvar atomicCounter atomic.Int64\nfor i := 0; i < 1000; i++ {\n\twg.Add(1)\n\tgo func() {\n\t\tdefer wg.Done()\n\t\tatomicCounter.Add(1)  // safe\n\t}()\n}\n\n// Run: go test -race ./...\n// Run: go build -race ."
+    ],
+    "Profiling & pprof": [
+      "Profiler ในตัวของ Go: CPU, memory, goroutine, mutex, block profiles ใช้ net/http/pprof สำหรับ web apps",
+      "import _ \"net/http/pprof\"\n\n// Web app: add pprof handlers\nhttp.HandleFunc(\"/debug/pprof/\", http.DefaultServeMux.ServeHTTP)\nlog.Fatal(http.ListenAndServe(\":8080\", nil))\n\n// Collect profiles:\n// go tool pprof http://localhost:8080/debug/pprof/profile?seconds=30\n// go tool pprof http://localhost:8080/debug/pprof/heap\n// go tool pprof http://localhost:8080/debug/pprof/goroutine\n\n// CLI profiling (in code)\nf, _ := os.Create(\"cpu.prof\")\npprof.StartCPUProfile(f)\ndefer pprof.StopCPUProfile()\n\n// Memory profile\nf, _ = os.Create(\"mem.prof\")\npprof.WriteHeapProfile(f)\nf.Close()"
+    ],
+    "sync/atomic (Go 1.19+ Typed API)": [
+      "Go 1.19+ เพิ่ม typed atomic values: atomic.Int64, atomic.Value, ฯลฯ zero value พร้อมใช้ ไม่ต้อง initialisation",
+      "var (\n\tcounter atomic.Int64\n\tloaded  atomic.Bool\n\tconfig  atomic.Pointer[Config]\n)\n\n// Counter\ncounter.Add(1)\nval := counter.Load()\ncounter.Store(42)\n\n// Bool\nloaded.Store(true)\nif loaded.Load() { fmt.Println(\"ready\") }\n\n// Pointer (atomic swap of config)\ncfg := &Config{Port: 8080}\nconfig.Store(cfg)\ncurrent := config.Load()\nfmt.Println(current.Port)\n\n// Swap + CompareAndSwap for lock-free algorithms\nold := config.Swap(&Config{Port: 9090})\nswapped := config.CompareAndSwap(old, &Config{Port: 3000})"
+    ]
+  },
+  "Ecosystem & Frameworks": {
+    "CLI Applications (Cobra)": [
+      "สร้าง CLI applications ที่ทรงพลังด้วย Cobra (spf13/cobra) ซึ่งเป็น framework ที่อยู่เบื้องหลัง kubectl, gh, และ hugo",
+      "import \"github.com/spf13/cobra\"\n\nvar rootCmd = &cobra.Command{\n\tUse:   \"app\",\n\tShort: \"My CLI application\",\n\tRun: func(cmd *cobra.Command, args []string) {\n\t\tfmt.Println(\"Hello from CLI\")\n\t},\n}\n\nvar verbose bool\nfunc init() {\n\trootCmd.PersistentFlags().BoolVarP(&verbose, \"verbose\", \"v\", false, \"verbose output\")\n}\n\nfunc main() {\n\trootCmd.Execute()\n}"
+    ],
+    "Web Frameworks (Gin, Echo)": [
+      "แม้ว่า net/http จะเพียงพอสำหรับหลายกรณี frameworks เช่น Gin และ Echo เพิ่ม routing, middleware chaining, request binding",
+      "// Gin example\nimport \"github.com/gin-gonic/gin\"\n\nr := gin.Default()\nr.GET(\"/api/users/:id\", func(c *gin.Context) {\n\tid := c.Param(\"id\")\n\tc.JSON(200, gin.H{\"user_id\": id})\n})\nr.POST(\"/api/users\", func(c *gin.Context) {\n\tvar user User\n\tif err := c.ShouldBindJSON(&user); err != nil {\n\t\tc.JSON(400, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\tc.JSON(201, user)\n})\nr.Run(\":8080\")"
+    ],
+    "gRPC & Protocol Buffers": [
+      "gRPC คือ RPC framework ประสิทธิภาพสูงที่ใช้ HTTP/2 และ Protocol Buffers สำหรับ serialization กำหนด services ใน .proto files",
+      "// Define in hello.proto\n// service Greeter {\n//   rpc SayHello (HelloRequest) returns (HelloReply);\n// }\n// message HelloRequest { string name = 1; }\n// message HelloReply { string message = 1; }\n\n// Generate: protoc --go_out=. --go-grpc_out=. hello.proto\n\n// Server\nimport \"google.golang.org/grpc\"\n\nlis, _ := net.Listen(\"tcp\", \":50051\")\ns := grpc.NewServer()\npb.RegisterGreeterServer(s, &server{})\ns.Serve(lis)\n\n// Client\nconn, _ := grpc.Dial(\"localhost:50051\", grpc.WithInsecure())\ndefer conn.Close()\nc := pb.NewGreeterClient(conn)\nresp, _ := c.SayHello(ctx, &pb.HelloRequest{Name: \"World\"})\nfmt.Println(resp.Message)"
+    ],
+    "Logging Libraries (Zap, Zerolog)": [
+      "สำหรับ structured logging ประสิทธิภาพสูง Zap และ Zerolog มี zero-allocation logging paths",
+      "import \"go.uber.org/zap\"\n\n// Production logger\nlogger, _ := zap.NewProduction()\ndefer logger.Sync()\n\nlogger.Info(\"server starting\",\n\tzap.String(\"host\", \"localhost\"),\n\tzap.Int(\"port\", 8080),\n)\n\n// Sugared logger (fmt-style)\nsugar := logger.Sugar()\nsugar.Infof(\"Listening on %s:%d\", \"localhost\", 8080)\n\n// Zerolog equivalent\n// import \"github.com/rs/zerolog/log\"\n// log.Info().Str(\"host\", \"localhost\").Int(\"port\", 8080).Msg(\"server starting\")"
+    ],
+    "Linters & Code Quality": [
+      "รักษาคุณภาพโค้ดด้วยเครื่องมืออัตโนมัติ golangci-lint รันหลาย linters พร้อมกัน staticcheck, revive, govet",
+      "// Install\n// go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest\n// go install golang.org/x/vuln/cmd/govulncheck@latest\n\n// Run linters\n// $ golangci-lint run ./...\n// $ staticcheck ./...\n// $ go vet ./...\n\n// .golangci.yml configuration\n// linters:\n//   enable:\n//     - errcheck\n//     - gosimple\n//     - govet\n//     - ineffassign\n//     - staticcheck\n//     - unused\n\n// Security check\n// $ govulncheck ./..."
+    ],
+    "TinyGo & WebAssembly": [
+      "TinyGo คอมไพล์ Go สำหรับ microcontrollers และ WebAssembly (WASM) subset ของ Go: ไม่มี reflect, goroutines จำกัด, maps จำกัด",
+      "// Blink LED — TinyGo on Raspberry Pi Pico\npackage main\n\nimport (\n\t\"machine\"\n\t\"time\"\n)\n\nfunc main() {\n\tled := machine.LED\n\tled.Configure(machine.PinConfig{Mode: machine.PinOutput})\n\t\n\tfor {\n\t\tled.High()\n\t\ttime.Sleep(time.Millisecond * 500)\n\t\tled.Low()\n\t\ttime.Sleep(time.Millisecond * 500)\n\t}\n}\n\n// WASM target: export functions\n//go:wasmexport add\nfunc add(a, b int32) int32 {\n\treturn a + b\n}\n\n// Build:\n// tinygo build -o blink.uf2 -target=raspberry-pi-pico ./main.go\n// tinygo build -o main.wasm -target=wasm ./main.go\n\n// Import from host\n//go:wasmimport env log\nfunc logMessage(ptr uintptr, size uint32)\n\n// Memory-safe approach\nfunc greet(name string) {\n\tmsg := \"Hello, \" + name + \"!\"\n\tptr := uintptr(unsafe.Pointer(&([]byte(msg)[0])))\n\tlogMessage(ptr, uint32(len(msg)))\n}"
+    ]
+  },
+  "Advanced Go": {
+    "Reflection": [
+      "reflect package ให้ตรวจสอบและจัดการ types และ values ใน runtime ใช้ reflect.TypeOf, reflect.ValueOf",
+      "import \"reflect\"\n\nvar x float64 = 3.14\nt := reflect.TypeOf(x)\nv := reflect.ValueOf(x)\n\nfmt.Println(t)        // float64\nfmt.Println(v.Float()) // 3.14\n\n// Inspect struct tags\ntype Config struct {\n\tPort int `json:\"port\" default:\"8080\"`\n}\n\nfield, _ := reflect.TypeOf(Config{}).FieldByName(\"Port\")\nfmt.Println(field.Tag.Get(\"json\"))    // \"port\"\nfmt.Println(field.Tag.Get(\"default\")) // \"8080\""
+    ],
+    "CGO Basics": [
+      "CGO ให้ Go เรียก C code โดยตรง ใช้ import \"C\" พร้อม comments พิเศษ CGO ต้องการ C compiler",
+      "// #include <math.h>\n// #include <stdlib.h>\nimport \"C\"\nimport \"unsafe\"\n\nfunc Sqrt(val float64) float64 {\n\treturn float64(C.sqrt(C.double(val)))\n}\n\nfunc StringLength(s string) C.int {\n\tcs := C.CString(s)\n\tdefer C.free(unsafe.Pointer(cs))\n\treturn C.strlen(cs)\n}\n\n// Build with CGO\n// $ CGO_ENABLED=1 go build\n// $ go build -tags=cgo\n\n// Cross-compile with CGO is HARD\n// $ CGO_ENABLED=0 GOOS=linux go build  # no CGO = easy"
+    ],
+    "Escape Analysis": [
+      "Escape analysis คือ optimization ของ compiler ที่ตัดสินว่าค่าสามารถ allocate บน stack (เร็ว) หรือต้องไป heap",
+      "// Check escape analysis:\n// $ go build -gcflags='-m' main.go\n// $ go build -gcflags='-m -l' main.go  # disable inlining\n\nfunc createUser() *User {\n\tu := User{Name: \"Alice\"}\n\treturn &u // u escapes to heap!\n}\n\nfunc createUserValue() User {\n\tu := User{Name: \"Bob\"}\n\treturn u // u stays on stack (value copy)\n}\n\n// Inline vs escape\nfunc sum(a, b int) int {\n\treturn a + b // inlined, no allocation\n}"
+    ],
+    "unsafe Package": [
+      "unsafe package ให้ low-level primitives สำหรับ bypassing type safety ของ Go",
+      "import \"unsafe\"\n\n// Size and offset of struct fields\ntype Data struct {\n\tX int64 // 8 bytes\n\tY bool  // 1 byte (+7 padding)\n}\n\nfmt.Println(unsafe.Sizeof(Data{}))     // 16 (with alignment)\nfmt.Println(unsafe.Offsetof(Data{}.Y)) // 8\n\n// Pointer arithmetic (careful!)\nvar arr [3]int32\nbase := unsafe.Pointer(&arr[0])\nsecond := (*int32)(unsafe.Pointer(uintptr(base) + unsafe.Sizeof(arr[0])))\n*second = 42\nfmt.Println(arr[1]) // 42\n\n// Converting between types\nvar f float64 = 3.14\nbits := *(*uint64)(unsafe.Pointer(&f))\nfmt.Printf(\"%016x\\n\", bits) // float64 bits as uint64"
+    ],
+    "Generics Deep: Constraints & Type Inference": [
+      "Go 1.18+ generics: type parameters ถูกจำกัดโดย interfaces Built-in: `comparable`, `any` Custom: `interface { ~int | ~string }`",
+      "package main\n\nimport (\n\t\"fmt\"\n\t\"golang.org/x/exp/constraints\"\n)\n\n// Type set constraint\ntype Numeric interface {\n\t~int | ~float64\n}\n\n// Generic function\nfunc Sum[T Numeric](s []T) T {\n\tvar total T\n\tfor _, v := range s {\n\t\ttotal += v\n\t}\n\treturn total\n}\n\n// Comparable constraint\nfunc Index[T comparable](s []T, v T) int {\n\tfor i, item := range s {\n\t\tif item == v {\n\t\t\treturn i\n\t\t}\n\t}\n\treturn -1\n}\n\n// Multi-type parameter\nfunc Map[T, U any](s []T, f func(T) U) []U {\n\tresult := make([]U, len(s))\n\tfor i, v := range s {\n\t\tresult[i] = f(v)\n\t}\n\treturn result\n}\n\n// Using constraints package\ntype Number interface {\n\tconstraints.Integer | constraints.Float\n}\n\nfunc Max[T Number](a, b T) T {\n\tif a > b { return a }\n\treturn b\n}\n\nfunc main() {\n\tints := []int{1, 2, 3, 4}\n\tfmt.Println(Sum(ints))  // 10\n\t\n\tfloats := []float64{1.5, 2.5, 3.0}\n\tfmt.Println(Sum(floats))  // 7.0\n\t\n\tfmt.Println(Index(ints, 3))  // 2\n\t\n\tdoubled := Map(ints, func(x int) int { return x * 2 })\n\tfmt.Println(doubled)  // [2 4 6 8]\n\t\n\tfmt.Println(Max(10, 20))  // 20\n}"
+    ]
+  },
+  "Deployment & DevOps": {
+    "Docker Multi-stage Builds": [
+      "ใช้ multi-stage Docker builds เพื่อสร้าง Go images ขนาดเล็ก Stage 1: build binary ด้วย golang:alpine Stage 2: คัดลอก binary ไปยัง scratch หรือ distroless",
+      "# Dockerfile\nFROM golang:1.22-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o /app/server .\n\nFROM scratch\nCOPY --from=builder /app/server /server\nEXPOSE 8080\nCMD [\"/server\"]\n\n# Build\n# $ docker build -t myapp .\n# $ docker run -p 8080:8080 myapp\n\n# With distroless\n# FROM gcr.io/distroless/base-debian12\n# COPY --from=builder /app/server /server"
+    ],
+    "Kubernetes Deployment": [
+      "ปรับใช้ Go services กับ Kubernetes ด้วย Deployments และ Services ใช้ liveness probes และ readiness probes",
+      "# deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: go-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: go-api\n  template:\n    metadata:\n      labels:\n        app: go-api\n    spec:\n      containers:\n      - name: api\n        image: myapp:latest\n        ports:\n        - containerPort: 8080\n        livenessProbe:\n          httpGet: { path: /healthz, port: 8080 }\n        readinessProbe:\n          httpGet: { path: /readyz, port: 8080 }\n        resources:\n          limits: { cpu: 500m, memory: 256Mi }\n          requests: { cpu: 100m, memory: 128Mi }\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: go-api\nspec:\n  selector:\n    app: go-api\n  ports:\n  - port: 80\n    targetPort: 8080\n\n# Deploy\n# $ kubectl apply -f deployment.yaml\n# $ kubectl get pods\n# $ kubectl rollout status deployment/go-api"
+    ]
+  }
+}

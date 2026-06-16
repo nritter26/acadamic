@@ -80,7 +80,13 @@ impl AppConfig {
 
         let content_dir = PathBuf::from(
             env::var("CONTENT_DIR").unwrap_or_else(|_| {
-                project_root.join("content").to_string_lossy().to_string()
+                let backend_content = project_root.join("backend").join("content");
+                let root_content = project_root.join("content");
+                if backend_content.exists() {
+                    backend_content.to_string_lossy().to_string()
+                } else {
+                    root_content.to_string_lossy().to_string()
+                }
             })
         );
 
@@ -149,7 +155,7 @@ impl AppConfig {
 }
 
 pub const RATE_WINDOW_MS: u64 = 60_000;
-pub const RATE_MAX: u32 = 30;
+pub const RATE_MAX: u32 = 10000;
 pub const REVIEW_INTERVALS: &[u32] = &[1, 3, 7, 14, 30];
 pub const MAX_CONCURRENT_EXEC: usize = 4;
 pub const EXEC_TIMEOUT_MS: u64 = 30_000;

@@ -17,6 +17,12 @@
       "exercises": []
     }
   },
+  "AR Foundation": {
+    "Augmented Reality": [
+      "AR Foundation provides a cross-platform AR framework for iOS (ARKit) and Android (ARCore). Key components: <code>ARSession</code> (manages AR lifecycle), <code>ARPlaneManager</code> (detects surfaces), <code>ARPointCloudManager</code> (feature points), <code>ARAnchorManager</code> (world anchors), and <code>ARRaycastManager</code> (hit testing). Place virtual objects on detected planes with <code>ARPlacementInteractable</code>.",
+      "using UnityEngine;\nusing UnityEngine.XR.ARFoundation;\nusing UnityEngine.XR.ARSubsystems;\n\npublic class ARController : MonoBehaviour\n{\n    public ARSession session;\n    public ARPlaneManager planeManager;\n    public ARRaycastManager raycastManager;\n    public GameObject placementPrefab;\n    private List<ARRaycastHit> hits = new List<ARRaycastHit>();\n\n    void Start()\n    {\n        // Check AR availability\n        if (ARSession.state == ARSessionState.None ||\n            ARSession.state == ARSessionState.CheckingAvailability)\n        {\n            StartCoroutine(CheckARSupport());\n        }\n\n        // Configure plane detection\n        planeManager.planeDetectionMode = PlaneDetectionMode.Horizontal;\n        planeManager.requestedDetectionMode = PlaneDetectionMode.Horizontal;\n    }\n\n    IEnumerator CheckARSupport()\n    {\n        yield return ARSession.CheckAvailability();\n        if (ARSession.state == ARSessionState.Unsupported)\n        {\n            Debug.LogError(\"AR not supported on this device\");\n        }\n    }\n\n    void Update()\n    {\n        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)\n        {\n            Vector2 touchPos = Input.GetTouch(0).position;\n\n            if (raycastManager.Raycast(touchPos, hits, TrackableType.PlaneWithinPolygon))\n            {\n                Pose hitPose = hits[0].pose;\n                Instantiate(placementPrefab, hitPose.position, hitPose.rotation);\n            }\n        }\n    }\n\n    public void TogglePlaneDetection(bool enable)\n    {\n        planeManager.enabled = enable;\n        foreach (var plane in planeManager.trackables)\n            plane.gameObject.SetActive(enable);\n    }\n\n    public void ResetARSession()\n    {\n        session.Reset();\n    }\n\n    void OnEnable() => planeManager.planesChanged += OnPlanesChanged;\n    void OnDisable() => planeManager.planesChanged -= OnPlanesChanged;\n\n    void OnPlanesChanged(ARPlanesChangedEventArgs args)\n    {\n        foreach (var plane in args.added)\n            Debug.Log($\"Plane detected: {plane.trackableId}\");\n    }\n}"
+    ]
+  },
   "Components & UI": {
     "Unity Components": {
       "exp": "Building user interfaces with Unity.",
@@ -38,37 +44,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Unity Data": {
-      "exp": "Working with data and APIs in Unity.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Unity Testing": {
-      "exp": "Testing strategies for Unity.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Unity Deployment": {
-      "exp": "Deploying Unity applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Unity Best Practices": {
       "exp": "Best practices for Unity development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Unity Advanced": {
-      "exp": "Advanced Unity topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -157,12 +135,6 @@
       "using UnityEngine;\n\npublic class Player2D : MonoBehaviour\n{\n    public float speed = 5f;\n    public float jumpForce = 10f;\n    private Rigidbody2D rb;\n    private SpriteRenderer sprite;\n    private Animator anim;\n\n    void Start()\n    {\n        rb = GetComponent<Rigidbody2D>();\n        sprite = GetComponent<SpriteRenderer>();\n        anim = GetComponent<Animator>();\n\n        // Sorting layer via code\n        sprite.sortingLayerName = \"Characters\";\n        sprite.sortingOrder = 1;\n    }\n\n    void Update()\n    {\n        float move = Input.GetAxis(\"Horizontal\");\n        rb.velocity = new Vector2(move * speed, rb.velocity.y);\n\n        if (move > 0)\n            sprite.flipX = false;\n        else if (move < 0)\n            sprite.flipX = true;\n\n        if (Input.GetButtonDown(\"Jump\") && Mathf.Abs(rb.velocity.y) < 0.01f)\n            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);\n\n        anim.SetFloat(\"Speed\", Mathf.Abs(move));\n        anim.SetBool(\"Grounded\", Mathf.Abs(rb.velocity.y) < 0.01f);\n    }\n\n    void OnTriggerEnter2D(Collider2D other)\n    {\n        if (other.CompareTag(\"Coin\"))\n        {\n            Destroy(other.gameObject);\n            ScoreManager.Instance.AddCoin();\n        }\n    }\n\n    // CompositeCollider2D: attach to a parent with TilemapCollider2D\n    // SpriteShape: create terrain via SpriteShape Profile + Controller\n}"
     ]
   },
-  "Lighting & Reflections": {
-    "Lighting & Probes": [
-      "Unity lighting includes Directional (sun), Point (bulb), Spot (cone), and Area (rectangle) lights. Real-time vs baked lighting. Lightmapping: bake indirect lighting into lightmaps with Progressive Lightmapper. Reflection Probes capture environment reflections on metallic/glossy surfaces. Light Probe Groups provide indirect lighting on dynamic objects. Emission on materials contributes to baked lighting.",
-      "using UnityEngine;\n\npublic class LightingController : MonoBehaviour\n{\n    public Light directionalLight;\n    public ReflectionProbe probe;\n    public Material glowingMaterial;\n\n    void Start()\n    {\n        // Light properties\n        directionalLight.intensity = 1.2f;\n        directionalLight.color = Color.white;\n        directionalLight.shadowStrength = 0.8f;\n        directionalLight.shadowBias = 0.05f;\n\n        // Mixed mode: real-time direct + baked indirect\n        directionalLight.lightmapBakeType = LightmapBakeType.Mixed;\n    }\n\n    void Update()\n    {\n        // Rotate sun\n        directionalLight.transform.Rotate(Vector3.right, Time.deltaTime * 5f);\n    }\n\n    void BakeLighting()\n    {\n        // Trigger lightmap bake via code\n        Lightmapping.BakeAsync();\n    }\n\n    void UpdateReflectionProbe()\n    {\n        // Refresh probe at current position\n        probe.transform.position = Camera.main.transform.position;\n        probe.RenderProbe();\n    }\n\n    void SetupEmission()\n    {\n        // Emission contributes to baked GI\n        glowingMaterial.EnableKeyword(\"_EMISSION\");\n        glowingMaterial.SetColor(\"_EmissionColor\", Color.red * 2f);\n\n        // Light Probe Group: place probes in level for dynamic objects\n        // Create: GameObject > Light > Light Probe Group\n    }\n\n    void OnDrawGizmos()\n    {\n        // Visualize light cookies\n        Gizmos.DrawIcon(transform.position, \"Light Gizmo\", true);\n    }\n}"
-    ]
-  },
   "Audio Systems": {
     "AudioSources & Mixers": [
       "Unity's audio system uses <code>AudioSource</code> to play <code>AudioClip</code> assets. <code>AudioMixer</code> provides bus routing with groups (Master, Music, SFX, Voice) and effects (reverb, EQ, compression). Spatial Blend controls 2D vs 3D positioning. 3D audio uses distance attenuation curves and Doppler effect. <code>AudioReverbZone</code> creates realistic environment transitions.",
@@ -173,12 +145,6 @@
     "Intelligent Cameras": [
       "Cinemachine provides modular camera system with virtual cameras. <code>CinemachineVirtualCamera</code> defines camera behavior: <code>FramingTransposer</code> (follow), <code>FreeLook</code> (3rd person orbit), <code>BlendList</code> (cutscene sequences). Priority system blends between cameras. Noise (Perlin) adds screen shake. Dolly tracks animate cameras along paths. Aim components: Composer, GroupComposer, HardLookAt.",
       "using Cinemachine;\nusing UnityEngine;\n\npublic class CameraManager : MonoBehaviour\n{\n    public CinemachineVirtualCamera followCam;\n    public CinemachineVirtualCamera aimCam;\n    public CinemachineFreeLook freeLookCam;\n    public CinemachineDollyCart dollyCart;\n\n    void Start()\n    {\n        // Set follow target\n        followCam.Follow = GameObject.FindGameObjectWithTag(\"Player\").transform;\n        followCam.LookAt = followCam.Follow;\n\n        // Aim camera with composer\n        var composer = aimCam.GetCinemachineComponent<CinemachineComposer>();\n        composer.m_TrackedObjectOffset = new Vector3(0, 1.5f, 0);\n        composer.m_DeadZoneWidth = 0.1f;\n        composer.m_SoftZoneWidth = 0.6f;\n    }\n\n    public void SwitchCamera(CinemachineVirtualCamera cam)\n    {\n        // Cinemachine blends automatically based on priority\n        followCam.Priority = 0;\n        cam.Priority = 1;\n    }\n\n    public void ShakeCamera(float intensity, float duration)\n    {\n        var noise = followCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();\n        noise.m_AmplitudeGain = intensity;\n        Invoke(() => noise.m_AmplitudeGain = 0, duration);\n    }\n\n    public void PlayDollyPath(CinemachineTrackedDolly dolly, float speed)\n    {\n        // Dolly cart movement\n        dollyCart.m_Speed = speed;\n        dollyCart.m_Position = 0;\n        dollyCart.m_AutoDolly = false;\n    }\n\n    // FreeLook: 3rd person orbit camera\n    // Top/Bottom/Middle rigs control different height orbits\n}"
-    ]
-  },
-  "Object Pooling & Optimization": {
-    "Performance & Pooling": [
-      "Object pooling prevents GC spikes by reusing objects instead of instantiate/destroy. The Profiler window shows CPU/GPU/Rendering/Memory usage. Frame Debugger: Window > Analysis > Frame Debugger to inspect draw calls. Key optimizations: reduce draw calls (static batching, GPU instancing), LOD groups, occlusion culling, texture atlasing, and reducing material count.",
-      "using UnityEngine;\nusing System.Collections.Generic;\n\npublic class ObjectPool : MonoBehaviour\n{\n    public static ObjectPool Instance;\n    public GameObject bulletPrefab;\n    public int poolSize = 50;\n    private Queue<GameObject> pool = new Queue<GameObject>();\n\n    void Awake()\n    {\n        Instance = this;\n        for (int i = 0; i < poolSize; i++)\n        {\n            var obj = Instantiate(bulletPrefab);\n            obj.SetActive(false);\n            obj.transform.SetParent(transform);\n            pool.Enqueue(obj);\n        }\n    }\n\n    public GameObject Get()\n    {\n        if (pool.Count == 0)\n            pool.Enqueue(Instantiate(bulletPrefab));\n\n        var obj = pool.Dequeue();\n        obj.SetActive(true);\n        return obj;\n    }\n\n    public void Return(GameObject obj)\n    {\n        obj.SetActive(false);\n        pool.Enqueue(obj);\n    }\n\n    void Update()\n    {\n        // Profile markers\n        UnityEngine.Profiling.Profiler.BeginSample(\"HeavyUpdate\");\n        // ... heavy work ...\n        UnityEngine.Profiling.Profiler.EndSample();\n    }\n\n    void OptimizeDrawCalls()\n    {\n        // Static batching: mark objects as Static in inspector\n        // GPU instancing: enable in material inspector\n\n        // LOD Group\n        var lod = gameObject.AddComponent<LODGroup>();\n        var lods = new LOD[3];\n        lods[0] = new LOD(0.5f, GetComponent<Renderer>());\n        lod.SetLODs(lods);\n        lod.RecalculateBounds();\n    }\n\n    void OnDrawGizmos()\n    {\n        // Verify occlusion culling in Occlusion Culling window\n        // Window > Rendering > Occlusion Culling\n    }\n}"
     ]
   },
   "Localization": {
@@ -193,10 +159,44 @@
       "using UnityEngine;\n\npublic class TerrainController : MonoBehaviour\n{\n    public Terrain terrain;\n    public TerrainData terrainData;\n    public Material terrainMaterial;\n\n    void Start()\n    {\n        terrain = GetComponent<Terrain>();\n        terrainData = terrain.terrainData;\n\n        // Terrain settings\n        terrain.heightmapPixelError = 5;\n        terrain.basemapDistance = 500;\n        terrain.detailObjectDensity = 0.5f;\n        terrain.treeDistance = 500;\n\n        // Add tree\n        var tree = new TreePrototype();\n        tree.prefab = treePrefab;\n        terrainData.treePrototypes = new TreePrototype[] { tree };\n\n        // Place trees\n        var instances = new TreeInstance[10];\n        for (int i = 0; i < 10; i++)\n        {\n            instances[i] = new TreeInstance\n            {\n                position = new Vector3(Random.Range(0f, 1f), 0, Random.Range(0f, 1f)),\n                widthScale = Random.Range(0.8f, 1.2f),\n                heightScale = Random.Range(0.8f, 1.2f),\n                prototypeIndex = 0\n            };\n        }\n        terrainData.treeInstances = instances;\n\n        // Paint terrain texture\n        var splat = new SplatPrototype[1];\n        splat[0] = new SplatPrototype\n        {\n            texture = groundTexture,\n            tileSize = new Vector2(10, 10)\n        };\n        terrainData.splatPrototypes = splat;\n\n        // Modify height\n        float[,] heights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);\n        for (int x = 0; x < terrainData.heightmapResolution; x++)\n            for (int y = 0; y < terrainData.heightmapResolution; y++)\n                heights[x, y] = Mathf.PerlinNoise(x * 0.01f, y * 0.01f) * 0.3f;\n        terrainData.SetHeights(0, 0, heights);\n    }\n\n    void OnDrawGizmosSelected()\n    {\n        // Show terrain bounds\n        Gizmos.DrawWireCube(terrain.transform.position + terrainData.bounds.center, terrainData.bounds.size);\n    }\n}"
     ]
   },
-  "AR Foundation": {
-    "Augmented Reality": [
-      "AR Foundation provides a cross-platform AR framework for iOS (ARKit) and Android (ARCore). Key components: <code>ARSession</code> (manages AR lifecycle), <code>ARPlaneManager</code> (detects surfaces), <code>ARPointCloudManager</code> (feature points), <code>ARAnchorManager</code> (world anchors), and <code>ARRaycastManager</code> (hit testing). Place virtual objects on detected planes with <code>ARPlacementInteractable</code>.",
-      "using UnityEngine;\nusing UnityEngine.XR.ARFoundation;\nusing UnityEngine.XR.ARSubsystems;\n\npublic class ARController : MonoBehaviour\n{\n    public ARSession session;\n    public ARPlaneManager planeManager;\n    public ARRaycastManager raycastManager;\n    public GameObject placementPrefab;\n    private List<ARRaycastHit> hits = new List<ARRaycastHit>();\n\n    void Start()\n    {\n        // Check AR availability\n        if (ARSession.state == ARSessionState.None ||\n            ARSession.state == ARSessionState.CheckingAvailability)\n        {\n            StartCoroutine(CheckARSupport());\n        }\n\n        // Configure plane detection\n        planeManager.planeDetectionMode = PlaneDetectionMode.Horizontal;\n        planeManager.requestedDetectionMode = PlaneDetectionMode.Horizontal;\n    }\n\n    IEnumerator CheckARSupport()\n    {\n        yield return ARSession.CheckAvailability();\n        if (ARSession.state == ARSessionState.Unsupported)\n        {\n            Debug.LogError(\"AR not supported on this device\");\n        }\n    }\n\n    void Update()\n    {\n        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)\n        {\n            Vector2 touchPos = Input.GetTouch(0).position;\n\n            if (raycastManager.Raycast(touchPos, hits, TrackableType.PlaneWithinPolygon))\n            {\n                Pose hitPose = hits[0].pose;\n                Instantiate(placementPrefab, hitPose.position, hitPose.rotation);\n            }\n        }\n    }\n\n    public void TogglePlaneDetection(bool enable)\n    {\n        planeManager.enabled = enable;\n        foreach (var plane in planeManager.trackables)\n            plane.gameObject.SetActive(enable);\n    }\n\n    public void ResetARSession()\n    {\n        session.Reset();\n    }\n\n    void OnEnable() => planeManager.planesChanged += OnPlanesChanged;\n    void OnDisable() => planeManager.planesChanged -= OnPlanesChanged;\n\n    void OnPlanesChanged(ARPlanesChangedEventArgs args)\n    {\n        foreach (var plane in args.added)\n            Debug.Log($\"Plane detected: {plane.trackableId}\");\n    }\n}"
+  "Testing": {
+    "Unity Testing": {
+      "exp": "Testing strategies for Unity.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Unity Data": {
+      "exp": "Working with data and APIs in Unity.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Lighting & Reflections": {
+    "Lighting & Probes": [
+      "Unity lighting includes Directional (sun), Point (bulb), Spot (cone), and Area (rectangle) lights. Real-time vs baked lighting. Lightmapping: bake indirect lighting into lightmaps with Progressive Lightmapper. Reflection Probes capture environment reflections on metallic/glossy surfaces. Light Probe Groups provide indirect lighting on dynamic objects. Emission on materials contributes to baked lighting.",
+      "using UnityEngine;\n\npublic class LightingController : MonoBehaviour\n{\n    public Light directionalLight;\n    public ReflectionProbe probe;\n    public Material glowingMaterial;\n\n    void Start()\n    {\n        // Light properties\n        directionalLight.intensity = 1.2f;\n        directionalLight.color = Color.white;\n        directionalLight.shadowStrength = 0.8f;\n        directionalLight.shadowBias = 0.05f;\n\n        // Mixed mode: real-time direct + baked indirect\n        directionalLight.lightmapBakeType = LightmapBakeType.Mixed;\n    }\n\n    void Update()\n    {\n        // Rotate sun\n        directionalLight.transform.Rotate(Vector3.right, Time.deltaTime * 5f);\n    }\n\n    void BakeLighting()\n    {\n        // Trigger lightmap bake via code\n        Lightmapping.BakeAsync();\n    }\n\n    void UpdateReflectionProbe()\n    {\n        // Refresh probe at current position\n        probe.transform.position = Camera.main.transform.position;\n        probe.RenderProbe();\n    }\n\n    void SetupEmission()\n    {\n        // Emission contributes to baked GI\n        glowingMaterial.EnableKeyword(\"_EMISSION\");\n        glowingMaterial.SetColor(\"_EmissionColor\", Color.red * 2f);\n\n        // Light Probe Group: place probes in level for dynamic objects\n        // Create: GameObject > Light > Light Probe Group\n    }\n\n    void OnDrawGizmos()\n    {\n        // Visualize light cookies\n        Gizmos.DrawIcon(transform.position, \"Light Gizmo\", true);\n    }\n}"
     ]
+  },
+  "Deployment": {
+    "Unity Deployment": {
+      "exp": "Deploying Unity applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Object Pooling & Optimization": {
+    "Performance & Pooling": [
+      "Object pooling prevents GC spikes by reusing objects instead of instantiate/destroy. The Profiler window shows CPU/GPU/Rendering/Memory usage. Frame Debugger: Window > Analysis > Frame Debugger to inspect draw calls. Key optimizations: reduce draw calls (static batching, GPU instancing), LOD groups, occlusion culling, texture atlasing, and reducing material count.",
+      "using UnityEngine;\nusing System.Collections.Generic;\n\npublic class ObjectPool : MonoBehaviour\n{\n    public static ObjectPool Instance;\n    public GameObject bulletPrefab;\n    public int poolSize = 50;\n    private Queue<GameObject> pool = new Queue<GameObject>();\n\n    void Awake()\n    {\n        Instance = this;\n        for (int i = 0; i < poolSize; i++)\n        {\n            var obj = Instantiate(bulletPrefab);\n            obj.SetActive(false);\n            obj.transform.SetParent(transform);\n            pool.Enqueue(obj);\n        }\n    }\n\n    public GameObject Get()\n    {\n        if (pool.Count == 0)\n            pool.Enqueue(Instantiate(bulletPrefab));\n\n        var obj = pool.Dequeue();\n        obj.SetActive(true);\n        return obj;\n    }\n\n    public void Return(GameObject obj)\n    {\n        obj.SetActive(false);\n        pool.Enqueue(obj);\n    }\n\n    void Update()\n    {\n        // Profile markers\n        UnityEngine.Profiling.Profiler.BeginSample(\"HeavyUpdate\");\n        // ... heavy work ...\n        UnityEngine.Profiling.Profiler.EndSample();\n    }\n\n    void OptimizeDrawCalls()\n    {\n        // Static batching: mark objects as Static in inspector\n        // GPU instancing: enable in material inspector\n\n        // LOD Group\n        var lod = gameObject.AddComponent<LODGroup>();\n        var lods = new LOD[3];\n        lods[0] = new LOD(0.5f, GetComponent<Renderer>());\n        lod.SetLODs(lods);\n        lod.RecalculateBounds();\n    }\n\n    void OnDrawGizmos()\n    {\n        // Verify occlusion culling in Occlusion Culling window\n        // Window > Rendering > Occlusion Culling\n    }\n}"
+    ]
+  },
+  "Advanced Topics": {
+    "Unity Advanced": {
+      "exp": "Advanced Unity topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   }
 }

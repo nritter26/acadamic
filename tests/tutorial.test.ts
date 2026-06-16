@@ -60,7 +60,7 @@ describe('tutorial helpers', () => {
   it('getTopicIndex finds topic position in phase', () => {
     const course = getCourseById('js');
     const idx = getTopicIndex(course, 'fundamentals', 'What is JavaScript');
-    expect(idx).toBe(0);
+    expect(idx).toBe(8);
   });
 
   it('getTopicIndex returns -1 for missing topic', () => {

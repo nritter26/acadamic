@@ -44,15 +44,15 @@
     }
   },
   "State Management": {
+    "setState": [
+      "setState is the simplest state management approach, notifying the framework to rebuild the widget tree when state changes inside StatefulWidget.",
+      "setState(() { _counter++; });"
+    ],
     "Flutter State": {
       "exp": "Managing application state in Flutter.",
       "code": "",
       "exercises": []
     },
-    "setState": [
-      "setState is the simplest state management approach, notifying the framework to rebuild the widget tree when state changes inside StatefulWidget.",
-      "setState(() { _counter++; });"
-    ],
     "Provider": [
       "Provider exposes values down the widget tree via InheritedWidget. It is the recommended simple state management solution for Flutter apps.",
       "Provider<Counter>(\n  create: (_) => Counter(),\n  child: Consumer<Counter>(\n    builder: (ctx, counter, _) => Text('${counter.value}')\n  )\n)"
@@ -66,49 +66,9 @@
       "class CounterCubit extends Cubit<int> {\n  void increment() => emit(state + 1);\n}"
     ]
   },
-  "Data & APIs": {
-    "Flutter Data": {
-      "exp": "Working with data and APIs in Flutter.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Flutter Testing": {
-      "exp": "Testing strategies for Flutter.",
-      "code": "",
-      "exercises": []
-    },
-    "Widget Testing": [
-      "Widget tests verify individual widget behavior using the flutter_test package. They run in a simulated environment without a real device.",
-      "void main() {\n  testWidgets('MyWidget shows message', (tester) async {\n    await tester.pumpWidget(MyWidget(message: 'Hello'));\n    expect(find.text('Hello'), findsOneWidget);\n  });\n}"
-    ],
-    "Unit Testing": [
-      "Unit tests test individual functions and classes in isolation. Use the test package with expect, group, and setUp for organized tests.",
-      "void main() {\n  group('Calculator', () {\n    test('adds two numbers', () {\n      expect(add(2, 3), equals(5));\n    });\n  });\n}"
-    ],
-    "Integration Testing": [
-      "Integration tests run on a real device or emulator, testing the full app flow from user interactions to UI changes.",
-      "void main() {\n  IntegrationTestWidgetsFlutterBinding.ensureInitialized();\n  testWidgets('complete login flow', (tester) async {\n    app.main();\n    await tester.pumpAndSettle();\n    await tester.enterText(find.byKey(Key('email')), 'user@test.com');\n    await tester.tap(find.text('Login'));\n    await tester.pumpAndSettle();\n    expect(find.text('Welcome'), findsOneWidget);\n  });\n}"
-    ]
-  },
-  "Deployment": {
-    "Flutter Deployment": {
-      "exp": "Deploying Flutter applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Flutter Best Practices": {
       "exp": "Best practices for Flutter development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Flutter Advanced": {
-      "exp": "Advanced Flutter topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -126,24 +86,16 @@
       "Stack overlays children on top of each other, positioning them with Positioned widget relative to the stack edges.",
       "Stack(\n  children: [\n    Container(color: Colors.blue),\n    Positioned(top: 10, left: 10, child: Text('Overlay'))\n  ]\n)"
     ],
-    "Container": [
-      "Container combines painting, positioning, and sizing widgets. It supports padding, margins, borders, background color, and constraints.",
-      "Container(\n  padding: EdgeInsets.all(16),\n  color: Colors.white,\n  child: Text('Content')\n)"
-    ],
     "Expanded & Flexible": [
       "Expanded forces a child to fill available space in a Row or Column. Flexible allows the child to be smaller than available space if needed.",
       "Row(children: [\n  Expanded(flex: 2, child: Container(color: Colors.red)),\n  Expanded(flex: 1, child: Container(color: Colors.blue)),\n])"
+    ],
+    "Container": [
+      "Container combines painting, positioning, and sizing widgets. It supports padding, margins, borders, background color, and constraints.",
+      "Container(\n  padding: EdgeInsets.all(16),\n  color: Colors.white,\n  child: Text('Content')\n)"
     ]
   },
   "Animations": {
-    "AnimatedContainer": [
-      "AnimatedContainer automatically animates changes to its properties like color, size, padding, and border radius over a specified duration.",
-      "AnimatedContainer(\n  duration: Duration(milliseconds: 300),\n  color: isActive ? Colors.blue : Colors.grey,\n  width: isActive ? 200 : 100,\n  child: Text('Animate'),\n)"
-    ],
-    "TweenAnimationBuilder": [
-      "TweenAnimationBuilder animates a value from a start to end point using a curve. It rebuilds the widget tree on each frame during the animation.",
-      "TweenAnimationBuilder<double>(\n  tween: Tween(begin: 0, end: 1),\n  duration: Duration(seconds: 2),\n  builder: (context, value, child) => Opacity(opacity: value, child: child),\n  child: Text('Fade in'),\n)"
-    ],
     "Hero": [
       "Hero animates a widget from one screen to another during navigation. Both screens must have a Hero widget with the same tag for the shared transition.",
       "// Screen 1\nHero(tag: 'profile', child: CircleAvatar(radius: 50))\n\n// Screen 2\nHero(tag: 'profile', child: CircleAvatar(radius: 100))"
@@ -151,16 +103,14 @@
     "CustomPainter": [
       "CustomPainter lets you draw custom graphics using a Canvas API with Paint objects. It's essential for charts, signatures, and complex visual effects.",
       "class MyPainter extends CustomPainter {\n  @override\n  void paint(Canvas canvas, Size size) {\n    final paint = Paint()\n      ..color = Colors.blue\n      ..style = PaintingStyle.fill;\n    canvas.drawCircle(Offset(100, 100), 50, paint);\n  }\n  \n  @override\n  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;\n}\n\n// Usage\nCustomPaint(painter: MyPainter(), size: Size(200, 200))"
-    ]
-  },
-  "Concurrency": {
-    "Isolates": [
-      "Isolates are independent workers that run Dart code in parallel with their own memory heap. Use compute() for simple parallel tasks or Isolate.spawn for complex ones.",
-      "import 'dart:isolate';\n\n// Simple parallel computation\nFuture<int> calculateHeavy() async {\n  return await Isolate.run(() {\n    var sum = 0;\n    for (var i = 0; i < 1000000; i++) sum += i;\n    return sum;\n  });\n}\n\n// Using compute helper (Flutter)\nimport 'package:flutter/foundation.dart';\nfinal result = await compute(heavyFunction, input);"
     ],
-    "Futures & Streams": [
-      "Futures represent single async values, while Streams represent sequences of async events. Both are core to Flutter's async programming model.",
-      "// Future\nFuture<String> fetchData() async {\n  final response = await http.get(Uri.parse('https://api.example.com'));\n  return response.body;\n}\n\n// Stream\nStream<int> countStream() async* {\n  for (var i = 0; i < 10; i++) {\n    await Future.delayed(Duration(seconds: 1));\n    yield i;\n  }\n}\n\n// StreamBuilder in UI\nStreamBuilder<int>(\n  stream: countStream(),\n  builder: (context, snapshot) => Text('${snapshot.data}'),\n)"
+    "TweenAnimationBuilder": [
+      "TweenAnimationBuilder animates a value from a start to end point using a curve. It rebuilds the widget tree on each frame during the animation.",
+      "TweenAnimationBuilder<double>(\n  tween: Tween(begin: 0, end: 1),\n  duration: Duration(seconds: 2),\n  builder: (context, value, child) => Opacity(opacity: value, child: child),\n  child: Text('Fade in'),\n)"
+    ],
+    "AnimatedContainer": [
+      "AnimatedContainer automatically animates changes to its properties like color, size, padding, and border radius over a specified duration.",
+      "AnimatedContainer(\n  duration: Duration(milliseconds: 300),\n  color: isActive ? Colors.blue : Colors.grey,\n  width: isActive ? 200 : 100,\n  child: Text('Animate'),\n)"
     ]
   },
   "Navigation": {
@@ -189,24 +139,6 @@
     "Validation": [
       "Form validation uses validator callbacks that return error strings or null. AutovalidateMode controls when validation triggers automatically.",
       "TextFormField(\n  autovalidateMode: AutovalidateMode.onUserInteraction,\n  validator: (v) => v!.length < 3 ? 'Too short' : null\n)"
-    ]
-  },
-  "Networking": {
-    "http": [
-      "The http package provides a simple, stream-based HTTP client for making REST API calls. It returns Response objects with status codes and bodies.",
-      "var response = await http.get(Uri.parse('https://api.example.com/data'));\nprint(response.body);"
-    ],
-    "dio": [
-      "Dio is a powerful HTTP client with interceptors, request cancellation, timeout handling, and file download/upload progress tracking.",
-      "final response = await Dio().get('https://api.example.com/users');\nprint(response.data);"
-    ],
-    "REST API": [
-      "REST APIs are consumed by mapping JSON responses to Dart models using fromJson/toJson methods. jsonDecode parses raw JSON strings.",
-      "final json = jsonDecode(response.body);\nfinal user = User.fromJson(json);"
-    ],
-    "GraphQL": [
-      "GraphQL queries request specific fields from the server, reducing over-fetching. The graphql_flutter package integrates with the widget tree.",
-      "final result = await client.query(QueryOptions(document: gql('{ users { name email } }')));"
     ]
   },
   "Storage": {
@@ -241,6 +173,39 @@
       "LayoutBuilder(\n  builder: (ctx, constraints) {\n    if (constraints.maxWidth > 600) return WideLayout();\n    else return NarrowLayout();\n  }\n)"
     ]
   },
+  "Firebase Integration": {
+    "Firebase Auth": [
+      "Firebase Authentication provides backend services for email/password, phone, OAuth (Google, Facebook, Apple), and anonymous auth in Flutter.",
+      "import 'package:firebase_auth/firebase_auth.dart';\n\nFuture<User?> signInWithGoogle() async {\n  final provider = GoogleAuthProvider();\n  final credential = await FirebaseAuth.instance.signInWithPopup(provider);\n  return credential.user;\n}"
+    ],
+    "Cloud Messaging": [
+      "Firebase Cloud Messaging (FCM) sends push notifications to Flutter apps. Supports notification messages, data messages, and topic-based subscriptions.",
+      "import 'package:firebase_messaging/firebase_messaging.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp();\n  \n  final messaging = FirebaseMessaging.instance;\n  final token = await messaging.getToken();\n  print('FCM token: $token');\n  \n  FirebaseMessaging.onMessage.listen((RemoteMessage message) {\n    print('Received: ${message.notification?.title}');\n  });\n}"
+    ],
+    "Firestore": [
+      "Cloud Firestore is a flexible, scalable NoSQL database for Flutter apps. It provides real-time listeners, offline support, and automatic data synchronization.",
+      "import 'package:cloud_firestore/cloud_firestore.dart';\n\nStream<List<User>> getUsers() {\n  return FirebaseFirestore.instance\n      .collection('users')\n      .snapshots()\n      .map((snapshot) => snapshot.docs.map((doc) => User.fromFirestore(doc)).toList());\n}"
+    ]
+  },
+  "Testing": {
+    "Flutter Testing": {
+      "exp": "Testing strategies for Flutter.",
+      "code": "",
+      "exercises": []
+    },
+    "Widget Testing": [
+      "Widget tests verify individual widget behavior using the flutter_test package. They run in a simulated environment without a real device.",
+      "void main() {\n  testWidgets('MyWidget shows message', (tester) async {\n    await tester.pumpWidget(MyWidget(message: 'Hello'));\n    expect(find.text('Hello'), findsOneWidget);\n  });\n}"
+    ],
+    "Unit Testing": [
+      "Unit tests test individual functions and classes in isolation. Use the test package with expect, group, and setUp for organized tests.",
+      "void main() {\n  group('Calculator', () {\n    test('adds two numbers', () {\n      expect(add(2, 3), equals(5));\n    });\n  });\n}"
+    ],
+    "Integration Testing": [
+      "Integration tests run on a real device or emulator, testing the full app flow from user interactions to UI changes.",
+      "void main() {\n  IntegrationTestWidgetsFlutterBinding.ensureInitialized();\n  testWidgets('complete login flow', (tester) async {\n    app.main();\n    await tester.pumpAndSettle();\n    await tester.enterText(find.byKey(Key('email')), 'user@test.com');\n    await tester.tap(find.text('Login'));\n    await tester.pumpAndSettle();\n    expect(find.text('Welcome'), findsOneWidget);\n  });\n}"
+    ]
+  },
   "DevTools & Debugging": {
     "Flutter DevTools": [
       "Flutter DevTools is a suite of debugging and profiling tools: widget inspector, timeline view, memory/CPU profiler, network logging, and app size analysis.",
@@ -251,18 +216,53 @@
       "// Enable performance overlay\nMaterialApp(showPerformanceOverlay: true)\n\n// Profile mode (CLI)\nflutter run --profile\n\n// Track rebuilds\nclass MyWidget extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    print('MyWidget rebuilt');\n    return Text('Hello');\n  }\n}"
     ]
   },
-  "Firebase Integration": {
-    "Firebase Auth": [
-      "Firebase Authentication provides backend services for email/password, phone, OAuth (Google, Facebook, Apple), and anonymous auth in Flutter.",
-      "import 'package:firebase_auth/firebase_auth.dart';\n\nFuture<User?> signInWithGoogle() async {\n  final provider = GoogleAuthProvider();\n  final credential = await FirebaseAuth.instance.signInWithPopup(provider);\n  return credential.user;\n}"
+  "Data & APIs": {
+    "Flutter Data": {
+      "exp": "Working with data and APIs in Flutter.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Networking": {
+    "dio": [
+      "Dio is a powerful HTTP client with interceptors, request cancellation, timeout handling, and file download/upload progress tracking.",
+      "final response = await Dio().get('https://api.example.com/users');\nprint(response.data);"
     ],
-    "Firestore": [
-      "Cloud Firestore is a flexible, scalable NoSQL database for Flutter apps. It provides real-time listeners, offline support, and automatic data synchronization.",
-      "import 'package:cloud_firestore/cloud_firestore.dart';\n\nStream<List<User>> getUsers() {\n  return FirebaseFirestore.instance\n      .collection('users')\n      .snapshots()\n      .map((snapshot) => snapshot.docs.map((doc) => User.fromFirestore(doc)).toList());\n}"
+    "GraphQL": [
+      "GraphQL queries request specific fields from the server, reducing over-fetching. The graphql_flutter package integrates with the widget tree.",
+      "final result = await client.query(QueryOptions(document: gql('{ users { name email } }')));"
     ],
-    "Cloud Messaging": [
-      "Firebase Cloud Messaging (FCM) sends push notifications to Flutter apps. Supports notification messages, data messages, and topic-based subscriptions.",
-      "import 'package:firebase_messaging/firebase_messaging.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp();\n  \n  final messaging = FirebaseMessaging.instance;\n  final token = await messaging.getToken();\n  print('FCM token: $token');\n  \n  FirebaseMessaging.onMessage.listen((RemoteMessage message) {\n    print('Received: ${message.notification?.title}');\n  });\n}"
+    "http": [
+      "The http package provides a simple, stream-based HTTP client for making REST API calls. It returns Response objects with status codes and bodies.",
+      "var response = await http.get(Uri.parse('https://api.example.com/data'));\nprint(response.body);"
+    ],
+    "REST API": [
+      "REST APIs are consumed by mapping JSON responses to Dart models using fromJson/toJson methods. jsonDecode parses raw JSON strings.",
+      "final json = jsonDecode(response.body);\nfinal user = User.fromJson(json);"
+    ]
+  },
+  "Deployment": {
+    "Flutter Deployment": {
+      "exp": "Deploying Flutter applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Flutter Advanced": {
+      "exp": "Advanced Flutter topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Concurrency": {
+    "Isolates": [
+      "Isolates are independent workers that run Dart code in parallel with their own memory heap. Use compute() for simple parallel tasks or Isolate.spawn for complex ones.",
+      "import 'dart:isolate';\n\n// Simple parallel computation\nFuture<int> calculateHeavy() async {\n  return await Isolate.run(() {\n    var sum = 0;\n    for (var i = 0; i < 1000000; i++) sum += i;\n    return sum;\n  });\n}\n\n// Using compute helper (Flutter)\nimport 'package:flutter/foundation.dart';\nfinal result = await compute(heavyFunction, input);"
+    ],
+    "Futures & Streams": [
+      "Futures represent single async values, while Streams represent sequences of async events. Both are core to Flutter's async programming model.",
+      "// Future\nFuture<String> fetchData() async {\n  final response = await http.get(Uri.parse('https://api.example.com'));\n  return response.body;\n}\n\n// Stream\nStream<int> countStream() async* {\n  for (var i = 0; i < 10; i++) {\n    await Future.delayed(Duration(seconds: 1));\n    yield i;\n  }\n}\n\n// StreamBuilder in UI\nStreamBuilder<int>(\n  stream: countStream(),\n  builder: (context, snapshot) => Text('${snapshot.data}'),\n)"
     ]
   },
   "Flutter State Management Deep Dive": {

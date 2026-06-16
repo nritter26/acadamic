@@ -50,9 +50,6 @@
   });
 
   onMount(() => {
-    // Apply saved language preference
-    applySavedLanguage();
-
     const handlers = {
       'toggle-kodex': () => showKodex = !showKodex,
       'toggle-lang': () => showLang = !showLang,
@@ -60,11 +57,14 @@
       'toggle-roadmap': () => showRoadmap = !showRoadmap,
       'toggle-game': () => showGame = !showGame,
       'toggle-schema': () => { app.mode = 'schema'; },
+      'language-changed': (e) => { curr.uiLang = e.detail.lang; },
       'close-all-modals': () => { showKodex = false; showLang = false; showCheatsheet = false; showRoadmap = false; showGame = false; },
     };
     for (const [event, handler] of Object.entries(handlers)) {
       window.addEventListener(event, handler);
     }
+    // Apply saved language preference (dispatches language-changed, caught above)
+    applySavedLanguage();
     return () => {
       for (const [event, handler] of Object.entries(handlers)) {
         window.removeEventListener(event, handler);

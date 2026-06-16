@@ -46,37 +46,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Bootstrap Data": {
-      "exp": "Working with data and APIs in Bootstrap.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Bootstrap Testing": {
-      "exp": "Testing strategies for Bootstrap.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Deployment": {
-    "Bootstrap Deployment": {
-      "exp": "Deploying Bootstrap applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Bootstrap Best Practices": {
       "exp": "Best practices for Bootstrap development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Bootstrap Advanced": {
-      "exp": "Advanced Bootstrap topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -92,6 +64,10 @@
     ]
   },
   "Components": {
+    "List Group & Badges": [
+      "List groups display series of content. Base .list-group with .list-group-item. Active, disabled, links, buttons, flush (borderless), numbered variants. Badges: .badge with .bg-{color}, .rounded-pill for pill shape. Position badges with position-relative + position-absolute. Badges scale to parent font size.",
+      "<ul class=\"list-group\">\n  <li class=\"list-group-item active\">Active item</li>\n  <li class=\"list-group-item disabled\">Disabled item</li>\n  <li class=\"list-group-item d-flex justify-content-between align-items-center\">\n    With badge\n    <span class=\"badge bg-primary rounded-pill\">14</span>\n  </li>\n</ul>\n\n<!-- Link list group -->\n<div class=\"list-group mt-3\">\n  <a href=\"#\" class=\"list-group-item list-group-item-action\">Link item</a>\n  <button class=\"list-group-item list-group-item-action\">Button item</button>\n</div>\n\n<!-- Badge alone -->\n<span class=\"badge bg-success\">Success</span>\n<span class=\"badge bg-warning text-dark\">Warning</span>"
+    ],
     "Buttons & Button Groups": [
       "Bootstrap buttons use .btn with contextual classes: btn-primary, btn-secondary, btn-success, btn-danger, btn-warning, btn-info, btn-light, btn-dark, btn-link. Outline variants with btn-outline-*. Sizes: btn-lg, btn-sm. States: active, disabled. Button groups with .btn-group for horizontal grouping, .btn-group-vertical for vertical. Toolbars combine multiple groups.",
       "<button type=\"button\" class=\"btn btn-primary\">Primary</button>\n<button type=\"button\" class=\"btn btn-outline-danger\">Danger Outline</button>\n<button type=\"button\" class=\"btn btn-success btn-lg\">Large Success</button>\n<button type=\"button\" class=\"btn btn-secondary btn-sm\" disabled>Disabled</button>\n\n<div class=\"btn-group\" role=\"group\">\n  <button class=\"btn btn-outline-primary\">Left</button>\n  <button class=\"btn btn-primary\">Middle</button>\n  <button class=\"btn btn-outline-primary\">Right</button>\n</div>"
@@ -107,10 +83,6 @@
     "Modals & Alerts": [
       "Modals are dialog boxes built with HTML, CSS, and JavaScript. Structure: modal, modal-dialog, modal-content (header + body + footer). Trigger with data-bs-toggle=modal and data-bs-target. Sizes: modal-sm, modal-lg, modal-xl. Centered with modal-dialog-centered. Scrollable with modal-dialog-scrollable. Alerts: .alert with .alert-{color}. Dismissible with .alert-dismissible + data-bs-dismiss=alert.",
       "<!-- Button trigger modal -->\n<button type=\"button\" class=\"btn btn-primary\"\n        data-bs-toggle=\"modal\" data-bs-target=\"#exampleModal\">\n  Launch demo modal\n</button>\n\n<!-- Modal -->\n<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <h5 class=\"modal-title\">Modal title</h5>\n        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n      </div>\n      <div class=\"modal-body\">Modal body text goes here.</div>\n      <div class=\"modal-footer\">\n        <button class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n        <button class=\"btn btn-primary\">Save changes</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Alert -->\n<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">\n  <strong>Error!</strong> Something went wrong.\n  <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>\n</div>"
-    ],
-    "List Group & Badges": [
-      "List groups display series of content. Base .list-group with .list-group-item. Active, disabled, links, buttons, flush (borderless), numbered variants. Badges: .badge with .bg-{color}, .rounded-pill for pill shape. Position badges with position-relative + position-absolute. Badges scale to parent font size.",
-      "<ul class=\"list-group\">\n  <li class=\"list-group-item active\">Active item</li>\n  <li class=\"list-group-item disabled\">Disabled item</li>\n  <li class=\"list-group-item d-flex justify-content-between align-items-center\">\n    With badge\n    <span class=\"badge bg-primary rounded-pill\">14</span>\n  </li>\n</ul>\n\n<!-- Link list group -->\n<div class=\"list-group mt-3\">\n  <a href=\"#\" class=\"list-group-item list-group-item-action\">Link item</a>\n  <button class=\"list-group-item list-group-item-action\">Button item</button>\n</div>\n\n<!-- Badge alone -->\n<span class=\"badge bg-success\">Success</span>\n<span class=\"badge bg-warning text-dark\">Warning</span>"
     ],
     "Forms & Input Groups": [
       "Form controls: .form-control (text, number, file, etc.), .form-select (dropdown), .form-check (checkboxes/radios), .form-range (sliders), .form-floating (floating labels). Input groups extend form controls with .input-group and .input-group-text. Validation with .is-valid/.is-invalid and .invalid-feedback/.valid-feedback. Layout with .row + .col-* and .form-label.",
@@ -206,6 +178,34 @@
       "ScrollSpy auto-activates nav links based on scroll position. Add data-bs-spy=\"scroll\" to the scrollable element with data-bs-target=\"#navId\". Works with nav, list-group, or simple links. Tab component toggles content panes: nav-tabs + tab-content with tab-pane. Active via show class. Fade with fade class. Methods: show, dispose. Events: show.bs.tab, shown.bs.tab.",
       "<!-- ScrollSpy -->\n<nav id=\"navbar-spy\" class=\"navbar navbar-light bg-light px-3 mb-3\">\n  <ul class=\"nav nav-pills\">\n    <li class=\"nav-item\"><a class=\"nav-link\" href=\"#section1\">Section 1</a></li>\n    <li class=\"nav-item\"><a class=\"nav-link\" href=\"#section2\">Section 2</a></li>\n  </ul>\n</nav>\n<div data-bs-spy=\"scroll\" data-bs-target=\"#navbar-spy\"\n     data-bs-offset=\"0\" tabindex=\"0\" style=\"height:200px;overflow-y:scroll\">\n  <h4 id=\"section1\">Section 1</h4>Content...\n\n  <h4 id=\"section2\">Section 2</h4>Content...\n\n</div>\n\n<!-- Tabs -->\n<ul class=\"nav nav-tabs\" id=\"myTab\">\n  <li class=\"nav-item\">\n    <button class=\"nav-link active\" data-bs-toggle=\"tab\" data-bs-target=\"#home\">Home</button>\n  </li>\n  <li class=\"nav-item\">\n    <button class=\"nav-link\" data-bs-toggle=\"tab\" data-bs-target=\"#profile\">Profile</button>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"myTabContent\">\n  <div class=\"tab-pane fade show active\" id=\"home\">Home content</div>\n  <div class=\"tab-pane fade\" id=\"profile\">Profile content</div>\n</div>"
     ]
+  },
+  "Testing": {
+    "Bootstrap Testing": {
+      "exp": "Testing strategies for Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Data & APIs": {
+    "Bootstrap Data": {
+      "exp": "Working with data and APIs in Bootstrap.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Bootstrap Deployment": {
+      "exp": "Deploying Bootstrap applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Bootstrap Advanced": {
+      "exp": "Advanced Bootstrap topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Helpers & Advanced": {
     "Sticky & Fixed Positioning": [

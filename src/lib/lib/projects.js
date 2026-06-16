@@ -2079,78 +2079,66 @@ export function groupProjectsByDifficulty(projects, filters = {}) {
   return grouped;
 }
 
-// Stream projects from NDJSON endpoint, calling onProject for each as it arrives
-// Returns the total count of projects from the response header
 export async function loadProjectCatalogStream(onProject, onComplete) {
+  // Try NDJSON streaming first (progressive load), fall back to bulk endpoint
   try {
     const response = await fetch('/api/content/projects', {
       headers: { 'Accept': 'application/x-ndjson' },
     });
-    if (!response.ok) throw new Error('Bulk stream failed');
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.includes('x-ndjson')) {
+      const total = parseInt(response.headers.get('X-Total-Projects') || '0', 10);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let loaded = 0;
 
-    const total = parseInt(response.headers.get('X-Total-Projects') || '0', 10);
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let loaded = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-      for (const line of lines) {
-        if (line.trim()) {
-          try {
-            const project = JSON.parse(line);
-            loaded++;
-            onProject(project, loaded, total);
-          } catch {
-            // Skip malformed lines
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const project = JSON.parse(line);
+              loaded++;
+              onProject(project, loaded, total);
+            } catch {
+              // Skip malformed lines
+            }
           }
         }
       }
+
+      onComplete(loaded, total);
+      return total;
     }
-
-    onComplete(loaded, total);
-    return total;
   } catch {
-    // Fall through to non-streaming loader
+    // NDJSON failed, fall through to bulk
   }
-  return -1;
-}
 
-export async function loadProjectCatalog(fetcher = fetch) {
-  // Try bulk endpoint first (much faster, avoids rate limiting)
+  // Fallback: load all projects via bulk JSON endpoint (single request, no rate-limit risk)
   try {
-    const bulkResponse = await fetcher('/api/content/projects');
+    const bulkResponse = await fetch('/api/content/projects');
     if (bulkResponse.ok) {
       const projects = await bulkResponse.json();
-      if (Array.isArray(projects) && projects.length > 0) {
-        return projects;
+      if (Array.isArray(projects)) {
+        const total = projects.length;
+        for (let i = 0; i < total; i++) {
+          onProject(projects[i], i + 1, total);
+        }
+        onComplete(total, total);
+        return total;
       }
     }
   } catch {
-    // Fall through to individual fetches
+    // Bulk also failed
   }
 
-  // Fallback: load individual projects with concurrency limit to avoid rate limiting
-  const loaded = [];
-  const CONCURRENCY = 5;
-  for (let i = 0; i < PROJECT_IDS.length; i += CONCURRENCY) {
-    const batch = PROJECT_IDS.slice(i, i + CONCURRENCY);
-    await Promise.all(batch.map(async (id) => {
-      try {
-        const response = await fetcher(`/api/content/projects/${id}`);
-        if (response.ok === false) return;
-        loaded.push(await response.json());
-      } catch {
-        // Missing project files should not break the route; the legacy app behaved the same way.
-      }
-    }));
-  }
-  return loaded.sort((a, b) => PROJECT_IDS.indexOf(a.id) - PROJECT_IDS.indexOf(b.id));
+  onComplete(0, 0);
+  return 0;
 }

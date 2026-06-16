@@ -9,13 +9,13 @@
       "Ruby on Rails (often just Rails) is a full-stack web application framework written in Ruby by David Heinemeier Hansson (DHH). It follows the Model-View-Controller (MVC) architectural pattern and emphasizes convention over configuration, DRY (Don't Repeat Yourself), and rapid development. Rails includes everything needed to build database-backed web applications: ORM (ActiveRecord), routing, templating, testing, asset pipeline, and more. First released in 2004, Rails popularized many modern web development practices.",
       "# Install Rails\ngem install rails\nrails --version\n\n# Create new app\nrails new myapp\ncd myapp\n\n# Generate scaffold (model + views + controller + migrations)\nrails generate scaffold Post title:string body:text\n\n# Run migrations\nrails db:migrate\n\n# Start server\nrails server\n# Visit http://localhost:3000/posts"
     ],
-    "MVC Architecture": [
-      "Rails follows the Model-View-Controller pattern. Models (ActiveRecord) handle data and business logic. Views (ActionView) render HTML/JSON templates. Controllers (ActionController) process requests, interact with models, and render views. The router maps URLs to controller actions. Additional layers: mailers, helpers, channels, jobs, libraries.",
-      "# Request lifecycle:\n# Browser -> Router -> Controller -> Model -> View -> Response\n\n# app/models/post.rb\nclass Post < ApplicationRecord\n  validates :title, presence: true\nend\n\n# app/controllers/posts_controller.rb\nclass PostsController < ApplicationController\n  def index\n    @posts = Post.all\n  end\n\n  def show\n    @post = Post.find(params[:id])\n  end\nend\n\n# app/views/posts/index.html.erb\n<h1>Posts</h1>\n<% @posts.each do |post| %>\n  <h2><%= post.title %></h2>\n<% end %>"
-    ],
     "Project Structure": [
       "A Rails project has a standardized directory structure. app/ contains models, views, controllers, helpers, jobs, mailers, channels. config/ has routes, database, environments. db/ holds migrations and schema. public/ serves static assets. test/ (or spec/) for tests. Gemfile lists dependencies. The rails command and Rake tasks handle most development operations.",
       "myapp/\n├── app/\n│   ├── controllers/    # Request handlers\n│   ├── models/         # Business logic & data\n│   ├── views/          # Templates (ERB, Haml, Slim)\n│   ├── helpers/        # View helper methods\n│   ├── jobs/           # Background jobs (ActiveJob)\n│   ├── mailers/        # Email sending\n│   └── channels/       # WebSocket (ActionCable)\n├── config/\n│   ├── routes.rb       # URL routing\n│   ├── database.yml    # Database config\n│   └── environments/   # dev, test, production\n├── db/\n│   └── migrate/        # Database migrations\n├── test/               # Tests (Minitest)\n├── Gemfile             # Dependencies\n├── Gemfile.lock        # Locked versions\n└── Rakefile            # Rake tasks"
+    ],
+    "MVC Architecture": [
+      "Rails follows the Model-View-Controller pattern. Models (ActiveRecord) handle data and business logic. Views (ActionView) render HTML/JSON templates. Controllers (ActionController) process requests, interact with models, and render views. The router maps URLs to controller actions. Additional layers: mailers, helpers, channels, jobs, libraries.",
+      "# Request lifecycle:\n# Browser -> Router -> Controller -> Model -> View -> Response\n\n# app/models/post.rb\nclass Post < ApplicationRecord\n  validates :title, presence: true\nend\n\n# app/controllers/posts_controller.rb\nclass PostsController < ApplicationController\n  def index\n    @posts = Post.all\n  end\n\n  def show\n    @post = Post.find(params[:id])\n  end\nend\n\n# app/views/posts/index.html.erb\n<h1>Posts</h1>\n<% @posts.each do |post| %>\n  <h2><%= post.title %></h2>\n<% end %>"
     ]
   },
   "Core Concepts": {
@@ -50,36 +50,9 @@
       "exercises": []
     }
   },
-  "Data & APIs": {
-    "Rails Data": {
-      "exp": "Working with data and APIs in Rails.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Testing": {
-    "Rails Testing": [
-      "Rails supports Minitest natively (test/ directory) and RSpec (via gem). Test types: unit tests (models), functional tests (controllers), integration tests (full stack), system tests (browser with Capybara). Fixtures and factories (FactoryBot) for test data. Assertions: assert_equal, assert_response, assert_redirected_to, assert_select, assert_difference.",
-      "# test/models/post_test.rb (Minitest)\nrequire \"test_helper\"\n\nclass PostTest < ActiveSupport::TestCase\n  test \"should not save without title\" do\n    post = Post.new\n    assert_not post.save, \"Saved without a title\"\n  end\n\n  test \"should have comments counter\" do\n    post = posts(:one)\n    assert_difference(\"post.comments.count\", 1) do\n      post.comments.create!(body: \"Nice!\", user: users(:alice))\n    end\n  end\nend\n\n# test/controllers/posts_controller_test.rb\nclass PostsControllerTest < ActionDispatch::IntegrationTest\n  setup do\n    @post = posts(:one)\n  end\n\n  test \"should get index\" do\n    get posts_url\n    assert_response :success\n  end\n\n  test \"should create post\" do\n    assert_difference(\"Post.count\") do\n      post posts_url, params: {\n        post: { title: \"Test\", body: \"Body\" }\n      }\n    end\n    assert_redirected_to post_path(Post.last)\n  end\nend\n\n# Run: rails test\n# Run: rails test:system"
-    ]
-  },
-  "Deployment": {
-    "Rails Deployment": {
-      "exp": "Deploying Rails applications.",
-      "code": "",
-      "exercises": []
-    }
-  },
   "Best Practices": {
     "Rails Best Practices": {
       "exp": "Best practices for Rails development.",
-      "code": "",
-      "exercises": []
-    }
-  },
-  "Advanced Topics": {
-    "Rails Advanced": {
-      "exp": "Advanced Rails topics and patterns.",
       "code": "",
       "exercises": []
     }
@@ -121,6 +94,33 @@
       "Rails form helpers generate HTML forms with CSRF protection, error handling, and correct field names. form_for / form_with (Rails 5.1+). form_with can work with models or URLs. Collection helpers: collection_select, collection_check_boxes. Date/time select helpers. Fields for nested attributes. Strong parameters integration.",
       "# Model-backed form with form_with\n<%= form_with model: @post, local: true do |f| %>\n  <% if @post.errors.any? %>\n    <div id=\"error_explanation\">\n      <h2><%= pluralize(@post.errors.count, \"error\") %></h2>\n      <ul>\n        <% @post.errors.full_messages.each do |msg| %>\n          <li><%= msg %></li>\n        <% end %>\n      </ul>\n    </div>\n  <% end %>\n\n  <div class=\"field\">\n    <%= f.label :title %>\n    <%= f.text_field :title %>\n  </div>\n\n  <div class=\"field\">\n    <%= f.label :body %>\n    <%= f.text_area :body, rows: 10 %>\n  </div>\n\n  <div class=\"field\">\n    <%= f.label :category_id %>\n    <%= f.collection_select :category_id, Category.all, :id, :name %>\n  </div>\n\n  <div class=\"actions\">\n    <%= f.submit %>\n  </div>\n<% end %>\n\n# Simple search form (no model)\n<%= form_with url: search_path, method: :get do |f| %>\n  <%= f.text_field :q, placeholder: \"Search...\" %>\n  <%= f.submit \"Search\" %>\n<% end %>"
     ]
+  },
+  "Testing": {
+    "Rails Testing": [
+      "Rails supports Minitest natively (test/ directory) and RSpec (via gem). Test types: unit tests (models), functional tests (controllers), integration tests (full stack), system tests (browser with Capybara). Fixtures and factories (FactoryBot) for test data. Assertions: assert_equal, assert_response, assert_redirected_to, assert_select, assert_difference.",
+      "# test/models/post_test.rb (Minitest)\nrequire \"test_helper\"\n\nclass PostTest < ActiveSupport::TestCase\n  test \"should not save without title\" do\n    post = Post.new\n    assert_not post.save, \"Saved without a title\"\n  end\n\n  test \"should have comments counter\" do\n    post = posts(:one)\n    assert_difference(\"post.comments.count\", 1) do\n      post.comments.create!(body: \"Nice!\", user: users(:alice))\n    end\n  end\nend\n\n# test/controllers/posts_controller_test.rb\nclass PostsControllerTest < ActionDispatch::IntegrationTest\n  setup do\n    @post = posts(:one)\n  end\n\n  test \"should get index\" do\n    get posts_url\n    assert_response :success\n  end\n\n  test \"should create post\" do\n    assert_difference(\"Post.count\") do\n      post posts_url, params: {\n        post: { title: \"Test\", body: \"Body\" }\n      }\n    end\n    assert_redirected_to post_path(Post.last)\n  end\nend\n\n# Run: rails test\n# Run: rails test:system"
+    ]
+  },
+  "Data & APIs": {
+    "Rails Data": {
+      "exp": "Working with data and APIs in Rails.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Deployment": {
+    "Rails Deployment": {
+      "exp": "Deploying Rails applications.",
+      "code": "",
+      "exercises": []
+    }
+  },
+  "Advanced Topics": {
+    "Rails Advanced": {
+      "exp": "Advanced Rails topics and patterns.",
+      "code": "",
+      "exercises": []
+    }
   },
   "Rails Advanced Patterns": {
     "Rails API Mode & GraphQL": [
