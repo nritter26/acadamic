@@ -108,6 +108,8 @@
   {/if}
 </div>
 
+<!-- AI evaluation provides contextual hints on wrong answers -->
+
 <style>
   .exercise-fill { margin: 8px 0; }
   .exercise-prompt { color: #e2e8f0; font-size: 14px; margin: 0 0 12px; line-height: 1.6; }
