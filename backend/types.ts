@@ -149,6 +149,21 @@ export const RecommendSchema = z.object({
 });
 export type RecommendInput = z.infer<typeof RecommendSchema>;
 
+export const CheckSchema = z.object({
+  lang: z.string().optional(),
+  code: z.string().min(1, 'Code is required'),
+});
+export type CheckInput = z.infer<typeof CheckSchema>;
+
+export const HintSchema = z.object({
+  topic: z.string().optional(),
+  lang: z.string().optional(),
+  code: z.string().optional(),
+  learnerId: z.string().optional(),
+  promptContext: z.string().optional(),
+});
+export type HintInput = z.infer<typeof HintSchema>;
+
 export const ReviewSchema = z.object({
   code: z.string().min(1),
   lang: z.string().optional(),
