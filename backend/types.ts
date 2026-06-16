@@ -155,6 +155,14 @@ export const CheckSchema = z.object({
 });
 export type CheckInput = z.infer<typeof CheckSchema>;
 
+export const ExplainErrorSchema = z.object({
+  code: z.string().min(1),
+  errorOutput: z.string().min(1),
+  lang: z.string().optional(),
+  topic: z.string().optional(),
+});
+export type ExplainErrorInput = z.infer<typeof ExplainErrorSchema>;
+
 export const HintSchema = z.object({
   topic: z.string().optional(),
   lang: z.string().optional(),

@@ -4,7 +4,7 @@ import { createSession, transitionState, getSession } from '../services/teaching
 import { searchWithSources } from '../ai/embeddings';
 import { getConceptMastery } from '../ai/learner';
 import { validate } from '../middleware';
-import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema } from '../types';
+import { ExplainTopicSchema, StartExerciseSchema, AttemptExerciseSchema, ExplainErrorSchema } from '../types';
 import { generateExercise } from '../ai/exercises';
 import { review as codeReview } from '../ai/reviewer';
 import { getNextRecommendedTopic, trackAttempt, trackError } from '../ai/learner';
@@ -166,6 +166,71 @@ Keep it conversational and encourage the student to try it themselves.`;
   res.write(`data: ${JSON.stringify({ type: 'explanation_end', topic, lang: useLang, phase: usePhase })}\n\n`);
   res.write('data: [DONE]\n\n');
   res.end();
+});
+
+router.post('/explain-error', validate(ExplainErrorSchema), async (req: Request, res: Response) => {
+  const { code, errorOutput, lang, topic } = req.body;
+  const useLang = lang || 'js';
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  let aborted = false;
+  let sseDoneCalled = false;
+  res.on('close', () => { aborted = true; });
+
+  const TIMEOUT_MS = 30000;
+  const timeoutHandle = setTimeout(() => {
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      res.write(`data: ${JSON.stringify({ content: "\n\n[TIMEOUT] Could not analyze error. Try asking Devin directly." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }, TIMEOUT_MS);
+
+  const systemPrompt = `You are a debug tutor. Explain what caused this error and how to fix it.
+Be specific about the line and the cause. Keep it clear and actionable for a student learning ${useLang}.`;
+
+  const messages: LLMMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: `The student is working on${topic ? ` "${topic}" in ${useLang}` : ` ${useLang}`}.
+Their code:
+\`\`\`${useLang}
+${code}
+\`\`\`
+The error output:
+\`\`\`
+${errorOutput}
+\`\`\`
+Explain what caused this error and how to fix it.` },
+  ];
+
+  const sseSend = (chunk: string) => {
+    if (aborted || sseDoneCalled) return;
+    res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+  };
+
+  try {
+    await askLLM(messages, sseSend, { lang: useLang, topic: topic || useLang });
+  } catch (e) {
+    console.error('[tutor] explain-error LLM error:', (e as Error).message);
+    if (!sseDoneCalled) {
+      sseDoneCalled = true;
+      clearTimeout(timeoutHandle);
+      res.write(`data: ${JSON.stringify({ content: "Sorry, I couldn't analyze the error right now." })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }
+
+  if (!sseDoneCalled && !aborted) {
+    sseDoneCalled = true;
+    clearTimeout(timeoutHandle);
+    res.write('data: [DONE]\n\n');
+    res.end();
+  }
 });
 
 router.post('/start-exercise', validate(StartExerciseSchema), async (req: Request, res: Response) => {
