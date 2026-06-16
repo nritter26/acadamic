@@ -7,17 +7,27 @@
   let curr = $derived(getCurriculumState());
   let hintRevealed = $state(false);
   let checkResult = $state(null);
+  let checking = $state(false);
 
   async function check() {
-    const res = await apiPost('/api/tutor/attempt-exercise', {
-      topic: curr.topic,
-      lang: curr.lang,
-      code: ai.editorCode,
-      learnerId: 'default',
-    });
-    checkResult = res;
-    if (res.passed) {
-      ai.sessionState = 'reviewing';
+    if (checking) return;
+    checking = true;
+    checkResult = null;
+    try {
+      const res = await apiPost('/api/tutor/attempt-exercise', {
+        topic: curr.topic,
+        lang: curr.lang,
+        code: ai.editorCode,
+        learnerId: 'default',
+      });
+      checkResult = res;
+      if (res.passed) {
+        ai.sessionState = 'reviewing';
+      }
+    } catch {
+      checkResult = { error: 'Check failed. Make sure the server is running.', score: 0, attempts: 0, passed: false };
+    } finally {
+      checking = false;
     }
   }
 
@@ -45,21 +55,28 @@
     {#if ai.exercise.starterCode && ai.exercise.starterCode !== '// Write your code here'}
       <pre class="ex-code">{ai.exercise.starterCode}</pre>
     {/if}
-    <button class="ex-btn" onclick={check}>Check my solution</button>
+    <button class="ex-btn" onclick={check} disabled={checking}>
+      {checking ? 'Checking...' : 'Check my solution'}
+    </button>
     {#if !hintRevealed}
       <button class="ex-hint-btn" onclick={() => hintRevealed = true}>Give me a hint</button>
     {:else if ai.exercise.hint}
       <div class="ex-hint">{ai.exercise.hint}</div>
     {/if}
     {#if checkResult}
-      <div class="ex-result">
+      <div class="ex-result" class:ex-passed={checkResult.passed} class:ex-failed={!checkResult.passed}>
         <div class="ex-score">Score: {checkResult.score ?? '?'}/10</div>
-        <div class="ex-attempts">Attempts: {checkResult.attempts}</div>
+        <div class="ex-attempts">Attempts: {checkResult.attempts}/3</div>
         {#if checkResult.hint}
           <div class="ex-hint">{checkResult.hint}</div>
         {/if}
         {#if checkResult.passed}
-          <div class="ex-passed">Great work! You've completed this exercise.</div>
+          <div class="ex-passed-msg">Great work! You've completed this exercise.</div>
+        {:else}
+          <div class="ex-failed-msg">Not quite. Try fixing the issues above and check again.</div>
+        {/if}
+        {#if checkResult.review}
+          <div class="ex-review">{checkResult.review}</div>
         {/if}
       </div>
     {/if}
@@ -75,8 +92,13 @@
   .ex-btn { padding: 6px 14px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; margin-right: 6px; }
   .ex-hint-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 6px; font-size: 11px; cursor: pointer; }
   .ex-hint { margin-top: 8px; padding: 8px; background: #1e293b; border-radius: 6px; font-size: 11px; color: #f59e0b; }
-  .ex-result { margin-top: 8px; padding: 8px; background: #1e293b; border-radius: 6px; font-size: 11px; color: #94a3b8; }
+  .ex-result { margin-top: 8px; padding: 8px; background: #1e293b; border-radius: 6px; font-size: 11px; color: #94a3b8; border: 1px solid transparent; }
   .ex-score { font-weight: 700; color: #e2e8f0; }
-  .ex-passed { margin-top: 6px; color: #22c55e; font-weight: 700; }
   .ex-attempts { color: #64748b; }
+  .ex-passed { border-color: #22c55e !important; }
+  .ex-failed { border-color: #ef4444 !important; }
+  .ex-passed-msg { margin-top: 6px; color: #22c55e; font-weight: 700; }
+  .ex-failed-msg { margin-top: 6px; color: #f59e0b; font-weight: 600; }
+  .ex-review { margin-top: 8px; padding: 8px; background: #0a0f1e; border-radius: 6px; font-size: 11px; color: #94a3b8; white-space: pre-wrap; }
+  .ex-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
