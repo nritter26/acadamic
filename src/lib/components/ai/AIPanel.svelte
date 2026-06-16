@@ -62,7 +62,8 @@
     }
 
     const cmdType = cmdName.slice(1);
-    let streamed = '';
+    const typeLabels = { async: 'Async/Await', 'error-handling': 'Error Handling', typescript: 'TypeScript', optimize: 'Optimization', document: 'Documentation', test: 'Tests', fix: 'Bug Fix' };
+    const label = typeLabels[cmdType] || cmdType;
     try {
       const r = await fetch('/api/tutor/transform', {
         method: 'POST',
@@ -73,7 +74,7 @@
       if (data.error) {
         ai.updateLastMessage(`Transformation failed: ${data.error}`);
       } else {
-        ai.updateLastMessage(`**${cmdName}**\n\n${data.explanation}\n\nTransformed code:\n\`\`\`\n${data.transformedCode}\n\`\`\``);
+        ai.updateLastMessage(`**${label}**\n\n${data.explanation}\n\nTransformed code:\n\`\`\`\n${data.transformedCode}\n\`\`\``);
       }
     } catch (e) {
       ai.updateLastMessage(`Error: ${e.message}`);
@@ -103,15 +104,19 @@
 
     showCommands = false;
     input = '';
-    ai.addMessage(message, 'user');
-    ai.addMessage('', 'bot');
-    ai.setStreaming(true);
 
     const cmd = getCommandMatch(message);
     if (cmd) {
+      ai.addMessage(message, 'user', 'transform');
+      ai.addMessage('', 'bot', 'transform');
+      ai.setStreaming(true);
       await handleTransformCommand(cmd.name);
       return;
     }
+
+    ai.addMessage(message, 'user');
+    ai.addMessage('', 'bot');
+    ai.setStreaming(true);
 
     let streamed = '';
     const body = { message, lang: curr.lang, topic: curr.topic, phase: curr.phase, code: ai.editorCode || undefined };
