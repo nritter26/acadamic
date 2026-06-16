@@ -84,6 +84,7 @@
           if (raw) {
             topicData = Array.isArray(raw) ? raw : [raw.exp, raw.code, raw.exercises];
             editableCode = topicData[1] || '';
+            loadRecommendations();
           } else {
             topicData = null;
           }
@@ -136,6 +137,23 @@
   }
 
   let showQuiz = $state(false);
+  let recommended = $state(null);
+  let recommendedLoading = $state(false);
+
+  async function loadRecommendations() {
+    if (recommended || recommendedLoading) return;
+    recommendedLoading = true;
+    try {
+      const r = await fetch(`/api/tutor/recommend?lang=${currentCourse?.lang || 'js'}&learnerId=default`);
+      const data = await r.json();
+      if (data && data.topic) recommended = data;
+      else recommended = { topic: null, reason: 'all-complete' };
+    } catch {
+      recommended = { topic: null, reason: 'unavailable' };
+    } finally {
+      recommendedLoading = false;
+    }
+  }
 
   function openQuiz() {
     if (currentCourse && currentPhase) {
@@ -262,6 +280,26 @@
         <ExerciseGroup exercises={topicData[2]} lang={currentCourse?.lang || 'js'} />
       {/if}
 
+      {#if recommended && recommended.topic}
+        <div class="recommended-section">
+          <h3 class="recommended-title">Recommended for You</h3>
+          <div class="recommended-card">
+            <div class="recommended-topic">{recommended.topic}</div>
+            {#if recommended.reason}
+              <p class="recommended-reason">{recommended.reason}</p>
+            {/if}
+            {#if recommended.weakAreas}
+              <div class="recommended-weak">
+                <span class="recommended-weak-label">Areas to review:</span>
+                {#each recommended.weakAreas as area}
+                  <span class="recommended-weak-tag">{area.topic}</span>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        </div>
+      {/if}
+
       <TutorialHelpButton topic={topicName} lang={currentCourse?.lang || 'js'} phase={currentPhase?.id || ''} />
 
       <div class="lesson-footer">
@@ -368,4 +406,12 @@
   .gamification-xp { color: #f97316; font-weight: 700; }
   .gamification-streak { color: #fbbf24; font-weight: 600; }
   .xp-toast { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #f97316, #fb923c); color: #fff; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 15px; box-shadow: 0 4px 16px rgba(249,115,22,0.3); z-index: 200; animation: fadeSlide 0.2s ease; pointer-events: none; }
+  .recommended-section { margin-top: 32px; padding: 24px; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px; background: rgba(15, 23, 42, 0.6); }
+  .recommended-title { font-size: 18px; font-weight: 800; color: #a5b4fc; margin: 0 0 16px; }
+  .recommended-card { display: flex; flex-direction: column; gap: 8px; }
+  .recommended-topic { font-size: 20px; font-weight: 700; color: #e2e8f0; }
+  .recommended-reason { font-size: 14px; color: #94a3b8; margin: 0; line-height: 1.5; }
+  .recommended-weak { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+  .recommended-weak-label { font-size: 12px; color: #64748b; font-weight: 600; }
+  .recommended-weak-tag { padding: 2px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; font-size: 11px; color: #f59e0b; }
 </style>
