@@ -15,6 +15,7 @@
   let offlineStatus = $state('⟳ Checking server...');
   let showCommands = $state(false);
   let selectedCmdIndex = $state(0);
+  let currentSuggestions = $state([]);
 
   const COMMANDS = [
     { name: '/async', desc: 'Convert to async/await' },
@@ -128,6 +129,10 @@
         : `Error: ${error}`;
       ai.updateLastMessage(msg);
       ai.setStreaming(false);
+    }, (event, data) => {
+      if (event === 'suggestions' && data?.suggestions) {
+        currentSuggestions = data.suggestions;
+      }
     });
   }
 
@@ -203,7 +208,7 @@
         <div class="typing">Devin is thinking...</div>
       {/if}
     </div>
-    <AISuggestions onsuggest={handleSuggest} />
+    <AISuggestions onsuggest={handleSuggest} suggestions={currentSuggestions} />
     <ExercisePrompt />
     {#if offlineStatus}
       <div class="ai-offline-badge">{offlineStatus}</div>
