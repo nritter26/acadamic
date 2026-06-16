@@ -1,7 +1,21 @@
 <script>
+  import { getAIState } from '$lib/stores/ai.svelte.js';
+
   let { onsuggest = () => {}, suggestions: dynamicSuggestions = [] } = $props();
-  const defaults = ['Explain this topic', 'Give me a hint', 'Review my code'];
-  let items = $derived(dynamicSuggestions.length > 0 ? dynamicSuggestions : defaults);
+
+  let ai = $derived(getAIState());
+
+  function getContextDefaults() {
+    const code = ai.editorCode || '';
+    if (!code.trim()) return ['Explain this topic', 'Give me a hint', 'Review my code'];
+    if (/error|exception|failed|panic|TypeError|SyntaxError|ReferenceError/i.test(code)) {
+      return ['Fix this error', 'Explain the bug', 'Review my code'];
+    }
+    if (code.length > 100) return ['Review my code', 'Optimize this', 'Add error handling', 'Document this'];
+    return ['Explain this topic', 'Give me a hint', 'Review my code'];
+  }
+
+  let items = $derived(dynamicSuggestions.length > 0 ? dynamicSuggestions : getContextDefaults());
 </script>
 
 {#if items.length > 0}
