@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { generateStructureReview } from '../ai/reviewer';
 
 const router = Router();
 
@@ -12,12 +13,9 @@ router.post('/', async (req: Request, res: Response) => {
 
   const useLang = (lang as string) || 'js';
 
-  res.json({
-    result: 'Check complete',
-    issues: [],
-    score: null,
-    source: 'static',
-  });
+  const { review, issues, score } = generateStructureReview(code, useLang);
+
+  res.json({ result: review, issues, score, source: 'static' });
 });
 
 export default router;

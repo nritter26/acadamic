@@ -145,7 +145,7 @@ function findLineIndex(lines: string[], matchIndex: number): number {
   return 0;
 }
 
-function analyzeStructure(code: string, _lang: string): ReviewIssue[] {
+export function analyzeStructure(code: string, _lang: string): ReviewIssue[] {
   const issues: ReviewIssue[] = [];
   const lines = code.split('\n');
 
@@ -194,7 +194,7 @@ function analyzeStructure(code: string, _lang: string): ReviewIssue[] {
   return issues;
 }
 
-function checkKeywordPatterns(code: string, lang: string): ReviewIssue[] {
+export function checkKeywordPatterns(code: string, lang: string): ReviewIssue[] {
   const issues: ReviewIssue[] = [];
   const patterns = KEYWORD_ISSUES[lang as LangKey];
   if (!patterns) return issues;
@@ -244,7 +244,7 @@ Overall score out of 10 based on: correctness, style, efficiency, edge cases.`;
   }
 }
 
-function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[]; score: number } {
+export function generateStructureReview(code: string, lang: string): { review: string; issues: ReviewIssue[]; score: number } {
   const lines = code.split('\n');
   const hasMain = /\bmain\b/i.test(code);
   const hasFunctions = /\b(function|=>|def\s+\w+|func\s+\w+)\s*\(/.test(code);
