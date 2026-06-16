@@ -1,9 +1,17 @@
 <script>
-  let { exercise, oncomplete = () => {} } = $props();
+  import { requestHint } from '$lib/lib/tutorial-ai.js';
+  import TutorialHelpButton from './TutorialHelpButton.svelte';
+
+  let { exercise, oncomplete = () => {}, lang = 'js' } = $props();
+  let topic = $derived(exercise.prompt?.split('\n')[0] || 'programming');
 
   let currentOrder = $state([...exercise.lines]);
   let answered = $state(false);
   let correct = $state(false);
+  let aiHint = $state('');
+  let aiHintLoading = $state(false);
+  let aiHintError = $state('');
+  let aiHintController = null;
 
   function shuffle(arr) {
     const a = [...arr];
@@ -18,6 +26,13 @@
     currentOrder = shuffle(exercise.lines);
     answered = false;
     correct = false;
+    aiHint = '';
+    aiHintLoading = false;
+    aiHintError = '';
+    return () => {
+      aiHintController?.abort();
+      aiHintController = null;
+    };
   });
 
   function moveUp(i) {
@@ -38,10 +53,25 @@
     if (answered) return;
     const expected = exercise.expected || exercise.lines;
     correct = currentOrder.every((line, i) => line === expected[i]);
-    answered = true;
     if (correct) {
+      answered = true;
       oncomplete();
+    } else {
+      requestAiHint();
     }
+  }
+
+  function requestAiHint() {
+    aiHintLoading = true;
+    const ac = new AbortController();
+    aiHintController = ac;
+    const promptText = `The user is reordering code lines. The correct order is: ${(exercise.expected || exercise.lines).join(' | ')}. Their order: ${currentOrder.join(' | ')}. Give a hint about what's wrong.`;
+    requestHint(topic, lang, currentOrder.join('\n'), promptText,
+      (hint) => { aiHint = hint; },
+      () => { aiHintLoading = false; },
+      (err) => { aiHintError = err; aiHintLoading = false; },
+      ac.signal
+    );
   }
 </script>
 
@@ -60,6 +90,13 @@
     {/each}
   </div>
   <button class="check-btn" disabled={answered} onclick={handleCheck}>Check Answer</button>
+  {#if !answered && aiHint}
+    <div class="ai-hint">&#128161; {aiHint}</div>
+  {:else if !answered && aiHintLoading}
+    <div class="ai-hint-loading">Analyzing order...</div>
+  {:else if !answered && aiHintError}
+    <div class="ai-hint-error">Hint unavailable: {aiHintError}</div>
+  {/if}
   {#if answered}
     <div class="feedback" class:correct class:wrong={!correct} aria-live="polite">
       {#if correct}
@@ -68,6 +105,14 @@
         <span class="feedback-icon">&#10007;</span> Wrong order
       {/if}
     </div>
+    {#if !correct}
+      <TutorialHelpButton
+        label="Ask Devin for help"
+        topic={topic}
+        lang={lang}
+        context="I got the code order wrong, can you help?"
+      />
+    {/if}
   {/if}
 </div>
 
@@ -90,4 +135,7 @@
   .feedback.correct { color: #22c55e; border: 1px solid #22c55e; }
   .feedback.wrong { color: #ef4444; border: 1px solid #ef4444; }
   .feedback-icon { margin-right: 4px; }
+  .ai-hint { margin-top: 8px; padding: 10px; background: #1e1b4b; border: 1px solid #4c1d95; border-radius: 6px; font-size: 12px; color: #c4b5fd; line-height: 1.5; font-weight: 400; }
+  .ai-hint-loading { margin-top: 8px; padding: 10px; font-size: 12px; color: #8b5cf6; font-style: italic; }
+  .ai-hint-error { margin-top: 8px; padding: 10px; background: #1e1b4b; border: 1px solid #ef4444; border-radius: 6px; font-size: 12px; color: #fca5a5; line-height: 1.5; font-weight: 400; }
 </style>
