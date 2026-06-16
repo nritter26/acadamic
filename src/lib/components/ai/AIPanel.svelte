@@ -6,6 +6,7 @@
   import AISettings from './AISettings.svelte';
   import AISuggestions from './AISuggestions.svelte';
   import ExercisePrompt from './ExercisePrompt.svelte';
+  import DiffView from './DiffView.svelte';
   import { slide } from 'svelte/transition';
 
   let ai = $derived(getAIState());
@@ -16,6 +17,7 @@
   let showCommands = $state(false);
   let selectedCmdIndex = $state(0);
   let currentSuggestions = $state([]);
+  let transformResult = $state(null);
 
   const COMMANDS = [
     { name: '/async', desc: 'Convert to async/await' },
@@ -71,10 +73,12 @@
         body: JSON.stringify({ code, lang: curr.lang, type: cmdType }),
       });
       const data = await r.json();
+      transformResult = null;
       if (data.error) {
         ai.updateLastMessage(`Transformation failed: ${data.error}`);
       } else {
-        ai.updateLastMessage(`**${label}**\n\n${data.explanation}\n\nTransformed code:\n\`\`\`\n${data.transformedCode}\n\`\`\``);
+        transformResult = { originalCode: code, transformedCode: data.transformedCode, explanation: data.explanation };
+        ai.updateLastMessage(`**${label}**\n\n${data.explanation}`);
       }
     } catch (e) {
       ai.updateLastMessage(`Error: ${e.message}`);
@@ -206,8 +210,14 @@
       </div>
     {/if}
     <div class="ai-messages" bind:this={messagesEl}>
-      {#each ai.messages as message (message.id)}
+      {#each ai.messages as message, i (message.id)}
         <AIMessage text={message.text} role={message.role} source={message.source || ''} />
+        {#if transformResult && i === ai.messages.length - 1 && message.role === 'bot'}
+          <DiffView originalCode={transformResult.originalCode} transformedCode={transformResult.transformedCode} />
+          <button class="apply-transform-btn" onclick={() => { ai.editorCode = transformResult.transformedCode; transformResult = null; }}>
+            Apply Changes
+          </button>
+        {/if}
       {/each}
       {#if ai.streaming}
         <div class="typing">Devin is thinking...</div>
@@ -285,4 +295,6 @@
   .cmd-item:hover { background: #334155; }
   .cmd-name { font-weight: 700; color: #6366f1; }
   .cmd-desc { color: #94a3b8; font-size: 10px; }
+  .apply-transform-btn { display: block; margin: 4px 12px 8px; padding: 6px 14px; background: #22c55e; color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .apply-transform-btn:hover { background: #16a34a; }
 </style>
