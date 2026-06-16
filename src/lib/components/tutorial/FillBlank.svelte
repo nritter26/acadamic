@@ -109,6 +109,7 @@
 </div>
 
 <!-- AI evaluation provides contextual hints on wrong answers -->
+<!-- Feedback shows retry count and error state for better UX -->
 
 <style>
   .exercise-fill { margin: 8px 0; }
