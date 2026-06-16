@@ -1,20 +1,20 @@
 import { apiStream } from './api.js';
 
-export function requestHint(topic, lang, code, prompt, onHint, onDone, onError, signal) {
+export function requestHint(topic, lang, code, promptContext, onHint, onDone, onError, signal) {
   let hint = '';
-  apiStream('/api/tutor/explain-topic', {
+  apiStream('/api/tutor/hint', {
     topic,
     lang,
     code,
     learnerId: 'default',
-    phase: 'exercise-hint',
+    promptContext,
   }, (chunk) => {
     if (signal?.aborted) return;
     hint += chunk;
     onHint?.(hint);
   }, () => {
     if (signal?.aborted) return;
-    onDone?.(hint);
+    onDone?.();
   }, (error) => {
     onError?.(error);
   }, signal);
