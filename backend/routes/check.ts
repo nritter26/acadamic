@@ -8,11 +8,6 @@ const router = Router();
 router.post('/', validate(CheckSchema), async (req: Request, res: Response) => {
   const { lang, code } = req.body;
 
-  if (!code || typeof code !== 'string') {
-    res.status(400).json({ error: 'Code is required' });
-    return;
-  }
-
   const useLang = (lang as string) || 'js';
 
   if (!code.trim()) {
@@ -20,9 +15,14 @@ router.post('/', validate(CheckSchema), async (req: Request, res: Response) => {
     return;
   }
 
-  const { review, issues, score } = generateStructureReview(code, useLang);
+  try {
+    const { review, issues, score } = generateStructureReview(code, useLang);
 
-  res.json({ result: review, issues, score, source: 'static' });
+    res.json({ result: review, issues, score, source: 'static' });
+  } catch (e) {
+    console.error('[check] error:', (e as Error).message);
+    res.status(500).json({ error: 'Check failed', result: 'Internal error.' });
+  }
 });
 
 export default router;
