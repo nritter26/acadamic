@@ -9,7 +9,37 @@
   let curr = $derived(getCurriculumState());
   let editor = $derived(getEditorState());
 
+  import { getAIState } from '$lib/stores/ai.svelte.js';
+  import { apiStream } from '$lib/lib/api.js';
+
   let activeTab = $state('output');
+
+  let ai = $derived(getAIState());
+
+  let explainErrorLoading = $state(false);
+
+  function handleExplainError() {
+    const errorText = exec.error || exec.output;
+    if (!errorText) return;
+    explainErrorLoading = true;
+    ai.togglePanel();
+    ai.toggleAI();
+    ai.addMessage(`Explain this error:\n\`\`\`\n${errorText}\n\`\`\``, 'user');
+    ai.addMessage('', 'bot');
+    ai.setStreaming(true);
+    let streamed = '';
+    apiStream('/api/tutor/explain-error', { code: editor.code || '', errorOutput: errorText, lang: curr.lang, topic: curr.topic }, (chunk) => {
+      streamed += chunk;
+      ai.updateLastMessage(streamed);
+    }, () => {
+      ai.setStreaming(false);
+      explainErrorLoading = false;
+    }, (error) => {
+      ai.updateLastMessage(`Error: ${error}`);
+      ai.setStreaming(false);
+      explainErrorLoading = false;
+    });
+  }
   let appData = $state(null);
 
   async function loadAppData() {
@@ -104,7 +134,15 @@
       <Tabs.Trigger value="api" class="text-[10px] font-semibold">API Response</Tabs.Trigger>
       <Tabs.Trigger value="compiler" class="text-[10px] font-semibold" onclick={() => { loadAppData(); compilerRunPipeline(-1); }}>Compiler</Tabs.Trigger>
     </Tabs.List>
-    <Tabs.Content value="output" class="flex-1 p-0">
+    <Tabs.Content value="output" class="flex-1 flex flex-col p-0">
+      <div class="output-toolbar">
+        {#if (exec.error || /error|exception|failed|panic/i.test(exec.output)) && !explainErrorLoading}
+          <button class="explain-error-btn" onclick={handleExplainError}>Explain Error</button>
+        {/if}
+        {#if explainErrorLoading}
+          <span class="explain-error-loading">Explaining error...</span>
+        {/if}
+      </div>
       <pre class="flex-1 m-0 p-3 font-mono text-xs leading-relaxed text-[#e2e8f0] overflow-auto whitespace-pre-wrap" class:has-error={exec.error}>{exec.error ? exec.error : exec.output || '// Run code to see output'}</pre>
     </Tabs.Content>
     <Tabs.Content value="api" class="flex-1 flex flex-col p-0">
@@ -165,4 +203,8 @@
   .compiler-html :global(.cp-stage-title) { margin: 8px 0 4px; font-size: 10px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; }
   .compiler-html :global(.cp-stage) { margin-bottom: 12px; }
   .compiler-html :global(.cp-empty) { color: #64748b; font-style: italic; }
+  .output-toolbar { display: flex; align-items: center; gap: 8px; padding: 4px 12px; border-bottom: 1px solid #1e293b; min-height: 28px; }
+  .explain-error-btn { background: #dc2626; color: #fff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; }
+  .explain-error-btn:hover { background: #b91c1c; }
+  .explain-error-loading { color: #f59e0b; font-size: 10px; font-weight: 600; }
 </style>
