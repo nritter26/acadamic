@@ -9,10 +9,10 @@ An interactive multi-language programming textbook, code playground, and compile
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-  - [Docker (Recommended — includes all runtimes)](#docker-recommended--includes-all-runtimes)
-  - [Node.js Backend (Direct)](#node-js-backend-direct)
-  - [Go Backend (Alternative)](#go-backend-alternative)
-  - [Svelte Frontend (Alternative)](#svelte-frontend-alternative)
+  - [Docker (Recommended)](#docker-recommended--includes-all-runtimes)
+  - [Rust Backend (Direct)](#rust-backend-direct)
+  - [Node.js Backend (Fallback)](#node-js-backend-fallback)
+  - [Svelte Frontend (Development)](#svelte-frontend-development)
 - [Ollama AI Setup](#ollama-ai-setup)
 - [AI Module Configuration](#ai-module-configuration)
 - [Environment Configuration](#environment-configuration)
@@ -105,22 +105,24 @@ Complete compiler curriculum: tokenization, AST, parsing, code generation, optim
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Svelte 5 + Tailwind CSS v4 + Shadcn-Svelte |
-| Backend (primary) | Rust (Axum) |
-| Backend (fallback) | Node.js (Express) |
-| Runtime | Node.js 18+, Go 1.22+ |
-| Database (SQL) | better-sqlite3 (built-in), optional pg + mysql2 |
-| AI | Hybrid keyword + tiny-LLM tutor (default), OpenAI, Anthropic, Google Gemini, local Ollama/LM Studio |
-| Code bundler | esbuild, tsc, Vite |
-| Deploy | Docker, Netlify (static + serverless functions) |
+| Frontend | Svelte 5 + SvelteKit + Tailwind CSS v4 + Shadcn-Svelte |
+| Frontend (legacy) | Vanilla JS (TypeScript-compiled) |
+| Backend (primary) | Rust (Axum 0.8, async, tokio) |
+| Backend (fallback) | Node.js (Express 4, TypeScript via tsx) |
+| Database (SQL) | SQLite (better-sqlite3 / rusqlite), optional PostgreSQL + MySQL |
+| AI | Hybrid keyword + Transformers.js (default, no API key), OpenAI, Anthropic, Google Gemini, local Ollama/LM Studio |
+| Code execution | 19 language runtimes via subprocess + Docker sandbox |
+| Code bundler | Vite 6 (Svelte), esbuild (AI data), tsc (TypeScript), Cargo (Rust) |
+| Deploy | Docker (+ Docker Compose), Netlify (serverless) |
+| Testing | Vitest (frontend/Node), Cargo test (Rust) |
 
 ---
 
 ## Prerequisites
 
-- **Node.js 18+** — [Download](https://nodejs.org/)
+- **Rust 1.80+** (for primary backend) — [Download](https://rustup.rs/)
+- **Node.js 18+** (for fallback backend & frontend build) — [Download](https://nodejs.org/)
 - **npm** (comes with Node.js)
-- **Go 1.22+** (optional, for Go backend) — [Download](https://go.dev/dl/)
 - **Docker** (optional, for containerized setup) — [Download](https://www.docker.com/products/docker-desktop/)
 - **Ollama** (optional, for local AI) — [Download](https://ollama.ai/download)
 - System compilers/interpreters for languages you want to execute (or use Docker)
@@ -131,7 +133,7 @@ Complete compiler curriculum: tokenization, AST, parsing, code generation, optim
 
 ### Docker (Recommended — includes all runtimes)
 
-This builds a single image with all 19 language runtimes pre-installed (Node.js, Python, Go, Rust, .NET, Kotlin, Scala, Swift, Zig, Wasmtime, PHP, C/C++, Bash, Lua, Java, Ruby).
+The Docker setup runs the **Rust backend** by default on port 3001. Node.js fallback is available via the `fallback` profile.
 
 ```bash
 # Build and start the application
@@ -140,6 +142,12 @@ docker compose up
 ```
 
 Open http://localhost:3001
+
+To run the Node.js fallback instead:
+
+```bash
+docker compose --profile fallback up
+```
 
 To run in detached mode:
 
@@ -153,7 +161,22 @@ To stop:
 docker compose down
 ```
 
-### Node.js Backend (Direct)
+### Rust Backend (Direct)
+
+```bash
+# 1. Build and run the Rust backend
+cargo run --release
+```
+
+The Rust server starts on port 3001 by default (configurable via `PORT` env var).
+
+For development with hot-reload (requires `cargo-watch`):
+
+```bash
+cargo watch -x run
+```
+
+### Node.js Backend (Fallback)
 
 ```bash
 # 1. Install dependencies
@@ -175,31 +198,23 @@ For development with hot-reload:
 npm run dev
 ```
 
-### Go Backend (Alternative)
+### Svelte Frontend (Development)
+
+The Svelte 5 frontend runs on its own dev server and proxies `/api` calls to the backend:
 
 ```bash
-cd backend-go
-go run main.go
+# Development server (proxies /api to http://localhost:3000)
+npm run dev:svelte
 ```
 
-The Go backend runs on port 8080 and serves the core API subset plus static files.
+Open http://localhost:5173
 
-### Svelte Frontend (Alternative)
-
-A Svelte-based frontend is also available:
+For production build:
 
 ```bash
-# Development server
-npm run dev:svelte
-
-# Production build
 npm run build:svelte
-
-# Preview production build
 npm run preview:svelte
 ```
-
-The Svelte frontend serves on its own port (Vite default: 5173) and proxies `/api` calls to the Express backend at `http://localhost:3000`.
 
 ---
 
@@ -469,104 +484,87 @@ cp .env.example .env
 ## Project Structure
 
 ```
-├── server.ts                 # Express server boot, WebSocket, cleanup, API mount
-├── routes/                   # HTTP handlers (Express routers)
-├── services/                 # Business logic layer
-│   ├── executor.ts           # Code execution engine (all languages)
-│   ├── compiler.ts           # Compiler pipeline (tokenizer, AST, stats)
-│   ├── tutor.ts              # AI tutor message handling
-│   ├── ollama.ts             # Ollama auto-detection
-│   ├── analyzer.ts           # Static code analysis
-│   ├── conversation.ts       # Conversation history management
-│   ├── docker-executor.ts    # Docker sandbox code execution
-│   ├── strategies/           # AI tutor response strategies (7 strategies)
-│   ├── proxy.ts              # HTTP proxy with SSRF protection
-│   ├── websocket.ts          # WebSocket server
-│   ├── metrics.ts            # Prometheus metrics
-│   ├── openapi.ts            # OpenAPI spec generation
-│   └── rateLimit.ts          # Rate limiting middleware
-├── middleware/                # Shared Express middleware
-│   ├── index.ts              # Logger, error handler, auth
-│   └── ...                   # Request logger, error handler, optional auth
-├── ai/                       # AI orchestration and analysis
-│   ├── config.ts             # AI provider configuration
-│   ├── provider.ts           # Provider abstraction layer
-│   ├── embeddings.ts         # TF-IDF + OpenAI embeddings
-│   ├── intent.ts             # Intent classification
-│   ├── learner.ts            # Learner profile management (SM-2)
-│   ├── responses-data.ts     # Curated AI responses
-│   ├── tutor-keywords.ts     # Keyword matching for AI tutor
-│   ├── exercises.ts          # Exercise generation
-│   ├── summarizer.ts         # Conversation summarization
-│   ├── template-matcher.ts   # Template matching
-│   ├── chunker.ts            # Text chunking
-│   ├── cache.ts              # LLM response caching
-│   └── query-expander.ts     # Query expansion for search
-├── sql/                      # Database layer
-│   └── database.ts           # SQLite initialization, seed data (20+ tables)
-├── public/                   # Browser app (vanilla HTML/CSS/JS)
-│   ├── index.html            # Main entry point
-│   ├── app.js                # Main application logic
-│   ├── bootstrap.js          # Shared startup globals
-│   ├── style.css             # Main stylesheet
-│   ├── styles/               # Stylesheet slices
-│   ├── app-data.js           # Aggregated curriculum data (browser)
-│   ├── landing.js            # Welcome screen
-│   ├── lang-intro.js         # Language intro rendering
-│   ├── projects.js           # Projects tab (54 projects)
-│   ├── schema.js             # Schema designer
-│   ├── db-lab.js             # Database lab
-│   ├── game.js               # Gaming mode (16 mini-games)
-│   ├── git-visualize.js      # Git visualizer
-│   ├── styling-visualize.js  # CSS visualizer
-│   ├── api-client.js         # REST API client
-│   ├── techstack.js          # Tech stack explorer
-│   ├── compiler-core.js      # Client-side compiler pipeline
-│   ├── ai/                   # Client-side AI responses
-│   └── logos/                # Technology logos
-├── content/                  # Curriculum JSON files (69+ files)
-├── data/                     # Runtime state and learner profiles
-├── core-typescript/          # Browser TS source slices
-├── browser-build/            # Generated browser JS outputs
-├── tests/                    # Integration and service tests
-├── docker/                   # Language sandbox Dockerfiles
-├── scripts/                  # Build and maintenance helpers
-├── backend-go/               # Alternative Go backend
+├── Cargo.toml                # Rust workspace root (7 crates)
+├── crates/                   # Rust backend (primary)
+│   ├── kodex-core/           #   Common types, config, error handling
+│   ├── kodex-sql/            #   Database connection pool & models
+│   ├── kodex-api/            #   API route handlers
+│   ├── kodex-ai/             #   AI providers, strategies, conversation
+│   ├── kodex-executor/       #   Code execution sandbox (subprocess + Docker)
+│   ├── kodex-websocket/      #   WebSocket server (axum ws)
+│   └── kodex-server/         #   Main entrypoint: Axum HTTP server
+├── backend/                  # Node.js backend (fallback)
+│   ├── server.ts             #   Express server boot, WebSocket, cleanup
+│   ├── routes/               #   HTTP handlers (Express routers)
+│   ├── services/             #   Business logic layer
+│   ├── middleware/            #   Express middleware
+│   ├── ai/                   #   AI orchestration (TS version)
+│   ├── sql/                  #   SQLite initialization, seed data
+│   ├── content/              #   Curriculum JSON files (71+ files)
+│   ├── data/                 #   Runtime state and learner profiles
+│   ├── rust/                 #   Legacy Rust backend (superseded by root crates/)
+│   └── scripts/              #   Build and maintenance helpers
+├── src/                      # Svelte 5 frontend (primary)
+│   ├── routes/               #   SvelteKit routes ([lang]/, game/, git/, etc.)
+│   ├── lib/components/       #   UI components (ai, canvas, challenge, etc.)
+│   ├── lib/stores/           #   App state stores
+│   └── lib/lib/              #   Utilities
+├── public/                   # Legacy browser app (vanilla HTML/CSS/JS)
+│   ├── index.html            #   Main entry point
+│   ├── app.js                #   Main application logic
+│   ├── style.css             #   Main stylesheet
+│   ├── app-data.js           #   Aggregated curriculum data
+│   └── ...                   #   Schema designer, DB lab, games, etc.
 ├── netlify/                  # Netlify serverless function entry
-├── svelte-app/               # Svelte alternative frontend
+├── docker/                   # Language sandbox Dockerfiles
+├── tests/                    # Integration and service tests
 ├── docs/                     # Documentation
-├── docker-compose.yml        # Docker Compose configuration
-├── Dockerfile                # Main Docker image (all runtimes)
+├── content/                  # Aggregated curriculum data (app-data.json)
+├── data/                     # Runtime state and learner profiles
+├── docker-compose.yml        # Docker Compose (rust-backend default)
+├── Dockerfile                # Node.js Docker image (all runtimes)
 ├── docker-entrypoint.sh      # Container startup script
-├── tsconfig.json             # TypeScript configuration
-├── tsconfig.browser.json     # Browser TypeScript configuration
-├── vite.config.js            # Vite configuration (Svelte)
+├── package.json              # Node.js dependencies + npm scripts
 ├── svelte.config.js          # SvelteKit configuration
-└── vitest.config.ts          # Vitest test configuration
+├── vite.config.js            # Vite configuration (Svelte + API proxy)
+├── tailwind.config.js        # Tailwind CSS configuration
+├── postcss.config.js         # PostCSS configuration
+├── tsconfig.json             # TypeScript configuration (Node backend)
+├── vitest.config.ts          # Vitest test configuration
+└── netlify.toml              # Netlify deployment config
 ```
 
 ---
 
 ## Scripts Reference
 
-| Script | Command | Purpose |
-|--------|---------|---------|
-| `npm start` | `npm run build:ai && npm run build:browser && tsx server.ts` | Build browser assets, then run the server |
-| `npm run dev` | `npm run build:ai && npm run build:browser && tsx watch server.ts` | Build browser assets, then run in watch mode |
-| `npm run build` | `npm run build:ai && npm run build:browser && tsc` | Compile server TS and browser TS outputs |
-| `npm run build:ai` | `esbuild ai/responses-data.ts ...` | Build AI response data for browser |
-| `npm run build:browser` | `tsc -p tsconfig.browser.json` | Build browser TypeScript to JS |
-| `npm run build:watch` | `tsc --watch` | Watch mode for TS compilation |
-| `npm run typecheck` | `tsc --noEmit` | Type-check without writing build output |
-| `npm test` | `vitest run` | Run test suite |
-| `npm run test:watch` | `vitest` | Run tests in watch mode |
-| `npm run dev:svelte` | `vite dev` | Start Svelte dev server |
-| `npm run build:svelte` | `vite build` | Build Svelte production bundle |
-| `npm run preview:svelte` | `vite preview` | Preview Svelte production build |
+| Command | Purpose |
+|---------|---------|
+| **Rust Backend** | |
+| `cargo run --release` | Build & run the Rust backend (port 3001) |
+| `cargo run` | Build & run Rust backend in debug mode |
+| `cargo test` | Run Rust test suite across all crates |
+| `cargo watch -x run` | Run Rust with hot-reload (requires `cargo-watch`) |
+| `npm run start:rust` | Shortcut for `cd backend/rust && cargo run` (legacy Rust) |
+| **Node.js Backend** | |
+| `npm start` | Build AI + browser assets, then run Express server (port 3000) |
+| `npm run dev` | Same as `start` but with file watch / hot-reload (tsx watch) |
+| `npm run build` | Build AI data, browser TS, and compile server TS |
+| `npm run build:ai` | Build AI response data for browser (esbuild) |
+| `npm run build:browser` | Build browser TypeScript to JS |
+| `npm test` | Run Vitest test suite |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run typecheck` | `tsc --noEmit` type-check without writing output |
+| **Svelte Frontend** | |
+| `npm run dev:svelte` | Start SvelteKit dev server (port 5173, proxies `/api` to backend) |
+| `npm run build:svelte` | Build Svelte production bundle |
+| `npm run preview:svelte` | Preview Svelte production build |
 
 ---
 
 ## API Endpoints
+
+All endpoints are served by both the **Rust backend** (port 3001, primary) and the **Node.js fallback** (port 3000). Rate limiting: 30 requests per 60 seconds per IP across all `/api/*` routes.
 
 ### Health & System
 | Method | Path | Description |
@@ -618,8 +616,6 @@ cp .env.example .env
 | GET | `/api/metrics` | Prometheus application metrics |
 | GET | `/api/openapi.json` | OpenAPI specification |
 | GET | `/api/docs` | Swagger UI documentation |
-
-**Rate limiting:** 30 requests per 60 seconds per IP across all `/api/*` routes.
 
 ---
 
@@ -757,14 +753,26 @@ The workspace includes a full Thunderclient-style HTTP client:
 
 ## Docker Configuration
 
-### Single Image (all runtimes)
+### Rust Backend (default)
 
-The root `Dockerfile` builds a single image with all 19 language runtimes pre-installed, alongside the Express backend:
+The `docker-compose.yml` runs the **Rust backend** on port 3001 by default. The image is built from `backend/rust/Dockerfile` and includes all API routes, WebSocket support, and middleware.
 
 ```bash
 docker compose build
 docker compose up
 ```
+
+Open http://localhost:3001
+
+### Node.js Backend (fallback profile)
+
+The root `Dockerfile` builds a single image with all 19 language runtimes pre-installed, alongside the Express backend. Run it with the `fallback` profile:
+
+```bash
+docker compose --profile fallback up
+```
+
+Open http://localhost:3000
 
 The `docker-entrypoint.sh` script verifies all runtimes at container startup.
 
@@ -843,26 +851,19 @@ Course files in `content/` are 71+ JSON files with topics organized by phase (no
 
 Each file has multiple phases, each phase has multiple topics. Topics can optionally include a `prereq` field. All course data is aggregated into `content/app-data.json` and embedded into `public/app-data.js` for browser delivery.
 
-## UI Features
-
-- **Header extra tabs** — Backend, CI/CD, Code Lab, Compiler, DB Lab, Projects, GameDev, Gaming, Git Grounds, Mobile, Quiz, Learn Code, Tech Stack, Styling Grounds — each with distinct accent colors and hover effects
-- **Engine filter bar** — Filter gamedev topics by engine (All Engines / Godot / Unity / Unreal), shows only engine-specific phases
-- **Platform filter bar** — Filter mobile topics by platform (All / Android / iOS), shows only platform-specific phases
-- **Roadmap view** — SVG-based visual learning roadmap for topic progression
-- **Language-specific theming** — Dynamic accent colors per language via CSS custom properties
-- **Skeleton loading** — Placeholder UI while curriculum content lazy-loads
-- **File integration** — Load local source files into the editor via file picker
-- **Collapsible phases** — Expand/collapse all phases, with per-phase completion counters
-
 ## Deployment
 
 ### Docker
 
-```bash
-docker compose up -d
-```
+The Rust backend runs on port 3001 by default. Use the `fallback` profile for the Node.js backend.
 
-Builds and runs a self-contained image with all language runtimes. Listens on port 3001 (maps to container port 3000).
+```bash
+# Rust backend (default)
+docker compose up -d
+
+# Node.js backend
+docker compose --profile fallback up -d
+```
 
 ### Netlify
 

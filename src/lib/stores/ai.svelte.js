@@ -149,22 +149,22 @@ export function getAIState() {
       broadcast('panelOpen', true);
       _addMessage(`Explain "${topic}" in ${lang}`, 'user');
       _addMessage('', 'bot');
-      _streaming = true;
-      broadcast('streaming', true);
-      let streamed = '';
-      try {
-        await apiStream('/api/tutor/explain-topic', { topic, lang, phase, learnerId: 'default', useAI: _useAI }, (chunk) => {
-          streamed += chunk;
-          _updateLastMessage(streamed);
-        }, () => {
-          _streaming = false;
-          broadcast('streaming', false);
-          _addMessage('Try writing some code or ask me a follow-up question!', 'bot');
-        }, (error) => {
-          _updateLastMessage(`Error: ${error}`);
-          _streaming = false;
-          broadcast('streaming', false);
-        });
+          _streaming = true;
+          broadcast('streaming', true);
+          let streamed = '';
+          try {
+            await apiStream('/api/tutor/explain-topic', { topic, lang, phase, learnerId: 'default', useAI: _useAI }, (chunk) => {
+              streamed += chunk;
+              _updateLastMessage(streamed);
+            }, () => {
+              _streaming = false;
+              broadcast('streaming', false);
+              _addMessage('Try writing some code or ask me a follow-up question!', 'bot');
+            }, (error) => {
+              _updateLastMessage(`Error: ${error}`);
+              _streaming = false;
+              broadcast('streaming', false);
+            });
       } catch {
         _streaming = false;
         broadcast('streaming', false);
